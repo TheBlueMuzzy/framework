@@ -9,7 +9,7 @@
 //   3. adds the kit's fonts to content/credits.json (no duplicates)
 // On an update it first lists which kit files changed, were added or were removed.
 import { execSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -23,13 +23,22 @@ const writeText = (path, text) => { mkdirSync(dirname(path), { recursive: true }
 const copyFile = (from, to) => { mkdirSync(dirname(to), { recursive: true }); copyFileSync(from, to) }
 const sameFile = (a, b) => readFileSync(a).equals(readFileSync(b)) // byte for byte (fonts too)
 
-// Every file under a folder, as paths relative to it with forward slashes ("blocks/hud.tsx")
+// Every file under a folder, as paths relative to it with forward slashes ("blocks/hud.tsx").
+// Links to other folders (symlinks, junctions) are skipped, so an update can never reach outside the kit.
 function listFiles(dir, base = dir) {
   if (!existsSync(dir)) return []
-  return readdirSync(dir).flatMap((name) => {
-    const path = join(dir, name)
-    return statSync(path).isDirectory() ? listFiles(path, base) : [relative(base, path).replaceAll('\\', '/')]
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isSymbolicLink()) return []
+    const path = join(dir, entry.name)
+    return entry.isDirectory() ? listFiles(path, base) : [relative(base, path).replaceAll('\\', '/')]
   })
+}
+
+// Only ever delete a file that really sits inside the game's src/ui/kit
+function removeInside(target, file, log) {
+  const path = join(target, file)
+  if (realpathSync(path).startsWith(realpathSync(target))) rmSync(path)
+  else log(`  ! skipped ${file}: it points outside src/ui/kit`)
 }
 
 // "0.1.0 (a1b2c3d)" — the kit's version and the framework commit it's copied from
@@ -113,7 +122,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   if (dryRun) { log('\nDry run: nothing was changed.'); return { added, changed, removed, isUpdate } }
 
   // Copy
-  for (const f of removed) rmSync(join(target, f))
+  for (const f of removed) removeInside(target, f, log)
   for (const f of sourceFiles) copyFile(join(kitDir, f), join(target, f))
   writeText(join(target, 'VERSION'), `${version}\ncommit ${commit}\n`)
   if (makeStyle) writeText(stylePath, JSON.stringify({ preset, tweaks: {} }, null, 2) + '\n')

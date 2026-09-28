@@ -93,8 +93,10 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
       default: return null
     }
   }
+  // Links only open web and mail addresses (never javascript: or file:)
+  const openLink = (url?: string) => { if (url && /^(https?:|mailto:)/i.test(url)) window.open(url, '_blank', 'noopener') }
   const openRow = (row: SettingRow) =>
-    row.type === 'link' ? () => window.open(row.url, '_blank', 'noopener') : row.type === 'button' ? () => onAction?.(row.id) : undefined
+    row.type === 'link' ? () => openLink(row.url) : row.type === 'button' ? () => onAction?.(row.id) : undefined
 
   const tabPicker = {
     label: w.title, tabs: tabs.map(labelOf), value: tab ? labelOf(tab) : '',

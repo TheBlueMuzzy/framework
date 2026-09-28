@@ -132,7 +132,7 @@ const openers: Record<string, () => void> = {
   reconnecting: () => { screens.push('hud'); screens.push('reconnecting') },
   failed: () => { screens.push('hud'); screens.push('failed') },
 }
-const isKnown = (id: string) => id in samples || id in openers
+const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──
 type StageProps = { id: string; preset: string; onPreset: (preset: string) => void; onMenu: () => void }
