@@ -7,7 +7,10 @@ import { allVariableNames, optionalTokens, type StylePreset, type StyleTweaks } 
 export type StyleFile = { preset: string; tweaks?: StyleTweaks }
 
 const BODY_TEXT_REM = 1.125 // 18px — the accessibility floor for all text
-const SPACING_STEP_REM = 0.25 // 4px — the spacing scale is built from this
+// Spacing and tap targets are in px on purpose: when a player zooms text to 200%,
+// the words grow but the gaps and 44px targets don't eat the extra room.
+const SPACING_STEP_PX = 4 // the spacing scale is built from this
+const TARGET_MIN_PX = 44 // accessibility floor: smallest tap target
 const GAP_STEPS = { 'gap-xs': 1, 'gap-s': 2, 'gap-m': 4, 'gap-l': 6, 'gap-xl': 8 }
 
 const rem = (n: number) => `${Math.round(n * 1000) / 1000}rem`
@@ -37,7 +40,8 @@ export function resolveStyle(file: StyleFile): Record<string, string> {
   vars['text-heading'] = rem(body * scale)
   vars['text-title'] = rem(body * scale ** 2)
   vars['text-display'] = rem(body * scale ** 3)
-  for (const [name, steps] of Object.entries(GAP_STEPS)) vars[name] = rem(SPACING_STEP_REM * steps * density)
+  for (const [name, steps] of Object.entries(GAP_STEPS)) vars[name] = `${Math.round(SPACING_STEP_PX * steps * density)}px`
+  vars['target-min'] = `${TARGET_MIN_PX}px`
   return vars
 }
 

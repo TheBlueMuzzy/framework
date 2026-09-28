@@ -9,7 +9,7 @@ Done when: the gallery shows every layout box and control, built only from style
 - [x] 🤖 3. Layout boxes `kit/layout.tsx`: Screen (safe-area slots: top-left, top, top-right, center, bottom…), Panel, Stack, Row, Grid — spacing only via `gap`
 - [x] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
 - [x] 🤖 5. Rule checker `scripts/check-ui.mjs`: no hex colours, px sizes, `position:absolute` (outside Screen slots), inline styles or stray fonts in `kit/` or game UI code + test
-- [ ] 🤖 6. Parts page in the gallery; Playwright screenshots at 390×844, 844×390, 1440×900 (`scripts/shoot.mjs`)
+- [x] 🤖 6. Parts page in the gallery; Playwright screenshots at 390×844, 844×390, 1440×900 (`scripts/shoot.mjs`)
 Check: `npm test` + `npm run build` + `npm run check-ui` pass; screenshots show no overflow/clipping, targets ≥ 44px.
 
 ## F02 🎮 The 5 styles (Clean, Cozy, Cartoon, Pixel, Neon)
@@ -32,4 +32,9 @@ Notes:
 - Selector and Stepper share one small `ArrowPicker` (◀ value ▶): one focus stop, ← / → step it. A gamepad d-pad just needs to send arrow keys.
 - Controls are bare (their name is an aria-label); the visible label comes from the ListRow they sit in.
 - Rule checker also fails on `var(--name)` that isn't a style name in `tokens.ts` (per-part helpers must start `--kit-`), and bans `position: fixed` as well as absolute. It imports `tokens.ts` straight from Node 24 (type stripping), so no build step.
+- Gaps and the 44px target floor are px (set by applyStyle as `--gap-*` / `--target-min`); text sizes are rem. Reason: at 200% text on a 390px phone, rem gaps + rem targets doubled and squeezed ◀ value ▶ to one letter per line. Now only words grow. Other shape sizes (toggle track, slider thumb, room-code boxes) stay rem.
+- Screen's centre slot doesn't scroll itself (it clipped Panel shadows into grey boxes); tall centre content = Panel + ScrollArea.
+- Tabs wrap onto a second line on phones instead of scrolling sideways (nothing hidden).
+- `npm run shoot` starts its own Vite (port 5180) in-process and closes it; it also fails on sideways overflow, targets under 44px and console errors, and shoots 200% text + a live tweak. Phones "zoom out" to fit wide pages, so overflow is checked against the real screen width.
+- F01 kit size: ~610 lines of code + CSS (kit.css 201), excluding tests and clean.json — F02–F04 share the remaining ~400.
 - Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.

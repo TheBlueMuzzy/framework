@@ -5,7 +5,8 @@ describe('style engine', () => {
   it('fills every variable from the preset', () => {
     const vars = resolveStyle({ preset: 'clean' })
     expect(vars.primary).toBe('#2f5bd3')
-    expect(vars['gap-m']).toBe('1rem') // 4 steps × 4px × density 1
+    expect(vars['gap-m']).toBe('16px') // 4 steps × 4px × density 1
+    expect(vars['target-min']).toBe('44px')
     expect(vars['text-body']).toBe('1.125rem') // 18px
     expect(vars.glow).toBe('none') // optional extra gets its default
   })
@@ -13,7 +14,7 @@ describe('style engine', () => {
   it('lets tweaks win over the preset', () => {
     const vars = resolveStyle({ preset: 'clean', tweaks: { accent: '#e07a5f', density: 1.25 } })
     expect(vars.accent).toBe('#e07a5f')
-    expect(vars['gap-m']).toBe('1.25rem')
+    expect(vars['gap-m']).toBe('20px')
   })
 
   it('never lets text go below 18px', () => {

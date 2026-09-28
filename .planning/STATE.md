@@ -20,6 +20,7 @@ Live: none (the gallery may get a private preview link later)
 - Size budget: web kit ≤ ~1,000 lines incl. CSS for v1.
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
+- Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 
 ## Log
 - 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.

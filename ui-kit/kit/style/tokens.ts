@@ -53,6 +53,7 @@ export const derivedTokens = {
   'text-heading': 'body × font-scale',
   'text-title': 'body × font-scale²',
   'text-display': 'body × font-scale³',
+  'target-min': 'Smallest tap target (accessibility floor: 44px)',
 } as const
 
 type RequiredName = keyof typeof colourTokens | keyof typeof otherTokens

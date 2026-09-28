@@ -1,0 +1,12 @@
+/* Gallery-only styles (the "game" layer). Same rules as game code: style names only. */
+@layer game {
+  .gallery { max-inline-size: 64rem; margin-inline: auto; padding: var(--gap-l); padding-block-end: var(--gap-xl); }
+
+  /* A stand-in game view for the Screen demo */
+  .gallery-stage {
+    position: relative; block-size: 22rem;
+    border: var(--border-width) dashed var(--border); border-radius: var(--radius-panel);
+    overflow: hidden;
+  }
+  .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
+}

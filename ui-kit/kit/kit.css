@@ -14,7 +14,7 @@
   :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
 
   /* Accessibility floor: every control is at least 44px to tap */
-  .kit-target { min-block-size: 2.75rem; min-inline-size: 2.75rem; }
+  .kit-target { min-block-size: var(--target-min); min-inline-size: var(--target-min); }
 
   /* Spacing: every box reads its gap name */
   [data-gap="xs"] { gap: var(--gap-xs); }
@@ -38,12 +38,13 @@
   .kit-screen > [data-slot="top-left"] { grid-area: top-left; justify-self: start; }
   .kit-screen > [data-slot="top"] { grid-area: top; }
   .kit-screen > [data-slot="top-right"] { grid-area: top-right; justify-self: end; }
-  .kit-screen > [data-slot="center"] { grid-area: center; place-self: center; max-block-size: 100%; max-inline-size: 100%; overflow: auto; }
+  /* The centre never scrolls itself (that would clip shadows): put a ScrollArea inside a Panel for tall content */
+  .kit-screen > [data-slot="center"] { grid-area: center; place-self: center; display: flex; flex-direction: column; min-block-size: 0; max-block-size: 100%; max-inline-size: 100%; }
   .kit-screen > [data-slot="bottom-left"] { grid-area: bottom-left; justify-self: start; }
   .kit-screen > [data-slot="bottom"] { grid-area: bottom; }
   .kit-screen > [data-slot="bottom-right"] { grid-area: bottom-right; justify-self: end; }
 
-  .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; }
+  .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; min-block-size: 0; }
   .kit-panel { padding: var(--gap-l); }
   .kit-row { display: flex; flex-wrap: wrap; align-items: center; }
   .kit-row[data-justify="center"] { justify-content: center; }
@@ -83,12 +84,13 @@
   .kit-slider::-webkit-slider-thumb { -webkit-appearance: none; inline-size: 1.5rem; block-size: 1.5rem; margin-block-start: -0.5rem; }
   .kit-slider::-moz-range-thumb { inline-size: 1.5rem; block-size: 1.5rem; }
 
-  .kit-picker { display: inline-flex; align-items: center; gap: var(--gap-xs); }
-  .kit-picker-value { min-inline-size: 5rem; text-align: center; font-weight: 600; }
-  .kit-stepper .kit-picker-value { min-inline-size: 2.5rem; }
+  .kit-picker { display: inline-flex; align-items: center; gap: var(--gap-xs); max-inline-size: 100%; }
+  .kit-picker > .kit-button { flex: none; }
+  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: anywhere; }
+  .kit-stepper .kit-picker-value { flex-basis: 2.5rem; }
 
-  .kit-tabs { display: flex; gap: var(--gap-xs); padding: var(--gap-xs); overflow-x: auto; scrollbar-width: none; max-inline-size: 100%; }
-  .kit-tab { flex: 0 0 auto; padding: var(--gap-s) var(--gap-l); border: 0; background: none; font-weight: 600; }
+  .kit-tabs { display: flex; flex-wrap: wrap; gap: var(--gap-xs); padding: var(--gap-xs); }
+  .kit-tab { flex: 1 0 auto; padding: var(--gap-s) var(--gap-l); border: 0; background: none; font-weight: 600; }
 
   .kit-field { display: flex; flex-direction: column; gap: var(--gap-xs); }
   .kit-field-label { font-weight: 600; }
@@ -104,12 +106,16 @@
   .kit-card { display: flex; flex-direction: column; gap: var(--gap-s); padding: var(--gap-l); text-align: start; border-style: solid; }
   .kit-card-title { font-size: var(--text-heading); font-weight: 700; }
 
-  .kit-badge { display: inline-flex; align-items: center; padding: 0 var(--gap-s); font-weight: 700; line-height: 1.6; border-style: solid; }
-  .kit-avatar { display: inline-grid; place-items: center; flex: none; inline-size: 2.75rem; block-size: 2.75rem; overflow: hidden; font-weight: 700; }
+  .kit-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 0 var(--gap-s); font-weight: 700; line-height: 1.6; border-style: solid; }
+  .kit-avatar { display: inline-grid; place-items: center; flex: none; inline-size: var(--target-min); block-size: var(--target-min); overflow: hidden; font-weight: 700; }
   .kit-avatar img { inline-size: 100%; block-size: 100%; object-fit: cover; }
 
-  .kit-progress { display: block; inline-size: 100%; block-size: 0.75rem; overflow: hidden; }
+  .kit-progress { display: block; min-inline-size: 6rem; block-size: 0.75rem; overflow: hidden; }
   .kit-progress-fill { display: block; block-size: 100%; inline-size: calc(var(--kit-fill, 0) * 100%); }
+
+  /* Bars and sliders share a line with their neighbours and grow to fill it */
+  :is(.kit-row, .kit-listrow) > .kit-slider { flex: 1 1 8rem; }
+  :is(.kit-row, .kit-listrow) > .kit-progress { flex: 1 1 6rem; }
 
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
