@@ -76,7 +76,7 @@ function Menu({ current, onStyle, onOpen }: MenuProps) {
           <Text kind="caption">Pick a screen to run it live in this style. Back or Esc comes back here.</Text>
         </Stack>
         <StyleSwitcher current={current} onChange={onStyle} onReset={() => onStyle(null)} />
-        <Grid gap="l" min="l">
+        <Grid gap="l" min="l" className="gallery-menu">
           <MenuGroup title="Parts" entries={[{ id: 'parts', name: 'Parts', about: 'Every box and control on one page' }]} onOpen={onOpen} />
           {menu.map((group) => <MenuGroup key={group.title} title={group.title} entries={group.entries} onOpen={onOpen} />)}
         </Grid>

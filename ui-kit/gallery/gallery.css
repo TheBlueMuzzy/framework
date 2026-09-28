@@ -14,5 +14,6 @@
   .gallery-game { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: hidden;
     background: repeating-linear-gradient(45deg, var(--bg) 0 1.5rem, var(--surface) 0 3rem); }
   .gallery-game-label { block-size: 100%; align-items: center; justify-content: center; }
+  .gallery-menu { align-items: start; } /* each group panel only as tall as its rows */
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
 }
