@@ -6,7 +6,7 @@ Muzzy: task 11 — look at the 5 styles in the gallery (`/play`) once F02 is bui
 
 ## Where we are
 Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: 01 — every part in all 5 styles
-Doing: F01 — building   Branch: dev/v0-1-ui-kit   Version: 0.0.0
+Doing: F03 — Muzzy check   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts

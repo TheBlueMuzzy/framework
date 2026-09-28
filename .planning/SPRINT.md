@@ -16,7 +16,7 @@ Check: `npm test` + `npm run build` + `npm run check-ui` pass; screenshots show 
 Done when: the gallery's style switcher flips between all 5 and each reads as its family (design §3); every preset passes the same-names + contrast test.
 - [x] 🤖 7. `kit/styles/clean.json` + preset test (identical keys, 4.5:1 contrast on every colour pair)
 - [x] 🤖 8. `cozy.json`, `cartoon.json`, `pixel.json`, `neon.json` — Google Fonts (OFL, 🟢) logged in `content/credits.json`; motion flavour per style
-- [ ] 🙋 11. Look at the 5 styles on the parts page, phone + desktop (`/play`), and say what feels off (tuning)
+- [x] 🙋 11. Look at the 5 styles on the parts page, phone + desktop (`/play`), and say what feels off (tuning)
 Check: preset test passes; screenshots of every style at phone + desktop.
 
 ## F03 🧱 Screen stack + transitions
@@ -27,6 +27,7 @@ Check: tests pass; Playwright: open → dialog → Esc → Esc returns to start,
 
 Ask Muzzy: —
 Notes:
+- 2026-09-28 — Muzzy: all 5 styles "good enough, solid overall" → F01 + F02 approved, no tuning asked.
 - Spike (task 1, `ui-kit/spike/dialog-popover-spike.mjs`): native `<dialog>` showModal (backdrop blocks the page, Esc closes, form return value), `popover` (opens, tap-outside dismisses) and `inert` (blocks focus) all pass in Playwright Chromium (Pixel 7) and WebKit (iPhone 15). → Use native `<dialog>` for modals, `popover` for tooltips/toasts, `inert` under the top screen (F03). Not tried on a real phone; WebKit here is the iOS engine but not the iOS build. Minimums: iOS 17 / Chrome 114 for popover. Phone back button does not send Esc, so F03 still needs browser-history handling.
 - Playwright WebKit on Windows: tap emulation is unreliable, so tests click with the mouse instead.
 - Selector and Stepper share one small `ArrowPicker` (◀ value ▶): one focus stop, ← / → step it. A gamepad d-pad just needs to send arrow keys.
