@@ -4,7 +4,7 @@ Branch: dev/v0-1-ui-kit
 
 ## F01 🧱 Parts + style engine
 Done when: the gallery shows every layout box and control, built only from style names; changing `style.json` (preset or a tweak) restyles everything live; the rule checker passes; phone + desktop screenshots look right.
-- [ ] 🤖 1. Set up `ui-kit/` (Vite + React + TS + vitest) with `kit/` (the copyable part) and `gallery/` (the app); spike: native `<dialog>` + popover support on phone Safari/Chrome → pick what's native vs hand-made
+- [x] 🤖 1. Set up `ui-kit/` (Vite + React + TS + vitest) with `kit/` (the copyable part) and `gallery/` (the app); spike: native `<dialog>` + popover support on phone Safari/Chrome → pick what's native vs hand-made
 - [ ] 🤖 2. Style engine: `kit/style/tokens.ts` (the setting names), `kit/style/applyStyle.ts` (preset + tweaks → CSS variables on `<html>`), `kit/kit.css` (`@layer kit-base`: layout only, zero colours) + accessibility floor (18px text min, 44px targets, focus ring, 200% text scale, reduce motion)
 - [ ] 🤖 3. Layout boxes `kit/layout.tsx`: Screen (safe-area slots: top-left, top, top-right, center, bottom…), Panel, Stack, Row, Grid — spacing only via `gap`
 - [ ] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
@@ -26,4 +26,7 @@ Done when: screens open/close/replace; only the top screen responds; Esc / phone
 Check: tests pass; Playwright: open → dialog → Esc → Esc returns to start, lower screen can't be clicked while covered.
 
 Ask Muzzy: —
-Notes: Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.
+Notes:
+- Spike (task 1, `ui-kit/spike/dialog-popover-spike.mjs`): native `<dialog>` showModal (backdrop blocks the page, Esc closes, form return value), `popover` (opens, tap-outside dismisses) and `inert` (blocks focus) all pass in Playwright Chromium (Pixel 7) and WebKit (iPhone 15). → Use native `<dialog>` for modals, `popover` for tooltips/toasts, `inert` under the top screen (F03). Not tried on a real phone; WebKit here is the iOS engine but not the iOS build. Minimums: iOS 17 / Chrome 114 for popover. Phone back button does not send Esc, so F03 still needs browser-history handling.
+- Playwright WebKit on Windows: tap emulation is unreliable, so tests click with the mouse instead.
+- Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.
