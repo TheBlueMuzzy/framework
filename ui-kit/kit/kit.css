@@ -116,7 +116,7 @@
   .kit-listrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
     gap: var(--gap-s) var(--gap-m); inline-size: 100%; padding: var(--gap-s) 0; border: 0; background: none; text-align: start; }
   .kit-listrow-text { display: flex; flex-direction: column; flex: 1 1 6rem; min-inline-size: 0; }
-  button.kit-listrow { padding-inline: var(--gap-s); }
+  button.kit-listrow { padding-inline: 0; } /* link rows line up with value rows */
 
   .kit-card { display: flex; flex-direction: column; gap: var(--gap-s); padding: var(--gap-l); text-align: start; border-style: solid; }
   .kit-card-title { font-size: var(--text-heading); font-weight: 700; }
@@ -132,7 +132,10 @@
   :is(.kit-row, .kit-listrow) > .kit-slider { flex: 1 1 8rem; }
   :is(.kit-row, .kit-listrow) > .kit-progress { flex: 1 1 6rem; }
 
-  .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; }
+  /* A scroll box clips at its edge, so it keeps a little room inside for outlines, drop shadows and focus rings
+     (Cartoon's ink + press shadow poke out) and gives it back with a matching negative margin: text stays aligned. */
+  .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain;
+    padding: 0.5rem; margin: -0.5rem; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }
   .kit-scroll[data-max="l"] { max-block-size: 28rem; }
