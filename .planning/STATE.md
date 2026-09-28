@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 01 done: parts + style engine, 5 styles (Clean, Cozy, Cartoon, Pixel, Neon), screen stack — all approved by Muzzy. Kit ≈ 870 of ~1,000 lines.
-Next: `/sprint` → sprint 02 = F04 built screens (menu, list-driven settings, pause, dialogs, loading, results, lobby, HUD). Watch the line budget.
+Sprint 02 on `dev/v0-1-ui-kit`: F04 built screens (tasks 1–6) → F05 gallery menu + screenshots. Next: `/develop` continues with the next unticked task in SPRINT.md.
+Muzzy: task 10 — try the screens in the gallery once F05 is built.
 
 ## Where we are
-Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: none (01 done)
-Doing: —   Branch: dev/v0-1-ui-kit   Version: 0.0.0
+Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: 02 — every core screen in all 5 styles
+Doing: F04 — building   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts
@@ -17,7 +17,7 @@ Live: none (the gallery may get a private preview link later)
 - Parts and screens contain no colours, px sizes or fonts — only style names. The style file paints everything.
 - All presets have identical setting names + pass contrast (tested). Accessibility floor lives outside presets.
 - Web: plain React + plain CSS variables. No Tailwind, no component library (design §6).
-- Size budget: web kit ≤ ~1,000 lines incl. CSS for v1.
+- Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
