@@ -21,7 +21,7 @@ Check: preset test passes; screenshots of every style at phone + desktop.
 
 ## F03 🧱 Screen stack + transitions
 Done when: screens open/close/replace; only the top screen responds; Esc / phone back closes it; a dialog is a screen on top; transitions follow the style's motion and respect reduce-motion.
-- [ ] 🤖 9. `kit/screens.ts`: tiny built-in store (no library) — push / pop / replace, `inert` below the top, Esc + browser back → pop + tests
+- [x] 🤖 9. `kit/screens.ts`: tiny built-in store (no library) — push / pop / replace, `inert` below the top, Esc + browser back → pop + tests
 - [ ] 🤖 10. Transitions (fade/slide from motion settings, reduce-motion) + a gallery demo (open a panel, a dialog on top, back out)
 Check: tests pass; Playwright: open → dialog → Esc → Esc returns to start, lower screen can't be clicked while covered.
 
@@ -45,3 +45,6 @@ Notes:
 - Surprise: Press Start 2P (the classic 8-bit font) is so wide that "ONLINE" burst out of a mode card, so Pixel titles use Silkscreen (about 30% narrower, still 8-bit). Avatar initials now use the body font in every style, because Silkscreen's M read as H at 18px. `font-synthesis: none` stops browsers faking bold on one-weight fonts.
 - Gallery: `?preset=neon` in the link opens a style directly (handy on a phone). `npm run shoot` also saves `<preset>-phone.png` + `<preset>-desktop.png`, and waits for fonts to load.
 - Kit size after F02: ~743 lines of code + CSS (excluding tests + preset JSON), leaving ~260 for F03/F04.
+- F03 screen stack (task 9): `kit/screens.ts` is a tiny store (`screens.push/pop/replace`, `screens.current`), no library; `kit/ScreenStack.tsx` draws it in React (`useSyncExternalStore`) and makes every layer below the top `inert`. It also moves focus into a screen when it opens and back to whatever opened it when it closes (keyboard/gamepad). Each open screen is one browser history entry (`{ kitScreens: depth }`), so phone/browser Back closes the top screen; with every screen closed, Back leaves the page as normal. Closing a screen any other way (Esc, a button) steps history back too, so no Back press is ever wasted. Forward can't reopen a closed screen (it's stepped straight back).
+- Surprise: two `history.back()` calls in a row can merge into one (jsdom does it; browsers may too), so closing two screens at once left a stray entry. History now moves one step at a time, waiting for each popstate before the next.
+- Gamepad B is a hook, not built in: call `screens.pop()` when B is pressed (reading the Gamepad API needs a polling loop — that belongs with the game's input code).
