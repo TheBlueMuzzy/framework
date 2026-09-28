@@ -10,7 +10,8 @@
     "test": "vitest run",
     "check-ui": "node scripts/check-ui.mjs",
     "install-kit": "node scripts/install-kit.mjs",
-    "shoot": "node scripts/shoot.mjs"
+    "shoot": "node scripts/shoot.mjs",
+    "pick-sheet": "node scripts/pick-sheet.mjs"
   },
   "dependencies": {
     "react": "^19.3.0",
