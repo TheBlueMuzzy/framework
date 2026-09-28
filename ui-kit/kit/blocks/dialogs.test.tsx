@@ -1,5 +1,6 @@
 // Toast timing, and Confirm opened through the screen stack.
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { StrictMode } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ScreenStack, screens } from '..'
 import { askConfirm, kitScreens, MAX_TOASTS, toast, toasts } from './dialogs'
@@ -39,6 +40,51 @@ describe('askConfirm', () => {
     fireEvent.click(screen.getByText('Reset'))
     expect(onConfirm).toHaveBeenCalledOnce()
     expect(screens.current).toEqual([])
+  })
+})
+
+describe('Confirm cancel', () => {
+  // Any close that isn't "yes" is a "no": Esc, phone Back and tapping the dim all pop the screen.
+  const open = (onConfirm = vi.fn(), onCancel = vi.fn()) => {
+    render(<ScreenStack overlay screens={kitScreens} />)
+    act(() => askConfirm({ title: 'Quit?', onConfirm, onCancel }))
+    return { onConfirm, onCancel }
+  }
+
+  it('closing it without Yes (Esc, Back, the dim: all a screen pop) calls onCancel once', async () => {
+    const { onConfirm, onCancel } = open()
+    await act(async () => screens.pop())
+    expect(onCancel).toHaveBeenCalledOnce()
+    expect(onConfirm).not.toHaveBeenCalled()
+  })
+
+  it('Esc counts as cancel', async () => {
+    const { onCancel } = open()
+    await act(async () => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })) })
+    expect(screens.current).toEqual([])
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('the Cancel button calls onCancel once, not twice', async () => {
+    const { onCancel } = open()
+    await act(async () => { fireEvent.click(screen.getByText('Cancel')) })
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('React StrictMode (which closes and reopens screens once while developing) is not a cancel', async () => {
+    const onCancel = vi.fn()
+    render(<StrictMode><ScreenStack screens={kitScreens} /></StrictMode>)
+    await act(async () => askConfirm({ title: 'Quit?', onConfirm: () => {}, onCancel }))
+    expect(onCancel).not.toHaveBeenCalled()
+    await act(async () => screens.pop())
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('Yes never calls onCancel', async () => {
+    const { onConfirm, onCancel } = open()
+    await act(async () => { fireEvent.click(screen.getByText('OK')) })
+    expect(onConfirm).toHaveBeenCalledOnce()
+    expect(onCancel).not.toHaveBeenCalled()
   })
 })
 

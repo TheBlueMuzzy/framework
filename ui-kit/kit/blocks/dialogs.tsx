@@ -24,7 +24,8 @@ export function Modal({ title, children, actions }: ModalProps) {
 }
 
 // CONFIRM — "Are you sure?". danger paints the yes-button red (reset progress, quit, delete).
-// Either button closes it first, then calls your function.
+// Either button closes it first, then calls your function. Closing it any other way (Esc, phone
+// Back, tapping the dim) counts as Cancel. onCancel runs once at most, and never after onConfirm.
 export const confirmWords = { yes: 'OK', no: 'Cancel' }
 export type ConfirmProps = {
   title: string; message?: string; danger?: boolean
@@ -32,7 +33,23 @@ export type ConfirmProps = {
 }
 export function Confirm({ title, message, danger, onConfirm, onCancel, words }: ConfirmProps) {
   const w = { ...confirmWords, ...words }
-  const close = (then?: () => void) => { screens.pop(); then?.() }
+  const answered = useRef(false) // true once Yes or Cancel has run
+  const close = (then?: () => void) => { answered.current = true; screens.pop(); then?.() }
+
+  // Closed without an answer → that's a Cancel. Checked a moment after closing, because React's
+  // StrictMode (while developing) closes and reopens every screen once, which isn't a real close.
+  const isOpen = useRef(false)
+  useEffect(() => {
+    isOpen.current = true
+    return () => {
+      isOpen.current = false
+      queueMicrotask(() => {
+        if (isOpen.current || answered.current) return
+        answered.current = true
+        onCancel?.()
+      })
+    }
+  }, [onCancel])
   return (
     <Modal title={title} actions={<>
       <Button variant="secondary" onClick={() => close(onCancel)}>{w.no}</Button>
