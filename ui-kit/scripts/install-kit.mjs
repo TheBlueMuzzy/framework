@@ -136,7 +136,21 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
          <Game />
        </ScreenStack>
        <ToastStack />
-     then open one from anywhere with screens.push('settings').`)
+     then open one from anywhere with screens.push('settings').
+     A game with its own UI already (a letterboxed canvas, a HUD with z-indexes): don't wrap it —
+     put <ScreenStack overlay screens={…} /> next to it and set --kit-overlay-z in the game's CSS.
+     A game built fully from the kit: add class="kit-page" to <body> so the kit paints the page.`)
+  }
+  // Old page-wide CSS (Vite's index.css "button {…}", a "* { margin: 0; padding: 0 }" reset) is
+  // unlayered, so it beats every kit rule. Say how to tame it.
+  const globalCss = ['src/index.css', 'src/App.css'].filter((f) => {
+    const text = existsSync(join(gameDir, f)) ? readText(join(gameDir, f)) : ''
+    return /(^|\n)\s*(\*|button|input|a)\s*[,{]/.test(text) && !text.includes('game-base')
+  })
+  if (globalCss.length) {
+    log(`  CSS: ${globalCss.join(' and ')} style every button / every element. Wrap those page-wide rules in
+       @layer game-base { … } (the kit's weakest layer) so they can't reach kit parts; the game's own
+       screens keep their look. Screenshot the game's other screens before and after.`)
   }
   log(`  ${isUpdate ? 1 : 3}. Check the game's UI code keeps the rules: node src/ui/kit/check-ui.mjs src/ui
   ${isUpdate ? 2 : 4}. Run the game's tests and build, and look at every screen on a phone and a desktop.`)

@@ -6,7 +6,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 ## Parts (`?screen=parts`)
 - **Layout:** `Screen` (slots `topLeft` `top` `topRight` `bottomLeft` `bottom` `bottomRight` + centre · `dialog` = dims what's under it) · `Panel` · `Stack` (column) · `Row` · `Grid`. Gaps by name: `xs s m l xl`.
 - **Controls:** `Button` (primary / secondary / ghost / danger, + `icon`, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` · `ProgressBar` · `ScrollArea` · `Text`.
-- **Glue:** `ScreenStack` + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })`.
+- **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })`.
 
 ## Built
 
