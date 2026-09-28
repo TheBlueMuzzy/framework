@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-New project, created 2026-09-28. First module: the game UI kit — design approved (`.planning/design/ui-kit.md`), feature map in ROADMAP (F01–F07).
-Next: `/sprint` to line up sprint 01 (parts + style engine, presets, screen stack).
+Sprint 01 on `dev/v0-1-ui-kit`: F01 parts + style engine → F02 5 styles → F03 screen stack. Next: `/develop` continues with the next unticked task in SPRINT.md.
+Muzzy: task 11 — look at the 5 styles in the gallery (`/play`) once F02 is built.
 
 ## Where we are
-Stage: define → develop   Milestone: v0.1 — Game UI kit   Sprint: none yet
-Doing: —   Branch: main   Version: 0.0.0
+Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: 01 — every part in all 5 styles
+Doing: F01 — building   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts
