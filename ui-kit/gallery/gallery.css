@@ -1,0 +1,19 @@
+/* Gallery-only styles (the "game" layer). Same rules as game code: style names only. */
+@layer game {
+  .gallery { max-inline-size: 64rem; margin-inline: auto; padding: var(--gap-l); padding-block-end: var(--gap-xl); }
+
+  /* A stand-in game view for the Screen demo */
+  .gallery-stage {
+    position: relative; block-size: 22rem;
+    border: var(--border-width) dashed var(--border); border-radius: var(--radius-panel);
+    overflow: hidden;
+  }
+  /* One screen, full-size: a thin bar (menu + style) over a stand-in game running the screen stack */
+  .gallery-stage-page { display: flex; flex-direction: column; block-size: 100dvh; }
+  .gallery-bar { flex: none; padding: var(--gap-xs) var(--gap-m); border-block-end: var(--border-width) solid var(--border); }
+  .gallery-game { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: hidden;
+    background: repeating-linear-gradient(45deg, var(--bg) 0 1.5rem, var(--surface) 0 3rem); }
+  .gallery-game-label { block-size: 100%; align-items: center; justify-content: center; }
+  .gallery-menu { align-items: start; } /* each group panel only as tall as its rows */
+  .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
+}

@@ -66,10 +66,10 @@ Kicks in on its own whenever a game needs a screen, panel, button or HUD piece, 
 8. **Improvements flow back** to the shared kit (version bump), so the next game starts better.
 
 ## 6. Engineering calls (Claude's — logged here, open to your pushback)
-- **Web: plain React + plain CSS variables, no Tailwind, no component library.** Native browser dialogs/popovers where they work; a small headless helper only if one control truly needs it. Reason: "super basic" and human-readable — one styling language, nothing to learn. *(Changes the earlier shadcn recommendation: shadcn brings Tailwind as a second styling language and its look, not just structure.)*
+- **Web: plain React + plain CSS variables, no Tailwind, no component library.** Native browser dialogs/popovers where they work; a small headless helper only if one control truly needs it. *Spike 2026-09-28: native `<dialog>`, `popover` and `inert` all work in Chromium + WebKit phone emulation, so modals use `<dialog>`, tooltips and toasts use `popover`, and the screen stack uses `inert`. No helper library needed.* Reason: "super basic" and human-readable — one styling language, nothing to learn. *(Changes the earlier shadcn recommendation: shadcn brings Tailwind as a second styling language and its look, not just structure.)*
 - **Style applied at runtime on web** (the JSON sets CSS variables) → live tweaking in the Dev Kit with no rebuild.
 - **Screen stack:** one small store — open/close/replace; only the top screen takes input; Esc / gamepad B / phone back closes it; modals are just screens on top.
-- **Size budget:** web kit ≤ ~1,000 lines incl. CSS for v1. Every file readable top to bottom.
+- **Size budget:** core (parts, styles, stack) ≤ ~1,000 lines incl. CSS; built screens have their own budget, ≈ 60 lines each on average (~1,500) — decided 2026-09-28 when the core hit ~870. Every file readable top to bottom.
 - **Unity: later**, when a Unity game needs UI — adopt the free sinanata UI Toolkit design system for controls, add the same layout classes, screen stack and catalog names, and read the same `style.json`. Same catalog, same presets, two platforms.
 - **Tests:** every preset has identical settings names and passes contrast (automatic test); gallery screenshots are the visual check.
 

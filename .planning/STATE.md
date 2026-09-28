@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-New project, created 2026-09-28. First module: the game UI kit — design approved (`.planning/design/ui-kit.md`), feature map in ROADMAP (F01–F07).
-Next: `/sprint` to line up sprint 01 (parts + style engine, presets, screen stack).
+Sprint 03 done — v0.1 Game UI kit musts 6/6: the `game-ui` skill works on its own and passed its first real try-out (Roll Better Settings in Cartoon; kit 0.1.3).
+Next: `/deliver` the framework v0.1 (merge `dev/v0-1-ui-kit` → main, tag). Then the rest of Roll Better's UI on the kit (a Roll Better feature — see ROADMAP Ideas for the kit additions it will need).
 
 ## Where we are
-Stage: define → develop   Milestone: v0.1 — Game UI kit   Sprint: none yet
-Doing: —   Branch: main   Version: 0.0.0
+Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: none (03 done)
+Doing: —   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts
@@ -17,9 +17,14 @@ Live: none (the gallery may get a private preview link later)
 - Parts and screens contain no colours, px sizes or fonts — only style names. The style file paints everything.
 - All presets have identical setting names + pass contrast (tested). Accessibility floor lives outside presets.
 - Web: plain React + plain CSS variables. No Tailwind, no component library (design §6).
-- Size budget: web kit ≤ ~1,000 lines incl. CSS for v1.
+- Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
+- Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 
 ## Log
+- 2026-09-28 — Pre-release reviews: security (1 low fixed: installer never deletes outside src/ui/kit) + code review (6 bugs fixed: replace focus, per-game settings slot, React 18 inert, room-code clearing, confirm cancel, Esc with tooltip); shoot now flags clipped controls. Kit 0.1.5, 115 tests.
+- 2026-09-28 — Sprint 03 done: F06 game-ui skill (+ catalog, install-kit, shipped checker, pick sheet, BMUZ wiring); F07 Roll Better Settings rebuilt in Cartoon (408 hand-made lines gone), kit 0.1.0 → 0.1.3 from the try-out. Muzzy approved.
+- 2026-09-28 — Sprint 02 done: F04 built screens (~36, blocks 959 lines), F05 gallery menu + 116 screenshots; Pixel body font → VT323; focus rings keyboard-only. Muzzy approved.
+- 2026-09-28 — Sprint 01 done: F01 parts + style engine, F02 5 styles, F03 screen stack (Back/Esc, inert, style transitions); 74 tests. Muzzy approved all three.
 - 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.
