@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 02 done: ~36 built screens (dialogs, front end, list-driven settings, pause + HUD, flow, online) + gallery with a screen menu and deep links (`?screen=settings&preset=neon`); 91 tests, 116 screenshots. Muzzy approved.
-Next: `/sprint` → F06 the `game-ui` skill + recipe catalog + wiring into /develop and /define, then F07 try it on a real game.
+Sprint 03 on `dev/v0-1-ui-kit`: F06 the `game-ui` skill (tasks 1–6) → F07 try it on Roll Better's settings. Next: `/develop` continues with the next unticked task in SPRINT.md.
+Muzzy: pick Roll Better's style from the 5-style sheet (task 7), then try the new settings (task 9).
 
 ## Where we are
-Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: none (02 done)
-Doing: —   Branch: dev/v0-1-ui-kit   Version: 0.0.0
+Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: 03 — game-ui skill, proven on Roll Better
+Doing: F06 — building   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts

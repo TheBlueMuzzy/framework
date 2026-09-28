@@ -10,8 +10,8 @@ Goal: any game can get good-looking, standard menus, settings, dialogs and HUD i
 - ✅ F03 🧱 Screen stack + transitions — must:prototype · needs: F01 · sprint 1
 - ✅ F04 🎮 Built screens: menu, list-driven settings, pause, dialogs, loading, flow/results, lobby, HUD frame + pieces — must:prototype · needs: F01, F03 · sprint 2
 - ✅ F05 🔧 Gallery app (every catalog entry × every preset; phone + desktop screenshots; style switcher) — must:prototype · needs: F01, ~F04 · sprint 2
-- 🟢 F06 🧱 `game-ui` skill + recipe catalog + wiring into /develop and /define — must:prototype · needs: F04, F05
-- ⏳ F07 ❓ Try it: pick a game + a real screen to rebuild; adjust from what we learn — needs: F06
+- 🔨 F06 🧱 `game-ui` skill + recipe catalog + wiring into /develop and /define — must:prototype · needs: F04, F05 · sprint 3
+- 🔨 F07 ❓ Try it: pick a game + a real screen to rebuild; adjust from what we learn — needs: F06 · sprint 3
 
 ```mermaid
 flowchart LR
@@ -21,9 +21,9 @@ flowchart LR
   F03 --> F04
   F01 --> F05[✅ F05 Gallery]
   F04 -.working.-> F05
-  F04 --> F06[🟢 F06 game-ui skill]
+  F04 --> F06[🔨 F06 game-ui skill]
   F05 --> F06
-  F06 --> F07[⏳ F07 Try it on a game]
+  F06 --> F07[🔨 F07 Try it on a game]
 ```
 
 ## Later
