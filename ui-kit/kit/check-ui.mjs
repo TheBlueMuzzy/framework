@@ -5,7 +5,7 @@
 //   1. raw colours (#hex, rgb(), hsl())       → use a colour name: var(--primary)
 //   2. px sizes                                → use gap names / rem
 //   3. font names                              → use var(--font-body) / var(--font-display)
-//   4. position:absolute/fixed outside Screen  → use Screen slots, Stack, Row, Grid
+//   4. position:absolute/fixed outside Screen (and the stack's overlay) → use Screen slots, Stack, Row, Grid
 //   5. inline style= (except setting --css-variables)
 //   6. var(--something) that isn't a style name from kit/style/tokens.ts (or a --kit-… helper)
 // The style engine (kit/style/), the presets (kit/styles/), the font files (kit/fonts/ — their
@@ -49,7 +49,7 @@ function checkCss(text) {
       const report = (message) => problems.push({ line: at, message, snippet: `${prop}: ${value}` })
       valueProblems(value).forEach(report)
       if (/^font(-family)?$/.test(prop) && !/^(var\(|inherit)/.test(value)) report('font name — use var(--font-body) or var(--font-display)')
-      if (prop === 'position' && /absolute|fixed/.test(value) && !selector.includes('.kit-screen')) report('position:absolute/fixed — only Screen slots may do this')
+      if (prop === 'position' && /absolute|fixed/.test(value) && !/\.kit-(screen|overlay)\b/.test(selector)) report('position:absolute/fixed — only Screen slots (and the stack overlay) may do this')
     }
   }
   return problems

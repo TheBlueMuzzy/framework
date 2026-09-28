@@ -1,17 +1,23 @@
 /* THE KIT'S CSS
-   Three layers, weakest first: kit-base (layout + accessibility floor, no colours),
-   kit-style (paints parts using the style variables), game (a game's own additions win).
+   Four layers, weakest first: game-base (a game's old page-wide rules — put its index.css and
+   "* { … }" resets in here so they can't reach kit parts), kit-base (layout + accessibility floor,
+   no colours), kit-style (paints parts using the style variables), game (a game's own additions win).
+   The kit only touches its own things: screens, toasts, and a page that opts in with
+   <body class="kit-page"> (a game built fully from the kit). A game's older UI keeps its own look.
    No raw colours, px sizes or font names here — only var(--style-name). */
-@layer kit-base, kit-style, game;
+@layer game-base, kit-base, kit-style, game;
 
 /* ───────────── kit-base: layout only, zero colours ───────────── */
 @layer kit-base {
-  *, *::before, *::after { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  body { margin: 0; font-size: var(--text-body); line-height: 1.4; font-synthesis: none; /* no fake bold on one-weight fonts */ }
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-overlay),
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-overlay) *,
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-overlay) *::before,
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-overlay) *::after { box-sizing: border-box; }
+  .kit-page { margin: 0; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  :where(.kit-page, .kit-screen, .kit-toasts) { font-size: var(--text-body); line-height: 1.4; font-synthesis: none; /* no fake bold on one-weight fonts */ }
 
   /* Accessibility floor: visible focus ring for keyboard + gamepad */
-  :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
+  :where(.kit-page, .kit-screen, .kit-toasts) :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
 
   /* Accessibility floor: every control is at least 44px to tap */
   .kit-target { min-block-size: var(--target-min); min-inline-size: var(--target-min); }
@@ -45,6 +51,9 @@
   .kit-screen > [data-slot="bottom-right"] { grid-area: bottom-right; justify-self: end; }
   /* Screen stack layers: no box of their own, they only carry "inert" for the screens inside */
   .kit-layer { display: contents; }
+  /* <ScreenStack overlay>: open screens cover the whole window above a game that isn't built from Screens */
+  .kit-overlay { position: fixed; inset: 0; z-index: var(--kit-overlay-z, 100); pointer-events: none; }
+  .kit-overlay[data-open] { pointer-events: auto; }
 
   .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; min-block-size: 0; }
   .kit-panel { padding: var(--gap-l); }
@@ -58,9 +67,9 @@
   .kit-grid[data-min="l"] { --kit-tile: 18rem; }
 
   /* ── Controls: shapes and sizes only ── */
-  button, input { font: inherit; color: inherit; margin: 0; }
-  button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  button:disabled { cursor: not-allowed; }
+  :where(.kit-page, .kit-screen, .kit-toasts) :is(button, input) { font: inherit; color: inherit; margin: 0; }
+  :where(.kit-page, .kit-screen, .kit-toasts) button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  :where(.kit-page, .kit-screen, .kit-toasts) button:disabled { cursor: not-allowed; }
 
   .kit-text { margin: 0; overflow-wrap: anywhere; }
   .kit-text[data-kind="display"] { font-size: var(--text-display); line-height: 1.1; font-weight: 800; }
@@ -126,7 +135,8 @@
 
   /* Accessibility floor: reduce motion turns animation off and presses don't shrink */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    :where(.kit-page, .kit-screen, .kit-toasts), :where(.kit-page, .kit-screen, .kit-toasts) *,
+    :where(.kit-page, .kit-screen, .kit-toasts) *::before, :where(.kit-page, .kit-screen, .kit-toasts) *::after {
       animation-duration: 0s !important;
       transition-duration: 0s !important;
       scroll-behavior: auto !important;
@@ -137,7 +147,9 @@
 
 /* ───────────── kit-style: paint, from style variables only ───────────── */
 @layer kit-style {
-  body { background: var(--bg); color: var(--on-bg); font-family: var(--font-body); }
+  .kit-page { background: var(--bg); }
+  :where(.kit-page, .kit-screen, .kit-toasts) { color: var(--on-bg); font-family: var(--font-body); }
+  .kit-overlay[data-open] { background: color-mix(in srgb, var(--bg) 70%, transparent); } /* dims the game under it */
   .kit-panel {
     background: var(--surface) var(--panel-texture); color: var(--on-surface);
     border: var(--border-width) solid var(--border); border-radius: var(--radius-panel);
@@ -151,7 +163,7 @@
   .kit-text[data-kind="caption"], .kit-listrow-detail { color: var(--muted); }
   .kit-text:is([data-kind="display"], [data-kind="title"], [data-kind="heading"]),
   .kit-card-title, .kit-button, .kit-tab, .kit-badge { text-transform: var(--text-case); }
-  :focus-visible { filter: var(--glow); }
+  :where(.kit-page, .kit-screen, .kit-toasts) :focus-visible { filter: var(--glow); }
 
   /* Appearing: panels and cards play the style's entrance once (fade, float, pop, blink, flicker) */
   .kit-panel, .kit-card { animation: var(--enter) var(--motion-normal) var(--ease) backwards; }

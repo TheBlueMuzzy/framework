@@ -57,13 +57,14 @@ type SettingsProps = {
   load?: () => SettingsValues | null; save?: (values: SettingsValues) => void
   words?: Partial<typeof settingsWords>
   labels?: Record<string, string> // translated tab and row labels, by id: { audio: 'Sonido' }
+  hide?: string[] // row ids to leave out right now, e.g. in-game-only rows when opened from the main menu
 }
 
-export function Settings({ schema = defaultSchema, onChange, onAction, info = {}, onBack = () => screens.pop(), load = loadFromBrowser, save = saveToBrowser, words, labels = {} }: SettingsProps) {
+export function Settings({ schema = defaultSchema, onChange, onAction, info = {}, onBack = () => screens.pop(), load = loadFromBrowser, save = saveToBrowser, words, labels = {}, hide = [] }: SettingsProps) {
   const w = { ...settingsWords, ...words }
   const [values, setValues] = useState(() => loadSettings(schema, load))
   const tabs = schema.tabs
-    .map((tab) => ({ ...tab, rows: tab.rows.filter((row) => row.on !== false) }))
+    .map((tab) => ({ ...tab, rows: tab.rows.filter((row) => row.on !== false && !hide.includes(row.id)) }))
     .filter((tab) => tab.rows.length > 0)
   const [tabId, setTabId] = useState<string | undefined>(tabs[0]?.id)
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0]
@@ -107,9 +108,11 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
           <Text kind="title">{w.title}</Text>
           <Button variant="secondary" onClick={onBack}>{w.back}</Button>
         </Row>
-        {/* Phones get ◀ Audio ▶ instead of a tab bar: 8 tabs would fill half the screen */}
-        <div className="kit-settings-tabs"><Tabs {...tabPicker} /></div>
-        <div className="kit-settings-picker"><Selector {...tabPicker} options={tabPicker.tabs} /></div>
+        {/* Phones get ◀ Audio ▶ instead of a tab bar: 8 tabs would fill half the screen. One tab: no picker. */}
+        {tabs.length > 1 && <>
+          <div className="kit-settings-tabs"><Tabs {...tabPicker} /></div>
+          <div className="kit-settings-picker"><Selector {...tabPicker} options={tabPicker.tabs} /></div>
+        </>}
         {tab && (
           <ScrollArea label={labelOf(tab)}>
             {tab.rows.map((row) => (

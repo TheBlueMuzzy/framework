@@ -41,3 +41,18 @@ describe('askConfirm', () => {
     expect(screens.current).toEqual([])
   })
 })
+
+describe('ScreenStack overlay', () => {
+  it('holds open screens in a cover over the game; tapping the dim closes the top one', () => {
+    const { container } = render(<ScreenStack overlay screens={kitScreens} />)
+    const cover = container.querySelector('.kit-overlay')!
+    expect(cover.hasAttribute('data-open')).toBe(false)
+    act(() => askConfirm({ title: 'Quit?', onConfirm: () => {} }))
+    expect(cover.hasAttribute('data-open')).toBe(true)
+    expect(cover.contains(screen.getByRole('dialog', { name: 'Quit?' }))).toBe(true)
+    fireEvent.click(screen.getByText('Quit?')) // a tap inside the dialog doesn't close it
+    expect(screens.current).toEqual(['confirm'])
+    fireEvent.click(cover)
+    expect(screens.current).toEqual([])
+  })
+})

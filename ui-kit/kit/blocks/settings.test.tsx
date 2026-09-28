@@ -26,10 +26,25 @@ describe('Settings', () => {
 
   it('a row switched off is not drawn, and a tab with no rows left disappears', () => {
     const list = schema()
+    list.tabs.push({ id: 'video', label: 'Video', rows: [{ id: 'hd', type: 'toggle', label: 'HD', default: true }] })
     list.tabs[1].rows[0].on = false
     render(<Settings schema={list} />)
     expect(screen.queryByRole('tab', { name: 'About' })).toBeNull()
     expect(screen.getByRole('tab', { name: 'Audio' })).toBeTruthy()
+  })
+
+  it('with only one tab there is no tab picker, just its rows', () => {
+    const list = schema()
+    list.tabs.pop()
+    render(<Settings schema={list} />)
+    expect(screen.queryByRole('tab')).toBeNull()
+    expect(screen.getByRole('switch', { name: 'Music' })).toBeTruthy()
+  })
+
+  it('hide leaves rows out for now (e.g. in-game-only rows on the main menu)', () => {
+    render(<Settings schema={schema()} hide={['reset']} />)
+    expect(screen.queryByRole('tab', { name: 'About' })).toBeNull() // its only row is hidden
+    expect(screen.getByRole('switch', { name: 'Music' })).toBeTruthy()
   })
 
   it('remembers values in the browser, and "reset to defaults" puts them back', () => {
