@@ -14,8 +14,8 @@ Check: `npm test` + `npm run build` + `npm run check-ui` pass; screenshots show 
 
 ## F02 🎮 The 5 styles (Clean, Cozy, Cartoon, Pixel, Neon)
 Done when: the gallery's style switcher flips between all 5 and each reads as its family (design §3); every preset passes the same-names + contrast test.
-- [ ] 🤖 7. `kit/styles/clean.json` + preset test (identical keys, 4.5:1 contrast on every colour pair)
-- [ ] 🤖 8. `cozy.json`, `cartoon.json`, `pixel.json`, `neon.json` — Google Fonts (OFL, 🟢) logged in `content/credits.json`; motion flavour per style
+- [x] 🤖 7. `kit/styles/clean.json` + preset test (identical keys, 4.5:1 contrast on every colour pair)
+- [x] 🤖 8. `cozy.json`, `cartoon.json`, `pixel.json`, `neon.json` — Google Fonts (OFL, 🟢) logged in `content/credits.json`; motion flavour per style
 - [ ] 🙋 11. Look at the 5 styles on the parts page, phone + desktop (`/play`), and say what feels off (tuning)
 Check: preset test passes; screenshots of every style at phone + desktop.
 
@@ -38,3 +38,10 @@ Notes:
 - `npm run shoot` starts its own Vite (port 5180) in-process and closes it; it also fails on sideways overflow, targets under 44px and console errors, and shoots 200% text + a live tweak. Phones "zoom out" to fit wide pages, so overflow is checked against the real screen width.
 - F01 kit size: ~610 lines of code + CSS (kit.css 201), excluding tests and clean.json — F02–F04 share the remaining ~400.
 - Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.
+- F02 new style settings (all 5 presets set every one; `tokens.ts` explains each): `ink` (outline colour around filled buttons/badges and framing bars + switch tracks; `transparent` = none), `corner-shape` (`round` or `bevel` = chamfered corners, uses CSS `corner-shape`), `text-case` (`none`/`uppercase` for titles, buttons, tabs, badges), `press-shift` (how far a button sinks when pressed; its rest shadow disappears, for the hard-shadow press), `enter` (how panels and cards appear: `kit-fade` / `kit-float` / `kit-pop` / `kit-blink` / `kit-flicker`). Pixel's no-easing motion is just `ease: steps(2)`, and Cartoon's bounce is an overshooting cubic-bezier, so no extra motion setting was needed. `glow` and `panel-texture` are now set in every preset too.
+- `corner-shape: bevel` works in Chrome/Edge (Chromium 139+) only. Safari and Firefox fall back to rounded corners of the same size, so Neon looks softer on an iPhone. Nothing breaks.
+- Preset test (`kit/styles/styles.test.ts`): identical names; 4.5:1 for on-bg/bg, on-surface/surface, on-primary/primary, on-danger/danger, muted/surface, muted/bg; 3:1 for the focus ring on bg + surface. Ratios: clean 15.3 / 16.7 / 5.9 / 5.4 / 6.1 / 5.6 · cozy 11.1 / 12.9 / 4.6 / 5.5 / 5.7 / 4.9 · cartoon 10.8 / 16.8 / 10.7 / 5.0 / 7.6 / 4.9 · pixel 15.3 / 10.3 / 6.5 / 5.2 / 5.0 / 7.4 · neon 18.1 / 16.7 / 12.2 / 6.2 / 7.3 / 8.0. The test caught Cartoon's first red (3.8:1), so it was darkened.
+- Fonts: self-hosted in `kit/fonts/` (Latin only, 1 file per font, variable fonts where they exist, so each file holds every weight), not the Google CDN. Reasons: the kit is copied into games, which should work offline and on itch, and nothing gets sent to Google. The browser only downloads the active preset's fonts. Clean = system font (0 KB) · Cozy = Nunito (39 KB) · Cartoon = Lilita One display + Fredoka body (40 KB) · Pixel = Silkscreen display + Pixelify Sans body (20 KB) · Neon = Orbitron display + Exo 2 body (53 KB). All OFL 1.1, logged in `ui-kit/content/credits.json` as 🟡 per the toolkit's traffic light (its Fontsource row says OFL needs no visible credit; the credit lines are there anyway).
+- Surprise: Press Start 2P (the classic 8-bit font) is so wide that "ONLINE" burst out of a mode card, so Pixel titles use Silkscreen (about 30% narrower, still 8-bit). Avatar initials now use the body font in every style, because Silkscreen's M read as H at 18px. `font-synthesis: none` stops browsers faking bold on one-weight fonts.
+- Gallery: `?preset=neon` in the link opens a style directly (handy on a phone). `npm run shoot` also saves `<preset>-phone.png` + `<preset>-desktop.png`, and waits for fonts to load.
+- Kit size after F02: ~743 lines of code + CSS (excluding tests + preset JSON), leaving ~260 for F03/F04.

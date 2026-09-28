@@ -1,10 +1,12 @@
-// SCREENSHOTS — the gallery at phone portrait, phone landscape and desktop, saved to screenshots/.
+// SCREENSHOTS — the gallery at phone portrait, phone landscape and desktop, plus every style preset, saved to screenshots/.
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Also reports two things to fix: sideways overflow, and tap targets smaller than 44px.
 // Usage: npm run shoot
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readdirSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
+// Preset names = the JSON files in kit/styles/
+const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
 
 const sizes = [
   { name: 'phone-portrait', width: 390, height: 844, mobile: true },
@@ -43,10 +45,11 @@ async function shoot(name, size, prepare) {
   const errors = []
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
-  await page.goto('http://localhost:5180/')
+  await page.goto(`http://localhost:5180/${size.query ?? ''}`)
   await page.waitForSelector('.kit-screen')
+  await page.evaluate(() => document.fonts.ready)
   if (prepare) await prepare(page)
-  await page.waitForTimeout(300) // let transitions finish
+  await page.waitForTimeout(600) // let entrances and transitions finish
   await page.screenshot({ path: `screenshots/${name}.png`, fullPage: true })
   const problems = [...errors, ...(await page.evaluate(findProblems, size.width))]
   problemCount += problems.length
@@ -64,6 +67,11 @@ try {
     await page.getByLabel('Next Spacing').click()
     await page.locator('.gallery-colour').fill('#b0306a')
   })
+  // Every style preset at phone and desktop size: <preset>-phone.png, <preset>-desktop.png
+  for (const preset of presetNames) {
+    await shoot(`${preset}-phone`, { ...sizes[0], query: `?preset=${preset}` })
+    await shoot(`${preset}-desktop`, { ...sizes[2], query: `?preset=${preset}` })
+  }
 } finally {
   await browser.close()
   await server.close()

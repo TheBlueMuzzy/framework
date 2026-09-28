@@ -19,9 +19,15 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
+function presetFromLink(): StyleFile | null {
+  const preset = new URLSearchParams(location.search).get('preset')
+  return preset ? { preset } : null
+}
+
 export function App() {
   // The dev switcher's changes sit on top of style.json until you press Reset.
-  const [devStyle, setDevStyle] = useState<StyleFile | null>(null)
+  // A link can pick the preset too: …/?preset=neon (handy for opening each style on a phone).
+  const [devStyle, setDevStyle] = useState<StyleFile | null>(presetFromLink)
   const style = devStyle ?? (styleFile as StyleFile)
   useEffect(() => applyStyle(style), [style])
 

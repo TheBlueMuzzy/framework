@@ -1,5 +1,6 @@
 // THE GAME UI KIT — copy this whole folder into a game's src/ui/kit/.
 // Then: applyStyle(styleJson) once at start-up, and build screens from these parts.
+import './fonts/fonts.css'
 import './kit.css'
 
 export * from './layout'

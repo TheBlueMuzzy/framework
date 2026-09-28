@@ -7,13 +7,14 @@
 //   4. position:absolute/fixed outside Screen  → use Screen slots, Stack, Row, Grid
 //   5. inline style= (except setting --css-variables)
 //   6. var(--something) that isn't a style name from kit/style/tokens.ts (or a --kit-… helper)
-// The style engine (kit/style/), the presets (kit/styles/) and tests are allowed raw values.
+// The style engine (kit/style/), the presets (kit/styles/), the font files (kit/fonts/ — their
+// @font-face rules must name each font) and tests are allowed raw values.
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { allVariableNames } from '../kit/style/tokens.ts'
 
-const EXEMPT = [/kit[\\/]style[\\/]/, /kit[\\/]styles[\\/]/, /\.test\./]
+const EXEMPT = [/kit[\\/]style[\\/]/, /kit[\\/]styles[\\/]/, /kit[\\/]fonts[\\/]/, /\.test\./]
 
 // Replace comments with spaces (keeping line breaks) so notes like "44px" don't count.
 const stripComments = (text) =>
