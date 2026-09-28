@@ -29,6 +29,31 @@
   /* Pips: little segments (lives, hearts, page dots) */
   .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }
 
+  /* HUD: its slots let taps through to the game; only buttons and inputs catch them */
+  .kit-screen > [data-slot]:has(> .kit-hud-slot) { pointer-events: none; }
+  .kit-hud-slot { display: contents; }
+  .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
+  .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
+  .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
+  .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { justify-self: center; }
+  /* Phones: the corners share the first row and the top-centre piece gets its own row below,
+     so three things never squeeze into one narrow line. Same at the bottom. */
+  @media (max-width: 40rem) {
+    .kit-screen:has(> [data-slot] > .kit-hud-slot) {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+      grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
+    }
+  }
+  .kit-banner { align-items: center; text-align: center; }
+  /* +N float-up: stacked on top of its number (same grid cell), so no positioning needed */
+  .kit-float-anchor { display: inline-grid; }
+  .kit-float-anchor > * { grid-area: 1 / 1; justify-self: center; }
+  .kit-float-up { font-weight: 800; white-space: nowrap; }
+  .kit-combo { display: inline-block; }
+  .kit-timer { display: inline-grid; place-items: center; inline-size: 3.5rem; aspect-ratio: 1; border-radius: 50%; }
+  .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }
+
   /* Toasts: a popover pinned to the top centre, newest at the bottom */
   .kit-toasts { inset: 0 0 auto; margin: max(var(--gap-m), env(safe-area-inset-top)) auto 0; padding: 0; border: 0; background: none;
     overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s); max-inline-size: calc(100% - 2 * var(--gap-m)); }
@@ -51,4 +76,20 @@
   .kit-tooltip { animation: kit-fade var(--motion-fast) var(--ease); }
   .kit-pip { background: var(--border); border-radius: var(--radius-control); corner-shape: var(--corner-shape); outline: var(--border-width) solid var(--ink); }
   .kit-pip[data-state="on"] { background: var(--primary); filter: var(--glow); }
+
+  .kit-hud-chip { background: var(--surface) var(--panel-texture); color: var(--on-surface); border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control); corner-shape: var(--corner-shape); box-shadow: var(--depth-1); }
+  .kit-hud-chip[data-state="active"] { border-color: var(--accent); outline: 0.1875rem solid var(--accent); outline-offset: -0.1875rem; }
+  .kit-float-up { color: var(--primary); animation: kit-float-up calc(var(--motion-normal) * 4) var(--ease) forwards; }
+  .kit-float-up[data-variant="danger"] { color: var(--danger); }
+  .kit-combo { animation: kit-pop var(--motion-normal) var(--ease); }
+  .kit-timer { --kit-ring: var(--primary); color: var(--on-surface); box-shadow: var(--depth-1);
+    background: radial-gradient(closest-side, var(--surface) 74%, transparent 76%), conic-gradient(var(--kit-ring) calc(var(--kit-fill) * 1turn), var(--border) 0); }
+  .kit-timer[data-variant="danger"] { --kit-ring: var(--danger); }
+  .kit-dot[data-status="good"] { background: var(--primary); }
+  .kit-dot[data-status="weak"] { box-shadow: inset 0 0 0 0.1875rem var(--danger); } /* a hollow red dot: half there */
+  .kit-dot[data-status="lost"] { background: var(--danger); }
 }
+
+/* The +N float-up: rises and fades (a style's motion-normal × 4) */
+@keyframes kit-float-up { to { opacity: 0; transform: translateY(-1.75em); } }

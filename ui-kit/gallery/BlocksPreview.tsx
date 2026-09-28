@@ -3,7 +3,7 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import credits from '../content/credits.json'
 import {
-  askConfirm, Credits, EmptyState, HowToPlay, MainMenu, ModeSelect, kitScreens, Panel, RewardPopup, Row, Screen, ScreenStack, screens,
+  askConfirm, Bar, Button, ConnectionDot, Counter, Credits, Hud, Pause, PlayerSeats, Rank, Score, TimerRing, TurnBanner, EmptyState, HowToPlay, MainMenu, ModeSelect, kitScreens, Panel, RewardPopup, Row, Screen, ScreenStack, screens,
   Settings, Spinner, Stack, Text, toast, ToastStack, Tooltip,
 } from '../kit'
 
@@ -41,6 +41,27 @@ const howPages = [
 ]
 const people = [{ role: 'Design & art', names: ['Muzzy'] }, { role: 'Code', names: ['Claude'] }, { role: 'Playtesters', names: ['Sherman Meredith', 'Ada', 'Lin'] }]
 
+// A HUD whose numbers change every 1.5 s, to show the float-ups, combo pop, timer and turn banner
+function HudDemo() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
+  const players = [{ id: 'a', name: 'Muzzy', score: 42 }, { id: 'b', name: 'Sam', score: 37 }, { id: 'c', name: 'Ada', score: 18 }]
+  const turn = players[tick % 3]
+  return (
+    <Hud
+      vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" /><Bar label="Lives" pips value={2} max={3} /></Stack>}
+      status={<Row gap="s"><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
+      currency={<Counter label="Coins" icon="🪙" value={250 + tick * 5} />}
+      onPause={() => screens.push('pause')}
+      banner={<TurnBanner text={`${turn.name}'s turn`} detail="Roll up to 3 times" />}
+      bottomLeft={<ConnectionDot status="weak" />}
+      bottomRight={<Rank place={2} of={3} />}
+      actions={<Stack gap="s"><PlayerSeats players={players} activeId={turn.id} /><Row justify="center"><Button>Roll</Button></Row></Stack>}
+    />
+  )
+}
+const pauseScreen = () => <Pause onSettings={noop} onHowToPlay={noop} onQuit={noop} />
+
 // name → its screens for the stack, what to open at the start, and what sits underneath
 type Demo = { screens?: Record<string, ComponentType>; open?: () => void; base?: ComponentType }
 const demos: Record<string, Demo> = {
@@ -51,6 +72,8 @@ const demos: Record<string, Demo> = {
   modes: { screens: { modes: Modes }, open: () => screens.push('modes') },
   howto: { screens: { howto: () => <HowToPlay pages={howPages} /> }, open: () => screens.push('howto') },
   settings: { screens: { settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} /> }, open: () => screens.push('settings') },
+  hud: { base: HudDemo, screens: { pause: pauseScreen } },
+  pause: { base: HudDemo, screens: { pause: pauseScreen }, open: () => screens.push('pause') },
   credits: { screens: { credits: () => <Credits people={people} assets={credits} /> }, open: () => screens.push('credits') },
 }
 export const blockNames = Object.keys(demos)
