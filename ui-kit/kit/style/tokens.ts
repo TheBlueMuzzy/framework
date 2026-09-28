@@ -18,6 +18,11 @@ export const colourTokens = {
   'focus': 'Keyboard/gamepad focus ring',
 } as const
 
+// Colours that never have text on them, so the contrast test skips them.
+export const lineColourTokens = {
+  'ink': 'Outline around filled buttons and badges (the cartoon ink line). "transparent" = none',
+} as const
+
 export const otherTokens = {
   'font-display': 'Font for titles (font names live only in presets)',
   'font-body': 'Font for everything else',
@@ -33,12 +38,17 @@ export const otherTokens = {
   'motion-fast': 'Quick animations (presses, toggles)',
   'motion-normal': 'Normal animations (panels, screens)',
   'press-scale': 'How much a button shrinks when pressed, e.g. 0.96',
-  'ease': 'Animation curve',
+  'ease': 'Animation curve. steps(2) = choppy retro, an overshooting cubic-bezier = bouncy',
+  // Added for the 5 presets (F02) — each is one plain CSS value:
+  'corner-shape': 'How corners are cut: round (curved) or bevel (chamfered, sci-fi). Needs radius > 0',
+  'text-case': 'Letter case for titles, buttons, tabs and badges: none or uppercase',
+  'press-shift': 'How far a button sinks when pressed; its rest shadow vanishes (hard-shadow styles)',
+  'enter': 'How panels and cards appear: kit-fade, kit-float, kit-pop, kit-blink, kit-flicker or none',
 } as const
 
 // Optional extras: a preset may leave these out and gets the default.
 export const optionalTokens = {
-  'glow': 'none',
+  'glow': 'none', // a CSS filter on lit things (primary buttons, on-switches, bars, focus), e.g. drop-shadow(…)
   'panel-texture': 'none',
 } as const
 
@@ -56,13 +66,13 @@ export const derivedTokens = {
   'target-min': 'Smallest tap target (accessibility floor: 44px)',
 } as const
 
-type RequiredName = keyof typeof colourTokens | keyof typeof otherTokens
+type RequiredName = keyof typeof colourTokens | keyof typeof lineColourTokens | keyof typeof otherTokens
 export type TokenName = RequiredName | keyof typeof optionalTokens
 export type StylePreset = Record<RequiredName, string | number> & Partial<Record<TokenName, string | number>>
 export type StyleTweaks = Partial<Record<TokenName, string | number>>
 
 // Names every preset must have (F02's test checks all presets match this list).
-export const requiredTokenNames = [...Object.keys(colourTokens), ...Object.keys(otherTokens)] as TokenName[]
+export const requiredTokenNames = [...Object.keys(colourTokens), ...Object.keys(lineColourTokens), ...Object.keys(otherTokens)] as TokenName[]
 
 // Every CSS variable the kit may read (the rule checker uses this list).
 export const allVariableNames = [

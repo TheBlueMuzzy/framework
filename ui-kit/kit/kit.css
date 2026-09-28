@@ -8,7 +8,7 @@
 @layer kit-base {
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  body { margin: 0; font-size: var(--text-body); line-height: 1.4; }
+  body { margin: 0; font-size: var(--text-body); line-height: 1.4; font-synthesis: none; /* no fake bold on one-weight fonts */ }
 
   /* Accessibility floor: visible focus ring for keyboard + gamepad */
   :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
@@ -147,23 +147,35 @@
   .kit-text[data-kind="display"], .kit-text[data-kind="title"], .kit-text[data-kind="heading"],
   .kit-card-title, .kit-roomcode-box { font-family: var(--font-display); }
   .kit-text[data-kind="caption"], .kit-listrow-detail { color: var(--muted); }
+  .kit-text:is([data-kind="display"], [data-kind="title"], [data-kind="heading"]),
+  .kit-card-title, .kit-button, .kit-tab, .kit-badge { text-transform: var(--text-case); }
+  :focus-visible { filter: var(--glow); }
 
-  /* Pressing: things shrink a little (the style decides how much and how fast) */
-  button.kit-target { transition: transform var(--motion-fast) var(--ease), background-color var(--motion-fast) var(--ease); }
-  button.kit-target:active:not(:disabled) { transform: scale(var(--press-scale)); }
+  /* Appearing: panels and cards play the style's entrance once (fade, float, pop, blink, flicker) */
+  .kit-panel, .kit-card { animation: var(--enter) var(--motion-normal) var(--ease) backwards; }
+
+  /* Pressing: things shrink and/or sink (the style decides how much and how fast).
+     A sinking button drops onto its shadow, so the shadow goes. */
+  button.kit-target { transition: transform var(--motion-fast) var(--ease), background-color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease); }
+  button.kit-target:active:not(:disabled) { transform: translateY(var(--press-shift)) scale(var(--press-scale)); }
+  .kit-button:active:not(:disabled) { box-shadow: none; }
 
   .kit-button, .kit-input, .kit-picker, .kit-tabs, .kit-badge, .kit-progress, .kit-avatar,
   .kit-toggle-track, .kit-toggle-thumb, .kit-tab, .kit-slider::-webkit-slider-runnable-track,
   .kit-slider::-webkit-slider-thumb { border-radius: var(--radius-control); }
   .kit-slider::-moz-range-track, .kit-slider::-moz-range-thumb { border-radius: var(--radius-control); }
   .kit-card { border-radius: var(--radius-panel); }
+  .kit-panel, .kit-card, .kit-button, .kit-input, .kit-picker, .kit-tabs, .kit-badge, .kit-progress, .kit-avatar,
+  .kit-toggle-track, .kit-toggle-thumb, .kit-tab { corner-shape: var(--corner-shape); }
+  /* The ink line: around filled buttons and badges, and framing bars and switch tracks */
+  .kit-toggle-track, .kit-progress { outline: var(--border-width) solid var(--ink); }
 
   .kit-button, .kit-input, .kit-card, .kit-badge { border-width: var(--border-width); border-color: var(--border); }
   .kit-button { box-shadow: var(--depth-0); }
-  .kit-button[data-variant="primary"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); filter: var(--glow); }
+  .kit-button[data-variant="primary"] { background: var(--primary); color: var(--on-primary); border-color: var(--ink); filter: var(--glow); }
   .kit-button[data-variant="secondary"] { background: var(--surface); color: var(--on-surface); }
   .kit-button[data-variant="ghost"] { background: transparent; border-color: transparent; box-shadow: none; }
-  .kit-button[data-variant="danger"] { background: var(--danger); color: var(--on-danger); border-color: var(--danger); }
+  .kit-button[data-variant="danger"] { background: var(--danger); color: var(--on-danger); border-color: var(--ink); }
   .kit-spinner { border-color: currentColor; border-inline-end-color: transparent; }
 
   .kit-toggle-track { background: var(--muted); transition: background-color var(--motion-fast) var(--ease); }
@@ -187,10 +199,10 @@
   .kit-card[data-state="selected"] { border-color: var(--primary); outline: 0.1875rem solid var(--primary); outline-offset: -0.1875rem; }
 
   .kit-badge[data-variant="neutral"] { background: var(--surface); color: var(--on-surface); }
-  .kit-badge[data-variant="primary"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
-  .kit-badge[data-variant="danger"] { background: var(--danger); color: var(--on-danger); border-color: var(--danger); }
+  .kit-badge[data-variant="primary"] { background: var(--primary); color: var(--on-primary); border-color: var(--ink); }
+  .kit-badge[data-variant="danger"] { background: var(--danger); color: var(--on-danger); border-color: var(--ink); }
 
-  .kit-avatar { background: var(--primary); color: var(--on-primary); font-family: var(--font-display); }
+  .kit-avatar { background: var(--primary); color: var(--on-primary); } /* initials stay in the body font: small display letters get hard to read */
   .kit-avatar[data-state="active"] { outline: 0.1875rem solid var(--accent); outline-offset: 0.125rem; }
 
   .kit-progress { background: var(--border); }
@@ -199,3 +211,10 @@
   .kit-progress[data-variant="accent"] .kit-progress-fill { background: var(--accent); }
   .kit-progress[data-variant="danger"] .kit-progress-fill { background: var(--danger); }
 }
+
+/* Entrances named by the style's "enter" setting */
+@keyframes kit-fade { from { opacity: 0; } }
+@keyframes kit-float { from { opacity: 0; transform: translateY(0.75rem); } }
+@keyframes kit-pop { from { opacity: 0; transform: scale(0.85); } }
+@keyframes kit-blink { 0%, 24%, 50%, 74% { opacity: 0; } 25%, 49%, 75%, 100% { opacity: 1; } }
+@keyframes kit-flicker { 0% { opacity: 0; } 10% { opacity: 0.8; } 20% { opacity: 0.1; } 35% { opacity: 1; } 45% { opacity: 0.3; } 60%, 100% { opacity: 1; } }
