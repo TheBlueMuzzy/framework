@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 01 on `dev/v0-1-ui-kit`: F01 parts + style engine → F02 5 styles → F03 screen stack. Next: `/develop` continues with the next unticked task in SPRINT.md.
-Muzzy: task 11 — look at the 5 styles in the gallery (`/play`) once F02 is built.
+Sprint 01 done: parts + style engine, 5 styles (Clean, Cozy, Cartoon, Pixel, Neon), screen stack — all approved by Muzzy. Kit ≈ 870 of ~1,000 lines.
+Next: `/sprint` → sprint 02 = F04 built screens (menu, list-driven settings, pause, dialogs, loading, results, lobby, HUD). Watch the line budget.
 
 ## Where we are
-Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: 01 — every part in all 5 styles
-Doing: F03 — Muzzy check   Branch: dev/v0-1-ui-kit   Version: 0.0.0
+Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: none (01 done)
+Doing: —   Branch: dev/v0-1-ui-kit   Version: 0.0.0
 Live: none (the gallery may get a private preview link later)
 
 ## Key facts
@@ -23,4 +23,5 @@ Live: none (the gallery may get a private preview link later)
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 
 ## Log
+- 2026-09-28 — Sprint 01 done: F01 parts + style engine, F02 5 styles, F03 screen stack (Back/Esc, inert, style transitions); 74 tests. Muzzy approved all three.
 - 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.
