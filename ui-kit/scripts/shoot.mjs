@@ -4,7 +4,7 @@
 //   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop,
 //                                                    and the key screens in every style
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
-// Reports what to fix: sideways overflow, tap targets under 44px, console errors, a focus ring
+// Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
 // Usage: npm run shoot
 import { mkdirSync, readdirSync } from 'node:fs'
@@ -36,6 +36,17 @@ function findProblems({ screenWidth, checkFocus }) {
     if (box.width === 0) continue // hidden
     if (box.width < 43.5 || box.height < 43.5) {
       problems.push(`small target ${Math.round(box.width)}×${Math.round(box.height)}: ${el.getAttribute('aria-label') ?? el.textContent?.trim()}`)
+    }
+    // Clipped inside a box: a scroll area or panel that hides overflow cuts off outlines and drop shadows
+    // drawn just outside a control (Cartoon's ink). Controls need a little room from the box's left/right edge.
+    for (let clip = el.parentElement; clip && clip !== document.body; clip = clip.parentElement) {
+      if (getComputedStyle(clip).overflowX === 'visible') continue
+      const edge = clip.getBoundingClientRect()
+      const room = 3 // px of clearance for an outline or shadow
+      if (box.left < edge.left + room - 0.5 || box.right > edge.right - room + 0.5) {
+        problems.push(`clipped at the edge of a box: ${el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 30)}`)
+      }
+      break // only the nearest clipping box matters
     }
   }
   const ring = checkFocus && document.querySelector(':focus-visible')
@@ -196,5 +207,5 @@ try {
   await server.close()
 }
 console.log(`\n${shotCount} screenshots in ${Math.round((Date.now() - started) / 1000)} s`)
-console.log(problemCount ? `${problemCount} problem(s) found` : 'No overflow, small targets, stray focus rings or console errors found')
+console.log(problemCount ? `${problemCount} problem(s) found` : 'No overflow, clipped controls, small targets, stray focus rings or console errors found')
 process.exit(problemCount ? 1 : 0)
