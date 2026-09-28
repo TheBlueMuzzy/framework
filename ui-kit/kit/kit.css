@@ -43,6 +43,8 @@
   .kit-screen > [data-slot="bottom-left"] { grid-area: bottom-left; justify-self: start; }
   .kit-screen > [data-slot="bottom"] { grid-area: bottom; }
   .kit-screen > [data-slot="bottom-right"] { grid-area: bottom-right; justify-self: end; }
+  /* Screen stack layers: no box of their own, they only carry "inert" for the screens inside */
+  .kit-layer { display: contents; }
 
   .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; min-block-size: 0; }
   .kit-panel { padding: var(--gap-l); }
@@ -153,6 +155,9 @@
 
   /* Appearing: panels and cards play the style's entrance once (fade, float, pop, blink, flicker) */
   .kit-panel, .kit-card { animation: var(--enter) var(--motion-normal) var(--ease) backwards; }
+  /* A dialog dims what's under it, fading the dim in (its panel plays the entrance above) */
+  .kit-screen[data-dialog] { background: color-mix(in srgb, var(--bg) 70%, transparent); transition: background-color var(--motion-normal) var(--ease); }
+  @starting-style { .kit-screen[data-dialog] { background-color: transparent; } }
 
   /* Pressing: things shrink and/or sink (the style decides how much and how fast).
      A sinking button drops onto its shadow, so the shadow goes. */

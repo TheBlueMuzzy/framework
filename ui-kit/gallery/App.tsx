@@ -9,6 +9,7 @@ import {
 } from '../kit'
 import styleFile from './content/ui/style.json'
 import { StyleSwitcher } from './StyleSwitcher'
+import { ScreensDemo } from './ScreensDemo'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -40,6 +41,7 @@ export function App() {
         </Stack>
         <StyleSwitcher current={style} onChange={setDevStyle} onReset={() => setDevStyle(null)} />
         <LayoutBoxes />
+        <ScreensDemo />
         <Buttons />
         <Inputs />
         <Display />

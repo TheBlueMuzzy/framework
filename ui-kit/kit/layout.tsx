@@ -12,11 +12,13 @@ type ScreenProps = {
   bottomLeft?: ReactNode; bottom?: ReactNode; bottomRight?: ReactNode
   children?: ReactNode // goes in the centre
   label?: string // what a screen reader calls this screen
+  dialog?: boolean // dims what's underneath; for a small question on top of another screen
 }
-export function Screen({ children, label, ...slots }: ScreenProps) {
+export function Screen({ children, label, dialog, ...slots }: ScreenProps) {
   const slotNames = { topLeft: 'top-left', top: 'top', topRight: 'top-right', bottomLeft: 'bottom-left', bottom: 'bottom', bottomRight: 'bottom-right' }
   return (
-    <section className="kit-screen" aria-label={label}>
+    <section className="kit-screen" aria-label={label} data-dialog={dialog || undefined}
+      role={dialog ? 'dialog' : undefined} aria-modal={dialog || undefined}>
       {Object.entries(slotNames).map(([prop, slot]) => {
         const content = slots[prop as keyof typeof slots]
         return content ? <div key={slot} data-slot={slot}>{content}</div> : null

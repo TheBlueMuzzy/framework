@@ -22,7 +22,7 @@ Check: preset test passes; screenshots of every style at phone + desktop.
 ## F03 🧱 Screen stack + transitions
 Done when: screens open/close/replace; only the top screen responds; Esc / phone back closes it; a dialog is a screen on top; transitions follow the style's motion and respect reduce-motion.
 - [x] 🤖 9. `kit/screens.ts`: tiny built-in store (no library) — push / pop / replace, `inert` below the top, Esc + browser back → pop + tests
-- [ ] 🤖 10. Transitions (fade/slide from motion settings, reduce-motion) + a gallery demo (open a panel, a dialog on top, back out)
+- [x] 🤖 10. Transitions (fade/slide from motion settings, reduce-motion) + a gallery demo (open a panel, a dialog on top, back out)
 Check: tests pass; Playwright: open → dialog → Esc → Esc returns to start, lower screen can't be clicked while covered.
 
 Ask Muzzy: —
@@ -48,3 +48,7 @@ Notes:
 - F03 screen stack (task 9): `kit/screens.ts` is a tiny store (`screens.push/pop/replace`, `screens.current`), no library; `kit/ScreenStack.tsx` draws it in React (`useSyncExternalStore`) and makes every layer below the top `inert`. It also moves focus into a screen when it opens and back to whatever opened it when it closes (keyboard/gamepad). Each open screen is one browser history entry (`{ kitScreens: depth }`), so phone/browser Back closes the top screen; with every screen closed, Back leaves the page as normal. Closing a screen any other way (Esc, a button) steps history back too, so no Back press is ever wasted. Forward can't reopen a closed screen (it's stepped straight back).
 - Surprise: two `history.back()` calls in a row can merge into one (jsdom does it; browsers may too), so closing two screens at once left a stray entry. History now moves one step at a time, waiting for each popstate before the next.
 - Gamepad B is a hook, not built in: call `screens.pop()` when B is pressed (reading the Gamepad API needs a polling loop — that belongs with the game's input code).
+- F03 transitions (task 10): no new animations. A screen's panels and cards already play the style's `enter` entrance (fade/float/pop/blink/flicker, `motion-normal`, `ease`) when they appear, which is exactly when a screen opens. A dialog is `<Screen dialog>`: it dims what's under it (the page colour at 70%) and fades the dim in with the same duration + ease (CSS `@starting-style`). The existing reduce-motion rule sets both to 0s (checked on Neon: `kit-flicker 0s`, dim `0s`). Closing is instant, with no exit animation: it feels snappy and can never leave a half-closed layer stuck on screen. Say if you want exit fades.
+- Gallery "Screens" section (`gallery/ScreensDemo.tsx`): a game stand-in → Open settings → Quit… opens a dialog on top → Stay / Esc / Back close one screen, Quit closes both.
+- `npm run shoot` now also runs the screen stack at phone + desktop: open → dialog → Esc → Esc back to the start; a covered button ignores a real mouse click and can't take focus; the Back button closes a screen and stays on the page; Quit closes two at once. Saves `screens-dialog-phone-portrait.png` / `-desktop.png`. Proven to catch a missing `inert` (with it removed, the covered button opened a second settings screen).
+- Kit size after F03: ~128 new lines (screens.ts 69, ScreenStack.tsx 48, plus 11 in layout/CSS/index), so the kit is about 860–870 lines, leaving ~130 for F04.
