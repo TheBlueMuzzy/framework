@@ -1,7 +1,7 @@
 # Game Framework — Roadmap
-Release target: prototype — musts 6/6 done
+Release target: next milestone not set (/define) — v0.1 prototype released 2026-09-28
 
-## v0.1 — Game UI kit  ← current  (→ prototype)
+## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
 - ✅ F01 🧱 Parts + style engine — must:prototype · sprint 1
   what: 5 layout boxes (Screen, Panel, Stack, Row, Grid), the controls, style.json → CSS variables at runtime, accessibility floor, preset test

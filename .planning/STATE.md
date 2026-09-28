@@ -1,13 +1,13 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 03 done — v0.1 Game UI kit musts 6/6: the `game-ui` skill works on its own and passed its first real try-out (Roll Better Settings in Cartoon; kit 0.1.3).
-Next: `/deliver` the framework v0.1 (merge `dev/v0-1-ui-kit` → main, tag). Then the rest of Roll Better's UI on the kit (a Roll Better feature — see ROADMAP Ideas for the kit additions it will need).
+Released v0.1.0 — the Game UI kit (kit 0.1.5): 5 styles, ~36 screens, the `game-ui` skill, proven on Roll Better settings. Nothing to host: games copy the kit with `ui-kit/scripts/install-kit.mjs`.
+Next: the rest of Roll Better's UI on the kit (Roll Better ROADMAP → Ideas), which will add game-box mode, seat-claim list and 3D-pinned labels here. Or `/roadmap` for the next framework module.
 
 ## Where we are
-Stage: develop   Milestone: v0.1 — Game UI kit   Sprint: none (03 done)
-Doing: —   Branch: dev/v0-1-ui-kit   Version: 0.0.0
-Live: none (the gallery may get a private preview link later)
+Stage: deliver   Milestone: v0.1 — Game UI kit   Sprint: none (03 done)
+Doing: —   Branch: main   Version: 0.1.0
+Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.1.0
 
 ## Key facts
 **What this is**

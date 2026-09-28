@@ -1,1 +1,17 @@
-{"name": "Game Framework", "version": "0.0.0", "build": 0, "history": [{"version": "0.0.0", "date": "2026-09-28", "summary": "Project created — first module: game UI kit"}]}
+{
+  "name": "Game Framework",
+  "version": "0.1.0",
+  "build": 0,
+  "history": [
+    {
+      "version": "0.1.0",
+      "date": "2026-09-28",
+      "summary": "Game UI kit: 5 styles, ~36 ready screens, a passive game-ui skill, proven on Roll Better's settings"
+    },
+    {
+      "version": "0.0.0",
+      "date": "2026-09-28",
+      "summary": "Project created — first module: game UI kit"
+    }
+  ]
+}
