@@ -28,23 +28,26 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
   const layers = useRef<(HTMLDivElement | null)[]>([])
   const openers = useRef<(Element | null)[]>([]) // what had focus when each screen opened
 
-  // Keyboard/gamepad focus: into a screen when it opens, back to its opener when it closes.
+  // Keyboard/gamepad focus: into a screen when it opens (or is swapped in by replace),
+  // back to its opener when it closes.
   const depth = stack.length
-  const lastDepth = useRef(depth)
+  const top = depth ? `${depth}-${stack[depth - 1]}` : '' // which screen is on top, e.g. "2-shop"
+  const last = useRef({ depth, top })
   // Noted while drawing, before the screen below turns inert and drops its focus.
-  if (depth > lastDepth.current) openers.current[depth - 1] = document.activeElement
+  if (depth > last.current.depth) openers.current[depth - 1] = document.activeElement
   useEffect(() => {
-    if (depth > lastDepth.current) {
+    if (depth < last.current.depth) {
+      (openers.current[depth] as HTMLElement | null)?.focus?.()
+    } else if (top !== last.current.top) {
+      // A new top screen: opened, or swapped in by replace (same depth, so it keeps the old opener).
       // The first button or input; a scroll box only if there's nothing else (it would wear the focus ring)
       const layer = layers.current[depth]
       const first = layer?.querySelector<HTMLElement>('button:not(:disabled), input') ?? layer?.querySelector<HTMLElement>('[tabindex="0"]')
       // ("as FocusOptions": older TypeScript versions, like many games use, don't know focusVisible yet)
       first?.focus(keyPressed ? undefined : ({ focusVisible: false } as FocusOptions))
-    } else if (depth < lastDepth.current) {
-      (openers.current[depth] as HTMLElement | null)?.focus?.()
     }
-    lastDepth.current = depth
-  }, [depth])
+    last.current = { depth, top }
+  }, [depth, top])
 
   const open = stack.map((name, i) => {
     const Screen = screens[name]
