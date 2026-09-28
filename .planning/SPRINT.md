@@ -7,7 +7,7 @@ Done when: the gallery shows every layout box and control, built only from style
 - [x] 🤖 1. Set up `ui-kit/` (Vite + React + TS + vitest) with `kit/` (the copyable part) and `gallery/` (the app); spike: native `<dialog>` + popover support on phone Safari/Chrome → pick what's native vs hand-made
 - [x] 🤖 2. Style engine: `kit/style/tokens.ts` (the setting names), `kit/style/applyStyle.ts` (preset + tweaks → CSS variables on `<html>`), `kit/kit.css` (`@layer kit-base`: layout only, zero colours) + accessibility floor (18px text min, 44px targets, focus ring, 200% text scale, reduce motion)
 - [x] 🤖 3. Layout boxes `kit/layout.tsx`: Screen (safe-area slots: top-left, top, top-right, center, bottom…), Panel, Stack, Row, Grid — spacing only via `gap`
-- [ ] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
+- [x] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
 - [ ] 🤖 5. Rule checker `scripts/check-ui.mjs`: no hex colours, px sizes, `position:absolute` (outside Screen slots), inline styles or stray fonts in `kit/` or game UI code + test
 - [ ] 🤖 6. Parts page in the gallery; Playwright screenshots at 390×844, 844×390, 1440×900 (`scripts/shoot.mjs`)
 Check: `npm test` + `npm run build` + `npm run check-ui` pass; screenshots show no overflow/clipping, targets ≥ 44px.
@@ -29,4 +29,6 @@ Ask Muzzy: —
 Notes:
 - Spike (task 1, `ui-kit/spike/dialog-popover-spike.mjs`): native `<dialog>` showModal (backdrop blocks the page, Esc closes, form return value), `popover` (opens, tap-outside dismisses) and `inert` (blocks focus) all pass in Playwright Chromium (Pixel 7) and WebKit (iPhone 15). → Use native `<dialog>` for modals, `popover` for tooltips/toasts, `inert` under the top screen (F03). Not tried on a real phone; WebKit here is the iOS engine but not the iOS build. Minimums: iOS 17 / Chrome 114 for popover. Phone back button does not send Esc, so F03 still needs browser-history handling.
 - Playwright WebKit on Windows: tap emulation is unreliable, so tests click with the mouse instead.
+- Selector and Stepper share one small `ArrowPicker` (◀ value ▶): one focus stop, ← / → step it. A gamepad d-pad just needs to send arrow keys.
+- Controls are bare (their name is an aria-label); the visible label comes from the ListRow they sit in.
 - Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.
