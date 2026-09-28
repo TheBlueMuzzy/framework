@@ -14,6 +14,7 @@
   "ink": "transparent",
   "font-display": "'Orbitron', 'Exo 2', system-ui, sans-serif",
   "font-body": "'Exo 2', system-ui, sans-serif",
+  "font-numbers": "var(--font-display)",
   "text-size": 1,
   "font-scale": 1.22,
   "radius-control": "0.625rem",

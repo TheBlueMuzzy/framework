@@ -87,8 +87,8 @@
   .kit-hud-chip { background: var(--surface) var(--panel-texture); color: var(--on-surface); border: var(--border-width) solid var(--border);
     border-radius: var(--radius-control); corner-shape: var(--corner-shape); box-shadow: var(--depth-1); }
   .kit-hud-chip[data-state="active"] { border-color: var(--accent); outline: 0.1875rem solid var(--accent); outline-offset: -0.1875rem; }
-  /* Game numbers use the display font: Pixel's body font draws a small 2 like an 8 and 5 like an S */
-  .kit-float-anchor, .kit-timer, .kit-number { font-family: var(--font-display); }
+  /* Game numbers (scores, timers, places) use the style's number font — usually its display font */
+  .kit-float-anchor, .kit-timer, .kit-number, :is(.kit-float-anchor, .kit-number, .kit-place) .kit-text { font-family: var(--font-numbers); }
   .kit-float-up { color: var(--primary); animation: kit-float-up calc(var(--motion-normal) * 4) var(--ease) forwards; }
   .kit-float-up[data-variant="danger"] { color: var(--danger); }
   .kit-combo { animation: kit-pop var(--motion-normal) var(--ease); }

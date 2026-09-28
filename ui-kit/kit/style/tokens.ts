@@ -26,6 +26,7 @@ export const lineColourTokens = {
 export const otherTokens = {
   'font-display': 'Font for titles (font names live only in presets)',
   'font-body': 'Font for everything else',
+  'font-numbers': 'Font for game numbers: scores, timers, places. Usually var(--font-display); Pixel uses its body font (clearer digits)',
   'text-size': 'Body text size, 1 = 18px (never smaller than 1)',
   'font-scale': 'How much bigger each heading level is, e.g. 1.25',
   'radius-control': 'Corner roundness of buttons and inputs',

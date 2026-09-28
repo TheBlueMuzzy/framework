@@ -14,6 +14,7 @@
   "ink": "transparent",
   "font-display": "'Nunito', ui-rounded, system-ui, sans-serif",
   "font-body": "'Nunito', ui-rounded, system-ui, sans-serif",
+  "font-numbers": "var(--font-display)",
   "text-size": 1,
   "font-scale": 1.25,
   "radius-control": "1rem",

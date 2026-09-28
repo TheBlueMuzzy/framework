@@ -168,7 +168,7 @@ type RankProps = { place: number; of?: number; format?: (place: number) => strin
 export function Rank({ place, of, format = ordinal, label = 'Place' }: RankProps) {
   return (
     <Chip role="group" aria-label={label}>
-      <Text kind="heading">{format(place)}</Text>
+      <span className="kit-place"><Text kind="heading">{format(place)}</Text></span>
       {of !== undefined && <Text kind="caption">/ {of}</Text>}
     </Chip>
   )

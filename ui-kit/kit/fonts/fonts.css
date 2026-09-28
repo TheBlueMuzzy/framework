@@ -5,6 +5,7 @@
 @font-face { font-family: 'Fredoka'; src: url('./fredoka.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
 @font-face { font-family: 'Lilita One'; src: url('./lilita-one.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Silkscreen'; src: url('./silkscreen.woff2') format('woff2'); font-weight: 700; font-display: swap; }
-@font-face { font-family: 'Pixelify Sans'; src: url('./pixelify-sans.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+/* VT323 draws small for its size, so it's scaled up to sit level with the other body fonts */
+@font-face { font-family: 'VT323'; src: url('./vt323.woff2') format('woff2'); font-weight: 400; size-adjust: 125%; font-display: swap; }
 @font-face { font-family: 'Orbitron'; src: url('./orbitron.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
 @font-face { font-family: 'Exo 2'; src: url('./exo-2.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }

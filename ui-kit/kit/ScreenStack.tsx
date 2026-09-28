@@ -7,6 +7,11 @@
 import { useEffect, useRef, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
 import { screens as store } from './screens'
 
+// Until a key is pressed, a screen that opens shouldn't show the keyboard focus ring
+// (browsers show it for focus moved by code before any click or key, e.g. a screen opened at load).
+let keyPressed = false
+if (typeof window !== 'undefined') window.addEventListener('keydown', () => { keyPressed = true }, { once: true, capture: true })
+
 type ScreenStackProps = { screens: Record<string, ComponentType>; children?: ReactNode }
 
 export function useScreens() {
@@ -25,7 +30,10 @@ export function ScreenStack({ screens, children }: ScreenStackProps) {
   if (depth > lastDepth.current) openers.current[depth - 1] = document.activeElement
   useEffect(() => {
     if (depth > lastDepth.current) {
-      layers.current[depth]?.querySelector<HTMLElement>('button, input, [tabindex="0"]')?.focus()
+      // The first button or input; a scroll box only if there's nothing else (it would wear the focus ring)
+      const layer = layers.current[depth]
+      const first = layer?.querySelector<HTMLElement>('button:not(:disabled), input') ?? layer?.querySelector<HTMLElement>('[tabindex="0"]')
+      first?.focus(keyPressed ? undefined : { focusVisible: false })
     } else if (depth < lastDepth.current) {
       (openers.current[depth] as HTMLElement | null)?.focus?.()
     }

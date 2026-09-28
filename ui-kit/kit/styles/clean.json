@@ -14,6 +14,7 @@
   "ink": "transparent",
   "font-display": "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   "font-body": "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+  "font-numbers": "var(--font-display)",
   "text-size": 1,
   "font-scale": 1.25,
   "radius-control": "0.5rem",
