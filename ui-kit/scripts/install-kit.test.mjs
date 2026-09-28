@@ -63,3 +63,23 @@ describe('install-kit', () => {
     expect(existsSync(join(game, 'content'))).toBe(false)
   })
 })
+
+describe('install-kit React check', () => {
+  const withReact = (range) => writeFileSync(join(game, 'package.json'), JSON.stringify({ dependencies: { react: range } }))
+
+  it('warns when the game\'s React is older than the kit needs', () => {
+    withReact('^17.0.2')
+    const lines = []
+    installKit(game, { dryRun: true, log: (line) => lines.push(line) })
+    expect(lines.some((line) => line.includes('needs React 18'))).toBe(true)
+  })
+
+  it('stays quiet for React 18 and 19', () => {
+    for (const range of ['^18.2.0', '~19.2.0']) {
+      withReact(range)
+      const lines = []
+      installKit(game, { dryRun: true, log: (line) => lines.push(line) })
+      expect(lines.some((line) => line.includes('needs React'))).toBe(false)
+    }
+  })
+})

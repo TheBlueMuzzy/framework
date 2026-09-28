@@ -1,5 +1,6 @@
 // THE GAME UI KIT — copy this whole folder into a game's src/ui/kit/.
 // Then: applyStyle(styleJson) once at start-up, and build screens from these parts.
+// Needs React 18 or newer (tested on 18.3 and 19).
 import './fonts/fonts.css'
 import './kit.css'
 

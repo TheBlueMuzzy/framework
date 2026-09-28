@@ -8,6 +8,7 @@
 //   2. creates content/ui/style.json and content/ui/settings.json — only if missing, never overwrites
 //   3. adds the kit's fonts to content/credits.json (no duplicates)
 // On an update it first lists which kit files changed, were added or were removed.
+// It also warns if the game's React is older than the kit needs (REACT_NEEDED).
 import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
@@ -16,6 +17,21 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const uiKitDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const kitDir = join(uiKitDir, 'kit')
 const presetNames = readdirSync(join(kitDir, 'styles')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
+
+// The kit needs React 18 or newer (useSyncExternalStore, useId). Tested on 18.3 and 19.
+export const REACT_NEEDED = 18
+
+// The game's React major version from its package.json ("^18.2.0" → 18), or null if it can't tell.
+export function gameReactMajor(gameDir) {
+  const packagePath = join(gameDir, 'package.json')
+  if (!existsSync(packagePath)) return null
+  try {
+    const pkg = JSON.parse(readText(packagePath))
+    const range = pkg.dependencies?.react ?? pkg.devDependencies?.react ?? pkg.peerDependencies?.react
+    const major = String(range ?? '').match(/\d+/)
+    return major ? Number(major[0]) : null
+  } catch { return null }
+}
 
 const isTest = (path) => /\.test\./.test(path)
 const readText = (path) => readFileSync(path, 'utf8')
@@ -94,6 +110,12 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
     if (changed.length) log('  (Changed files are replaced. If the game edited any of them, move that edit into the framework kit first.)')
   } else {
     log(`Installing kit ${version} (commit ${commit}) into ${gameDir}/src/ui/kit: ${sourceFiles.length} files`)
+  }
+
+  const reactMajor = gameReactMajor(gameDir)
+  if (reactMajor !== null && reactMajor < REACT_NEEDED) {
+    log(`  ! The game uses React ${reactMajor}, but the kit needs React ${REACT_NEEDED} or newer. Update React first:
+       npm install react@latest react-dom@latest`)
   }
 
   // 2. The game's own style + settings files: made once, then they're the game's

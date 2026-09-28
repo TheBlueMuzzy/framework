@@ -1,6 +1,7 @@
 # Game UI catalog
 
 Every known, common game screen. **Built** = ready in the kit: import it from `src/ui/kit` and pass words, data and callbacks. **Recipe** = not built yet: build it from the listed parts the first time a game needs it, then add it to the kit as Built (and bump `kit/VERSION`).
+**Needs React 18 or newer** (tested on 18.3 and 19; `install-kit` warns if a game's React is older).
 See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:5180/?screen=<id>&preset=<style>`.
 
 ## Parts (`?screen=parts`)

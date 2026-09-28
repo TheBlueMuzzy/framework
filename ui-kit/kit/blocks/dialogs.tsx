@@ -2,6 +2,8 @@
 // Modal, Confirm and RewardPopup are screens: open them through the screen stack, so Esc,
 // phone Back and "only the top screen takes taps" all work. Toasts and tooltips use the
 // browser's own popover, so they float above everything without any positioning code.
+// (The popover attributes go in as {...{ popover: 'auto' }} spreads: React 18's TypeScript types
+// don't list them yet, React 19's do, and both versions put them on the page the same way.)
 import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { Grid, Panel, Row, Screen, Stack } from '../layout'
 import { Button, Card, Text } from '../controls'
@@ -82,7 +84,7 @@ export function ToastStack({ label = 'Messages' }: { label?: string }) {
     if (!list.length && open) el.hidePopover()
   }, [list.length])
   return (
-    <div ref={box} popover="manual" className="kit-toasts" role="status" aria-label={label}>
+    <div ref={box} {...{ popover: 'manual' }} className="kit-toasts" role="status" aria-label={label}>
       {list.map((t) => (
         <Panel key={t.id} depth={2} gap="xs" className="kit-toast" data-variant={t.variant}>{t.text}</Panel>
       ))}
@@ -95,8 +97,8 @@ export function Tooltip({ text, label = 'More info', icon = 'ⓘ' }: { text: Rea
   const id = useId()
   return (
     <>
-      <Button variant="ghost" icon aria-label={label} popoverTarget={id} className="kit-tooltip-button">{icon}</Button>
-      <Panel id={id} popover="auto" role="tooltip" depth={2} gap="xs" className="kit-tooltip">{text}</Panel>
+      <Button variant="ghost" icon aria-label={label} {...{ popoverTarget: id }} className="kit-tooltip-button">{icon}</Button>
+      <Panel id={id} {...{ popover: 'auto' }} role="tooltip" depth={2} gap="xs" className="kit-tooltip">{text}</Panel>
     </>
   )
 }
