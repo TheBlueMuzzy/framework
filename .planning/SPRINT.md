@@ -7,7 +7,7 @@ Done when: when any game needs UI, the `game-ui` skill kicks in by itself, gets 
 - [ ] 🤖 1. `~/.claude/skills/game-ui/SKILL.md` — the passive rules (design §5); finds the kit in `dev/framework/ui-kit` or clones TheBlueMuzzy/framework
 - [ ] 🤖 2. `ui-kit/CATALOG.md` — every known screen: Built (block + gallery link) or Recipe (parts + sketch); the niche list
 - [ ] 🤖 3. Install/update tool `ui-kit/scripts/install-kit.mjs <game>` — copies `kit/` → `<game>/src/ui/kit/` with a VERSION stamp; creates `content/ui/style.json` + `content/ui/settings.json`; merges font credits into `content/credits.json`; on update shows what changes
-- [ ] 🤖 4. Rule checker ships inside the kit (`kit/check-ui.mjs`) so it checks a game's own UI code too
+- [x] 🤖 4. Rule checker ships inside the kit (`kit/check-ui.mjs`) so it checks a game's own UI code too
 - [ ] 🤖 5. Style-pick sheet: `scripts/pick-sheet.mjs` → one image of a screen in all 5 styles side by side
 - [ ] 🤖 6. Wiring: /develop (any UI task → game-ui), /define build plan (pick the style), /bmuz specialists, PROJECT-FILES layout (`content/ui/`), checkup `sources.json`; sync to claude-config
 Check: a dry run of the skill on a scratch copy of a game goes start to finish; tests + build + check-ui pass.
@@ -21,3 +21,4 @@ Check: Roll Better `npm test` + `npm run build` pass; e2e solo still passes; Muz
 
 Ask Muzzy: (answered) try-out = Roll Better settings.
 Notes:
+- F06 task 4 (rule checker in the kit): the rules now live in `kit/check-ui.mjs`, so every game gets them with the kit: `node src/ui/kit/check-ui.mjs src/ui` (with no folders it checks the kit itself). `scripts/check-ui.mjs` is a 12-line wrapper (same `npm run check-ui`, default kit + gallery; re-exports `checkSource` for the tests), no duplicate logic. It imports `./style/tokens.ts` next to itself, so the Node type-stripping import works wherever the kit is copied. Point it at UI folders, not all of `src/`: a 3D game's materials and shaders are full of raw colours on purpose. New test: the same exemptions work on `src/ui/kit/…` paths.

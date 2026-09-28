@@ -42,4 +42,9 @@ describe('check-ui', () => {
     expect(messages('kit/style/applyStyle.ts', `const x = '#fff'; const y = '4px'`)).toEqual([])
     expect(messages('kit/styles/index.ts', `'#fff'`)).toEqual([])
   })
+
+  it('works the same on the kit copied into a game (src/ui/kit/)', () => {
+    expect(messages('src/ui/kit/style/applyStyle.ts', `const x = '#fff'`)).toEqual([])
+    expect(messages('src/ui/Hud.tsx', `const c = '#123456'`)[0]).toMatch(/raw colour/)
+  })
 })
