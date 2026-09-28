@@ -3,6 +3,7 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import credits from '../content/credits.json'
 import {
+  Countdown, GameOver, Loading, PostGame, Results, RoundIntro, Victory,
   askConfirm, Bar, Button, ConnectionDot, Counter, Credits, Hud, Pause, PlayerSeats, Rank, Score, TimerRing, TurnBanner, EmptyState, HowToPlay, MainMenu, ModeSelect, kitScreens, Panel, RewardPopup, Row, Screen, ScreenStack, screens,
   Settings, Spinner, Stack, Text, toast, ToastStack, Tooltip,
 } from '../kit'
@@ -60,6 +61,11 @@ function HudDemo() {
     />
   )
 }
+const scores = [
+  { id: 'a', name: 'Muzzy', score: 212 }, { id: 'b', name: 'Sam', score: 187 }, { id: 'c', name: 'Ada', score: 212 },
+  { id: 'd', name: 'Lin', score: 96 }, { id: 'e', name: 'Sherman Meredith', score: 140 },
+]
+const stats = [{ label: 'Best roll', value: 'Five of a kind' }, { label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
 const pauseScreen = () => <Pause onSettings={noop} onHowToPlay={noop} onQuit={noop} />
 
 // name → its screens for the stack, what to open at the start, and what sits underneath
@@ -74,6 +80,13 @@ const demos: Record<string, Demo> = {
   settings: { screens: { settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} /> }, open: () => screens.push('settings') },
   hud: { base: HudDemo, screens: { pause: pauseScreen } },
   pause: { base: HudDemo, screens: { pause: pauseScreen }, open: () => screens.push('pause') },
+  loading: { base: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." /> },
+  countdown: { base: () => <Countdown onDone={noop} /> },
+  round: { base: () => <RoundIntro round={2} total={5} detail="Doubles score twice this round" /> },
+  results: { screens: { results: () => <Results players={scores} meId="a" onContinue={noop} /> }, open: () => screens.push('results') },
+  victory: { screens: { victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={noop} /> }, open: () => screens.push('victory') },
+  gameover: { screens: { gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={noop} onQuit={noop} /> }, open: () => screens.push('gameover') },
+  postgame: { screens: { postgame: () => <PostGame onRematch={noop} onLobby={noop} onQuit={noop}><Text kind="caption">2 of 4 players want a rematch</Text></PostGame> }, open: () => screens.push('postgame') },
   credits: { screens: { credits: () => <Credits people={people} assets={credits} /> }, open: () => screens.push('credits') },
 }
 export const blockNames = Object.keys(demos)
