@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "check-ui": "node scripts/check-ui.mjs",
+    "install-kit": "node scripts/install-kit.mjs",
     "shoot": "node scripts/shoot.mjs"
   },
   "dependencies": {

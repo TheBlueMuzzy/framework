@@ -33,7 +33,8 @@ export function ScreenStack({ screens, children }: ScreenStackProps) {
       // The first button or input; a scroll box only if there's nothing else (it would wear the focus ring)
       const layer = layers.current[depth]
       const first = layer?.querySelector<HTMLElement>('button:not(:disabled), input') ?? layer?.querySelector<HTMLElement>('[tabindex="0"]')
-      first?.focus(keyPressed ? undefined : { focusVisible: false })
+      // ("as FocusOptions": older TypeScript versions, like many games use, don't know focusVisible yet)
+      first?.focus(keyPressed ? undefined : ({ focusVisible: false } as FocusOptions))
     } else if (depth < lastDepth.current) {
       (openers.current[depth] as HTMLElement | null)?.focus?.()
     }
