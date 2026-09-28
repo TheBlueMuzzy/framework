@@ -3,8 +3,9 @@
 //   <Settings schema={settingsJson} onChange={(values) => audio.setVolume(values.musicVolume)} />
 // Row types: slider · toggle · selector · stepper · button (calls onAction(id)) · link (opens url)
 //            · destructive (asks first, then onAction(id)) · info (read-only, e.g. the version).
-// Values are remembered in the browser (or pass your own load/save). At start-up, call
-// applyAccessibility(loadSettings(schema)) so text size and reduce motion apply before Settings opens.
+// Values are remembered in the browser, in a slot of the game's own (or pass your own load/save).
+// At start-up, call applyAccessibility(loadSettings(schema)) so text size and reduce motion apply
+// before Settings opens.
 import { useState } from 'react'
 import { Panel, Row, Screen } from '../layout'
 import { Button, ListRow, ScrollArea, Selector, Slider, Stepper, Tabs, Text, Toggle } from '../controls'
@@ -29,15 +30,53 @@ export function defaultValues(schema: SettingsSchema, tabId?: string): SettingsV
 }
 
 // Saving: localStorage by default. Private browsing can refuse it — then settings last until reload.
-const STORAGE_KEY = 'kit-settings'
-function loadFromBrowser(): SettingsValues | null {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') } catch { return null }
+// Every game on <user>.github.io shares one browser storage, so each game gets its own slot, named
+// after the first folder in its address: <user>.github.io/roll-better/ → "kit-settings:roll-better".
+// Only the first folder counts, so every page and ?screen= link inside a game uses the same slot.
+// (A game at the top of its own site, like localhost:5173/, gets "kit-settings:".)
+export function settingsStorageKey() {
+  if (typeof location === 'undefined') return 'kit-settings'
+  const firstFolder = location.pathname.split('/').slice(1, -1)[0] ?? ''
+  return `kit-settings:${firstFolder}`
 }
-function saveToBrowser(values: SettingsValues) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(values)) } catch { /* not remembered, still works */ }
+function loadFromBrowser(storageKey: string): SettingsValues | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null')
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : null
+  } catch { return null }
 }
-export function loadSettings(schema: SettingsSchema = defaultSchema, load = loadFromBrowser): SettingsValues {
-  return { ...defaultValues(schema), ...load() }
+function saveToBrowser(storageKey: string, values: SettingsValues) {
+  try { localStorage.setItem(storageKey, JSON.stringify(values)) } catch { /* not remembered, still works */ }
+}
+
+// A saved value only counts if it still fits its row (the list may have changed since it was saved):
+// a toggle needs true/false, a selector one of its options, a slider or stepper a number in range.
+function fitsRow(row: SettingRow, value: unknown) {
+  switch (row.type) {
+    case 'toggle': return typeof value === 'boolean'
+    case 'selector': return typeof value === 'string' && (row.options ?? []).includes(value)
+    case 'slider': case 'stepper': {
+      const max = row.max ?? (row.type === 'slider' ? 100 : 99) // the same ranges Slider and Stepper use
+      return typeof value === 'number' && value >= (row.min ?? 0) && value <= max
+    }
+    default: return false
+  }
+}
+
+// Defaults, then every saved value that fits its row. Values for ids not in the list are kept as saved.
+function withSaved(schema: SettingsSchema, saved: SettingsValues | null): SettingsValues {
+  const values = defaultValues(schema)
+  const rows = schema.tabs.flatMap((tab) => tab.rows)
+  for (const [id, value] of Object.entries(saved ?? {})) {
+    const row = rows.find((r) => r.id === id)
+    if (!row || (holdsValue(row) && fitsRow(row, value))) values[id] = value
+  }
+  return values
+}
+
+// At start-up: applyAccessibility(loadSettings(schema)) — pass the same storageKey as <Settings>, if you gave it one.
+export function loadSettings(schema: SettingsSchema = defaultSchema, storageKey = settingsStorageKey()): SettingsValues {
+  return withSaved(schema, loadFromBrowser(storageKey))
 }
 
 // Text size and reduce motion drive the kit itself: text is in rem, so the page's font size scales
@@ -54,15 +93,17 @@ type SettingsProps = {
   onAction?: (id: string) => void // button and destructive rows
   info?: Record<string, string> // text for info rows, e.g. { version: '1.2.0' }
   onBack?: () => void
-  load?: () => SettingsValues | null; save?: (values: SettingsValues) => void
+  storageKey?: string // the browser save slot; each game gets its own by default (see settingsStorageKey)
+  load?: () => SettingsValues | null; save?: (values: SettingsValues) => void // or the game's own saving
   words?: Partial<typeof settingsWords>
   labels?: Record<string, string> // translated tab and row labels, by id: { audio: 'Sonido' }
   hide?: string[] // row ids to leave out right now, e.g. in-game-only rows when opened from the main menu
 }
 
-export function Settings({ schema = defaultSchema, onChange, onAction, info = {}, onBack = () => screens.pop(), load = loadFromBrowser, save = saveToBrowser, words, labels = {}, hide = [] }: SettingsProps) {
+export function Settings({ schema = defaultSchema, onChange, onAction, info = {}, onBack = () => screens.pop(),
+  storageKey = settingsStorageKey(), load = () => loadFromBrowser(storageKey), save = (values) => saveToBrowser(storageKey, values), words, labels = {}, hide = [] }: SettingsProps) {
   const w = { ...settingsWords, ...words }
-  const [values, setValues] = useState(() => loadSettings(schema, load))
+  const [values, setValues] = useState(() => withSaved(schema, load()))
   const tabs = schema.tabs
     .map((tab) => ({ ...tab, rows: tab.rows.filter((row) => row.on !== false && !hide.includes(row.id)) }))
     .filter((tab) => tab.rows.length > 0)
