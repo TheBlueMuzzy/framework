@@ -103,7 +103,8 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
 
   return (
     <Screen label={w.title}>
-      <Panel depth={2} gap="m" className="kit-wide kit-tall">
+      {/* Several tabs: a steady tall panel, so it doesn't jump when switching. One tab: as tall as its rows. */}
+      <Panel depth={2} gap="m" className={tabs.length > 1 ? 'kit-wide kit-tall' : 'kit-wide'}>
         <Row gap="s" justify="between">
           <Text kind="title">{w.title}</Text>
           <Button variant="secondary" onClick={onBack}>{w.back}</Button>
@@ -120,12 +121,13 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
                 {openRow(row) ? <Text kind="caption">›</Text> : control(row, labelOf(row))}
               </ListRow>
             ))}
+            {/* Reset scrolls with the rows, so short landscape phones keep their room for rows */}
+            {tab.rows.some(holdsValue) && (
+              <Row justify="end">
+                <Button variant="ghost" onClick={() => update({ ...values, ...defaultValues(schema, tab.id) }, tab.id)}>{w.reset}</Button>
+              </Row>
+            )}
           </ScrollArea>
-        )}
-        {tab && tab.rows.some(holdsValue) && (
-          <Row justify="end">
-            <Button variant="ghost" onClick={() => update({ ...values, ...defaultValues(schema, tab.id) }, tab.id)}>{w.reset}</Button>
-          </Row>
         )}
       </Panel>
     </Screen>

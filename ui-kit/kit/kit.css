@@ -57,6 +57,7 @@
 
   .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; min-block-size: 0; }
   .kit-panel { padding: var(--gap-l); }
+  @media (max-height: 30rem) { .kit-panel { padding: var(--gap-m); } } /* landscape phones: room for content */
   .kit-row { display: flex; flex-wrap: wrap; align-items: center; }
   .kit-row[data-justify="center"] { justify-content: center; }
   .kit-row[data-justify="end"] { justify-content: flex-end; }
@@ -67,7 +68,10 @@
   .kit-grid[data-min="l"] { --kit-tile: 18rem; }
 
   /* ── Controls: shapes and sizes only ── */
-  :where(.kit-page, .kit-screen, .kit-toasts) :is(button, input) { font: inherit; color: inherit; margin: 0; }
+  /* A full reset, so a game's old "button { … }" rules (radius, padding, hover borders) never show through */
+  :where(.kit-page, .kit-screen, .kit-toasts) :is(button, input) { font: inherit; color: inherit; margin: 0;
+    padding: 0; border: 0; border-radius: 0; background: none; }
+  :where(.kit-page, .kit-screen, .kit-toasts) :focus:not(:focus-visible) { outline: none; } /* rings only for keys and pads */
   :where(.kit-page, .kit-screen, .kit-toasts) button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   :where(.kit-page, .kit-screen, .kit-toasts) button:disabled { cursor: not-allowed; }
 
