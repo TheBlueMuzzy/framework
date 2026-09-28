@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screens } from './screens'
 
 // Browser history moves a moment later (like a real browser), so wait for it.
@@ -78,5 +78,23 @@ describe('screen stack', () => {
     screens.push('settings')
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(screens.current).toEqual([])
+  })
+
+  it('Esc while a tooltip (popover) is open only closes the tooltip, not the screen', () => {
+    screens.push('settings')
+    // The test page can't open real popovers, so pretend the browser found an open one.
+    const tooltip = document.createElement('div')
+    const find = vi.spyOn(document, 'querySelector').mockImplementation((selector) => (selector.includes(':popover-open') ? tooltip : null))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    find.mockRestore()
+    expect(screens.current).toEqual(['settings'])
+  })
+
+  it('Esc already handled by something else (preventDefault) leaves the screen open', () => {
+    screens.push('settings')
+    const handled = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })
+    handled.preventDefault()
+    window.dispatchEvent(handled)
+    expect(screens.current).toEqual(['settings'])
   })
 })

@@ -3,7 +3,7 @@
 //   screens.pop()              close the top screen (safe when nothing is open)
 //   screens.replace('shop')    swap the top screen for another
 //   screens.current            the open screens, e.g. ['settings', 'quit']
-// Esc and the browser/phone Back button close the top screen on their own.
+// Esc and the browser/phone Back button close the top screen on their own (Esc skips it while a tooltip is open).
 // Gamepad: call screens.pop() when B is pressed (the kit doesn't read gamepads itself).
 //
 // Back button: every open screen is also a browser history entry, so a phone's Back closes
@@ -54,6 +54,12 @@ export const screens = {
   },
 }
 
+// Is a popup open that Esc closes by itself? (A tooltip, not the toast list, which Esc leaves alone.)
+function popupOpen() {
+  try { return document.querySelector(':popover-open:not([popover="manual"])') !== null }
+  catch { return false } // a browser (or test page) that doesn't know popovers: there are none open
+}
+
 if (typeof window !== 'undefined') {
   window.addEventListener('popstate', (e) => {
     const ourTrip = travelling
@@ -63,7 +69,10 @@ if (typeof window !== 'undefined') {
     if (!ourTrip && historyDepth < stack.length) setStack(stack.slice(0, historyDepth))
     syncHistory() // catch up with anything opened or closed during the trip
   })
+  // Esc closes the top screen, unless something else is using this Esc: an open tooltip or other
+  // popup (the browser closes that one itself), or code that already handled it (preventDefault).
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && stack.length && !e.defaultPrevented) screens.pop()
+    if (e.key !== 'Escape' || !stack.length || e.defaultPrevented || popupOpen()) return
+    screens.pop()
   })
 }
