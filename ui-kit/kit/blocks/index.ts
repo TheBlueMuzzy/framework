@@ -4,3 +4,5 @@ import './blocks.css'
 
 export { fill } from './words'
 export * from './dialogs'
+export * from './frontend'
+export * from './hud'

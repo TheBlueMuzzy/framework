@@ -5,7 +5,7 @@ Branch: dev/v0-1-ui-kit
 ## F04 🎮 Built screens
 Done when: every Built entry in design §4 exists in `kit/blocks/`, made only from kit parts (rule checker passes), takes its words from the game (English defaults), and looks right in all 5 styles at phone + desktop.
 - [x] 🤖 1. Dialogs & feedback — `kit/blocks/dialogs.tsx`: Modal, Confirm (danger), Toast stack (popover), Tooltip, RewardPopup, EmptyState, Spinner
-- [ ] 🤖 2. Front end — `kit/blocks/frontend.tsx`: MainMenu, ModeSelect, HowToPlay pages, Credits (reads a game's `content/credits.json`)
+- [x] 🤖 2. Front end — `kit/blocks/frontend.tsx`: MainMenu, ModeSelect, HowToPlay pages, Credits (reads a game's `content/credits.json`)
 - [ ] 🤖 3. Settings, list-driven — `kit/blocks/Settings.tsx` + default `kit/blocks/settings.default.json` (tabs: Audio, Display, Controls, Gameplay, Accessibility, Language, Account/Privacy, About; rows switchable; saved + remembered; "reset to defaults" per tab; destructive rows → Confirm) + test: add an entry → a row appears
 - [ ] 🤖 4. In game — `kit/blocks/hud.tsx`: Pause, HUD frame (named slots) + pieces: Bar (incl. pips), Counter with +N float-up, Score & combo, TimerRing, TurnBanner, PlayerSeats (active highlight), Rank, ConnectionDot
 - [ ] 🤖 5. Flow — `kit/blocks/flow.tsx`: Loading, Countdown 3-2-1, RoundIntro, Results/scoreboard, Victory, GameOver, PostGame (rematch / lobby / quit)
@@ -27,3 +27,4 @@ Notes:
 - Every block's words are a `words` prop with English defaults (`pauseWords`, `confirmWords`…), so a game passes `words={text.pause}` from en.json; `fill('Round {n}', { n: 2 })` fills in numbers. Block-only CSS is `kit/blocks/blocks.css`.
 - Surprise: a popover that is also a Panel stayed visible when closed (Panel's `display: flex` beats the browser's hide rule) — blocks.css hides it when not open.
 - Gallery: temporary `?block=<name>` preview page (`gallery/BlocksPreview.tsx`) + a "Built screens" button row; F05 replaces it with the menu.
+- F04 task 2 (frontend.tsx, 136 lines for 4 screens): MainMenu shows a button only for each function you pass (onContinue, onPlay, onSettings, onHowToPlay, onCredits, onQuit); the first is the primary one. Credits takes `people` + `assets` (a game's content/credits.json as-is; entries without a `credit` line show author + licence). HowToPlay's page dots are `Pips` (lives in hud.tsx, shared with the HUD bar). Screens that close themselves default to `screens.pop()`.

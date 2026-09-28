@@ -15,6 +15,11 @@
   .kit-wide { inline-size: 40rem; max-inline-size: 100%; }
   .kit-tall { block-size: 44rem; max-block-size: 100%; }
   .kit-menu .kit-button { inline-size: 100%; }
+  .kit-centred { text-align: center; }
+  .kit-picture { display: block; inline-size: 100%; max-block-size: 12rem; object-fit: contain; }
+
+  /* Pips: little segments (lives, hearts, page dots) */
+  .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }
 
   /* Toasts: a popover pinned to the top centre, newest at the bottom */
   .kit-toasts { inset: 0 0 auto; margin: max(var(--gap-m), env(safe-area-inset-top)) auto 0; padding: 0; border: 0; background: none;
@@ -36,4 +41,6 @@
   .kit-toast[data-variant="danger"] { border-color: var(--danger); }
   .kit-spinner-big { color: var(--primary); }
   .kit-tooltip { animation: kit-fade var(--motion-fast) var(--ease); }
+  .kit-pip { background: var(--border); border-radius: var(--radius-control); corner-shape: var(--corner-shape); outline: var(--border-width) solid var(--ink); }
+  .kit-pip[data-state="on"] { background: var(--primary); filter: var(--glow); }
 }
