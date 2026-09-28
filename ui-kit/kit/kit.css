@@ -1,0 +1,33 @@
+/* THE KIT'S CSS
+   Three layers, weakest first: kit-base (layout + accessibility floor, no colours),
+   kit-style (paints parts using the style variables), game (a game's own additions win).
+   No raw colours, px sizes or font names here — only var(--style-name). */
+@layer kit-base, kit-style, game;
+
+/* ───────────── kit-base: layout only, zero colours ───────────── */
+@layer kit-base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { margin: 0; font-size: var(--text-body); line-height: 1.4; }
+
+  /* Accessibility floor: visible focus ring for keyboard + gamepad */
+  :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
+
+  /* Accessibility floor: every control is at least 44px to tap */
+  .kit-target { min-block-size: 2.75rem; min-inline-size: 2.75rem; }
+
+  /* Accessibility floor: reduce motion turns animation off and presses don't shrink */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0s !important;
+      transition-duration: 0s !important;
+      scroll-behavior: auto !important;
+    }
+    .kit-target:active { transform: none !important; }
+  }
+}
+
+/* ───────────── kit-style: paint, from style variables only ───────────── */
+@layer kit-style {
+  body { background: var(--bg); color: var(--on-bg); font-family: var(--font-body); }
+}

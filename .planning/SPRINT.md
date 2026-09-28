@@ -5,7 +5,7 @@ Branch: dev/v0-1-ui-kit
 ## F01 🧱 Parts + style engine
 Done when: the gallery shows every layout box and control, built only from style names; changing `style.json` (preset or a tweak) restyles everything live; the rule checker passes; phone + desktop screenshots look right.
 - [x] 🤖 1. Set up `ui-kit/` (Vite + React + TS + vitest) with `kit/` (the copyable part) and `gallery/` (the app); spike: native `<dialog>` + popover support on phone Safari/Chrome → pick what's native vs hand-made
-- [ ] 🤖 2. Style engine: `kit/style/tokens.ts` (the setting names), `kit/style/applyStyle.ts` (preset + tweaks → CSS variables on `<html>`), `kit/kit.css` (`@layer kit-base`: layout only, zero colours) + accessibility floor (18px text min, 44px targets, focus ring, 200% text scale, reduce motion)
+- [x] 🤖 2. Style engine: `kit/style/tokens.ts` (the setting names), `kit/style/applyStyle.ts` (preset + tweaks → CSS variables on `<html>`), `kit/kit.css` (`@layer kit-base`: layout only, zero colours) + accessibility floor (18px text min, 44px targets, focus ring, 200% text scale, reduce motion)
 - [ ] 🤖 3. Layout boxes `kit/layout.tsx`: Screen (safe-area slots: top-left, top, top-right, center, bottom…), Panel, Stack, Row, Grid — spacing only via `gap`
 - [ ] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
 - [ ] 🤖 5. Rule checker `scripts/check-ui.mjs`: no hex colours, px sizes, `position:absolute` (outside Screen slots), inline styles or stray fonts in `kit/` or game UI code + test
