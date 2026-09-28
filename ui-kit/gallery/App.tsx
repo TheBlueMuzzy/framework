@@ -10,6 +10,7 @@ import {
 import styleFile from './content/ui/style.json'
 import { StyleSwitcher } from './StyleSwitcher'
 import { ScreensDemo } from './ScreensDemo'
+import { BlocksPreview, blockNames } from './BlocksPreview'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -31,6 +32,8 @@ export function App() {
   const [devStyle, setDevStyle] = useState<StyleFile | null>(presetFromLink)
   const style = devStyle ?? (styleFile as StyleFile)
   useEffect(() => applyStyle(style), [style])
+  const block = new URLSearchParams(location.search).get('block')
+  if (block) return <BlocksPreview name={block} />
 
   return (
     <main className="gallery">
@@ -42,6 +45,7 @@ export function App() {
         <StyleSwitcher current={style} onChange={setDevStyle} onReset={() => setDevStyle(null)} />
         <LayoutBoxes />
         <ScreensDemo />
+        <BlockLinks />
         <Buttons />
         <Inputs />
         <Display />
@@ -73,6 +77,17 @@ function LayoutBoxes() {
         <Panel gap="s"><Text kind="label">Grid</Text><Grid gap="s" min="s"><Badge>1</Badge><Badge>2</Badge><Badge>3</Badge><Badge>4</Badge></Grid></Panel>
         <Panel gap="s" depth={2}><Text kind="label">Panel, depth 2</Text><Text kind="caption">Shadows come from the style.</Text></Panel>
       </Grid>
+    </Section>
+  )
+}
+
+// Built screens, each opened full-size on its own page (?block=name). F05 replaces this with a menu.
+function BlockLinks() {
+  const open = (name: string) => { location.search = `?block=${name}&preset=${style().preset}` }
+  const style = () => (presetFromLink() ?? (styleFile as StyleFile))
+  return (
+    <Section title="Built screens">
+      <Row gap="s">{blockNames.map((name) => <Button key={name} variant="secondary" onClick={() => open(name)}>{name}</Button>)}</Row>
     </Section>
   )
 }

@@ -1,0 +1,6 @@
+// BUILT SCREENS ("blocks") — ready-made screens and HUD pieces, made only from kit parts.
+// Every block takes its words, data and callbacks as props; none of them holds game rules.
+import './blocks.css'
+
+export { fill } from './words'
+export * from './dialogs'

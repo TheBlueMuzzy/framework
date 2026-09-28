@@ -1,0 +1,39 @@
+/* THE BLOCKS' CSS — only what the built screens add on top of kit.css.
+   Same rules: style names only (no raw colours, px sizes or font names), same two layers. */
+
+/* ───────────── kit-base: layout only ───────────── */
+@layer kit-base {
+  /* Settings → Accessibility → Reduce motion: the same switch-off as the device setting in kit.css */
+  :root[data-reduce-motion] *, :root[data-reduce-motion] *::before, :root[data-reduce-motion] *::after {
+    animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important;
+  }
+  :root[data-reduce-motion] button.kit-target:active { transform: none !important; }
+
+  /* Dialog-sized boxes: never wider than the screen */
+  .kit-modal { inline-size: 28rem; max-inline-size: 100%; }
+  .kit-menu { inline-size: 22rem; max-inline-size: 100%; }
+  .kit-wide { inline-size: 40rem; max-inline-size: 100%; }
+  .kit-tall { block-size: 44rem; max-block-size: 100%; }
+  .kit-menu .kit-button { inline-size: 100%; }
+
+  /* Toasts: a popover pinned to the top centre, newest at the bottom */
+  .kit-toasts { inset: 0 0 auto; margin: max(var(--gap-m), env(safe-area-inset-top)) auto 0; padding: 0; border: 0; background: none;
+    overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s); max-inline-size: calc(100% - 2 * var(--gap-m)); }
+  .kit-toasts:popover-open { display: flex; }
+  .kit-toast { padding: var(--gap-s) var(--gap-m); }
+
+  /* Tooltip: a popover next to its ⓘ button (anchor positioning), centred on older browsers */
+  .kit-tooltip { margin: var(--gap-xs); inset: auto; position-area: top; position-try-fallbacks: flip-block;
+    padding: var(--gap-s) var(--gap-m); max-inline-size: min(20rem, calc(100vw - 2 * var(--gap-m))); }
+  .kit-tooltip:not(:popover-open) { display: none; } /* Panel's display would otherwise show it */
+
+  .kit-empty { align-items: center; text-align: center; padding: var(--gap-l); }
+  .kit-spinner-big { display: inline-block; inline-size: 2.5rem; block-size: 2.5rem; border-width: 0.3rem; }
+}
+
+/* ───────────── kit-style: paint ───────────── */
+@layer kit-style {
+  .kit-toast[data-variant="danger"] { border-color: var(--danger); }
+  .kit-spinner-big { color: var(--primary); }
+  .kit-tooltip { animation: kit-fade var(--motion-fast) var(--ease); }
+}

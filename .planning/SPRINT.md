@@ -4,7 +4,7 @@ Branch: dev/v0-1-ui-kit
 
 ## F04 🎮 Built screens
 Done when: every Built entry in design §4 exists in `kit/blocks/`, made only from kit parts (rule checker passes), takes its words from the game (English defaults), and looks right in all 5 styles at phone + desktop.
-- [ ] 🤖 1. Dialogs & feedback — `kit/blocks/dialogs.tsx`: Modal, Confirm (danger), Toast stack (popover), Tooltip, RewardPopup, EmptyState, Spinner
+- [x] 🤖 1. Dialogs & feedback — `kit/blocks/dialogs.tsx`: Modal, Confirm (danger), Toast stack (popover), Tooltip, RewardPopup, EmptyState, Spinner
 - [ ] 🤖 2. Front end — `kit/blocks/frontend.tsx`: MainMenu, ModeSelect, HowToPlay pages, Credits (reads a game's `content/credits.json`)
 - [ ] 🤖 3. Settings, list-driven — `kit/blocks/Settings.tsx` + default `kit/blocks/settings.default.json` (tabs: Audio, Display, Controls, Gameplay, Accessibility, Language, Account/Privacy, About; rows switchable; saved + remembered; "reset to defaults" per tab; destructive rows → Confirm) + test: add an entry → a row appears
 - [ ] 🤖 4. In game — `kit/blocks/hud.tsx`: Pause, HUD frame (named slots) + pieces: Bar (incl. pips), Counter with +N float-up, Score & combo, TimerRing, TurnBanner, PlayerSeats (active highlight), Rank, ConnectionDot
@@ -23,3 +23,7 @@ Check: all screenshots clean; Muzzy's look.
 Ask Muzzy: (answered) line budget → Claude's call.
 Notes:
 - Budget (Muzzy: "I trust your call", 2026-09-28): **core** (parts, styles, stack) stays ≤ ~1,000 lines; **screens** get their own budget, ≈ 60 lines each on average (~1,500 total). Screens are only parts put together, so the rule checker keeps them from inventing looks.
+- F04 task 1 (dialogs.tsx, 136 lines for 7 blocks): Modal and Confirm are `<Screen dialog>` screens on the stack — the way F03 settled dialogs (dim + inert + Esc/Back) — rather than a second, native `<dialog>` system beside it. Toasts and Tooltip use native `popover` as the spike said. `askConfirm({...})` opens a Confirm from anywhere (Settings' destructive rows, Pause's Quit); a game adds the kit's own screens once: `<ScreenStack screens={{ ...kitScreens, ... }}>`. `toast('Saved')` from anywhere + `<ToastStack />` once (top centre, max 3, 3 s each). Tooltip is tap/click only (hover-to-show fought with click-to-toggle); it sits above its ⓘ via CSS anchor positioning (Chromium, Safari 26), centred on older browsers.
+- Every block's words are a `words` prop with English defaults (`pauseWords`, `confirmWords`…), so a game passes `words={text.pause}` from en.json; `fill('Round {n}', { n: 2 })` fills in numbers. Block-only CSS is `kit/blocks/blocks.css`.
+- Surprise: a popover that is also a Panel stayed visible when closed (Panel's `display: flex` beats the browser's hide rule) — blocks.css hides it when not open.
+- Gallery: temporary `?block=<name>` preview page (`gallery/BlocksPreview.tsx`) + a "Built screens" button row; F05 replaces it with the menu.

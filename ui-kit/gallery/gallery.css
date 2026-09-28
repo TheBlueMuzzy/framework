@@ -8,5 +8,9 @@
     border: var(--border-width) dashed var(--border); border-radius: var(--radius-panel);
     overflow: hidden;
   }
+  /* Block preview: a full-screen stand-in game under the screen being checked */
+  .gallery-game { position: relative; block-size: 100dvh; overflow: hidden;
+    background: repeating-linear-gradient(45deg, var(--bg) 0 1.5rem, var(--surface) 0 3rem); }
+  .gallery-game-label { block-size: 100%; align-items: center; justify-content: center; }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
 }
