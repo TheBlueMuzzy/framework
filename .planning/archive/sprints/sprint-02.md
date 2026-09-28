@@ -17,7 +17,7 @@ Done when: the gallery has a menu (Parts + every screen), each screen runs live 
 - [x] 🤖 7. Gallery menu: Parts / Screens (every block, live, opened via the screen stack); style switcher + `?preset=` link kept — `gallery/`
 - [x] 🤖 8. `scripts/shoot.mjs`: every block at phone + desktop (clean) + the 6 key screens (menu, settings, pause, results, lobby, HUD) in all 5 styles; overflow + 44px checks
 - [x] 🤖 9. Tidy + line count report; Credits screen shows the kit's fonts from `content/credits.json`
-- [ ] 🙋 10. Try the screens on phone + desktop (`/play`), say what feels off (tuning)
+- [x] 🙋 10. Try the screens on phone + desktop (`/play`), say what feels off (tuning)
 Check: all screenshots clean; Muzzy's look.
 
 Ask Muzzy: (answered) line budget → Claude's call.
@@ -54,3 +54,4 @@ Notes:
 - Line count (code + CSS, no tests): **core 880** (layout, controls, stack, style engine, fonts.css; +1 token line, ScreenStack +7), **blocks 959** (+ settings.default.json 55), **gallery 574** (App 98, menu 44, Screens 156, Parts 142, ScreensDemo 50, StyleSwitcher 48, css/html/main 36), shoot.mjs 200, presets JSON 240, tests 453.
 - Checks: `npm test` 91 passed (10 files) · `npm run build` ok · `npm run check-ui` pass (66 files) · `npm run shoot` 116 screenshots in 97 s, no overflow, small targets, stray focus rings or console errors.
 - Ask Muzzy (tuning, task 10): Pixel's new body font VT323 — a thinner "terminal" look than Pixelify; does it still feel like Pixel? Mode select on desktop leaves an empty 4th column (the Grid fills the line with 8rem tiles).
+- 2026-09-28 — Muzzy: "approved — we can tweak these as we use them." Nitpicks → ROADMAP Ideas.
