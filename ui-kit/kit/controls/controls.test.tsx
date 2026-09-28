@@ -74,6 +74,16 @@ describe('RoomCodeInput', () => {
     expect(document.activeElement).toBe(boxes()[1])
   })
 
+  it('clearing a box without Backspace (Delete, cut, some phone keyboards) empties it', () => {
+    render(<RoomCodeDemo />)
+    fireEvent.paste(boxes()[0], { clipboardData: { getData: () => 'ABCD' } })
+    fireEvent.change(boxes()[3], { target: { value: '' } }) // no Backspace keydown, just an empty box
+    expect(code()).toBe('ABC')
+    fireEvent.change(boxes()[1], { target: { value: '' } }) // from the middle: later letters close the gap
+    expect(code()).toBe('AC')
+    expect(document.activeElement).toBe(boxes()[1])
+  })
+
   it('pasting fills every box and ignores junk', () => {
     render(<RoomCodeDemo />)
     fireEvent.paste(boxes()[0], { clipboardData: { getData: () => 'x7-k2 99' } })

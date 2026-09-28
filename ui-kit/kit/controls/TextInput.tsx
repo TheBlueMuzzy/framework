@@ -1,6 +1,7 @@
 // TEXT INPUT — a labelled box for typing (player name, chat).
 // ROOM CODE INPUT — N boxes, one letter each: jumps to the next box as you type,
-// Backspace goes back, and pasting a whole code fills every box.
+// Backspace goes back, and pasting a whole code fills every box. Emptying a box any other way
+// (Delete, cut, a phone keyboard) takes its letter out too.
 import { useRef, type ClipboardEvent, type InputHTMLAttributes, type KeyboardEvent } from 'react'
 
 export function TextInput({ label, className = '', ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
@@ -31,13 +32,24 @@ export function RoomCodeInput({ length = 4, value, onChange, label = 'Room code'
     focusBox(start + letters.length)
   }
 
+  // Take the letter in box i out; the letters after it move up, so there's never a gap.
+  function remove(i: number) {
+    onChange(value.slice(0, i) + value.slice(i + 1))
+    focusBox(i)
+  }
+
+  // What the box holds now decides: empty → its letter is gone; otherwise → the new letters go in.
+  // (Based on the box's text, not on which key was pressed: phone keyboards often don't say.)
+  function onBoxChange(i: number, boxText: string) {
+    if (boxText === '') remove(i)
+    else write(i, newLetters(boxText, value[i]))
+  }
+
+  // Backspace in an already-empty box changes nothing in it, so it's handled here: delete the one before.
   function onKeyDown(i: number, e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key !== 'Backspace') return
+    if (e.key !== 'Backspace' || value[i] || i === 0) return
     e.preventDefault()
-    const target = value[i] ? i : i - 1 // empty box → delete the one before
-    if (target < 0) return
-    onChange(value.slice(0, target) + value.slice(target + 1))
-    focusBox(target)
+    remove(i - 1)
   }
 
   function onPaste(i: number, e: ClipboardEvent<HTMLInputElement>) {
@@ -56,7 +68,7 @@ export function RoomCodeInput({ length = 4, value, onChange, label = 'Room code'
           value={value[i] ?? ''}
           autoCapitalize="characters" autoComplete="off" spellCheck={false}
           onFocus={(e) => e.target.select()}
-          onChange={(e) => write(i, newLetters(e.target.value, value[i]))}
+          onChange={(e) => onBoxChange(i, e.target.value)}
           onKeyDown={(e) => onKeyDown(i, e)}
           onPaste={(e) => onPaste(i, e)}
         />
