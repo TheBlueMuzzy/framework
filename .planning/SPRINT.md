@@ -8,7 +8,7 @@ Done when: the gallery shows every layout box and control, built only from style
 - [x] 🤖 2. Style engine: `kit/style/tokens.ts` (the setting names), `kit/style/applyStyle.ts` (preset + tweaks → CSS variables on `<html>`), `kit/kit.css` (`@layer kit-base`: layout only, zero colours) + accessibility floor (18px text min, 44px targets, focus ring, 200% text scale, reduce motion)
 - [x] 🤖 3. Layout boxes `kit/layout.tsx`: Screen (safe-area slots: top-left, top, top-right, center, bottom…), Panel, Stack, Row, Grid — spacing only via `gap`
 - [x] 🤖 4. Controls `kit/controls/`: Button (primary/secondary/ghost/danger/icon/loading), Toggle, Slider, Selector ◀▶, Tabs, Stepper, TextInput + RoomCodeInput, ListRow, Card, Badge, Avatar, ProgressBar, ScrollArea, Text roles — states as `data-*` attributes only
-- [ ] 🤖 5. Rule checker `scripts/check-ui.mjs`: no hex colours, px sizes, `position:absolute` (outside Screen slots), inline styles or stray fonts in `kit/` or game UI code + test
+- [x] 🤖 5. Rule checker `scripts/check-ui.mjs`: no hex colours, px sizes, `position:absolute` (outside Screen slots), inline styles or stray fonts in `kit/` or game UI code + test
 - [ ] 🤖 6. Parts page in the gallery; Playwright screenshots at 390×844, 844×390, 1440×900 (`scripts/shoot.mjs`)
 Check: `npm test` + `npm run build` + `npm run check-ui` pass; screenshots show no overflow/clipping, targets ≥ 44px.
 
@@ -31,4 +31,5 @@ Notes:
 - Playwright WebKit on Windows: tap emulation is unreliable, so tests click with the mouse instead.
 - Selector and Stepper share one small `ArrowPicker` (◀ value ▶): one focus stop, ← / → step it. A gamepad d-pad just needs to send arrow keys.
 - Controls are bare (their name is an aria-label); the visible label comes from the ListRow they sit in.
+- Rule checker also fails on `var(--name)` that isn't a style name in `tokens.ts` (per-part helpers must start `--kit-`), and bans `position: fixed` as well as absolute. It imports `tokens.ts` straight from Node 24 (type stripping), so no build step.
 - Web is plain React + plain CSS variables, no Tailwind or component library (design §6). Kit budget ≤ ~1,000 lines for v1.
