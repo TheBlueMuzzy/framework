@@ -1,173 +1,98 @@
-// THE GALLERY — every layout box and control, built only from style names.
-// Its style comes from content/ui/style.json, exactly like a game. Edit that file and the page restyles.
-import { useEffect, useState, type ReactNode } from 'react'
-import {
-  applyStyle, type StyleFile,
-  Screen, Panel, Stack, Row, Grid,
-  Avatar, Badge, Button, Card, ListRow, ProgressBar, RoomCodeInput, ScrollArea,
-  Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle,
-} from '../kit'
+// THE GALLERY — a menu of every part and built screen, in the chosen style.
+// Its style comes from content/ui/style.json, exactly like a game; the dev switcher tries others on top.
+// Links:  ?preset=neon                    the menu in Neon
+//         ?screen=settings&preset=neon    straight into one screen (the ids are in menu.ts)
+//         ?screen=parts                   the parts page
+import { useEffect, useRef, useState } from 'react'
+import { applyStyle, Grid, ListRow, Panel, screens, Stack, Text, ToastStack, type StyleFile } from '../kit'
 import styleFile from './content/ui/style.json'
 import { StyleSwitcher } from './StyleSwitcher'
-import { ScreensDemo } from './ScreensDemo'
-import { BlocksPreview, blockNames } from './BlocksPreview'
+import { menu, type MenuGroup as MenuGroupType } from './menu'
+import { Parts } from './Parts'
+import { Stage } from './Screens'
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <Stack gap="m">
-      <Text kind="title">{title}</Text>
-      {children}
-    </Stack>
-  )
-}
-
-function presetFromLink(): StyleFile | null {
-  const preset = new URLSearchParams(location.search).get('preset')
-  return preset ? { preset } : null
-}
+const param = (name: string) => new URLSearchParams(location.search).get(name)
+const presetFromLink = (): StyleFile | null => (param('preset') ? { preset: param('preset')! } : null)
 
 export function App() {
   // The dev switcher's changes sit on top of style.json until you press Reset.
-  // A link can pick the preset too: …/?preset=neon (handy for opening each style on a phone).
   const [devStyle, setDevStyle] = useState<StyleFile | null>(presetFromLink)
   const style = devStyle ?? (styleFile as StyleFile)
   useEffect(() => applyStyle(style), [style])
-  const block = new URLSearchParams(location.search).get('block')
-  if (block) return <BlocksPreview name={block} />
 
+  // Which page is showing: null = the menu, 'parts', or a screen id. The link always says it too.
+  const [page, setPage] = useState(() => param('screen'))
+  const pageNow = useRef(page)
+  pageNow.current = page
+  const linkTo = (to: string | null) => {
+    const query = new URLSearchParams()
+    if (to) query.set('screen', to)
+    if (devStyle) query.set('preset', devStyle.preset)
+    return `${location.pathname}${query.toString() ? `?${query}` : ''}`
+  }
+  // A new style updates the link, without adding a Back step
+  useEffect(() => history.replaceState(history.state, '', linkTo(page)), [devStyle?.preset])
+
+  // Opening a page adds a Back step, so the phone's Back button returns to the menu
+  const open = (to: string) => { history.pushState({ gallery: true }, '', linkTo(to)); setPage(to) }
+  const goToMenu = () => {
+    // Close any open screens first: the kit steps back through history, then onBack below finishes the trip
+    if (screens.current.length) { while (screens.current.length) screens.pop(); return }
+    if (history.state?.gallery) history.back() // back to the menu's own history entry
+    else { history.replaceState(null, '', linkTo(null)); setPage(null) } // opened from a link: no menu behind it
+  }
+
+  useEffect(() => {
+    const onBack = () => {
+      if (history.state?.kitScreens) return // still stepping back through open screens
+      const next = param('screen')
+      // The last screen just closed (its own Back button, Esc or the phone's Back): back to the menu
+      const closedLastScreen = next && next !== 'parts' && next === pageNow.current && !screens.current.length
+      if (closedLastScreen) goToMenu()
+      else setPage(next)
+    }
+    addEventListener('popstate', onBack)
+    return () => removeEventListener('popstate', onBack)
+  })
+
+  const setPreset = (preset: string) => setDevStyle({ ...style, preset })
+  return (
+    <>
+      {page === 'parts' ? <Parts onMenu={goToMenu} />
+        : page ? <Stage id={page} preset={style.preset} onPreset={setPreset} onMenu={goToMenu} />
+        : <Menu current={style} onStyle={setDevStyle} onOpen={open} />}
+      <ToastStack />
+    </>
+  )
+}
+
+type MenuProps = { current: StyleFile; onStyle: (style: StyleFile | null) => void; onOpen: (page: string) => void }
+function Menu({ current, onStyle, onOpen }: MenuProps) {
   return (
     <main className="gallery">
       <Stack gap="xl">
         <Stack gap="xs">
           <Text kind="display">Game UI Kit</Text>
-          <Text kind="caption">Parts gallery — every box and control, painted by the style.</Text>
+          <Text kind="caption">Pick a screen to run it live in this style. Back or Esc comes back here.</Text>
         </Stack>
-        <StyleSwitcher current={style} onChange={setDevStyle} onReset={() => setDevStyle(null)} />
-        <LayoutBoxes />
-        <ScreensDemo />
-        <BlockLinks />
-        <Buttons />
-        <Inputs />
-        <Display />
+        <StyleSwitcher current={current} onChange={onStyle} onReset={() => onStyle(null)} />
+        <Grid gap="l" min="l">
+          <MenuGroup title="Parts" entries={[{ id: 'parts', name: 'Parts', about: 'Every box and control on one page' }]} onOpen={onOpen} />
+          {menu.map((group) => <MenuGroup key={group.title} title={group.title} entries={group.entries} onOpen={onOpen} />)}
+        </Grid>
       </Stack>
     </main>
   )
 }
 
-function LayoutBoxes() {
+// One group of the menu: a panel with a row per screen (tap the row to open it)
+function MenuGroup({ title, entries, onOpen }: MenuGroupType & { onOpen: (page: string) => void }) {
   return (
-    <Section title="Layout boxes">
-      <Text kind="caption">Screen: safe slots around the edges, the centre in the middle. Taps pass through empty space.</Text>
-      <div className="gallery-stage">
-        <Screen
-          label="HUD demo"
-          topLeft={<Row gap="s"><Avatar name="Muzzy" active /><ProgressBar label="Health" value={0.7} variant="danger" /></Row>}
-          top={<Badge variant="primary">Round 2</Badge>}
-          topRight={<Button variant="secondary" icon aria-label="Pause">❚❚</Button>}
-          bottomLeft={<Badge>corner</Badge>}
-          bottom={<Button>Roll</Button>}
-          bottomRight={<Badge variant="danger">3 left</Badge>}
-        >
-          <Panel depth={2}><Text kind="heading">Centre</Text></Panel>
-        </Screen>
-      </div>
-      <Grid gap="m" min="m">
-        <Panel gap="s"><Text kind="label">Panel · Stack</Text><Badge>one</Badge><Badge>two</Badge><Badge>three</Badge></Panel>
-        <Panel gap="s"><Text kind="label">Row (wraps)</Text><Row gap="s"><Badge>one</Badge><Badge>two</Badge><Badge>three</Badge><Badge>four</Badge></Row></Panel>
-        <Panel gap="s"><Text kind="label">Grid</Text><Grid gap="s" min="s"><Badge>1</Badge><Badge>2</Badge><Badge>3</Badge><Badge>4</Badge></Grid></Panel>
-        <Panel gap="s" depth={2}><Text kind="label">Panel, depth 2</Text><Text kind="caption">Shadows come from the style.</Text></Panel>
-      </Grid>
-    </Section>
-  )
-}
-
-// Built screens, each opened full-size on its own page (?block=name). F05 replaces this with a menu.
-function BlockLinks() {
-  const open = (name: string) => { location.search = `?block=${name}&preset=${style().preset}` }
-  const style = () => (presetFromLink() ?? (styleFile as StyleFile))
-  return (
-    <Section title="Built screens">
-      <Row gap="s">{blockNames.map((name) => <Button key={name} variant="secondary" onClick={() => open(name)}>{name}</Button>)}</Row>
-    </Section>
-  )
-}
-
-function Buttons() {
-  return (
-    <Section title="Buttons">
-      <Row gap="s">
-        <Button>Primary</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="danger">Delete save</Button>
-        <Button variant="secondary" icon aria-label="Settings">⚙</Button>
-        <Button loading>Joining</Button>
-        <Button disabled>Disabled</Button>
-      </Row>
-    </Section>
-  )
-}
-
-function Inputs() {
-  const [tab, setTab] = useState('Audio')
-  const [music, setMusic] = useState(true)
-  const [shake, setShake] = useState(false)
-  const [volume, setVolume] = useState(70)
-  const [difficulty, setDifficulty] = useState('Normal')
-  const [players, setPlayers] = useState(2)
-  const [code, setCode] = useState('')
-  return (
-    <Section title="Inputs">
-      <Tabs label="Settings" tabs={['Audio', 'Display', 'Controls', 'Accessibility']} value={tab} onChange={setTab} />
-      <Panel gap="xs">
-        <ListRow label="Music"><Toggle label="Music" on={music} onChange={setMusic} /></ListRow>
-        <ListRow label="Screen shake" detail="Off is easier on the eyes"><Toggle label="Screen shake" on={shake} onChange={setShake} /></ListRow>
-        <ListRow label="Volume"><Slider label="Volume" value={volume} onChange={setVolume} /></ListRow>
-        <ListRow label="Difficulty"><Selector label="Difficulty" options={['Easy', 'Normal', 'Hard']} value={difficulty} onChange={setDifficulty} /></ListRow>
-        <ListRow label="Players"><Stepper label="Players" value={players} min={1} max={4} onChange={setPlayers} /></ListRow>
-        <ListRow label="Credits" detail="A whole row can be a button" onClick={() => {}}><Text kind="caption">›</Text></ListRow>
-      </Panel>
-      <Grid gap="m" min="m">
-        <TextInput label="Your name" placeholder="Player 1" />
-        <Stack gap="xs"><Text kind="label">Room code</Text><RoomCodeInput length={4} value={code} onChange={setCode} /></Stack>
-      </Grid>
-    </Section>
-  )
-}
-
-function Display() {
-  const [mode, setMode] = useState('Party')
-  const players = ['Muzzy', 'Sherman M', 'Ada', 'Lin', 'Sam', 'Kai']
-  return (
-    <Section title="Display">
-      <Grid gap="m" min="s">
-        {['Solo', 'Party', 'Online'].map((m) => (
-          <Card key={m} title={m} selected={mode === m} onClick={() => setMode(m)}>
-            <Text kind="caption">{m === 'Online' ? 'Room code play' : 'Pick a mode'}</Text>
-          </Card>
-        ))}
-      </Grid>
-      <Row gap="s"><Badge>Neutral</Badge><Badge variant="primary">NEW</Badge><Badge variant="danger">3</Badge></Row>
-      <Row gap="s">{players.slice(0, 4).map((p, i) => <Avatar key={p} name={p} active={i === 0} />)}</Row>
-      <Stack gap="s">
-        <ProgressBar label="Loading" value={0.45} />
-        <ProgressBar label="XP" value={0.8} variant="accent" />
-        <ProgressBar label="Health" value={0.25} variant="danger" />
-      </Stack>
-      <Panel gap="xs">
-        <Text kind="label">Scroll area</Text>
-        <ScrollArea label="Players" max="s">
-          {players.map((p, i) => <ListRow key={p} label={p} detail={`${(6 - i) * 120} pts`}><Avatar name={p} /></ListRow>)}
-        </ScrollArea>
-      </Panel>
-      <Stack gap="xs">
-        <Text kind="display">Display</Text>
-        <Text kind="title">Title</Text>
-        <Text kind="heading">Heading</Text>
-        <Text kind="body">Body text — never below the accessibility floor.</Text>
-        <Text kind="label">Label</Text>
-        <Text kind="caption">Caption</Text>
-      </Stack>
-    </Section>
+    <Panel gap="xs">
+      <Text kind="heading">{title}</Text>
+      {entries.map((entry) => (
+        <ListRow key={entry.id} label={entry.name} detail={entry.about} onClick={() => onOpen(entry.id)}><Text kind="caption">›</Text></ListRow>
+      ))}
+    </Panel>
   )
 }

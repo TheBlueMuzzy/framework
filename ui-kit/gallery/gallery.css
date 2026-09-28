@@ -8,8 +8,10 @@
     border: var(--border-width) dashed var(--border); border-radius: var(--radius-panel);
     overflow: hidden;
   }
-  /* Block preview: a full-screen stand-in game under the screen being checked */
-  .gallery-game { position: relative; block-size: 100dvh; overflow: hidden;
+  /* One screen, full-size: a thin bar (menu + style) over a stand-in game running the screen stack */
+  .gallery-stage-page { display: flex; flex-direction: column; block-size: 100dvh; }
+  .gallery-bar { flex: none; padding: var(--gap-xs) var(--gap-m); border-block-end: var(--border-width) solid var(--border); }
+  .gallery-game { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: hidden;
     background: repeating-linear-gradient(45deg, var(--bg) 0 1.5rem, var(--surface) 0 3rem); }
   .gallery-game-label { block-size: 100%; align-items: center; justify-content: center; }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
