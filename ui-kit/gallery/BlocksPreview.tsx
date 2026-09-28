@@ -4,7 +4,7 @@ import { useEffect, useState, type ComponentType } from 'react'
 import credits from '../content/credits.json'
 import {
   askConfirm, Credits, EmptyState, HowToPlay, MainMenu, ModeSelect, kitScreens, Panel, RewardPopup, Row, Screen, ScreenStack, screens,
-  Spinner, Stack, Text, toast, ToastStack, Tooltip,
+  Settings, Spinner, Stack, Text, toast, ToastStack, Tooltip,
 } from '../kit'
 
 function Feedback() {
@@ -50,6 +50,7 @@ const demos: Record<string, Demo> = {
   menu: { base: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" onContinue={noop} onPlay={noop} onSettings={noop} onHowToPlay={noop} onCredits={noop} onQuit={noop} /> },
   modes: { screens: { modes: Modes }, open: () => screens.push('modes') },
   howto: { screens: { howto: () => <HowToPlay pages={howPages} /> }, open: () => screens.push('howto') },
+  settings: { screens: { settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} /> }, open: () => screens.push('settings') },
   credits: { screens: { credits: () => <Credits people={people} assets={credits} /> }, open: () => screens.push('credits') },
 }
 export const blockNames = Object.keys(demos)

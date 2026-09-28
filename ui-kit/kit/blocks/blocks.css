@@ -18,6 +18,14 @@
   .kit-centred { text-align: center; }
   .kit-picture { display: block; inline-size: 100%; max-block-size: 12rem; object-fit: contain; }
 
+  /* Settings: a tab bar on wide screens, ◀ tab ▶ on phones */
+  .kit-settings-picker { display: none; }
+  .kit-settings-picker .kit-picker { inline-size: 100%; }
+  @media (max-width: 40rem) {
+    .kit-settings-tabs { display: none; }
+    .kit-settings-picker { display: block; }
+  }
+
   /* Pips: little segments (lives, hearts, page dots) */
   .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }
 
