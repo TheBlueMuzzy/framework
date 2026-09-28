@@ -95,6 +95,7 @@
   .kit-timer { --kit-ring: var(--primary); color: var(--on-surface); box-shadow: var(--depth-1);
     background: radial-gradient(closest-side, var(--surface) 74%, transparent 76%), conic-gradient(var(--kit-ring) calc(var(--kit-fill) * 1turn), var(--border) 0); }
   .kit-timer[data-variant="danger"] { --kit-ring: var(--danger); }
+  .kit-error { color: var(--danger); font-weight: 600; }
   .kit-countdown { background: var(--surface) var(--panel-texture); color: var(--on-surface); border: var(--border-width) solid var(--border);
     box-shadow: var(--depth-2); animation: kit-pop var(--motion-normal) var(--ease); }
   .kit-end-title { animation: kit-pop calc(var(--motion-normal) * 2) var(--ease) backwards; }

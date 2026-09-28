@@ -3,7 +3,7 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import credits from '../content/credits.json'
 import {
-  Countdown, GameOver, Loading, PostGame, Results, RoundIntro, Victory,
+  Lobby, Reconnecting, Countdown, GameOver, Loading, PostGame, Results, RoundIntro, Victory,
   askConfirm, Bar, Button, ConnectionDot, Counter, Credits, Hud, Pause, PlayerSeats, Rank, Score, TimerRing, TurnBanner, EmptyState, HowToPlay, MainMenu, ModeSelect, kitScreens, Panel, RewardPopup, Row, Screen, ScreenStack, screens,
   Settings, Spinner, Stack, Text, toast, ToastStack, Tooltip,
 } from '../kit'
@@ -66,6 +66,15 @@ const scores = [
   { id: 'd', name: 'Lin', score: 96 }, { id: 'e', name: 'Sherman Meredith', score: 140 },
 ]
 const stats = [{ label: 'Best roll', value: 'Five of a kind' }, { label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
+function LobbyJoin() {
+  const [name, setName] = useState('Muzzy')
+  return <Lobby name={name} onNameChange={setName} error="No room called QXZT — check the code." onCreate={noop} onJoin={noop} onReady={noop} onStart={noop} onLeave={noop} />
+}
+function LobbyRoom() {
+  const [ready, setReady] = useState(false)
+  const players = [{ id: 'h', name: 'Sherman Meredith' }, { id: 'me', name: 'Muzzy', ready }, { id: 'c', name: 'Ada', ready: true }, { id: 'd', name: 'Lin' }]
+  return <Lobby roomCode="K7QD" meId="me" hostId="h" players={players} onCreate={noop} onJoin={noop} onReady={setReady} onStart={noop} onLeave={noop} />
+}
 const pauseScreen = () => <Pause onSettings={noop} onHowToPlay={noop} onQuit={noop} />
 
 // name → its screens for the stack, what to open at the start, and what sits underneath
@@ -87,6 +96,10 @@ const demos: Record<string, Demo> = {
   victory: { screens: { victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={noop} /> }, open: () => screens.push('victory') },
   gameover: { screens: { gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={noop} onQuit={noop} /> }, open: () => screens.push('gameover') },
   postgame: { screens: { postgame: () => <PostGame onRematch={noop} onLobby={noop} onQuit={noop}><Text kind="caption">2 of 4 players want a rematch</Text></PostGame> }, open: () => screens.push('postgame') },
+  lobby: { base: LobbyJoin },
+  room: { base: LobbyRoom },
+  reconnecting: { base: HudDemo, screens: { r: () => <Reconnecting onQuit={noop} /> }, open: () => screens.push('r') },
+  failed: { base: HudDemo, screens: { r: () => <Reconnecting failed onRetry={noop} onQuit={noop} /> }, open: () => screens.push('r') },
   credits: { screens: { credits: () => <Credits people={people} assets={credits} /> }, open: () => screens.push('credits') },
 }
 export const blockNames = Object.keys(demos)
