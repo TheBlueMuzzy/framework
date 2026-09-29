@@ -1,11 +1,11 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 04 built (autonomous, 2026-09-29), waiting for Muzzy's OK: **Dev Kit is now a framework module** (`devkit/` 0.1.1 + `install-devkit.mjs`, game tabs via `src/devkit-game/tabs.ts`) and **UI kit 0.2.2** (MainMenu items, Results dim, ToastStack place + side room, Bar width, PlayerChip xs, PinnedBox, check-ui --css, landscape menu). Both installed into Roll Better on its `dev/v1.6` branch; all checks + e2e green; two code reviews found no bugs.
-Next: Muzzy tries Roll Better (`/play` on dev/v1.6) → "approved" → F08–F11 ✅, archive Sprint 04, then `/deliver` framework v0.2.0.
+Sprint 04 done — Muzzy approved 2026-09-29 ("it's great"): Dev Kit is a framework module (`devkit/` 0.1.1) and UI kit is 0.2.2, both running in Roll Better (dev/v1.6). v0.2 musts 4/4.
+Next: `/deliver` framework v0.2.0 (version.json + tag; nothing to host). Roll Better's branch ships with its own /deliver after F48.
 
 ## Where we are
-Stage: develop   Milestone: v0.2 — Dev Kit module + kit pass   Sprint: 04 (built, awaiting OK)
+Stage: develop   Milestone: v0.2 — Dev Kit module + kit pass   Sprint: none (04 done)
 Doing: —   Branch: main   Version: 0.1.0
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.1.0
 
