@@ -4,10 +4,10 @@ Autonomous run ("just do everything", 2026-09-29). Roll Better work goes on bran
 
 ## F08 🧱 Dev Kit module
 Done when: `framework/devkit/` holds the generic Dev Kit + an installer; a game gets it with one command and adds its own tools as game tabs.
-- [ ] 🤖 1. Move the generic parts from Roll Better into `devkit/kit/` (panel, mount, saveContent, css, ColourBlindPreview, colour tab for kit colours, vite plugin, flags) + tests
-- [ ] 🤖 2. Game-tab API: games register extra tabs (id, label, Panel) — no editing kit files
-- [ ] 🤖 3. Installer `devkit/scripts/install-devkit.mjs` (--dry-run, VERSION stamp, removes dropped files, creates content/devkit.json if missing, prints wiring steps) + tests
-- [ ] 🤖 4. Generic release check (`check-devkit.mjs`, game URL/port from args, not hardcoded)
+- [x] 🤖 1. Move the generic parts from Roll Better into `devkit/kit/` (panel, mount, saveContent, css, ColourBlindPreview, colour tab for kit colours, vite plugin, flags) + tests
+- [x] 🤖 2. Game-tab API: games register extra tabs (id, label, Panel) — no editing kit files
+- [x] 🤖 3. Installer `devkit/scripts/install-devkit.mjs` (--dry-run, VERSION stamp, removes dropped files, creates content/devkit.json if missing, prints wiring steps) + tests
+- [x] 🤖 4. Generic release check (`check-devkit.mjs`, game URL/port from args, not hardcoded)
 - [ ] 🤖 5. README catalog row, DEVKIT.md + skills point at the module; new web games get it at setup
 Check: `npm test` in devkit/ + installer dry-run on a scratch copy of Roll Better
 
@@ -35,3 +35,8 @@ Check: screenshots match before (or better), all green
 
 Ask Muzzy: —
 Notes:
+- F08 (2026-09-29): `devkit/` = `kit/` (→ game `src/devkit/`) + `vite/` (→ `vite-plugins/devkit/`, Node code the browser tsconfig can't check) + `devkit-game/tabs.ts` starter + `scripts/install-devkit.mjs`. 48 tests (panel, colour logic vs real UI kit, plugin in a real Vite server, installer, check helpers), tsc clean.
+- Decision: game tabs = `src/devkit-game/tabs.ts` that the kit imports (installer makes it once, never touches it) — main.tsx stays the same one line in every game and game tools load in the Dev Kit's lazy chunk, so they vanish at 1.0 too. Not `mountDevKit({ tabs })`: that would pull game tools into main's bundle.
+- Decision: one Vite helper `devkit()` does the devkit.json switch (define) + Save endpoint → vite.config needs 2 lines. Color tab finds the UI kit via `import.meta.glob`; no UI kit → only the colour-blind preview. Release check reads the web path from `dist/index.html` (`--port`, default 5198, and `--base` override).
+- Proof on a scratch copy of Roll Better: dry-run listed the hand-made files it replaces + 4 old files to delete; real install + wiring (delete old files, vite.config 2 lines, check:devkit script) + table felt moved to `src/devkit-game/TableTab.tsx` → tsc -b clean, eslint clean, 76 tests pass, build OK, `npm run check:devkit` PASS both ways, dev server: tabs Color + Table, Table Save wrote table.json keeping `_help`. F09 = do the same in the real repo.
+- Task 5: README row, devkit/README.md, DEVKIT.md, sprint + develop skills updated (the skills' lines: new web game scaffold → install-devkit; /develop VERSION check).
