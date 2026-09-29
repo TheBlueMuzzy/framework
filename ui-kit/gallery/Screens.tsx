@@ -184,6 +184,9 @@ const samples: Record<string, ComponentType> = {
   results: () => <Results players={scores} meId="a" onContinue={() => screens.replace('victory')} />,
   endgame: () => <Results title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
     onRematch={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
+  // dim: the end of a game over the table — the game stays visible, darkened (here over the HUD)
+  endgamedim: () => <Results dim title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
+    onRematch={() => screens.replace('countdown')} onQuit={() => { screens.pop(); screens.pop() }} />,
   victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')} />,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   postgame: () => (
@@ -208,6 +211,7 @@ const openers: Record<string, () => void> = {
   pause: () => { screens.push('hud'); screens.push('pause') },
   reconnecting: () => { screens.push('hud'); screens.push('reconnecting') },
   failed: () => { screens.push('hud'); screens.push('failed') },
+  endgamedim: () => { screens.push('hud'); screens.push('endgamedim') },
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
 const darkScreens = ['hud', 'chips']

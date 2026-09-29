@@ -30,6 +30,7 @@ export const menu: MenuGroup[] = [
     { id: 'round', name: 'Round intro', about: '“Round 2 of 5”' },
     { id: 'results', name: 'Results', about: 'Scores, best first; ties share a place' },
     { id: 'endgame', name: 'Results: end of game', about: 'Title, player colours, winner star, Rematch / Quit' },
+    { id: 'endgamedim', name: 'Results: over the game', about: 'dim: the game stays visible behind, darkened' },
     { id: 'victory', name: 'Victory', about: 'The big win, with stats' },
     { id: 'gameover', name: 'Game over', about: 'Try again or quit' },
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },

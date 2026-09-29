@@ -33,7 +33,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Loading | `Loading` | `?screen=loading` | Bar (with `progress`) or spinner, plus a tip |
 | Countdown | `Countdown` | `?screen=countdown` | 3-2-1-Go!, then `onDone` |
 | Round intro | `RoundIntro` | `?screen=round` | "Round 2 of 5" |
-| Results | `Results` (+ `rankPlayers`) | `?screen=results` · `?screen=endgame` | Scores best first, ties share a place, "You" badge, ★ on 1st, rows arrive one by one. Optional: `color` per player, `title` ("You win!"), `message`, `onRematch` / `onQuit` / `actions` — one end-of-game screen. Phone on its side: list beside the title |
+| Results | `Results` (+ `rankPlayers`) | `?screen=results` · `?screen=endgame` · `?screen=endgamedim` | Scores best first, ties share a place, "You" badge, ★ on 1st, rows arrive one by one. Optional: `color` per player, `title` ("You win!"), `message`, `onRematch` / `onQuit` / `actions` — one end-of-game screen. `dim` = darkens the game behind it (still visible), like a dialog (`?screen=endgamedim`). Phone on its side: list beside the title |
 | Victory | `Victory` | `?screen=victory` | Big win title, message, stats |
 | Game over | `GameOver` | `?screen=gameover` | Try again or quit |
 | Post-game | `PostGame` | `?screen=postgame` | Rematch / back to lobby / quit |
