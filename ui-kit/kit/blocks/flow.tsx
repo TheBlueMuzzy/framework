@@ -44,13 +44,14 @@ export function Countdown({ from = 3, seconds = 1, onDone, words }: CountdownPro
   )
 }
 
-// ROUND INTRO — "Round 2 of 5" and what this round is about.
+// ROUND INTRO — "Round 2 of 5" and what this round is about. Plain words, not a card: it's information,
+// and anything that isn't a button must not look like one.
 export const roundIntroWords = { round: 'Round {n}', roundOf: 'Round {n} of {total}' }
 type RoundIntroProps = { round: number; total?: number; detail?: string; words?: Partial<typeof roundIntroWords> }
 export function RoundIntro({ round, total, detail, words }: RoundIntroProps) {
   const w = { ...roundIntroWords, ...words }
   const text = fill(total ? w.roundOf : w.round, { n: round, total: total ?? '' })
-  return <Screen label={text}><TurnBanner text={text} detail={detail} /></Screen>
+  return <Screen label={text}><TurnBanner variant="plain" text={text} detail={detail} /></Screen>
 }
 
 // RESULTS — everyone's score, best first. Equal scores share a place (1st, 1st, 3rd).
