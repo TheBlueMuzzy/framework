@@ -135,7 +135,7 @@ export function installDevkit(gameDir, { dryRun = false, log = console.log } = {
     log(`Installing Dev Kit ${version} (commit ${commit}) into ${gameDir}`)
   }
   for (const p of plans) {
-    if (!p.isUpdate) { log(`  ${p.to}/: ${p.sourceFiles.length} files`); continue }
+    if (!p.isUpdate) { log(`  ${p.to}/: ${p.sourceFiles.length} file${p.sourceFiles.length === 1 ? '' : 's'}`); continue }
     if (p.handMade) {
       log(`  ! ${p.to}/ already has files that didn't come from the framework (no VERSION file).
     They are replaced by the kit's — anything marked "removed" below is deleted. A game's own tools belong
