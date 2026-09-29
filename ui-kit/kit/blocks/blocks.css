@@ -87,9 +87,14 @@
   .kit-player-chip[data-size="s"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 2rem; block-size: 2rem; }
   .kit-player-chip[data-size="s"] .kit-player-chip-icon { font-size: var(--text-body); }
 
-  /* Toasts: a popover pinned to the top centre, newest at the bottom */
-  .kit-toasts { inset: 0 0 auto; margin: max(var(--gap-m), env(safe-area-inset-top)) auto 0; padding: 0; border: 0; background: none;
-    overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s); max-inline-size: calc(100% - 2 * var(--gap-m)); }
+  /* Toasts: a popover, centred sideways, newest at the bottom. data-place: top (default), center or bottom.
+     In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars. */
+  .kit-toasts { --kit-letterbox-h: calc((100dvh - var(--kit-frame-h, 100dvh)) / 2);
+    inset: 0 0 auto; margin: calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
+    overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s);
+    max-inline-size: calc(var(--kit-frame-w, 100vw) - 2 * var(--gap-m)); }
+  .kit-toasts[data-place="center"] { inset: 0; margin: auto; }
+  .kit-toasts[data-place="bottom"] { inset: auto 0 0; margin: 0 auto calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-bottom))); }
   .kit-toasts:popover-open { display: flex; }
   .kit-toast { padding: var(--gap-s) var(--gap-m); }
   .kit-toast[data-dismissible] { flex-direction: row; align-items: center; padding-block: var(--gap-xs); padding-inline-end: var(--gap-xs); cursor: pointer; }

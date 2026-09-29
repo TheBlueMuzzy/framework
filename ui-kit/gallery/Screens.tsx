@@ -2,14 +2,14 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
-  TimerRing, toast, Tooltip, TurnBanner, Victory,
+  TimerRing, toast, Tooltip, TurnBanner, Victory, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -40,8 +40,13 @@ const endScores = [
 ]
 const stats = [{ label: 'Best roll', value: 'Five of a kind' }, { label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
 
+// Where the gallery's one ToastStack shows its toasts (App.tsx owns it; the Feedback sample moves it)
+export const ToastPlaceContext = createContext<{ place: ToastPlace; setPlace: (place: ToastPlace) => void }>({ place: 'top', setPlace: noop })
+
 // ── Samples that need a little state ──
 function Feedback() {
+  const { place, setPlace } = useContext(ToastPlaceContext)
+  const moveToasts = (to: string) => { setPlace(to as ToastPlace); toast(`Toasts now show at the ${to}`) }
   useEffect(() => {
     toast('Sam joined the room')
     toast('Connection lost', { variant: 'danger', seconds: 60 })
@@ -52,6 +57,7 @@ function Feedback() {
       <Panel gap="m" className="kit-modal">
         <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
         <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
+        <Row gap="s"><Text kind="label">Toasts at</Text><Selector label="Toasts at" options={['top', 'center', 'bottom']} value={place} onChange={moveToasts} /></Row>
         <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
       </Panel>
     </Screen>

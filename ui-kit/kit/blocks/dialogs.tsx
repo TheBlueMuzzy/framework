@@ -72,6 +72,8 @@ export const kitScreens = { confirm: () => (pendingConfirm ? <Confirm {...pendin
 // TOASTS — short messages that fade away ("Saved", "Sam joined"). Call toast('Saved') from
 // anywhere; put <ToastStack /> once near the top of your app (outside the ScreenStack).
 // dismissible: tapping the toast (or its ✕ Close button) hides it early.
+// <ToastStack place="bottom" />: where they show — 'top' (default), 'center' or 'bottom' of the screen
+// (of the game picture, in a letterboxed game that sets --kit-frame-w / --kit-frame-h).
 export type Toast = { id: number; text: string; variant: 'neutral' | 'danger'; dismissible: boolean }
 export const MAX_TOASTS = 3 // older ones make room for new ones
 let toastList: readonly Toast[] = []
@@ -93,7 +95,8 @@ export function toast(text: string, { variant = 'neutral', seconds = 3, dismissi
 }
 
 export const toastWords = { label: 'Messages', close: 'Close' }
-export function ToastStack({ label, words }: { label?: string; words?: Partial<typeof toastWords> }) {
+export type ToastPlace = 'top' | 'center' | 'bottom'
+export function ToastStack({ label, place = 'top', words }: { label?: string; place?: ToastPlace; words?: Partial<typeof toastWords> }) {
   const w = { ...toastWords, ...words }
   const list = useSyncExternalStore(toasts.subscribe, () => toasts.current, () => toasts.current)
   const box = useRef<HTMLDivElement>(null)
@@ -105,7 +108,7 @@ export function ToastStack({ label, words }: { label?: string; words?: Partial<t
     if (!list.length && open) el.hidePopover()
   }, [list.length])
   return (
-    <div ref={box} {...{ popover: 'manual' }} className="kit-toasts" role="status" aria-label={label ?? w.label}>
+    <div ref={box} {...{ popover: 'manual' }} className="kit-toasts" data-place={place} role="status" aria-label={label ?? w.label}>
       {list.map((t) => t.dismissible ? (
         <Panel key={t.id} depth={2} gap="s" className="kit-toast" data-variant={t.variant} data-dismissible
           onClick={() => toasts.dismiss(t.id)}>

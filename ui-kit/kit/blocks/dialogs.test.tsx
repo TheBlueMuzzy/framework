@@ -31,6 +31,16 @@ describe('toasts', () => {
   })
 })
 
+describe('ToastStack place', () => {
+  it('top by default; place moves it to the centre or the bottom', () => {
+    const { container, rerender } = render(<ToastStack />)
+    const place = () => container.querySelector('.kit-toasts')?.getAttribute('data-place')
+    expect(place()).toBe('top')
+    rerender(<ToastStack place="bottom" />)
+    expect(place()).toBe('bottom')
+  })
+})
+
 describe('dismissible toasts', () => {
   it('the Close button hides it early; others stay', () => {
     toast('Saved')

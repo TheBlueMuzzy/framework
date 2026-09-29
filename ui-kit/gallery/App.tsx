@@ -3,13 +3,14 @@
 // Links:  ?preset=neon                    the menu in Neon
 //         ?screen=settings&preset=neon    straight into one screen (the ids are in menu.ts)
 //         ?screen=parts                   the parts page
+//         ?screen=feedback&toasts=bottom  toasts at the bottom (top, center or bottom)
 import { useEffect, useRef, useState } from 'react'
-import { applyStyle, Grid, ListRow, Panel, screens, Stack, Text, ToastStack, type StyleFile } from '../kit'
+import { applyStyle, Grid, ListRow, Panel, screens, Stack, Text, ToastStack, type StyleFile, type ToastPlace } from '../kit'
 import styleFile from './content/ui/style.json'
 import { StyleSwitcher } from './StyleSwitcher'
 import { menu, type MenuGroup as MenuGroupType } from './menu'
 import { Parts } from './Parts'
-import { Stage } from './Screens'
+import { Stage, ToastPlaceContext } from './Screens'
 
 const param = (name: string) => new URLSearchParams(location.search).get(name)
 const presetFromLink = (): StyleFile | null => (param('preset') ? { preset: param('preset')! } : null)
@@ -56,13 +57,14 @@ export function App() {
   })
 
   const setPreset = (preset: string) => setDevStyle({ ...style, preset })
+  const [toastPlace, setToastPlace] = useState(() => (param('toasts') ?? 'top') as ToastPlace)
   return (
-    <>
+    <ToastPlaceContext.Provider value={{ place: toastPlace, setPlace: setToastPlace }}>
       {page === 'parts' ? <Parts onMenu={goToMenu} />
         : page ? <Stage id={page} preset={style.preset} onPreset={setPreset} onMenu={goToMenu} />
         : <Menu current={style} onStyle={setDevStyle} onOpen={open} />}
-      <ToastStack />
-    </>
+      <ToastStack place={toastPlace} />
+    </ToastPlaceContext.Provider>
   )
 }
 
