@@ -95,6 +95,26 @@ describe('the Tuning tab', () => {
     vi.unstubAllGlobals()
   })
 
+  it('_help can be one line per value; text values (e.g. a colour) are shown, not edited', () => {
+    const drag = {
+      name: 'drag',
+      data: {
+        _help: { dragHeight: 'How high a picked-up die floats.', highlightColor: 'Colour of the drop zone.' },
+        _ranges: { dragHeight: [0, 3, 0.1] },
+        dragHeight: 1.2,
+        zoneHighlight: 'tint',
+        highlightColor: '#ffffff',
+      },
+    }
+    render(<TuningTab files={[drag]} />)
+    expect(screen.getByText('How high a picked-up die floats.')).toBeTruthy()
+    expect(screen.getByText('Colour of the drop zone.')).toBeTruthy()
+    expect(screen.getByLabelText('dragHeight slider (0 to 3)')).toBeTruthy()
+    expect(screen.getByText('tint')).toBeTruthy()
+    expect(screen.getByText('#ffffff')).toBeTruthy()
+    expect(screen.queryByText(/\[object Object\]/)).toBeNull()
+  })
+
   it('is hidden in a game with no content/tuning files (the framework has none)', () => {
     render(<DevKit />)
     expect(screen.queryByRole('tab', { name: 'Tuning', hidden: true })).toBeNull()

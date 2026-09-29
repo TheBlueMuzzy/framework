@@ -50,7 +50,9 @@ useFrame(() => { body.setLinearDamping(physics.current.damping) })
 ```
 Slider ranges: add `"_ranges": { "dice.bounce": [0, 1, 0.05] }` (min, max, step) to a tuning file when the guess is wrong
 (guess: 0 → twice the value; whole numbers step by 1 up to at least 10; negatives from twice the value up to its opposite).
+`_help` can be one note for the file, or one line per value (`{ "dragHeight": "how high…" }`) shown under each row.
 Save keeps `_help` and `_ranges`, and writes number lists on one line.
+A game that keeps its tuning in its own mutable object can follow edits with `onTuning('drag', (data) => Object.assign(drag, data))`.
 
 ## Knobs
 - `content/devkit.json` → `inReleaseBuilds` (the switch above).

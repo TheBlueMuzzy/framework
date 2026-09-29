@@ -105,10 +105,12 @@ type SectionProps = {
   onChange: (path: string, value: unknown) => void
 }
 
-// One file: its name, its _help note, then its values under their group headings
+// One file: its name, its _help note, then its values under their group headings.
+// "_help" is either one note for the whole file, or one per value: { "dragHeight": "how high a die lifts" }
 function FileSection({ name, data, loaded, saved, onChange }: SectionProps) {
   const fields = listFields(data)
   const help = typeof data._help === 'string' ? data._help : null
+  const helpPerValue = data._help && typeof data._help === 'object' ? (data._help as Record<string, unknown>) : {}
   return (
     <section className="tt-file">
       <h3 className="tt-file-name">{name}.json <small>{pathOf(name)}</small></h3>
@@ -124,6 +126,7 @@ function FileSection({ name, data, loaded, saved, onChange }: SectionProps) {
               savedValue={valueAt(saved, field.path)}
               loadedValue={valueAt(loaded, field.path)}
               ranges={data._ranges}
+              help={typeof helpPerValue[field.path] === 'string' ? (helpPerValue[field.path] as string) : undefined}
               onChange={(value) => onChange(field.path, value)}
             />
           </div>
@@ -138,11 +141,12 @@ type RowProps = {
   savedValue: unknown
   loadedValue: unknown
   ranges: unknown
+  help?: string // this value's own line from _help, if the file has one per value
   onChange: (value: unknown) => void
 }
 
 // One value: [● name] then [slider] [number] [↺] — or a checkbox, or plain text
-function FieldRow({ field, savedValue, loadedValue, ranges, onChange }: RowProps) {
+function FieldRow({ field, savedValue, loadedValue, ranges, help, onChange }: RowProps) {
   const { path, kind, value } = field
   const label = nameOf(path)
   const changed = value !== savedValue
@@ -152,12 +156,17 @@ function FieldRow({ field, savedValue, loadedValue, ranges, onChange }: RowProps
       {label}
     </span>
   )
+  const helpLine = help && <p className="tt-row-help">{help}</p>
 
   if (kind === 'text') {
     return (
       <div className="tt-row tt-row-text">
         {name}
-        <span className="tt-text" title="Text — edit it in the file">{String(value)}</span>
+        <span className="tt-text" title="Text — edit it in the file">
+          {/^#[0-9a-f]{3,8}$/i.test(String(value)) && <span className="tt-swatch" style={{ background: String(value) }} />}
+          {String(value)}
+        </span>
+        {helpLine}
       </div>
     )
   }
@@ -183,6 +192,7 @@ function FieldRow({ field, savedValue, loadedValue, ranges, onChange }: RowProps
           {label}
         </label>
         {reset}
+        {helpLine}
       </div>
     )
   }
@@ -213,6 +223,7 @@ function FieldRow({ field, savedValue, loadedValue, ranges, onChange }: RowProps
         aria-label={path}
       />
       {reset}
+      {helpLine}
     </div>
   )
 }

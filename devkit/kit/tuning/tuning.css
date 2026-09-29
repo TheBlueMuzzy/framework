@@ -54,6 +54,8 @@
   font-size: 12px !important;
 }
 .tt-text { color: #9a9bab; font-family: ui-monospace, Consolas, monospace; font-size: 12px; text-align: right; overflow-wrap: anywhere; }
+.tt-row-help { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.35; color: #9a9bab; }
+.tt-swatch { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -2px; border: 1px solid #5a5c6e; border-radius: 3px; }
 .tt-reset {
   width: 30px;
   height: 26px;
