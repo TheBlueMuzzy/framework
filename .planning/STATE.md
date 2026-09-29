@@ -1,13 +1,13 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Sprint 04 done — Muzzy approved 2026-09-29 ("it's great"): Dev Kit is a framework module (`devkit/` 0.1.1) and UI kit is 0.2.2, both running in Roll Better (dev/v1.6). v0.2 musts 4/4.
-Next: `/deliver` framework v0.2.0 (version.json + tag; nothing to host). Roll Better's branch ships with its own /deliver after F48.
+Released v0.2.0 (2026-09-29) — the Dev Kit is a framework module (`devkit/` 0.1.1, `install-devkit.mjs`, game tabs) and the UI kit is 0.2.2. Roll Better runs both (its dev/v1.6 branch).
+Next: `/roadmap` for the next framework module (candidates: online rooms, drag-to-zone, physics dice) — or back to Roll Better F48.
 
 ## Where we are
-Stage: develop   Milestone: v0.2 — Dev Kit module + kit pass   Sprint: none (04 done)
-Doing: —   Branch: main   Version: 0.1.0
-Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.1.0
+Stage: deliver   Milestone: v0.2 — Dev Kit module + kit pass ✅   Sprint: none (04 done)
+Doing: —   Branch: main   Version: 0.2.0
+Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
 **What this is**

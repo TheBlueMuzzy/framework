@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.2.0",
+      "date": "2026-09-29",
+      "summary": "Dev Kit becomes a framework module (one-command install, game tabs); UI kit 0.2.2 closes Roll Better's gaps"
+    },
     {
       "version": "0.1.0",
       "date": "2026-09-28",
