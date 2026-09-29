@@ -12,6 +12,8 @@
   "border": "#1b7f96",
   "focus": "#ff3fd8",
   "ink": "transparent",
+  "on-game": "#dff8ff",
+  "game-shade": "#06080f",
   "font-display": "'Orbitron', 'Exo 2', system-ui, sans-serif",
   "font-body": "'Exo 2', system-ui, sans-serif",
   "font-numbers": "var(--font-display)",

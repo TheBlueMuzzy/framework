@@ -4,9 +4,11 @@ Every known, common game screen. **Built** = ready in the kit: import it from `s
 **Needs React 18 or newer** (tested on 18.3 and 19; `install-kit` warns if a game's React is older).
 See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:5180/?screen=<id>&preset=<style>`.
 
+**Rule: non-buttons never look like buttons.** Only things you can press get a filled pill/box with an outline and a drop shadow. Instructions ("Hold to Roll", "Locked 1!") and small info ("Round 1") are `HudText`: plain words in the style's `on-game` colour with a soft `game-shade` halo, no plate. HUD chips (scores, player chips, counters) are flat plates with no shadow. Never use a `Badge`, `Panel` or `Button` just to show words.
+
 ## Parts (`?screen=parts`)
 - **Layout:** `Screen` (slots `topLeft` `top` `topRight` `bottomLeft` `bottom` `bottomRight` + centre · `dialog` = dims what's under it) · `Panel` · `Stack` (column) · `Row` · `Grid`. Gaps by name: `xs s m l xl`.
-- **Controls:** `Button` (primary / secondary / ghost / danger, + `icon`, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` (+ `color`) · `ProgressBar` · `ScrollArea` · `Text`.
+- **Controls:** `Button` (primary / secondary / ghost / danger, + `icon` — square, ≥ 44px, glyph at title size, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` (+ `color`; initials in the body font, semibold) · `ProgressBar` · `ScrollArea` · `Text`.
 - **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })` · `copyText(text, shownElement)` (clipboard, or selects the text where there's none) · `reduceMotion()` / `useCountUp(n)` (numbers that roll up, off with reduce motion).
 - **`kit-scope`:** wrap kit parts shown outside a Screen — e.g. pinned to a 3D point — in `<div className="kit-scope">`: they get the style's fonts, colours, text size and focus ring, but no layout, background or positioning (and taps are left as they were).
 - **Game box** (letterboxed games, with `ScreenStack overlay`): set `--kit-frame-w` / `--kit-frame-h` and overlay screens sit on the game picture (centred) instead of the whole window, so corner slots (version, HUD) never land in the black bars; the dim still covers the whole window. Unset = 100% (fills the window, as before). A 16:9 game: `:root { --kit-frame-w: min(100vw, calc(100dvh * 16 / 9)); --kit-frame-h: min(100dvh, calc(100vw * 9 / 16)); }`
@@ -24,8 +26,9 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | **In game** | | | |
 | Pause | `Pause` | `?screen=pause` | Resume / settings / how to play / quit (asks first) |
 | HUD frame | `Hud` | `?screen=hud` | Safe slots: vitals top-left, status top-centre, currency + pause top-right, actions bottom, banner centre |
-| HUD pieces | `Bar` `Pips` `Counter` `Score` `TimerRing` `TurnBanner` `PlayerSeats` `Rank` `ConnectionDot` | `?screen=hud` | Health/xp/timer bars, +N counter, score + combo, timer ring, turn banner, seats with active player, place, connection |
-| Player chip | `PlayerChip` | `?screen=chips` | One player's card beside their row/seat (the game places it; wrap in `kit-scope` outside a Screen): avatar (`color`), name, ★ score that counts up, `detail`, `badge`, `active`, `dim` (fades), `size` s/m. Goal chip: `icon` or `avatar={false}` |
+| HUD pieces | `Bar` `Pips` `Counter` `Score` `TimerRing` `TurnBanner` `PlayerSeats` `Rank` `ConnectionDot` | `?screen=hud` | Health/xp/timer bars, +N counter, score + combo, timer ring, turn banner (`variant="plain"` = big HudText, no panel), seats with active player, place, connection |
+| HUD text | `HudText` | `?screen=hud` · `?screen=chips` | Plain words on the game — instructions ("Hold to Roll"), info ("Round 1"). No plate; `on-game` colour + `game-shade` halo; read out politely; pops in when the text changes. `size` s / m (default) / l, `tone="accent"`, `detail` line |
+| Player chip | `PlayerChip` | `?screen=chips` | One player's card beside their row/seat (the game places it; wrap in `kit-scope` outside a Screen): avatar flush in the chip's rounded start (`color`; `active` ring drawn inside it), name, ★ score that counts up, `detail`, `badge`, `active`, `dim` (fades), `size` s/m. Goal chip: `icon` or `avatar={false}` |
 | **Flow** | | | |
 | Loading | `Loading` | `?screen=loading` | Bar (with `progress`) or spinner, plus a tip |
 | Countdown | `Countdown` | `?screen=countdown` | 3-2-1-Go!, then `onDone` |

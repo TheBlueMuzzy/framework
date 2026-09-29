@@ -16,11 +16,13 @@ export const colourTokens = {
   'muted': 'Quiet text: hints, captions',
   'border': 'Outlines, dividers, empty tracks',
   'focus': 'Keyboard/gamepad focus ring',
+  'on-game': 'HUD text drawn straight on the game (no plate): instructions, "Round 1". Light, e.g. white',
 } as const
 
 // Colours that never have text on them, so the contrast test skips them.
 export const lineColourTokens = {
   'ink': 'Outline around filled buttons and badges (the cartoon ink line). "transparent" = none',
+  'game-shade': 'The soft shadow behind on-game text, so it reads over any game art. Dark',
 } as const
 
 export const otherTokens = {

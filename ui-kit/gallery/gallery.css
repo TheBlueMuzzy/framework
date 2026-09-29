@@ -13,6 +13,9 @@
   .gallery-bar { flex: none; padding: var(--gap-xs) var(--gap-m); border-block-end: var(--border-width) solid var(--border); }
   .gallery-game { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: hidden;
     background: repeating-linear-gradient(45deg, var(--bg) 0 1.5rem, var(--surface) 0 3rem); }
+  .gallery-game[data-dark] { background: repeating-linear-gradient(45deg, var(--game-shade) 0 1.5rem,
+    color-mix(in srgb, var(--game-shade) 80%, var(--primary)) 0 3rem); }
+  .gallery-game[data-dark] .gallery-game-label { visibility: hidden; } /* the HUD text is what's being checked there */
   .gallery-game-label { block-size: 100%; align-items: center; justify-content: center; }
   .gallery-menu { align-items: start; } /* each group panel only as tall as its rows */
   /* Stand-in for a 3D library's own div: nothing from the page reaches inside (kit-scope brings the style back) */

@@ -12,6 +12,8 @@
   "border": "#f4f4f4",
   "focus": "#ffcd75",
   "ink": "#0d0e17",
+  "on-game": "#f4f4f4",
+  "game-shade": "#0d0e17",
   "font-display": "'Silkscreen', 'VT323', monospace",
   "font-body": "'VT323', monospace",
   "font-numbers": "'VT323', monospace",

@@ -17,7 +17,7 @@ const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json'))
 // Shown in every style, for picking a style and catching a style that breaks one of them
 const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'lobby', 'room', 'seats', 'hud', 'chips']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['lobby', 'room', 'roomauto', 'endgame', 'chips']
+const landscapeScreens = ['lobby', 'room', 'roomauto', 'endgame', 'chips', 'hud']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },

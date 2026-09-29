@@ -6,7 +6,7 @@ import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
-  askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, kitScreens,
+  askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
   TimerRing, toast, Tooltip, TurnBanner, Victory,
@@ -63,7 +63,8 @@ function Modes() {
   return <ModeSelect modes={modes} value={mode} onChange={setMode} onStart={() => screens.replace('countdown')} />
 }
 
-// A HUD whose numbers change every 1.5 s, to show the float-ups, combo pop, timer and turn banner
+// A HUD whose numbers change every 1.5 s, to show the float-ups, combo pop, timer and turn banner.
+// It sits on a dark stand-in game: the turn banner and the instructions are plain HudText (never button-like).
 function HudSample() {
   const [tick, setTick] = useState(0)
   useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
@@ -72,10 +73,12 @@ function HudSample() {
   return (
     <Hud
       vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" /><Bar label="Lives" pips value={2} max={3} /></Stack>}
-      status={<Row gap="s"><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
-      currency={<Counter label="Coins" icon="🪙" value={250 + tick * 5} />}
+      status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
+      currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
+        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button></Row>}
       onPause={() => screens.push('pause')}
-      banner={<TurnBanner text={`${turn.name}'s turn`} detail="Roll up to 3 times" />}
+      banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
+        {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail="Up to 3 times">Hold to Roll</HudText>}</Stack>}
       bottomLeft={<ConnectionDot status="weak" />}
       bottomRight={<Rank place={2} of={3} />}
       actions={<Stack gap="s"><PlayerSeats players={players} activeId={turn.id} /><Row justify="center"><Button onClick={() => toast('Rolled!')}>Roll</Button></Row></Stack>}
@@ -88,6 +91,7 @@ function HudSample() {
 // wrapped in kit-scope, which brings the style's font and colours back. Every 1.5 s the turn moves
 // on, the player whose turn it was scores (counting up), and Bolt dims as if a die rolls over it.
 // Below them: a goal chip (an icon instead of an avatar), a small chip, and a bare score chip.
+// They sit on a dark stand-in game, with plain HudText ("Round 1") and a settings icon button above.
 function PlayerChips() {
   const [tick, setTick] = useState(0)
   useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
@@ -95,10 +99,11 @@ function PlayerChips() {
   const score = (i: number) => 4 * i + 3 * Math.floor((tick + players.length - 1 - i) / players.length)
   const pinned = (key: string, chip: ReactNode) => <div key={key} className="gallery-outside"><div className="kit-scope">{chip}</div></div>
   return (
-    <Screen label="Player chips">
-      <Panel gap="s" className="kit-wide">
+    <Screen label="Player chips" top={<HudText>Round 1</HudText>}
+      topRight={<Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>}>
+      <Stack gap="s" className="kit-wide">
         <ScrollArea label="Player chips" max="l">
-          <Grid gap="m" min="m">
+          <Grid gap="m" min="l">
             {players.map((p, i) => pinned(p.id, <PlayerChip name={p.name} color={p.color} badge={'badge' in p ? p.badge : undefined}
               score={score(i)} detail={`S${1 + (tick % 3)} · T${1 + i}`} active={tick % players.length === i} dim={i === 2 && tick % 2 === 1} />))}
             {pinned('goal', <PlayerChip name="Goal" icon="◎" score={30} detail="If you lock it now" />)}
@@ -106,7 +111,7 @@ function PlayerChips() {
             {pinned('bare', <PlayerChip name="Goal" avatar={false} showName={false} size="s" score={12} />)}
           </Grid>
         </ScrollArea>
-      </Panel>
+      </Stack>
     </Screen>
   )
 }
@@ -201,6 +206,8 @@ const openers: Record<string, () => void> = {
   reconnecting: () => { screens.push('hud'); screens.push('reconnecting') },
   failed: () => { screens.push('hud'); screens.push('failed') },
 }
+// Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
+const darkScreens = ['hud', 'chips']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──
@@ -213,7 +220,7 @@ export function Stage({ id, preset, onPreset, onMenu }: StageProps) {
         <Button variant="secondary" onClick={onMenu}>◀ Menu</Button>
         <Selector label="Style" options={Object.keys(presets)} value={preset} onChange={onPreset} />
       </Row>
-      <div className="gallery-game">
+      <div className="gallery-game" data-dark={darkScreens.includes(id) || undefined}>
         <ScreenStack screens={{ ...kitScreens, ...samples }}>
           <Stack gap="xs" className="gallery-game-label">
             <Text kind="caption">{isKnown(id) ? '(the game)' : `No screen called “${id}”.`}</Text>

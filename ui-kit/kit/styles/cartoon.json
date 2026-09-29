@@ -12,6 +12,8 @@
   "border": "#1d1a33",
   "focus": "#7a2cf5",
   "ink": "#1d1a33",
+  "on-game": "#ffffff",
+  "game-shade": "#1d1a33",
   "font-display": "'Lilita One', 'Fredoka', system-ui, sans-serif",
   "font-body": "'Fredoka', ui-rounded, system-ui, sans-serif",
   "font-numbers": "var(--font-display)",

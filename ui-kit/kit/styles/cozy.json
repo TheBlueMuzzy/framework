@@ -12,6 +12,8 @@
   "border": "#e2d2b8",
   "focus": "#c0662c",
   "ink": "transparent",
+  "on-game": "#fffaf0",
+  "game-shade": "#3b2c20",
   "font-display": "'Nunito', ui-rounded, system-ui, sans-serif",
   "font-body": "'Nunito', ui-rounded, system-ui, sans-serif",
   "font-numbers": "var(--font-display)",

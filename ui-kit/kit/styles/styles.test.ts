@@ -8,6 +8,7 @@ import { requiredTokenNames, optionalTokens } from '../style/tokens'
 const textPairs: [text: string, background: string][] = [
   ['on-bg', 'bg'], ['on-surface', 'surface'], ['on-primary', 'primary'], ['on-danger', 'danger'],
   ['muted', 'surface'], ['muted', 'bg'], // captions, hints and inactive tabs sit on both
+  ['on-game', 'game-shade'], ['accent', 'game-shade'], // HUD text on the game: its shadow is what it reads against
 ]
 const shapePairs: [shape: string, background: string][] = [['focus', 'bg'], ['focus', 'surface']]
 

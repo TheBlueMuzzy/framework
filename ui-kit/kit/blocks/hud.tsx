@@ -133,8 +133,27 @@ export function TimerRing({ seconds, total, label = 'Time left', warnAt = 5 }: T
   )
 }
 
+// HUD TEXT — plain words straight on the game: "Hold to Roll", "Locked 1!", "Round 1".
+// No plate, outline or shadow block (only buttons look like buttons): the style's on-game colour
+// with a soft shade behind it so it reads over any art. Read out politely when it changes, and it
+// pops in again whenever the text changes.  size: s | m (default) | l.  tone: accent = highlighted.
+type HudTextProps = { children: string; detail?: string; size?: 's' | 'm' | 'l'; tone?: 'normal' | 'accent' }
+export function HudText({ children, detail, size = 'm', tone = 'normal' }: HudTextProps) {
+  const kind = size === 's' ? 'label' : size === 'm' ? 'heading' : 'title'
+  return (
+    <div className="kit-hud-text" data-size={size} data-tone={tone === 'accent' ? tone : undefined} aria-live="polite">
+      <Stack key={children} gap="xs">
+        <Text kind={kind}>{children}</Text>
+        {detail && <Text kind="label">{detail}</Text>}
+      </Stack>
+    </div>
+  )
+}
+
 // TURN BANNER — "Sam's turn" / "Level 2!" in the middle. It pops in again whenever the text changes.
-export function TurnBanner({ text, detail }: { text: string; detail?: string }) {
+// variant="plain": big HudText instead of a panel (for instructions that must not look like a button).
+export function TurnBanner({ text, detail, variant = 'panel' }: { text: string; detail?: string; variant?: 'panel' | 'plain' }) {
+  if (variant === 'plain') return <HudText size="l" detail={detail}>{text}</HudText>
   return (
     <Panel key={text} depth={2} gap="xs" className="kit-banner" role="status">
       <Text kind="title">{text}</Text>
