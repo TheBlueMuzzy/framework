@@ -85,7 +85,7 @@ function LobbyJoin() {
   const [error, setError] = useState('')
   const join = (code: string) => (code === 'QX2T' ? screens.replace('room') : setError(`No room called ${code} — try QX2T.`))
   return <Lobby name={name} onNameChange={setName} error={error} onCreate={() => screens.replace('room')} onJoin={join}
-    onReady={noop} onStart={noop} onLeave={() => screens.pop()} />
+    onReady={noop} onStart={noop} onLeave={() => screens.pop()} onBack={() => screens.pop()} />
 }
 
 function LobbyRoom() {
@@ -93,6 +93,18 @@ function LobbyRoom() {
   const players = [{ id: 'h', name: 'Sherman Meredith' }, { id: 'me', name: 'Muzzy', ready }, { id: 'c', name: 'Ada', ready: true }, { id: 'd', name: 'Lin' }]
   return <Lobby roomCode="QX2T" meId="me" hostId="h" players={players} onCreate={noop} onJoin={noop}
     onReady={setReady} onStart={noop} onLeave={() => screens.pop()} />
+}
+
+// A game that marks players ready by itself: no onReady, so no Ready button and Start only waits for
+// enough players. Player colours come from content JSON, like a game's would.
+function LobbyRoomAutoReady() {
+  const players = [
+    { id: 'me', name: 'Muzzy', color: seats[0].color },
+    { id: seats[1].id, name: seats[1].name, color: seats[1].color },
+    { id: seats[2].id, name: seats[2].name, color: seats[2].color },
+  ]
+  return <Lobby roomCode="QX2T" meId="me" hostId="me" players={players} onCreate={noop} onJoin={noop}
+    onStart={() => screens.replace('countdown')} onLeave={() => screens.pop()} />
 }
 
 // Pick a seat → "Joining…" for a moment → into the game (the HUD). Cancel goes back to the list.
@@ -133,6 +145,7 @@ const samples: Record<string, ComponentType> = {
   ),
   lobby: LobbyJoin,
   room: LobbyRoom,
+  roomauto: LobbyRoomAutoReady,
   reconnecting: () => <Reconnecting onQuit={() => { screens.pop(); screens.pop() }} />,
   seats: () => <Seats />,
   joining: () => <Seats startWaiting />,

@@ -16,6 +16,8 @@ import { screenIds } from '../gallery/menu.ts'
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
 // Shown in every style, for picking a style and catching a style that breaks one of them
 const keyScreens = ['menu', 'settings', 'pause', 'results', 'lobby', 'room', 'seats', 'hud']
+// Also shot on a landscape phone (short screens squeeze these most), in every style
+const landscapeScreens = ['lobby', 'room', 'roomauto']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },
@@ -202,6 +204,12 @@ try {
   for (const [id, preset] of shots) {
     for (const size of [sizes.phone, sizes.desktop]) await shoot(`screens/${id}-${preset}-${size.name}`, size, `?screen=${id}&preset=${preset}`)
   }
+  for (const preset of presetNames) {
+    for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.landscape.name}`, sizes.landscape, `?screen=${id}&preset=${preset}`)
+  }
+  // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
+  await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
+    (page) => page.getByRole('button', { name: 'Copy' }).click())
 } finally {
   await browser.close()
   await server.close()

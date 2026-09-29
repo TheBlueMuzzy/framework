@@ -7,7 +7,8 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 ## Parts (`?screen=parts`)
 - **Layout:** `Screen` (slots `topLeft` `top` `topRight` `bottomLeft` `bottom` `bottomRight` + centre · `dialog` = dims what's under it) · `Panel` · `Stack` (column) · `Row` · `Grid`. Gaps by name: `xs s m l xl`.
 - **Controls:** `Button` (primary / secondary / ghost / danger, + `icon`, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` (+ `color`) · `ProgressBar` · `ScrollArea` · `Text`.
-- **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })`.
+- **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })` · `copyText(text, shownElement)` (clipboard, or selects the text where there's none).
+- **Game box** (letterboxed games, with `ScreenStack overlay`): set `--kit-frame-w` / `--kit-frame-h` and overlay screens sit on the game picture (centred) instead of the whole window, so corner slots (version, HUD) never land in the black bars; the dim still covers the whole window. Unset = 100% (fills the window, as before). A 16:9 game: `:root { --kit-frame-w: min(100vw, calc(100dvh * 16 / 9)); --kit-frame-h: min(100dvh, calc(100vw * 9 / 16)); }`
 
 ## Built
 
@@ -33,8 +34,8 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Post-game | `PostGame` | `?screen=postgame` | Rematch / back to lobby / quit |
 | Transitions | (built in) | any | Panels play the style's entrance when a screen opens; dialogs fade their dim |
 | **Online** | | | |
-| Lobby: join | `Lobby` (no `roomCode`) | `?screen=lobby` | Create a room or join by code |
-| Lobby: room | `Lobby` (with `roomCode`) | `?screen=room` | Code, players, host badge, ready, Start |
+| Lobby: join | `Lobby` (no `roomCode`) | `?screen=lobby` | Create a room or join by code; `onBack` → a Back button |
+| Lobby: room | `Lobby` (with `roomCode`) | `?screen=room` · `?screen=roomauto` | Code + Copy (toast "Code copied!"; selects the code where there's no clipboard), players (`color` each), host badge, ready, Start. No `onReady` = the game readies players itself: no Ready button, Start only waits for enough players |
 | Reconnecting | `Reconnecting` | `?screen=reconnecting` · `?screen=failed` | Spinner dialog; `failed` → try again / quit |
 | Seat picker | `SeatPicker` | `?screen=seats` · `?screen=joining` · `?screen=noseats` | Join a game in progress: pick a seat (e.g. a bot's) to take over |
 | **Dialogs & feedback** | | | |

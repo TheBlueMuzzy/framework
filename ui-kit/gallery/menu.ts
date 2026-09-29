@@ -33,8 +33,9 @@ export const menu: MenuGroup[] = [
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },
   ] },
   { title: 'Online', entries: [
-    { id: 'lobby', name: 'Lobby: join', about: 'Create a room or join by code' },
-    { id: 'room', name: 'Lobby: room', about: 'Room code, players, ready' },
+    { id: 'lobby', name: 'Lobby: join', about: 'Create a room or join by code, or go Back' },
+    { id: 'room', name: 'Lobby: room', about: 'Room code (tap Copy), players, ready' },
+    { id: 'roomauto', name: 'Lobby: no Ready', about: 'The game readies players itself; player colours' },
     { id: 'reconnecting', name: 'Reconnecting', about: 'Over the HUD, with a spinner' },
     { id: 'failed', name: 'Can’t connect', about: 'Try again or quit' },
     { id: 'seats', name: 'Seat picker', about: 'Join a game in progress: take over a seat' },

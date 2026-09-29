@@ -1,8 +1,11 @@
-// Lobby: Join waits for a whole code; Start waits for enough players who are all ready.
+// Lobby: Join waits for a whole code; Start waits for enough players who are all ready
+// (unless the game has no onReady: then there's no Ready button and nobody waits for it);
+// Copy puts the code on the clipboard, or selects it where there's no clipboard; Back shows only when passed.
 // SeatPicker: a tap on a seat picks it; waiting swaps the list for Joining… + Cancel; no seats → the empty message.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Lobby, SeatPicker } from './online'
+import { copyText, Lobby, SeatPicker } from './online'
+import { toasts } from './dialogs'
 
 afterEach(cleanup)
 const noop = () => {}
@@ -33,6 +36,65 @@ describe('Lobby', () => {
     expect(screen.queryByRole('button', { name: 'Start game' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'I’m ready' }))
     expect(onReady).toHaveBeenCalledWith(true)
+  })
+
+  it('without onReady: no Ready button or badges, and Start doesn’t wait for ready', () => {
+    const players = [{ id: 'h', name: 'Host' }, { id: 'b', name: 'Bo' }]
+    const noReady = { onCreate: noop, onStart: noop, onLeave: noop } // no onReady
+    const { rerender } = render(<Lobby {...noReady} onJoin={noop} roomCode="ABCD" meId="h" hostId="h" players={players} />)
+    expect(screen.getByRole('button', { name: 'Start game' })).toHaveProperty('disabled', false)
+    expect(screen.queryByText('Not ready')).toBeNull()
+    rerender(<Lobby {...noReady} onJoin={noop} roomCode="ABCD" meId="b" hostId="h" players={players} />)
+    expect(screen.queryByRole('button', { name: 'I’m ready' })).toBeNull()
+    expect(screen.getByText('Waiting for the host to start…')).toBeTruthy()
+  })
+
+  it('Back on the create / join card only when onBack is passed', () => {
+    const onBack = vi.fn()
+    const { rerender } = render(<Lobby {...calls} onJoin={noop} />)
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    rerender(<Lobby {...calls} onJoin={noop} onBack={onBack} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(onBack).toHaveBeenCalled()
+  })
+
+  it('Copy puts the room code on the clipboard and says so', async () => {
+    const writeText = vi.fn(() => Promise.resolve())
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } })
+    render(<Lobby {...calls} onJoin={noop} roomCode="QX2T" meId="h" hostId="h" players={[{ id: 'h', name: 'Host' }]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }))
+    await vi.waitFor(() => expect(toasts.current.some((t) => t.text === 'Code copied!')).toBe(true))
+    expect(writeText).toHaveBeenCalledWith('QX2T')
+    vi.unstubAllGlobals()
+  })
+})
+
+describe('copyText', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('with no Clipboard API it selects the text instead, and doesn’t throw', async () => {
+    vi.stubGlobal('navigator', { ...navigator, clipboard: undefined })
+    const box = document.createElement('span')
+    box.textContent = 'QX2T'
+    document.body.append(box)
+    await expect(copyText('QX2T', box)).resolves.toBeTypeOf('boolean')
+    expect(window.getSelection()?.toString()).toBe('QX2T')
+    box.remove()
+  })
+
+  it('when the clipboard refuses, it falls back to selecting too', async () => {
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText: () => Promise.reject(new Error('denied')) } })
+    const box = document.createElement('span')
+    box.textContent = 'ABCD'
+    document.body.append(box)
+    await copyText('ABCD', box)
+    expect(window.getSelection()?.toString()).toBe('ABCD')
+    box.remove()
+  })
+
+  it('nothing to select and no clipboard: just false', async () => {
+    vi.stubGlobal('navigator', { ...navigator, clipboard: undefined })
+    await expect(copyText('ABCD', null)).resolves.toBe(false)
   })
 })
 
