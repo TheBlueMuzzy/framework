@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: next milestone not set (/define) — v0.1 prototype released 2026-09-28
+Release target: prototype — v0.2 musts 0/4 done
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -24,6 +24,20 @@ flowchart LR
   F04 --> F06[✅ F06 game-ui skill]
   F05 --> F06
   F06 --> F07[✅ F07 Try it on a game]
+```
+
+## v0.2 — Dev Kit module + kit pass  ← current
+Goal: every web game gets the in-game Dev Kit (` key) from the framework, and the UI kit closes the gaps Roll Better found.
+- 🔨 F08 🧱 Dev Kit module (`devkit/`: panel, Save/Copy for Claude, release switch, colour tab, game-tab API, installer, release check) — must:prototype · sprint 4
+  why: every game gets the same tuning tools on day one → taste calls happen by eye in the game, not by description
+- ⏳ F09 🔧 Roll Better on the framework Dev Kit (table felt becomes its game tab) — must:prototype · needs: F08 · sprint 4
+- ⏳ F10 ✨ Kit pass 0.2: MainMenu item list, Results dim, toast placement, Bar width, PlayerChip xs, pinned-part scale helper, check-ui scans game CSS — must:prototype · sprint 4
+- ⏳ F11 🔧 Roll Better on kit 0.2 (remove its stitches) — must:prototype · needs: F10 · sprint 4
+
+```mermaid
+flowchart LR
+  F08[🔨 F08 Dev Kit module] --> F09[⏳ F09 Roll Better Dev Kit]
+  F10[⏳ F10 Kit pass 0.2] --> F11[⏳ F11 Roll Better kit 0.2]
 ```
 
 ## Later
