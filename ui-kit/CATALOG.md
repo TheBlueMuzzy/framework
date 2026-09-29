@@ -25,8 +25,9 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
     // screen pixels per world unit at this point: project it and a point one unit to its right
     a.set(...position).project(camera); b.set(position[0] + 1, position[1], position[2]).project(camera)
     const pixelsPerUnit = (Math.abs(b.x - a.x) * size.width) / 2
-    return <Html position={position} zIndexRange={[5, 0]} pointerEvents="none"><PinnedBox pixelsPerUnit={pixelsPerUnit} {...box} /></Html>
+    return <Html position={position} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}><PinnedBox pixelsPerUnit={pixelsPerUnit} {...box} /></Html>
   }
+  // style pointerEvents none, NOT the pointerEvents prop — that prop only works in drei's transform mode; without it the label's invisible box eats taps on the 3D scene under it (Roll Better 2026-09-29)
   // use: <Pinned position={[-4, 0, -3.75]} fit={[2.95, 1.15]} rem={0.34} name="me"><PlayerChip size="xs" … /></Pinned>
   ```
 - **Game box** (letterboxed games, with `ScreenStack overlay`): set `--kit-frame-w` / `--kit-frame-h` and overlay screens sit on the game picture (centred) instead of the whole window, so corner slots (version, HUD) never land in the black bars; the dim still covers the whole window. Unset = 100% (fills the window, as before). A 16:9 game: `:root { --kit-frame-w: min(100vw, calc(100dvh * 16 / 9)); --kit-frame-h: min(100dvh, calc(100vw * 9 / 16)); }`
