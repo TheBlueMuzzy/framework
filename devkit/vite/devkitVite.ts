@@ -71,6 +71,10 @@ export function devkit(): Plugin {
     },
     // 2. The Save endpoint (configureServer only runs for the dev server)
     configureServer(server) {
+      // "null" or junk in the Origin header → no host, so the request is refused instead of crashing
+      const originHost = (origin: string) => {
+        try { return new URL(origin).host } catch { return '' }
+      }
       server.middlewares.use(SAVE_URL, (req, res) => {
         const reply = (status: number, body: object) => {
           res.statusCode = status
@@ -82,14 +86,15 @@ export function devkit(): Plugin {
         // could otherwise POST here. A same-page fetch sends Origin = this server; JSON forces that check.
         const origin = req.headers.origin
         const host = req.headers.host
-        if (!origin || !host || new URL(origin).host !== host) return reply(403, { error: 'Save only from the game page' })
+        if (!origin || !host || originHost(origin) !== host) return reply(403, { error: 'Save only from the game page' })
         if (!String(req.headers['content-type'] ?? '').startsWith('application/json')) return reply(415, { error: 'JSON only' })
 
-        let raw = ''
-        req.on('data', (chunk) => (raw += chunk))
+        const chunks: Buffer[] = []
+        req.on('data', (chunk: Buffer) => chunks.push(chunk))
         req.on('end', () => {
           try {
-            const { path, data } = JSON.parse(raw)
+            // Join the raw bytes first, so a character split across two chunks (like "—") stays whole
+            const { path, data } = JSON.parse(Buffer.concat(chunks).toString('utf8'))
             if (!isAllowedContentPath(path)) return reply(400, { error: `Not allowed: only .json files inside content/ (got ${path})` })
             if (typeof data !== 'object' || data === null || Array.isArray(data)) return reply(400, { error: 'data must be a JSON object' })
 
