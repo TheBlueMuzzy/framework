@@ -43,9 +43,17 @@ export function keepHelp(existing: unknown, incoming: Record<string, unknown>): 
   return { _help: help, ...incoming }
 }
 
-/** How every Dev Kit file is written: 2-space JSON + a newline at the end (like a hand-edited file). */
+// A list of plain numbers / true / false / null that JSON.stringify spread over lines. It must start with
+// "[" + a line break, which never happens inside a text value (there a line break is written as \n).
+const SHORT_LIST = /\[\n\s*((?:[-\d.eE+]+|true|false|null)(?:,\n\s*(?:[-\d.eE+]+|true|false|null))*)\n\s*\]/g
+
+/**
+ * How every Dev Kit file is written: 2-space JSON + a newline at the end (like a hand-edited file).
+ * Lists of plain numbers / true / false stay on one line — [8, 6, 4, 2, 1] — the way people write them.
+ */
 export function formatJson(data: unknown): string {
-  return JSON.stringify(data, null, 2) + '\n'
+  const pretty = JSON.stringify(data, null, 2)
+  return pretty.replace(SHORT_LIST, (_, items: string) => `[${items.split(/,\s*/).join(', ')}]`) + '\n'
 }
 
 // Same file, same key — whatever slashes or drive-letter case the path came with (Windows)

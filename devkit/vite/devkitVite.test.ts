@@ -54,6 +54,12 @@ describe('formatJson', () => {
   it('is 2-space pretty JSON with a trailing newline', () => {
     expect(formatJson({ preset: 'cartoon', tweaks: {} })).toBe('{\n  "preset": "cartoon",\n  "tweaks": {}\n}\n')
   })
+  it('keeps lists of numbers on one line, but not lists of text or objects', () => {
+    expect(formatJson({ points: [8, 6, -4.5, 1e-7], on: [true, false] })).toBe('{\n  "points": [8, 6, -4.5, 1e-7],\n  "on": [true, false]\n}\n')
+    expect(formatJson({ names: ['a', 'b'] })).toBe('{\n  "names": [\n    "a",\n    "b"\n  ]\n}\n')
+    expect(formatJson({ rows: [{ a: 1 }], empty: [] })).toBe('{\n  "rows": [\n    {\n      "a": 1\n    }\n  ],\n  "empty": []\n}\n')
+    expect(formatJson({ tip: 'a [1,2] in text' })).toBe('{\n  "tip": "a [1,2] in text"\n}\n')
+  })
 })
 
 describe('devkitInReleaseBuilds — the release-build switch', () => {

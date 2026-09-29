@@ -55,8 +55,8 @@ describe('slider ranges', () => {
     expect(sliderRange(2.5, 'm')).toEqual({ min: 0, max: 5, step: 0.01 })
     expect(sliderRange(0.4, 'dice.bounce', { other: [0, 9, 1] }).max).toBe(0.8)
   })
-  it('negatives go −value → +value', () => {
-    expect(sliderRange(-3.5, 'm')).toEqual({ min: -3.5, max: 3.5, step: 0.01 })
+  it('negatives go twice the value → its opposite (never pinned at the end)', () => {
+    expect(sliderRange(-3.5, 'm')).toEqual({ min: -7, max: 3.5, step: 0.1 })
     expect(sliderRange(-20, 'm')).toEqual({ min: -40, max: 40, step: 1 })
   })
   it('whole numbers step by 1 and get at least 0–10', () => {

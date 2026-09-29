@@ -55,7 +55,8 @@ export const nameOf = (path: string) => path.split('.').pop()!
  * The slider's range for a number.
  *   1. The file's own "_ranges": { "dice.bounce": [0, 1, 0.05] } = min, max, step — use this when the auto
  *      range is wrong (e.g. a multiplier of 1 that should go up to 5).
- *   2. Otherwise from the value as it was loaded: 0 → twice the value (negatives: −value → +value).
+ *   2. Otherwise from the value as it was loaded: 0 → twice the value (negatives: twice the value → its opposite,
+ *      e.g. −3 → −6…3, so the value never starts pinned at the slider's end).
  *      Whole numbers step by 1 and always get at least 0–10; decimals get about 100–1000 steps.
  */
 export function sliderRange(value: number, path: string, ranges?: unknown): Range {
@@ -69,7 +70,7 @@ export function sliderRange(value: number, path: string, ranges?: unknown): Rang
     const reach = Math.max(size * 2, 10)
     return { min: value < 0 ? -reach : 0, max: reach, step: 1 }
   }
-  if (value < 0) return { min: -size, max: size, step: autoStep(size * 2) }
+  if (value < 0) return { min: -size * 2, max: size, step: autoStep(size * 3) } // room to grow, and to cross 0
   return { min: 0, max: size * 2, step: autoStep(size * 2) }
 }
 
