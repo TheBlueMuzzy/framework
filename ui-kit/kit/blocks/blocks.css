@@ -82,12 +82,14 @@
     .kit-results > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-results > .kit-row:last-child { align-self: end; justify-content: start; }
   }
-  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right in
-     two columns with the main one(s) across both, so five or six buttons still fit */
+  /* Main menu: extra buttons (children) sit in the button column like the others */
+  .kit-main-menu-extra { display: contents; }
+  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right.
+     With six or more buttons they go in two columns (main one(s) and extra buttons across both), so they still fit. */
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; inline-size: 46rem; }
-    .kit-main-menu-buttons { display: grid; grid-template-columns: 1fr 1fr; }
-    .kit-main-menu-buttons > .kit-button[data-variant="primary"] { grid-column: 1 / -1; }
+    .kit-main-menu-buttons:has(> .kit-button:nth-child(6)) { display: grid; grid-template-columns: 1fr 1fr; }
+    .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   .kit-end-title { display: inline-block; }
   .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }

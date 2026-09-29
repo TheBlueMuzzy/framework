@@ -36,7 +36,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Screen | Export | Link | What it's for |
 |---|---|---|---|
 | **Front end** | | | |
-| Main menu | `MainMenu` | `?screen=menu` | Title + big buttons. `items={[{ label: 'Play', onClick: play }, { label: 'Play online', onClick: online }]}` = your own order (first = primary, or mark `primary: true`). Phone on its side: title on the left, buttons in two columns (main one across both). Or the named `onContinue` / `onPlay` / `onSettings` / `onHowToPlay` / `onCredits` / `onQuit` (fixed order; ignored when `items` is given). `children` = extra buttons below |
+| Main menu | `MainMenu` | `?screen=menu` | Title + big buttons. `items={[{ label: 'Play', onClick: play }, { label: 'Play online', onClick: online }]}` = your own order (first = primary, or mark `primary: true`). Phone on its side: title on the left, buttons on the right (6+ buttons: two columns, main one and `children` across both). Or the named `onContinue` / `onPlay` / `onSettings` / `onHowToPlay` / `onCredits` / `onQuit` (fixed order; ignored when `items` is given). `children` = extra buttons below |
 | Mode select | `ModeSelect` | `?screen=modes` | A card per mode, then Start |
 | How to play | `HowToPlay` | `?screen=howto` | Pages to flip, with page dots |
 | Credits | `Credits` | `?screen=credits` | People, then every asset from `content/credits.json` |

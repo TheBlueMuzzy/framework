@@ -42,7 +42,7 @@ export function MainMenu({ title, subtitle, version, children, items, words, ...
           {buttons.map((item, i) => (
             <Button key={`${i}-${item.label}`} variant={isPrimary(item, i) ? 'primary' : 'secondary'} onClick={item.onClick}>{item.label}</Button>
           ))}
-          {children}
+          {children && <div className="kit-main-menu-extra">{children}</div>}
         </Stack>
       </Stack>
     </Screen>
