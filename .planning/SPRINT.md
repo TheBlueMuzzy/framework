@@ -8,14 +8,14 @@ Done when: `framework/devkit/` holds the generic Dev Kit + an installer; a game 
 - [x] 🤖 2. Game-tab API: games register extra tabs (id, label, Panel) — no editing kit files
 - [x] 🤖 3. Installer `devkit/scripts/install-devkit.mjs` (--dry-run, VERSION stamp, removes dropped files, creates content/devkit.json if missing, prints wiring steps) + tests
 - [x] 🤖 4. Generic release check (`check-devkit.mjs`, game URL/port from args, not hardcoded)
-- [ ] 🤖 5. README catalog row, DEVKIT.md + skills point at the module; new web games get it at setup
+- [x] 🤖 5. README catalog row, DEVKIT.md + skills point at the module; new web games get it at setup
 Check: `npm test` in devkit/ + installer dry-run on a scratch copy of Roll Better
 
 ## F09 🔧 Roll Better on the framework Dev Kit
 Done when: Roll Better's Dev Kit is the installed module, table felt is a game tab, ` works exactly as before.
-- [ ] 🤖 1. Run the installer into Roll Better (dry-run first)
-- [ ] 🤖 2. Table felt → `src/devkit-game/` game tab; delete the old copies
-- [ ] 🤖 3. Prove: npm test, build, check:devkit, Playwright screenshot of the open panel
+- [x] 🤖 1. Run the installer into Roll Better (dry-run first)
+- [x] 🤖 2. Table felt → `src/devkit-game/` game tab; delete the old copies
+- [x] 🤖 3. Prove: npm test, build, check:devkit, Playwright screenshot of the open panel
 Check: screenshot + check:devkit green
 
 ## F10 ✨ Kit pass 0.2
@@ -40,3 +40,4 @@ Notes:
 - Decision: one Vite helper `devkit()` does the devkit.json switch (define) + Save endpoint → vite.config needs 2 lines. Color tab finds the UI kit via `import.meta.glob`; no UI kit → only the colour-blind preview. Release check reads the web path from `dist/index.html` (`--port`, default 5198, and `--base` override).
 - Proof on a scratch copy of Roll Better: dry-run listed the hand-made files it replaces + 4 old files to delete; real install + wiring (delete old files, vite.config 2 lines, check:devkit script) + table felt moved to `src/devkit-game/TableTab.tsx` → tsc -b clean, eslint clean, 76 tests pass, build OK, `npm run check:devkit` PASS both ways, dev server: tabs Color + Table, Table Save wrote table.json keeping `_help`. F09 = do the same in the real repo.
 - Task 5: README row, devkit/README.md, DEVKIT.md, sprint + develop skills updated (the skills' lines: new web game scaffold → install-devkit; /develop VERSION check).
+- F09 (2026-09-29, Roll Better `dev/v1.6`, commits e6ef373 + c9b3106): installed kit 0.1.0 over the hand-made copy (dry-run first), deleted the 4 old files, vite.config → `devkit()`, check:devkit → `src/devkit/check-devkit.mjs`. Table felt = game tab `src/devkit-game/TableTab.tsx` (+ `tableLogic.ts` + test; `tableColors.ts` + Scene subscription unchanged). TDD §1/§3 Dev Kit rows updated. Proof: tsc -b clean, eslint clean on Dev Kit files, 78 tests pass, build OK, check:devkit PASS both ways, dev-server screenshots of Color + Table tabs mid-game (Rows felt → #aa3333 repainted the 3D table live; undone, nothing saved).
