@@ -22,6 +22,7 @@ export const menu: MenuGroup[] = [
   { title: 'In game / HUD', entries: [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },
     { id: 'chips', name: 'Player chips', about: 'Beside each row: score counts up, dim, a goal chip' },
+    { id: 'pinned', name: 'Pinned to the table', about: 'PinnedBox: xs chips beside rows, sized with the table' },
     { id: 'pause', name: 'Pause', about: 'Over the HUD; Quit asks first' },
   ] },
   { title: 'Flow', entries: [

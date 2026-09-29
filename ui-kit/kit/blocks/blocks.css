@@ -97,6 +97,15 @@
   .kit-player-chip[data-size="xs"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 1.5rem; block-size: 1.5rem; font-size: calc(var(--text-body) * 0.7); }
   .kit-player-chip[data-size="xs"] .kit-badge { line-height: 1.2; }
 
+  /* PinnedBox: a piece stuck to a point in the game world. Scaled first (--kit-pin-scale, set by PinnedBox to fit
+     its box on the table), then shifted so the point lands on its right-middle / middle / left-middle.
+     Hidden until its first measure. Never catches taps (the game underneath gets them). */
+  .kit-pinned { inline-size: max-content; transform-origin: 0 0; transform: scale(var(--kit-pin-scale, 1)) translate(-100%, -50%); visibility: hidden; }
+  .kit-pinned[data-anchor="center"] { transform: scale(var(--kit-pin-scale, 1)) translate(-50%, -50%); }
+  .kit-pinned[data-anchor="left"] { transform: scale(var(--kit-pin-scale, 1)) translate(0, -50%); }
+  .kit-pinned[data-ready] { visibility: visible; }
+  .kit-pinned, .kit-pinned * { pointer-events: none; }
+
   /* Toasts: a popover, centred sideways, newest at the bottom. data-place: top (default), center or bottom.
      In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars. */
   .kit-toasts { --kit-letterbox-h: calc((100dvh - var(--kit-frame-h, 100dvh)) / 2);

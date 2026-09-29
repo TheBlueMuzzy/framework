@@ -11,6 +11,23 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 - **Controls:** `Button` (primary / secondary / ghost / danger, + `icon` — square, ≥ 44px, glyph at title size, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` (+ `color`; initials in the body font, semibold) · `ProgressBar` · `ScrollArea` · `Text`.
 - **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })` · `copyText(text, shownElement)` (clipboard, or selects the text where there's none) · `reduceMotion()` / `useCountUp(n)` (numbers that roll up, off with reduce motion).
 - **`kit-scope`:** wrap kit parts shown outside a Screen — e.g. pinned to a 3D point — in `<div className="kit-scope">`: they get the style's fonts, colours, text size and focus ring, but no layout, background or positioning (and taps are left as they were).
+- **Pinned** (`?screen=pinned`) — kit parts stuck to a point in the game world (a chip beside a row on a 3D table). Kit parts are sized in rem, but a pinned piece must scale WITH the table. `PinnedBox` does the sizing and knows nothing about 3D; a tiny adapter in the game (the only file that imports three / R3F) puts it at the point and passes `pixelsPerUnit` (screen pixels one world unit takes up there). Props: `fit={[w, h]}` (world units: fit that box, tighter side wins) · `rem` (world units per rem: every piece with the same rem is the same size; `fit` still shrinks one that would spill) · `anchor` `right` (default: its right-middle on the point) / `center` / `left` · `name` (→ `data-pin`). Hidden until measured, wears `kit-scope`, never catches taps. Also exported: `pinScale()` (the maths). **Layers:** pinned pieces go above the game canvas but below the HUD and kit screens — e.g. drei `zIndexRange={[5, 0]}`, the game's HUD at z-index 10, `ScreenStack overlay` at `--kit-overlay-z` (default 100).
+  ```tsx
+  // src/components/Pinned.tsx — the game's R3F adapter (the kit never imports three)
+  import { Html } from '@react-three/drei'
+  import { useThree } from '@react-three/fiber'
+  import { Vector3 } from 'three'
+  import { PinnedBox, type PinnedBoxProps } from '../ui/kit'
+  const a = new Vector3(), b = new Vector3()
+  export function Pinned({ position, ...box }: Omit<PinnedBoxProps, 'pixelsPerUnit'> & { position: [number, number, number] }) {
+    const camera = useThree((s) => s.camera), size = useThree((s) => s.size) // re-measures when the window resizes
+    // screen pixels per world unit at this point: project it and a point one unit to its right
+    a.set(...position).project(camera); b.set(position[0] + 1, position[1], position[2]).project(camera)
+    const pixelsPerUnit = (Math.abs(b.x - a.x) * size.width) / 2
+    return <Html position={position} zIndexRange={[5, 0]} pointerEvents="none"><PinnedBox pixelsPerUnit={pixelsPerUnit} {...box} /></Html>
+  }
+  // use: <Pinned position={[-4, 0, -3.75]} fit={[2.95, 1.15]} rem={0.34} name="me"><PlayerChip size="xs" … /></Pinned>
+  ```
 - **Game box** (letterboxed games, with `ScreenStack overlay`): set `--kit-frame-w` / `--kit-frame-h` and overlay screens sit on the game picture (centred) instead of the whole window, so corner slots (version, HUD) never land in the black bars; the dim still covers the whole window. Unset = 100% (fills the window, as before). A 16:9 game: `:root { --kit-frame-w: min(100vw, calc(100dvh * 16 / 9)); --kit-frame-h: min(100dvh, calc(100vw * 9 / 16)); }`
 
 ## Built

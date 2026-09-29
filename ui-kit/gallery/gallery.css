@@ -20,5 +20,14 @@
   .gallery-menu { align-items: start; } /* each group panel only as tall as its rows */
   /* Stand-in for a 3D library's own div: nothing from the page reaches inside (kit-scope brings the style back) */
   .gallery-outside { all: initial; display: block; }
+  /* Stand-in 3D table for PinnedBox: 12 units wide (1 unit = 100cqi / 12), rows 1.25 units apart, dice 0.9 units.
+     Sized to fit the stage both ways. The chips' points sit 3.5 units in, just left of each row's first die. */
+  .gallery-table { container-type: inline-size; inline-size: min(56rem, 90vw, calc((100dvh - 9rem) * 12 / 6.5));
+    border: var(--border-width) dashed var(--on-game); border-radius: var(--radius-panel); }
+  .gallery-table-row { display: flex; align-items: center; gap: calc(100cqi / 12 * 0.15); block-size: calc(100cqi / 12 * 1.25);
+    padding-inline-start: calc(100cqi / 12 * 3.5); }
+  .gallery-table-point { flex: none; inline-size: 0; block-size: 0; margin-inline-end: calc(100cqi / 12 * 0.2); }
+  .gallery-die { flex: none; inline-size: calc(100cqi / 12 * 0.9); aspect-ratio: 1; border-radius: var(--radius-control);
+    background: var(--surface); outline: var(--border-width) solid var(--ink); }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
 }

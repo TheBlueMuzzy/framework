@@ -2,12 +2,12 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { createContext, useContext, useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
-  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
+  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
   TimerRing, toast, Tooltip, TurnBanner, Victory, type ToastPlace,
 } from '../kit'
@@ -124,6 +124,41 @@ function PlayerChips() {
   )
 }
 
+// PINNED — kit pieces stuck to points on a stand-in table (a Goal row, then a row per player), sized WITH the
+// table: make the window smaller and the chips shrink with the dice. The table is 12 units wide; a game's own
+// adapter (CATALOG.md → Pinned) works out pixelsPerUnit from its camera, here it's just the table's width / 12.
+// Each chip's right-middle sits on a point just left of its row's first die (anchor="right").
+const TABLE_UNITS = 12
+function PinnedTable() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
+  const table = useRef<HTMLDivElement>(null)
+  const [pixelsPerUnit, setPixelsPerUnit] = useState(0)
+  useEffect(() => {
+    const measure = () => setPixelsPerUnit((table.current?.offsetWidth ?? 0) / TABLE_UNITS)
+    const watcher = new ResizeObserver(measure)
+    if (table.current) watcher.observe(table.current)
+    return () => watcher.disconnect()
+  }, [])
+  const players = [{ id: 'me', name: 'Muzzy', color: seats[3].color }, ...seats.slice(0, 3).map((s) => ({ ...s, badge: 'Bot' }))]
+  const pin = { pixelsPerUnit, fit: [3.3, 1] as [number, number], rem: 0.3 }
+  const row = (key: string, piece: ReactNode) => (
+    <div key={key} className="gallery-table-row">
+      <span className="gallery-table-point">{pixelsPerUnit > 0 && <PinnedBox {...pin} name={key}>{piece}</PinnedBox>}</span>
+      {Array.from({ length: 6 }, (_, i) => <span key={i} className="gallery-die" />)}
+    </div>
+  )
+  return (
+    <Screen label="Pinned to the table" top={<HudText size="s">Chips grow and shrink with the table</HudText>}>
+      <div ref={table} className="gallery-table">
+        {row('goal', <PlayerChip name="Goal" avatar={false} showName={false} size="xs" score={12 + (tick % 3) * 4} />)}
+        {players.map((p, i) => row(p.id, <PlayerChip name={p.name} showName={false} color={p.color} badge={'badge' in p ? p.badge : undefined}
+          size="xs" detail={`S${1 + ((tick + i) % 3)} · T${3 + i}`} score={4 * i + tick} active={i === 0} />))}
+      </div>
+    </Screen>
+  )
+}
+
 // Counts down, says Go!, then starts again
 function CountdownSample() {
   const [run, setRun] = useState(0)
@@ -185,6 +220,7 @@ const samples: Record<string, ComponentType> = {
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
   hud: HudSample,
   chips: PlayerChips,
+  pinned: PinnedTable,
   pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
@@ -222,7 +258,7 @@ const openers: Record<string, () => void> = {
   endgamedim: () => { screens.push('hud'); screens.push('endgamedim') },
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
-const darkScreens = ['hud', 'chips']
+const darkScreens = ['hud', 'chips', 'pinned']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──
