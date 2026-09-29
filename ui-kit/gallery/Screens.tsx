@@ -97,7 +97,7 @@ function HudSample() {
 // sits in a box that cuts off everything the page passes down (like a 3D library's own div would),
 // wrapped in kit-scope, which brings the style's font and colours back. Every 1.5 s the turn moves
 // on, the player whose turn it was scores (counting up), and Bolt dims as if a die rolls over it.
-// Below them: a goal chip (an icon instead of an avatar), a small chip, and a bare score chip.
+// Below them: a goal chip (an icon instead of an avatar), a small chip, an xs chip (all on one line), and a bare score chip.
 // They sit on a dark stand-in game, with plain HudText ("Round 1") and a settings icon button above.
 function PlayerChips() {
   const [tick, setTick] = useState(0)
@@ -115,6 +115,7 @@ function PlayerChips() {
               score={score(i)} detail={`S${1 + (tick % 3)} · T${1 + i}`} active={tick % players.length === i} dim={i === 2 && tick % 2 === 1} />))}
             {pinned('goal', <PlayerChip name="Goal" icon="◎" score={30} detail="If you lock it now" />)}
             {pinned('small', <PlayerChip name="Pip" color={seats[2].color} size="s" score={score(3)} />)}
+            {pinned('xs', <PlayerChip name="Bolt" color={seats[1].color} size="xs" badge="Bot" detail={`S${1 + (tick % 3)} · T5`} score={score(2)} />)}
             {pinned('bare', <PlayerChip name="Goal" avatar={false} showName={false} size="s" score={12} />)}
           </Grid>
         </ScrollArea>

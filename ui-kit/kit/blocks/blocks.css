@@ -92,6 +92,10 @@
   .kit-player-chip-icon { display: inline-grid; place-items: center; inline-size: var(--target-min); block-size: var(--target-min); font-size: var(--text-heading); }
   .kit-player-chip[data-size="s"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 2rem; block-size: 2rem; }
   .kit-player-chip[data-size="s"] .kit-player-chip-icon { font-size: var(--text-body); }
+  /* xs: one line, as short as the text — a smaller avatar (smaller initials, which are only a picture: the name is read out)
+     and a badge no taller than the words beside it */
+  .kit-player-chip[data-size="xs"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 1.5rem; block-size: 1.5rem; font-size: calc(var(--text-body) * 0.7); }
+  .kit-player-chip[data-size="xs"] .kit-badge { line-height: 1.2; }
 
   /* Toasts: a popover, centred sideways, newest at the bottom. data-place: top (default), center or bottom.
      In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars. */

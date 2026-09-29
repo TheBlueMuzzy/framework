@@ -94,3 +94,22 @@ describe('Bar width', () => {
     expect(chip()?.getAttribute('data-width')).toBe('s')
   })
 })
+
+describe('PlayerChip xs', () => {
+  it('xs puts name, badge and detail on one line; other sizes keep the detail below', () => {
+    const lines = (size: 'xs' | 's') => {
+      const { container, unmount } = render(<PlayerChip name="Bolt" badge="Bot" detail="S2 · T5" size={size} />)
+      const text = container.querySelector('.kit-player-chip-text')!
+      const result = [...text.children].map((line) => line.textContent)
+      unmount()
+      return result
+    }
+    expect(lines('xs')).toEqual(['BoltBotS2 · T5'])
+    expect(lines('s')).toEqual(['BoltBot', 'S2 · T5'])
+  })
+
+  it('no empty name line when only the detail shows (no stray gap above it)', () => {
+    const { container } = render(<PlayerChip name="Sam" showName={false} detail="S2 · T5" size="s" />)
+    expect([...container.querySelector('.kit-player-chip-text')!.children].map((line) => line.textContent)).toEqual(['S2 · T5'])
+  })
+})
