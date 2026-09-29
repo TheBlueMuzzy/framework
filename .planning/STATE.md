@@ -1,11 +1,11 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Released v0.1.0 — the Game UI kit (kit 0.1.5): 5 styles, ~36 screens, the `game-ui` skill, proven on Roll Better settings. Nothing to host: games copy the kit with `ui-kit/scripts/install-kit.mjs`.
-Next: the rest of Roll Better's UI on the kit (Roll Better ROADMAP → Ideas), which will add game-box mode, seat-claim list and 3D-pinned labels here. Or `/roadmap` for the next framework module.
+Sprint 04 built (autonomous, 2026-09-29), waiting for Muzzy's OK: **Dev Kit is now a framework module** (`devkit/` 0.1.1 + `install-devkit.mjs`, game tabs via `src/devkit-game/tabs.ts`) and **UI kit 0.2.2** (MainMenu items, Results dim, ToastStack place + side room, Bar width, PlayerChip xs, PinnedBox, check-ui --css, landscape menu). Both installed into Roll Better on its `dev/v1.6` branch; all checks + e2e green; two code reviews found no bugs.
+Next: Muzzy tries Roll Better (`/play` on dev/v1.6) → "approved" → F08–F11 ✅, archive Sprint 04, then `/deliver` framework v0.2.0.
 
 ## Where we are
-Stage: deliver   Milestone: v0.1 — Game UI kit   Sprint: none (03 done)
+Stage: develop   Milestone: v0.2 — Dev Kit module + kit pass   Sprint: 04 (built, awaiting OK)
 Doing: —   Branch: main   Version: 0.1.0
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.1.0
 
@@ -21,8 +21,10 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
+- Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-09-29 — Sprint 04 built autonomously: F08 Dev Kit module, F09 Roll Better on it, F10 kit 0.2 (7 gaps), F11 Roll Better on kit 0.2.2 (+2 gaps found in the move). Reviews clean; 2 small save-endpoint hardenings (Dev Kit 0.1.1).
 - 2026-09-28 — Pre-release reviews: security (1 low fixed: installer never deletes outside src/ui/kit) + code review (6 bugs fixed: replace focus, per-game settings slot, React 18 inert, room-code clearing, confirm cancel, Esc with tooltip); shoot now flags clipped controls. Kit 0.1.5, 115 tests.
 - 2026-09-28 — Sprint 03 done: F06 game-ui skill (+ catalog, install-kit, shipped checker, pick sheet, BMUZ wiring); F07 Roll Better Settings rebuilt in Cartoon (408 hand-made lines gone), kit 0.1.0 → 0.1.3 from the try-out. Muzzy approved.
 - 2026-09-28 — Sprint 02 done: F04 built screens (~36, blocks 959 lines), F05 gallery menu + 116 screenshots; Pixel body font → VT323; focus rings keyboard-only. Muzzy approved.

@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: prototype — v0.2 musts 0/4 done
+Release target: prototype — v0.2 musts 4/4 built, waiting for Muzzy's OK
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -28,16 +28,16 @@ flowchart LR
 
 ## v0.2 — Dev Kit module + kit pass  ← current
 Goal: every web game gets the in-game Dev Kit (` key) from the framework, and the UI kit closes the gaps Roll Better found.
-- 🔨 F08 🧱 Dev Kit module (`devkit/`: panel, Save/Copy for Claude, release switch, colour tab, game-tab API, installer, release check) — must:prototype · sprint 4
+- 🎛️ F08 🧱 Dev Kit module (`devkit/`: panel, Save/Copy for Claude, release switch, colour tab, game-tab API, installer, release check) — must:prototype · sprint 4
   why: every game gets the same tuning tools on day one → taste calls happen by eye in the game, not by description
-- ⏳ F09 🔧 Roll Better on the framework Dev Kit (table felt becomes its game tab) — must:prototype · needs: F08 · sprint 4
-- ⏳ F10 ✨ Kit pass 0.2: MainMenu item list, Results dim, toast placement, Bar width, PlayerChip xs, pinned-part scale helper, check-ui scans game CSS — must:prototype · sprint 4
-- ⏳ F11 🔧 Roll Better on kit 0.2 (remove its stitches) — must:prototype · needs: F10 · sprint 4
+- 🎛️ F09 🔧 Roll Better on the framework Dev Kit (table felt becomes its game tab) — must:prototype · needs: F08 · sprint 4
+- 🎛️ F10 ✨ Kit pass 0.2: MainMenu item list, Results dim, toast placement, Bar width, PlayerChip xs, pinned-part scale helper, check-ui scans game CSS — must:prototype · sprint 4
+- 🎛️ F11 🔧 Roll Better on kit 0.2 (remove its stitches) — must:prototype · needs: F10 · sprint 4
 
 ```mermaid
 flowchart LR
-  F08[🔨 F08 Dev Kit module] --> F09[⏳ F09 Roll Better Dev Kit]
-  F10[⏳ F10 Kit pass 0.2] --> F11[⏳ F11 Roll Better kit 0.2]
+  F08[🎛️ F08 Dev Kit module] --> F09[🎛️ F09 Roll Better Dev Kit]
+  F10[🎛️ F10 Kit pass 0.2] --> F11[🎛️ F11 Roll Better kit 0.2]
 ```
 
 ## Later
@@ -50,3 +50,4 @@ flowchart LR
 ## Ideas
 - 2026-09-28 — UI kit nitpicks to fix when a game uses them: Mode select leaves an empty 4th column on desktop · toasts briefly cover the gallery bar · gamepad-only games show the focus ring only after the first key press · does VT323 still feel "Pixel"? · "Accessibility" breaks mid-word in ◀ ▶ at 200%
 - 2026-09-28 — Kit additions expected from a full Roll Better UI pass: "game box" mode (screens/HUD inside a fixed-aspect frame, not the window) · Lobby seat-claim list (rejoin) · kit parts inside drei <Html> labels pinned to 3D
+- 2026-09-29 — Kit review nits: landscape MainMenu counts only items/named buttons toward "6 → two columns" (extra child buttons don't count) · check-ui --css splits on ';' (false warning on data: URLs) · MainMenu `children && …` would render a stray 0
