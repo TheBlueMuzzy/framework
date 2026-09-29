@@ -114,13 +114,18 @@
   .kit-pinned, .kit-pinned * { pointer-events: none; }
 
   /* Toasts: a popover, centred sideways, newest at the bottom. data-place: top (default), center or bottom.
-     In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars. */
+     In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars.
+     --kit-toasts-start / --kit-toasts-end: room to keep clear at the game picture's left / right edge (default none),
+     e.g. a game whose left half is its board: :root { --kit-toasts-start: calc(var(--kit-frame-w, 100vw) / 2); }
+     puts toasts over the right half. (Plain % would be of the window, not the game picture.) */
   .kit-toasts { --kit-letterbox-h: calc((100dvh - var(--kit-frame-h, 100dvh)) / 2);
-    inset: 0 0 auto; margin: calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
+    --kit-letterbox-w: calc((100vw - var(--kit-frame-w, 100vw)) / 2);
+    inset-block: 0 auto; inset-inline: calc(var(--kit-letterbox-w) + var(--kit-toasts-start, 0%)) calc(var(--kit-letterbox-w) + var(--kit-toasts-end, 0%));
+    margin: calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
     overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s);
-    max-inline-size: calc(var(--kit-frame-w, 100vw) - 2 * var(--gap-m)); }
-  .kit-toasts[data-place="center"] { inset: 0; margin: auto; }
-  .kit-toasts[data-place="bottom"] { inset: auto 0 0; margin: 0 auto calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-bottom))); }
+    max-inline-size: calc(var(--kit-frame-w, 100vw) - var(--kit-toasts-start, 0%) - var(--kit-toasts-end, 0%) - 2 * var(--gap-m)); }
+  .kit-toasts[data-place="center"] { inset-block: 0; margin: auto; }
+  .kit-toasts[data-place="bottom"] { inset-block: auto 0; margin: 0 auto calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-bottom))); }
   .kit-toasts:popover-open { display: flex; }
   .kit-toast { padding: var(--gap-s) var(--gap-m); }
   .kit-toast[data-dismissible] { flex-direction: row; align-items: center; padding-block: var(--gap-xs); padding-inline-end: var(--gap-xs); cursor: pointer; }

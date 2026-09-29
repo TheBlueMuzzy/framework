@@ -65,7 +65,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Modal | `Modal` | (inside Confirm) | Any dialog: title, body, action buttons |
 | Confirm | `Confirm` / `askConfirm()` | `?screen=confirm` | "Are you sure?" — destructive yes in danger colour |
 | Reward popup | `RewardPopup` | `?screen=rewards` | A tile per reward, then Collect |
-| Toasts | `toast()` + `ToastStack` | `?screen=feedback` · `?screen=feedback&toasts=bottom` | Short messages, max 3. `<ToastStack place="bottom" />` = where: `top` (default) / `center` / `bottom`, centred sideways; in a game box (`--kit-frame-w/-h`) they stay on the game picture. `toast(text, { dismissible: true })` → tap it (or its ✕ Close) to hide it early |
+| Toasts | `toast()` + `ToastStack` | `?screen=feedback` · `?screen=feedback&toasts=bottom` | Short messages, max 3. `<ToastStack place="bottom" />` = where: `top` (default) / `center` / `bottom`, centred sideways; in a game box (`--kit-frame-w/-h`) they stay on the game picture. Keep one side clear with `--kit-toasts-start` / `--kit-toasts-end` (room at the picture's left / right edge), e.g. over the right half only: `:root { --kit-toasts-start: calc(var(--kit-frame-w, 100vw) / 2); }`. `toast(text, { dismissible: true })` → tap it (or its ✕ Close) to hide it early |
 | Tooltip | `Tooltip` | `?screen=feedback` | ⓘ tap for a hint |
 | Empty state | `EmptyState` | `?screen=feedback` | "Nothing here yet" + one action |
 | Spinner | `Spinner` | `?screen=feedback` | Waiting |
