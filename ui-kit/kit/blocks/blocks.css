@@ -53,6 +53,12 @@
       grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
     }
   }
+  /* Bar width (s / m / l): the bar keeps that length and its plate hugs it. Unset = it fills the room it's given. */
+  .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
+  .kit-hud-chip[data-width] > .kit-progress { flex: none; min-inline-size: 0; inline-size: var(--kit-bar-w); max-inline-size: 100%; }
+  .kit-hud-chip[data-width="s"] { --kit-bar-w: 4rem; }
+  .kit-hud-chip[data-width="m"] { --kit-bar-w: 8rem; }
+  .kit-hud-chip[data-width="l"] { --kit-bar-w: 14rem; }
   .kit-banner { align-items: center; text-align: center; }
   /* +N float-up: stacked on top of its number (same grid cell), so no positioning needed */
   .kit-float-anchor { display: inline-grid; }
@@ -76,6 +82,13 @@
     .kit-results > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-results > .kit-row:last-child { align-self: end; justify-content: start; }
   }
+  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right in
+     two columns with the main one(s) across both, so five or six buttons still fit */
+  @media (max-height: 30rem) and (min-width: 40rem) {
+    .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; inline-size: 46rem; }
+    .kit-main-menu-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+    .kit-main-menu-buttons > .kit-button[data-variant="primary"] { grid-column: 1 / -1; }
+  }
   .kit-end-title { display: inline-block; }
   .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }
 
@@ -86,10 +99,28 @@
   .kit-player-chip-icon { display: inline-grid; place-items: center; inline-size: var(--target-min); block-size: var(--target-min); font-size: var(--text-heading); }
   .kit-player-chip[data-size="s"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 2rem; block-size: 2rem; }
   .kit-player-chip[data-size="s"] .kit-player-chip-icon { font-size: var(--text-body); }
+  /* xs: one line, as short as the text — a smaller avatar (smaller initials, which are only a picture: the name is read out)
+     and a badge no taller than the words beside it */
+  .kit-player-chip[data-size="xs"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 1.5rem; block-size: 1.5rem; font-size: calc(var(--text-body) * 0.7); }
+  .kit-player-chip[data-size="xs"] .kit-badge { line-height: 1.2; }
 
-  /* Toasts: a popover pinned to the top centre, newest at the bottom */
-  .kit-toasts { inset: 0 0 auto; margin: max(var(--gap-m), env(safe-area-inset-top)) auto 0; padding: 0; border: 0; background: none;
-    overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s); max-inline-size: calc(100% - 2 * var(--gap-m)); }
+  /* PinnedBox: a piece stuck to a point in the game world. Scaled first (--kit-pin-scale, set by PinnedBox to fit
+     its box on the table), then shifted so the point lands on its right-middle / middle / left-middle.
+     Hidden until its first measure. Never catches taps (the game underneath gets them). */
+  .kit-pinned { inline-size: max-content; transform-origin: 0 0; transform: scale(var(--kit-pin-scale, 1)) translate(-100%, -50%); visibility: hidden; }
+  .kit-pinned[data-anchor="center"] { transform: scale(var(--kit-pin-scale, 1)) translate(-50%, -50%); }
+  .kit-pinned[data-anchor="left"] { transform: scale(var(--kit-pin-scale, 1)) translate(0, -50%); }
+  .kit-pinned[data-ready] { visibility: visible; }
+  .kit-pinned, .kit-pinned * { pointer-events: none; }
+
+  /* Toasts: a popover, centred sideways, newest at the bottom. data-place: top (default), center or bottom.
+     In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars. */
+  .kit-toasts { --kit-letterbox-h: calc((100dvh - var(--kit-frame-h, 100dvh)) / 2);
+    inset: 0 0 auto; margin: calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
+    overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s);
+    max-inline-size: calc(var(--kit-frame-w, 100vw) - 2 * var(--gap-m)); }
+  .kit-toasts[data-place="center"] { inset: 0; margin: auto; }
+  .kit-toasts[data-place="bottom"] { inset: auto 0 0; margin: 0 auto calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-bottom))); }
   .kit-toasts:popover-open { display: flex; }
   .kit-toast { padding: var(--gap-s) var(--gap-m); }
   .kit-toast[data-dismissible] { flex-direction: row; align-items: center; padding-block: var(--gap-xs); padding-inline-end: var(--gap-xs); cursor: pointer; }

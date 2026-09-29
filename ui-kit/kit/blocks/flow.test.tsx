@@ -52,6 +52,13 @@ describe('Results', () => {
   const delays = (container: HTMLElement) =>
     [...container.querySelectorAll<HTMLElement>('.kit-result-row')].map((row) => row.style.getPropertyValue('--kit-i'))
 
+  it('dim: dims the game behind it like a dialog; off by default', () => {
+    const { container, rerender } = render(<Results players={players} />)
+    expect(container.querySelector('.kit-screen')?.hasAttribute('data-dialog')).toBe(false)
+    rerender(<Results players={players} dim />)
+    expect(container.querySelector('.kit-screen')?.hasAttribute('data-dialog')).toBe(true)
+  })
+
   it('rows arrive one after another', () => {
     const { container } = render(<Results players={players} />)
     expect(delays(container)).toEqual(['0', '1', '2'])

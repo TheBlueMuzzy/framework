@@ -1,6 +1,6 @@
 // Tests for the rule checker itself: it must catch each broken rule and let good code through.
 import { describe, expect, it } from 'vitest'
-import { checkSource } from './check-ui.mjs'
+import { checkSource, findKitRestyles, readArguments } from './check-ui.mjs'
 
 const messages = (path, text) => checkSource(path, text).map((p) => p.message)
 
@@ -46,5 +46,29 @@ describe('check-ui', () => {
   it('works the same on the kit copied into a game (src/ui/kit/)', () => {
     expect(messages('src/ui/kit/style/applyStyle.ts', `const x = '#fff'`)).toEqual([])
     expect(messages('src/ui/Hud.tsx', `const c = '#123456'`)[0]).toMatch(/raw colour/)
+  })
+})
+
+describe('check-ui --css: game CSS that restyles kit parts', () => {
+  const warned = (path, text) => findKitRestyles(path, text).map((w) => w.snippet)
+
+  it('warns about rules that restyle a .kit-… class, with the line they start on', () => {
+    const css = '.board { color: var(--primary); }\n\n@media (max-width: 40rem) {\n  .game .kit-toasts { inset: auto 0 0; }\n}'
+    expect(findKitRestyles('src/App.css', css)).toEqual([expect.objectContaining({ line: 4, snippet: '.game .kit-toasts' })])
+  })
+
+  it('lets rules that only set CSS variables through, and ignores comments', () => {
+    expect(warned('src/App.css', ':root { --kit-frame-w: 100vw; } .kit-overlay { --kit-overlay-z: 80; } /* .kit-button { } */')).toEqual([])
+  })
+
+  it('skips the kit itself (any folder named kit) and non-CSS files', () => {
+    expect(warned('src/ui/kit/kit.css', '.kit-button { padding: 0; }')).toEqual([])
+    expect(warned('src\\ui\\kit\\blocks\\blocks.css', '.kit-button { padding: 0; }')).toEqual([])
+    expect(warned('src/App.tsx', '.kit-button { padding: 0; }')).toEqual([])
+  })
+
+  it('reads the command line: UI folders, then --css folders', () => {
+    expect(readArguments(['src/ui', '--css', 'src'])).toEqual({ folders: ['src/ui'], cssFolders: ['src'] })
+    expect(readArguments(['src/ui'])).toEqual({ folders: ['src/ui'], cssFolders: [] })
   })
 })

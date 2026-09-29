@@ -2,14 +2,14 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
-  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
+  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
-  TimerRing, toast, Tooltip, TurnBanner, Victory,
+  TimerRing, toast, Tooltip, TurnBanner, Victory, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -40,8 +40,13 @@ const endScores = [
 ]
 const stats = [{ label: 'Best roll', value: 'Five of a kind' }, { label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
 
+// Where the gallery's one ToastStack shows its toasts (App.tsx owns it; the Feedback sample moves it)
+export const ToastPlaceContext = createContext<{ place: ToastPlace; setPlace: (place: ToastPlace) => void }>({ place: 'top', setPlace: noop })
+
 // ── Samples that need a little state ──
 function Feedback() {
+  const { place, setPlace } = useContext(ToastPlaceContext)
+  const moveToasts = (to: string) => { setPlace(to as ToastPlace); toast(`Toasts now show at the ${to}`) }
   useEffect(() => {
     toast('Sam joined the room')
     toast('Connection lost', { variant: 'danger', seconds: 60 })
@@ -49,10 +54,16 @@ function Feedback() {
   }, [])
   return (
     <Screen label="Feedback">
-      <Panel gap="m" className="kit-modal">
-        <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
-        <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
-        <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
+      <Panel gap="m" className="kit-wide">
+        <Grid gap="l" min="m">
+          <Stack gap="m">
+            <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
+            <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
+            <Stack gap="xs"><Text kind="label">Toasts at</Text>
+              <Selector label="Toasts at" options={['top', 'center', 'bottom']} value={place} onChange={moveToasts} /></Stack>
+          </Stack>
+          <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
+        </Grid>
       </Panel>
     </Screen>
   )
@@ -72,7 +83,8 @@ function HudSample() {
   const turn = players[tick % 3]
   return (
     <Hud
-      vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" /><Bar label="Lives" pips value={2} max={3} /></Stack>}
+      vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label="Energy" icon="⚡" value={40 + (tick % 4) * 20} variant="accent" width="s" />
+        <Bar label="Lives" pips value={2} max={3} /></Stack>}
       status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
         <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button></Row>}
@@ -90,7 +102,7 @@ function HudSample() {
 // sits in a box that cuts off everything the page passes down (like a 3D library's own div would),
 // wrapped in kit-scope, which brings the style's font and colours back. Every 1.5 s the turn moves
 // on, the player whose turn it was scores (counting up), and Bolt dims as if a die rolls over it.
-// Below them: a goal chip (an icon instead of an avatar), a small chip, and a bare score chip.
+// Below them: a goal chip (an icon instead of an avatar), a small chip, an xs chip (all on one line), and a bare score chip.
 // They sit on a dark stand-in game, with plain HudText ("Round 1") and a settings icon button above.
 function PlayerChips() {
   const [tick, setTick] = useState(0)
@@ -108,10 +120,46 @@ function PlayerChips() {
               score={score(i)} detail={`S${1 + (tick % 3)} · T${1 + i}`} active={tick % players.length === i} dim={i === 2 && tick % 2 === 1} />))}
             {pinned('goal', <PlayerChip name="Goal" icon="◎" score={30} detail="If you lock it now" />)}
             {pinned('small', <PlayerChip name="Pip" color={seats[2].color} size="s" score={score(3)} />)}
+            {pinned('xs', <PlayerChip name="Bolt" color={seats[1].color} size="xs" badge="Bot" detail={`S${1 + (tick % 3)} · T5`} score={score(2)} />)}
             {pinned('bare', <PlayerChip name="Goal" avatar={false} showName={false} size="s" score={12} />)}
           </Grid>
         </ScrollArea>
       </Stack>
+    </Screen>
+  )
+}
+
+// PINNED — kit pieces stuck to points on a stand-in table (a Goal row, then a row per player), sized WITH the
+// table: make the window smaller and the chips shrink with the dice. The table is 12 units wide; a game's own
+// adapter (CATALOG.md → Pinned) works out pixelsPerUnit from its camera, here it's just the table's width / 12.
+// Each chip's right-middle sits on a point just left of its row's first die (anchor="right").
+const TABLE_UNITS = 12
+function PinnedTable() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
+  const table = useRef<HTMLDivElement>(null)
+  const [pixelsPerUnit, setPixelsPerUnit] = useState(0)
+  useEffect(() => {
+    const measure = () => setPixelsPerUnit((table.current?.offsetWidth ?? 0) / TABLE_UNITS)
+    const watcher = new ResizeObserver(measure)
+    if (table.current) watcher.observe(table.current)
+    return () => watcher.disconnect()
+  }, [])
+  const players = [{ id: 'me', name: 'Muzzy', color: seats[3].color }, ...seats.slice(0, 3).map((s) => ({ ...s, badge: 'Bot' }))]
+  const pin = { pixelsPerUnit, fit: [3.3, 1] as [number, number], rem: 0.3 }
+  const row = (key: string, piece: ReactNode) => (
+    <div key={key} className="gallery-table-row">
+      <span className="gallery-table-point">{pixelsPerUnit > 0 && <PinnedBox {...pin} name={key}>{piece}</PinnedBox>}</span>
+      {Array.from({ length: 6 }, (_, i) => <span key={i} className="gallery-die" />)}
+    </div>
+  )
+  return (
+    <Screen label="Pinned to the table" top={<HudText size="s">Chips grow and shrink with the table</HudText>}>
+      <div ref={table} className="gallery-table">
+        {row('goal', <PlayerChip name="Goal" avatar={false} showName={false} size="xs" score={12 + (tick % 3) * 4} />)}
+        {players.map((p, i) => row(p.id, <PlayerChip name={p.name} showName={false} color={p.color} badge={'badge' in p ? p.badge : undefined}
+          size="xs" detail={`S${1 + ((tick + i) % 3)} · T${3 + i}`} score={4 * i + tick} active={i === 0} />))}
+      </div>
     </Screen>
   )
 }
@@ -165,15 +213,19 @@ function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
 const samples: Record<string, ComponentType> = {
   feedback: Feedback,
   rewards: () => <RewardPopup rewards={[{ icon: '🪙', amount: 250, label: 'Coins' }, { icon: '💎', amount: 3, label: 'Gems' }, { icon: '🎲', label: 'Gold dice skin' }]} />,
-  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" onContinue={() => screens.push('hud')}
-    onPlay={() => screens.push('modes')} onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')}
-    onCredits={() => screens.push('credits')} onQuit={() => screens.pop()} />,
+  // items: the buttons in the game's own order (the first is the main one unless one says primary)
+  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" items={[
+    { label: 'Play', onClick: () => screens.push('modes') }, { label: 'Play online', onClick: () => screens.push('lobby') },
+    { label: 'Settings', onClick: () => screens.push('settings') }, { label: 'How to play', onClick: () => screens.push('howto') },
+    { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
+  ]} />,
   modes: Modes,
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
   hud: HudSample,
   chips: PlayerChips,
+  pinned: PinnedTable,
   pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
@@ -181,6 +233,9 @@ const samples: Record<string, ComponentType> = {
   results: () => <Results players={scores} meId="a" onContinue={() => screens.replace('victory')} />,
   endgame: () => <Results title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
     onRematch={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
+  // dim: the end of a game over the table — the game stays visible, darkened (here over the HUD)
+  endgamedim: () => <Results dim title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
+    onRematch={() => screens.replace('countdown')} onQuit={() => { screens.pop(); screens.pop() }} />,
   victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')} />,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   postgame: () => (
@@ -205,9 +260,10 @@ const openers: Record<string, () => void> = {
   pause: () => { screens.push('hud'); screens.push('pause') },
   reconnecting: () => { screens.push('hud'); screens.push('reconnecting') },
   failed: () => { screens.push('hud'); screens.push('failed') },
+  endgamedim: () => { screens.push('hud'); screens.push('endgamedim') },
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
-const darkScreens = ['hud', 'chips']
+const darkScreens = ['hud', 'chips', 'pinned']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──

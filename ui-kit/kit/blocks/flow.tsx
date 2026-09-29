@@ -59,6 +59,7 @@ export function RoundIntro({ round, total, detail, words }: RoundIntroProps) {
 // For the end of a game on ONE screen: title ("You win!" / "Tie!"), message, and its buttons
 // (onRematch, onQuit, or your own in actions). Rows arrive one after another (the style's motion;
 // all at once with reduce motion on), and 1st place gets a star badge. color: each player's avatar colour.
+// dim: darkens the game behind it (still visible), like a dialog — for results shown over the table.
 export type ResultPlayer = { id: string; name: string; score: number; avatar?: string; color?: string }
 export function rankPlayers<P extends ResultPlayer>(players: P[], lowestWins = false) {
   const sorted = [...players].sort((a, b) => (lowestWins ? a.score - b.score : b.score - a.score))
@@ -68,15 +69,15 @@ export const resultsWords = { title: 'Results', you: 'You', continue: 'Continue'
 type ResultsProps = {
   players: ResultPlayer[]; meId?: string; lowestWins?: boolean
   title?: string; message?: string; onContinue?: () => void; onRematch?: () => void; onQuit?: () => void; actions?: ReactNode
-  format?: (place: number) => string; words?: Partial<typeof resultsWords>
+  format?: (place: number) => string; dim?: boolean; words?: Partial<typeof resultsWords>
 }
-export function Results({ players, meId, lowestWins, title, message, onContinue, onRematch, onQuit, actions, format = ordinal, words }: ResultsProps) {
+export function Results({ players, meId, lowestWins, title, message, onContinue, onRematch, onQuit, actions, format = ordinal, dim, words }: ResultsProps) {
   const w = { ...resultsWords, ...words }
   const heading = title ?? w.title
   const stagger = reduceMotion() ? 0 : 1 // 1: each row waits a little longer than the one above it; 0: all at once
   const hasButtons = actions || onQuit || onRematch || onContinue
   return (
-    <Screen label={heading}>
+    <Screen label={heading} dialog={dim}>
       <Panel depth={2} gap="m" className="kit-modal kit-results">
         <span className="kit-end-title"><Text kind="title">{heading}</Text></span>
         {message && <Text>{message}</Text>}

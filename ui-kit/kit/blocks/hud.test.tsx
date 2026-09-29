@@ -1,7 +1,7 @@
 // HUD logic: English place names, and the +N float-up appearing when a number changes.
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
-import { Counter, HudText, ordinal, PlayerChip, TurnBanner } from './hud'
+import { Bar, Counter, HudText, ordinal, PlayerChip, TurnBanner } from './hud'
 import { toMilliseconds } from './motion'
 
 afterEach(() => { cleanup(); document.documentElement.removeAttribute('data-reduce-motion') })
@@ -82,5 +82,34 @@ describe('HudText', () => {
     const { container } = render(<TurnBanner variant="plain" text="Sam's turn" />)
     expect(container.querySelector('.kit-panel')).toBeNull()
     expect(container.querySelector('.kit-hud-text')?.textContent).toBe("Sam's turn")
+  })
+})
+
+describe('Bar width', () => {
+  it('width names the bar length for the CSS; no width = fills its room, as before', () => {
+    const { container, rerender } = render(<Bar label="Time" value={50} />)
+    const chip = () => container.querySelector('.kit-hud-chip')
+    expect(chip()?.hasAttribute('data-width')).toBe(false)
+    rerender(<Bar label="Time" value={50} width="s" />)
+    expect(chip()?.getAttribute('data-width')).toBe('s')
+  })
+})
+
+describe('PlayerChip xs', () => {
+  it('xs puts name, badge and detail on one line; other sizes keep the detail below', () => {
+    const lines = (size: 'xs' | 's') => {
+      const { container, unmount } = render(<PlayerChip name="Bolt" badge="Bot" detail="S2 · T5" size={size} />)
+      const text = container.querySelector('.kit-player-chip-text')!
+      const result = [...text.children].map((line) => line.textContent)
+      unmount()
+      return result
+    }
+    expect(lines('xs')).toEqual(['BoltBotS2 · T5'])
+    expect(lines('s')).toEqual(['BoltBot', 'S2 · T5'])
+  })
+
+  it('no empty name line when only the detail shows (no stray gap above it)', () => {
+    const { container } = render(<PlayerChip name="Sam" showName={false} detail="S2 · T5" size="s" />)
+    expect([...container.querySelector('.kit-player-chip-text')!.children].map((line) => line.textContent)).toEqual(['S2 · T5'])
   })
 })

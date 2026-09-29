@@ -9,29 +9,38 @@ import { Pips } from './hud'
 import { fill } from './words'
 
 // MAIN MENU — the game's name, then its big buttons. The first one is the main (primary) one.
+// Two ways to give the buttons:
+//   items: your own list, in your order — [{ label: 'Play', onClick: play }, { label: 'Play online', onClick: online }].
+//          primary: true marks the main button(s); if none is marked, the first one is.
+//   or the named ones (onContinue, onPlay, onSettings…): shown in that fixed order. Ignored when items is given.
 export const mainMenuWords = { continue: 'Continue', play: 'Play', settings: 'Settings', howToPlay: 'How to play', credits: 'Credits', quit: 'Quit' }
+export type MainMenuItem = { label: string; onClick: () => void; primary?: boolean }
 type MainMenuProps = {
   title: string; subtitle?: string; version?: string; children?: ReactNode // children: extra buttons
+  items?: MainMenuItem[]
   onContinue?: () => void; onPlay?: () => void; onSettings?: () => void
   onHowToPlay?: () => void; onCredits?: () => void; onQuit?: () => void
   words?: Partial<typeof mainMenuWords>
 }
-export function MainMenu({ title, subtitle, version, children, words, ...on }: MainMenuProps) {
+export function MainMenu({ title, subtitle, version, children, items, words, ...on }: MainMenuProps) {
   const w = { ...mainMenuWords, ...words }
-  const items = [
+  const named = [
     [w.continue, on.onContinue], [w.play, on.onPlay], [w.settings, on.onSettings],
     [w.howToPlay, on.onHowToPlay], [w.credits, on.onCredits], [w.quit, on.onQuit],
-  ].filter(([, onClick]) => onClick) as [string, () => void][]
+  ].filter(([, onClick]) => onClick).map(([label, onClick]) => ({ label, onClick }) as MainMenuItem)
+  const buttons = items ?? named
+  const anyMarked = buttons.some((item) => item.primary)
+  const isPrimary = (item: MainMenuItem, i: number) => (anyMarked ? item.primary : i === 0)
   return (
     <Screen label={title} bottom={version && <Text kind="caption">{version}</Text>}>
-      <Stack gap="xl" className="kit-menu kit-centred">
+      <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
           <Text kind="display">{title}</Text>
           {subtitle && <Text kind="caption">{subtitle}</Text>}
         </Stack>
-        <Stack gap="s">
-          {items.map(([label, onClick], i) => (
-            <Button key={label} variant={i === 0 ? 'primary' : 'secondary'} onClick={onClick}>{label}</Button>
+        <Stack gap="s" className="kit-main-menu-buttons">
+          {buttons.map((item, i) => (
+            <Button key={`${i}-${item.label}`} variant={isPrimary(item, i) ? 'primary' : 'secondary'} onClick={item.onClick}>{item.label}</Button>
           ))}
           {children}
         </Stack>

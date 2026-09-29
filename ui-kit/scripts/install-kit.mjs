@@ -183,7 +183,8 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
        @layer game-base { … } (the kit's weakest layer) so they can't reach kit parts; the game's own
        screens keep their look. Screenshot the game's other screens before and after.`)
   }
-  log(`  ${isUpdate ? 1 : 3}. Check the game's UI code keeps the rules: node src/ui/kit/check-ui.mjs src/ui
+  log(`  ${isUpdate ? 1 : 3}. Check the game's UI code keeps the rules: node src/ui/kit/check-ui.mjs src/ui --css src
+     (--css src also warns about the game's CSS restyling kit parts — use the style file or a kit option instead)
   ${isUpdate ? 2 : 4}. Run the game's tests and build, and look at every screen on a phone and a desktop.`)
   if (!isUpdate) log('  To try another look later, change "preset" in content/ui/style.json (clean, cozy, cartoon, pixel, neon).')
   // Vite's ESLint setup flags the kit's shared word lists (a fast-refresh hint, not a bug). The kit is
