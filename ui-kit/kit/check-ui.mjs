@@ -1,5 +1,6 @@
 // RULE CHECKER — keeps UI code built only from style names. Ships inside the kit, so a game runs:
 //   node src/ui/kit/check-ui.mjs src/ui          (point it at the folders that hold UI code)
+//   node src/ui/kit/check-ui.mjs src/ui --css src   (also: warn about game CSS that restyles kit parts)
 // With no folders it checks the kit itself. In the framework: npm run check-ui (kit + gallery).
 // Fails on:
 //   1. raw colours (#hex, rgb(), hsl())       → use a colour name: var(--primary)
@@ -8,6 +9,10 @@
 //   4. position:absolute/fixed outside Screen (and the stack's overlay) → use Screen slots, Stack, Row, Grid
 //   5. inline style= (except setting --css-variables)
 //   6. var(--something) that isn't a style name from kit/style/tokens.ts (or a --kit-… helper)
+// --css <folders>: every .css file in them (outside the kit's own folder) is also checked for rules that
+// restyle kit parts — a selector naming a .kit-… class. Those are WARNINGS (they don't fail the check):
+// the look belongs in the style file, and a kit update may quietly break them. A rule that only sets
+// CSS variables (--kit-frame-w, --kit-overlay-z…) is fine.
 // The style engine (kit/style/), the presets (kit/styles/), the font files (kit/fonts/ — their
 // @font-face rules must name each font) and tests are allowed raw values.
 import { readdirSync, readFileSync, statSync } from 'node:fs'
@@ -82,6 +87,23 @@ export function checkSource(path, text) {
   return []
 }
 
+// Game CSS that restyles kit parts: rules whose selector names a .kit-… class. Returns [{ line, message, snippet }].
+export function findKitRestyles(path, text) {
+  if (/(^|[\\/])kit[\\/]/.test(path) ||!path.endsWith('.css')) return [] // the kit's own CSS may style itself
+  const clean = stripComments(text)
+  const warnings = []
+  for (const rule of clean.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const kitClasses = [...new Set(rule[1].match(/\.kit-[\w-]+/g) ?? [])]
+    if (!kitClasses.length) continue
+    const properties = rule[2].split(';').map((d) => d.split(':')[0].trim()).filter(Boolean)
+    if (properties.every((p) => p.startsWith('--'))) continue // only sets CSS variables
+    const selector = rule[1].trim()
+    const line = lineOf(clean, rule.index + rule[1].search(/\S/))
+    warnings.push({ line, message: `restyles kit part ${kitClasses.join(' ')} — change the style file or a kit option instead`, snippet: selector })
+  }
+  return warnings
+}
+
 function listFiles(dir) {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name)
@@ -91,7 +113,8 @@ function listFiles(dir) {
 }
 
 // Check every file in these folders, print each problem, and return how many there were.
-export function checkFolders(folders) {
+// cssFolders: also warn about CSS in these folders that restyles kit parts (warnings don't count as problems).
+export function checkFolders(folders, cssFolders = []) {
   const files = folders.flatMap(listFiles)
   let count = 0
   for (const file of files) {
@@ -101,13 +124,30 @@ export function checkFolders(folders) {
     ${p.snippet}`)
     }
   }
+  let warningCount = 0
+  const cssFiles = cssFolders.flatMap(listFiles).filter((file) => file.endsWith('.css'))
+  for (const file of cssFiles) {
+    for (const w of findKitRestyles(file, readFileSync(file, 'utf8'))) {
+      warningCount++
+      console.log(`${relative('.', file)}:${w.line}  ⚠ ${w.message}
+    ${w.snippet}`)
+    }
+  }
   console.log(count ? `
 ✗ ${count} rule problem(s) in UI code` : `✓ UI rules pass (${files.length} files checked)`)
+  if (cssFolders.length) console.log(warningCount ? `⚠ ${warningCount} warning(s): game CSS restyling kit parts` : `✓ no game CSS restyles kit parts (${cssFiles.length} CSS files checked)`)
   return count
+}
+
+// Splits the command line into UI folders and, after --css, the folders whose CSS gets the kit-restyle warnings.
+export function readArguments(args) {
+  const split = args.indexOf('--css')
+  if (split === -1) return { folders: args, cssFolders: [] }
+  return { folders: args.slice(0, split), cssFolders: args.slice(split + 1) }
 }
 
 // Run from the command line
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const folders = process.argv.slice(2).length ? process.argv.slice(2) : [dirname(fileURLToPath(import.meta.url))]
-  process.exit(checkFolders(folders) ? 1 : 0)
+  const { folders, cssFolders } = readArguments(process.argv.slice(2))
+  process.exit(checkFolders(folders.length ? folders : [dirname(fileURLToPath(import.meta.url))], cssFolders) ? 1 : 0)
 }

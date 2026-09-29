@@ -2,6 +2,7 @@
 
 Every known, common game screen. **Built** = ready in the kit: import it from `src/ui/kit` and pass words, data and callbacks. **Recipe** = not built yet: build it from the listed parts the first time a game needs it, then add it to the kit as Built (and bump `kit/VERSION`).
 **Needs React 18 or newer** (tested on 18.3 and 19; `install-kit` warns if a game's React is older).
+**Check the rules:** `node src/ui/kit/check-ui.mjs src/ui --css src` — fails on raw colours / px / fonts in UI code; `--css src` also warns (doesn't fail) about the game's CSS restyling kit parts (a selector naming a `.kit-…` class that sets more than CSS variables): the look belongs in the style file or a kit option.
 See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:5180/?screen=<id>&preset=<style>`.
 
 **Rule: non-buttons never look like buttons.** Only things you can press get a filled pill/box with an outline and a drop shadow. Instructions ("Hold to Roll", "Locked 1!") and small info ("Round 1") are `HudText`: plain words in the style's `on-game` colour with a soft `game-shade` halo, no plate. HUD chips (scores, player chips, counters) are flat plates with no shadow. Never use a `Badge`, `Panel` or `Button` just to show words.
