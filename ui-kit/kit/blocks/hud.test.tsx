@@ -1,7 +1,7 @@
 // HUD logic: English place names, and the +N float-up appearing when a number changes.
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
-import { Counter, HudText, ordinal, PlayerChip, TurnBanner } from './hud'
+import { Bar, Counter, HudText, ordinal, PlayerChip, TurnBanner } from './hud'
 import { toMilliseconds } from './motion'
 
 afterEach(() => { cleanup(); document.documentElement.removeAttribute('data-reduce-motion') })
@@ -82,5 +82,15 @@ describe('HudText', () => {
     const { container } = render(<TurnBanner variant="plain" text="Sam's turn" />)
     expect(container.querySelector('.kit-panel')).toBeNull()
     expect(container.querySelector('.kit-hud-text')?.textContent).toBe("Sam's turn")
+  })
+})
+
+describe('Bar width', () => {
+  it('width names the bar length for the CSS; no width = fills its room, as before', () => {
+    const { container, rerender } = render(<Bar label="Time" value={50} />)
+    const chip = () => container.querySelector('.kit-hud-chip')
+    expect(chip()?.hasAttribute('data-width')).toBe(false)
+    rerender(<Bar label="Time" value={50} width="s" />)
+    expect(chip()?.getAttribute('data-width')).toBe('s')
   })
 })

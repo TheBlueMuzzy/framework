@@ -54,7 +54,8 @@ export function Hud({ vitals, status, currency, onPause, actions, banner, bottom
 }
 
 // A small readable plate behind a HUD piece, so it shows up over any game art.
-function Chip({ children, active, ...rest }: { children: ReactNode; active?: boolean; role?: string; 'aria-label'?: string }) {
+type ChipProps = { children: ReactNode; active?: boolean; role?: string; 'aria-label'?: string; 'data-width'?: string }
+function Chip({ children, active, ...rest }: ChipProps) {
   return <Row gap="s" className="kit-hud-chip" data-state={active ? 'active' : undefined} {...rest}>{children}</Row>
 }
 
@@ -68,10 +69,14 @@ export function Pips({ count, filled, label }: { count: number; filled: number; 
 }
 
 // BAR — health, XP, energy… value out of max. pips: draw it as segments (hearts, lives) instead.
-type BarProps = { label: string; value: number; max?: number; variant?: 'primary' | 'accent' | 'danger'; pips?: boolean; icon?: ReactNode }
-export function Bar({ label, value, max = 100, variant = 'primary', pips, icon }: BarProps) {
+// width: how long the bar is — 's' short, 'm' medium, 'l' long. Without it the bar fills the room it's given.
+type BarProps = {
+  label: string; value: number; max?: number; variant?: 'primary' | 'accent' | 'danger'; pips?: boolean; icon?: ReactNode
+  width?: 's' | 'm' | 'l'
+}
+export function Bar({ label, value, max = 100, variant = 'primary', pips, icon, width }: BarProps) {
   return (
-    <Chip>
+    <Chip data-width={width}>
       {icon && <span aria-hidden="true">{icon}</span>}
       {pips ? <Pips count={max} filled={value} label={label} /> : <ProgressBar label={label} value={value / max} variant={variant} />}
     </Chip>

@@ -53,6 +53,12 @@
       grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
     }
   }
+  /* Bar width (s / m / l): the bar keeps that length and its plate hugs it. Unset = it fills the room it's given. */
+  .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
+  .kit-hud-chip[data-width] > .kit-progress { flex: none; min-inline-size: 0; inline-size: var(--kit-bar-w); max-inline-size: 100%; }
+  .kit-hud-chip[data-width="s"] { --kit-bar-w: 4rem; }
+  .kit-hud-chip[data-width="m"] { --kit-bar-w: 8rem; }
+  .kit-hud-chip[data-width="l"] { --kit-bar-w: 14rem; }
   .kit-banner { align-items: center; text-align: center; }
   /* +N float-up: stacked on top of its number (same grid cell), so no positioning needed */
   .kit-float-anchor { display: inline-grid; }
