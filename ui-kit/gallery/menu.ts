@@ -11,7 +11,7 @@ export const menu: MenuGroup[] = [
     { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
   ] },
   { title: 'Front end', entries: [
-    { id: 'menu', name: 'Main menu', about: 'The game’s name and its big buttons' },
+    { id: 'menu', name: 'Main menu', about: 'The game’s name and its big buttons, in the game’s own order' },
     { id: 'modes', name: 'Mode select', about: 'A card per mode, then Start' },
     { id: 'howto', name: 'How to play', about: 'Pages to flip through' },
     { id: 'credits', name: 'Credits', about: 'People, then the kit’s fonts from credits.json' },

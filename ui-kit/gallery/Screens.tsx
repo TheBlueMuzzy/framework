@@ -165,9 +165,12 @@ function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
 const samples: Record<string, ComponentType> = {
   feedback: Feedback,
   rewards: () => <RewardPopup rewards={[{ icon: '🪙', amount: 250, label: 'Coins' }, { icon: '💎', amount: 3, label: 'Gems' }, { icon: '🎲', label: 'Gold dice skin' }]} />,
-  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" onContinue={() => screens.push('hud')}
-    onPlay={() => screens.push('modes')} onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')}
-    onCredits={() => screens.push('credits')} onQuit={() => screens.pop()} />,
+  // items: the buttons in the game's own order (the first is the main one unless one says primary)
+  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" items={[
+    { label: 'Play', onClick: () => screens.push('modes') }, { label: 'Play online', onClick: () => screens.push('lobby') },
+    { label: 'Settings', onClick: () => screens.push('settings') }, { label: 'How to play', onClick: () => screens.push('howto') },
+    { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
+  ]} />,
   modes: Modes,
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
