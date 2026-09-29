@@ -122,6 +122,7 @@
     text-shadow: 0 0.0625rem 0.125rem var(--game-shade), 0 0 0.375rem var(--game-shade), 0 0 0.75rem var(--game-shade); }
   .kit-hud-text[data-tone="accent"] { color: var(--accent); }
   .kit-hud-text .kit-stack { animation: var(--enter) var(--motion-normal) var(--ease) backwards; }
+  .kit-hud-text[data-pop] .kit-stack { animation: kit-attention calc(var(--motion-normal) * 1.5) var(--ease); }
   /* Game numbers (scores, timers, places) use the style's number font — usually its display font */
   .kit-float-anchor, .kit-timer, .kit-number, :is(.kit-float-anchor, .kit-number, .kit-place) .kit-text { font-family: var(--font-numbers); }
   .kit-float-up { color: var(--primary); animation: kit-float-up calc(var(--motion-normal) * 4) var(--ease) forwards; }

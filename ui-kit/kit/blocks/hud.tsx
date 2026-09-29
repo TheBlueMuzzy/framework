@@ -137,11 +137,13 @@ export function TimerRing({ seconds, total, label = 'Time left', warnAt = 5 }: T
 // No plate, outline or shadow block (only buttons look like buttons): the style's on-game colour
 // with a soft shade behind it so it reads over any art. Read out politely when it changes, and it
 // pops in again whenever the text changes.  size: s | m (default) | l.  tone: accent = highlighted.
-type HudTextProps = { children: string; detail?: string; size?: 's' | 'm' | 'l'; tone?: 'normal' | 'accent' }
-export function HudText({ children, detail, size = 'm', tone = 'normal' }: HudTextProps) {
+// pop: when the text changes, a quick grow-and-settle instead of the soft entrance — to call attention
+// to a change ("Round 2"). Off with reduce motion, like every animation.
+type HudTextProps = { children: string; detail?: string; size?: 's' | 'm' | 'l'; tone?: 'normal' | 'accent'; pop?: boolean }
+export function HudText({ children, detail, size = 'm', tone = 'normal', pop }: HudTextProps) {
   const kind = size === 's' ? 'label' : size === 'm' ? 'heading' : 'title'
   return (
-    <div className="kit-hud-text" data-size={size} data-tone={tone === 'accent' ? tone : undefined} aria-live="polite">
+    <div className="kit-hud-text" data-size={size} data-tone={tone === 'accent' ? tone : undefined} data-pop={pop || undefined} aria-live="polite">
       <Stack key={children} gap="xs">
         <Text kind={kind}>{children}</Text>
         {detail && <Text kind="label">{detail}</Text>}
