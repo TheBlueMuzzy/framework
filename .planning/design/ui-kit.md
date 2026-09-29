@@ -43,7 +43,7 @@ Every known, non-niche screen gets a catalog entry. Two kinds, to stay lean:
 - Front end: title/main menu · settings (tabs from a list) · how-to-play pages · credits · mode select
 - In game: pause · HUD frame (safe corners: vitals top-left, pause + currency top-right, timer/score/turn top-centre, actions bottom, banners centre)
 - Flow: loading · transitions · countdown 3-2-1 · round intro · results/scoreboard · victory · game over · post-game (rematch / lobby / quit)
-- Online: lobby (create / join by room code / players / ready) · reconnecting / error
+- Online: lobby (create / join by room code / players / ready) · reconnecting / error · seat picker (join a game in progress)
 - Dialogs & feedback: modal · confirm (destructive in danger colour) · toast stack · tooltip · reward popup · empty state · spinner
 - HUD pieces: bar (health / xp / timer / segmented pips) · counter with +N float-up · score & combo · timer ring · turn banner · player seats with active highlight · rank · pause/settings chrome · connection dot
 - Controls: button (primary / secondary / ghost / danger / icon / loading) · toggle · slider · **◀ option ▶ selector** (the game control web kits lack) · tabs · stepper · text + room-code input · list row · card · badge · avatar · progress bar · scroll area

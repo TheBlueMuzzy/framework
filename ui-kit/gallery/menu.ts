@@ -37,6 +37,9 @@ export const menu: MenuGroup[] = [
     { id: 'room', name: 'Lobby: room', about: 'Room code, players, ready' },
     { id: 'reconnecting', name: 'Reconnecting', about: 'Over the HUD, with a spinner' },
     { id: 'failed', name: 'Can’t connect', about: 'Try again or quit' },
+    { id: 'seats', name: 'Seat picker', about: 'Join a game in progress: take over a seat' },
+    { id: 'joining', name: 'Seat picker: joining', about: 'After picking: spinner and Cancel' },
+    { id: 'noseats', name: 'Seat picker: no seats', about: 'Nothing free right now, so Leave' },
   ] },
 ]
 

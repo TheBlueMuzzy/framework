@@ -4,10 +4,11 @@
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
 import { useEffect, useState, type ComponentType } from 'react'
 import credits from '../content/credits.json'
+import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, kitScreens,
   Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  RewardPopup, RoundIntro, Row, Score, Screen, ScreenStack, screens, Selector, Settings, Spinner, Stack, Text,
+  RewardPopup, RoundIntro, Row, Score, Screen, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
   TimerRing, toast, Tooltip, TurnBanner, Victory,
 } from '../kit'
 
@@ -94,6 +95,18 @@ function LobbyRoom() {
     onReady={setReady} onStart={noop} onLeave={() => screens.pop()} />
 }
 
+// Pick a seat → "Joining…" for a moment → into the game (the HUD). Cancel goes back to the list.
+function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
+  const [waiting, setWaiting] = useState(startWaiting)
+  useEffect(() => {
+    if (!waiting || startWaiting) return
+    const timer = setTimeout(() => screens.replace('hud'), 2000)
+    return () => clearTimeout(timer)
+  }, [waiting, startWaiting])
+  return <SeatPicker seats={seats} waiting={waiting} onPick={() => setWaiting(true)}
+    onCancel={() => (waiting ? setWaiting(false) : screens.pop())} />
+}
+
 // ── Every screen the stack can open, by name ──
 const samples: Record<string, ComponentType> = {
   feedback: Feedback,
@@ -121,6 +134,9 @@ const samples: Record<string, ComponentType> = {
   lobby: LobbyJoin,
   room: LobbyRoom,
   reconnecting: () => <Reconnecting onQuit={() => { screens.pop(); screens.pop() }} />,
+  seats: () => <Seats />,
+  joining: () => <Seats startWaiting />,
+  noseats: () => <SeatPicker seats={[]} onPick={noop} onCancel={() => screens.pop()} />,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 

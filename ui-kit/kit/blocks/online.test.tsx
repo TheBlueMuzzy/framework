@@ -1,7 +1,8 @@
 // Lobby: Join waits for a whole code; Start waits for enough players who are all ready.
+// SeatPicker: a tap on a seat picks it; waiting swaps the list for Joining… + Cancel; no seats → the empty message.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Lobby } from './online'
+import { Lobby, SeatPicker } from './online'
 
 afterEach(cleanup)
 const noop = () => {}
@@ -32,5 +33,33 @@ describe('Lobby', () => {
     expect(screen.queryByRole('button', { name: 'Start game' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'I’m ready' }))
     expect(onReady).toHaveBeenCalledWith(true)
+  })
+})
+
+describe('SeatPicker', () => {
+  const seats = [{ id: 'z', name: 'Zippy', badge: 'bot', detail: 'Score 12' }, { id: 'b', name: 'Bolt', color: 'tomato' }]
+
+  it('tapping a seat picks it; Leave cancels', () => {
+    const onPick = vi.fn(), onCancel = vi.fn()
+    render(<SeatPicker seats={seats} onPick={onPick} onCancel={onCancel} />)
+    fireEvent.click(screen.getByRole('button', { name: /Bolt/ }))
+    expect(onPick).toHaveBeenCalledWith('b')
+    fireEvent.click(screen.getByRole('button', { name: 'Leave' }))
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('while waiting: no seats to tap, Joining… and Cancel', () => {
+    const onCancel = vi.fn()
+    render(<SeatPicker seats={seats} waiting onPick={noop} onCancel={onCancel} />)
+    expect(screen.queryByRole('button', { name: /Zippy/ })).toBeNull()
+    expect(screen.getByRole('status', { name: 'Joining…' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('no seats shows the empty message and Leave', () => {
+    render(<SeatPicker seats={[]} onPick={noop} onCancel={noop} words={{ empty: 'Full up' }} />)
+    expect(screen.getByText('Full up')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy()
   })
 })

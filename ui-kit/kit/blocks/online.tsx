@@ -107,3 +107,58 @@ export function Reconnecting({ failed, message, onRetry, onQuit, words }: Reconn
     </Modal>
   )
 }
+
+// SEAT PICKER — join a game that's already going: pick a seat (often a bot's) to take over.
+// The game says which seats are free; this screen shows them and reports the pick.
+// After a pick the game passes waiting (spinner + Cancel) until it's in, or an error if it didn't work.
+// onCancel is both buttons: Leave (not waiting) and Cancel (waiting) — the game knows which by its own waiting flag.
+export const seatPickerWords = {
+  title: 'Game in progress', caption: 'Pick a seat to take over', seats: 'Seats',
+  empty: 'No seats available right now', joining: 'Joining…', cancel: 'Cancel', leave: 'Leave',
+}
+export type PickableSeat = { id: string; name: string; color?: string; badge?: string; detail?: string } // detail: e.g. "Score 12 · Locks 5/8"
+type SeatPickerProps = {
+  seats: PickableSeat[]; onPick: (id: string) => void; onCancel: () => void
+  waiting?: boolean; error?: string; words?: Partial<typeof seatPickerWords>
+}
+
+export function SeatPicker({ seats, onPick, onCancel, waiting, error, words }: SeatPickerProps) {
+  const w = { ...seatPickerWords, ...words }
+  return (
+    <Screen label={w.title}>
+      <Panel depth={2} gap="m" className="kit-modal">
+        <Stack gap="xs">
+          <Text kind="title">{w.title}</Text>
+          {!waiting && seats.length > 0 && <Text kind="caption">{w.caption}</Text>}
+        </Stack>
+        {error && <Text kind="caption"><span className="kit-error">{error}</span></Text>}
+        {waiting ? (
+          <Row gap="m" className="kit-nowrap">
+            <Spinner label={w.joining} />
+            <Text>{w.joining}</Text>
+          </Row>
+        ) : seats.length === 0 ? (
+          <Text>{w.empty}</Text>
+        ) : (
+          <ScrollArea label={w.seats} max="m">
+            {seats.map((seat) => (
+              <ListRow key={seat.id} onClick={() => onPick(seat.id)} label={
+                <Row gap="s" className="kit-nowrap">
+                  <Avatar name={seat.name} color={seat.color} />
+                  <Stack gap="xs" className="kit-result-name">
+                    <Row gap="xs"><Text kind="label">{seat.name}</Text>{seat.badge && <Badge>{seat.badge}</Badge>}</Row>
+                    {seat.detail && <Text kind="caption">{seat.detail}</Text>}
+                  </Stack>
+                  <Text kind="label">›</Text>
+                </Row>
+              } />
+            ))}
+          </ScrollArea>
+        )}
+        <Row gap="s" justify="end">
+          <Button variant={waiting ? 'secondary' : 'ghost'} onClick={onCancel}>{waiting ? w.cancel : w.leave}</Button>
+        </Row>
+      </Panel>
+    </Screen>
+  )
+}

@@ -6,7 +6,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 
 ## Parts (`?screen=parts`)
 - **Layout:** `Screen` (slots `topLeft` `top` `topRight` `bottomLeft` `bottom` `bottomRight` + centre · `dialog` = dims what's under it) · `Panel` · `Stack` (column) · `Row` · `Grid`. Gaps by name: `xs s m l xl`.
-- **Controls:** `Button` (primary / secondary / ghost / danger, + `icon`, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` · `ProgressBar` · `ScrollArea` · `Text`.
+- **Controls:** `Button` (primary / secondary / ghost / danger, + `icon`, `loading`) · `Toggle` · `Slider` · `Selector` (◀ option ▶) · `Stepper` · `Tabs` · `TextInput` · `RoomCodeInput` · `ListRow` · `Card` · `Badge` · `Avatar` (+ `color`) · `ProgressBar` · `ScrollArea` · `Text`.
 - **Glue:** `ScreenStack` (`overlay` = over a game with its own UI) + `screens.push/pop/replace` · `kitScreens` · `applyStyle` · `applyAccessibility` + `loadSettings` · `fill('Round {n}', { n: 2 })`.
 
 ## Built
@@ -36,6 +36,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Lobby: join | `Lobby` (no `roomCode`) | `?screen=lobby` | Create a room or join by code |
 | Lobby: room | `Lobby` (with `roomCode`) | `?screen=room` | Code, players, host badge, ready, Start |
 | Reconnecting | `Reconnecting` | `?screen=reconnecting` · `?screen=failed` | Spinner dialog; `failed` → try again / quit |
+| Seat picker | `SeatPicker` | `?screen=seats` · `?screen=joining` · `?screen=noseats` | Join a game in progress: pick a seat (e.g. a bot's) to take over |
 | **Dialogs & feedback** | | | |
 | Modal | `Modal` | (inside Confirm) | Any dialog: title, body, action buttons |
 | Confirm | `Confirm` / `askConfirm()` | `?screen=confirm` | "Are you sure?" — destructive yes in danger colour |

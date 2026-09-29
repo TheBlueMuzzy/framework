@@ -139,6 +139,8 @@
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }
   .kit-scroll[data-max="l"] { max-block-size: 28rem; }
+  /* On a short screen (landscape phone) only the scroll box gives up height; titles and buttons around it keep theirs */
+  .kit-panel:has(> .kit-scroll) > :not(.kit-scroll) { flex-shrink: 0; }
 
   /* Accessibility floor: reduce motion turns animation off and presses don't shrink */
   @media (prefers-reduced-motion: reduce) {
@@ -226,7 +228,7 @@
   .kit-badge[data-variant="primary"] { background: var(--primary); color: var(--on-primary); border-color: var(--ink); }
   .kit-badge[data-variant="danger"] { background: var(--danger); color: var(--on-danger); border-color: var(--ink); }
 
-  .kit-avatar { background: var(--primary); color: var(--on-primary); } /* initials stay in the body font: small display letters get hard to read */
+  .kit-avatar { background: var(--kit-avatar-color, var(--primary)); color: var(--on-primary); } /* initials stay in the body font: small display letters get hard to read */
   .kit-avatar[data-state="active"] { outline: 0.1875rem solid var(--accent); outline-offset: 0.125rem; }
 
   .kit-progress { background: var(--border); }
