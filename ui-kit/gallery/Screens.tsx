@@ -54,11 +54,16 @@ function Feedback() {
   }, [])
   return (
     <Screen label="Feedback">
-      <Panel gap="m" className="kit-modal">
-        <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
-        <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
-        <Row gap="s"><Text kind="label">Toasts at</Text><Selector label="Toasts at" options={['top', 'center', 'bottom']} value={place} onChange={moveToasts} /></Row>
-        <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
+      <Panel gap="m" className="kit-wide">
+        <Grid gap="l" min="m">
+          <Stack gap="m">
+            <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
+            <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
+            <Stack gap="xs"><Text kind="label">Toasts at</Text>
+              <Selector label="Toasts at" options={['top', 'center', 'bottom']} value={place} onChange={moveToasts} /></Stack>
+          </Stack>
+          <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
+        </Grid>
       </Panel>
     </Screen>
   )

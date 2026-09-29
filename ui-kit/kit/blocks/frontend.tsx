@@ -33,12 +33,12 @@ export function MainMenu({ title, subtitle, version, children, items, words, ...
   const isPrimary = (item: MainMenuItem, i: number) => (anyMarked ? item.primary : i === 0)
   return (
     <Screen label={title} bottom={version && <Text kind="caption">{version}</Text>}>
-      <Stack gap="xl" className="kit-menu kit-centred">
+      <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
           <Text kind="display">{title}</Text>
           {subtitle && <Text kind="caption">{subtitle}</Text>}
         </Stack>
-        <Stack gap="s">
+        <Stack gap="s" className="kit-main-menu-buttons">
           {buttons.map((item, i) => (
             <Button key={`${i}-${item.label}`} variant={isPrimary(item, i) ? 'primary' : 'secondary'} onClick={item.onClick}>{item.label}</Button>
           ))}

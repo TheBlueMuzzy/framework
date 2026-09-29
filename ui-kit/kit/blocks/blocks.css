@@ -82,6 +82,13 @@
     .kit-results > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-results > .kit-row:last-child { align-self: end; justify-content: start; }
   }
+  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right in
+     two columns with the main one(s) across both, so five or six buttons still fit */
+  @media (max-height: 30rem) and (min-width: 40rem) {
+    .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; inline-size: 46rem; }
+    .kit-main-menu-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+    .kit-main-menu-buttons > .kit-button[data-variant="primary"] { grid-column: 1 / -1; }
+  }
   .kit-end-title { display: inline-block; }
   .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }
 
