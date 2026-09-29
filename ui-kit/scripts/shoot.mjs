@@ -15,9 +15,9 @@ import { screenIds } from '../gallery/menu.ts'
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
 // Shown in every style, for picking a style and catching a style that breaks one of them
-const keyScreens = ['menu', 'settings', 'pause', 'results', 'lobby', 'room', 'seats', 'hud']
+const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'lobby', 'room', 'seats', 'hud', 'chips']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['lobby', 'room', 'roomauto']
+const landscapeScreens = ['lobby', 'room', 'roomauto', 'endgame', 'chips']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },
@@ -91,7 +91,8 @@ async function shoot(file, size, query, prepare) {
   await page.waitForSelector(isScreen ? '.gallery-game .kit-screen' : '.gallery')
   await page.evaluate(() => document.fonts.ready)
   if (prepare) await prepare(page)
-  await page.waitForTimeout(700) // let entrances and transitions finish
+  // let entrances and transitions finish (Results rows arrive one after another, so they take longer)
+  await page.waitForTimeout(/screen=(results|endgame)/.test(query) ? 1300 : 700)
   await page.screenshot({ path: `screenshots/${file}.png`, fullPage: true })
   shotCount++
   report(`${file}.png`, [...page.errors, ...(await page.evaluate(findProblems, { screenWidth: size.width, checkFocus: !prepare }))])

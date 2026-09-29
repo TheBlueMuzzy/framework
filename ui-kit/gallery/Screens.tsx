@@ -2,13 +2,13 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { useEffect, useState, type ComponentType } from 'react'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
-  askConfirm, Bar, Button, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, kitScreens,
-  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  RewardPopup, RoundIntro, Row, Score, Screen, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
+  askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, kitScreens,
+  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
+  RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
   TimerRing, toast, Tooltip, TurnBanner, Victory,
 } from '../kit'
 
@@ -33,11 +33,20 @@ const scores = [
   { id: 'a', name: 'Muzzy', score: 212 }, { id: 'b', name: 'Sam', score: 187 }, { id: 'c', name: 'Ada', score: 212 },
   { id: 'd', name: 'Lin', score: 96 }, { id: 'e', name: 'Sherman Meredith', score: 140 },
 ]
+// End of a game: each player's colour comes from content JSON, like a game's would
+const endScores = [
+  { id: 'a', name: 'Muzzy', score: 212, color: seats[3].color }, { id: 'b', name: seats[0].name, score: 187, color: seats[0].color },
+  { id: 'c', name: seats[1].name, score: 140, color: seats[1].color }, { id: 'd', name: seats[2].name, score: 96, color: seats[2].color },
+]
 const stats = [{ label: 'Best roll', value: 'Five of a kind' }, { label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
 
 // ── Samples that need a little state ──
 function Feedback() {
-  useEffect(() => { toast('Game saved'); toast('Sam joined the room'); toast('Connection lost', { variant: 'danger', seconds: 60 }) }, [])
+  useEffect(() => {
+    toast('Sam joined the room')
+    toast('Connection lost', { variant: 'danger', seconds: 60 })
+    toast('Tap to close me', { dismissible: true, seconds: 60 })
+  }, [])
   return (
     <Screen label="Feedback">
       <Panel gap="m" className="kit-modal">
@@ -71,6 +80,34 @@ function HudSample() {
       bottomRight={<Rank place={2} of={3} />}
       actions={<Stack gap="s"><PlayerSeats players={players} activeId={turn.id} /><Row justify="center"><Button onClick={() => toast('Rolled!')}>Roll</Button></Row></Stack>}
     />
+  )
+}
+
+// PLAYER CHIPS beside stand-in game rows. A game pins each chip to a 3D point itself, so here each
+// sits in a box that cuts off everything the page passes down (like a 3D library's own div would),
+// wrapped in kit-scope, which brings the style's font and colours back. Every 1.5 s the turn moves
+// on, the player whose turn it was scores (counting up), and Bolt dims as if a die rolls over it.
+// Below them: a goal chip (an icon instead of an avatar), a small chip, and a bare score chip.
+function PlayerChips() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
+  const players = [{ id: 'me', name: 'Muzzy', color: seats[3].color }, ...seats.slice(0, 3).map((s) => ({ ...s, badge: 'Bot' }))]
+  const score = (i: number) => 4 * i + 3 * Math.floor((tick + players.length - 1 - i) / players.length)
+  const pinned = (key: string, chip: ReactNode) => <div key={key} className="gallery-outside"><div className="kit-scope">{chip}</div></div>
+  return (
+    <Screen label="Player chips">
+      <Panel gap="s" className="kit-wide">
+        <ScrollArea label="Player chips" max="l">
+          <Grid gap="m" min="m">
+            {players.map((p, i) => pinned(p.id, <PlayerChip name={p.name} color={p.color} badge={'badge' in p ? p.badge : undefined}
+              score={score(i)} detail={`S${1 + (tick % 3)} · T${1 + i}`} active={tick % players.length === i} dim={i === 2 && tick % 2 === 1} />))}
+            {pinned('goal', <PlayerChip name="Goal" icon="◎" score={30} detail="If you lock it now" />)}
+            {pinned('small', <PlayerChip name="Pip" color={seats[2].color} size="s" score={score(3)} />)}
+            {pinned('bare', <PlayerChip name="Goal" avatar={false} showName={false} size="s" score={12} />)}
+          </Grid>
+        </ScrollArea>
+      </Panel>
+    </Screen>
   )
 }
 
@@ -131,11 +168,14 @@ const samples: Record<string, ComponentType> = {
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
   hud: HudSample,
+  chips: PlayerChips,
   pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
   round: () => <RoundIntro round={2} total={5} detail="Doubles score twice this round" />,
   results: () => <Results players={scores} meId="a" onContinue={() => screens.replace('victory')} />,
+  endgame: () => <Results title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
+    onRematch={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')} />,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   postgame: () => (

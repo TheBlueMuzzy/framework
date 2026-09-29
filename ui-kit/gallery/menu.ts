@@ -8,7 +8,7 @@ export const menu: MenuGroup[] = [
   { title: 'Dialogs & feedback', entries: [
     { id: 'confirm', name: 'Confirm', about: '“Are you sure?” with the yes in danger red' },
     { id: 'rewards', name: 'Reward popup', about: 'A tile per reward, then Collect' },
-    { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts, a tooltip, a spinner and an empty list' },
+    { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
   ] },
   { title: 'Front end', entries: [
     { id: 'menu', name: 'Main menu', about: 'The game’s name and its big buttons' },
@@ -21,6 +21,7 @@ export const menu: MenuGroup[] = [
   ] },
   { title: 'In game / HUD', entries: [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },
+    { id: 'chips', name: 'Player chips', about: 'Beside each row: score counts up, dim, a goal chip' },
     { id: 'pause', name: 'Pause', about: 'Over the HUD; Quit asks first' },
   ] },
   { title: 'Flow', entries: [
@@ -28,6 +29,7 @@ export const menu: MenuGroup[] = [
     { id: 'countdown', name: 'Countdown', about: '3, 2, 1, Go! (repeats)' },
     { id: 'round', name: 'Round intro', about: '“Round 2 of 5”' },
     { id: 'results', name: 'Results', about: 'Scores, best first; ties share a place' },
+    { id: 'endgame', name: 'Results: end of game', about: 'Title, player colours, winner star, Rematch / Quit' },
     { id: 'victory', name: 'Victory', about: 'The big win, with stats' },
     { id: 'gameover', name: 'Game over', about: 'Try again or quit' },
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { StrictMode } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ScreenStack, screens } from '..'
-import { askConfirm, kitScreens, MAX_TOASTS, toast, toasts } from './dialogs'
+import { askConfirm, kitScreens, MAX_TOASTS, toast, toasts, ToastStack } from './dialogs'
 
 afterEach(() => {
   cleanup()
@@ -28,6 +28,27 @@ describe('toasts', () => {
   it(`keeps at most ${MAX_TOASTS}, dropping the oldest`, () => {
     ;['a', 'b', 'c', 'd'].forEach((text) => toast(text))
     expect(toasts.current.map((t) => t.text)).toEqual(['b', 'c', 'd'])
+  })
+})
+
+describe('dismissible toasts', () => {
+  it('the Close button hides it early; others stay', () => {
+    toast('Saved')
+    toast('Tap me', { dismissible: true, seconds: 60 })
+    render(<ToastStack />)
+    act(() => { fireEvent.click(screen.getByLabelText('Close')) })
+    expect(toasts.current.map((t) => t.text)).toEqual(['Saved'])
+  })
+  it('tapping the toast itself hides it too', () => {
+    toast('Tap me', { dismissible: true })
+    render(<ToastStack />)
+    act(() => { fireEvent.click(screen.getByText('Tap me')) })
+    expect(toasts.current).toEqual([])
+  })
+  it('an ordinary toast has no Close button', () => {
+    toast('Saved')
+    render(<ToastStack />)
+    expect(screen.queryByLabelText('Close')).toBeNull()
   })
 })
 

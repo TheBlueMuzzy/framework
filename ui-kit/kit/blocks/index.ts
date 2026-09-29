@@ -3,6 +3,7 @@
 import './blocks.css'
 
 export { fill } from './words'
+export { reduceMotion, motionTime, useCountUp } from './motion'
 export * from './dialogs'
 export * from './frontend'
 export * from './hud'

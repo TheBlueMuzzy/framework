@@ -5,6 +5,7 @@ import { Panel, Row, Screen, Stack } from '../layout'
 import { Avatar, Badge, Button, ProgressBar, Text } from '../controls'
 import { screens } from '../screens'
 import { askConfirm, Modal } from './dialogs'
+import { useCountUp } from './motion'
 import { fill } from './words'
 
 // PAUSE — a dialog over the game. Resume closes it; Quit asks first (turn off with confirmQuit={false}).
@@ -156,6 +157,52 @@ export function PlayerSeats({ players, activeId }: { players: Seat[]; activeId?:
           </Stack>
         </Chip>
       ))}
+    </Row>
+  )
+}
+
+// PLAYER CHIP — one player's little card, to sit beside their row or seat in the game (the game
+// places it). Avatar (or an icon, or nothing), name, score with its icon, a detail line, a badge.
+//   active: highlighted (whose turn it is, or you).   dim: faded (e.g. while something passes over it).
+//   size: 's' for tight spots, 'm' (default) otherwise.   showName={false}: the name is only read out.
+//   avatar: a picture; avatar={false} hides it — with icon, that makes a goal/target chip.
+// The score counts up when it rises (and floats up "+N"); with reduce motion on it just changes.
+// Like every HUD piece it never catches taps: the game underneath gets them.
+export const playerChipWords = { score: '{n} points' }
+export type PlayerChipProps = {
+  name: string; showName?: boolean; color?: string; avatar?: string | false; icon?: ReactNode
+  score?: number; scoreIcon?: ReactNode; detail?: ReactNode; badge?: ReactNode
+  active?: boolean; dim?: boolean; size?: 's' | 'm'; words?: Partial<typeof playerChipWords>
+}
+export function PlayerChip({
+  name, showName = true, color, avatar, icon, score, scoreIcon = '★', detail, badge,
+  active, dim, size = 'm', words,
+}: PlayerChipProps) {
+  const w = { ...playerChipWords, ...words }
+  const shownScore = useCountUp(score ?? 0)
+  const floats = useFloatUps(score ?? 0)
+  return (
+    <Row gap={size === 's' ? 'xs' : 's'} className="kit-hud-chip kit-player-chip kit-nowrap" role="group" aria-label={name}
+      data-state={active ? 'active' : undefined} data-dim={dim || undefined} data-size={size}>
+      {icon && <span className="kit-player-chip-icon" aria-hidden="true">{icon}</span>}
+      {!icon && avatar !== false && <Avatar name={name} src={avatar || undefined} color={color} active={active} />}
+      {(showName || detail || badge) && (
+        <Stack gap="xs" className="kit-player-chip-text">
+          <Row gap="xs" className="kit-nowrap">
+            {showName && <Text kind="label">{name}</Text>}
+            {badge && <Badge>{badge}</Badge>}
+          </Row>
+          {detail && <Text kind="caption">{detail}</Text>}
+        </Stack>
+      )}
+      {score !== undefined && (
+        <span className="kit-player-chip-score" role="img" aria-label={fill(w.score, { n: score })}>
+          <span className="kit-player-chip-star" aria-hidden="true">{scoreIcon}</span>
+          <span className="kit-float-anchor" aria-hidden="true">
+            <Text kind={size === 's' ? 'label' : 'heading'}>{shownScore}</Text>{floats}
+          </span>
+        </span>
+      )}
     </Row>
   )
 }

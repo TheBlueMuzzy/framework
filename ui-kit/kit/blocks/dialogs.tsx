@@ -71,7 +71,8 @@ export const kitScreens = { confirm: () => (pendingConfirm ? <Confirm {...pendin
 
 // TOASTS — short messages that fade away ("Saved", "Sam joined"). Call toast('Saved') from
 // anywhere; put <ToastStack /> once near the top of your app (outside the ScreenStack).
-export type Toast = { id: number; text: string; variant: 'neutral' | 'danger' }
+// dismissible: tapping the toast (or its ✕ Close button) hides it early.
+export type Toast = { id: number; text: string; variant: 'neutral' | 'danger'; dismissible: boolean }
 export const MAX_TOASTS = 3 // older ones make room for new ones
 let toastList: readonly Toast[] = []
 let nextToastId = 1
@@ -83,14 +84,17 @@ export const toasts = {
   subscribe(listener: () => void) { toastListeners.add(listener); return () => { toastListeners.delete(listener) } },
   dismiss(id: number) { setToasts(toastList.filter((t) => t.id !== id)) },
 }
-export function toast(text: string, { variant = 'neutral', seconds = 3 }: { variant?: Toast['variant']; seconds?: number } = {}) {
+type ToastOptions = { variant?: Toast['variant']; seconds?: number; dismissible?: boolean }
+export function toast(text: string, { variant = 'neutral', seconds = 3, dismissible = false }: ToastOptions = {}) {
   const id = nextToastId++
-  setToasts([...toastList, { id, text, variant }].slice(-MAX_TOASTS))
+  setToasts([...toastList, { id, text, variant, dismissible }].slice(-MAX_TOASTS))
   setTimeout(() => toasts.dismiss(id), seconds * 1000)
   return id
 }
 
-export function ToastStack({ label = 'Messages' }: { label?: string }) {
+export const toastWords = { label: 'Messages', close: 'Close' }
+export function ToastStack({ label, words }: { label?: string; words?: Partial<typeof toastWords> }) {
+  const w = { ...toastWords, ...words }
   const list = useSyncExternalStore(toasts.subscribe, () => toasts.current, () => toasts.current)
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => { // show the popover only while there's something to say
@@ -101,8 +105,14 @@ export function ToastStack({ label = 'Messages' }: { label?: string }) {
     if (!list.length && open) el.hidePopover()
   }, [list.length])
   return (
-    <div ref={box} {...{ popover: 'manual' }} className="kit-toasts" role="status" aria-label={label}>
-      {list.map((t) => (
+    <div ref={box} {...{ popover: 'manual' }} className="kit-toasts" role="status" aria-label={label ?? w.label}>
+      {list.map((t) => t.dismissible ? (
+        <Panel key={t.id} depth={2} gap="s" className="kit-toast" data-variant={t.variant} data-dismissible
+          onClick={() => toasts.dismiss(t.id)}>
+          <span>{t.text}</span>
+          <Button variant="ghost" icon aria-label={w.close}>✕</Button>
+        </Panel>
+      ) : (
         <Panel key={t.id} depth={2} gap="xs" className="kit-toast" data-variant={t.variant}>{t.text}</Panel>
       ))}
     </div>

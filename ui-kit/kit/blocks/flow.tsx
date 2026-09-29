@@ -1,10 +1,11 @@
 // FLOW — the screens between the playing: Loading, Countdown, RoundIntro, Results,
 // Victory, GameOver, PostGame. They show what the game tells them; the game decides what's next.
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Panel, Row, Screen, Stack } from '../layout'
 import { Avatar, Badge, Button, ListRow, ProgressBar, ScrollArea, Text } from '../controls'
 import { Spinner } from './dialogs'
 import { ordinal, TurnBanner } from './hud'
+import { reduceMotion } from './motion'
 import { fill } from './words'
 
 // LOADING — a bar when you know how far along it is (progress 0 to 1), a spinner when you don't.
@@ -54,34 +55,55 @@ export function RoundIntro({ round, total, detail, words }: RoundIntroProps) {
 
 // RESULTS — everyone's score, best first. Equal scores share a place (1st, 1st, 3rd).
 // lowestWins: for golf-style games where the smallest score is best.
-export type ResultPlayer = { id: string; name: string; score: number; avatar?: string }
-export function rankPlayers(players: ResultPlayer[], lowestWins = false) {
+// For the end of a game on ONE screen: title ("You win!" / "Tie!"), message, and its buttons
+// (onRematch, onQuit, or your own in actions). Rows arrive one after another (the style's motion;
+// all at once with reduce motion on), and 1st place gets a star badge. color: each player's avatar colour.
+export type ResultPlayer = { id: string; name: string; score: number; avatar?: string; color?: string }
+export function rankPlayers<P extends ResultPlayer>(players: P[], lowestWins = false) {
   const sorted = [...players].sort((a, b) => (lowestWins ? a.score - b.score : b.score - a.score))
   return sorted.map((player) => ({ ...player, place: 1 + sorted.findIndex((other) => other.score === player.score) }))
 }
-export const resultsWords = { title: 'Results', you: 'You', continue: 'Continue', points: '{n} pts' }
+export const resultsWords = { title: 'Results', you: 'You', continue: 'Continue', points: '{n} pts', winner: 'Winner', rematch: 'Rematch', quit: 'Quit' }
 type ResultsProps = {
-  players: ResultPlayer[]; meId?: string; lowestWins?: boolean; onContinue?: () => void
+  players: ResultPlayer[]; meId?: string; lowestWins?: boolean
+  title?: string; message?: string; onContinue?: () => void; onRematch?: () => void; onQuit?: () => void; actions?: ReactNode
   format?: (place: number) => string; words?: Partial<typeof resultsWords>
 }
-export function Results({ players, meId, lowestWins, onContinue, format = ordinal, words }: ResultsProps) {
+export function Results({ players, meId, lowestWins, title, message, onContinue, onRematch, onQuit, actions, format = ordinal, words }: ResultsProps) {
   const w = { ...resultsWords, ...words }
+  const heading = title ?? w.title
+  const stagger = reduceMotion() ? 0 : 1 // 1: each row waits a little longer than the one above it; 0: all at once
+  const hasButtons = actions || onQuit || onRematch || onContinue
   return (
-    <Screen label={w.title}>
-      <Panel depth={2} gap="m" className="kit-modal">
-        <Text kind="title">{w.title}</Text>
-        <ScrollArea label={w.title} max="l">
-          {rankPlayers(players, lowestWins).map((p) => (
-            <ListRow key={p.id} label={
-              <Row gap="s" className="kit-nowrap">
-                <span className="kit-place"><Text kind="heading">{format(p.place)}</Text></span>
-                <Avatar name={p.name} src={p.avatar} active={p.place === 1} />
-                <Row gap="xs" className="kit-result-name"><Text kind="label">{p.name}</Text>{p.id === meId && <Badge variant="primary">{w.you}</Badge>}</Row>
-              </Row>
-            }><span className="kit-number"><Text kind="label">{fill(w.points, { n: p.score })}</Text></span></ListRow>
+    <Screen label={heading}>
+      <Panel depth={2} gap="m" className="kit-modal kit-results">
+        <span className="kit-end-title"><Text kind="title">{heading}</Text></span>
+        {message && <Text>{message}</Text>}
+        <ScrollArea label={heading} max="l">
+          {rankPlayers(players, lowestWins).map((p, i) => (
+            <div key={p.id} className="kit-result-row" style={{ '--kit-i': stagger * i } as CSSProperties}>
+              <ListRow label={
+                <Row gap="s" className="kit-nowrap">
+                  <span className="kit-place"><Text kind="heading">{format(p.place)}</Text></span>
+                  <Avatar name={p.name} src={p.avatar} color={p.color} active={p.place === 1} />
+                  <Row gap="xs" className="kit-result-name">
+                    <Text kind="label">{p.name}</Text>
+                    {p.place === 1 && <Badge variant="primary"><span role="img" aria-label={w.winner}>★</span></Badge>}
+                    {p.id === meId && <Badge variant="primary">{w.you}</Badge>}
+                  </Row>
+                </Row>
+              }><span className="kit-number"><Text kind="label">{fill(w.points, { n: p.score })}</Text></span></ListRow>
+            </div>
           ))}
         </ScrollArea>
-        {onContinue && <Row justify="end"><Button onClick={onContinue}>{w.continue}</Button></Row>}
+        {hasButtons && (
+          <Row gap="s" justify="end">
+            {actions}
+            {onQuit && <Button variant="secondary" onClick={onQuit}>{w.quit}</Button>}
+            {onRematch && <Button onClick={onRematch}>{w.rematch}</Button>}
+            {onContinue && <Button onClick={onContinue}>{w.continue}</Button>}
+          </Row>
+        )}
       </Panel>
     </Screen>
   )
