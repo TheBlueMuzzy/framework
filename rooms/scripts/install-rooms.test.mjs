@@ -28,7 +28,7 @@ describe('install-rooms', () => {
     }
     expect(existsSync(join(kit, 'useRoom.test.tsx'))).toBe(false)
     expect(existsSync(join(kit, 'server/seats.test.ts'))).toBe(false)
-    expect(readFileSync(join(kit, 'VERSION'), 'utf8')).toMatch(/^0\.1\.0\ncommit /)
+    expect(readFileSync(join(kit, 'VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+\ncommit /)
     expect(readFileSync(join(game, 'party/server.ts'), 'utf8')).toContain("from '../src/rooms/server/roomServer'")
     expect(existsSync(join(game, 'party/rules.ts'))).toBe(true)
     expect(readJson(join(game, 'content/rooms.json')).missedTurnsBeforeBot).toBe(2)
