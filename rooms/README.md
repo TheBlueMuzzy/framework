@@ -1,6 +1,6 @@
 # Rooms
 
-Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.1.0**.
+Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.1.1** (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review).
 
 ## What a game gets
 | Part | Does |
@@ -112,11 +112,13 @@ From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run
 - **`closed` vs `error`:** `closed` = you're out, stop reconnecting (useRoom closes the socket); `error` = that request didn't happen, you're still in.
 - **Late closes are ignored.** A reconnecting tab can open its new socket before the old one's close arrives (same tab id); the seat keeps the newest connection, matched by object and then by id + `getConnection`. Don't turn on PartyKit's `hibernate` option (it would recreate connection objects and wipe in-memory rooms).
 - **Room codes: 4-letter consonant–vowel** (Glyphtender's original wished for word-based codes). Two short words would be friendlier still but need a curated word list and are slower to type on a phone; CVCV reads like a word, is quick to say, and the letters that get misheard are gone. If a game wants real words later, `makeRoomCode`/`isRoomCode` are the only places to change (server and client share them).
+- **An action that changes nothing answers only its sender.** If `onAction` returns the very same state object (e.g. "send me my view again"), only the sender gets their view — otherwise one player could make the server message everyone on demand.
+- **One connection = one seat, and a flood limit** (`maxMessagesPerSecond`, 10): never trust a raw WebSocket to behave like `useRoom`.
 - **Lobby drop = seat gone** (as Roll Better): no "ghost" seats blocking Start; the player rejoins at the end when back.
 - **One timers table** with `room:` names for the module's own timers (bot takes over, empty room) and anything else for the game's — so game-over can stop the game's timers without touching the room's.
 - **Dev default server address = the page's own host, port 1999** (Roll Better's `localhost:1999` didn't work from a phone on the Wi-Fi).
 
-## Known limits (0.1.0)
+## Known limits (0.1.1)
 - Rooms live in memory: if Cloudflare restarts the room, it's gone (same as Roll Better). Fine for a party game.
 - A *duplicated* browser tab copies sessionStorage, so both tabs share a tab id; the server keeps whichever joined last.
 - No spectators and no joining a game in progress (Roll Better's seat picker for mid-game joiners stays in Roll Better until a second game needs it).
