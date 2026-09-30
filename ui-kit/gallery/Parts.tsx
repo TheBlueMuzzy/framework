@@ -72,6 +72,7 @@ function Buttons() {
         <Button variant="secondary" icon aria-label="Settings">⚙</Button>
         <Button loading>Joining</Button>
         <Button disabled>Disabled</Button>
+        <Button variant="secondary" size={72}>Piece-sized</Button>
       </Row>
     </Section>
   )
