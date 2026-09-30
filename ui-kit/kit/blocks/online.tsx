@@ -109,8 +109,9 @@ function Room({ w, roomCode, players = [], meId, hostId, minPlayers = 2, onReady
         </Stack>
         <Button variant="secondary" onClick={copy}>{w.copy}</Button>
       </Row>
-      {/* With extra rows (children) the list and the rows share one scroll area that fills the card */}
-      <ScrollArea label={w.title} max={children ? undefined : 'm'}>
+      {/* The players (and any extra rows) share one scroll area that fills the card: on a phone on its side
+          a fixed-height list showed only a row and a half */}
+      <ScrollArea label={w.title}>
         {players.map((p) => (
           <ListRow key={p.id} label={
             <Row gap="s" className="kit-nowrap">
