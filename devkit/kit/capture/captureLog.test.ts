@@ -136,7 +136,7 @@ describe('bug capture report', () => {
     const capture = buildBugCapture({ game: { name: 'T', version: '1' }, whatWentWrong: 'stuck', log, stateNow: { turn: 1 }, summaryNow: '', device, now: 1000 })
     const saved = captureForClaude(capture, '.planning/bugs/capture-x.json')
     expect(saved.split('\n')[0]).toBe('/bug — Dev Kit bug capture from T 1: stuck')
-    expect(saved).toContain('Saved to .planning/bugs/capture-x.json (with 1 extra state snapshots')
+    expect(saved).toContain('Saved to .planning/bugs/capture-x.json (with 1 extra state snapshot,')
     const json = JSON.parse(saved.slice(saved.indexOf('{')))
     expect(json.states).toBeUndefined()
     expect(json.stateNow.state).toEqual({ turn: 1 })

@@ -11,7 +11,7 @@ import { describeMoment, useDevKitGame, type DevKitGame } from '../devkitGame'
 import { NotPluggedIn } from '../NotPluggedIn'
 import { CAN_SAVE, copyText, saveContentFile } from '../saveContent'
 import { KEEP_MS, STATE_EVERY_MS, clearLog, logMark, newCaptureLog, recentLog, type CaptureLog } from './captureLog'
-import { buildBugCapture, captureFilePath, captureForClaude, readDevice, type BugCapture } from './captureReport'
+import { buildBugCapture, captureFilePath, captureForClaude, count, readDevice, type BugCapture } from './captureReport'
 import { copyOfState, startRecording } from './captureRecorder'
 import './capture.css'
 
@@ -148,7 +148,7 @@ function Capture({ game }: { game: DevKitGame }) {
       </div>
       <p className="bc-counts" role="status">
         {recording
-          ? `Recording — last ${seconds} s: ${recent.events.length} events · ${recent.states.length} states (one every ${STATE_EVERY_MS / 1000} s)`
+          ? `Recording — last ${seconds} s: ${count(recent.events.length, 'event')} · ${count(recent.states.length, 'state')} (one every ${STATE_EVERY_MS / 1000} s)`
           : `Not recording. ● Record keeps the last ${seconds} s of play; it stays on after a reload.`}
       </p>
 

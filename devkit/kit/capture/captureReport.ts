@@ -72,6 +72,9 @@ export function buildBugCapture({ game, whatWentWrong, log, stateNow, summaryNow
   }
 }
 
+/** "1 event", "3 events" */
+export const count = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
+
 const two = (n: number) => String(n).padStart(2, '0')
 
 /** Where Send saves it in dev: ".planning/bugs/capture-2026-09-30-23-15-07.json" (local time). */
@@ -88,7 +91,7 @@ export function captureFilePath(date: Date): string {
 export function captureForClaude(capture: BugCapture, savedTo: string | null): string {
   const { states, ...rest } = capture
   const where = savedTo
-    ? `Saved to ${savedTo} (with ${states.length} extra state snapshots, one every ~5 s).`
+    ? `Saved to ${savedTo} (with ${count(states.length, 'extra state snapshot')}, one every ~5 s).`
     : `Not saved as a file (live build) — please save it to .planning/bugs/ in the game.`
   return [
     `/bug — Dev Kit bug capture from ${capture.game} ${capture.version}: ${capture.whatWentWrong}`,
