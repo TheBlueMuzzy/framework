@@ -172,6 +172,14 @@ describe('seats: kick', () => {
     expect(room.seats[1].kind).toBe('bot')
     expect(kick(room, 'seat-1')).toBeNull()
   })
+
+  it('mid-game: a bot the host added stays (a seat is never removed mid-game — the game still has it)', () => {
+    const room = lobby()
+    addBot(room, settings)
+    startPlaying(room)
+    expect(kick(room, 'seat-3')).toBeNull()
+    expect(names(room)).toEqual(['Ann', 'Bob', 'Bot 1'])
+  })
 })
 
 describe('seats: starting and ending', () => {
