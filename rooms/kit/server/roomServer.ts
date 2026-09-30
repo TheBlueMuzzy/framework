@@ -52,6 +52,8 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   game: State | null = null
   /** The live connection of each seated player: seat id → connection. */
   private sockets = new Map<string, PartyConnection>()
+  /** Messages each connection sent this second (connection id → count), for settings.maxMessagesPerSecond. */
+  private messageCounts = new Map<string, { second: number; count: number }>()
   /** true while a game callback runs (so update() can't clash with it). */
   private insideGameCode = false
   private tools: RoomTools<State, Event>
@@ -87,6 +89,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   }
 
   onMessage(raw: unknown, sender: PartyConnection): void {
+    if (this.tooManyMessages(sender)) return // flooding: dropped unread
     const message = parseClientMessage(raw)
     if (!message) {
       this.sendError(sender, 'bad_message', 'The server didn\'t understand that message.')
@@ -113,6 +116,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   }
 
   onClose(connection: PartyConnection): void {
+    this.messageCounts.delete(connection.id)
     const seatId = this.seatIdOfClosed(connection)
     if (!seatId) return
     this.sockets.delete(seatId)
@@ -138,6 +142,21 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   /** A connection that broke with an error counts as dropped, like a close. */
   onError(connection: PartyConnection): void {
     this.onClose(connection)
+  }
+
+  /** Past settings.maxMessagesPerSecond this second? (A real player sends a few a minute; 0 = no limit.) */
+  private tooManyMessages(connection: PartyConnection): boolean {
+    const limit = this.settings.maxMessagesPerSecond
+    if (limit <= 0) return false
+    const second = Math.floor(Date.now() / 1000)
+    const seen = this.messageCounts.get(connection.id)
+    if (!seen || seen.second !== second) {
+      this.messageCounts.set(connection.id, { second, count: 1 })
+      return false
+    }
+    seen.count += 1
+    if (seen.count === limit + 1) this.log(`too many messages from ${connection.id.slice(0, 8)} — dropping them for the rest of this second`)
+    return seen.count > limit
   }
 
   // ─── Room messages ────────────────────────────────────────────────

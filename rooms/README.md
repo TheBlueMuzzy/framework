@@ -87,7 +87,7 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 - The seat list never contains anyone's `persistentId`.
 
 ## Knobs — `content/rooms.json`
-`minSeats` (2) · `maxSeats` (4) · `missedTurnsBeforeBot` (2) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
+`minSeats` (2) · `maxSeats` (4) · `missedTurnsBeforeBot` (2) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
 
 ## Install or update
 From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run` first to see what would change).

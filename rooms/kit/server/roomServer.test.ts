@@ -200,6 +200,19 @@ describe('RoomServer: lobby', () => {
     expect(seats().map((s) => s.name)).toEqual(['Ann'])
   })
 
+  it("flooding: past maxMessagesPerSecond a connection's messages are dropped unread, then it may talk again", () => {
+    const ann = join('tab-ann', 'Ann', ANN, true)
+    join('tab-bob', 'Bob', BOB)
+    const rooms = () => ann.received.filter((m) => m.type === 'room').length
+    const before = rooms()
+    for (let i = 0; i < 50; i++) send(ann, { type: 'ready', ready: true }) // each one sends the room to everyone
+    const roomsSent = rooms()
+    expect(roomsSent - before).toBeLessThan(10) // her join was one of this second's 10
+    vi.advanceTimersByTime(1000)
+    send(ann, { type: 'ready', ready: true })
+    expect(ann.received.filter((m) => m.type === 'room').length).toBe(roomsSent + 1)
+  })
+
   it('host can kick; the kicked player is told and can\'t come back', () => {
     const ann = join('tab-ann', 'Ann', ANN, true)
     const bob = join('tab-bob', 'Bob', BOB)
