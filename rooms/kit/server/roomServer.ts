@@ -143,6 +143,11 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   // ─── Room messages ────────────────────────────────────────────────
 
   private handleJoin(connection: PartyConnection, message: Extract<ClientMessage, { type: 'join' }>): void {
+    // One connection = one seat. (A second seat on it would never be let go when it closes: a ghost seat, maybe a ghost host.)
+    const already = this.seatOf(connection)
+    if (already && already.persistentId !== message.persistentId) {
+      return this.sendError(connection, 'not_now', 'You already have a seat in this room.')
+    }
     const before = findSeatOf(this.data, message.persistentId)
     const wasAway = before !== undefined && (before.kind === 'bot' || !before.connected)
 

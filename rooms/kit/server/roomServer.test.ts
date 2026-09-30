@@ -188,6 +188,16 @@ describe('RoomServer: lobby', () => {
     expect(join('tab-cat', 'Cat', CAT).last('closed')?.reason).toBe('no_room') // the code is free again
   })
 
+  it('one connection holds one seat: joining again as someone else is refused (no ghost seat or ghost host)', () => {
+    join('tab-ann', 'Ann', ANN, true)
+    const bob = join('tab-bob', 'Bob', BOB)
+    send(bob, { type: 'join', name: 'Cat', persistentId: CAT, create: false })
+    expect(bob.last('error')?.code).toBe('not_now')
+    expect(seats().map((s) => s.name)).toEqual(['Ann', 'Bob'])
+    drop(bob)
+    expect(seats().map((s) => s.name)).toEqual(['Ann'])
+  })
+
   it('host can kick; the kicked player is told and can\'t come back', () => {
     const ann = join('tab-ann', 'Ann', ANN, true)
     const bob = join('tab-bob', 'Bob', BOB)
