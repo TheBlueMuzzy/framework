@@ -46,6 +46,7 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
   },
   checkAction(raw) {
     const action = mustBeObject(raw, 'action')
+    if (action.look === true) return { add: 0 } // "show me the game again"
     return { add: mustBeWholeNumber(action.add, 1, 3, 'add') }
   },
   onStart(options, seats, room) {
@@ -56,6 +57,7 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
     return state
   },
   onAction(state, seat, action, room) {
+    if (action.add === 0) return state // nothing changes: the same state object
     if (state.order[state.turn] !== seat.id) throw new Error('It\'s not your turn.')
     if (action.add === 3 && state.total === 0) room.update((s) => s) // not allowed in here — throws
     room.broadcastEvent(`${seat.name} added ${action.add}`, seat.id)
@@ -281,6 +283,15 @@ describe('RoomServer: the game', () => {
     expect(ann.last('error')).toEqual({ type: 'error', code: 'bad_action', message: 'add must be a whole number from 1 to 3' })
     send(bob, { type: 'action', action: { add: 1 } })
     expect(bob.last('error')).toEqual({ type: 'error', code: 'action_refused', message: 'It\'s not your turn.' })
+  })
+
+  it("an action that changes nothing (the same state back) re-sends only the sender's view", () => {
+    const { ann, bob } = startGame()
+    const bobViews = bob.received.length
+    send(ann, { type: 'action', action: { look: true } })
+    expect(ann.last('view')?.view).toMatchObject({ total: 0 })
+    expect(ann.received.at(-1)?.type).toBe('view')
+    expect(bob.received.length).toBe(bobViews) // nobody else is sent anything
   })
 
   it('room.update() inside onAction is refused loudly (return the state instead)', () => {

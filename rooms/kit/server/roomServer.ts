@@ -277,6 +277,8 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     } finally {
       this.insideGameCode = false
     }
+    // Nothing changed (the game gave back the SAME state, e.g. "send me my view again"): only the sender is answered
+    if (state === this.game) return this.sendView(seat)
     this.game = state
     // A move of their own: they're not idle
     if (seat.missedTurns > 0) {
