@@ -1,11 +1,11 @@
 // @vitest-environment node
 // Runs in the framework (not copied into games).
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { devkit, devkitInReleaseBuilds, formatJson, isAllowedContentPath, keepHelp } from './devkitVite'
+import { devkit, devkitInReleaseBuilds, formatJson, isAllowedBugCapturePath, isAllowedContentPath, keepHelp } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -32,6 +32,20 @@ describe('isAllowedContentPath — the Dev Kit may only write JSON inside conten
     expect(isAllowedContentPath('content/notes.md')).toBe(false)
     expect(isAllowedContentPath(undefined)).toBe(false)
     expect(isAllowedContentPath(42)).toBe(false)
+  })
+})
+
+describe('isAllowedBugCapturePath — bug captures may go in .planning/bugs/ (where /bug keeps them), nowhere else', () => {
+  it('allows a capture file directly in .planning/bugs/', () => {
+    expect(isAllowedBugCapturePath('.planning/bugs/capture-2026-09-30-23-15-07.json')).toBe(true)
+  })
+  it('refuses other .planning files, sub-folders, sneaking out, and non-JSON', () => {
+    expect(isAllowedBugCapturePath('.planning/STATE.json')).toBe(false)
+    expect(isAllowedBugCapturePath('.planning/bugs/a/b.json')).toBe(false)
+    expect(isAllowedBugCapturePath('.planning/bugs/../../package.json')).toBe(false)
+    expect(isAllowedBugCapturePath('.planning/bugs/..json')).toBe(false)
+    expect(isAllowedBugCapturePath('.planning/bugs/capture.md')).toBe(false)
+    expect(isAllowedBugCapturePath(undefined)).toBe(false)
   })
 })
 
@@ -123,6 +137,20 @@ describe('the plugin in a real Vite dev server', () => {
   it('refuses paths outside content/', async () => {
     const res = await save({ path: 'content/../package.json', data: {} })
     expect(res.status).toBe(400)
+  })
+  it('saves a bug capture to .planning/bugs/, making the folder the first time', async () => {
+    const res = await save({ path: '.planning/bugs/capture-1.json', data: { whatWentWrong: 'x' } })
+    expect(res.status).toBe(200)
+    expect(JSON.parse(readFileSync(join(game, '.planning/bugs/capture-1.json'), 'utf8'))).toEqual({ whatWentWrong: 'x' })
+  })
+  it('makes content/snapshots/ on the first snapshot, but still refuses other missing folders', async () => {
+    expect((await save({ path: 'content/snapshots/a.json', data: { name: 'a' } })).status).toBe(200)
+    expect(existsSync(join(game, 'content/snapshots/a.json'))).toBe(true)
+    expect((await save({ path: 'content/nowhere/a.json', data: {} })).status).toBe(400)
+    expect(existsSync(join(game, 'content/nowhere'))).toBe(false)
+  })
+  it('refuses other .planning files', async () => {
+    expect((await save({ path: '.planning/STATE.json', data: {} })).status).toBe(400)
   })
   it('refuses saves from another web page', async () => {
     const res = await save({ path: 'content/ui/table.json', data: {} }, { Origin: 'http://evil.example' })
