@@ -164,6 +164,7 @@ A game that keeps its tuning in its own mutable object can follow edits with `on
 - **Rows that don't fit page with a dot carousel (`kit/carousel/`), not a scroll bar** (Muzzy, 0.4.1). ◀ ▶ step a page of
   whole items (the window is clipped to them), dots show where you are; nothing shows cut in half, nothing scrolls by accident, and a desktop never shows a
   scroll bar. The selected tab / a keyboard-focused item is always turned to. The paging is plain maths (`carouselPages.ts`, tested).
+- **The tool tabs have their own full-width row** under a small title + ✕ row (Muzzy, 0.4.2: "the tabs/carousels move below it to take advantage of the full width of the panel") — more tabs per carousel page, and the title stays.
 - **The release check reads the game's web path from the build** (`dist/index.html`), so nothing is hardcoded; `--port` (default 5198) and `--base` override.
 
 ## Develop
