@@ -42,7 +42,9 @@ describe('Carousel', () => {
     expect(slide()).toBe('translateX(-128px)')
     fireEvent.click(dots()[2])
     expect(current()).toBe(2)
-    expect(slide()).toBe('translateX(-186px)') // the last page stops at the row's end
+    expect(slide()).toBe('translateX(-256px)')
+    // the window shows only this page's whole items (the 130-px window, 60 px of item)
+    expect((document.querySelector('.dk-carousel-view') as HTMLElement).style.clipPath).toBe('inset(-4px 70px -4px -4px)')
     expect((screen.getByRole('button', { name: 'Next tools' }) as HTMLButtonElement).disabled).toBe(true)
   })
 

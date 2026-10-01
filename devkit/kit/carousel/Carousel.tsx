@@ -1,6 +1,6 @@
 // DOT CAROUSEL — a row of things that may not all fit (tabs, chips). Instead of a sideways scroll bar it shows as
 // many WHOLE items as fit; ◀ ▶ slide it a page at a time, and dots under it show which page you're on (tap one to
-// jump there). Everything fits → just the row: no arrows, no dots. (Muzzy, 2026-10-01: "the dev kit shouldn't have a
+// jump there). A page never shows an item cut in half. Everything fits → just the row: no arrows, no dots. (Muzzy, 2026-10-01: "the dev kit shouldn't have a
 // scroll bar, but a dot carousel UI with arrows that moves it left/right".)
 //   <Carousel label="Tools" role="tablist" active={selectedIndex}>{tabs}</Carousel>
 // active: the item to keep in view (the selected tab) — the carousel turns to its page when it changes.
@@ -20,7 +20,7 @@ type Props = {
 }
 
 type Layout = { pages: CarouselPage[]; items: ItemBox[]; view: number }
-const ONE_PAGE: Layout = { pages: [{ first: 0, offset: 0 }], items: [], view: 0 }
+const ONE_PAGE: Layout = { pages: [{ first: 0, offset: 0, width: 0 }], items: [], view: 0 }
 
 export function Carousel({ children, label, role, active, className = '' }: Props) {
   const viewRef = useRef<HTMLDivElement>(null)
@@ -57,7 +57,7 @@ export function Carousel({ children, label, role, active, className = '' }: Prop
   // Keep the active item (the selected tab) in view
   useLayoutEffect(() => {
     if (active === undefined || active < 0) return
-    setPage(pageOf(layout.pages, layout.items, active, layout.view))
+    setPage(pageOf(layout.pages, active))
   }, [active, layout])
 
   // Tabbing onto an item on another page turns to it
@@ -65,7 +65,7 @@ export function Carousel({ children, label, role, active, className = '' }: Prop
     const track = trackRef.current
     if (!track) return
     const index = [...track.children].findIndex((item) => item.contains(e.target as Node))
-    if (index >= 0) setPage(pageOf(layout.pages, layout.items, index, layout.view))
+    if (index >= 0) setPage(pageOf(layout.pages, index))
   }
 
   const pages = layout.pages
@@ -78,7 +78,9 @@ export function Carousel({ children, label, role, active, className = '' }: Prop
         <button type="button" className="dk-carousel-arrow" data-side="prev" aria-label={`Previous ${name}`} title={`Previous ${name}`}
           disabled={at === 0} onClick={() => setPage(at - 1)}>◀</button>
       )}
-      <div ref={viewRef} className="dk-carousel-view">
+      {/* (clipped to the page's whole items: the next page's first item never peeks in, cut in half) */}
+      <div ref={viewRef} className="dk-carousel-view"
+        style={paged ? { clipPath: `inset(-4px ${Math.max(0, layout.view - pages[at].width)}px -4px -4px)` } : undefined}>
         <div ref={trackRef} className="dk-carousel-track" role={role} aria-label={label} onFocus={onFocus}
           style={{ transform: `translateX(${-pages[at].offset}px)` }}>
           {children}

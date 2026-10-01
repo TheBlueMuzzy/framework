@@ -162,7 +162,7 @@ A game that keeps its tuning in its own mutable object can follow edits with `on
   live link don't need; the tab hides behind `import.meta.env.DEV` (a lazy import a release build drops) and main.tsx's frame
   branch does too. `check:devkit` fails if `bmuz-devkit-previews` or `devkit-preview=` is in either build.
 - **Rows that don't fit page with a dot carousel (`kit/carousel/`), not a scroll bar** (Muzzy, 0.4.1). ◀ ▶ step a page of
-  whole items, dots show where you are; nothing fits half-cut, nothing scrolls by accident, and a desktop never shows a
+  whole items (the window is clipped to them), dots show where you are; nothing shows cut in half, nothing scrolls by accident, and a desktop never shows a
   scroll bar. The selected tab / a keyboard-focused item is always turned to. The paging is plain maths (`carouselPages.ts`, tested).
 - **The release check reads the game's web path from the build** (`dist/index.html`), so nothing is hardcoded; `--port` (default 5198) and `--base` override.
 
