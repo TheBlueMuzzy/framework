@@ -73,6 +73,7 @@ function Buttons() {
         <Button loading>Joining</Button>
         <Button disabled>Disabled</Button>
         <Button variant="secondary" size={72}>Piece-sized</Button>
+        <Button variant="secondary" size={72} compact>Compact</Button>
       </Row>
     </Section>
   )

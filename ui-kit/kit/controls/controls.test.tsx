@@ -100,6 +100,12 @@ describe('Button size', () => {
     expect(button.style.opacity).toBe('1') // its own style is kept
   })
 
+  it('compact: marked for the narrower side padding', () => {
+    render(<><Button compact>Tight</Button><Button>Roomy</Button></>)
+    expect(screen.getByRole('button', { name: 'Tight' }).dataset.compact).toBe('true')
+    expect(screen.getByRole('button', { name: 'Roomy' }).dataset.compact).toBeUndefined()
+  })
+
   it('no size (or 0): the normal button', () => {
     render(<><Button>Plain</Button><Button size={0}>Zero</Button></>)
     for (const name of ['Plain', 'Zero']) {
