@@ -95,7 +95,7 @@ describe('the Tuning tab', () => {
     vi.unstubAllGlobals()
   })
 
-  it('_help can be one line per value; text values (e.g. a colour) are shown, not edited', () => {
+  it('_help can be one line per value; a colour gets a picker, other text is shown, not edited', () => {
     const drag = {
       name: 'drag',
       data: {
@@ -111,7 +111,7 @@ describe('the Tuning tab', () => {
     expect(screen.getByText('Colour of the drop zone.')).toBeTruthy()
     expect(screen.getByLabelText('dragHeight slider (0 to 3)')).toBeTruthy()
     expect(screen.getByText('tint')).toBeTruthy()
-    expect(screen.getByText('#ffffff')).toBeTruthy()
+    expect((screen.getByLabelText('Highlight color — hex') as HTMLInputElement).value).toBe('#ffffff')
     expect(screen.queryByText(/\[object Object\]/)).toBeNull()
   })
 
