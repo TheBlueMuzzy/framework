@@ -31,6 +31,35 @@ describe('ScreenStack inert', () => {
   })
 })
 
+describe('ScreenStack covered screens', () => {
+  // Only the top screen shows: open screens under it are hidden (data-covered → visibility hidden in kit.css),
+  // the game (children) never is, and a screen comes back when the one on top of it closes.
+  it('hides the open screens under the top one, and shows them again when it closes', () => {
+    render(<ScreenStack screens={testScreens}><button>Game button</button></ScreenStack>)
+    const layerOf = (text: string) => screen.getByText(text).closest('.kit-layer')!
+    act(() => screens.push('menu'))
+    expect(layerOf('Menu button').hasAttribute('data-covered')).toBe(false)
+    act(() => screens.push('shop'))
+    expect(layerOf('Menu button').hasAttribute('data-covered')).toBe(true)
+    expect(layerOf('Shop button').hasAttribute('data-covered')).toBe(false)
+    expect(layerOf('Game button').hasAttribute('data-covered')).toBe(false) // the game stays, under the dim
+    expect(layerOf('Shop button').hasAttribute('data-over')).toBe(true) // opened over a screen: no dim fade-in
+    expect(layerOf('Menu button').hasAttribute('data-over')).toBe(false)
+    act(() => screens.pop())
+    expect(layerOf('Menu button').hasAttribute('data-covered')).toBe(false)
+  })
+
+  it('works the same in overlay mode', () => {
+    render(<ScreenStack overlay screens={testScreens} />)
+    const layerOf = (text: string) => screen.getByText(text).closest('.kit-layer')!
+    act(() => screens.push('menu'))
+    act(() => screens.push('shop'))
+    expect(layerOf('Menu button').hasAttribute('data-covered')).toBe(true)
+    act(() => screens.replace('menu')) // swapped, same depth: the new top shows, the one under stays hidden
+    expect(screen.getAllByText('Menu button').map((b) => b.closest('.kit-layer')!.hasAttribute('data-covered'))).toEqual([true, false])
+  })
+})
+
 describe('ScreenStack focus', () => {
   it('moves focus into a screen when it opens, and back to the opener when it closes', () => {
     render(<ScreenStack screens={testScreens}><button>Game button</button></ScreenStack>)
