@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DevKit } from '../DevKit'
 import PreviewsTab from './PreviewsTab'
-import { blockedLine } from './PreviewOverlay'
+import { blockedLine } from './overlayLogic'
 import { groupPreviews, previewUrl, readPreviewUrl, type DevKitPreview } from './previewTypes'
 
 afterEach(cleanup)

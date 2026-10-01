@@ -7,7 +7,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { PREVIEWS_FILE, loadGamePreviews } from './gamePreviews'
-import { PreviewOverlay, dropBackGuard, pushBackGuard } from './PreviewOverlay'
+import { PreviewOverlay } from './PreviewOverlay'
+import { dropBackGuard, pushBackGuard } from './overlayLogic'
 import { groupPreviews, type DevKitPreview } from './previewTypes'
 import './previews.css'
 
