@@ -1,6 +1,6 @@
 {
   "name": "Game Framework",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "build": 0,
   "history": [
     {
@@ -17,6 +17,11 @@
       "version": "0.0.0",
       "date": "2026-09-28",
       "summary": "Project created — first module: game UI kit"
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-03",
+      "summary": "Rooms module (online rooms, harvested from Roll Better); UI kit 0.2.10 (Carousel, ScreenStack, spacing); Dev Kit 0.5.0 (Screen previews, search, sections) — first used by Glyphtender v0.3.0"
     }
   ]
 }
