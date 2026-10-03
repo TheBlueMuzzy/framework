@@ -5,11 +5,14 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 ## What a game gets
 | Tool | Does |
 |---|---|
-| Panel | ` / Esc / ✕ / triple-tap; ignores ` while the player types; floats above the game's popovers; stays open-able in release builds until 1.0 |
+| Panel | ` / Esc / ✕ / triple-tap; ignores ` while the player types; floats above the game's popovers; stays open-able in release builds until 1.0. More tabs than fit (a phone) → ◀ ▶ + page dots, never a sideways scroll bar |
+| Search | A search box pinned under the tabs: type and every settings tab (Color, Tuning) filters live — case-insensitive, matching ANYWHERE in a word ("ade" finds spotlightFade), in the key (camelCase split: "trail fade" finds trailFade), its readable label, its help line, its section title and its file name; several words = all must match. Results grouped by tab + section, the typed text highlighted, a count; tap a section title to clear the search and jump there. ✕ or Esc clears (the next Esc closes). 16 px text, so a phone doesn't zoom in |
+| Sections | Settings sit in titled sections that open and close ("Trails · 6"), remembered per game in this browser; chips at the top of a tab jump to one; Expand all / Collapse all; a dot on a closed section that holds an unsaved change. Sections and readable names come from the game's files (*Naming settings*, below) |
 | Color | Colour-blind preview (3 types) + the 15 UI kit colours from `content/ui/style.json`, live, with ↺ back to the preset. A game without the UI kit gets only the preview |
-| Tuning | Every number in `content/tuning/*.json` as a slider + number box (nested keys = headings, true/false = checkbox, text shown as-is), ↺ back to saved. Live in the game if it reads its tuning through `liveTuning` (below). Only shows when the game has `content/tuning/` files |
+| Tuning | Every number in `content/tuning/*.json` as a slider + number box (true/false = checkbox, `#rrggbb` text = a colour picker, other text shown as-is), ↺ back to saved, in sections with readable names, the `file · key` under each name. Live in the game if it reads its tuning through `liveTuning` (below). Only shows when the game has `content/tuning/` files |
 | Snapshots | Save "this exact moment" under a name → list (time, version, one-line summary) with **Restore** · **Copy for Claude** (the JSON) · **Save to file** (dev: `content/snapshots/<name>.json`, so Claude and tests can load it) · ✕. Kept in this browser (localStorage, per game); files in `content/snapshots/` are listed too. Restore is greyed out when the game says `canRestore()` is false (online). Needs the game adapter (below) |
 | Bugs (Bug capture) | **● Record** keeps the last 60 s of the game's events + its state every 5 s (stays on after a reload) · **📍 Mark** "it happened here" (keeps that state) · "What went wrong?" · **Send to /bug** (dev: `.planning/bugs/capture-<date>-<time>.json`, where /bug keeps captures) · **Copy for Claude** (starts with `/bug —`; the only way out of a live build). The capture: note, version, device (userAgent, screen, window, orientation, touch), marks with their state, state now, events and states with `secondsAgo`. Needs the game adapter |
+| Screens (previews) | **Dev only.** Screens that are normally gated (an end screen, a handoff, a lobby with 4 players, an error) listed by group, one button per variant (2 / 3 / 4 players, host / guest…). Picking one opens it **in a sandbox over the game**: a full-window overlay badged PREVIEW with the variants, a size switch (fit / phone 390×844 / desktop 1440×900, scaled to fit), ↻ Replay, what the sandbox blocked (those in a dot carousel when they don't fit — on a phone, a row of their own), and ✕ Close (or Esc, or the phone's Back). Closing leaves the real game exactly as it was. Needs `src/devkit-game/previews.tsx` + one line in main.tsx (below) |
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note; no page reload for its own writes |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
 | Release check | `npm run check:devkit` builds the game both ways and checks each in a browser (/deliver runs it) |
@@ -55,6 +58,49 @@ registerDevKitGame(myGameAdapter)
 ```
 Without it, both tabs just say how to plug in. Glyphtender's `src/devkit-game/glyphtenderAdapter.ts` is a full example (a Zustand store).
 
+## Screen previews (the Screens tab)
+For a quick look at a screen you'd otherwise have to play your way to. **Dev only** — the tab is loaded behind
+`import.meta.env.DEV`, so no release build has it, even while `inReleaseBuilds` is true (`check:devkit` checks both builds).
+
+How it stays harmless: a preview is the game's own page loaded again in a frame (`?devkit-preview=<id>&variant=<id>`),
+so it has its OWN copy of every store, screen stack and toast — the preview fills those with sample data, never the real
+game's. Before anything runs, the frame blocks what it still shares with the real page (`kit/previews/sandbox.ts`):
+storage writes stay in the frame (reads see them), WebSockets never connect, fetch / XHR / sendBeacon may only GET,
+BroadcastChannel is mute, history steps do nothing, sounds are silent, no service worker, no new windows. Each block is
+counted (the bar shows it). Buttons inside still work — a New game starts IN the frame — they just can't reach out. The overlay
+is a modal `<dialog>` (the game underneath can't be touched); Esc / ✕ / Back close it; Back is caught by one history entry
+pushed on open with the SAME state (so the game's screen stack, which counts its entries, sees nothing change).
+
+Wiring, once per game:
+```tsx
+// src/main.tsx — before the normal start (service worker, Dev Kit, render <App />), which goes in the else:
+if (import.meta.env.DEV && location.search.includes('devkit-preview=')) {
+  import('./devkit/previews/frame').then((m) => m.startPreviewFrame({ app: <App />, root: document.getElementById('root')! }))
+} else {
+  startGame()
+}
+```
+The list — `src/devkit-game/previews.tsx` (found by name, like the Color tab finds the UI kit):
+```tsx
+import type { DevKitPreview } from '../devkit/previews/previewTypes'
+export const previews: DevKitPreview[] = [
+  {
+    id: 'end-table', label: 'End table', group: 'End of game', note: 'The results, straight away',
+    variants: [{ id: '2p', label: '2 players' }, { id: '4p', label: '4 players' }],
+    hint: 'phone',                      // optional: a tag, and opens in the phone-sized frame
+    async show({ variant, failRequests, afterRender }) {
+      // runs IN THE FRAME: fill the game's stores with sample data, open the screen
+      useGameStore.getState().loadState(sampleFinishedGame(variant))
+      screens.push('gameOver')
+      // return nothing to draw the normal <App />, or a tree to draw instead (e.g. the app without its live connection)
+    },
+  },
+]
+```
+`failRequests('words.csv')` makes a GET fail (an error screen); `afterRender(fn)` runs once it has drawn. If `show` throws,
+the overlay says so in red. For tests: the frame has `window.__devkitPreview` = `{ id, variant, ready, problems, counts }`.
+Sample data: build it with the game's own engine (a seeded sim game) rather than hand-writing state — it keeps up when the rules change.
+
 ## Live tuning in the game
 The game keeps importing its own tuning JSON; it just wraps it so the Tuning tab's sliders reach it while it runs.
 `src/devkit/tuning/liveTuning.ts` has no Dev Kit code in it, so it's safe in every build (with the Dev Kit off,
@@ -80,10 +126,33 @@ Slider ranges: add `"_ranges": { "dice.bounce": [0, 1, 0.05] }` (min, max, step)
 Save keeps `_help` and `_ranges`, and writes number lists on one line.
 A game that keeps its tuning in its own mutable object can follow edits with `onTuning('drag', (data) => Object.assign(drag, data))`.
 
+## Naming settings (sections + readable labels)
+So an artist can find a setting, a tuning file can carry two more notes beside `_help` and `_ranges`. The keys
+themselves never change for this — the game's code reads them.
+```json
+{
+  "_help":     { "trailFade": "How long the trail takes to fade, in seconds." },
+  "_labels":   { "trailFade": "Trail: fade time" },
+  "_sections": { "Turn trails": ["trailLead", "trailFade"], "End screen: awards": ["awardPriority"] },
+  "trailLead": 0.5, "trailFade": 0.2, "awardPriority": { "comeback": 9 }
+}
+```
+- `_labels` — the name shown (and searched). None → made from the key: `trailFade` → "Trail fade".
+- `_sections` — title → the keys in it, in order. A group key (`awardPriority`) brings all of its settings. The **same title
+  in two files is one section** (a trail's timing in anim.json and its look in garden.json sit together). Keys left out
+  go in a "`<file>.json (no section)`" section; a file with no `_sections` is one section named after the file, as before.
+- `content/devkit.json` `"sectionOrder": ["Board look", "Turn trails", …]` — the order of the sections (others follow).
+- Write a label so it reads alone in search results ("Spotlight: time per word", not "hold"), and say *colour* in a
+  colour's label, so typing "colour" lists them all.
+A game tab can join the search too: give its `DevKitTab` a `countMatches(query)`, read the text with
+`useContext(DevKitSearch)` (`kit/search/searchContext.ts`), and list its rows in `<Section>`s (`kit/search/Section.tsx`)
+filtered with `filterSections` (`kit/search/searchLogic.ts`) — Tuning and Color are the examples.
+
 ## Knobs
 - `content/devkit.json` → `inReleaseBuilds` (the switch above).
 - The Color tab reads and saves `content/ui/style.json` (the UI kit's file).
-- The Tuning tab reads and saves `content/tuning/*.json` — `_ranges` in a file sets its slider ranges.
+- The Tuning tab reads and saves `content/tuning/*.json` — `_ranges` in a file sets its slider ranges; `_labels` / `_sections` name and group its settings, `content/devkit.json` `sectionOrder` orders the sections.
+- Open/closed sections are kept in localStorage under `devkit-sections:<game name>`.
 - The Snapshots tab reads `content/snapshots/*.json` and saves there. Bug capture: `KEEP_MS` (60 s) and `STATE_EVERY_MS` (5 s) in `kit/capture/captureLog.ts`.
 
 ## Decisions
@@ -109,7 +178,21 @@ A game that keeps its tuning in its own mutable object can follow edits with `on
   arrive (and at most 500 events), so leaving ● Record on all session costs nothing. Marks are kept until Send/Clear.
   Copy for Claude leaves out the every-5-seconds states to stay pasteable; the saved file has them.
 - **● Record is remembered across reloads** — a bug you didn't expect is exactly the one you weren't recording.
+- **Screen previews run in a frame, not over the real stores.** A screen that reads global stores directly (Zustand and
+  friends) can't be handed sample data without changing the game; a second copy of the page has its own stores for free,
+  so the game needs no "preview mode" in its screens and a preview can't leave anything behind. The cost — a second page
+  load (about a second in dev) — is fine for a review tool. The few things two same-site pages share are blocked in the frame
+  (sandbox.ts), and counted so a test can prove nothing got through.
+- **Previews are dev-only, unlike the other tools.** They carry sample-data code and a second boot path that friends on the
+  live link don't need; the tab hides behind `import.meta.env.DEV` (a lazy import a release build drops) and main.tsx's frame
+  branch does too. `check:devkit` fails if `bmuz-devkit-previews` or `devkit-preview=` is in either build.
+- **Rows that don't fit page with a dot carousel (`kit/carousel/`), not a scroll bar** (Muzzy, 0.4.1). ◀ ▶ step a page of
+  whole items (the window is clipped to them), dots show where you are; nothing shows cut in half, nothing scrolls by accident, and a desktop never shows a
+  scroll bar. The selected tab / a keyboard-focused item is always turned to. The paging is plain maths (`carouselPages.ts`, tested).
+- **The tool tabs have their own full-width row** under a small title + ✕ row (Muzzy, 0.4.2: "the tabs/carousels move below it to take advantage of the full width of the panel") — more tabs per carousel page, and the title stays.
+- **Search over the panel, sections inside the tabs** (Muzzy, 0.5.0: "it's SOO hard to find attributes … if the devkit is difficult to use, it becomes useless"). One box filters every settings tab at once, because Muzzy remembers *what* a knob does, not which tab or file it's in. Plain substring matching (no fuzzy ranking): predictable, and "what you typed is inside the word" is exactly what he asked for. The tabs stay mounted while searching (all tabs share one scrolling area) so unsaved edits survive, and a tab filters itself from the search text (a React context), so game tabs need no new props. Sections and labels live **in the content files** (`_labels`, `_sections`, next to `_help`) so Muzzy can rename and regroup in Obsidian, and Save keeps them.
+- **Sections start closed** (when a tab has more than one), so a tab opens as a short list of titles + counts — the index itself; the chips are for jumping when sections are open.
 - **The release check reads the game's web path from the build** (`dist/index.html`), so nothing is hardcoded; `--port` (default 5198) and `--base` override.
 
 ## Develop
-`npm install`, then `npm test` (panel, colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
+`npm install`, then `npm test` (panel, dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
