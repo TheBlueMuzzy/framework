@@ -7,7 +7,7 @@ import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
-  Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
+  ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
   TimerRing, toast, Tooltip, TurnBanner, Victory, type ToastPlace,
 } from '../kit'
@@ -193,8 +193,11 @@ function LobbyRoomAutoReady() {
     { id: seats[1].id, name: seats[1].name, color: seats[1].color },
     { id: seats[2].id, name: seats[2].name, color: seats[2].color },
   ]
+  // children: the host's game options, under the players
   return <Lobby roomCode="QX2T" meId="me" hostId="me" players={players} onCreate={noop} onJoin={noop}
-    onStart={() => screens.replace('countdown')} onLeave={() => screens.pop()} />
+    onStart={() => screens.replace('countdown')} onLeave={() => screens.pop()}>
+    <ListRow label="Board"><Selector label="Board" options={['Small', 'Large']} value="Small" onChange={noop} /></ListRow>
+  </Lobby>
 }
 
 // Pick a seat → "Joining…" for a moment → into the game (the HUD). Cancel goes back to the list.

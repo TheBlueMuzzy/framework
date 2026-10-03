@@ -2,7 +2,7 @@
 import { useState, type ReactNode } from 'react'
 import {
   Screen, Panel, Stack, Row, Grid,
-  Avatar, Badge, Button, Card, ListRow, ProgressBar, RoomCodeInput, ScrollArea,
+  Avatar, Badge, Button, Card, Carousel, ListRow, ProgressBar, RoomCodeInput, ScrollArea,
   Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle,
 } from '../kit'
 import { ScreensDemo } from './ScreensDemo'
@@ -72,6 +72,8 @@ function Buttons() {
         <Button variant="secondary" icon aria-label="Settings">⚙</Button>
         <Button loading>Joining</Button>
         <Button disabled>Disabled</Button>
+        <Button variant="secondary" size={72}>Piece-sized</Button>
+        <Button variant="secondary" size={72} compact>Compact</Button>
       </Row>
     </Section>
   )
@@ -116,6 +118,14 @@ function Display() {
           </Card>
         ))}
       </Grid>
+      <Panel gap="xs">
+        <Text kind="label">Carousel (moves on every 4 s; tap, ◀ ▶ or swipe holds it 3 s)</Text>
+        <Carousel label="Highlights">
+          {[['Lockdown', 'Blue: 9 moves → 2'], ['Long word', 'GARDENS, 7 letters'], ['Close call', 'One move from tangled, got out']].map(([title, why]) => (
+            <Row key={title} gap="s"><Text kind="label">{title}</Text><Text kind="caption">{why}</Text></Row>
+          ))}
+        </Carousel>
+      </Panel>
       <Row gap="s"><Badge>Neutral</Badge><Badge variant="primary">NEW</Badge><Badge variant="danger">3</Badge></Row>
       <Row gap="s">{players.slice(0, 4).map((p, i) => <Avatar key={p} name={p} active={i === 0} />)}</Row>
       <Stack gap="s">

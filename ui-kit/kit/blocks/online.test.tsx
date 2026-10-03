@@ -30,6 +30,11 @@ describe('Lobby', () => {
     expect(screen.getByRole('button', { name: 'Start game' })).toHaveProperty('disabled', false)
   })
 
+  it('extra rows (children) show in the room, under the players', () => {
+    render(<Lobby {...calls} onJoin={noop} roomCode="ABCD" meId="h" hostId="h" players={[{ id: 'h', name: 'Host' }]}><p>Board: Small</p></Lobby>)
+    expect(screen.getByText('Board: Small')).toBeTruthy()
+  })
+
   it('other players get a Ready button instead of Start', () => {
     const onReady = vi.fn()
     render(<Lobby {...calls} onReady={onReady} onJoin={noop} roomCode="ABCD" meId="b" hostId="h" players={[{ id: 'h', name: 'Host' }, { id: 'b', name: 'Bo' }]} />)

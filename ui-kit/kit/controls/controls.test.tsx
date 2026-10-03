@@ -1,8 +1,8 @@
-// Behaviour tests for the controls that have real logic: Selector, Stepper, Tabs, RoomCodeInput.
+// Behaviour tests for the controls that have real logic: Selector, Stepper, Tabs, RoomCodeInput, Button size.
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
-import { RoomCodeInput, Selector, Stepper, Tabs } from '.'
+import { Button, RoomCodeInput, Selector, Stepper, Tabs } from '.'
 
 afterEach(cleanup)
 
@@ -88,5 +88,30 @@ describe('RoomCodeInput', () => {
     render(<RoomCodeDemo />)
     fireEvent.paste(boxes()[0], { clipboardData: { getData: () => 'x7-k2 99' } })
     expect(code()).toBe('X7K2') // cut to 4 letters
+  })
+})
+
+describe('Button size', () => {
+  it('a game can make a button as big as its pieces (px), passed to the CSS as --kit-button-size', () => {
+    render(<Button size={96.4} style={{ opacity: 1 }}>Cast</Button>)
+    const button = screen.getByRole('button', { name: 'Cast' })
+    expect(button.dataset.sized).toBe('true')
+    expect(button.style.getPropertyValue('--kit-button-size')).toBe('96px')
+    expect(button.style.opacity).toBe('1') // its own style is kept
+  })
+
+  it('compact: marked for the narrower side padding', () => {
+    render(<><Button compact>Tight</Button><Button>Roomy</Button></>)
+    expect(screen.getByRole('button', { name: 'Tight' }).dataset.compact).toBe('true')
+    expect(screen.getByRole('button', { name: 'Roomy' }).dataset.compact).toBeUndefined()
+  })
+
+  it('no size (or 0): the normal button', () => {
+    render(<><Button>Plain</Button><Button size={0}>Zero</Button></>)
+    for (const name of ['Plain', 'Zero']) {
+      const button = screen.getByRole('button', { name })
+      expect(button.dataset.sized).toBeUndefined()
+      expect(button.style.getPropertyValue('--kit-button-size')).toBe('')
+    }
   })
 })

@@ -39,7 +39,7 @@ describe('DevKit panel', () => {
 
   it('by default lists the kit tabs + src/devkit-game/tabs.ts (empty here)', () => {
     render(<DevKit />)
-    expect(screen.getAllByRole('tab', { hidden: true }).map((t) => t.textContent)).toEqual(['Color'])
+    expect(screen.getAllByRole('tab', { hidden: true }).map((t) => t.textContent)).toEqual(['Color', 'Snapshots', 'Bugs'])
   })
 
   it('Color tab without the UI kit: just the colour-blind preview and a note', () => {
