@@ -1,12 +1,13 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-Released v0.2.0 (2026-09-29) — the Dev Kit is a framework module (`devkit/` 0.1.1, `install-devkit.mjs`, game tabs) and the UI kit is 0.2.2. Roll Better runs both (its dev/v1.6 branch).
-Next: `/roadmap` for the next framework module (candidates: online rooms, drag-to-zone, physics dice) — or back to Roll Better F48.
+v0.3.1 released 2026-10-03 (Rooms, Dev Kit 0.5, UI kit 0.2.15; all work branches merged + deleted). Now: **v0.4 The Table** (defined 2026-10-04) — design `design/table.md`, ROADMAP F12–F18. Built here first and switched on in Glyphtender v0.6 (its F29–F36) the same sprint; Glyphtender's golden games + before-screenshots are the judge. Built for online + AI (local and online).
+Next: the work starts in Glyphtender (`/sprint` there → F29 Safety net), then F12 Game core here.
+Known gap: Rooms `broadcastEvent` sends to every seat — F18 adds per-seat events before any game sends secret cues.
 
 ## Where we are
-Stage: deliver   Milestone: v0.2 — Dev Kit module + kit pass ✅   Sprint: none (04 done)
-Doing: —   Branch: main   Version: 0.2.0
+Stage: define → develop   Milestone: v0.4 — The Table   Sprint: none (work starts in Glyphtender F29)
+Doing: planned   Branch: main   Version: 0.3.1
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts

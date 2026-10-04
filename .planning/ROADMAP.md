@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: next milestone not set (/define) — v0.2 released 2026-09-29
+Release target: v0.4 The Table (0/7) — v0.3.1 released 2026-10-03
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -38,6 +38,30 @@ Goal: every web game gets the in-game Dev Kit (` key) from the framework, and th
 flowchart LR
   F08[✅ F08 Dev Kit module] --> F09[✅ F09 Roll Better Dev Kit]
   F10[✅ F10 Kit pass 0.2] --> F11[✅ F11 Roll Better kit 0.2]
+```
+
+## v0.3 — Rooms, Dev Kit 0.5, kit 0.2.15  ✅ released 2026-10-03 (v0.3.0 → v0.3.1, built through Glyphtender)
+Shipped while Glyphtender used them (backfilled 2026-10-04): **Rooms** module (online rooms, seats, rejoin, bot takeover, per-player views — harvested from Roll Better, proven in Glyphtender) · **Dev Kit 0.3–0.5** (snapshots, bug capture, screen previews, search + sections) · **UI kit 0.2.3–0.2.15** (screen stack, carousel that loops, cards that breathe, no orphans, PlayerChip floatUps…).
+
+## v0.4 — The Table  ← current  (proven by Glyphtender v0.6)
+Goal: the foundation every board/tabletop game stands on — Game core + events, Turns & flow, Zones & pieces, drag referee, Hand view, seats & per-seat views — built for online play and AI (local and online). Design: `design/table.md`. Each feature is built here first and switched on in Glyphtender the same sprint (its F29–F36); Roll Better is the second-game proof after.
+- ⏳ F12 🧱 Game core: rules contract (setup, legalActions, check, apply → state + events, isOver, viewFor), replayable move record, fast mode, seeded random — must:prototype · needs: Glyphtender F29 (golden games)
+- ⏳ F13 🧱 Event stream: events with visibility; listeners for screen, sound, stats, achievements, online replay — must:prototype · needs: F12
+- ⏳ F14 🧱 Turns & flow: stack of named levels, who may act (one · some/all · everyone), order list from the rules, ends-when, response windows; presets — must:prototype · needs: F12
+- ⏳ F15 🧱 Zones & pieces: zones (nesting, inherited owner/visibility), pieces with stable ids, owner field, shared vs local states, accepts by kind — must:prototype · needs: F12
+- ⏳ F16 🧱 Drag referee: one acceptance answer → glow, piece reaction, nope, cursor; phones show valid zones on pick-up; server re-check — must:prototype · needs: F14, F15
+- ⏳ F17 🧱 Hand view: zone layouts with presets (rack first; fan later) — must:prototype · needs: F16
+- ⏳ F18 🧱 Seats & per-seat views: one seat model (human/bot, local/online), viewer seat for pass-and-play, per-seat views + per-seat events in Rooms (replaces broadcast-to-all), leak tests — must:prototype · needs: F13, F15
+```mermaid
+flowchart LR
+  F12[F12 Game core] --> F13[F13 Events]
+  F12 --> F14[F14 Turns & flow]
+  F12 --> F15[F15 Zones & pieces]
+  F14 --> F16[F16 Drag referee]
+  F15 --> F16
+  F16 --> F17[F17 Hand view]
+  F13 --> F18[F18 Seats & views]
+  F15 --> F18
 ```
 
 ## Later
