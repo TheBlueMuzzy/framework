@@ -52,6 +52,7 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
   onStart(options, seats, room) {
     const secrets: Record<string, number> = {}
     seats.forEach((seat, i) => { secrets[seat.id] = options.secretBase + i })
+    room.sendEventPerSeat((seat, i) => (i === 0 ? `your secret is ${secrets[seat.id]}` : null)) // only the first seat hears it
     const state = { total: 0, turn: 0, order: seats.map((s) => s.id), secrets }
     startTurnClock(state, room)
     return state
@@ -287,7 +288,14 @@ describe('RoomServer: the game', () => {
     expect(ann.last('view')?.view).toMatchObject({ total: 2, whoseTurn: 'seat-2' })
     expect(bob.last('view')?.view).toMatchObject({ total: 2, whoseTurn: 'seat-2' })
     expect(bob.last('event')?.event).toBe('Ann added 2')
-    expect(ann.last('event')).toBeUndefined()
+    expect(ann.last('event')?.event).toBe('your secret is 100') // (from the start — not Ann's own move)
+  })
+
+  it('per-seat events: a secret reaches only the seat it is for', () => {
+    const { ann, bob } = startGame()
+    expect(ann.last('event')?.event).toBe('your secret is 100')
+    expect(bob.last('event')).toBeUndefined()
+    expect(JSON.stringify(bob.received)).not.toContain('your secret')
   })
 
   it('bad shapes → bad_action; rule breaks → action_refused with the game\'s own words', () => {
