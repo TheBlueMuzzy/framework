@@ -88,11 +88,11 @@ describe('scoring and choosing', () => {
       }
       return picks
     }
-    const hunter = { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }
+    const hunter = { aggression: { min: 100, max: 100 }, greed: { min: 30, max: 30 } }
     expect([...always(person({ traits: hunter, nudge: 0.2 }))]).toEqual([11])
-    // The other goals are weighted by their traits (all 0 → evenly), so greed 0 or 30 both still nudge.
-    expect([...always(person({ traits: { ...hunter, greed: { min: 30, max: 30 } }, nudge: 0.2 }))]).toEqual([11])
-    expect(always(person({ traits: hunter, nudge: 0 })).size).toBe(2) // no nudge: either neighbour
+    // Each other goal nudges by its trait: no greed → gold doesn't matter; no nudge → either neighbour.
+    expect(always(person({ traits: { ...hunter, greed: { min: 0, max: 0 } }, nudge: 0.2 })).size).toBe(2)
+    expect(always(person({ traits: hunter, nudge: 0 })).size).toBe(2)
   })
 
   it('a looser skill picks among more moves; spread 1 + topN 1 always takes the best', () => {

@@ -7,8 +7,8 @@
 //   4. Want   — walk the goal priority list: a goal wins when a d100 roll comes in at or under its trait's value.
 //               None wins → the first goal.
 //   5. Look   — imagine the hidden things (skill.worlds times), take up to skill.candidates moves from the plug.
-//   6. Score  — each move: the main goal (0–1 among these moves) + nudge × the other goals (0–1, weighted by their
-//               traits), averaged over the imagined worlds. The main goal sets the character; the nudge lets it pick
+//   6. Score  — each move: the main goal (0–1 among these moves) + nudge × each other goal (0–1) × its trait ÷ 100,
+//               averaged over the imagined worlds. The main goal sets the character; the nudge lets it pick
 //               the hunt that ALSO spells.
 //   7. Choose — keep the moves within skill.spread of the best, at most skill.topN, pick one weighted by score.
 //   8. Explain— a Decision with a plain-English note (Dev Kit, bug reports — never players).
@@ -137,12 +137,10 @@ export function makeBrain<View, Action, World>(plug: GamePlug<View, Action, Worl
         const hi = Math.max(...values)
         return { goal, values, norm: values.map((v) => (hi > lo ? (v - lo) / (hi - lo) : 0)), mattered: hi > lo }
       })
-      const weightOf = (goalId: string) => Math.max(0, traits[traitOf(goalId)] ?? 0)
-      const otherWeight = scored.slice(1).reduce((s, g) => s + weightOf(g.goal.id), 0)
-      const combined = actions.map((_, i) => {
-        const nudge = scored.slice(1).reduce((s, g) => s + (otherWeight > 0 ? weightOf(g.goal.id) / otherWeight : 1 / (scored.length - 1)) * g.norm[i], 0)
-        return scored[0].norm[i] + personality.nudge * nudge
-      })
+      // Each other goal adds up to nudge × (its trait ÷ 100): a greedy Bully still likes a hunt that spells, a Bully
+      // with no greed doesn't care. (Not a share split between the goals — that made every one of them too faint.)
+      const weightOf = (goalId: string) => Math.max(0, traits[traitOf(goalId)] ?? 0) / 100
+      const combined = actions.map((_, i) => scored[0].norm[i] + personality.nudge * scored.slice(1).reduce((s, g) => s + weightOf(g.goal.id) * g.norm[i], 0))
 
       // 7. Choose like a person.
       const best = Math.max(...combined)
