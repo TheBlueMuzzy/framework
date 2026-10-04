@@ -12,6 +12,7 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Tuning | Every number in `content/tuning/*.json` as a slider + number box (true/false = checkbox, `#rrggbb` text = a colour picker, other text shown as-is), ↺ back to saved, in sections with readable names, the `file · key` under each name. Live in the game if it reads its tuning through `liveTuning` (below). Only shows when the game has `content/tuning/` files |
 | Snapshots | Save "this exact moment" under a name → list (time, version, one-line summary) with **Restore** · **Copy for Claude** (the JSON) · **Save to file** (dev: `content/snapshots/<name>.json`, so Claude and tests can load it) · ✕. Kept in this browser (localStorage, per game); files in `content/snapshots/` are listed too. Restore is greyed out when the game says `canRestore()` is false (online). Needs the game adapter (below) |
 | Bugs (Bug capture) | **● Record** keeps the last 60 s of the game's events + its state every 5 s (stays on after a reload) · **📍 Mark** "it happened here" (keeps that state) · "What went wrong?" · **Send to /bug** (dev: `.planning/bugs/capture-<date>-<time>.json`, where /bug keeps captures) · **Copy for Claude** (starts with `/bug —`; the only way out of a live build). The capture: note, version, device (userAgent, screen, window, orientation, touch), marks with their state, state now, events and states with `secondsAgo`. Needs the game adapter |
+| AI (game tab, plugged in) | **Dev Kit 0.6.0.** Tune the game's AI opponents: pick a personality (or **Copy to new…**), two-handled range sliders per trait (0–100, with number boxes), drag-to-reorder goal order (▲ ▼ on touch), nudge / chattiness / extras, mood-shift rows (reading · from → full · trait · by, + add / ✕), bio text, skill picker + its numbers. Problems from the game's `validate` (e.g. the AI kit's `personalityProblems`) show in red and hold Save back. **Save** writes `content/ai/*.json` (and the bio's text file) whole, notes kept; Copy for Claude lists the changes. **▶ Watch**: a new all-AI game on the real board (seat 1 = the personality being edited, unsaved changes included) with each decision's note and per-bot belief bars (guessed score + how sure). **Run check** (6 / 20 / 60 games, the game runs them off the main thread) → a link to the Personality Check report. Joins the search ("nerve", "wobble"). Needs `aiTab(…)` in `src/devkit-game/tabs.ts` (below) |
 | Screens (previews) | **Dev only.** Screens that are normally gated (an end screen, a handoff, a lobby with 4 players, an error) listed by group, one button per variant (2 / 3 / 4 players, host / guest…). Picking one opens it **in a sandbox over the game**: a full-window overlay badged PREVIEW with the variants, a size switch (fit / phone 390×844 / desktop 1440×900, scaled to fit), ↻ Replay, what the sandbox blocked (those in a dot carousel when they don't fit — on a phone, a row of their own), and ✕ Close (or Esc, or the phone's Back). Closing leaves the real game exactly as it was. Needs `src/devkit-game/previews.tsx` + one line in main.tsx (below) |
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note; no page reload for its own writes |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
@@ -100,6 +101,31 @@ export const previews: DevKitPreview[] = [
 `failRequests('words.csv')` makes a GET fail (an error screen); `afterRender(fn)` runs once it has drawn. If `show` throws,
 the overlay says so in red. For tests: the frame has `window.__devkitPreview` = `{ id, variant, ready, problems, counts }`.
 Sample data: build it with the game's own engine (a seeded sim game) rather than hand-writing state — it keeps up when the rules change.
+
+## The AI tab (a game's AI opponents)
+For a game using the framework AI module (`ai/`, content in `content/ai/`). The Dev Kit never imports the game's AI —
+the game hands the tab its files as data plus optional callbacks (`kit/ai/aiTypes.ts` → `DevKitAi`):
+```ts
+// src/devkit-game/tabs.ts
+import { aiTab } from '../devkit/ai/aiTabEntry'
+import type { DevKitTab } from '../devkit/DevKit'
+import { myGameAi } from './aiDevKit'
+export const gameTabs: DevKitTab[] = [aiTab(myGameAi)]
+
+// src/devkit-game/aiDevKit.ts
+export const myGameAi: DevKitAi = {
+  personalities: { path: 'content/ai/personalities.json', data: personalitiesFile, listKey: 'personalities' },
+  skills: { path: 'content/ai/skills.json', data: skillsFile, listKey: 'skills' },
+  bios: { path: 'content/text/en.json', data: en, at: (id) => ['ai', 'personality', id, 'bio'] }, // optional
+  readings: ['myDanger', 'behind'],                         // optional: the mood-shift reading choices
+  validate: (p) => personalityProblems(p, plug),            // optional: red problems, Save waits
+  watch: (seats, onEvent) => startWatch(seats, onEvent),    // optional: all-AI game on the board; return "stop"
+  runCheck: ({ games, personalities, skills, onProgress }) => runInWorker(…), // optional: → report HTML
+}
+```
+Sections come from the files' own `_sections` (+ "AI: bio", "AI: watch a game", "AI: Personality Check"); settings no
+section lists go in "… — more". Names and help lines: `_labels` / `_help`, keyed by the path inside ONE item
+(`traits.aggression`, `extras.nerve`), so one note fits every personality. Glyphtender's `src/devkit-game/aiDevKit.ts` is the full example.
 
 ## Live tuning in the game
 The game keeps importing its own tuning JSON; it just wraps it so the Tuning tab's sliders reach it while it runs.
@@ -192,7 +218,10 @@ filtered with `filterSections` (`kit/search/searchLogic.ts`) — Tuning and Colo
 - **The tool tabs have their own full-width row** under a small title + ✕ row (Muzzy, 0.4.2: "the tabs/carousels move below it to take advantage of the full width of the panel") — more tabs per carousel page, and the title stays.
 - **Search over the panel, sections inside the tabs** (Muzzy, 0.5.0: "it's SOO hard to find attributes … if the devkit is difficult to use, it becomes useless"). One box filters every settings tab at once, because Muzzy remembers *what* a knob does, not which tab or file it's in. Plain substring matching (no fuzzy ranking): predictable, and "what you typed is inside the word" is exactly what he asked for. The tabs stay mounted while searching (all tabs share one scrolling area) so unsaved edits survive, and a tab filters itself from the search text (a React context), so game tabs need no new props. Sections and labels live **in the content files** (`_labels`, `_sections`, next to `_help`) so Muzzy can rename and regroup in Obsidian, and Save keeps them.
 - **Sections start closed** (when a tab has more than one), so a tab opens as a short list of titles + counts — the index itself; the chips are for jumping when sections are open.
+- **The AI tab is a game tab the kit provides (`aiTab(…)`), not a kit tab** (0.6.0). Only games with an AI opponent want it, and its data (personalities, skills, bios) and its live parts (watch, check) are the game's — so the game lists it in `tabs.ts` with its plug, like Snapshots' adapter. The tab edits whole items in memory and Save writes each changed file whole with `{...file, personalities: list}` — `_help` / `_labels` / `_sections` ride along untouched.
+- **Watch and Run check use the tab's current values, unsaved changes included** — the point is "drag a slider, see if it plays differently", without saving first.
+- **The two-handled slider is two plain range inputs stacked** (only their handles take touches): keyboard, screen readers and Playwright all work with them as ordinary sliders; the number boxes beside them are for exact values on a phone.
 - **The release check reads the game's web path from the build** (`dist/index.html`), so nothing is hardcoded; `--port` (default 5198) and `--base` override.
 
 ## Develop
-`npm install`, then `npm test` (panel, dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
+`npm install`, then `npm test` (panel, AI tab (editor, save, copy, watch, check, search), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
