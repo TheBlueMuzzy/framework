@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: v0.5 — not defined yet (/define) — v0.4.0 The Table released 2026-10-04
+Release target: v0.5 The AI (defined 2026-10-04, proven by Glyphtender beta) — musts 0/6 · v0.4.0 The Table released 2026-10-04
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -43,7 +43,7 @@ flowchart LR
 ## v0.3 — Rooms, Dev Kit 0.5, kit 0.2.15  ✅ released 2026-10-03 (v0.3.0 → v0.3.1, built through Glyphtender)
 Shipped while Glyphtender used them (backfilled 2026-10-04): **Rooms** module (online rooms, seats, rejoin, bot takeover, per-player views — harvested from Roll Better, proven in Glyphtender) · **Dev Kit 0.3–0.5** (snapshots, bug capture, screen previews, search + sections) · **UI kit 0.2.3–0.2.15** (screen stack, carousel that loops, cards that breathe, no orphans, PlayerChip floatUps…).
 
-## v0.4 — The Table  ← current  (proven by Glyphtender v0.6)  ✅ released 2026-10-04
+## v0.4 — The Table  (proven by Glyphtender v0.6)  ✅ released 2026-10-04
 Goal: the foundation every board/tabletop game stands on — Game core + events, Turns & flow, Zones & pieces, drag referee, Hand view, seats & per-seat views — built for online play and AI (local and online). Design: `design/table.md`. Each feature is built here first and switched on in Glyphtender the same sprint (its F29–F36); Roll Better is the second-game proof after.
 - ✅ F12 🧱 Game core: rules contract (setup, legalActions, check, apply → state + events, isOver, viewFor), replayable move record, fast mode, seeded random — must:prototype · needs: Glyphtender F29 (golden games) · built in table/ (kit 0.1.0), switched over in Glyphtender sprint 09
 - ✅ F13 🧱 Event stream: events with visibility; listeners for screen, sound, stats, achievements, online replay — must:prototype · needs: F12
@@ -62,6 +62,33 @@ flowchart LR
   F16 --> F17[F17 Hand view]
   F13 --> F18[F18 Seats & views]
   F15 --> F18
+```
+
+## v0.5 — The AI  ← current  (proven by Glyphtender beta, its v0.7)
+Goal: any turn-based game can put a fair, human-feeling AI in any seat — local or online — with personalities Muzzy tunes in the Dev Kit and proves by watching behaviour across hundreds of games. Design: `design/ai.md`. Built here first and switched on in Glyphtender the same sprint (its F38–F47).
+- 🟢 F19 🧱 Brain: personality + skill data, see (view only) → imagine hidden → readings → mood shifts → goal roll → candidates → score (main goal + nudge) → choose like a person → explain note; seeded; game plug shape — must:beta · needs: F12, F18
+- ⏳ F20 🧱 Fuzzy beliefs: estimates with confidence that decays / rises from the seat's own events; drift; rebuilt from events (rejoin-safe) — must:beta · needs: F19, F13
+- ⏳ F21 🧱 Pace + background thinking: Web Worker runner, time budget, think-time + speed presets (Slow · Normal · Fast · Instant), server runner inside the room — must:beta · needs: F19
+- ⏳ F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
+- ⏳ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20
+  why: Muzzy tunes personalities by eye in the game, not by description
+- ⏳ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21
+  why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
+- ⏳ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
+- ⏳ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
+```mermaid
+flowchart LR
+  F12[✅ F12 Game core] --> F19[F19 Brain]
+  F18[✅ F18 Seats & views] --> F19
+  F19 --> F20[F20 Fuzzy beliefs]
+  F19 --> F21[F21 Pace + background]
+  F19 --> F22[F22 Banter]
+  F19 --> F23[F23 Dev Kit AI tab]
+  F20 -.working.-> F23
+  F19 --> F24[F24 Arena + Personality Check]
+  F21 -.working.-> F24
+  F24 --> F25[F25 What wins?]
+  F24 --> F26[F26 Auto-tuner]
 ```
 
 ## Later

@@ -1,12 +1,11 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-v0.3.1 released 2026-10-03 (Rooms, Dev Kit 0.5, UI kit 0.2.15; all work branches merged + deleted). Now: **v0.4 The Table** (defined 2026-10-04) — design `design/table.md`, ROADMAP F12–F18. Built here first and switched on in Glyphtender v0.6 (its F29–F36) the same sprint; Glyphtender's golden games + before-screenshots are the judge. Built for online + AI (local and online).
-Next: the work starts in Glyphtender (`/sprint` there → F29 Safety net), then F12 Game core here.
-Known gap: Rooms `broadcastEvent` sends to every seat — F18 adds per-seat events before any game sends secret cues.
+v0.4.0 The Table released 2026-10-04. Now: **v0.5 The AI** (defined 2026-10-04 with Muzzy) — design `design/ai.md`, ROADMAP F19–F26. Built here first and switched on in Glyphtender beta (its v0.7, F38–F47) the same sprint.
+Next: `/sprint` in Glyphtender — F19 Brain here + Glyphtender F38 AI plug together.
 
 ## Where we are
-Stage: define → develop   Milestone: v0.4 — The Table   Sprint: none (work starts in Glyphtender F29)
+Stage: define → develop   Milestone: v0.5 — The AI   Sprint: none (lined up from Glyphtender)
 Doing: planned   Branch: main   Version: 0.3.1
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
