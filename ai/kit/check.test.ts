@@ -1,0 +1,80 @@
+import { describe, expect, it } from 'vitest'
+import { checkFeelTargets, skillLadder, tellApart, winRates, type GameResult, type SeatResult } from './check'
+import { nextRandom } from './random'
+
+// Made-up arena results: Bullies tangle a lot and spell short; Scholars spell long and rarely tangle.
+let rng = 1
+const noise = (size: number) => {
+  const r = nextRandom(rng)
+  rng = r.rng
+  return (r.value * 2 - 1) * size
+}
+const seat = (personality: string, won: number, skill = 'mid'): SeatResult => ({
+  personality,
+  skill,
+  won,
+  meters: personality === 'Bully' ? { tangles: 1.4 + noise(0.4), wordLength: 3.1 + noise(0.3) } : { tangles: 0.2 + noise(0.2), wordLength: 4.6 + noise(0.4) },
+})
+const games: GameResult[] = Array.from({ length: 100 }, (_, i) => ({ seats: [seat('Bully', i % 5 < 2 ? 1 : 0), seat('Scholar', i % 5 < 2 ? 0 : 1)] }))
+
+describe('the Personality Check', () => {
+  it('feel targets: threshold and table targets go green or red with what was measured', () => {
+    const out = checkFeelTargets(games, {
+      Bully: [
+        { meter: 'tangles', op: '>=', value: 1, label: 'tangles a lot' },
+        { meter: 'tangles', op: 'tableBest', label: 'tangles most' },
+        { meter: 'wordLength', op: '>=', value: 4, label: 'spells long (it does not)' },
+      ],
+      Scholar: [{ meter: 'wordLength', op: 'tableBest', label: 'longest words' }],
+    })
+    expect(out.Bully.map((t) => t.pass)).toEqual([true, true, false])
+    expect(out.Bully[1].rival?.personality).toBe('Scholar')
+    expect(out.Scholar[0].pass).toBe(true)
+    expect(out.Bully[0].measured).toBeGreaterThan(1.2)
+  })
+
+  it('tell-apart: clearly different behaviour is told apart; identical behaviour is a coin toss', () => {
+    const t = tellApart(games, ['tangles', 'wordLength'])
+    expect(t.overall).toBeGreaterThan(0.95)
+    expect(t.grid.Bully.Bully + t.grid.Bully.Scholar).toBe(100)
+    rng = 5
+    const twins: GameResult[] = Array.from({ length: 200 }, () => ({
+      seats: ['A', 'B'].map((p) => ({ personality: p, skill: 'mid', won: 0, meters: { x: noise(1), y: noise(1) } })),
+    }))
+    const same = tellApart(twins, ['x', 'y'])
+    expect(same.overall).toBeGreaterThan(0.3)
+    expect(same.overall).toBeLessThan(0.7)
+  })
+
+  it('wins: overall share and head-to-head', () => {
+    const w = winRates(games)
+    expect(w.overall).toEqual({ Bully: 0.4, Scholar: 0.6 })
+    expect(w.headToHead.Bully.Scholar).toBe(0.4)
+    expect(w.headToHead.Scholar.Bully).toBe(0.6)
+  })
+
+  it('skill ladder: the higher skill’s share of wins when one personality meets itself at two skills', () => {
+    const ladder: GameResult[] = Array.from({ length: 20 }, (_, i) => ({ seats: [seat('Bully', i < 15 ? 1 : 0, 'high'), seat('Bully', i < 15 ? 0 : 1, 'low')] }))
+    expect(skillLadder(ladder, ['low', 'high'])).toEqual({ Bully: 0.75 })
+  })
+})
+
+describe('the report page', () => {
+  it('is one self-contained page with every section', async () => {
+    const { reportHtml } = await import('./report')
+    const html = reportHtml({
+      title: 'Personality Check',
+      subtitle: '100 games',
+      feel: checkFeelTargets(games, { Bully: [{ meter: 'tangles', op: '>=', value: 1, label: 'tangles <a lot>' }] }),
+      all: [{ label: 'skill ladder holds', pass: true, detail: '75%' }],
+      tell: tellApart(games, ['tangles', 'wordLength']),
+      wins: winRates(games),
+      ladder: {},
+      notes: ['Bully rolled TRAP'],
+    })
+    expect(html).toMatch(/^<!doctype html>/)
+    expect(html).toContain('tangles &lt;a lot&gt;')
+    expect(html).not.toMatch(/<script|src=|href=/)
+    for (const s of ['For all of them', 'feel like itself', 'tell them apart', 'win sometimes', 'How they think']) expect(html).toContain(s)
+  })
+})
