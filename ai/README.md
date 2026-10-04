@@ -13,6 +13,7 @@ Every game's AI is the same kind of player with different instincts. This module
 | `check.ts` (F24, early) | The Personality Check maths: `checkFeelTargets` (green/red per target, incl. "best at the table"), `tellApart` (nearest-average guess from behaviour alone + a who-was-that grid), `winRates` (overall + head-to-head), `skillLadder` |
 | `report.ts` (F24, early) | `reportHtml(report)` — one self-contained page: for-all checks, feel targets per personality, tell-apart grid, win shares + skill ladder, example notes |
 | `pace.ts` (F21 part) | `thinkDelay(pace, kind, speed, rng)` — a person-like moment per action kind ÷ the speed setting (Instant = 0) · `waitLeft` (thinking time counts toward it) · background thinking: `serveThinking` (inside a Web Worker), `makeThinker` (on the page → promises), `inlineThinker` (no worker: tests, Node, the server) |
+| `banter.ts` (F22 part) | `maybeSay(moment, turn, chattiness, lines, memory, settings, rng)` — chance per moment × chattiness, a cooldown (some moments skip it), no repeats until every line is used · `quietMemory` (plain JSON per bot seat) |
 | `random.ts` | seeded mulberry32: `nextRandom`, `randomBetween`, `sample`, `shuffle`, `weightedPick` |
 
 Coming next (v0.5): Fuzzy beliefs (F20) · Pace + background thinking (F21) · Banter (F22) · Dev Kit AI tab (F23) · Arena + Personality Check (F24).
