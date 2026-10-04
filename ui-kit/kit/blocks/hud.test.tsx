@@ -53,6 +53,11 @@ describe('PlayerChip', () => {
     const { container } = render(<PlayerChip name="Sam" dim />)
     expect(container.querySelector('.kit-player-chip')?.hasAttribute('data-dim')).toBe(true)
   })
+  it('floatUps={false}: a rising score floats no "+N" (the game flies its own points in)', () => {
+    const { container, rerender } = render(<PlayerChip name="Sam" score={5} floatUps={false} />)
+    rerender(<PlayerChip name="Sam" score={8} floatUps={false} />)
+    expect(container.querySelector('.kit-float-up')).toBeNull()
+  })
   it('with reduce motion on, a rising score jumps straight to its new value', () => {
     document.documentElement.setAttribute('data-reduce-motion', '')
     const { container, rerender } = render(<PlayerChip name="Sam" score={5} />)
