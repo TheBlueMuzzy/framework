@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { devkit, devkitInReleaseBuilds, formatJson, isAllowedBugCapturePath, isAllowedContentPath, keepHelp } from './devkitVite'
+import { devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -64,17 +64,7 @@ describe('keepHelp — a file\'s _help note survives a save', () => {
   })
 })
 
-describe('formatJson', () => {
-  it('is 2-space pretty JSON with a trailing newline', () => {
-    expect(formatJson({ preset: 'cartoon', tweaks: {} })).toBe('{\n  "preset": "cartoon",\n  "tweaks": {}\n}\n')
-  })
-  it('keeps lists of numbers on one line, but not lists of text or objects', () => {
-    expect(formatJson({ points: [8, 6, -4.5, 1e-7], on: [true, false] })).toBe('{\n  "points": [8, 6, -4.5, 1e-7],\n  "on": [true, false]\n}\n')
-    expect(formatJson({ names: ['a', 'b'] })).toBe('{\n  "names": [\n    "a",\n    "b"\n  ]\n}\n')
-    expect(formatJson({ rows: [{ a: 1 }], empty: [] })).toBe('{\n  "rows": [\n    {\n      "a": 1\n    }\n  ],\n  "empty": []\n}\n')
-    expect(formatJson({ tip: 'a [1,2] in text' })).toBe('{\n  "tip": "a [1,2] in text"\n}\n')
-  })
-})
+// formatJson (how files are written): formatJson.test.ts
 
 describe('devkitInReleaseBuilds — the release-build switch', () => {
   let game: string
@@ -133,6 +123,12 @@ describe('the plugin in a real Vite dev server', () => {
     const res = await save({ path: 'content/ui/table.json', data: { rows: '#123456' } })
     expect(res.status).toBe(200)
     expect(readFileSync(join(game, 'content/ui/table.json'), 'utf8')).toBe('{\n  "_help": "keep me",\n  "rows": "#123456"\n}\n')
+  })
+  it('keeps how the file was written (one-line rows stay one line, 1.0 stays 1.0)', async () => {
+    const handWritten = '{\n  "rows": [\n    { "min": 1.0, "max": 2 }\n  ]\n}\n'
+    writeFileSync(join(game, 'content/ui/rows.json'), handWritten)
+    expect((await save({ path: 'content/ui/rows.json', data: JSON.parse(handWritten) })).status).toBe(200)
+    expect(readFileSync(join(game, 'content/ui/rows.json'), 'utf8')).toBe(handWritten)
   })
   it('refuses paths outside content/', async () => {
     const res = await save({ path: 'content/../package.json', data: {} })
