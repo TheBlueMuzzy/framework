@@ -43,7 +43,7 @@
 
 /* two-handled range: [low] [track with two handles] [high] */
 .ai-range { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; align-items: center; }
-.ai-range-track { position: relative; height: 30px; }
+.ai-range-track { position: relative; height: 30px; isolation: isolate; } /* its handles never float over the sticky footer */
 .ai-range-track::before { /* the whole 0–100 track */
   content: '';
   position: absolute;
@@ -124,8 +124,8 @@
   font-size: 12px;
   color: #9a9bab;
 }
-.ai-shift .ai-num { width: 52px; }
-.ai-shift .ai-select { max-width: 9.5em; }
+.ai-shift .ai-num { width: 46px; }
+.ai-shift .ai-select { max-width: 8.5em; }
 
 /* watching + checking */
 .ai-watch, .ai-check { padding: 4px 0 8px; display: flex; flex-direction: column; gap: 6px; }
@@ -144,7 +144,8 @@
 .ai-bar-progress { height: 10px; }
 .ai-notes {
   margin: 0;
-  padding: 6px 6px 6px 30px;
+  list-style: none;
+  padding: 4px 8px;
   max-height: 40vh;
   overflow-y: auto;
   background: #0f1015;

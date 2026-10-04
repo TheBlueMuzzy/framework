@@ -97,13 +97,14 @@ export function WatchPanel({ watch, picked, everyone, skill }: Props) {
       )}
 
       {notes.length > 0 && (
-        <ol className="ai-notes" aria-label="Decision notes" reversed>
+        <ul className="ai-notes" aria-label="Decision notes (newest first)">
           {[...notes].reverse().map((e, i) => (
             <li key={notes.length - i} className="ai-note">
-              <b>{e.seat + 1} {e.who}</b> {e.note}
+              {/* the seat number, and the name unless the note already starts with it */}
+              <b>{e.seat + 1}{e.note.startsWith(e.who) ? '' : ` ${e.who}`}</b> {e.note}
             </li>
           ))}
-        </ol>
+        </ul>
       )}
     </div>
   )

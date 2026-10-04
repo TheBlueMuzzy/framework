@@ -109,7 +109,7 @@ describe('the AI tab', () => {
     expect(seats.map((s) => s.personality.id)).toEqual(['Bully', 'Scholar'])
     expect(seats[0].personality.traits.greed.min).toBe(41)
     act(() => send({ seat: 0, who: 'Bully', note: 'rolled TRAP', mine: 10, beliefs: [{ seat: 1, estimate: 8, confidence: 0.5 }] }))
-    expect(screen.getByLabelText('Decision notes').textContent).toContain('rolled TRAP')
+    expect(screen.getByLabelText('Decision notes (newest first)').textContent).toContain('rolled TRAP')
     expect(screen.getByText('≈8')).toBeTruthy()
     expect(screen.getByText('50%')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '■ Stop' }))
