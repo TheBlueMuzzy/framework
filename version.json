@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "build": 0,
   "history": [
+    {
+      "version": "0.3.1",
+      "date": "2026-10-03",
+      "summary": "UI kit 0.2.15: player cards breathe (nothing touches an edge), carousels loop past the end, no orphan words, PlayerChip floatUps, count-up never dips below its start (from Glyphtender's v0.3.0 round)"
+    },
     {
       "version": "0.2.0",
       "date": "2026-09-29",
