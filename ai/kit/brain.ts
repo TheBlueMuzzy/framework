@@ -36,6 +36,7 @@ export function personalityProblems<View, Action, World>(p: Personality, plug: G
     if (!(r.min >= 0 && r.max <= 100 && r.min <= r.max)) problems.push(`${p.id}: trait "${trait}" range ${r.min}–${r.max} must be inside 0–100, low to high`)
   }
   if (!(p.nudge >= 0 && p.nudge <= 1)) problems.push(`${p.id}: nudge ${p.nudge} must be 0–1`)
+  if (p.focus !== undefined && !(p.focus >= 0 && p.focus <= 1)) problems.push(`${p.id}: focus ${p.focus} must be 0–1`)
   return problems
 }
 
@@ -142,12 +143,16 @@ export function makeBrain<View, Action, World>(plug: GamePlug<View, Action, Worl
       const weightOf = (goalId: string) => Math.max(0, traits[traitOf(goalId)] ?? 0) / 100
       const combined = actions.map((_, i) => scored[0].norm[i] + personality.nudge * scored.slice(1).reduce((s, g) => s + weightOf(g.goal.id) * g.norm[i], 0))
 
-      // 7. Choose like a person.
-      const best = Math.max(...combined)
-      const worst = Math.min(...combined)
+      // 7. Choose like a person. Focus first: only moves at least `focus` good for the main goal stay in the running
+      //    (a Bully always picks a real hunt), then the nudge decides among them — identity from the main goal,
+      //    strength from the others.
+      const focus = scored[0].mattered ? (personality.focus ?? 0) : 0
+      const inFocus = actions.map((_, i) => i).filter((i) => scored[0].norm[i] >= focus - 1e-9)
+      const best = Math.max(...inFocus.map((i) => combined[i]))
+      const worst = Math.min(...inFocus.map((i) => combined[i]))
       const floor = best - (1 - skill.spread) * (best - worst)
       // Shuffled first, so equally good moves are equally likely (a person doesn't always take the first of a tie).
-      const near = shuffle(actions.map((_, i) => i).filter((i) => combined[i] >= floor - 1e-9), pos)
+      const near = shuffle(inFocus.filter((i) => combined[i] >= floor - 1e-9), pos)
       pos = near.rng
       const order = near.items.sort((a, b) => combined[b] - combined[a]).slice(0, Math.max(1, skill.topN))
       const gap = best - worst || 1

@@ -95,6 +95,16 @@ describe('scoring and choosing', () => {
     expect(always(person({ traits: hunter, nudge: 0 })).size).toBe(2)
   })
 
+  it('focus keeps it on its main goal, and the nudge picks among those moves', () => {
+    // Rival at 10, me at 6. Gold 9 at cell 7 (3 from the rival); gold 2 at cell 9 (right next to it).
+    const pick = (focus: number) => {
+      const brain = makeBrain(plug, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 100, max: 100 } }, nudge: 1, focus }), skill())
+      return brain.decide(view(6, 10, { 7: 9, 9: 2 }), 0, 5).action.to
+    }
+    expect(pick(0)).toBe(7) // no focus: the big gold wins though it is a weaker chase
+    expect(pick(0.8)).toBe(9) // focused: only real chases count — the one with gold
+  })
+
   it('a looser skill picks among more moves; spread 1 + topN 1 always takes the best', () => {
     const picks = (s: Skill) => {
       const brain = makeBrain(plug, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }, nudge: 0 }), s)

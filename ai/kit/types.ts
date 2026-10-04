@@ -32,8 +32,12 @@ export interface Personality {
   traits: Record<string, Range>
   /** Goal ids in priority order: the goal roll walks this list. */
   goals: string[]
-  /** How much the OTHER goals count when scoring a move, 0–1 (0 = only the main goal; the original AI). */
+  /** How much the OTHER goals count when scoring a move, 0–1 (0 = only the main goal; the original AI). Each other
+   *  goal adds up to nudge × its trait ÷ 100. */
   nudge: number
+  /** 0–1: how single-minded. Only moves at least this good for the main goal (0 = worst, 1 = best of this turn's)
+   *  are considered; the nudge then picks among them. Missing = 0 (any move). */
+  focus?: number
   shifts: Shift[]
   /** 0–100: how likely it is to say something at a banter moment. */
   chattiness: number
