@@ -75,6 +75,8 @@ describe('balanced-style targets', () => {
     expect(out.Mid.map((t) => t.pass)).toEqual([true, true])
     expect(out.Hi.map((t) => t.pass)).toEqual([false, false])
     expect(out.Hi[0].extremes).toEqual(['a', 'b'])
+    // A personality that didn't play can't pass (it was never measured).
+    expect(checkFeelTargets(three, { Absent: [{ meter: '*', op: 'neverExtreme', label: 'never extreme' }] }).Absent[0].pass).toBe(false)
   })
 })
 
