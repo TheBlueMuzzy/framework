@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: v0.4 The Table (0/7) — v0.3.1 released 2026-10-03
+Release target: v0.4 The Table (7/7 built, proven in Glyphtender v0.6 — release with Glyphtender's /deliver) — v0.3.1 released 2026-10-03
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -51,7 +51,7 @@ Goal: the foundation every board/tabletop game stands on — Game core + events,
 - ✅ F15 🧱 Zones & pieces: zones (nesting, inherited owner/visibility), pieces with stable ids, owner field, shared vs local states, accepts by kind — must:prototype · needs: F12
 - ✅ F16 🧱 Drag referee: one acceptance answer → glow, piece reaction, nope, cursor; phones show valid zones on pick-up; server re-check — must:prototype · needs: F14, F15
 - ✅ F17 🧱 Hand view: zone layouts with presets (rack first; fan later) — must:prototype · needs: F16
-- ⏳ F18 🧱 Seats & per-seat views: one seat model (human/bot, local/online), viewer seat for pass-and-play, per-seat views + per-seat events in Rooms (replaces broadcast-to-all), leak tests — must:prototype · needs: F13, F15
+- ✅ F18 🧱 Seats & per-seat views: one seat model (human/bot, local/online), viewer seat for pass-and-play, per-seat views + per-seat events in Rooms (replaces broadcast-to-all), leak tests — must:prototype · needs: F13, F15
 ```mermaid
 flowchart LR
   F12[F12 Game core] --> F13[F13 Events]
