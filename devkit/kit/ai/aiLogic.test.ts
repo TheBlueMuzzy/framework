@@ -1,6 +1,6 @@
 // Runs in the framework (not copied into games): the AI tab's thinking.
 import { describe, expect, it } from 'vitest'
-import { aiSections, copyPersonality, freeId, getAt, labelOf, listChanges, moveGoal, searchAi, setAt, withList, withRange } from './aiLogic'
+import { aiSections, copyPersonality, freeId, getAt, labelOf, listChanges, moveGoal, searchAi, setAt, settingsName, steadyLabel, withList, withRange, withSteady } from './aiLogic'
 import { sampleAi, bully } from './sampleAi.test'
 
 describe('AI tab logic', () => {
@@ -8,6 +8,22 @@ describe('AI tab logic', () => {
     expect(withRange(bully(), 'greed', -5, 120, 'min').traits.greed).toEqual({ min: 0, max: 100 })
     expect(withRange(bully(), 'greed', 70, 50, 'min').traits.greed).toEqual({ min: 70, max: 70 })
     expect(withRange(bully(), 'greed', 70, 50, 'max').traits.greed).toEqual({ min: 50, max: 50 })
+  })
+
+  it('steady: sets a goal (kept inside 0–1), clears one, and drops "steady" when none is left', () => {
+    expect(withSteady(bully(), 'TRAP', 0.3).steady).toEqual({ SCORE: 0.6, TRAP: 0.3 })
+    expect(withSteady(bully(), 'TRAP', 7).steady).toEqual({ SCORE: 0.6, TRAP: 1 })
+    expect('steady' in withSteady(bully(), 'SCORE', undefined)).toBe(false)
+    expect(steadyLabel(sampleAi().personalities, 'SCORE')).toBe('Always tries to score too')
+    expect(steadyLabel(sampleAi().personalities, 'TRAP')).toBe('TRAP')
+  })
+
+  it("the game's settings files become sections like the Tuning tab's", () => {
+    expect(settingsName('content/ai/goals.json')).toBe('goals')
+    const section = aiSections(sampleAi()).find((s) => s.file === 'settings')!
+    expect(section.title).toBe('AI: big moments')
+    expect(section.note).toBe("Each goal's big-moment bar.")
+    expect(section.fields!.map((f) => [f.file, f.path, f.label])).toEqual([['goals', 'bigAt.TRAP', 'Big moment: hunt (TRAP)'], ['goals', 'bigAt.SCORE', 'Big at score']])
   })
 
   it('moves a goal in the order; nonsense moves change nothing', () => {
@@ -57,7 +73,7 @@ describe('AI tab logic', () => {
     const ai = sampleAi()
     const sections = aiSections(ai)
     // shifts isn't in the sample's _sections, so it gets the "— more" section
-    expect(sections.map((s) => s.title)).toEqual(['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'])
+    expect(sections.map((s) => s.title)).toEqual(['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: big moments', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'])
     const nerve = searchAi(sections, 'nerve')
     expect(nerve.map((s) => s.title)).toEqual(['AI: banter, nerve & words'])
     expect(searchAi(sections, 'trap')[0].items.map((i) => i.key)).toEqual(['traits.aggression'])

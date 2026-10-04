@@ -4,13 +4,13 @@
 //
 // 1. KEEP WHAT THE FILE HAD. Every object and list that was already in the file stays the way it was written:
 //    on one line, or spread over lines. Every value keeps its exact spelling if it didn't change (1.0 stays 1.0,
-//    " " stays " "). Things are found by their place in the file ("ai.personality.Bully", "shifts.2").
+//    "\u00a0" stays "\u00a0"). Things are found by their place in the file ("ai.personality.Bully", "shifts.2").
 // 2. ANYTHING NEW follows a rule of thumb (2 spaces, like a hand-written file):
 //    - a list of only numbers / true / false / null: one line                   [8, 6, 4, 2, 1]
 //    - an object or list of only plain values (text, numbers, true / false), if the line fits in 120 characters:
 //      one line                                                                  { "min": 80, "max": 95 }
 //    - anything else: spread over lines, one value per line.
-//    Invisible characters in text (a non-breaking space…) are written as  , so they show in the file.
+//    Invisible characters in text (a non-breaking space…) are written as \u00a0, so they show in the file.
 // The file itself is always spread over lines and ends with a newline.
 
 /** The longest a NEW one-line object or list may make its line (indent and key included). */

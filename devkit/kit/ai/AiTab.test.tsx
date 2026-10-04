@@ -8,7 +8,7 @@ import { aiTab } from './aiTabEntry'
 import type { AiWatchEvent, DevKitAi } from './aiTypes'
 import { sampleAi } from './sampleAi.test'
 
-const ALL_SECTIONS = ['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'].map((t) => `ai:${t}`)
+const ALL_SECTIONS = ['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: big moments', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'].map((t) => `ai:${t}`)
 
 beforeEach(() => {
   localStorage.clear()
@@ -75,7 +75,45 @@ describe('the AI tab', () => {
     const files = written()
     expect(files.map((f) => f.path)).toEqual(['content/ai/personalities.json', 'content/text/en.json'])
     expect((files[0].data.personalities as { id: string }[]).map((p) => p.id)).toEqual(['Bully', 'Scholar', 'Brute'])
-    expect(JSON.stringify(files[1].data)).toContain('"Brute":{"bio":"Loves a chase."}')
+    expect(JSON.stringify(files[1].data)).toContain('"Brute":{"name":"the Brute","bio":"Loves a chase."}')
+  })
+
+  it('focus: a 0–1 slider that saves with the personality', async () => {
+    const written = saves()
+    render(<AiTab ai={sampleAi()} />)
+    expect((screen.getByLabelText('focus') as HTMLInputElement).value).toBe('0.8')
+    fireEvent.change(screen.getByLabelText('focus slider'), { target: { value: '0.5' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+    expect((written()[0].data.personalities as { focus: number }[])[0].focus).toBe(0.5)
+  })
+
+  it('steady: one row per goal — set one, clear one (empty = not set, and no goal left = no "steady")', async () => {
+    const written = saves()
+    render(<AiTab ai={sampleAi()} />)
+    expect(screen.getByText('Always tries to score too')).toBeTruthy() // its _labels name
+    expect((screen.getByLabelText('steady.SCORE') as HTMLInputElement).value).toBe('0.6')
+    expect((screen.getByLabelText('steady.TRAP') as HTMLInputElement).value).toBe('') // not set
+    fireEvent.change(screen.getByLabelText('steady.TRAP'), { target: { value: '0.25' } })
+    fireEvent.change(screen.getByLabelText('steady.SCORE'), { target: { value: '' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+    expect((written()[0].data.personalities as { steady?: object }[])[0].steady).toEqual({ TRAP: 0.25 })
+    fireEvent.click(screen.getByLabelText('Clear steady TRAP'))
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+    expect('steady' in (written()[1].data.personalities as object[])[0]).toBe(false)
+  })
+
+  it("the game's goal settings: a bigAt row per goal with its help line; Save writes goals.json with its notes", async () => {
+    const written = saves()
+    render(<AiTab ai={sampleAi()} />)
+    expect(screen.getByText('Big moment: hunt (TRAP)')).toBeTruthy()
+    expect(screen.getByText('Hunting: 55 ≈ a tangle.')).toBeTruthy()
+    expect(screen.getByText("Each goal's big-moment bar.")).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('bigAt.TRAP'), { target: { value: '60' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+    const [file, ...others] = written()
+    expect(others).toEqual([])
+    expect(file.path).toBe('content/ai/goals.json')
+    expect(file.data).toEqual({ ...sampleAi().settings![0].data, bigAt: { TRAP: 60, SCORE: 17 } })
   })
 
   it("shows the game's problems and won't save until they're fixed", async () => {
@@ -131,6 +169,7 @@ describe('the AI tab', () => {
     const tab = aiTab(sampleAi())
     expect(tab.countMatches!('nerve')).toBe(3) // the section title matches: all 3 of its settings
     expect(tab.countMatches!('zzz')).toBe(0)
+    expect(tab.countMatches!('hunt')).toBe(1) // a goal setting, by its label
     render(
       <DevKitSearch.Provider value={{ query: 'wobble', goTo: () => {} }}>
         <AiTab ai={sampleAi()} />

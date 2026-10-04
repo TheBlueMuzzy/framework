@@ -53,7 +53,7 @@ describe('formatJson — a new file (the rule of thumb)', () => {
   })
   it('leaves brackets inside text alone, and writes invisible characters as \\u codes', () => {
     expect(formatJson({ tip: 'a [1,2] in text' })).toBe('{\n  "tip": "a [1,2] in text"\n}\n')
-    expect(formatJson({ split: 'Words {n}' })).toBe('{\n  "split": "Words\\u00a0{n}"\n}\n')
+    expect(formatJson({ split: `Words${String.fromCharCode(0xa0)}{n}` })).toBe('{\n  "split": "Words\\u00a0{n}"\n}\n')
   })
 })
 
