@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.4.0",
+      "date": "2026-10-04",
+      "summary": "The Table (table/ 0.6.0): game core + rules contract, events + per-seat feed, turns & flow, zones & pieces with stable ids, drag referee, rack order, seats + bots that see only their view; ui-kit 0.3.0 HandView (rack); rooms 0.2.0 per-seat events — proven by rebuilding Glyphtender v0.6 with no visible change"
+    },
     {
       "version": "0.3.1",
       "date": "2026-10-03",
