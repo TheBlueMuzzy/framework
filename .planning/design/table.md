@@ -36,3 +36,6 @@ Guards before any change: **golden games** (≈300 seeded sim games: every actio
 
 ## Not in v0.4
 Full tag hierarchy · nested zone editor · board zoom/pan · context menus · fan layouts · the AI module itself (Glyphtender beta builds it ON this) · Roll Better's switch-over (the generalising proof, after v0.6).
+
+## Learned in the slices
+- **Game core (Glyphtender F30, 2026-10-04):** a game whose apply needs outside data (Glyphtender's word list) makes its rules with a function (`glyphtenderRules(words)`) — consider a context slot if a second game needs it. "Letters to you, a count to everyone else" takes two events (drew + drewHidden) because each event has one audience — a preset could help. Same-letter pieces make "the same action" depend on hand order until stable piece ids (Zones & pieces). Fast mode halved Glyphtender's sim time (36 s → 20 s).

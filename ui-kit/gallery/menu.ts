@@ -23,6 +23,7 @@ export const menu: MenuGroup[] = [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },
     { id: 'chips', name: 'Player chips', about: 'Beside each row: score counts up, dim, a goal chip' },
     { id: 'pinned', name: 'Pinned to the table', about: 'PinnedBox: xs chips beside rows, sized with the table' },
+    { id: 'hand', name: 'Hand: rack', about: 'HandView: a hand of plain pieces — tap to hold, swap (shrink → grow), hide' },
     { id: 'pause', name: 'Pause', about: 'Over the HUD; Quit asks first' },
   ] },
   { title: 'Flow', entries: [

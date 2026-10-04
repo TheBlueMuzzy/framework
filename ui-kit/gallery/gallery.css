@@ -29,5 +29,12 @@
   .gallery-table-point { flex: none; inline-size: 0; block-size: 0; margin-inline-end: calc(100cqi / 12 * 0.2); }
   .gallery-die { flex: none; inline-size: calc(100cqi / 12 * 0.9); aspect-ratio: 1; border-radius: var(--radius-control);
     background: var(--surface); outline: var(--border-width) solid var(--ink); }
+  /* HandView sample: the rack under its buttons, as wide as the stage allows (it wraps to 2 rows on a phone) */
+  .gallery-hand { inline-size: min(44rem, calc(100vw - 2 * var(--gap-l))); }
+  .gallery-hand-room { cursor: pointer; }
+  .gallery-hand-place { fill: var(--surface); stroke: var(--border); stroke-width: var(--border-width); }
+  .gallery-hand-piece circle { fill: var(--primary); }
+  .gallery-hand-piece text { fill: var(--on-primary); font-family: var(--font-display); text-anchor: middle; }
+  .gallery-hand-piece .gallery-hand-ring, .gallery-hand-ring { fill: none; stroke: var(--accent); }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
 }

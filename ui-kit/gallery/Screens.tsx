@@ -2,14 +2,14 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
-  TimerRing, toast, Tooltip, TurnBanner, Victory, type ToastPlace,
+  HandView, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
+  TimerRing, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -164,6 +164,82 @@ function PinnedTable() {
   )
 }
 
+// HAND (rack preset) — HandView with plain shapes instead of game art: a disc per piece on a rounded place.
+// Tap a piece to hold it (it lifts; the tap is found by data-place, like a game's input code would).
+// E is "aimed" (played somewhere else: only a dashed ring). The 4th place is empty (a played piece's place).
+// Swap 2 plays the shrink → grow stages on the first two pieces; Pass hides the hand; Wait dims it.
+const HAND_TILE = 64 // how big the sample wants each place, in pixels (a game passes e.g. its board hex's size)
+const HAND_MOTION = { shrinkTime: 0.25, growTime: 0.35, stagger: 0.12, overshoot: 0.15 }
+const EMPTY = 'gap' // an empty place in the order (the table module's GAP)
+function HandSample() {
+  const room = useRef<HTMLDivElement>(null)
+  const [roomWidth, setRoomWidth] = useState(0)
+  useEffect(() => {
+    const measure = () => setRoomWidth(room.current?.offsetWidth ?? 0)
+    const watcher = new ResizeObserver(measure)
+    if (room.current) watcher.observe(room.current)
+    return () => watcher.disconnect()
+  }, [])
+  const [order, setOrder] = useState(['A', 'B', 'C', EMPTY, 'D', 'E', 'F', 'G'])
+  const [held, setHeld] = useState<string | null>('B')
+  const [stage, setStage] = useState<HandStage>()
+  const [staged, setStaged] = useState<number[]>([])
+  const [hidden, setHidden] = useState(false)
+  const [waiting, setWaiting] = useState(false)
+  const nextLetter = useRef(7) // the new pieces are H, I, J…
+  const aimed = 'E'
+
+  // Shrink two pieces away, swap them for new ones, grow those in, done
+  const swap = () => {
+    if (stage) return
+    const picks = order.flatMap((id, i) => (id !== EMPTY && id !== aimed ? [i] : [])).slice(0, 2)
+    const shrinkMs = (HAND_MOTION.shrinkTime + HAND_MOTION.stagger * (picks.length - 1)) * 1000 + 200
+    const growMs = (HAND_MOTION.growTime + HAND_MOTION.stagger * (picks.length - 1)) * 1000
+    setHeld(null); setStaged(picks); setStage('out')
+    setTimeout(() => {
+      setOrder((now) => now.map((id, i) => (picks.includes(i) ? String.fromCharCode(65 + (nextLetter.current++ % 26)) : id)))
+      setStage('in')
+    }, shrinkMs)
+    setTimeout(() => { setStage(undefined); setStaged([]) }, shrinkMs + growMs)
+  }
+
+  const places: HandPlace<string>[] = order.map((id, i) => ({
+    key: id === EMPTY ? `empty-${i}` : id,
+    piece: id === EMPTY ? undefined : id,
+    attrs: { 'data-place': i },
+    held: id === held, aimed: id === aimed, waiting, staged: staged.includes(i),
+  }))
+  const layout = rackLayout({ room: roomWidth, tileWanted: HAND_TILE, places: order.length, tileMin: 44, gap: 8 })
+  const tap = (e: MouseEvent<HTMLDivElement>) => {
+    const index = (e.target as Element).closest('[data-place]')?.getAttribute('data-place')
+    const id = index == null ? undefined : order[Number(index)]
+    if (id && id !== EMPTY && id !== aimed && !stage) setHeld(id === held ? null : id)
+  }
+  return (
+    <Screen label="Hand: rack" top={<HudText size="s">Tap a piece to hold it</HudText>}
+      bottom={<Stack gap="m" className="gallery-hand">
+        <Row gap="s" justify="center">
+          <Button variant="secondary" compact onClick={swap}>Swap 2</Button>
+          <Button variant="secondary" compact onClick={() => setHidden(!hidden)}>{hidden ? 'Show' : 'Pass'}</Button>
+          <Button variant="secondary" compact onClick={() => setWaiting(!waiting)}>{waiting ? 'Go' : 'Wait'}</Button>
+        </Row>
+        <div ref={room} className="gallery-hand-room" onClick={tap}>
+          {roomWidth > 0 && <HandView layout={layout} boxWidth={roomWidth} places={places} hidden={hidden} stage={stage} motion={HAND_MOTION}
+            label="Your hand"
+            renderEmpty={({ x, y, tile }) => <rect className="gallery-hand-place" x={x - tile * 0.46} y={y - tile * 0.46}
+              width={tile * 0.92} height={tile * 0.92} rx={tile * 0.18} />}
+            renderPiece={(place, { x, y, tile }) => (place.aimed
+              ? <circle className="gallery-hand-ring" cx={x} cy={y} r={tile * 0.36} strokeWidth={tile * 0.05} strokeDasharray={`${tile * 0.1} ${tile * 0.08}`} />
+              : <g className="gallery-hand-piece">
+                <circle cx={x} cy={y} r={tile * 0.34} />
+                {place.held && <circle className="gallery-hand-ring" cx={x} cy={y} r={tile * 0.41} strokeWidth={tile * 0.05} />}
+                <text x={x} y={y} dy="0.35em" fontSize={tile * 0.36}>{place.piece}</text>
+              </g>)} />}
+        </div>
+      </Stack>} />
+  )
+}
+
 // Counts down, says Go!, then starts again
 function CountdownSample() {
   const [run, setRun] = useState(0)
@@ -229,6 +305,7 @@ const samples: Record<string, ComponentType> = {
   hud: HudSample,
   chips: PlayerChips,
   pinned: PinnedTable,
+  hand: HandSample,
   pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
