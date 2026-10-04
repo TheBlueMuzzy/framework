@@ -105,6 +105,21 @@ describe('scoring and choosing', () => {
     expect(pick(0.8)).toBe(9) // focused: only real chases count — the one with gold
   })
 
+  it('steady goals count on every move; focus only bites at a big moment', () => {
+    const at = (bigAt: number | undefined, focus: number) => {
+      const p2: typeof plug = { ...plug, goals: plug.goals.map((g) => (g.id === 'CHASE' ? { ...g, bigAt } : g)) }
+      const brain = makeBrain(p2, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }, nudge: 0, steady: { GOLD: 1 }, focus }), skill())
+      return brain.decide(view(6, 10, { 7: 9, 9: 2 }), 0, 5)
+    }
+    // Steady gold, no focus: the gold-rich weaker chase wins (greed 0 and no nudge — only "steady" counts it).
+    expect(at(undefined, 0).action.to).toBe(7)
+    // A big chance (best chase −1 ≥ bar −2): focused on the chase, gold breaks the tie.
+    expect(at(-2, 0.8).action.to).toBe(9)
+    expect(at(-2, 0.8).decision.note).toContain('Big moment')
+    // No big chance (bar above anything possible): it blends, like no focus.
+    expect(at(5, 0.8).action.to).toBe(7)
+  })
+
   it('a looser skill picks among more moves; spread 1 + topN 1 always takes the best', () => {
     const picks = (s: Skill) => {
       const brain = makeBrain(plug, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }, nudge: 0 }), s)
