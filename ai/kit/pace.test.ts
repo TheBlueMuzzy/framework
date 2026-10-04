@@ -25,10 +25,15 @@ describe('pace', () => {
 
 /** Two ends of a pretend worker, wired to each other (messages arrive later, like a real one). */
 function fakeWorkerPair() {
-  const listeners = { page: [] as ((e: { data: unknown }) => void)[], worker: [] as ((e: { data: unknown }) => void)[] }
-  const page: WorkerLike = { postMessage: (m) => queueMicrotask(() => listeners.worker.forEach((l) => l({ data: m }))), addEventListener: (_t, l) => listeners.page.push(l) }
-  const inside: WorkerLike = { postMessage: (m) => queueMicrotask(() => listeners.page.forEach((l) => l({ data: m }))), addEventListener: (_t, l) => listeners.worker.push(l) }
-  return { page, inside }
+  type L = (e: { data: unknown }) => void
+  const listeners = { page: [] as L[], worker: [] as L[], crash: [] as ((e: { message?: string }) => void)[] }
+  const page: WorkerLike = {
+    postMessage: (m) => queueMicrotask(() => listeners.worker.forEach((l) => l({ data: m }))),
+    addEventListener: ((t: string, l: L) => (t === 'error' ? listeners.crash.push(l as never) : listeners.page.push(l))) as WorkerLike['addEventListener'],
+  }
+  const inside: WorkerLike = { postMessage: (m) => queueMicrotask(() => listeners.page.forEach((l) => l({ data: m }))), addEventListener: ((_t: string, l: L) => listeners.worker.push(l)) as WorkerLike['addEventListener'] }
+  const crash = (message: string) => listeners.crash.forEach((l) => l({ message }))
+  return { page, inside, crash }
 }
 
 describe('thinking in the background', () => {
@@ -54,6 +59,15 @@ describe('thinking in the background', () => {
     await new Promise((r) => setTimeout(r, 10))
     expect(settled).toBe(false)
     await expect(thinker.think(2)).rejects.toThrow(/stopped/)
+  })
+
+  it('a crashed worker turns every waiting and later question into an error (so the game can fall back)', async () => {
+    const { page, crash } = fakeWorkerPair() // nobody serves inside: questions would wait forever
+    const thinker = makeThinker<number, number>(page)
+    const waiting = thinker.think(1)
+    crash('worker failed to load')
+    await expect(waiting).rejects.toThrow('worker failed to load')
+    await expect(thinker.think(2)).rejects.toThrow('worker failed to load')
   })
 
   it('inline thinker: same shape, no worker', async () => {
