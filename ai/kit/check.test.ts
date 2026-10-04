@@ -59,6 +59,25 @@ describe('the Personality Check', () => {
   })
 })
 
+describe('balanced-style targets', () => {
+  it('nearAverage and neverExtreme', () => {
+    const three: GameResult[] = Array.from({ length: 30 }, () => ({
+      seats: [
+        { personality: 'Hi', skill: 'mid', won: 1, meters: { a: 9, b: 1 } },
+        { personality: 'Mid', skill: 'mid', won: 0.5, meters: { a: 5, b: 5 } },
+        { personality: 'Lo', skill: 'mid', won: 0, meters: { a: 1, b: 9 } },
+      ],
+    }))
+    const out = checkFeelTargets(three, {
+      Mid: [{ meter: '*', op: 'neverExtreme', label: 'never extreme' }, { meter: 'a', op: 'nearAverage', value: 0.5, label: 'near average' }],
+      Hi: [{ meter: '*', op: 'neverExtreme', label: 'never extreme' }, { meter: 'a', op: 'nearAverage', value: 0.5, label: 'near average' }],
+    })
+    expect(out.Mid.map((t) => t.pass)).toEqual([true, true])
+    expect(out.Hi.map((t) => t.pass)).toEqual([false, false])
+    expect(out.Hi[0].extremes).toEqual(['a', 'b'])
+  })
+})
+
 describe('the report page', () => {
   it('is one self-contained page with every section', async () => {
     const { reportHtml } = await import('./report')
