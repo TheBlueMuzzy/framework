@@ -80,6 +80,17 @@ describe('balanced-style targets', () => {
   })
 })
 
+describe('rock-paper-scissors edges', () => {
+  it("'beats' passes when its share of the wins against that rival reaches the value", () => {
+    const out = checkFeelTargets(games, {
+      Scholar: [{ meter: 'won', op: 'beats', against: 'Bully', value: 0.55, label: 'beats the Bully' }],
+      Bully: [{ meter: 'won', op: 'beats', against: 'Scholar', value: 0.55, label: 'beats the Scholar' }],
+    })
+    expect([out.Scholar[0].pass, out.Scholar[0].measured]).toEqual([true, 0.6])
+    expect([out.Bully[0].pass, out.Bully[0].measured]).toEqual([false, 0.4])
+  })
+})
+
 describe('the report page', () => {
   it('is one self-contained page with every section', async () => {
     const { reportHtml } = await import('./report')

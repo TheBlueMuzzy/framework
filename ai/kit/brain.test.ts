@@ -120,6 +120,22 @@ describe('scoring and choosing', () => {
     expect(at(5, 0.8).action.to).toBe(7)
   })
 
+  it('poor sight misjudges that goal: a blind hunter wanders, a sighted one goes straight for it', () => {
+    const picks = (sight: number) => {
+      const brain = makeBrain(plug, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }, nudge: 0, sight: { CHASE: sight } }), skill())
+      const seen = new Set<number>()
+      let rng = 21
+      for (let i = 0; i < 100; i++) {
+        const d = brain.decide(view(4, 12), 0, rng)
+        rng = d.rng
+        seen.add(d.action.to)
+      }
+      return seen
+    }
+    expect([...picks(1)]).toEqual([8])
+    expect(picks(0.2).size).toBeGreaterThan(2)
+  })
+
   it('a looser skill picks among more moves; spread 1 + topN 1 always takes the best', () => {
     const picks = (s: Skill) => {
       const brain = makeBrain(plug, person({ traits: { aggression: { min: 100, max: 100 }, greed: { min: 0, max: 0 } }, nudge: 0 }), s)
