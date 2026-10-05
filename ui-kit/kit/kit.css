@@ -19,6 +19,12 @@
 
   /* Accessibility floor: visible focus ring for keyboard + gamepad */
   :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope) :focus-visible { outline: 0.1875rem solid var(--focus); outline-offset: 0.125rem; }
+  /* No blinking text caret anywhere but in a box you type in. With Chrome's caret browsing on (F7 — easy to switch on
+     by accident) the browser draws a caret in whatever has focus, buttons and pickers included; transparent hides it.
+     Boxes to type in get their caret back (.kit-input paints it the primary colour). */
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope, .kit-overlay) { caret-color: transparent; }
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope, .kit-overlay) :where(textarea, [contenteditable]:not([contenteditable="false"]),
+    input:not([type="range"], [type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="color"], [type="file"])) { caret-color: auto; }
 
   /* Accessibility floor: every control is at least 44px to tap */
   .kit-target { min-block-size: var(--target-min); min-inline-size: var(--target-min); }

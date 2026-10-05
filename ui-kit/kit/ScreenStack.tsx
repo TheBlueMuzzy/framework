@@ -12,8 +12,12 @@
 // with z-indexes). Put <ScreenStack overlay screens={…} /> next to the game, with no children:
 // open screens then cover the whole window above the game (at --kit-overlay-z, default 100), dim it
 // and block taps to it. Tapping the dim closes the top screen, like Esc and Back.
+//
+// Arrow keys: ↑ / ↓ jump from control to control on the top open screen, skipping words (arrowKeys.ts).
+// With no screen open, they do it inside the Panel the focus is in (a main menu), and leave the game's own keys alone.
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
 import { screens as store } from './screens'
+import { moveFocus } from './arrowKeys'
 
 // Until a key is pressed, a screen that opens shouldn't show the keyboard focus ring
 // (browsers show it for focus moved by code before any click or key, e.g. a screen opened at load).
@@ -64,6 +68,18 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
     }
     last.current = { depth, top }
   }, [depth, top])
+
+  // ↑ / ↓ on the top screen. After the controls' own key handlers (they can claim a key with preventDefault)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const scope = depth > 0
+        ? layers.current[depth]
+        : document.activeElement?.closest('.kit-panel') // no screen open: only inside a menu Panel in the game
+      if (scope && (depth > 0 || layers.current[0]?.contains(scope))) moveFocus(e, scope)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [depth])
 
   const open = stack.map((name, i) => {
     const Screen = screens[name]
