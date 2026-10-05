@@ -23,6 +23,15 @@ Each time a bot seat must act:
 
 All randomness comes from the bot's own seeded random → the same game replays with the same bot moves (golden games, bug reports).
 
+## The AI looks human (standard — Muzzy, 2026-10-05)
+*"When possible, the AI should visually come across as human. If a human would drag, they should too… at least the same animation speeds."*
+- **Same intention → same motion.** Every bot action on screen plays the SAME motion, path, speed and look as a person doing that thing — the game's own animation and timings, reused. Never a second animation for bots, never a pop where a person's piece travels.
+- **Show every step a person shows.** If a person picks a piece up from their hand / tray, carries it, aims, then confirms, the bot's piece does the same (from the same place, by the same path). It goes through the same store follow-ups as a person's taps — no shortcut that skips the screen.
+- **Pauses are pacing data, not animation.** The think pause and any "looking at it" hold (e.g. holding its aim before the throw) live in the pace file (per action kind, min–max) and scale with the AI speed setting; Instant = no pauses, but the animations still play.
+- **Secrets stay secret.** What only the acting player's eyes see (their own hand, its refresh) isn't shown for a bot — its timing still is.
+- **Proof:** each game keeps an audit table (every action: person vs bot — motion, path, timing, pops) and an e2e frame check that a bot's piece travels rather than appears.
+- Glyphtender (F50): the draft glyphling travels out of the tray like a person's drag (the glide's path + timings); a turn glides, holds its aim, then throws.
+
 ## Personality vs skill — two separate dials
 - **Personality = what it wants**: trait ranges · goal priority · nudge size · mood-shift strengths · chattiness · bio + banter. An easy Bully still hunts you; a deadly Scholar still loves long words.
 - **Skill = how well it sees and searches**: how many candidates it considers · how many imagined worlds · how close to the best it must pick · how fuzzy its beliefs are (confidence decay, drift) · game-specific limits (Glyphtender: vocabulary). Presets (Glyphtender: Apprentice · First Class · Archmage) are data too.
