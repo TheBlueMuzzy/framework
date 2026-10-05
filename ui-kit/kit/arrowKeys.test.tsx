@@ -172,12 +172,21 @@ describe('<Screen scroll>', () => {
     }
   })
 
-  it('in overlay mode, tapping its empty space closes it, like tapping the dim', () => {
+  it('in overlay mode, a stray tap on its empty space never closes it (a form would lose its choices) — Back / Esc do', () => {
     render(<ScreenStack overlay screens={{ tall: Tall }} />)
     act(() => screens.push('tall'))
-    fireEvent.click(screen.getByText('Start')) // a tap on a control doesn't
-    expect(screens.current).toEqual(['tall'])
+    fireEvent.click(screen.getByText('Start'))
     act(() => { fireEvent.click(screen.getByRole('region', { name: 'Tall menu' })) })
-    expect(screens.current).toEqual([])
+    expect(screens.current).toEqual(['tall'])
+  })
+
+  it("a tool beside the stack keeps its arrows while a screen is open (the Dev Kit's sliders)", () => {
+    render(<><ScreenStack screens={{ tall: Tall }} /><input type="range" aria-label="Tool slider" /></>)
+    act(() => screens.push('tall'))
+    const slider = screen.getByLabelText('Tool slider')
+    act(() => slider.focus())
+    const event = fireEvent.keyDown(slider, { key: 'ArrowDown' })
+    expect(event).toBe(true) // not prevented: the slider steps
+    expect(document.activeElement).toBe(slider)
   })
 })
