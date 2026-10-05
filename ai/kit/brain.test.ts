@@ -217,7 +217,7 @@ describe('modes (fight · flight · focus)', () => {
   it('a broken mode (empty goal list, upside-down range) is named plainly instead of crashing a game', () => {
     const broken = { id: 'Flight', goals: [], traits: { aggression: { min: 90, max: 10 } } }
     const problems = personalityProblems(digger, plug, [broken])
-    expect(problems).toContain('mode Flight: its goal list is empty (leave it out to keep the personality's)')
+    expect(problems).toContain("mode Flight: its goal list is empty (leave it out to keep the personality's)")
     expect(problems).toContain('mode Flight: trait "aggression" range 90–10 must be inside 0–100, low to high')
   })
 
