@@ -8,8 +8,8 @@ import seats from './content/seats.json' // player colours come from content JSO
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  HandView, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
-  TimerRing, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
+  HandView, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
+  TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -64,6 +64,38 @@ function Feedback() {
           </Stack>
           <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
         </Grid>
+      </Panel>
+    </Screen>
+  )
+}
+
+// <Screen scroll>: a New-Game-style menu taller than a phone. The whole screen drags as one, with no scroll bar;
+// turning on "More options" opens a section that pushes Start further down — still reachable by dragging
+function ScrollingMenu() {
+  const [players, setPlayers] = useState(2)
+  const [board, setBoard] = useState('Medium')
+  const [more, setMore] = useState(false)
+  const [flags, setFlags] = useState<Record<string, boolean>>({})
+  const flag = (name: string) => (
+    <ListRow key={name} label={name} detail="A rule you can switch on or off">
+      <Toggle label={name} on={!!flags[name]} onChange={(on) => setFlags({ ...flags, [name]: on })} />
+    </ListRow>
+  )
+  return (
+    <Screen scroll label="New game">
+      <Panel depth={2} gap="m">
+        <Row gap="s" justify="between">
+          <Text kind="title">New game</Text>
+          <Button variant="secondary" onClick={() => screens.pop()}>Back</Button>
+        </Row>
+        <ListRow label="Players" detail="Who sits at the table"><Stepper label="Players" value={players} min={2} max={4} onChange={setPlayers} /></ListRow>
+        <ListRow label="Board" detail="Bigger boards make longer games">
+          <Selector label="Board" options={['Small', 'Medium', 'Large']} value={board} onChange={setBoard} />
+        </ListRow>
+        {['Short words', 'Hide pieces', 'Word hints'].map(flag)}
+        <ListRow label="More options" detail="Opens more rules below"><Toggle label="More options" on={more} onChange={setMore} /></ListRow>
+        {more && ['Timer', 'Bonus tiles', 'Steal turns', 'Double points', 'Sudden death'].map(flag)}
+        <Button onClick={() => { toast('Starting!'); screens.pop() }}>Start</Button>
       </Panel>
     </Screen>
   )
@@ -299,6 +331,7 @@ const samples: Record<string, ComponentType> = {
     { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
   ]} />,
   modes: Modes,
+  scrolling: ScrollingMenu,
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,

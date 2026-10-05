@@ -1,5 +1,5 @@
 // Arrow keys on a menu: ↑ / ↓ jump from control to control (never to words), ← / → work the focused control,
-// and a box you type in keeps its arrows.
+// and a box you type in keeps its arrows. Also <Screen scroll>: the whole screen scrolls, focus moves bring things into view.
 import { afterEach, describe, expect, it } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
@@ -131,5 +131,53 @@ describe('arrow keys with no screen open', () => {
     screen.getByText('Board cell').focus()
     expect(fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' })).toBe(true) // not touched: the game's key
     expect(focusedName()).toBe('Board cell')
+  })
+})
+
+describe('<Screen scroll>', () => {
+  function Tall() {
+    return (
+      <Screen scroll label="Tall menu">
+        <Panel>
+          <Button>Back</Button>
+          {Array.from({ length: 12 }, (_, i) => <ListRow key={i} label={`Rule ${i + 1}`}><Toggle label={`Rule ${i + 1}`} on={false} onChange={() => {}} /></ListRow>)}
+          <Button>Start</Button>
+        </Panel>
+      </Screen>
+    )
+  }
+
+  it('marks the screen as the scroller (kit.css: scrolls, no scroll bar, centre from the top)', () => {
+    render(<Tall />)
+    const box = screen.getByRole('region', { name: 'Tall menu' })
+    expect(box.hasAttribute('data-scroll')).toBe(true)
+    expect(box.querySelector('.kit-scroll')).toBeNull() // no inner ScrollArea: the panel's own buttons scroll with it
+  })
+
+  it('↓ / ↑ bring the focused control (its whole row) into view inside it', () => {
+    const shown: Element[] = []
+    const real = Element.prototype.scrollIntoView
+    Element.prototype.scrollIntoView = function () { shown.push(this) }
+    try {
+      render(<ScreenStack screens={{ tall: Tall }} />)
+      act(() => screens.push('tall'))
+      press('ArrowUp') // from Back, round to Start at the bottom
+      expect(focusedName()).toBe('Start')
+      expect(shown.at(-1)?.textContent).toBe('Start')
+      press('ArrowUp')
+      expect(shown.at(-1)?.classList.contains('kit-listrow')).toBe(true)
+      expect(shown.at(-1)?.textContent).toContain('Rule 12')
+    } finally {
+      Element.prototype.scrollIntoView = real
+    }
+  })
+
+  it('in overlay mode, tapping its empty space closes it, like tapping the dim', () => {
+    render(<ScreenStack overlay screens={{ tall: Tall }} />)
+    act(() => screens.push('tall'))
+    fireEvent.click(screen.getByText('Start')) // a tap on a control doesn't
+    expect(screens.current).toEqual(['tall'])
+    act(() => { fireEvent.click(screen.getByRole('region', { name: 'Tall menu' })) })
+    expect(screens.current).toEqual([])
   })
 })

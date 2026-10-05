@@ -15,6 +15,7 @@ export const menu: MenuGroup[] = [
     { id: 'modes', name: 'Mode select', about: 'A card per mode, then Start' },
     { id: 'howto', name: 'How to play', about: 'Pages to flip through' },
     { id: 'credits', name: 'Credits', about: 'People, then the kit’s fonts from credits.json' },
+    { id: 'scrolling', name: 'Whole-screen scroll', about: '<Screen scroll>: a tall menu drags as one, no scroll bar; a section opening pushes Start down' },
   ] },
   { title: 'Settings', entries: [
     { id: 'settings', name: 'Settings', about: 'Tabs from a list; remembers what you set' },
