@@ -155,6 +155,14 @@ describe('seats: idle players and bots', () => {
     expect(addBot(room, settings)).toBeNull() // full (3 seats)
     expect(addBot(lobby(), readSettings({ allowBots: false }))).toBeNull()
   })
+
+  it('a bot the game described keeps its profile and name, numbered only when the name is taken', () => {
+    const named = addBot(lobby(), settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })
+    expect(named).toMatchObject({ kind: 'bot', name: 'The Survivor', profile: 'Survivor/FirstClass' })
+    const room = lobby()
+    room.seats[0].name = 'The Survivor'
+    expect(addBot(room, settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })?.name).toBe('The Survivor 2')
+  })
 })
 
 describe('seats: kick', () => {

@@ -67,7 +67,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Transitions | (built in) | any | Panels play the style's entrance when a screen opens; dialogs fade their dim |
 | **Online** | | | |
 | Lobby: join | `Lobby` (no `roomCode`) | `?screen=lobby` | Create a room or join by code; `onBack` → a Back button |
-| Lobby: room | `Lobby` (with `roomCode`) | `?screen=room` · `?screen=roomauto` | Code + Copy (toast "Code copied!"; selects the code where there's no clipboard), players (`color` each), host badge, ready, Start. No `onReady` = the game readies players itself: no Ready button, Start only waits for enough players. `children` = extra rows under the players (e.g. the host's game options; they scroll with the list) |
+| Lobby: room | `Lobby` (with `roomCode`) | `?screen=room` · `?screen=roomauto` | Code + Copy (toast "Code copied!"; selects the code where there's no clipboard), players (`color` each), host badge, ready, Start. No `onReady` = the game readies players itself: no Ready button, Start only waits for enough players. `children` = extra rows under the players (e.g. the host's game options; they scroll with the list). A player's `detail` = a caption under the name (e.g. "🤖 First Class"); `bot: true` = no Ready badge (always ready) and, with `onRemove`, the host gets a ✕ Remove on it (0.3.1) |
 | Reconnecting | `Reconnecting` | `?screen=reconnecting` · `?screen=failed` | Spinner dialog; `failed` → try again / quit |
 | Seat picker | `SeatPicker` | `?screen=seats` · `?screen=joining` · `?screen=noseats` | Join a game in progress: pick a seat (e.g. a bot's) to take over |
 | **Dialogs & feedback** | | | |
