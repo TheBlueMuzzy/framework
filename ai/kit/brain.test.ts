@@ -198,6 +198,27 @@ describe('moods and skill blur', () => {
   })
 })
 
+describe('modes (fight · flight · focus)', () => {
+  // Home = a gold-digger. Danger ≥ 8 (rival within 2 cells) → Flight: only run from the rival.
+  const flight = { id: 'Flight', goals: ['CHASE', 'GOLD'], traits: { aggression: { min: 100, max: 100 } }, sight: { GOLD: 0 } }
+  const digger = person({ id: 'Digger', homeMode: 'Focus', traits: { aggression: { min: 0, max: 0 }, greed: { min: 100, max: 100 } }, goals: ['GOLD', 'CHASE'], nudge: 0, switches: [{ reading: 'danger', atLeast: 8, to: 'Flight' }] })
+
+  it('plays its home mode until a switch matches, then the mode replaces its priorities', () => {
+    const brain = makeBrain(plug, digger, skill(), [flight])
+    const calm = brain.decide(view(2, 15, { 5: 9 }), 0, 1)
+    expect(calm.decision.mode).toBe('Focus')
+    expect(calm.decision.goal).toBe('GOLD')
+    const threatened = brain.decide(view(9, 10, { 5: 9 }), 0, 1) // danger 9
+    expect(threatened.decision.mode).toBe('Flight')
+    expect(threatened.decision.goal).toBe('CHASE')
+    expect(threatened.decision.note).toMatch(/^Digger \[Flight\] rolled CHASE/)
+  })
+
+  it('a switch to a mode the game does not have is a problem, named plainly', () => {
+    expect(() => makeBrain(plug, digger, skill(), [])).toThrow(/switches to mode "Flight", which isn't one of the game's modes/)
+  })
+})
+
 describe('the plug, specials and the Bot shape', () => {
   it('names what is wrong with a personality that does not fit the game', () => {
     expect(personalityProblems(person(), plug)).toEqual([])
