@@ -92,6 +92,9 @@ flowchart LR
 ```
 
 ## Later
+- **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
+- **Audio module** (Muzzy 2026-10-05): comes out of Glyphtender's audio sprint — should
+- **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
 - Textured extras (Kenney CC0 9-slice panels) — could
