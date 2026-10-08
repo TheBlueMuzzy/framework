@@ -1,7 +1,7 @@
 // THE GAME'S RULES ON THE SERVER — an EXAMPLE to replace with the real game.
 // "Count to 10": players take turns adding 1–3 to a shared total; each player also has a secret
 // number only they can see. It shows every part a game plugs in (see src/rooms/server/gameRules.ts):
-// check what arrives, start, apply a move, what each player may see, when it's over, idle players.
+// check what arrives, start, apply a move, what each player may see, when it's over, idle players (onTheClock, timedOut, onSeatChange).
 // A real game usually calls its own rules engine in onStart / onAction (the same code the phone runs).
 import { mustBeObject, mustBeWholeNumber } from '../src/rooms/server/checks'
 import type { GameRules, RoomTools } from '../src/rooms/server/gameRules'
@@ -13,7 +13,8 @@ export interface State { total: number; target: number; turn: number; order: str
 export interface View { total: number; target: number; whoseTurn: string; mySecret: number }
 export type Event = string
 
-const TURN_MS = 30_000
+const TURN_MS = 90_000
+const BOT_PAUSE_MS = 1_500
 
 export const rules: GameRules<State, Options, Action, View, Event> = {
   checkOptions(raw) {
@@ -48,19 +49,29 @@ export const rules: GameRules<State, Options, Action, View, Event> = {
   },
 
   isOver: (state) => state.total >= state.target,
+
+  // A bot took the seat whose turn it is (or its player took it back): restart the clock for whoever plays it now
+  onSeatChange(state, seat, change, room) {
+    if (change !== 'dropped' && state.order[state.turn] === seat.id) startTurnClock(state, room)
+    return state
+  },
 }
 
-// A player who doesn't move in time: the server adds 1 for them and counts a missed turn
-// (after content/rooms.json "missedTurnsBeforeBot" in a row, a bot takes their seat).
-// Bots here just keep adding 1 through this same clock.
+// Whose turn it is goes on the room's idle clock (content/rooms.json idleWarnAfterMs / idleTakeoverAfterMs: their screen
+// is warned, then a bot takes the seat until they tap). A player who doesn't move within TURN_MS gets the bot at once.
+// A bot (added by the host, or holding an idle or away player's seat) adds 1 after a short pause.
 function startTurnClock(state: State, room: RoomTools<State, Event>) {
   const seatId = state.order[state.turn]
-  room.timers.start('turn', TURN_MS, () => {
-    room.missedTurn(seatId)
-    room.update((current) => {
-      const next = { ...current, total: current.total + 1, turn: (current.turn + 1) % current.order.length }
-      startTurnClock(next, room)
-      return next
+  room.onTheClock([seatId])
+  if (room.seats().find((seat) => seat.id === seatId)?.kind === 'bot') {
+    room.timers.start('turn', BOT_PAUSE_MS, () => {
+      room.update((current) => {
+        const next = { ...current, total: current.total + 1, turn: (current.turn + 1) % current.order.length }
+        startTurnClock(next, room)
+        return next
+      })
     })
-  })
+  } else {
+    room.timers.start('turn', TURN_MS, () => room.timedOut(seatId))
+  }
 }

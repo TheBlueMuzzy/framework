@@ -39,8 +39,8 @@ const room: RoomState = {
   minSeats: 2,
   maxSeats: 4,
   seats: [
-    { id: 'seat-1', name: 'Ann', kind: 'human', isHost: true, connected: true, ready: false, missedTurns: 0 },
-    { id: 'seat-2', name: 'Bob', kind: 'human', isHost: false, connected: true, ready: false, missedTurns: 0 },
+    { id: 'seat-1', name: 'Ann', kind: 'human', isHost: true, connected: true, ready: false },
+    { id: 'seat-2', name: 'Bob', kind: 'human', isHost: false, connected: true, ready: false },
   ],
 }
 
@@ -179,5 +179,56 @@ describe('useRoom', () => {
     expect(sockets[1].room).toBe('MOTI')
     expect(result.current.status).toBe('connecting')
     expect(result.current.room).toBeNull()
+  })
+
+  it('idle: the warning arrives with its end time and goes away; a dropped connection clears it', () => {
+    vi.useFakeTimers({ now: 1_000_000 })
+    try {
+      const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: true }))
+      const socket = sockets[0]
+      socket.open()
+      socket.receive({ type: 'room', room: { ...room, phase: 'playing' }, you: 'seat-1' })
+      expect(result.current.idleWarning).toBeNull()
+      socket.receive({ type: 'idle_warning', msLeft: 30_000 })
+      expect(result.current.idleWarning).toEqual({ endsAt: 1_030_000 })
+      socket.receive({ type: 'idle_warning_off' })
+      expect(result.current.idleWarning).toBeNull()
+      socket.receive({ type: 'idle_warning', msLeft: 30_000 })
+      socket.drop()
+      expect(result.current.idleWarning).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('active(): at most one ping every few seconds — but at once while warned or while the bot plays for me', () => {
+    vi.useFakeTimers({ now: 1_000_000 })
+    try {
+      const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: true }))
+      const socket = sockets[0]
+      socket.open()
+      socket.receive({ type: 'room', room: { ...room, phase: 'playing' }, you: 'seat-1' })
+      const pings = () => socket.sent.filter((message) => message.type === 'active').length
+      expect(result.current.botPlaysForMe).toBe(false)
+      act(() => result.current.active())
+      act(() => result.current.active())
+      expect(pings()).toBe(1)
+      vi.advanceTimersByTime(5_000)
+      act(() => result.current.active())
+      expect(pings()).toBe(2)
+      // Warned: every tap goes straight out
+      socket.receive({ type: 'idle_warning', msLeft: 30_000 })
+      act(() => result.current.active())
+      expect(pings()).toBe(3)
+      socket.receive({ type: 'idle_warning_off' })
+      // The bot plays my seat (I idled, still connected): botPlaysForMe, and a tap goes straight out
+      const botHasMe: RoomState = { ...room, phase: 'playing', seats: [{ ...room.seats[0], kind: 'bot' }, room.seats[1]] }
+      socket.receive({ type: 'room', room: botHasMe, you: 'seat-1' })
+      expect(result.current.botPlaysForMe).toBe(true)
+      act(() => result.current.active())
+      expect(pings()).toBe(4)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

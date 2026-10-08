@@ -17,6 +17,7 @@ describe('protocol: checking what players send', () => {
     expect(send({ type: 'add_bot', profile: 'x'.repeat(41) })).toBeNull()
     expect(send({ type: 'back_to_lobby' })).toEqual({ type: 'back_to_lobby' })
     expect(send({ type: 'action', action: [1, 2] })).toEqual({ type: 'action', action: [1, 2] })
+    expect(send({ type: 'active', at: 123 })).toEqual({ type: 'active' }) // "I'm here" (extra fields dropped)
   })
 
   it('keeps only the known fields (extra junk is dropped)', () => {

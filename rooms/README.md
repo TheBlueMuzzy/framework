@@ -7,20 +7,21 @@ Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room,
 |---|---|
 | Room codes (`roomCodes.ts`) | 4 letters, consonant–vowel (BAKU, MOTE, ZIRA): easy to say out loud, no C/Q/W/X/Y, a short rude-word list is never handed out. Typing is forgiving (`ba-ku`, `M0T1` work). 6,400 codes; a clash is caught (`code_taken`) |
 | Identity (`identity.ts`) | `persistentId` (localStorage) = the player, owns their seat · `tabId` (sessionStorage) = this tab's connection · the player's name, remembered. Works in private windows too |
-| `useRoom(roomCode, { name, create })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`. Reconnects by itself; StrictMode-safe |
+| `useRoom(roomCode, { name, create })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`, `idleWarning` (`{ endsAt }` while your screen should show the idle bar, else null), `botPlaysForMe` (a bot holds your seat because you went idle), `active()` ("I'm here" — call it on any tap/key while it matters; throttled to one ping per 5 s, at once while warned or bot-held; 0.4.0). Reconnects by itself; StrictMode-safe |
 | Protocol (`protocol.ts`) | Every message, typed, shared by game and server. The server checks every field of every message (junk and huge messages are refused) |
-| Server base (`server/roomServer.ts`) | A class the game's `party/server.ts` extends: seats, host, join, rejoin, second-tab takeover, host migration, idle players → bot, kick, rematch, empty-room clean-up. Sends each player **only their own view** |
+| Server base (`server/roomServer.ts`) | A class the game's `party/server.ts` extends: seats, host, join, rejoin, second-tab takeover, host migration, idle players → warning → bot (and back with a tap), kick, rematch, empty-room clean-up. Sends each player **only their own view** |
 | Seat rules (`server/seats.ts`) | The rules above as plain functions (tested on their own) |
 | Timers table (`server/timers.ts`) | Every server timer by name: replace, stop, stop all, time left. A crashing timer is logged, not fatal |
 | Checks (`server/checks.ts`) | `mustBeObject`, `mustBeOneOf`, `mustBeWholeNumber`, `mustBeText`, `mustBeList`, `mustBeListWithoutRepeats`, `mustBeTrueOrFalse`, `nullOr` — for the game's `checkAction` |
 | Installer | `party/server.ts`, an example `party/rules.ts` ("Count to 10"), `content/rooms.json`, `partykit.json` — made once |
 
-**Stays in the game:** its rules (usually its own rules engine, shared with the phone), what each player sees (`viewFor`), the turn clock and what "an idle turn" means, bots' moves, the screens (the UI kit has Lobby / join screens). Roll Better's dice-specific parts (rolling, locking, unlock backstops, seat picker for mid-game joiners) stay in Roll Better.
+**Stays in the game:** its rules (usually its own rules engine, shared with the phone), what each player sees (`viewFor`), the turn clock (it tells the room whose move it waits for: `room.onTheClock`), bots' moves, the screens (the UI kit has Lobby / join screens). Roll Better's dice-specific parts (rolling, locking, unlock backstops, seat picker for mid-game joiners) stay in Roll Better.
 
 ## The seat rules (proven in Roll Better)
 - **A player's `persistentId` owns their seat.** Reload, lost Wi-Fi, locked phone, even after a bot took over: come back and it's yours again. A player still watching takes it back just by making a move.
 - **Lobby:** a player who drops out loses their seat (they rejoin at the end when they're back). An empty lobby is cleared, so the code is free again.
-- **Mid-game:** seats are never removed. Dropped = "not connected" (a bot takes over after `botTakesOverAfterMs`); **Leave** = a bot takes over now; idle = the game plays a turn for them and calls `room.missedTurn()`, after `missedTurnsBeforeBot` in a row (2) a bot takes over.
+- **Mid-game:** seats are never removed. Dropped = "not connected" (a bot takes over after `botTakesOverAfterMs`); **Leave** = a bot takes over now (for good — only a rejoin brings them back).
+- **Idle (0.4.0):** the game says whose move it's waiting for (`room.onTheClock(seatIds)`). A connected player on the clock who does nothing — no move, no tap (`active` ping) — for `idleWarnAfterMs` (30 s) gets `idle_warning` (their screen only: a draining bar until the takeover); at `idleTakeoverAfterMs` (60 s) a bot takes the seat **mid-turn**, as if they'd dropped out (others: `kind: 'bot'` with `connected: true` = "idle — a bot is playing for them"). Any tap or move from them gives the seat straight back (others see it turn human again = "is back"). The game's own turn timer running out calls `room.timedOut(seatId)`: the same takeover, at once. A dropped player has no idle clock (the away timer covers them) and still takes the seat back by reconnecting; a player who pressed Leave has no connection, so no tap can take it back.
 - **Host:** stays host while connected; otherwise the first connected human in seat order. No flip-flopping when the old host returns.
 - **Same player, second tab:** the new tab gets the seat, the old one is told (`connected_elsewhere`).
 - **Kick:** host only; lobby = seat gone, mid-game = a bot takes it. A kicked player can't come back to that room.
@@ -58,8 +59,8 @@ export const rules: GameRules<State, Options, Action, View, Event> = {
 - **Say no by throwing** an `Error` with a plain-English reason. The player gets it as `error.message` (`bad_action` from `checkAction`, `action_refused` from `onAction`, `cant_start` from `checkOptions`/`onStart`). The room carries on.
 - **Views are sent for you** after every change (and when someone comes back): each connected player gets `viewFor(state, theirSeat)`. Secrets stay out of the data, not just off the screen.
 - `seat` in `onAction` is **who sent it** — never trust a seat or player id inside the action.
-- `room` (RoomTools): `code`, `settings`, `timers`, `seats()`, `update(state => newState)` (for timers and bots — not inside the callbacks above; return the state there), `sendEvent(seatId, event)`, `broadcastEvent(event, exceptSeatId?)` (one-off messages, e.g. an animation cue; they arrive before the views of the same change), `missedTurn(seatId)`, `log(text)`.
-- **Timers:** `room.timers.start('turn', 30_000, () => { room.missedTurn(seatId); room.update(autoPlay) })`. One table; starting a name again replaces it; the game's timers stop by themselves when the game is over. Hard phase limits go here too.
+- `room` (RoomTools): `code`, `settings`, `timers`, `seats()`, `update(state => newState)` (for timers and bots — not inside the callbacks above; return the state there), `sendEvent(seatId, event)`, `broadcastEvent(event, exceptSeatId?)` (one-off messages, e.g. an animation cue; they arrive before the views of the same change), `onTheClock(seatIds)` (whose move the game waits for — call it after every change of turn; [] = nobody), `timedOut(seatId)` (the game's turn timer ran out: a bot takes the seat now), `log(text)`.
+- **Timers:** `room.onTheClock([seatId]); room.timers.start('turn', 90_000, () => room.timedOut(seatId))`. One table; starting a name again replaces it; the game's timers stop by themselves when the game is over. Hard phase limits go here too.
 - **Bots:** a seat with `kind: 'bot'` has no player. The game plays for it (e.g. in `onSeatChange(…, 'bot')` when it's that seat's turn, and in its turn clock).
 
 ### The screens — `useRoom`
@@ -87,7 +88,7 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 - The seat list never contains anyone's `persistentId`.
 
 ## Knobs — `content/rooms.json`
-`minSeats` (2) · `maxSeats` (4) · `missedTurnsBeforeBot` (2) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
+`minSeats` (2) · `maxSeats` (4) · `idleWarnAfterMs` (30000; 0 = no warning) · `idleTakeoverAfterMs` (60000; 0 = never) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
 
 ## Install or update
 From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run` first to see what would change).
@@ -116,6 +117,7 @@ From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run
 - **One connection = one seat, and a flood limit** (`maxMessagesPerSecond`, 10): never trust a raw WebSocket to behave like `useRoom`.
 - **Lobby drop = seat gone** (as Roll Better): no "ghost" seats blocking Start; the player rejoins at the end when back.
 - **One timers table** with `room:` names for the module's own timers (bot takes over, empty room) and anything else for the game's — so game-over can stop the game's timers without touching the room's.
+- **Idle = a warning, then a bot mid-turn, and a tap gives it back (0.4.0, Glyphtender F52).** Before, an idle player only lost their seat after `missedTurnsBeforeBot` (2) turns the game played for them — and only if the game had a turn timer, so with the timer off a friend who wandered off froze the table. Now the room owns it: the game only says whose move it waits for (`onTheClock`; it knows its own turns), the room runs one idle clock per such seat (`room:idle-warn:` / `room:idle-takeover:` timers), warns that player alone, then hands the seat to the bot exactly like a drop-out — so the game's existing bot path plays it. Activity is a tiny `active` message (throttled to one per 5 s by `useRoom`, flood-limited by the server like any message). Only an idle / timed-out seat comes back on a tap (that player is still connected); Leave and kick close the connection, so they can't. The turn timer now hands over the same way (`timedOut`) instead of the game playing one turn for them — one rule for "you weren't there". `Seat.missedTurns` and `missedTurnsBeforeBot` are gone.
 - **Dev default server address = the page's own host, port 1999** (Roll Better's `localhost:1999` didn't work from a phone on the Wi-Fi).
 
 ## Known limits (0.1.1)
@@ -125,4 +127,4 @@ From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run
 - The free PartyKit tier counts every message (~100k/day) — fine for turn-based games.
 
 ## Develop
-`npm install`, then `npm test` (room codes, identity, protocol checks, seats/host/rejoin/AFK rules, timers, checks, RoomServer with a fake PartyKit and a tiny game incl. private views, server-import guard, useRoom with a fake socket incl. StrictMode, installer incl. "a fresh install type-checks") and `npm run typecheck`.
+`npm install`, then `npm test` (room codes, identity, protocol checks, seats/host/rejoin rules, the idle clock (warn, takeover, tap back, turn timer), timers, checks, RoomServer with a fake PartyKit and a tiny game incl. private views, server-import guard, useRoom with a fake socket incl. StrictMode, installer incl. "a fresh install type-checks") and `npm run typecheck`.
