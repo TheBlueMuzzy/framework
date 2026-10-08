@@ -102,6 +102,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-08 — **Dev Kit can't edit content/rooms.json** (Glyphtender F52): its Tuning tab only lists content/tuning/*.json, so room knobs (idleWarnAfterMs, idleTakeoverAfterMs…) are file/Obsidian only — let the Tuning tab take extra files (and say "restart party:dev" for server-bundled ones).
+- 2026-10-08 — **rooms installer makes partykit.json even for wrangler games** (Glyphtender F52 deleted it) — skip it when wrangler.json exists.
 - 2026-10-04 — ui-kit `npm run shoot` times out on the `pause` screen (it waits for the FIRST `.kit-screen`, which under Pause is the hidden HUD — wait for a visible one instead). Also: shoot uses port 5180 with strictPort, the same port Glyphtender's /play server uses — give it its own port. (Found by the HandView helper, autonomous run.)
 - 2026-09-28 — UI kit nitpicks to fix when a game uses them: Mode select leaves an empty 4th column on desktop · toasts briefly cover the gallery bar · gamepad-only games show the focus ring only after the first key press · does VT323 still feel "Pixel"? · "Accessibility" breaks mid-word in ◀ ▶ at 200%
 - 2026-09-28 — Kit additions expected from a full Roll Better UI pass: "game box" mode (screens/HUD inside a fixed-aspect frame, not the window) · Lobby seat-claim list (rejoin) · kit parts inside drei <Html> labels pinned to 3D
