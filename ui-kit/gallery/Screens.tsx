@@ -8,7 +8,7 @@ import seats from './content/seats.json' // player colours come from content JSO
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  HandView, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
+  HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
   TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
@@ -308,6 +308,22 @@ function LobbyRoomAutoReady() {
   </Lobby>
 }
 
+// Idle warning: the bar drains for 30 s, then "A bot is playing for you — tap to play"; the button stands in for any tap
+function IdleSample({ startBot = false }: { startBot?: boolean }) {
+  const [endsAt, setEndsAt] = useState<number | null>(() => (startBot ? null : Date.now() + 30_000))
+  useEffect(() => {
+    if (endsAt === null) return
+    const takeover = setTimeout(() => setEndsAt(null), Math.max(0, endsAt - Date.now()))
+    return () => clearTimeout(takeover)
+  }, [endsAt])
+  return (
+    <Screen label="Idle warning">
+      <IdleWarning endsAt={endsAt} botPlaying={endsAt === null} />
+      <Button variant="secondary" onClick={() => setEndsAt(Date.now() + 30_000)}>Tap (I’m here)</Button>
+    </Screen>
+  )
+}
+
 // Pick a seat → "Joining…" for a moment → into the game (the HUD). Cancel goes back to the list.
 function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
   const [waiting, setWaiting] = useState(startWaiting)
@@ -363,6 +379,8 @@ const samples: Record<string, ComponentType> = {
   seats: () => <Seats />,
   joining: () => <Seats startWaiting />,
   noseats: () => <SeatPicker seats={[]} onPick={noop} onCancel={() => screens.pop()} />,
+  idle: () => <IdleSample />,
+  idlebot: () => <IdleSample startBot />,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 

@@ -47,6 +47,8 @@ export const menu: MenuGroup[] = [
     { id: 'seats', name: 'Seat picker', about: 'Join a game in progress: take over a seat' },
     { id: 'joining', name: 'Seat picker: joining', about: 'After picking: spinner and Cancel' },
     { id: 'noseats', name: 'Seat picker: no seats', about: 'Nothing free right now, so Leave' },
+    { id: 'idle', name: 'Idle warning', about: 'Your turn, nothing done: a bar drains, then a bot plays (tap = back)' },
+    { id: 'idlebot', name: 'Idle: bot playing', about: 'A bot plays for you — tap to play' },
   ] },
 ]
 

@@ -3,8 +3,8 @@
 // Copy puts the code on the clipboard, or selects it where there's no clipboard; Back shows only when passed.
 // SeatPicker: a tap on a seat picks it; waiting swaps the list for Joining… + Cancel; no seats → the empty message.
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { copyText, Lobby, SeatPicker } from './online'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { copyText, IdleWarning, Lobby, SeatPicker } from './online'
 import { toasts } from './dialogs'
 
 afterEach(cleanup)
@@ -128,5 +128,40 @@ describe('SeatPicker', () => {
     render(<SeatPicker seats={[]} onPick={noop} onCancel={noop} words={{ empty: 'Full up' }} />)
     expect(screen.getByText('Full up')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy()
+  })
+})
+
+// IdleWarning: nothing without a warning; warned = one line + a bar draining over the time left;
+// botPlaying = the "tap to play" line, no bar; reduce motion = the seconds left instead of the bar.
+describe('IdleWarning', () => {
+  afterEach(() => { vi.useRealTimers(); document.documentElement.removeAttribute('data-reduce-motion') })
+
+  it('shows nothing when there is no warning', () => {
+    const { container } = render(<IdleWarning endsAt={null} />)
+    expect(container.innerHTML).toBe('')
+  })
+
+  it('warned: one short line and a bar that drains over the time left', () => {
+    vi.useFakeTimers({ now: 1_000_000 })
+    render(<IdleWarning endsAt={1_030_000} />)
+    expect(screen.getByText('Still there? A bot plays for you soon')).toBeTruthy()
+    const bar = screen.getByRole('progressbar', { name: 'Time before a bot plays for you', hidden: true }) // (jsdom counts a popover as hidden)
+    expect(bar.getAttribute('style')).toContain('--kit-idle-ms: 30000ms')
+  })
+
+  it('the bot plays for you: the "tap to play" line, no bar', () => {
+    render(<IdleWarning endsAt={null} botPlaying words={{ botPlaying: 'Bot on — tap!' }} />)
+    expect(screen.getByText('Bot on — tap!')).toBeTruthy()
+    expect(screen.queryByRole('progressbar', { hidden: true })).toBeNull()
+  })
+
+  it('reduce motion: the seconds left, counting down, instead of the bar', () => {
+    vi.useFakeTimers({ now: 1_000_000 })
+    document.documentElement.setAttribute('data-reduce-motion', '')
+    render(<IdleWarning endsAt={1_030_000} />)
+    expect(screen.queryByRole('progressbar', { hidden: true })).toBeNull()
+    expect(screen.getByText('30s')).toBeTruthy()
+    act(() => { vi.advanceTimersByTime(3_000) })
+    expect(screen.getByText('27s')).toBeTruthy()
   })
 })
