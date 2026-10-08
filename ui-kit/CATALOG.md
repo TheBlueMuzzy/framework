@@ -52,7 +52,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Credits | `Credits` | `?screen=credits` | People, then every asset from `content/credits.json` |
 | Settings | `Settings` | `?screen=settings` | Tabs + rows from `content/ui/settings.json` — never hand-built |
 | **In game** | | | |
-| Pause | `Pause` | `?screen=pause` | Resume / settings / how to play / quit (asks first) |
+| Pause | `Pause` | `?screen=pause` | Resume / settings / how to play / quit (asks first). `note` (0.4.0) = one quiet caption line under the title, above the buttons (e.g. this game's settings) |
 | HUD frame | `Hud` | `?screen=hud` | Safe slots: vitals top-left, status top-centre, currency + pause top-right, actions bottom, banner centre |
 | HUD pieces | `Bar` (`width` s / m / l = short / medium / long; unset = fills its room) `Pips` `Counter` `Score` `TimerRing` `TurnBanner` `PlayerSeats` `Rank` `ConnectionDot` | `?screen=hud` | Health/xp/timer bars, +N counter, score + combo, timer ring, turn banner (`variant="plain"` = big HudText, no panel), seats with active player, place, connection |
 | HUD text | `HudText` | `?screen=hud` · `?screen=chips` | Plain words on the game — instructions ("Hold to Roll"), info ("Round 1"). No plate; `on-game` colour + `game-shade` halo; read out politely; pops in when the text changes. `size` s / m (default) / l, `tone="accent"`, `detail` line, `pop` = quick grow-and-settle when the text changes (calls attention, e.g. "Round 2") |

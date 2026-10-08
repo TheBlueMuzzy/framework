@@ -1,7 +1,7 @@
 // HUD logic: English place names, and the +N float-up appearing when a number changes.
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup, render } from '@testing-library/react'
-import { Bar, Counter, HudText, ordinal, PlayerChip, TurnBanner } from './hud'
+import { cleanup, render, screen } from '@testing-library/react'
+import { Bar, Counter, HudText, ordinal, Pause, PlayerChip, TurnBanner } from './hud'
 import { toMilliseconds } from './motion'
 
 afterEach(() => { cleanup(); document.documentElement.removeAttribute('data-reduce-motion') })
@@ -116,5 +116,17 @@ describe('PlayerChip xs', () => {
   it('no empty name line when only the detail shows (no stray gap above it)', () => {
     const { container } = render(<PlayerChip name="Sam" showName={false} detail="S2 · T5" size="s" />)
     expect([...container.querySelector('.kit-player-chip-text')!.children].map((line) => line.textContent)).toEqual(['S2 · T5'])
+  })
+})
+
+describe('Pause', () => {
+  it('note: one quiet caption under the title, above the buttons — none without it', () => {
+    const { rerender } = render(<Pause onQuit={() => {}} />)
+    expect(document.querySelector('.kit-modal [data-kind="caption"]')).toBeNull()
+    rerender(<Pause onQuit={() => {}} note="Small garden · 2-letter words off" />)
+    expect(screen.getByText('Small garden · 2-letter words off').getAttribute('data-kind')).toBe('caption')
+    const order = [...document.querySelector('.kit-modal')!.children].map((child) => child.getAttribute('data-kind') ?? child.className)
+    expect(order.indexOf('caption')).toBeGreaterThan(order.indexOf('title'))
+    expect(order.indexOf('caption')).toBeLessThan(order.findIndex((name) => name.includes('kit-menu')))
   })
 })

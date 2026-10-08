@@ -355,7 +355,7 @@ const samples: Record<string, ComponentType> = {
   chips: PlayerChips,
   pinned: PinnedTable,
   hand: HandSample,
-  pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
+  pause: () => <Pause note="Doubles score twice · 13 rounds" onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
   round: () => <RoundIntro round={2} total={5} detail="Doubles score twice this round" />,
