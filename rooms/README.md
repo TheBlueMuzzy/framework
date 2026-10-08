@@ -26,7 +26,7 @@ Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room,
 - **Same player, second tab:** the new tab gets the seat, the old one is told (`connected_elsewhere`).
 - **Kick:** host only; lobby = seat gone, mid-game = a bot takes it. A kicked player can't come back to that room.
 - **Everyone gone mid-game:** the room waits `keepEmptyRoomMs`, then clears.
-- **Start:** host only, at least `minSeats`, everyone (but the host) Ready. After a game (phase `over`) the host can **start** again (rematch, same seats) or go **back to lobby** (gone players lose their seats).
+- **Start:** host only, at least `minSeats`, everyone (but the host) Ready. After a game (phase `over`) the host can **start** again (rematch, same seats) or go **back to lobby** (gone players lose their seats). Anyone a bot was playing for because they idled — still connected — gets their seat back at that point, for either (0.4.1).
 
 ## Use it in a game
 ### The server — `party/server.ts` (made by the installer)

@@ -219,4 +219,28 @@ describe('settings', () => {
     expect(s.idleWarnAfterMs).toBe(30_000)
     expect(s.idleTakeoverAfterMs).toBe(60_000)
   })
+
+  it('game over: a player a bot played for (they idled, still connected) keeps their seat — back to the lobby and in a rematch', () => {
+    const room = lobby()
+    startPlaying(room)
+    handToBot(room, 'seat-2') // idled: still connected
+    room.phase = 'over'
+    backToLobby(room)
+    expect(room.seats.find((s) => s.id === 'seat-2')).toMatchObject({ kind: 'human', connected: true })
+    startPlaying(room)
+    handToBot(room, 'seat-2')
+    room.phase = 'over'
+    startPlaying(room) // rematch
+    expect(room.seats.find((s) => s.id === 'seat-2')).toMatchObject({ kind: 'human' })
+  })
+
+  it('game over: a player who LEFT (disconnected) still loses their seat on back to the lobby', () => {
+    const room = lobby()
+    startPlaying(room)
+    handToBot(room, 'seat-2')
+    room.seats.find((s) => s.id === 'seat-2')!.connected = false
+    room.phase = 'over'
+    backToLobby(room)
+    expect(room.seats.find((s) => s.id === 'seat-2')).toBeUndefined()
+  })
 })
