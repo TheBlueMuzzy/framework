@@ -14,6 +14,8 @@ describe('install-audio', () => {
     installAudio(game, { log: quiet })
     expect(existsSync(join(game, 'src/audio/config.ts'))).toBe(true)
     expect(existsSync(join(game, 'src/audio/config.test.ts'))).toBe(false)
+    expect(existsSync(join(game, 'src/audio/fakeAudioContext.test.helper.ts'))).toBe(false)
+    expect(existsSync(join(game, 'src/audio/engine.ts'))).toBe(true)
     expect(existsSync(join(game, 'src/audio/old.ts'))).toBe(false)
     expect(readFileSync(join(game, 'src/audio/VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+ \(framework /)
   })
