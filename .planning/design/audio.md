@@ -166,3 +166,19 @@ Saving audio files needs a new Dev Kit endpoint: binary, only into `public/audio
 - Code-made sounds (ZzFX) — never as defaults.
 - Middleware (FMOD/Wwise).
 - Unity twin (when a Unity game needs it).
+
+## Build notes
+Sprint 19 (2026-10-09, built while Muzzy slept — calls made, open to change):
+- **Added to `content/audio.json`** beyond the sketch above: per-sound `"duck": true` (big moments dip the music) with a top-level `duck` { amountDb −7, downMs 10, backMs 600 }; `limits` { maxVoices 14, staleMs 400 }; per-snapshot `fadeMs` (default 250).
+- **Priority: higher = more important** (0–5, default 2). Over the global cap the least important → quietest → oldest is cut; if everything playing is more important, the new sound is dropped (`global-limit`). Music, ambience and loops don't count toward the cap.
+- **Per-sound copies** over `maxVoices` always cut that sound's oldest copy (no "skip the new one" mode — not needed yet).
+- **Random volume and pitch are ±** (randomVolumeDb 2 = −2…+2 dB). The limiter catches the top.
+- **Ladder sounds get no random pitch** (it would put notes out of key). `ladder.root` is informational — the key the ladder's files are recorded in; the module doesn't retune.
+- **Loops are remembered, one-shots are not:** a loop asked for while locked / suspended / still loading starts once it can (one per name — no burst). Asking for a loop that's already playing is a no-op (`already-playing`). One-shots not loaded yet are dropped (`not-loaded`) and load for next time; effect + menu files preload right after the first tap.
+- **Mute everything** drops one-shots (`muted`) but lets loops keep running silently under the master, so unmuting brings the ambience back.
+- **Slider curve:** gain = (slider/100)² (50 → −12 dB, 0 = silent).
+- **Streaming music through `<audio>` moved to F28** — F27 decodes every file; keep beta loops short.
+- **`_ranges` / `_help` / `_labels` for sound knobs use a wildcard key** (`"sounds.*.volumeDb"`). The current Dev Kit tuning tab only knows exact paths; the Sound Board (F30) should read the wildcard.
+- **No `<AudioUnlock/>` component:** the engine listens for the first tap itself (capture phase), and keeps listening, so a tap after a phone call also resumes.
+- **`playSound` lives in `shared.ts`** (no React needed), `react.ts` has `useAudioSettings` / `useAudioSnapshot` / `useLoop`.
+- **UI kit (F29):** standard Audio tab rows = the ids `useAudioSettings` reads; the old "Voices" row is gone (voice-over is out of scope).
