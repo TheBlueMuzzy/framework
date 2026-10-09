@@ -150,7 +150,7 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
       <Panel depth={2} gap="m" className={tabs.length > 1 ? 'kit-wide kit-tall' : 'kit-wide'}>
         <Row gap="s" justify="between">
           <Text kind="title">{w.title}</Text>
-          <Button variant="secondary" onClick={onBack}>{w.back}</Button>
+          <Button variant="secondary" sound="back" onClick={onBack}>{w.back}</Button>
         </Row>
         {/* Phones get ◀ Audio ▶ instead of a tab bar: 8 tabs would fill half the screen. One tab: no picker. */}
         {tabs.length > 1 && <>

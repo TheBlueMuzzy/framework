@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
-import { Button, RoomCodeInput, Selector, Stepper, Tabs } from '.'
+import { Button, RoomCodeInput, Selector, Stepper, Tabs, Toggle, setControlSound } from '.'
 
 afterEach(cleanup)
 
@@ -113,5 +113,40 @@ describe('Button size', () => {
       expect(button.dataset.sized).toBeUndefined()
       expect(button.style.getPropertyValue('--kit-button-size')).toBe('')
     }
+  })
+})
+
+describe('control sounds (setControlSound)', () => {
+  afterEach(() => setControlSound(null))
+
+  it('a Button says tap, sound="back" says back, sound={false} says nothing; a Toggle says toggle', () => {
+    const heard: string[] = []
+    setControlSound((kind) => heard.push(kind))
+    render(<>
+      <Button>Play</Button>
+      <Button sound="back">Back</Button>
+      <Button sound={false}>Cast</Button>
+      <Toggle on={false} onChange={() => {}} label="Mono" />
+    </>)
+    fireEvent.click(screen.getByText('Play'))
+    fireEvent.click(screen.getByText('Back'))
+    fireEvent.click(screen.getByText('Cast'))
+    fireEvent.click(screen.getByRole('switch'))
+    expect(heard).toEqual(['tap', 'back', 'toggle'])
+  })
+
+  it('still runs the button\'s own onClick, and is silent with no listener', () => {
+    let pressed = 0
+    render(<Button onClick={() => pressed++}>Go</Button>)
+    fireEvent.click(screen.getByText('Go'))
+    expect(pressed).toBe(1)
+  })
+
+  it('Tabs and ◀ ▶ say tap', () => {
+    const heard: string[] = []
+    setControlSound((kind) => heard.push(kind))
+    render(<SelectorDemo />)
+    fireEvent.click(screen.getByLabelText('Next Difficulty'))
+    expect(heard).toEqual(['tap'])
   })
 })
