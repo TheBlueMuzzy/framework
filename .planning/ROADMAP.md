@@ -91,9 +91,25 @@ flowchart LR
   F24 --> F26[F26 Auto-tuner]
 ```
 
+## v0.6 — Audio  (proven by Glyphtender beta, its v0.9)
+Goal: any web game gets sound by naming its moments — content/audio.json says what they sound like, Muzzy tunes and swaps them in the Dev Kit Sound Board, and the standards (volume groups, variation, limits, phones, online catch-up) come for free. Design: `design/audio.md`. Defined with Muzzy 2026-10-09.
+- ⏳ F27 🧱 Audio engine + rules: pure planner (variants, random pitch/volume, voices + cooldown + priority, pitch ladder, stale/catch-up drop), Web Audio engine (unlock, buses → limiter, silent switch, hidden/interrupted = drop not queue, mono, snapshots + ducking), loader (decode sfx, stream music), content/audio.json config + validation, log (window.__audioLog), React helpers, installer; audio-setup skill → points at the module — must:beta · needs: —
+- ⏳ F28 🧱 Music + mix: synced layers, gapless loop points, crossfades, stingers, rests after N loops, snapshot/duck timing — must:beta · needs: F27
+- ⏳ F29 🎮 UI kit Settings → Audio tab standard: Master · Music · Ambience · Effects · UI · Mute everything · Mute in background · Mono, dB-feel sliders, wired to the engine — must:beta · needs: F27
+- ⏳ F30 🔧 Dev Kit Sound Board: sound list + ▶ / ▶×5, every knob as sliders (live, Save, ↺), files (drop to replace → public/audio, waveform trim/loop handles), A/B, ▶ in context (game adapter), mixer + meters, play/drop log, credits nudge; binary save endpoint (public/audio only, dev only) — must:beta · needs: F27, ~F28
+  why: Muzzy tunes sound by ear in the game ("I should be able to change sounds, tweak them")
+- ⏳ F31 🔧 Audio check script: loudness report + convert/normalize to MP3 (ffmpeg-static), used by the Sound Board's drop — should · needs: F27
+```mermaid
+flowchart LR
+  F27[F27 Engine + rules] --> F28[F28 Music + mix]
+  F27 --> F29[F29 Settings Audio tab]
+  F27 --> F30[F30 Sound Board]
+  F28 -.working.-> F30
+  F27 --> F31[F31 Audio check script]
+```
+
 ## Later
 - **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
-- **Audio module** (Muzzy 2026-10-05): comes out of Glyphtender's audio sprint — should
 - **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
