@@ -1,0 +1,74 @@
+// INSTALL / UPDATE THE AUDIO MODULE IN A GAME — plain Node, no packages needed.
+// Usage: node scripts/install-audio.mjs <game-folder> [--dry-run]
+//   --dry-run: only show what would change
+// What it does:
+//   - copies kit/ → <game>/src/audio/ (not the tests: they run here, in the framework)
+//   - writes a VERSION file (module version + framework commit)
+//   - removes files the module no longer ships — only ever inside src/audio/
+//   - gives the game a starter content/audio.json ONCE (if it has none). After that the game owns it: never overwritten.
+import { execSync } from 'node:child_process'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join, relative, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+const audioDir = join(dirname(fileURLToPath(import.meta.url)), '..')
+const KIT_TARGET = 'src/audio'
+const STARTER_CONTENT = 'content/audio.json'
+const isTest = (path) => /\.test\./.test(path)
+
+function listFiles(dir, base = dir) {
+  if (!existsSync(dir)) return []
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isSymbolicLink()) return []
+    const path = join(dir, entry.name)
+    return entry.isDirectory() ? listFiles(path, base) : [relative(base, path).replaceAll('\\', '/')]
+  })
+}
+
+function kitVersion() {
+  const version = readFileSync(join(audioDir, 'kit', 'VERSION'), 'utf8').trim()
+  let commit = 'no git'
+  try {
+    commit = execSync('git rev-parse --short HEAD', { cwd: audioDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+    if (execSync('git status --porcelain kit', { cwd: audioDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
+  } catch { /* not a git folder: fine */ }
+  return { version, commit }
+}
+
+export function installAudio(gameDir, { dryRun = false, log = console.log } = {}) {
+  const game = resolve(gameDir)
+  const target = join(game, KIT_TARGET)
+  const kitFiles = listFiles(join(audioDir, 'kit')).filter((f) => !isTest(f) && f !== 'VERSION')
+  const present = listFiles(target).filter((f) => f !== 'VERSION')
+  const changed = kitFiles.filter((f) => !present.includes(f) || !readFileSync(join(audioDir, 'kit', f)).equals(readFileSync(join(target, f))))
+  const removed = present.filter((f) => !kitFiles.includes(f))
+  const starter = existsSync(join(game, STARTER_CONTENT)) ? [] : [STARTER_CONTENT]
+  const { version, commit } = kitVersion()
+  log(`Audio module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
+  changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
+  removed.forEach((f) => log(`  removed ${f}`))
+  if (!changed.length && !removed.length) log('  already up to date')
+  starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
+  if (dryRun) return { changed, removed, starter }
+  for (const f of changed) {
+    mkdirSync(dirname(join(target, f)), { recursive: true })
+    copyFileSync(join(audioDir, 'kit', f), join(target, f))
+  }
+  for (const f of removed) rmSync(join(target, f))
+  mkdirSync(target, { recursive: true })
+  writeFileSync(join(target, 'VERSION'), `${version} (framework ${commit})\n`)
+  for (const f of starter) {
+    mkdirSync(dirname(join(game, f)), { recursive: true })
+    copyFileSync(join(audioDir, 'templates', f), join(game, f))
+  }
+  return { changed, removed, starter }
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  const gameDir = process.argv[2]
+  if (!gameDir) {
+    console.log('Usage: node scripts/install-audio.mjs <game-folder> [--dry-run]')
+    process.exit(1)
+  }
+  installAudio(gameDir, { dryRun: process.argv.includes('--dry-run') })
+}
