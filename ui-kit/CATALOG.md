@@ -50,7 +50,7 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Mode select | `ModeSelect` | `?screen=modes` | A card per mode, then Start |
 | How to play | `HowToPlay` | `?screen=howto` | Pages to flip, with page dots |
 | Credits | `Credits` | `?screen=credits` | People, then every asset from `content/credits.json` |
-| Settings | `Settings` | `?screen=settings` | Tabs + rows from `content/ui/settings.json` — never hand-built |
+| Settings | `Settings` | `?screen=settings` | Tabs + rows from `content/ui/settings.json` — never hand-built. Standard Audio tab (0.4.1): Master volume 80 · Music 50 · Ambience 60 · Sound effects 80 · Menus & buttons 70 · Mute everything · Mute when in the background · Mono audio — the same ids the audio module reads (`useAudioSettings`) |
 | **In game** | | | |
 | Pause | `Pause` | `?screen=pause` | Resume / settings / how to play / quit (asks first). `note` (0.4.0) = one quiet caption line under the title, above the buttons (e.g. this game's settings) |
 | HUD frame | `Hud` | `?screen=hud` | Safe slots: vitals top-left, status top-centre, currency + pause top-right, actions bottom, banner centre |

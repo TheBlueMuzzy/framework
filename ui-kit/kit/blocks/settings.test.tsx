@@ -119,3 +119,14 @@ describe('Settings', () => {
     expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true)
   })
 })
+
+describe('the standard Audio tab', () => {
+  it('has the rows the audio module reads, with the standard defaults', async () => {
+    const standard = (await import('./settings.default.json')).default as SettingsSchema
+    const audio = standard.tabs.find((tab) => tab.id === 'audio')!
+    expect(audio.rows.map((row) => [row.id, row.default])).toEqual([
+      ['masterVolume', 80], ['musicVolume', 50], ['ambienceVolume', 60], ['sfxVolume', 80], ['uiVolume', 70],
+      ['muteAll', false], ['muteInBackground', true], ['mono', false],
+    ])
+  })
+})
