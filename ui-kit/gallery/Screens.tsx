@@ -8,8 +8,8 @@ import seats from './content/seats.json' // player colours come from content JSO
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
-  HandView, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Text,
-  TimerRing, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
+  HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
+  TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -64,6 +64,38 @@ function Feedback() {
           </Stack>
           <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
         </Grid>
+      </Panel>
+    </Screen>
+  )
+}
+
+// <Screen scroll>: a New-Game-style menu taller than a phone. The whole screen drags as one, with no scroll bar;
+// turning on "More options" opens a section that pushes Start further down — still reachable by dragging
+function ScrollingMenu() {
+  const [players, setPlayers] = useState(2)
+  const [board, setBoard] = useState('Medium')
+  const [more, setMore] = useState(false)
+  const [flags, setFlags] = useState<Record<string, boolean>>({})
+  const flag = (name: string) => (
+    <ListRow key={name} label={name} detail="A rule you can switch on or off">
+      <Toggle label={name} on={!!flags[name]} onChange={(on) => setFlags({ ...flags, [name]: on })} />
+    </ListRow>
+  )
+  return (
+    <Screen scroll label="New game">
+      <Panel depth={2} gap="m">
+        <Row gap="s" justify="between">
+          <Text kind="title">New game</Text>
+          <Button variant="secondary" onClick={() => screens.pop()}>Back</Button>
+        </Row>
+        <ListRow label="Players" detail="Who sits at the table"><Stepper label="Players" value={players} min={2} max={4} onChange={setPlayers} /></ListRow>
+        <ListRow label="Board" detail="Bigger boards make longer games">
+          <Selector label="Board" options={['Small', 'Medium', 'Large']} value={board} onChange={setBoard} />
+        </ListRow>
+        {['Short words', 'Hide pieces', 'Word hints'].map(flag)}
+        <ListRow label="More options" detail="Opens more rules below"><Toggle label="More options" on={more} onChange={setMore} /></ListRow>
+        {more && ['Timer', 'Bonus tiles', 'Steal turns', 'Double points', 'Sudden death'].map(flag)}
+        <Button onClick={() => { toast('Starting!'); screens.pop() }}>Start</Button>
       </Panel>
     </Screen>
   )
@@ -276,6 +308,22 @@ function LobbyRoomAutoReady() {
   </Lobby>
 }
 
+// Idle warning: the bar drains for 30 s, then "A bot is playing for you — tap to play"; the button stands in for any tap
+function IdleSample({ startBot = false }: { startBot?: boolean }) {
+  const [endsAt, setEndsAt] = useState<number | null>(() => (startBot ? null : Date.now() + 30_000))
+  useEffect(() => {
+    if (endsAt === null) return
+    const takeover = setTimeout(() => setEndsAt(null), Math.max(0, endsAt - Date.now()))
+    return () => clearTimeout(takeover)
+  }, [endsAt])
+  return (
+    <Screen label="Idle warning">
+      <IdleWarning endsAt={endsAt} botPlaying={endsAt === null} />
+      <Button variant="secondary" onClick={() => setEndsAt(Date.now() + 30_000)}>Tap (I’m here)</Button>
+    </Screen>
+  )
+}
+
 // Pick a seat → "Joining…" for a moment → into the game (the HUD). Cancel goes back to the list.
 function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
   const [waiting, setWaiting] = useState(startWaiting)
@@ -299,6 +347,7 @@ const samples: Record<string, ComponentType> = {
     { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
   ]} />,
   modes: Modes,
+  scrolling: ScrollingMenu,
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
@@ -306,7 +355,7 @@ const samples: Record<string, ComponentType> = {
   chips: PlayerChips,
   pinned: PinnedTable,
   hand: HandSample,
-  pause: () => <Pause onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
+  pause: () => <Pause note="Doubles score twice · 13 rounds" onSettings={() => screens.push('settings')} onHowToPlay={() => screens.push('howto')} onQuit={() => { screens.pop(); screens.pop() }} />,
   loading: () => <Loading progress={0.6} tip="Tip: keep your sixes for the big rows." />,
   countdown: CountdownSample,
   round: () => <RoundIntro round={2} total={5} detail="Doubles score twice this round" />,
@@ -330,6 +379,8 @@ const samples: Record<string, ComponentType> = {
   seats: () => <Seats />,
   joining: () => <Seats startWaiting />,
   noseats: () => <SeatPicker seats={[]} onPick={noop} onCancel={() => screens.pop()} />,
+  idle: () => <IdleSample />,
+  idlebot: () => <IdleSample startBot />,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 

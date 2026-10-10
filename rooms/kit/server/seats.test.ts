@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  addBot, backToLobby, chooseHost, dropOut, handToBot, joinRoom, kick, missTurn, newRoom,
+  addBot, backToLobby, chooseHost, dropOut, handToBot, joinRoom, kick, newRoom,
   publicRoom, startPlaying, takeBack, whyNotStart,
 } from './seats'
 import type { RoomData } from './seats'
@@ -70,7 +70,7 @@ describe('seats: rejoin (persistentId owns the seat)', () => {
     handToBot(room, 'seat-2')
     expect(room.seats[1].kind).toBe('bot')
     expect(joinRoom(room, cat, settings)).toEqual({ ok: false, reason: 'game_started' })
-    expect(joinRoom(room, bob, settings)).toMatchObject({ ok: true, cameBack: true, seat: { id: 'seat-2', kind: 'human', missedTurns: 0 } })
+    expect(joinRoom(room, bob, settings)).toMatchObject({ ok: true, cameBack: true, seat: { id: 'seat-2', kind: 'human' } })
   })
 
   it('also works with create: true (a reload of the tab that made the room)', () => {
@@ -127,25 +127,14 @@ describe('seats: host migration', () => {
 })
 
 describe('seats: idle players and bots', () => {
-  it('a bot takes the seat after missedTurnsBeforeBot turns in a row', () => {
+  it('an idle player gets a bot; still connected, they can take the seat back', () => {
     const room = lobby()
     startPlaying(room)
-    expect(missTurn(room, 'seat-2', settings)).toBe(false)
-    expect(room.seats[1].missedTurns).toBe(1)
-    expect(missTurn(room, 'seat-2', settings)).toBe(true)
-    expect(room.seats[1].kind).toBe('bot')
-    expect(missTurn(room, 'seat-2', settings)).toBe(false) // already a bot
-  })
-
-  it('a still-connected owner can take the seat back from the bot', () => {
-    const room = lobby()
-    startPlaying(room)
-    missTurn(room, 'seat-1', settings)
-    missTurn(room, 'seat-1', settings)
+    handToBot(room, 'seat-1') // (RoomServer's idle clock ran out)
     expect(room.seats[0]).toMatchObject({ kind: 'bot', isHost: false, connected: true })
     expect(host(room)).toBe('Bob')
     takeBack(room, 'seat-1')
-    expect(room.seats[0]).toMatchObject({ kind: 'human', missedTurns: 0 })
+    expect(room.seats[0]).toMatchObject({ kind: 'human', connected: true })
     expect(host(room)).toBe('Bob')
   })
 
@@ -154,6 +143,14 @@ describe('seats: idle players and bots', () => {
     expect(addBot(room, settings)?.name).toBe('Bot 1')
     expect(addBot(room, settings)).toBeNull() // full (3 seats)
     expect(addBot(lobby(), readSettings({ allowBots: false }))).toBeNull()
+  })
+
+  it('a bot the game described keeps its profile and name, numbered only when the name is taken', () => {
+    const named = addBot(lobby(), settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })
+    expect(named).toMatchObject({ kind: 'bot', name: 'The Survivor', profile: 'Survivor/FirstClass' })
+    const room = lobby()
+    room.seats[0].name = 'The Survivor'
+    expect(addBot(room, settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })?.name).toBe('The Survivor 2')
   })
 })
 
@@ -219,6 +216,31 @@ describe('settings', () => {
     const s = readSettings({ maxSeats: 6, _help: 'notes', minSeats: 'two' } as never)
     expect(s.maxSeats).toBe(6)
     expect(s.minSeats).toBe(2)
-    expect(s.missedTurnsBeforeBot).toBe(2)
+    expect(s.idleWarnAfterMs).toBe(30_000)
+    expect(s.idleTakeoverAfterMs).toBe(60_000)
+  })
+
+  it('game over: a player a bot played for (they idled, still connected) keeps their seat — back to the lobby and in a rematch', () => {
+    const room = lobby()
+    startPlaying(room)
+    handToBot(room, 'seat-2') // idled: still connected
+    room.phase = 'over'
+    backToLobby(room)
+    expect(room.seats.find((s) => s.id === 'seat-2')).toMatchObject({ kind: 'human', connected: true })
+    startPlaying(room)
+    handToBot(room, 'seat-2')
+    room.phase = 'over'
+    startPlaying(room) // rematch
+    expect(room.seats.find((s) => s.id === 'seat-2')).toMatchObject({ kind: 'human' })
+  })
+
+  it('game over: a player who LEFT (disconnected) still loses their seat on back to the lobby', () => {
+    const room = lobby()
+    startPlaying(room)
+    handToBot(room, 'seat-2')
+    room.seats.find((s) => s.id === 'seat-2')!.connected = false
+    room.phase = 'over'
+    backToLobby(room)
+    expect(room.seats.find((s) => s.id === 'seat-2')).toBeUndefined()
   })
 })

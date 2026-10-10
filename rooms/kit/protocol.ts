@@ -15,15 +15,17 @@ export interface Seat {
   /** Stable for the whole room ("seat-1", "seat-2"…) — use it to tell seats apart. */
   id: string
   name: string
-  /** 'bot' = a bot plays this seat (added by the host, or the player left / went idle). */
+  /** 'bot' = a bot plays this seat (added by the host, or the player left / went idle / stayed away).
+   *  A bot seat that is still `connected` = its player went idle and is still watching: any tap gives it back. */
   kind: SeatKind
   isHost: boolean
   /** false = the player's connection dropped; their seat waits for them. */
   connected: boolean
   /** Lobby only: the player pressed Ready. */
   ready: boolean
-  /** Turns in a row the server had to play for this player (resets when they act). */
-  missedTurns: number
+  /** A bot the host added: who plays it, in the game's own words (e.g. "Survivor/FirstClass") — the game's
+   *  botProfile() checked it. Missing for players and for bots the game didn't describe. */
+  profile?: string
 }
 // Note: the player's persistentId (the thing that owns a seat) is NEVER sent to other players —
 // anyone who knew it could take that seat and see that player's hand. It stays on the server.
@@ -52,12 +54,15 @@ export type ClientMessage =
   | { type: 'start'; options: unknown }
   /** Host only. Removes a player (or a bot) — a kicked player can't come back to this room. */
   | { type: 'kick'; seatId: string }
-  /** Host only, lobby only, if the game allows bots. */
-  | { type: 'add_bot' }
+  /** Host only, lobby only, if the game allows bots. `profile` = which bot (the game's own words, checked by its botProfile()). */
+  | { type: 'add_bot'; profile?: string }
   /** Host only, after a game: everyone back to the lobby. */
   | { type: 'back_to_lobby' }
   /** The game's own move. The server's game rules check it. */
   | { type: 'action'; action: unknown }
+  /** "I'm here" — the player tapped or pressed a key. Resets their idle clock; if a bot holds their seat because they
+   *  went idle, it's theirs again at once. (useRoom's active() sends it at most every few seconds.) */
+  | { type: 'active' }
 
 // ─── Server → player ────────────────────────────────────────────────
 
@@ -91,10 +96,16 @@ export type ServerMessage =
   | { type: 'event'; event: unknown }
   | { type: 'error'; code: ErrorCode; message: string }
   | { type: 'closed'; reason: CloseReason; message: string }
+  /** Only to the idle player: you've done nothing on your turn for a while — a bot takes your seat in `msLeft` unless you do something. */
+  | { type: 'idle_warning'; msLeft: number }
+  /** Only to that player: the warning is over (they did something, their turn moved on, or the bot took over). */
+  | { type: 'idle_warning_off' }
 
 // ─── Checking what arrives ──────────────────────────────────────────
 
 export const MAX_NAME_LENGTH = 16
+/** A bot's profile is a short tag (the game checks what it means). */
+export const MAX_PROFILE_LENGTH = 40
 /** Bigger messages than this are refused unread (a real one is far smaller). */
 export const MAX_MESSAGE_LENGTH = 16_000
 
@@ -137,11 +148,15 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
     case 'kick':
       return typeof data.seatId === 'string' ? { type: 'kick', seatId: data.seatId } : null
     case 'add_bot':
-      return { type: 'add_bot' }
+      if (data.profile === undefined) return { type: 'add_bot' }
+      if (typeof data.profile !== 'string' || data.profile.length > MAX_PROFILE_LENGTH) return null
+      return { type: 'add_bot', profile: data.profile }
     case 'back_to_lobby':
       return { type: 'back_to_lobby' }
     case 'action':
       return { type: 'action', action: data.action }
+    case 'active':
+      return { type: 'active' }
     default:
       return null
   }

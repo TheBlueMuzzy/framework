@@ -31,7 +31,7 @@ describe('install-rooms', () => {
     expect(readFileSync(join(kit, 'VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+\ncommit /)
     expect(readFileSync(join(game, 'party/server.ts'), 'utf8')).toContain("from '../src/rooms/server/roomServer'")
     expect(existsSync(join(game, 'party/rules.ts'))).toBe(true)
-    expect(readJson(join(game, 'content/rooms.json')).missedTurnsBeforeBot).toBe(2)
+    expect(readJson(join(game, 'content/rooms.json')).idleTakeoverAfterMs).toBe(60000)
     expect(readJson(join(game, 'partykit.json'))).toEqual({ name: 'my-game', main: 'party/server.ts', compatibilityDate: '2024-12-01', port: 1999 })
   })
 

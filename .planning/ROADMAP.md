@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: v0.5 The AI (defined 2026-10-04, proven by Glyphtender beta) — musts 0/6 · v0.4.0 The Table released 2026-10-04
+Release target: v0.5 The AI (defined 2026-10-04, proven by Glyphtender beta) — musts 2/6 · v0.4.0 The Table released 2026-10-04
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -66,13 +66,13 @@ flowchart LR
 
 ## v0.5 — The AI  ← current  (proven by Glyphtender beta, its v0.7)
 Goal: any turn-based game can put a fair, human-feeling AI in any seat — local or online — with personalities Muzzy tunes in the Dev Kit and proves by watching behaviour across hundreds of games. Design: `design/ai.md`. Built here first and switched on in Glyphtender the same sprint (its F38–F47).
-- 🔨 F19 🧱 Brain: personality + skill data, see (view only) → imagine hidden → readings → mood shifts → goal roll → candidates → score (main goal + nudge) → choose like a person → explain note; seeded; game plug shape — must:beta · needs: F12, F18 · Glyphtender sprint 14
-- ⏳ F20 🧱 Fuzzy beliefs: estimates with confidence that decays / rises from the seat's own events; drift; rebuilt from events (rejoin-safe) — must:beta · needs: F19, F13
-- ⏳ F21 🧱 Pace + background thinking: Web Worker runner, time budget, think-time + speed presets (Slow · Normal · Fast · Instant), server runner inside the room — must:beta · needs: F19
-- ⏳ F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
-- ⏳ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20
+- ✅ F19 🧱 Brain: personality + skill data, see (view only) → imagine hidden → readings → mood shifts → goal roll → candidates → score (main goal + nudge) → choose like a person → explain note; seeded; game plug shape — must:beta · needs: F12, F18 · Glyphtender sprint 14 · built 2026-10-04 (ai kit 0.1.0)
+- ✅ F20 🧱 Fuzzy beliefs: estimates with confidence that decays / rises from the seat's own events; drift; rebuilt from events (rejoin-safe) — must:beta · needs: F19, F13 · built 2026-10-04 (stateless beliefs.ts)
+- ✅ F21 🧱 Pace + background thinking: Web Worker runner, time budget, think-time + speed presets (Slow · Normal · Fast · Instant), server runner inside the room — must:beta · needs: F19
+- 🔨 F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
+- ✅ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20 · built 2026-10-04 (Dev Kit 0.6.0, devkit/kit/ai: game plugs in with aiTab(DevKitAi) — files as data + validate / watch / runCheck callbacks; Run check opens the F24 report; first game: Glyphtender F41). Not yet: banter lines, pace.json, pause/step in Watch
   why: Muzzy tunes personalities by eye in the game, not by description
-- ⏳ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21
+- 🔨 F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21
   why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
 - ⏳ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
 - ⏳ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
@@ -91,7 +91,32 @@ flowchart LR
   F24 --> F26[F26 Auto-tuner]
 ```
 
+## v0.6 — Audio  (proven by Glyphtender beta, its v0.9)
+Goal: any web game gets sound by naming its moments — content/audio.json says what they sound like, Muzzy tunes and swaps them in the Dev Kit Sound Board, and the standards (volume groups, variation, limits, phones, online catch-up) come for free. Design: `design/audio.md`. Defined with Muzzy 2026-10-09.
+- ✅ F27 🧱 Audio engine + rules: pure planner (variants, random pitch/volume, voices + cooldown + priority, pitch ladder, stale/catch-up drop), Web Audio engine (unlock, buses → limiter, silent switch, hidden/interrupted = drop not queue, mono, snapshots + ducking), loader (decode sfx, stream music), content/audio.json config + validation, log (window.__audioLog), React helpers, installer; audio-setup skill → points at the module — must:beta · needs: —
+  status 2026-10-09 (Glyphtender sprint 19): built in audio/ (kit 0.1.0), tests pass (90) — planner, engine, loader (decode only), config, log, settings, React helpers, installer. Left: music streaming via <audio> (moved to F28), audio-setup skill pointer, the Glyphtender proof
+- ✅ F28 🧱 Music + mix: streaming long music/ambience through <audio> (F27 decodes everything for now), synced layers, gapless loop points, crossfades, stingers, rests after N loops, snapshot/duck timing — must:beta · needs: F27
+- ✅ F29 🎮 UI kit Settings → Audio tab standard: Master · Music · Ambience · Effects · UI · Mute everything · Mute in background · Mono, dB-feel sliders, wired to the engine — must:beta · needs: F27
+  status 2026-10-09: ui-kit 0.4.1 standard rows built, tests pass; the dB-feel curve + wiring are the audio module's useAudioSettings. Left: the Glyphtender proof
+- ✅ F30 🔧 Dev Kit Sound Board: sound list + ▶ / ▶×5, every knob as sliders (live, Save, ↺), files (drop to replace → public/audio, waveform trim/loop handles), A/B, ▶ in context (game adapter), mixer + meters, play/drop log, credits nudge; binary save endpoint (public/audio only, dev only) — must:beta · needs: F27, ~F28
+  why: Muzzy tunes sound by ear in the game ("I should be able to change sounds, tweak them")
+- ⏳ F31 🔧 Audio check script: loudness report + convert/normalize to MP3 (ffmpeg-static) + onset check (a tap/ui sound that takes > 15 ms to start is trimmed to its onset — Glyphtender B026), used by the Sound Board's drop — should · needs: F27
+- ✅ F32 🔧 Dev Kit Moments + feel presets (Muzzy 2026-10-09): Screens → pick a screen → its Moments (score pop, two-birds, tangle, reveal winner…) → ▶ fire / 🔁 loop while sliders change (feel tiers, timings, sound); each moment has a 3-style preset picker (research the styles other games use first — e.g. Soft · Balanced · Punchy) that sets all its values, then every slider stays tweakable — must:beta · needs: F27, ~F30
+  why: Muzzy picks feel by watching it loop, not by reading numbers; presets are the easy start (like the UI kit's 5 styles)
+```mermaid
+flowchart LR
+  F27[F27 Engine + rules] --> F28[F28 Music + mix]
+  F27 --> F29[F29 Settings Audio tab]
+  F27 --> F30[F30 Sound Board]
+  F28 -.working.-> F30
+  F27 --> F31[F31 Audio check script]
+  F27 --> F32[F32 Moments + presets]
+  F30 -.working.-> F32
+```
+
 ## Later
+- **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
+- **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
 - Textured extras (Kenney CC0 9-slice panels) — could
@@ -99,6 +124,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-08 — **Dev Kit can't edit content/rooms.json** (Glyphtender F52): its Tuning tab only lists content/tuning/*.json, so room knobs (idleWarnAfterMs, idleTakeoverAfterMs…) are file/Obsidian only — let the Tuning tab take extra files (and say "restart party:dev" for server-bundled ones).
+- 2026-10-08 — **rooms installer makes partykit.json even for wrangler games** (Glyphtender F52 deleted it) — skip it when wrangler.json exists.
 - 2026-10-04 — ui-kit `npm run shoot` times out on the `pause` screen (it waits for the FIRST `.kit-screen`, which under Pause is the hidden HUD — wait for a visible one instead). Also: shoot uses port 5180 with strictPort, the same port Glyphtender's /play server uses — give it its own port. (Found by the HandView helper, autonomous run.)
 - 2026-09-28 — UI kit nitpicks to fix when a game uses them: Mode select leaves an empty 4th column on desktop · toasts briefly cover the gallery bar · gamepad-only games show the focus ring only after the first key press · does VT323 still feel "Pixel"? · "Accessibility" breaks mid-word in ◀ ▶ at 200%
 - 2026-09-28 — Kit additions expected from a full Roll Better UI pass: "game box" mode (screens/HUD inside a fixed-aspect frame, not the window) · Lobby seat-claim list (rejoin) · kit parts inside drei <Html> labels pinned to 3D

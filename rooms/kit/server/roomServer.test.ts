@@ -36,7 +36,7 @@ class FakeConnection implements PartyConnection {
 
 interface State { total: number; turn: number; order: string[]; secrets: Record<string, number> }
 interface View { total: number; whoseTurn: string; mySecret: number }
-const TURN_MS = 30_000
+const TURN_MS = 90_000 // (longer than the idle clock: idleWarnAfterMs 30 s, idleTakeoverAfterMs 60 s)
 const seatChanges: string[] = []
 
 const countToTen: GameRules<State, { secretBase: number }, { add: number }, View, string> = {
@@ -76,17 +76,12 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
   },
 }
 
-// An idle player: the server adds 1 for them and counts a missed turn
+// Whose turn it is goes on the room's idle clock; the game's own turn timer running out hands the seat to a bot.
+// (This tiny game's bots never move — the tests only watch who holds the seat.)
 function startTurnClock(state: State, room: Parameters<typeof countToTen.onStart>[2]) {
   const seatId = state.order[state.turn]
-  room.timers.start('turn', TURN_MS, () => {
-    room.missedTurn(seatId)
-    room.update((s) => {
-      const next = { ...s, total: s.total + 1, turn: (s.turn + 1) % s.order.length }
-      startTurnClock(next, room)
-      return next
-    })
-  })
+  room.onTheClock(state.total >= 10 ? [] : [seatId])
+  room.timers.start('turn', TURN_MS, () => room.timedOut(seatId))
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -132,7 +127,7 @@ beforeEach(() => {
   vi.spyOn(console, 'log').mockImplementation(() => {})
   seatChanges.length = 0
   party = new FakeParty('BAKU')
-  server = new RoomServer(party, countToTen, { minSeats: 2, maxSeats: 3, botTakesOverAfterMs: 60_000, keepEmptyRoomMs: 60_000 })
+  server = new RoomServer(party, countToTen, { minSeats: 2, maxSeats: 3, botTakesOverAfterMs: 60_000, keepEmptyRoomMs: 60_000, idleWarnAfterMs: 30_000, idleTakeoverAfterMs: 60_000 })
 })
 afterEach(() => {
   vi.useRealTimers()
@@ -322,33 +317,98 @@ describe('RoomServer: the game', () => {
     expect(server.game?.total).toBe(0)
   })
 
-  it('idle: the server plays for them; after 2 missed turns in a row a bot takes the seat', () => {
+  it('leaving mid-game: the seat stays a bot even if a tap arrives (Leave closed the connection)', () => {
     const { ann, bob } = startGame()
-    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn now
-    vi.advanceTimersByTime(TURN_MS) // Bob idles → +1 for him, 1 missed
-    expect(seatNamed('Bob').missedTurns).toBe(1)
-    expect(ann.last('room')!.room.seats[1].missedTurns).toBe(1)
-    send(ann, { type: 'action', action: { add: 1 } })
-    vi.advanceTimersByTime(TURN_MS) // Bob idles again → bot
-    expect(seatNamed('Bob').kind).toBe('bot')
-    expect(seatChanges).toEqual(['Bob:bot'])
-    expect(server.game?.total).toBe(4)
-    // He's still connected: making a move takes his seat back from the bot
-    expect(bob.closed).toBe(false)
-    send(ann, { type: 'action', action: { add: 1 } })
-    send(bob, { type: 'action', action: { add: 1 } })
-    expect(seatNamed('Bob')).toMatchObject({ kind: 'human', missedTurns: 0, connected: true })
-    expect(seatChanges).toEqual(['Bob:bot', 'Bob:back'])
-    expect(server.game?.total).toBe(6)
+    send(bob, { type: 'leave' })
+    send(bob, { type: 'active' })
+    expect(bob.last('error')?.code).toBe('not_now') // "Join the room first."
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'bot', connected: false })
+    expect(ann.last('room')!.room.seats[1].kind).toBe('bot')
   })
 
-  it('acting resets the missed-turn count', () => {
+  // ─── Idle players (the idle clock) ───
+
+  it('idle on your turn: warned at 30 s (only you), a bot takes your seat at 60 s, mid-turn', () => {
+    const { ann, bob } = startGame() // Ann's turn
+    vi.advanceTimersByTime(29_999)
+    expect(ann.last('idle_warning')).toBeUndefined()
+    vi.advanceTimersByTime(1)
+    expect(ann.last('idle_warning')).toEqual({ type: 'idle_warning', msLeft: 30_000 })
+    expect(bob.last('idle_warning')).toBeUndefined() // nobody else is told (Bob isn't on the clock)
+    vi.advanceTimersByTime(29_999)
+    expect(seatNamed('Ann').kind).toBe('human')
+    vi.advanceTimersByTime(1)
+    expect(seatNamed('Ann')).toMatchObject({ kind: 'bot', connected: true }) // a bot plays; she's still watching
+    expect(ann.last('idle_warning_off')).toBeDefined()
+    expect(bob.last('room')!.room.seats[0]).toMatchObject({ kind: 'bot', connected: true })
+    expect(seatChanges).toEqual(['Ann:bot'])
+  })
+
+  it('a tap or a move restarts the clock and takes the warning away', () => {
     const { ann, bob } = startGame()
-    send(ann, { type: 'action', action: { add: 1 } })
-    vi.advanceTimersByTime(TURN_MS) // Bob misses one
-    send(ann, { type: 'action', action: { add: 1 } })
-    send(bob, { type: 'action', action: { add: 1 } })
-    expect(seatNamed('Bob').missedTurns).toBe(0)
+    vi.advanceTimersByTime(40_000) // warned
+    send(ann, { type: 'active' })
+    expect(ann.received.at(-1)).toEqual({ type: 'idle_warning_off' })
+    vi.advanceTimersByTime(45_000)
+    expect(seatNamed('Ann').kind).toBe('human') // 85 s in, but only 45 s since her tap
+    send(ann, { type: 'action', action: { add: 1 } }) // her move: Bob's turn, her clock stops
+    vi.advanceTimersByTime(30_000)
+    expect(bob.last('idle_warning')).toEqual({ type: 'idle_warning', msLeft: 30_000 })
+    vi.advanceTimersByTime(60_000)
+    expect(seatNamed('Ann').kind).toBe('human')
+    expect(seatNamed('Bob').kind).toBe('bot')
+  })
+
+  it('active again while the bot has the seat → it is theirs at once (others hear "back"), and their clock runs again', () => {
+    const { ann, bob } = startGame()
+    vi.advanceTimersByTime(60_000)
+    expect(seatNamed('Ann').kind).toBe('bot')
+    send(ann, { type: 'active' })
+    expect(seatNamed('Ann')).toMatchObject({ kind: 'human', connected: true })
+    expect(seatChanges).toEqual(['Ann:bot', 'Ann:back'])
+    expect(bob.last('room')!.room.seats[0].kind).toBe('human')
+    vi.advanceTimersByTime(60_000) // still her turn, still idle
+    expect(seatNamed('Ann').kind).toBe('bot')
+    // A move takes it back too (and is played)
+    send(ann, { type: 'action', action: { add: 2 } })
+    expect(seatNamed('Ann').kind).toBe('human')
+    expect(server.game?.total).toBe(2)
+  })
+
+  it('the game\'s turn timer running out hands the seat over the same way (and a tap takes it back)', () => {
+    const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    vi.advanceTimersByTime(50_000)
+    send(bob, { type: 'active' }) // he's busy thinking: no idle takeover…
+    vi.advanceTimersByTime(40_000) // …but his 90 s turn is up
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'bot', connected: true })
+    expect(seatChanges).toEqual(['Bob:bot'])
+    send(bob, { type: 'active' })
+    expect(seatNamed('Bob').kind).toBe('human')
+  })
+
+  it('dropped out: no idle clock while away (the away timer gives the bot); reconnecting takes the seat back and restarts the clock', () => {
+    const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    drop(bob)
+    vi.advanceTimersByTime(59_999)
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'human', connected: false })
+    vi.advanceTimersByTime(1) // botTakesOverAfterMs
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'bot', connected: false })
+    const back = join('tab-bob-2', 'Bob', BOB)
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'human', connected: true })
+    expect(server.timers.msLeft('room:idle-takeover:seat-2')).toBe(60_000) // a fresh idle clock
+    expect(back.last('idle_warning')).toBeUndefined()
+  })
+
+  it('no clock for bot seats, nor once the game is over', () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 4; i++) {
+      send(ann, { type: 'action', action: { add: 1 } })
+      send(bob, { type: 'action', action: { add: 2 } })
+    }
+    expect(server.data.phase).toBe('over')
+    expect(server.timers.names().filter((name) => name.includes('idle'))).toEqual([])
   })
 
   it('leaving mid-game hands the seat to a bot and says goodbye', () => {

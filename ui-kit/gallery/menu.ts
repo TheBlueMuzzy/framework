@@ -15,6 +15,7 @@ export const menu: MenuGroup[] = [
     { id: 'modes', name: 'Mode select', about: 'A card per mode, then Start' },
     { id: 'howto', name: 'How to play', about: 'Pages to flip through' },
     { id: 'credits', name: 'Credits', about: 'People, then the kit’s fonts from credits.json' },
+    { id: 'scrolling', name: 'Whole-screen scroll', about: '<Screen scroll>: a tall menu drags as one, no scroll bar; a section opening pushes Start down' },
   ] },
   { title: 'Settings', entries: [
     { id: 'settings', name: 'Settings', about: 'Tabs from a list; remembers what you set' },
@@ -46,6 +47,8 @@ export const menu: MenuGroup[] = [
     { id: 'seats', name: 'Seat picker', about: 'Join a game in progress: take over a seat' },
     { id: 'joining', name: 'Seat picker: joining', about: 'After picking: spinner and Cancel' },
     { id: 'noseats', name: 'Seat picker: no seats', about: 'Nothing free right now, so Leave' },
+    { id: 'idle', name: 'Idle warning', about: 'Your turn, nothing done: a bar drains, then a bot plays (tap = back)' },
+    { id: 'idlebot', name: 'Idle: bot playing', about: 'A bot plays for you — tap to play' },
   ] },
 ]
 

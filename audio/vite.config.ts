@@ -1,0 +1,6 @@
+import { defineConfig } from 'vitest/config'
+
+// The Audio module has no app of its own here — only its tests. It runs inside each game (kit/ → the game's src/audio/).
+export default defineConfig({
+  test: { include: ['kit/**/*.test.ts', 'scripts/**/*.test.mjs'] },
+})

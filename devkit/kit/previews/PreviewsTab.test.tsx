@@ -3,6 +3,8 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DevKit } from '../DevKit'
+import type { DevKitMoment } from '../moments/momentTypes'
+import { sendTuning } from '../tuning/liveTuning'
 import PreviewsTab from './PreviewsTab'
 import { blockedLine } from './overlayLogic'
 import { groupPreviews, previewUrl, readPreviewUrl, type DevKitPreview } from './previewTypes'
@@ -121,5 +123,48 @@ describe('Screens tab', () => {
     act(() => { fireEvent.keyDown(window, { key: 'Escape' }) })
     expect(frame()).toBeNull() // the preview closed…
     expect(panel.hidden).toBe(false) // …and the panel is still open, on the Screens tab
+  })
+
+  it('lists the Moments of a screen; tapping one opens the screen with its Moments panel, and live edits reach the frame', async () => {
+    vi.spyOn(history, 'back').mockImplementation(() => {})
+    const moments: DevKitMoment[] = [
+      { id: 'winner', screen: 'reveal', label: 'New winner', note: 'the crown', knobs: [], play: () => {} },
+      { id: 'count', screen: 'reveal', label: 'Count-up', knobs: [], play: () => {} },
+    ]
+    render(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'New winner' }))
+    expect(frame()?.getAttribute('src')).toContain('devkit-preview=reveal')
+    expect(frame()?.getAttribute('allow')).toBe('autoplay')
+    const panel = await screen.findByRole('complementary', { name: 'Moments' })
+    expect(panel.querySelector('[data-moment="winner"] .mo-name')?.getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Moments · 2' })).toBeTruthy()
+
+    const posted = vi.spyOn(frame()!.contentWindow!, 'postMessage')
+    act(() => sendTuning('feel', { tiers: { big: { grow: 0.6 } } }))
+    expect(posted).toHaveBeenCalledWith({ source: 'devkit-overlay', kind: 'tuning', file: 'feel', data: { tiers: { big: { grow: 0.6 } } } }, window.location.origin)
+    fireEvent.click(screen.getByRole('button', { name: 'Play Count-up' }))
+    expect(posted).toHaveBeenLastCalledWith(expect.objectContaining({ kind: 'moment', id: 'count', round: 0, looping: false }), window.location.origin)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the preview' }))
+  })
+
+  it('names problems in the moments list (a screen not in the list)', async () => {
+    const moments: DevKitMoment[] = [{ id: 'x', screen: 'nowhere', label: 'X', knobs: [], play: () => {} }]
+    render(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} />)
+    expect((await screen.findByRole('alert')).textContent).toContain('"nowhere"')
+  })
+
+  it('the Dev Kit search (while Screens is open) filters screens and their moments, highlighted', async () => {
+    const moments: DevKitMoment[] = [
+      { id: 'winner', screen: 'reveal', label: 'New winner', knobs: [], play: () => {} },
+      { id: 'count', screen: 'reveal', label: 'Count-up', knobs: [], play: () => {} },
+    ]
+    const { rerender } = render(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} query="count" />)
+    expect(await screen.findByRole('button', { name: 'Count-up' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'New winner' })).toBeNull()
+    expect(screen.queryByText('End table')).toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('1 screen found')
+    expect([...document.querySelectorAll('mark.dk-hit')].map((m) => m.textContent)).toContain('Count')
+    rerender(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} query="menu" />)
+    expect(screen.getByText('Pause')).toBeTruthy() // by its note ("The Menu button")
   })
 })
