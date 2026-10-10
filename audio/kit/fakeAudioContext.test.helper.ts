@@ -98,6 +98,87 @@ export class FakeAnalyser extends FakeNode {
   }
 }
 
+/** A fake <audio> element. While playing, its position follows a clock (seconds) the test moves; it ends at `duration`. */
+export class FakeMediaElement {
+  src: string
+  duration: number
+  paused = true
+  playbackRate = 1
+  preservesPitch = true
+  preload = ''
+  crossOrigin: string | null = null
+  released = false
+  /** false = the browser refuses play() (a phone before a tap) */
+  allowPlay = true
+  playCalls = 0
+  private position = 0
+  private hasEnded = false
+  private playedAt = 0
+  private clock: () => number
+  constructor(url: string, clock: () => number, duration = NaN) {
+    this.src = url
+    this.clock = clock
+    this.duration = duration
+  }
+  /** Brings the position up to the clock */
+  private update() {
+    if (this.paused || this.hasEnded) return
+    const now = this.clock()
+    this.position += (now - this.playedAt) * this.playbackRate
+    this.playedAt = now
+    if (Number.isFinite(this.duration) && this.position >= this.duration) {
+      this.position = this.duration
+      this.hasEnded = true
+      this.paused = true
+    }
+  }
+  get currentTime() {
+    this.update()
+    return this.position
+  }
+  set currentTime(value: number) {
+    this.update()
+    this.position = value
+    this.hasEnded = false
+  }
+  get ended() {
+    this.update()
+    return this.hasEnded
+  }
+  play() {
+    this.playCalls++
+    if (!this.allowPlay) return Promise.reject(new Error('NotAllowedError'))
+    this.update()
+    if (this.hasEnded) {
+      this.hasEnded = false
+      this.position = 0
+    }
+    this.paused = false
+    this.playedAt = this.clock()
+    return Promise.resolve()
+  }
+  pause() {
+    this.update()
+    this.paused = true
+  }
+  load() {}
+  removeAttribute(name: string) {
+    if (name === 'src') {
+      this.src = ''
+      this.released = true
+      this.paused = true
+    }
+  }
+}
+
+export class FakeMediaSource extends FakeNode {
+  element: FakeMediaElement
+  constructor(element: FakeMediaElement) {
+    super('media')
+    this.element = element
+  }
+}
+
 export class FakeAudioContext {
   state: 'suspended' | 'running' | 'interrupted' | 'closed' = 'suspended'
   currentTime = 0
@@ -121,6 +202,11 @@ export class FakeAudioContext {
   createDynamicsCompressor() { return this.made(new FakeCompressor()) }
   createBufferSource() { return this.made(new FakeSource()) }
   createAnalyser() { return this.made(new FakeAnalyser()) }
+  createMediaElementSource(element: FakeMediaElement) { return this.made(new FakeMediaSource(element)) }
+  /** The media sources made so far (one per streamed copy), oldest first */
+  mediaSources() {
+    return this.nodes.filter((n): n is FakeMediaSource => n instanceof FakeMediaSource)
+  }
   createBuffer(_channels: number, length: number, rate: number) { return { duration: length / rate } }
   decodeAudioData(_data: ArrayBuffer) {
     this.decoded++

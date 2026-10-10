@@ -53,9 +53,61 @@ describe('readAudioConfig', () => {
     expect(Object.keys(config.sounds)).toEqual(['a'])
   })
 
-  it('keeps the music section as written (framework F28)', () => {
-    const music = { layers: { bed: { files: ['mus/bed.mp3'] } } }
-    expect(readAudioConfig({ music }, () => {}).music).toEqual(music)
+  it('reads music tracks: layers with defaults, rests, fades (framework F28)', () => {
+    const warnings: string[] = []
+    const config = readAudioConfig({
+      music: {
+        _help: 'skipped',
+        tracks: {
+          garden: {
+            layers: {
+              harp: { file: 'mus/harp.mp3' },
+              pad: { files: ['mus/pad.mp3'], volumeDb: -6, fromIntensity: 0.3, fullAtIntensity: 0.8 },
+            },
+            playsBeforeRest: 1,
+            restSeconds: [90, 60],
+          },
+        },
+      },
+    }, (m) => warnings.push(m))
+    expect(warnings).toEqual([])
+    const garden = config.music.tracks.garden
+    expect(garden.layers.harp).toEqual({ file: 'mus/harp.mp3', volumeDb: 0, fromIntensity: 0, fullAtIntensity: 0 })
+    expect(garden.layers.pad).toEqual({ file: 'mus/pad.mp3', volumeDb: -6, fromIntensity: 0.3, fullAtIntensity: 0.8 })
+    expect(garden.playsBeforeRest).toBe(1)
+    expect(garden.restSeconds).toEqual([60, 90]) // put in order
+    expect(garden.loop).toBe(true)
+    expect(garden.fadeInMs).toBe(2000)
+  })
+
+  it('warns about bad music values and keeps going', () => {
+    const warnings: string[] = []
+    const config = readAudioConfig({
+      music: {
+        tracks: {
+          bad: {
+            layers: { a: { file: 'mus/a.mp3', fromIntensity: 0.8, fullAtIntensity: 0.2 }, b: { volumeDb: -3 }, c: { files: ['1.mp3', '2.mp3'] } },
+            restSeconds: 'long',
+            playsBeforeRest: 99,
+            tempo: 120,
+          },
+        },
+      },
+    }, (m) => warnings.push(m))
+    const bad = config.music.tracks.bad
+    expect(bad.layers.a.fullAtIntensity).toBe(0.8) // full can't come before from
+    expect(bad.layers.b).toBeUndefined() // no file: left out
+    expect(bad.layers.c.file).toBe('1.mp3')
+    expect(bad.restSeconds).toEqual([60, 90])
+    expect(bad.playsBeforeRest).toBe(20)
+    expect(warnings).toHaveLength(6)
+  })
+
+  it('reads stream: auto / always / never (true / false too)', () => {
+    const config = readAudioConfig({
+      sounds: { a: { files: ['a.mp3'] }, b: { files: ['b.mp3'], stream: true }, c: { files: ['c.mp3'], stream: 'never' } },
+    }, () => {})
+    expect([config.sounds.a.stream, config.sounds.b.stream, config.sounds.c.stream]).toEqual(['auto', 'always', 'never'])
   })
 
   it('warns once per message on the console by default', () => {

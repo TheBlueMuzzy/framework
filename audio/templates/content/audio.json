@@ -45,7 +45,21 @@
     "sounds.*.lowpassHz": "Muffle it: only sound below this pitch (Hz) gets through. 0 = off. Try 800-3000.",
     "sounds.*.highpassHz": "Thin it: only sound above this pitch (Hz) gets through. 0 = off. Try 200-800.",
     "sounds.*.ladder": "true = each quick repeat plays one note higher, up the ladder (see Ladder).",
-    "sounds.*.duck": "true = the music drops for a moment while it plays (big moments)."
+    "sounds.*.duck": "true = the music drops for a moment while it plays (big moments).",
+    "sounds.*.stream": "auto = music and ambience play straight from the file (a long file never sits whole in memory), effects and menus are loaded first so they start instantly. always / never to choose. A streamed loop can't jump back sample-exact: it crossfades at the loop point.",
+    "sounds.*.loopCrossfadeMs": "A streamed loop crossfades this long (ms) where it jumps back, to hide the seam. 50-300 is typical. (Not used when the sound isn't streamed.)",
+    "music.tracks.*.layers.*.file": "The layer's file, inside public/audio/ (e.g. mus/garden_harp.mp3). A track's layers play together, so make them the same length.",
+    "music.tracks.*.layers.*.volumeDb": "How loud this layer is at full, in dB.",
+    "music.tracks.*.layers.*.fromIntensity": "The music's intensity (0-1) where this layer starts to be heard. The game raises the intensity in exciting moments.",
+    "music.tracks.*.layers.*.fullAtIntensity": "The intensity where this layer is at full volume. Between the two it fades in. 0 and 0 = always on.",
+    "music.tracks.*.loop": "true = a seamless loop (each time round counts as one play). false = a piece with an ending (one play = to its end).",
+    "music.tracks.*.loopStartMs": "Where each loop jumps back to (ms into the files). 0 and 0 = the whole file.",
+    "music.tracks.*.loopEndMs": "Where each loop ends (ms). Anything after it is the ending, heard before a rest. 0 = the end of the file.",
+    "music.tracks.*.loopCrossfadeMs": "The crossfade at the loop point (ms), to hide the seam. 50-300 is typical.",
+    "music.tracks.*.playsBeforeRest": "How many plays before the music rests (just the ambience for a while). 0 = never rests.",
+    "music.tracks.*.restSeconds": "How long a rest is, in seconds: a random time between the two numbers.",
+    "music.tracks.*.fadeInMs": "Fade in (ms) when it starts and when it comes back after a rest.",
+    "music.tracks.*.fadeOutMs": "Fade out (ms) at the end of the last play before a rest, and when it's stopped."
   },
   "_labels": {
     "buses.music": "Music (dB)",
@@ -93,7 +107,21 @@
     "sounds.*.lowpassHz": "Muffle (Hz)",
     "sounds.*.highpassHz": "Thin (Hz)",
     "sounds.*.ladder": "Climbs the ladder",
-    "sounds.*.duck": "Ducks the music"
+    "sounds.*.duck": "Ducks the music",
+    "sounds.*.stream": "Stream from the file",
+    "sounds.*.loopCrossfadeMs": "Loop crossfade (ms)",
+    "music.tracks.*.layers.*.file": "File",
+    "music.tracks.*.layers.*.volumeDb": "Volume (dB)",
+    "music.tracks.*.layers.*.fromIntensity": "Comes in at intensity",
+    "music.tracks.*.layers.*.fullAtIntensity": "Full at intensity",
+    "music.tracks.*.loop": "Loop",
+    "music.tracks.*.loopStartMs": "Loop start (ms)",
+    "music.tracks.*.loopEndMs": "Loop end (ms)",
+    "music.tracks.*.loopCrossfadeMs": "Loop crossfade (ms)",
+    "music.tracks.*.playsBeforeRest": "Plays before a rest",
+    "music.tracks.*.restSeconds": "Rest (seconds, shortest-longest)",
+    "music.tracks.*.fadeInMs": "Fade in (ms)",
+    "music.tracks.*.fadeOutMs": "Fade out (ms)"
   },
   "_sections": {
     "Mix": ["buses", "master"],
@@ -101,7 +129,8 @@
     "Ladder": ["ladder"],
     "Named mixes": ["snapshots", "duck"],
     "Limits": ["limits"],
-    "Sounds": ["sounds"]
+    "Sounds": ["sounds"],
+    "Music": ["music"]
   },
   "_ranges": {
     "buses.music": [-40, 6, 0.5],
@@ -138,7 +167,18 @@
     "sounds.*.priority": [0, 5, 1],
     "sounds.*.pan": [-1, 1, 0.05],
     "sounds.*.lowpassHz": [0, 20000, 10],
-    "sounds.*.highpassHz": [0, 20000, 10]
+    "sounds.*.highpassHz": [0, 20000, 10],
+    "sounds.*.loopCrossfadeMs": [0, 5000, 10],
+    "music.tracks.*.layers.*.volumeDb": [-40, 6, 0.5],
+    "music.tracks.*.layers.*.fromIntensity": [0, 1, 0.05],
+    "music.tracks.*.layers.*.fullAtIntensity": [0, 1, 0.05],
+    "music.tracks.*.loopStartMs": [0, 600000, 10],
+    "music.tracks.*.loopEndMs": [0, 600000, 10],
+    "music.tracks.*.loopCrossfadeMs": [0, 10000, 10],
+    "music.tracks.*.playsBeforeRest": [0, 20, 1],
+    "music.tracks.*.restSeconds": [0, 600, 1],
+    "music.tracks.*.fadeInMs": [0, 20000, 50],
+    "music.tracks.*.fadeOutMs": [0, 20000, 50]
   },
   "buses": { "music": -8, "ambience": -10, "sfx": 0, "ui": -8 },
   "master": { "limiterDb": -1 },
@@ -174,10 +214,30 @@
       "lowpassHz": 0,
       "highpassHz": 0,
       "ladder": false,
-      "duck": false
+      "duck": false,
+      "stream": "auto",
+      "loopCrossfadeMs": 100
     },
     "tier.small": { "files": [], "bus": "sfx", "volumeDb": -10, "randomPitch": 0.5, "maxVoices": 3, "cooldownMs": 40, "priority": 1 },
     "tier.medium": { "files": [], "bus": "sfx", "volumeDb": -6, "randomPitch": 0.5, "maxVoices": 3, "cooldownMs": 40, "priority": 2 },
     "tier.big": { "files": [], "bus": "sfx", "volumeDb": -3, "maxVoices": 2, "cooldownMs": 100, "priority": 4, "duck": true }
+  },
+  "music": {
+    "tracks": {
+      "example.theme": {
+        "layers": {
+          "melody": { "file": "mus/example_theme_melody.mp3", "volumeDb": 0, "fromIntensity": 0, "fullAtIntensity": 0 },
+          "drums": { "file": "mus/example_theme_drums.mp3", "volumeDb": -4, "fromIntensity": 0.4, "fullAtIntensity": 0.8 }
+        },
+        "loop": true,
+        "loopStartMs": 0,
+        "loopEndMs": 0,
+        "loopCrossfadeMs": 100,
+        "playsBeforeRest": 2,
+        "restSeconds": [60, 90],
+        "fadeInMs": 2000,
+        "fadeOutMs": 3000
+      }
+    }
   }
 }

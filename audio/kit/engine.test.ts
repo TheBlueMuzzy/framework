@@ -17,8 +17,9 @@ const CONFIG = {
     tap: { files: ['ui/tap.mp3'], bus: 'ui', cooldownMs: 0 },
     shaped: { files: ['sfx/shaped.mp3'], trimStartMs: 100, trimEndMs: 200, fadeInMs: 50, fadeOutMs: 100, pitch: 12, pan: 0.5, lowpassHz: 2000, highpassHz: 100 },
     boom: { files: ['sfx/boom.mp3'], duck: true },
-    night: { files: ['amb/night.mp3'], bus: 'ambience', loop: true, loopStartMs: 200, loopEndMs: 800 },
-    theme: { files: ['mus/theme.mp3'], bus: 'music', loop: true },
+    // (decoded on purpose: these test the decoded path — streaming has its own tests in music.test.ts)
+    night: { files: ['amb/night.mp3'], bus: 'ambience', loop: true, loopStartMs: 200, loopEndMs: 800, stream: 'never' },
+    theme: { files: ['mus/theme.mp3'], bus: 'music', loop: true, stream: 'never' },
   },
 }
 
