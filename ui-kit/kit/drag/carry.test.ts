@@ -2,7 +2,7 @@
 // ending finishes (with and without Web Animations; reduce motion = no animation).
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  CARRY_NAMES, CARRY_PRESETS, DEFAULT_CARRY_FEEL, carriedOpacity, carryStyle, createCarrier, originWhileCarried,
+  CARRY_NAMES, CARRY_PRESETS, DEFAULT_CARRY_FEEL, carriedOpacity, carryStyle, createCarrier, originWhileCarried, travellingLook,
 } from './carry'
 
 afterEach(() => {
@@ -112,6 +112,30 @@ describe('carrier', () => {
     expect(played.at(-1)!.frames.at(-1)).toMatchObject({ opacity: 0, transform: 'translate(40px, 40px) scale(1.12)' })
     played.at(-1)!.finish()
     await expect(fade).resolves.toBe('returned')
+  })
+
+  it('travel: an AI’s piece goes from home to its spot by itself, lifted, then drops like a person’s', async () => {
+    const played = lendAnimate()
+    const el = element()
+    const carry = createCarrier(el)
+    carry.start(CARRY_PRESETS.A, { x: 0, y: 0 }, 20)
+    played[0].finish() // (the lift)
+    const trip = carry.travel({ x: 100, y: 0 }, 0.5)
+    const way = played[1]
+    expect(way.frames[0]).toMatchObject({ transform: 'translate(-10px, -10px) scale(1.12)' })
+    expect(way.frames[1]).toMatchObject({ transform: 'translate(90px, -10px) scale(1.12)', opacity: 1 })
+    way.finish()
+    await trip
+    const done = carry.drop({ x: 100, y: 0 }, { x: 0, y: 0 })
+    expect(played[2].frames[0]).toMatchObject({ transform: 'translate(90px, -10px) scale(1.12)' }) // (lands from where it travelled)
+    played[2].finish()
+    await expect(done).resolves.toBe('landed')
+  })
+
+  it('travellingLook: a piece gliding by itself wears the carried look, except a style that flies the real piece', () => {
+    expect(travellingLook(CARRY_PRESETS.B, DEFAULT_CARRY_FEEL)).toEqual({ opacity: 1, scale: 1.12, shadow: 0.35 })
+    expect(travellingLook(CARRY_PRESETS.D, DEFAULT_CARRY_FEEL)).toMatchObject({ opacity: 0.45 })
+    expect(travellingLook(CARRY_PRESETS.C, DEFAULT_CARRY_FEEL)).toBeNull()
   })
 
   it('reduce motion: no animation at all, the drop ends at once', async () => {
