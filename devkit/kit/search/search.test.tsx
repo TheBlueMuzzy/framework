@@ -1,10 +1,9 @@
-// Runs in the framework (not copied into games): the search box, collapsible sections and "go to section".
+// Runs in the framework (not copied into games): the search box (it searches only the open tab), collapsible
+// sections and "go to section".
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { DevKit, type DevKitTab } from '../DevKit'
 import { TuningTab } from '../tuning/TuningTab'
-import { searchTuning, tuningSections } from '../tuning/tuningSections'
-import { countFound } from './searchLogic'
 
 afterEach(() => {
   cleanup()
@@ -24,50 +23,55 @@ const files = [
     },
   },
 ]
-const index = tuningSections(files)
-const tuningTab: DevKitTab = {
-  id: 'tuning',
-  label: 'Tuning',
-  Panel: () => <TuningTab files={files} order={[]} />,
-  countMatches: (q) => countFound(searchTuning(index, q)),
-}
-const notesTab: DevKitTab = { id: 'notes', label: 'Notes', Panel: () => <p>notes tool</p> }
+const tuningTab: DevKitTab = { id: 'tuning', label: 'Tuning', Panel: ({ query }) => <TuningTab files={files} order={[]} query={query} /> }
+const heard: string[] = [] // what the Notes tab was told
+const notesTab: DevKitTab = { id: 'notes', label: 'Notes', Panel: ({ query = '' }) => { heard.push(query); return <p>notes tool</p> } }
+const quietTab: DevKitTab = { id: 'quiet', label: 'Quiet', Panel: () => <p>nothing to search</p>, searchable: false }
 
-const box = () => screen.getByRole('searchbox', { name: 'Search settings', hidden: true }) as HTMLInputElement
-const type = (text: string) => act(() => { fireEvent.change(box(), { target: { value: text } }) })
+const box = (tab = 'Tuning') => screen.getByRole('searchbox', { name: `Search ${tab}`, hidden: true }) as HTMLInputElement
+const type = (text: string, tab = 'Tuning') => act(() => { fireEvent.change(box(tab), { target: { value: text } }) })
 const sectionEl = (title: string) => document.querySelector(`[data-dk-section="tuning:${title}"]`) as HTMLElement
 const headOf = (title: string) => sectionEl(title).querySelector('.dk-section-btn') as HTMLElement
 const open = () => act(() => { fireEvent.keyDown(window, { key: '`' }) })
+const status = () => screen.getByRole('status', { hidden: true }).textContent
 
-describe('Dev Kit search', () => {
-  it('is only there when a tab can be searched', () => {
-    render(<DevKit tabs={[notesTab]} />)
+describe('Dev Kit search (the open tab only)', () => {
+  it('says what it searches, and hides on a tab with nothing to search', () => {
+    render(<DevKit tabs={[tuningTab, quietTab]} />)
+    expect(box().placeholder).toBe('Search Tuning…')
+    fireEvent.click(screen.getByRole('tab', { name: 'Quiet', hidden: true }))
     expect(screen.queryByRole('searchbox', { hidden: true })).toBeNull()
   })
 
+  it('only the open tab gets the text; other tabs stay as they are', () => {
+    heard.length = 0
+    render(<DevKit tabs={[tuningTab, notesTab]} />)
+    type('ade')
+    expect(heard.every((q) => q === '')).toBe(true)
+    expect(screen.getByText('notes tool').closest('section')!.hidden).toBe(true) // the Notes tab isn't shown or searched
+  })
+
   it('filters live by a fragment INSIDE a word, highlights it, and counts the matches', () => {
-    render(<DevKit tabs={[notesTab, tuningTab]} />)
+    render(<DevKit tabs={[tuningTab, notesTab]} />)
     type('ade') // inside "fade"
-    expect(screen.getByRole('status', { hidden: true }).textContent).toBe('1 setting')
+    expect(status()).toBe('1 setting found')
     expect([...document.querySelectorAll('mark.dk-hit')].map((m) => m.textContent)).toContain('ade')
     expect(screen.getByLabelText('trailFade', { selector: 'input[type=number]' })).toBeTruthy()
     expect(screen.queryByLabelText('trailLead')).toBeNull()
-    expect(screen.getByRole('heading', { name: 'Tuning · 1', hidden: true })).toBeTruthy()
-    expect((screen.getByText('notes tool').closest('section') as HTMLElement).hidden).toBe(true)
   })
 
   it('a section title that matches shows its whole section; help text matches too', () => {
     render(<DevKit tabs={[tuningTab]} />)
     type('trails')
-    expect(screen.getByRole('status', { hidden: true }).textContent).toBe('2 settings')
+    expect(status()).toBe('2 settings found')
     type('seconds grow')
-    expect(screen.getByRole('status', { hidden: true }).textContent).toBe('1 setting')
+    expect(status()).toBe('1 setting found')
   })
 
   it('says so when nothing matches; ✕ clears it back to the normal view', () => {
     render(<DevKit tabs={[tuningTab]} />)
     type('zzz')
-    expect(screen.getByText(/Nothing matches “zzz”/)).toBeTruthy()
+    expect(screen.getByText(/Nothing in Tuning matches “zzz”/)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Clear the search', hidden: true }))
     expect(box().value).toBe('')
     expect(screen.getByRole('navigation', { name: 'Tuning sections', hidden: true })).toBeTruthy()
@@ -84,8 +88,9 @@ describe('Dev Kit search', () => {
     expect((document.querySelector('aside.devkit') as HTMLElement).hidden).toBe(true)
   })
 
-  it('tapping a section title in the results clears the search, shows that tab and opens the section', async () => {
+  it('tapping a section title in the results clears the search and opens that section', () => {
     render(<DevKit tabs={[notesTab, tuningTab]} />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Tuning', hidden: true }))
     expect(sectionEl('Score pops').dataset.open).toBeUndefined() // several sections: closed to start
     type('grow')
     fireEvent.click(screen.getByRole('button', { name: /Score pops/, hidden: true }))
@@ -95,11 +100,11 @@ describe('Dev Kit search', () => {
     expect(sectionEl('Trails').dataset.open).toBeUndefined()
   })
 
-  it('picking a tab clears the search', () => {
-    render(<DevKit tabs={[notesTab, tuningTab]} />)
+  it('picking another tab clears the search (and it then searches that tab)', () => {
+    render(<DevKit tabs={[tuningTab, notesTab]} />)
     type('trail')
     fireEvent.click(screen.getByRole('tab', { name: 'Notes', hidden: true }))
-    expect(box().value).toBe('')
+    expect(box('Notes').value).toBe('')
     expect(screen.getByText('notes tool')).toBeTruthy()
   })
 })

@@ -12,7 +12,7 @@
 import { createElement } from 'react'
 import type { DevKitTab } from '../DevKit'
 import { SoundTab } from './SoundTab'
-import { countSounds, soundGroups, type RawAudio } from './soundLogic'
+import type { RawAudio } from './soundLogic'
 import type { SoundBoardAudio } from './soundTypes'
 
 export type SoundTabOptions = {
@@ -34,6 +34,5 @@ export function soundTab(getAudio: () => SoundBoardAudio | null, options: SoundT
     label,
     // The Dev Kit hands the open tab its search text as `query` (this tab filters its own sound list and log)
     Panel: ({ query }: { query?: string }) => createElement(SoundTab, { getAudio, file, path, tuningName, baseUrl, query }),
-    countMatches: (query) => countSounds(soundGroups(file, query)),
   }
 }

@@ -1,7 +1,6 @@
 // Runs in the framework (not copied into games): the AI tab on screen.
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { DevKitSearch } from '../search/searchContext'
 import { setSectionsOpen } from '../search/sectionState'
 import { AiTab } from './AiTab'
 import { aiTab } from './aiTabEntry'
@@ -165,17 +164,19 @@ describe('the AI tab', () => {
     expect(screen.getByRole('link', { name: 'open the report' }).getAttribute('href')).toBe('blob:report')
   })
 
-  it('joins the Dev Kit search: only matching sections show', () => {
-    const tab = aiTab(sampleAi())
-    expect(tab.countMatches!('nerve')).toBe(3) // the section title matches: all 3 of its settings
-    expect(tab.countMatches!('zzz')).toBe(0)
-    expect(tab.countMatches!('hunt')).toBe(1) // a goal setting, by its label
-    render(
-      <DevKitSearch.Provider value={{ query: 'wobble', goTo: () => {} }}>
-        <AiTab ai={sampleAi()} />
-      </DevKitSearch.Provider>,
-    )
+  it('the Dev Kit search (its query, while the tab is open): only matching sections show, with a count', () => {
+    const { rerender } = render(<AiTab ai={sampleAi()} query="wobble" />)
     expect(screen.getByLabelText('wobble')).toBeTruthy()
     expect(screen.queryByLabelText('aggression low end')).toBeNull()
+    rerender(<AiTab ai={sampleAi()} query="nerve" />)
+    expect(screen.getByRole('status').textContent).toBe('3 settings found') // the section title matches: all 3
+    rerender(<AiTab ai={sampleAi()} query="zzz" />)
+    expect(screen.getByRole('status').textContent).toMatch(/Nothing in AI matches “zzz”/)
+  })
+
+  it('aiTab hands the search box text on to the tab', () => {
+    const { Panel } = aiTab(sampleAi())
+    render(<Panel query="hunt" />)
+    expect(screen.getByRole('status').textContent).toBe('1 setting found') // a goal setting, by its label
   })
 })

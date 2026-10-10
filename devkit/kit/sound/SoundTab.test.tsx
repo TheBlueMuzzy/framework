@@ -233,11 +233,9 @@ describe('the Sound tab', () => {
 })
 
 describe('soundTab — the entry a game lists in tabs.ts', () => {
-  it('is a "Sound" tab whose Panel takes the search text, and counts matches', () => {
+  it('is a "Sound" tab whose Panel takes the search text (it searches only itself)', () => {
     const tab = soundTab(() => fakeAudio(), { file: FILE, baseUrl: '/' })
     expect(tab).toMatchObject({ id: 'sound', label: 'Sound' })
-    expect(tab.countMatches?.('seed')).toBe(1)
-    expect(tab.countMatches?.('')).toBe(3)
     const Panel = tab.Panel as (props: { query?: string }) => React.ReactElement
     render(<Panel query="night" />)
     expect(screen.getByRole('button', { name: 'amb.night' })).toBeTruthy()

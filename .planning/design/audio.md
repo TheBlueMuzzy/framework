@@ -127,7 +127,7 @@ No library. The browser's Web Audio has everything we need:
   - scheduled sequences hand their times to the planner: `audio.play('score.pop', { at: t })`
 - **Same intention → same motion → same sound.** The `feel` tiers (small / medium / big) each have a default sound. A juiced moment with no sound of its own plays its tier's sound in the same frame as its grow/shake. A moment can override it with its own sound.
 - **Reduce motion:** the sounds still play, at the instant the moment happens.
-- The Dev Kit **Screens** sandbox stays silent (it already suspends audio).
+- The Dev Kit **Screens** sandbox stays silent until a Moment's first ▶ (then `allowSound()` — `design/devkit-moments.md`).
 
 ## Dev Kit — Sound Board tab
 | Part | What it does |
@@ -136,7 +136,7 @@ No library. The browser's Web Audio has everything we need:
 | **Sound editor** | Sliders for every knob above (volume, pitch, random pitch/volume, delay, trim, fades, loop points, voices, cooldown, priority, bus, pan, muffle/thin filters, ladder). Changes are live in the running game; **Save** writes the JSON. ↺ per field. |
 | **Files** | The variants list: ▶ each one, remove, reorder. **Drop a file** (or pick one) → saved to `public/audio/<bus>/` with the naming rule, converted to MP3 if needed, added as a variant. A waveform with drag handles for trim and loop points. |
 | **A / B** | Hear the saved version against your edit. |
-| **▶ in context** | The game plays the real moment (via the game's Dev Kit adapter, like Snapshots) so you hear the sound with its animation. |
+| **▶ in context** | = F32 **Moments**: Screens → a screen → its moments play in the preview sandbox (never the live game), sound included — `design/devkit-moments.md`. |
 | **Mixer** | Bus faders (the defaults in `content/audio.json`, not the player's Settings) with level meters. Snapshot buttons (hear Paused, Reveal). |
 | **Log** | While you play: every sound that played and every one that was dropped, with why ("cooldown", "voice limit", "audio locked"). |
 | **Credits nudge** | A dropped-in file asks for source + licence → `content/credits.json`. |
@@ -146,7 +146,7 @@ Saving audio files needs a new Dev Kit endpoint: binary, only into `public/audio
 ## Each game provides
 - its `content/audio.json` (the sound list) and `public/audio/` files + credits
 - `playSound` calls at its animation moments, plus scheduled sequences
-- a Dev Kit adapter hook for "▶ in context" (optional)
+- its moments (`export const moments` in src/devkit-game/previews.tsx — F32) for "▶ in context" (optional)
 - its sound list doc: moment · sound · tier · bus · on-screen twin
 
 ## Proof (how we know it works)
