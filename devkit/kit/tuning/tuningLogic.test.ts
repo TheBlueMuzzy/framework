@@ -1,6 +1,6 @@
 // Runs in the framework (not copied into games): the Tuning tool's logic.
 import { describe, expect, it } from 'vitest'
-import { groupOf, listFields, listTuningChanges, nameOf, sliderRange, tuningChanged, tuningName, valueAt, withValue } from './tuningLogic'
+import { choicesFor, groupOf, listFields, listTuningChanges, nameOf, sliderRange, tuningChanged, tuningName, valueAt, withValue } from './tuningLogic'
 
 const file = {
   _help: 'Dice numbers.',
@@ -77,5 +77,19 @@ describe('Copy for Claude lines', () => {
   })
   it('file names come from the glob path', () => {
     expect(tuningName('../../../content/tuning/physics.json')).toBe('physics')
+  })
+})
+
+describe('choicesFor (a text setting’s dropdown)', () => {
+  it('reads a list or a value → name map from "_choices"; none → no dropdown', () => {
+    expect(choicesFor('look', { look: ['flat', 'round'] })).toEqual([{ value: 'flat', label: 'flat' }, { value: 'round', label: 'round' }])
+    expect(choicesFor('s.draft', { 's.draft': { A: 'A · Pick it up' } })).toEqual([{ value: 'A', label: 'A · Pick it up' }])
+    expect(choicesFor('other', { look: ['flat'] })).toBeUndefined()
+    expect(choicesFor('look', undefined)).toBeUndefined()
+    expect(choicesFor('look', { look: [] })).toBeUndefined()
+  })
+
+  it('keeps a saved value that is not an option, so nothing changes by itself', () => {
+    expect(choicesFor('look', { look: ['flat'] }, 'odd')).toEqual([{ value: 'flat', label: 'flat' }, { value: 'odd', label: 'odd' }])
   })
 })
