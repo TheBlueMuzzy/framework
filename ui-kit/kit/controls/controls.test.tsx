@@ -119,7 +119,7 @@ describe('Button size', () => {
 describe('control sounds (setControlSound)', () => {
   afterEach(() => setControlSound(null))
 
-  it('a Button says tap, sound="back" says back, sound={false} says nothing; a Toggle says toggle', () => {
+  it('a Button says tap, sound="back" says back, sound={false} says nothing; a Toggle says toggle.on / toggle.off', () => {
     const heard: string[] = []
     setControlSound((kind) => heard.push(kind))
     render(<>
@@ -127,12 +127,14 @@ describe('control sounds (setControlSound)', () => {
       <Button sound="back">Back</Button>
       <Button sound={false}>Cast</Button>
       <Toggle on={false} onChange={() => {}} label="Mono" />
+      <Toggle on onChange={() => {}} label="Shake" />
     </>)
     fireEvent.click(screen.getByText('Play'))
     fireEvent.click(screen.getByText('Back'))
     fireEvent.click(screen.getByText('Cast'))
-    fireEvent.click(screen.getByRole('switch'))
-    expect(heard).toEqual(['tap', 'back', 'toggle'])
+    fireEvent.click(screen.getByRole('switch', { name: 'Mono' }))
+    fireEvent.click(screen.getByRole('switch', { name: 'Shake' }))
+    expect(heard).toEqual(['tap', 'back', 'toggle.on', 'toggle.off'])
   })
 
   it('still runs the button\'s own onClick, and is silent with no listener', () => {
