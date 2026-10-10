@@ -101,6 +101,8 @@ Goal: any web game gets sound by naming its moments — content/audio.json says 
 - ⏳ F30 🔧 Dev Kit Sound Board: sound list + ▶ / ▶×5, every knob as sliders (live, Save, ↺), files (drop to replace → public/audio, waveform trim/loop handles), A/B, ▶ in context (game adapter), mixer + meters, play/drop log, credits nudge; binary save endpoint (public/audio only, dev only) — must:beta · needs: F27, ~F28
   why: Muzzy tunes sound by ear in the game ("I should be able to change sounds, tweak them")
 - ⏳ F31 🔧 Audio check script: loudness report + convert/normalize to MP3 (ffmpeg-static), used by the Sound Board's drop — should · needs: F27
+- ⏳ F32 🔧 Dev Kit Moments + feel presets (Muzzy 2026-10-09): Screens → pick a screen → its Moments (score pop, two-birds, tangle, reveal winner…) → ▶ fire / 🔁 loop while sliders change (feel tiers, timings, sound); each moment has a 3-style preset picker (research the styles other games use first — e.g. Soft · Balanced · Punchy) that sets all its values, then every slider stays tweakable — must:beta · needs: F27, ~F30
+  why: Muzzy picks feel by watching it loop, not by reading numbers; presets are the easy start (like the UI kit's 5 styles)
 ```mermaid
 flowchart LR
   F27[F27 Engine + rules] --> F28[F28 Music + mix]
@@ -108,6 +110,8 @@ flowchart LR
   F27 --> F30[F30 Sound Board]
   F28 -.working.-> F30
   F27 --> F31[F31 Audio check script]
+  F27 --> F32[F32 Moments + presets]
+  F30 -.working.-> F32
 ```
 
 ## Later
