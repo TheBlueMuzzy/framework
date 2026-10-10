@@ -1,6 +1,6 @@
 // Runs in the framework: the preview sandbox keeps a preview from saving, sending or stepping history.
 import { beforeAll, describe, expect, it, vi } from 'vitest'
-import { failRequests, installSandbox, sandboxCounts } from './sandbox'
+import { allowSound, failRequests, installSandbox, sandboxCounts } from './sandbox'
 
 const realGet = Storage.prototype.getItem
 const realFetch = vi.fn(async () => new Response('ok'))
@@ -68,5 +68,14 @@ describe('preview sandbox', () => {
     await document.createElement('audio').play()
     expect(sandboxCounts.sounds).toBe(1)
     expect(window.open('https://example.com')).toBeNull()
+  })
+
+  it('a Moment lets sound through: media plays for real after allowSound (no longer blocked or counted)', async () => {
+    const before = sandboxCounts.sounds
+    allowSound()
+    try {
+      await document.createElement('audio').play() // jsdom's real play() isn't implemented — reaching it is the point
+    } catch { /* jsdom: "not implemented" */ }
+    expect(sandboxCounts.sounds).toBe(before)
   })
 })

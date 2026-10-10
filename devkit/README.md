@@ -99,8 +99,32 @@ export const previews: DevKitPreview[] = [
 ]
 ```
 `failRequests('words.csv')` makes a GET fail (an error screen); `afterRender(fn)` runs once it has drawn. If `show` throws,
-the overlay says so in red. For tests: the frame has `window.__devkitPreview` = `{ id, variant, ready, problems, counts }`.
+the overlay says so in red. For tests: the frame has `window.__devkitPreview` = `{ id, variant, ready, problems, counts, played }`.
 Sample data: build it with the game's own engine (a seeded sim game) rather than hand-writing state — it keeps up when the rules change.
+Every Dev Kit live edit (Tuning, Sound, Moments — `devkit:tuning`) is copied into the frame, so a preview follows the sliders.
+
+### Moments (feel presets) — Dev Kit 0.8.0, framework F32
+Watch one moment loop while you change its feel. In the same `previews.tsx`, `export const moments: DevKitMoment[]`
+(`kit/moments/momentTypes.ts`); each one's `screen` is a preview id. The Screens list shows them under their screen; tapping
+one opens that screen with a **Moments** panel beside it: ▶ plays it once, 🔁 loops it (every 0.5–8 s, default 2.5), its
+knobs as Tuning rows (labels / help / ranges from each file's `_labels` / `_help` / `_ranges`, wildcards like
+`sounds.*.volumeDb` too), and **Soft · Balanced · Punchy** sets every knob at once (then "custom" after a tweak). Live in
+the game and the preview; **Save** writes each changed file whole. The sandbox stays silent until a moment plays.
+```tsx
+import type { DevKitMoment } from '../devkit/moments/momentTypes'
+export const moments: DevKitMoment[] = [{
+  id: 'score-pop', screen: 'board', label: 'Score pop', note: 'the +1s pop, the total flies to the score',
+  play: async ({ round, looping, variant }) => { loadSampleBoard(); await castTwoBirds() }, // repeatable: set up every time
+  knobs: [
+    { file: 'content/tuning/feel.json', path: 'tiers.medium.grow' },                    // role guessed: size
+    { file: 'content/audio.json', path: 'sounds.score.pop.volumeDb',                     // keys with dots work
+      values: { soft: -12, balanced: -8, punchy: -5 } },                                // exact values win
+  ],
+}]
+```
+Presets without exact values use relative rules on the values the screen opened with (duration ×1.3 / ×1 / ×0.75, size
+×0.6 / ×1 / ×1.4, volume −3 / 0 / +2 dB…) — the table and why: `.planning/design/devkit-moments.md`. Give `role` when the
+key doesn't say what it does (`'size'`, `'duration'`…, or `'none'` to keep it out of presets).
 
 ## The AI tab (a game's AI opponents)
 For a game using the framework AI module (`ai/`, content in `content/ai/`). The Dev Kit never imports the game's AI —
