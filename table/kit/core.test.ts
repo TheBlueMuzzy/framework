@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addMove, canSee, eventsFor, replay, type Rules, type TableEvent } from './core'
+import { addMove, botPlayedFor, canSee, eventsFor, replay, type MoveRecord, type Rules, type TableEvent } from './core'
 import { selfTest } from './selfTest'
 
 // "Draw to 10" — a tiny example game for these tests. Each turn the seat to act draws the top card of a seeded deck
@@ -93,6 +93,54 @@ describe('move record + replay', () => {
     const record = { setup: { players: 2, seed: 1 }, moves: [] }
     addMove(record, 0, { type: 'draw' })
     expect(record.moves).toEqual([])
+  })
+
+  it('a move can say who played it: the person, a bot for them, or a bot seat (0.7.0)', () => {
+    let record: MoveRecord<{ players: number; seed: number }, Action> = { setup: { players: 2, seed: 7 }, moves: [] }
+    record = addMove(record, 0, { type: 'draw' }, 'seat')
+    record = addMove(record, 1, { type: 'draw' }, 'bot-for-seat')
+    record = addMove(record, 0, { type: 'stop' }, 'bot')
+    expect(record.moves.map((m) => m.by)).toEqual(['seat', 'bot-for-seat', 'bot'])
+  })
+
+  it('addMove without `by` adds no `by` key (records stay as before)', () => {
+    const record = addMove({ setup: { players: 2, seed: 1 }, moves: [] }, 0, { type: 'draw' } as Action)
+    expect(record.moves[0]).toEqual({ seat: 0, action: { type: 'draw' } })
+    expect('by' in record.moves[0]).toBe(false)
+  })
+
+  it('replay ignores who played: the same game with or without `by`, and old records (no `by`) still load', () => {
+    const actions = [{ type: 'draw' }, { type: 'draw' }, { type: 'stop' }, { type: 'draw' }] as Action[]
+    let state = drawTo10.setup({ players: 2, seed: 7 })
+    let plain: MoveRecord<{ players: number; seed: number }, Action> = { setup: { players: 2, seed: 7 }, moves: [] }
+    let tagged = plain
+    actions.forEach((action, i) => {
+      const seat = state.current
+      state = drawTo10.apply(state, seat, action).state
+      plain = addMove(plain, seat, action)
+      tagged = addMove(tagged, seat, action, i % 2 === 0 ? 'seat' : 'bot-for-seat')
+    })
+    // an old record straight from JSON (made before 0.7.0)
+    const old = JSON.parse(JSON.stringify(plain)) as MoveRecord<{ players: number; seed: number }, Action>
+    expect(replay(drawTo10, tagged).state).toEqual(state)
+    expect(replay(drawTo10, old).state).toEqual(state)
+    expect(botPlayedFor(old, 0)).toEqual([])
+  })
+
+  it('botPlayedFor lists only the moves a bot played for that seat (not a bot seat own moves, not untagged)', () => {
+    const record: MoveRecord<null, string> = {
+      setup: null,
+      moves: [
+        { seat: 0, action: 'a', by: 'seat' },
+        { seat: 1, action: 'b', by: 'bot' },
+        { seat: 0, action: 'c', by: 'bot-for-seat' },
+        { seat: 1, action: 'd' },
+        { seat: 0, action: 'e', by: 'bot-for-seat' },
+        { seat: 0, action: 'f', by: 'seat' },
+      ],
+    }
+    expect(botPlayedFor(record, 0)).toEqual([2, 4])
+    expect(botPlayedFor(record, 1)).toEqual([])
   })
 
   it('says which move is no longer allowed', () => {
