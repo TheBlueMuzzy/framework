@@ -19,7 +19,9 @@ No library: the browser's own Web Audio does it all. No runtime dependencies.
 | `react.ts` | `useAudioSettings`, `useAudioSnapshot`, `useLoop` |
 | `shared.ts` | One shared engine so any file can `playSound(...)` |
 
-Coming next: music layers / crossfades / stingers / rests + streaming long files (F28) · Dev Kit Sound Board (F30) · loudness check script (F31).
+Kit 0.1.2 adds `audio.level(bus)` for the Dev Kit **Sound tab** (F30 — it lives in the Dev Kit: `devkit/kit/sound/`, see the Dev Kit README).
+
+Coming next: music layers / crossfades / stingers / rests + streaming long files (F28) · loudness check script (F31).
 
 ## Install / update in a game
 ```
@@ -71,6 +73,7 @@ audio.unlock()                                   // only for custom flows — th
 audio.state() → 'locked' | 'running' | 'suspended'
 audio.setConfig(json)                            // live tuning (Dev Kit): validated like at start
 audio.config()  ·  audio.voices()  ·  audio.preload(names?)  ·  audio.reloadFile(file)
+audio.level(bus | 'master') → 0…1                // the peak right now — the Dev Kit Sound tab's meters (0.1.2)
 audio.log.entries()  ·  audio.onLog(fn) → unsubscribe  ·  audio.dispose()
 
 setAudio(audio)  ·  getAudio()  ·  playSound(name, options?)  ·  playTier(tier, options?)   // shared engine; null-safe

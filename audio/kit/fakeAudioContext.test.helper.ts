@@ -87,6 +87,17 @@ export class FakeSource extends FakeNode {
   }
 }
 
+export class FakeAnalyser extends FakeNode {
+  fftSize = 2048
+  /** What the next getFloatTimeDomainData hands back (a test sets it) */
+  wave: number[] = []
+  constructor() { super('analyser') }
+  getFloatTimeDomainData(into: Float32Array) {
+    into.fill(0)
+    into.set(this.wave.slice(0, into.length))
+  }
+}
+
 export class FakeAudioContext {
   state: 'suspended' | 'running' | 'interrupted' | 'closed' = 'suspended'
   currentTime = 0
@@ -109,6 +120,7 @@ export class FakeAudioContext {
   createStereoPanner() { return this.made(new FakePanner()) }
   createDynamicsCompressor() { return this.made(new FakeCompressor()) }
   createBufferSource() { return this.made(new FakeSource()) }
+  createAnalyser() { return this.made(new FakeAnalyser()) }
   createBuffer(_channels: number, length: number, rate: number) { return { duration: length / rate } }
   decodeAudioData(_data: ArrayBuffer) {
     this.decoded++

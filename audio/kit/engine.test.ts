@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { dbToGain, sliderToGain } from './config.ts'
 import { createAudio, type AudioOptions } from './engine.ts'
-import { FakeAudioContext, FakeCompressor, FakeDocument, FakeFilter, FakeGain, FakeNode, FakeSource, settle } from './fakeAudioContext.test.helper.ts'
+import { FakeAnalyser, FakeAudioContext, FakeCompressor, FakeDocument, FakeFilter, FakeGain, FakeNode, FakeSource, settle } from './fakeAudioContext.test.helper.ts'
 import { exposeLog } from './log.ts'
 import { seededRandom } from './planner.ts'
 import { getAudio, playSound, setAudio } from './shared.ts'
@@ -181,6 +181,33 @@ describe('the mix', () => {
     audio.setConfig({ ...CONFIG, buses: { ...CONFIG.buses, ui: -20 } })
     expect(uiLevel.gain.value).toBeCloseTo(dbToGain(-20), 6)
     expect(audio.config().buses.ui).toBe(-20)
+  })
+})
+
+describe('level meters (Dev Kit)', () => {
+  it('is 0 before the first tap, then reads the peak of a side-branch listener on that group', async () => {
+    const { audio, ctx, tap } = setup()
+    expect(audio.level('sfx')).toBe(0)
+    await tap()
+    expect(audio.level('sfx')).toBe(0)
+    const analyser = ctx.nodes.find((n): n is FakeAnalyser => n instanceof FakeAnalyser)!
+    analyser.wave = [0.1, -0.6, 0.3]
+    expect(audio.level('sfx')).toBeCloseTo(0.6)
+    expect(analyser.connections).toEqual([]) // it only listens: nothing comes out of it
+    // the sfx group's mix node feeds it, and still feeds the master first (the sound's path is unchanged)
+    const feeder = ctx.nodes.find((n) => n.connections.includes(analyser))!
+    expect(feeder.connections[0]).not.toBe(analyser)
+  })
+  it('makes one listener per group, the master after the limiter', async () => {
+    const { audio, ctx, tap } = setup()
+    await tap()
+    audio.level('master')
+    audio.level('master')
+    audio.level('music')
+    const analysers = ctx.nodes.filter((n) => n instanceof FakeAnalyser)
+    expect(analysers).toHaveLength(2)
+    const limiter = ctx.nodes.find((n) => n instanceof FakeCompressor)!
+    expect(limiter.connections).toContain(analysers[0])
   })
 })
 

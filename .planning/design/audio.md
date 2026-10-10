@@ -182,3 +182,9 @@ Sprint 19 (2026-10-09, built while Muzzy slept — calls made, open to change):
 - **No `<AudioUnlock/>` component:** the engine listens for the first tap itself (capture phase), and keeps listening, so a tap after a phone call also resumes.
 - **`playSound` lives in `shared.ts`** (no React needed), `react.ts` has `useAudioSettings` / `useAudioSnapshot` / `useLoop`.
 - **UI kit (F29):** standard Audio tab rows = the ids `useAudioSettings` reads; the old "Voices" row is gone (voice-over is out of scope).
+
+Sprint 20 — F30 Sound tab (2026-10-10):
+- **The Sound Board lives in the Dev Kit** (`devkit/kit/sound/`, Dev Kit 0.7.0), not in `audio/devkit/`: it is a Dev Kit tab like the AI tab, and the Dev Kit installer already ships tabs. A game adds `soundTab(getAudio, { file: audioJson })` in `src/devkit-game/tabs.ts`. It doesn't import the audio module (a structural `SoundBoardAudio` type).
+- **Audio 0.1.2 adds `audio.level(bus)`** (peak 0…1, an AnalyserNode side branch made on first use) for the mixer's meters.
+- **Files come in through `POST /__devkit/save-audio`** (`devkit/vite/audioSave.ts`): system ffmpeg (not ffmpeg-static), sfx/ui mono 96k trimmed to the onset (B026), music/ambience stereo 128k untouched, named `<folder>_<object>_<action>_NN.mp3` with the next free number. Credits via `POST /__devkit/add-credit` (credits.json is a list, which the JSON Save refuses).
+- **"▶ in context"** (play the real moment with its animation) is not in the Sound tab: it is F32's Moments.
