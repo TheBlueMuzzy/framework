@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Seat, ServerMessage } from '../protocol'
 import { mustBeObject, mustBeWholeNumber } from './checks'
-import type { GameRules, SeatChange } from './gameRules'
+import type { GameRules, RoomTools, SeatChange } from './gameRules'
 import { RoomServer } from './roomServer'
 import type { PartyConnection, PartyRoom } from './roomServer'
 
@@ -38,6 +38,8 @@ interface State { total: number; turn: number; order: string[]; secrets: Record<
 interface View { total: number; whoseTurn: string; mySecret: number }
 const TURN_MS = 90_000 // (longer than the idle clock: idleWarnAfterMs 30 s, idleTakeoverAfterMs 60 s)
 const seatChanges: string[] = []
+/** The room tools the game was handed (to ask room.playedBy like a game's bot step would). */
+let roomTools: RoomTools<State, string> | null = null
 
 const countToTen: GameRules<State, { secretBase: number }, { add: number }, View, string> = {
   checkOptions(raw) {
@@ -50,6 +52,7 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
     return { add: mustBeWholeNumber(action.add, 1, 3, 'add') }
   },
   onStart(options, seats, room) {
+    roomTools = room
     const secrets: Record<string, number> = {}
     seats.forEach((seat, i) => { secrets[seat.id] = options.secretBase + i })
     room.sendEventPerSeat((seat, i) => (i === 0 ? `your secret is ${secrets[seat.id]}` : null)) // only the first seat hears it
@@ -126,6 +129,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.spyOn(console, 'log').mockImplementation(() => {})
   seatChanges.length = 0
+  roomTools = null
   party = new FakeParty('BAKU')
   server = new RoomServer(party, countToTen, { minSeats: 2, maxSeats: 3, botTakesOverAfterMs: 60_000, keepEmptyRoomMs: 60_000, idleWarnAfterMs: 30_000, idleTakeoverAfterMs: 60_000 })
 })
@@ -409,6 +413,41 @@ describe('RoomServer: the game', () => {
     }
     expect(server.data.phase).toBe('over')
     expect(server.timers.names().filter((name) => name.includes('idle'))).toEqual([])
+  })
+
+  // ─── Who played (room.playedBy, rooms 0.5.0) ───
+
+  it('room.playedBy: the person · a bot for them while idle · the person again after a tap · a bot for them after Leave', () => {
+    const { ann, bob } = startGame()
+    const playedBy = (seatId: string) => roomTools!.playedBy(seatId)
+    expect([playedBy('seat-1'), playedBy('seat-2')]).toEqual(['seat', 'seat'])
+    vi.advanceTimersByTime(60_000) // Ann idles: a bot plays for her
+    expect(playedBy('seat-1')).toBe('bot-for-seat')
+    send(ann, { type: 'active' })
+    expect(playedBy('seat-1')).toBe('seat')
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    vi.advanceTimersByTime(50_000)
+    send(bob, { type: 'active' })
+    vi.advanceTimersByTime(40_000) // his turn timer ran out
+    expect(playedBy('seat-2')).toBe('bot-for-seat')
+    send(bob, { type: 'leave' })
+    expect(playedBy('seat-2')).toBe('bot-for-seat') // still played FOR Bob, not a bot seat
+    expect(playedBy('seat-9')).toBeNull()
+  })
+
+  it('room.playedBy: away too long → a bot for them; a bot the host added → "bot"', () => {
+    server = new RoomServer(party, countToTen, { minSeats: 2, maxSeats: 3, botTakesOverAfterMs: 60_000, allowBots: true })
+    const ann = join('tab-ann', 'Ann', ANN, true)
+    const bob = join('tab-bob', 'Bob', BOB)
+    send(ann, { type: 'add_bot' })
+    send(bob, { type: 'ready', ready: true })
+    send(ann, { type: 'start', options: { secretBase: 100 } })
+    expect(server.data.phase).toBe('playing')
+    expect(roomTools!.playedBy('seat-3')).toBe('bot')
+    drop(bob)
+    expect(roomTools!.playedBy('seat-2')).toBe('seat') // dropped, but nobody plays for him yet
+    vi.advanceTimersByTime(60_000)
+    expect(roomTools!.playedBy('seat-2')).toBe('bot-for-seat')
   })
 
   it('leaving mid-game hands the seat to a bot and says goodbye', () => {
