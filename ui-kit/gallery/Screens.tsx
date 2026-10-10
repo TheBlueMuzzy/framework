@@ -200,6 +200,7 @@ function PinnedTable() {
 // Tap a piece to hold it (it lifts; the tap is found by data-place, like a game's input code would).
 // E is "aimed" (played somewhere else: only a dashed ring). The 4th place is empty (a played piece's place).
 // Swap 2 plays the shrink → grow stages on the first two pieces; Pass hides the hand; Wait dims it.
+// Make room shows the target feedback for a piece dragged into the 3rd gap: the places slide apart + a marker line.
 const HAND_TILE = 64 // how big the sample wants each place, in pixels (a game passes e.g. its board hex's size)
 const HAND_MOTION = { shrinkTime: 0.25, growTime: 0.35, stagger: 0.12, overshoot: 0.15 }
 const EMPTY = 'gap' // an empty place in the order (the table module's GAP)
@@ -218,6 +219,7 @@ function HandSample() {
   const [staged, setStaged] = useState<number[]>([])
   const [hidden, setHidden] = useState(false)
   const [waiting, setWaiting] = useState(false)
+  const [making, setMaking] = useState(false)
   const nextLetter = useRef(7) // the new pieces are H, I, J…
   const aimed = 'E'
 
@@ -254,10 +256,13 @@ function HandSample() {
           <Button variant="secondary" compact onClick={swap}>Swap 2</Button>
           <Button variant="secondary" compact onClick={() => setHidden(!hidden)}>{hidden ? 'Show' : 'Pass'}</Button>
           <Button variant="secondary" compact onClick={() => setWaiting(!waiting)}>{waiting ? 'Go' : 'Wait'}</Button>
+          <Button variant="secondary" compact onClick={() => setMaking(!making)}>{making ? 'Close up' : 'Make room'}</Button>
         </Row>
         <div ref={room} className="gallery-hand-room" onClick={tap}>
           {roomWidth > 0 && <HandView layout={layout} boxWidth={roomWidth} places={places} hidden={hidden} stage={stage} motion={HAND_MOTION}
-            label="Your hand"
+            label="Your hand" insertAt={making ? 2 : undefined} makeRoomAt={making ? 2 : undefined}
+            renderMarker={({ x, y, tile }) => <rect className="gallery-hand-marker" x={x - tile * 0.04} y={y - tile * 0.45}
+              width={tile * 0.08} height={tile * 0.9} rx={tile * 0.04} />}
             renderEmpty={({ x, y, tile }) => <rect className="gallery-hand-place" x={x - tile * 0.46} y={y - tile * 0.46}
               width={tile * 0.92} height={tile * 0.92} rx={tile * 0.18} />}
             renderPiece={(place, { x, y, tile }) => (place.aimed
