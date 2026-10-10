@@ -280,3 +280,4 @@ to search sets `searchable: false` (no box).
 
 ## Develop
 `npm install`, then `npm test` (panel, Sound tab (list, knobs, A/B, files + upload + credits, mixer, log, wildcard notes, waveform maths, the knobs matching audio/kit/config.ts), save-audio + credit endpoints (path safety; conversion when ffmpeg is installed), AI tab (editor, save, copy, watch, check, search), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
+- Before a version goes out, install it into a game and run the game's `npm run lint` too: the framework has no ESLint, and the games run React's hooks rules (Dev Kit 0.8.0 went out with 3 errors — setState inside an effect, a non-component export from a .tsx — fixed in 0.8.1).
