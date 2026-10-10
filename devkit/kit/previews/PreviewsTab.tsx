@@ -6,10 +6,13 @@
 //   in a separate copy of the game, badged PREVIEW. Close it and the real game is exactly where it was.
 //   A screen with Moments (the game's `moments` in the same file) lists them under its name: tapping one opens the
 //   screen with that moment ready to ▶ / 🔁 and its feel knobs beside it (moments/MomentsPanel.tsx).
+//   The Dev Kit's search box (while this tab is open) finds screens by name, group, note or variant, and by their moments.
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { checkMoments, momentsFor } from '../moments/momentLogic'
+import { checkMoments, momentsFor, searchScreens } from '../moments/momentLogic'
 import type { DevKitMoment } from '../moments/momentTypes'
+import { Highlight, SearchCount } from '../search/Section'
+import { searchTerms } from '../search/searchLogic'
 import { PREVIEWS_FILE, loadGameMoments, loadGamePreviews } from './gamePreviews'
 import { PreviewOverlay } from './PreviewOverlay'
 import { dropBackGuard, pushBackGuard } from './overlayLogic'
@@ -21,9 +24,10 @@ type Open = { preview: DevKitPreview; variant: string | undefined; moment?: stri
 type Props = {
   load?: () => Promise<DevKitPreview[]>
   loadMoments?: () => Promise<DevKitMoment[]>
+  query?: string // the Dev Kit's search box (while this tab is open)
 }
 
-export default function PreviewsTab({ load = loadGamePreviews, loadMoments = loadGameMoments }: Props) {
+export default function PreviewsTab({ load = loadGamePreviews, loadMoments = loadGameMoments, query = '' }: Props) {
   const [previews, setPreviews] = useState<DevKitPreview[] | null>(null)
   const [moments, setMoments] = useState<DevKitMoment[]>([])
   const [problem, setProblem] = useState<string | null>(null)
@@ -57,21 +61,25 @@ export default function PreviewsTab({ load = loadGamePreviews, loadMoments = loa
   }
 
   const momentProblems = checkMoments(moments, previews.map((p) => p.id))
+  const terms = searchTerms(query)
+  const found = searchScreens(previews, moments, query)
+  const shownMoments = (id: string) => found.find((f) => f.preview.id === id)?.moments ?? []
   return (
     <div className="pv">
       <p className="pv-intro">Opens a screen with sample data in a sandbox over the game. Nothing in it is saved or sent; ✕ / Esc / Back returns you here.</p>
       {momentProblems.length > 0 && (
         <ul className="pv-problems" role="alert">{momentProblems.map((p) => <li key={p}>{p}</li>)}</ul>
       )}
-      {groupPreviews(previews).map(({ group, previews: list }) => (
+      <SearchCount query={query} found={found.length} what="screen" where="Screens" />
+      {groupPreviews(found.map((f) => f.preview)).map(({ group, previews: list }) => (
         <section key={group} className="pv-section">
-          <h3 className="pv-heading">{group}</h3>
+          <h3 className="pv-heading"><Highlight text={group} terms={terms} /></h3>
           <ul className="pv-list">
             {list.map((p) => (
               <li key={p.id} className="pv-row">
                 <div className="pv-info">
-                  <span className="pv-name">{p.label}{p.hint && <span className="pv-hint">{p.hint}</span>}</span>
-                  {p.note && <span className="pv-note">{p.note}</span>}
+                  <span className="pv-name"><Highlight text={p.label} terms={terms} />{p.hint && <span className="pv-hint">{p.hint}</span>}</span>
+                  {p.note && <span className="pv-note"><Highlight text={p.note} terms={terms} /></span>}
                 </div>
                 <div className="pv-buttons">
                   {p.variants && p.variants.length > 0
@@ -80,12 +88,12 @@ export default function PreviewsTab({ load = loadGamePreviews, loadMoments = loa
                       ))
                     : <button className="devkit-btn" data-preview={p.id} onClick={() => show(p)}>Open</button>}
                 </div>
-                {momentsFor(moments, p.id).length > 0 && (
+                {shownMoments(p.id).length > 0 && (
                   <div className="pv-moments" aria-label={`${p.label} moments`}>
                     <span className="pv-moments-title">Moments</span>
-                    {momentsFor(moments, p.id).map((m) => (
+                    {shownMoments(p.id).map((m) => (
                       <button key={m.id} className="pv-moment" data-moment={m.id} onClick={() => show(p, undefined, m.id)} title={m.note}>
-                        {m.label}
+                        <Highlight text={m.label} terms={terms} />
                       </button>
                     ))}
                   </div>

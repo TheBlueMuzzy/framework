@@ -4,6 +4,7 @@
 //   Notes:    a knob's _labels / _help / _ranges entry, exact or by wildcard ("sounds.*.volumeDb")
 //   Presets:  Soft · Balanced · Punchy — exact values, else the relative rules (design/devkit-moments.md)
 //   Moments:  which belong to a screen, problems in the list, what the search looks through
+import type { DevKitPreview } from '../previews/previewTypes'
 import { matchesAll, readableKey, searchTerms } from '../search/searchLogic'
 import { sliderRange, type Range } from '../tuning/tuningLogic'
 import { FEEL_STYLES, type DevKitMoment, type FeelStyle, type KnobRole, type MomentKnob } from './momentTypes'
@@ -212,3 +213,22 @@ export const momentTexts = (m: DevKitMoment) => [m.label, m.note, m.id]
 
 /** Does this moment match a search? */
 export const momentMatches = (m: DevKitMoment, query: string) => matchesAll(searchTerms(query), momentTexts(m))
+
+/**
+ * The Screens tab's search: each screen that matches (its name, group, note, id or a variant's name) with ALL its
+ * moments, or a screen holding a matching moment with just those. Not searching = every screen, every moment.
+ */
+export function searchScreens(previews: DevKitPreview[], moments: DevKitMoment[], query: string) {
+  const terms = searchTerms(query)
+  const found: { preview: DevKitPreview; moments: DevKitMoment[] }[] = []
+  for (const preview of previews) {
+    const own = momentsFor(moments, preview.id)
+    const texts = [preview.label, preview.group, preview.note, preview.id, ...(preview.variants ?? []).map((v) => v.label)]
+    if (matchesAll(terms, texts)) found.push({ preview, moments: own })
+    else {
+      const hits = own.filter((m) => matchesAll(terms, momentTexts(m)))
+      if (hits.length > 0) found.push({ preview, moments: hits })
+    }
+  }
+  return found
+}

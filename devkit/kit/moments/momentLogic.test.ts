@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   activeStyle, allStyles, checkMoments, fitRange, guessRole, knobInfo, liveName, momentMatches, momentsFor, nextFireDelay,
-  noteFor, readKnob, resolveKeys, sharedWith, styleValue, writeKnob,
+  noteFor, readKnob, resolveKeys, searchScreens, sharedWith, styleValue, writeKnob,
 } from './momentLogic'
 import type { DevKitMoment, MomentKnob } from './momentTypes'
 
@@ -135,5 +135,30 @@ describe('the moments list', () => {
     expect(momentMatches(pop, '+1')).toBe(true)
     expect(momentMatches(win, 'grand')).toBe(true)
     expect(momentMatches(win, 'pop')).toBe(false)
+  })
+})
+
+describe('searchScreens — the Screens tab search', () => {
+  const show = () => {}
+  const play = () => {}
+  const previews = [
+    { id: 'board', label: 'Mid-game board', group: 'Game', show },
+    { id: 'reveal', label: 'Magic reveal', group: 'End of game', variants: [{ id: '4p', label: '4 players' }], show },
+  ]
+  const moments: DevKitMoment[] = [
+    { id: 'pop', screen: 'board', label: 'Score pop', knobs: [], play },
+    { id: 'tangle', screen: 'board', label: 'Tangle', knobs: [], play },
+    { id: 'win', screen: 'reveal', label: 'New Grand Glyphtender', knobs: [], play },
+  ]
+  const find = (q: string) => searchScreens(previews, moments, q).map((f) => [f.preview.id, f.moments.map((m) => m.id)])
+  it('a screen that matches shows with all its moments', () => {
+    expect(find('reveal')).toEqual([['reveal', ['win']]])
+    expect(find('4 players')).toEqual([['reveal', ['win']]])
+  })
+  it('a moment that matches brings its screen, with just the matching moments', () => {
+    expect(find('tangle')).toEqual([['board', ['tangle']]])
+  })
+  it('not searching: everything', () => {
+    expect(find('')).toEqual([['board', ['pop', 'tangle']], ['reveal', ['win']]])
   })
 })

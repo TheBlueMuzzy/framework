@@ -152,4 +152,19 @@ describe('Screens tab', () => {
     render(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} />)
     expect((await screen.findByRole('alert')).textContent).toContain('"nowhere"')
   })
+
+  it('the Dev Kit search (while Screens is open) filters screens and their moments, highlighted', async () => {
+    const moments: DevKitMoment[] = [
+      { id: 'winner', screen: 'reveal', label: 'New winner', knobs: [], play: () => {} },
+      { id: 'count', screen: 'reveal', label: 'Count-up', knobs: [], play: () => {} },
+    ]
+    const { rerender } = render(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} query="count" />)
+    expect(await screen.findByRole('button', { name: 'Count-up' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'New winner' })).toBeNull()
+    expect(screen.queryByText('End table')).toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('1 screen found')
+    expect([...document.querySelectorAll('mark.dk-hit')].map((m) => m.textContent)).toContain('Count')
+    rerender(<PreviewsTab load={load} loadMoments={() => Promise.resolve(moments)} query="menu" />)
+    expect(screen.getByText('Pause')).toBeTruthy() // by its note ("The Menu button")
+  })
 })

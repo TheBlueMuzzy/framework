@@ -1,7 +1,7 @@
 // Runs in the framework (not copied into games): the snapshot list kept in this browser.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  addSnapshot, cleanName, deleteSnapshot, isSnapshot, loadSnapshots, snapshotFilePath, snapshotForClaude, type Snapshot,
+  addSnapshot, cleanName, deleteSnapshot, isSnapshot, loadSnapshots, snapshotFilePath, snapshotForClaude, snapshotMatches, type Snapshot,
 } from './snapshotStore'
 
 const snap = (name: string, state: unknown = { turn: 1 }): Snapshot => ({
@@ -73,5 +73,16 @@ describe('snapshot helpers', () => {
     expect(text).toMatch(/^Dev Kit snapshot from Test 0\.1\.0 — "Near the end" \(turn 1\)/)
     expect(text).toContain('content/snapshots/near-the-end.json')
     expect(JSON.parse(text.slice(text.indexOf('{'))).state).toEqual({ turn: 1 })
+  })
+})
+
+describe('snapshotMatches — the Snapshots tab search', () => {
+  it('finds a snapshot by its name, its summary or its version', () => {
+    const s = { ...snap('one move from tangled'), summary: 'turn 12 · Blue to move', version: '0.1.0.12' }
+    expect(snapshotMatches(s, 'tangled')).toBe(true)
+    expect(snapshotMatches(s, 'blue turn')).toBe(true)
+    expect(snapshotMatches(s, '0.1.0.12')).toBe(true)
+    expect(snapshotMatches(s, 'red')).toBe(false)
+    expect(snapshotMatches(s, '')).toBe(true)
   })
 })
