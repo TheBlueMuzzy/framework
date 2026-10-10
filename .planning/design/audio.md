@@ -88,6 +88,7 @@ No library. The browser's Web Audio has everything we need:
 - Master → **Music · Ambience · Effects (sfx) · UI**. UI sits 6–10 dB under Effects; it's heard hundreds of times.
 - **Loudness target:** −16 to −18 LUFS overall, nothing above −1 dB. A limiter on the master as a safety net.
 - **Ducking:** a big moment lowers Music by 6–8 dB (10 ms down, 600 ms back). Snapshots (Paused, Reveal) are named mixes that ramp in and out.
+- **Menu sounds never vary** (Muzzy 2026-10-10): kit controls (tap, back, tabs, toggle on/off) = one file, no random pitch/volume — the same action always sounds the same. Toggle on rises, off falls (`toggle.on` / `toggle.off`, ui-kit 0.4.3). Variation below is for gameplay sounds.
 - **Not getting annoying:**
   - 2–3 variants (3–5 for the most frequent sound)
   - never the same one twice
