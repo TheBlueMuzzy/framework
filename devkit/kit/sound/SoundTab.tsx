@@ -47,9 +47,13 @@ export function SoundTab({ getAudio, file, path, tuningName, baseUrl, query = ''
   // What the game uses right now: the edit — or, while A is chosen, the edit with the open sound as saved
   const live = gameHearsSaved && selected ? abConfig(edited, saved, selected, 'A') : edited
   const liveText = JSON.stringify(live)
-  const first = useRef(true)
+  // Only a real change is sent: the game already has the file as loaded, and React may run this effect again with
+  // nothing changed (StrictMode, or the Dev Kit's hidden tabs reconnecting) — re-sending then would undo any other
+  // live edit of the file (a Moments knob, a test's setConfig)
+  const sent = useRef(liveText)
   useEffect(() => {
-    if (first.current) { first.current = false; return } // the game already has the file as loaded
+    if (liveText === sent.current) return
+    sent.current = liveText
     const data = JSON.parse(liveText) as RawAudio
     audio?.setConfig(data)
     sendTuning(tuningName, data)

@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { StrictMode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TUNING_EVENT } from '../tuning/liveTuning'
 import { SoundTab } from './SoundTab'
@@ -74,6 +75,16 @@ describe('the Sound tab', () => {
   it('says so when the game has no sound engine yet', () => {
     renderTab(null)
     expect(screen.getByText(/Sound isn't started yet/)).toBeTruthy()
+  })
+
+  it('sends nothing to the game until something is edited — even when React runs its effects twice (StrictMode / hidden tabs)', () => {
+    const audio = fakeAudio()
+    const heard = vi.fn()
+    window.addEventListener(TUNING_EVENT, heard)
+    render(<StrictMode><SoundTab getAudio={() => audio} file={FILE} path="content/audio.json" tuningName="audio" baseUrl="/" /></StrictMode>)
+    window.removeEventListener(TUNING_EVENT, heard)
+    expect(audio.setConfig).not.toHaveBeenCalled() // (re-sending the file would undo another live edit, e.g. a Moments knob)
+    expect(heard).not.toHaveBeenCalled()
   })
 
   it('lists every sound by volume group, with its files count', () => {
