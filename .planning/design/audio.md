@@ -35,7 +35,8 @@ Left out: 3D sound, blend containers, voice-over.
 | `planner.ts` | **Pure decisions**: given the sound's settings, what's playing now, the time and a seeded random → a play plan (file, volume, pitch, delay, filters) or a "dropped because…" reason. Variant pick (random-no-repeat · in order · shuffle), random pitch/volume, voice limit + cooldown + priority, the pitch ladder, stale/catch-up drop. | plain unit tests (no audio) |
 | `engine.ts` | The browser side: one `AudioContext`, unlock on the first tap, buses → master → limiter, iOS silent-switch respect (`navigator.audioSession.type = 'ambient'` when it exists), pause when hidden / interrupted (and **never queue** while paused), mono option, snapshots + ducking as volume ramps. Plays the planner's plans. | fake AudioContext |
 | `loader.ts` | Fetches and decodes short sounds once (cached). Streams music and ambience through `<audio>` into the Music / Ambience bus. Loads sound effects after the unlock; music when first needed. | unit + e2e |
-| `music.ts` | Layers that play in sync (each with its own volume), gapless loops (loop points in JSON), crossfades, stingers, and **rests**: after N loops, fade to ambience only for a while. | unit (timing plan) |
+| `music.ts` | Layers that play in sync (each with its own volume), gapless loops (loop points in JSON), crossfades, stingers, and **rests**: after N loops, fade to ambience only for a while. | fake AudioContext + fake `<audio>` + fake timers |
+| `stream.ts` | (F28) One file played through an `<audio>` element (MediaElementSource) into the mix, with a crossfade at the loop point. | same |
 | `config.ts` | Types, defaults and validation for `content/audio.json`. A bad value gives a clear console warning and a safe default; the game never crashes. | unit |
 | `log.ts` | Ring buffer of every play / drop with its reason. `window.__audioLog` in dev and tests. Feeds the Sound Board log. | unit |
 | `react.ts` | `useAudioSettings()` (Settings tab → buses), `<AudioUnlock/>` (first tap), `playSound` helper. | unit |
@@ -68,8 +69,9 @@ No library. The browser's Web Audio has everything we need:
       "ladder": false                                        // true = each repeat steps up the ladder
     }
   },
-  "music": { "layers": { ... }, "stingers": { ... }, "restAfterLoops": 3, "restSeconds": 90 }
-}
+  "music": { "tracks": { "garden": { "layers": { "harp": { "file": "…" }, "pad": { "file": "…", "fromIntensity": 0.3, "fullAtIntensity": 0.8 } },
+                                     "loop": true, "playsBeforeRest": 2, "restSeconds": [60, 90], "fadeInMs": 2000, "fadeOutMs": 3000 } } }
+}   // music as built in F28 — see Build notes, Sprint 21
 ```
 - Every key gets `_help` / `_labels` / `_sections` / `_ranges`, the Dev Kit convention.
 - Ranges:
@@ -188,3 +190,15 @@ Sprint 20 — F30 Sound tab (2026-10-10):
 - **Audio 0.1.2 adds `audio.level(bus)`** (peak 0…1, an AnalyserNode side branch made on first use) for the mixer's meters.
 - **Files come in through `POST /__devkit/save-audio`** (`devkit/vite/audioSave.ts`): system ffmpeg (not ffmpeg-static), sfx/ui mono 96k trimmed to the onset (B026), music/ambience stereo 128k untouched, named `<folder>_<object>_<action>_NN.mp3` with the next free number. Credits via `POST /__devkit/add-credit` (credits.json is a list, which the JSON Save refuses).
 - **"▶ in context"** (play the real moment with its animation) is not in the Sound tab: it is F32's Moments.
+
+Sprint 21 — F28 Music + mix (2026-10-10, audio 0.2.0):
+- **Streaming** (`stream.ts`): a sound's `"stream": "auto" | "always" | "never"` (true / false understood). `auto` = music + ambience buses stream through an `<audio>` element → MediaElementSource → the sound's usual chain; effects + menus stay decoded (they must start instantly). **Trade-off:** an `<audio>` element can't loop sample-exact, so a streamed loop primes a second element at the loop start and crossfades `loopCrossfadeMs` (default 100) at the loop point; the seam is a timer set for the exact moment (the 50 ms tick only notices it's near). A short rhythmic loop that must be sample-exact uses `"stream": "never"`. Glyphtender's amb.night (46 s, loopEndMs) streams by default now — if Muzzy hears the seam, raise its crossfade or set never.
+- **Music tracks** (`music.ts`), `content/audio.json` → `music.tracks.<name>`: `layers.<layer> = { file, volumeDb, fromIntensity, fullAtIntensity }` + `loop`, `loopStartMs`, `loopEndMs`, `loopCrossfadeMs`, `playsBeforeRest` (0 = never), `restSeconds: [min, max]`, `fadeInMs`, `fadeOutMs`. Calls: renamed the sprint sketch's `crossfadeMs` to `loopCrossfadeMs` (same name as on sounds; switching tracks has its own `fadeMs`). A layer plays ONE file (`files: [one]` accepted) — variants would break the sync.
+- **Intensity curve:** a layer is silent ≤ from, full ≥ full, t² in between (the player-slider curve, so halfway sounds like halfway). Only one intensity (per engine), set by the game; not saved in JSON.
+- **Plays + rests:** the first layer is the leader (its loops / end count plays). The last play before a rest stops looping and plays into the file's ending (after loopEndMs), fading out over its last fadeOutMs; rest time only counts while audio runs (hidden tab = paused); back from the top over fadeInMs. A piece (`loop: false`) with more plays to go restarts from the top at its end.
+- **Layers' sync:** separate `<audio>` elements started in one go — a few ms apart, never re-synced. Fine for beds / pads / melodies over ambience; not for two tight rhythm parts (decode those, later, if a game needs it).
+- **API:** `playMusic(name, { fadeMs })` (one at a time; switching crossfades; same name again = nothing; before the first tap → waits and starts after it) · `stopMusic({ fadeMs, track })` (`track` = only if it's that one — so a screen's cleanup never stops the next screen's track) · `setMusicIntensity(x, { rampMs })` · `restMusic()` / `endMusicRest()` (Dev Kit) · `musicState()`. React: `useMusic(audio, track, fadeMs?)`. Log: `result: 'music'`, `event: start | play | rest | stop`.
+- **Phones:** streams pause/resume with the AudioContext; an `<audio>` the browser refuses to start (iOS outside a tap) is retried on the next tap. **Not yet heard on a real iPhone** — Muzzy's phone check in Glyphtender task 9.
+- **Stingers** = a sound with `"duck": true` (no new stinger type needed): the duck is on the Music group's way out, so streamed music dips too (tested).
+- **Snapshot stack:** `pushSnapshot(name)` / `popSnapshot(name)` / `snapshots()`; `useAudioSnapshot` now pushes + pops, so Pause during the Reveal returns to the Reveal's mix. Push fades over the new mix's `fadeMs`; popping the top fades back over the removed one's `fadeMs`; popping one underneath changes nothing you hear. `snapshot(name | null)` still replaces the whole stack. Duck (`duck.amountDb / downMs / backMs`) and snapshot (`snapshots.*.fadeMs`) timings were already in content — confirmed, unchanged.
+- `stopAll()` now stops the music too.

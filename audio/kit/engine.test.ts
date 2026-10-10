@@ -9,7 +9,7 @@ import { getAudio, playSound, setAudio } from './shared.ts'
 const CONFIG = {
   buses: { music: -8, ambience: -10, sfx: 0, ui: -8 },
   master: { limiterDb: -1 },
-  snapshots: { paused: { music: -10, lowpassHz: 900, fadeMs: 250 } },
+  snapshots: { paused: { music: -10, lowpassHz: 900, fadeMs: 250 }, reveal: { music: -6, ambience: -8, fadeMs: 400 } },
   duck: { amountDb: -7, downMs: 10, backMs: 600 },
   tiers: { small: 'pop', medium: 'pop', big: 'boom' },
   sounds: {
@@ -383,6 +383,66 @@ describe('snapshots and ducking', () => {
     audio.snapshot('nope')
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('no snapshot called "nope"'))
     warn.mockRestore()
+  })
+
+  it('a mix pushed on top of another returns to it when popped (Pause during the Reveal)', async () => {
+    const { audio, ctx, tap } = setup()
+    await tap()
+    audio.play('theme')
+    await settle()
+    const musicMix = levelFor(lastSource(ctx)).connections[0] as FakeGain
+    const muffle = musicMix.connections[0].connections[0] as FakeFilter
+    audio.pushSnapshot('reveal')
+    expect(musicMix.gain.calls.at(-1)).toEqual(['ramp', dbToGain(-6), 0.4]) // in over the reveal's fadeMs
+    audio.pushSnapshot('paused')
+    expect(audio.snapshots()).toEqual(['reveal', 'paused'])
+    expect(musicMix.gain.calls.at(-1)).toEqual(['ramp', dbToGain(-10), 0.25])
+    expect(muffle.frequency.value).toBe(900)
+    audio.popSnapshot('paused')
+    // back to the reveal — not to normal — over the paused mix's fadeMs
+    expect(audio.snapshots()).toEqual(['reveal'])
+    expect(musicMix.gain.calls.at(-1)).toEqual(['ramp', dbToGain(-6), 0.25])
+    expect(muffle.frequency.value).toBe(20000)
+    audio.popSnapshot('reveal')
+    expect(musicMix.gain.calls.at(-1)).toEqual(['ramp', 1, 0.4])
+    expect(audio.snapshots()).toEqual([])
+  })
+
+  it('popping a mix that is NOT on top changes nothing you hear (the Reveal ends while paused)', async () => {
+    const { audio, ctx, tap } = setup()
+    await tap()
+    audio.play('theme')
+    await settle()
+    const musicMix = levelFor(lastSource(ctx)).connections[0] as FakeGain
+    audio.pushSnapshot('reveal')
+    audio.pushSnapshot('paused')
+    const calls = musicMix.gain.calls.length
+    audio.popSnapshot('reveal')
+    expect(audio.snapshots()).toEqual(['paused'])
+    expect(musicMix.gain.calls.length).toBe(calls)
+    audio.popSnapshot('reveal') // not there: nothing
+    audio.popSnapshot('paused')
+    expect(musicMix.gain.value).toBe(1)
+  })
+
+  it('snapshot(name) replaces the whole stack; snapshot(null) clears it', async () => {
+    const { audio, tap } = setup()
+    await tap()
+    audio.pushSnapshot('reveal')
+    audio.pushSnapshot('paused')
+    audio.snapshot('reveal')
+    expect(audio.snapshots()).toEqual(['reveal'])
+    audio.snapshot(null)
+    expect(audio.snapshots()).toEqual([])
+  })
+
+  it('a live edit that deletes a mix takes it off the stack', async () => {
+    const { audio, tap } = setup()
+    await tap()
+    audio.pushSnapshot('reveal')
+    audio.pushSnapshot('paused')
+    audio.setConfig({ ...CONFIG, snapshots: { reveal: CONFIG.snapshots.reveal } })
+    expect(audio.snapshots()).toEqual(['reveal'])
   })
 
   it('a ducking sound dips the music and brings it back', async () => {
