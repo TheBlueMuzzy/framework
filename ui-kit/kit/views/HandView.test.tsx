@@ -27,6 +27,19 @@ const draw = (props: Partial<Parameters<typeof HandView<string>>[0]> = {}) =>
 const places = (container: HTMLElement) => [...container.querySelectorAll('svg > g')]
 
 describe('HandView (rack)', () => {
+  it('a carried piece’s home shows a faint mark (ghost) or nothing (empty), and keeps its attributes for a drop back home', () => {
+    const carried = rack.map((p, i) => (i === 0 ? { ...p, origin: 'ghost' as const } : i === 1 ? { ...p, origin: 'empty' as const } : p))
+    const { container } = draw({ places: carried, look: { ghostOpacity: 0.3 } })
+    const [ghost, empty] = places(container)
+    expect(ghost.getAttribute('data-carried')).toBe('ghost')
+    expect(ghost.querySelector('.art')!.closest('[data-carried-from]')!.getAttribute('opacity')).toBe('0.3')
+    expect(ghost.querySelectorAll('.slot')).toHaveLength(1) // (the empty look stays full strength)
+    expect(empty.getAttribute('data-carried')).toBe('empty')
+    expect(empty.querySelector('.art')).toBeNull()
+    expect(empty.querySelector('.slot')).not.toBeNull()
+    expect(empty.getAttribute('data-hand')).toBe('b')
+  })
+
   it('draws one group per place with the game’s attributes, and keeps the game’s class on the svg', () => {
     const { container } = draw()
     const svg = container.querySelector('svg')!
