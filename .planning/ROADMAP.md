@@ -91,7 +91,7 @@ flowchart LR
   F24 --> F26[F26 Auto-tuner]
 ```
 
-## v0.6 — Audio  (proven by Glyphtender beta, its v0.9)
+## v0.6 — Audio  ✅ released 2026-10-10 in framework v0.5.0 (proven by Glyphtender v0.6.0)
 Goal: any web game gets sound by naming its moments — content/audio.json says what they sound like, Muzzy tunes and swaps them in the Dev Kit Sound Board, and the standards (volume groups, variation, limits, phones, online catch-up) come for free. Design: `design/audio.md`. Defined with Muzzy 2026-10-09.
 - ✅ F27 🧱 Audio engine + rules: pure planner (variants, random pitch/volume, voices + cooldown + priority, pitch ladder, stale/catch-up drop), Web Audio engine (unlock, buses → limiter, silent switch, hidden/interrupted = drop not queue, mono, snapshots + ducking), loader (decode sfx, stream music), content/audio.json config + validation, log (window.__audioLog), React helpers, installer; audio-setup skill → points at the module — must:beta · needs: —
   status 2026-10-09 (Glyphtender sprint 19): built in audio/ (kit 0.1.0), tests pass (90) — planner, engine, loader (decode only), config, log, settings, React helpers, installer. Left: music streaming via <audio> (moved to F28), audio-setup skill pointer, the Glyphtender proof

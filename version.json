@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.5.0",
+      "date": "2026-10-10",
+      "summary": "Audio module (audio/ 0.2.1 — named sounds from content/audio.json, variation, limits, pitch ladder, streamed music with layers + rests, stacked mixes, phone rules) + Dev Kit 0.9.1 (Sound tab, Moments with Soft · Balanced · Punchy presets, search per tab) + UI kit 0.4.4 (Audio tab standard with a Sound switch, control sounds, menus that open centred and grow down) + the AI module (ai/ 0.1.0) and rooms 0.4.1 (idle takeover) — proven in Glyphtender v0.5.0–v0.6.0. v0.6 Audio ✅ (F31 audio check script = should, open); v0.5 AI still open (F22 banter, F24 arena)"
+    },
     {
       "version": "0.4.0",
       "date": "2026-10-04",
