@@ -101,7 +101,7 @@ No library. The browser's Web Audio has everything we need:
   - one root key per game, so pops always sit in the music's key
 
 ## Settings (UI kit standard Audio tab)
-**Rows:** Master · Music · Ambience · Effects · UI (sliders) · Mute everything · Mute when in the background · Mono.
+**Rows:** Master · Music · Ambience · Effects · UI (sliders) · Sound (on/off) · Mute when in the background · Mono.
 - The kit's tabbed Settings already gives Audio its own page (tabs on wide screens, ◀ Audio ▶ on phones). Eight rows fit a phone with no scrolling, so no new page is needed.
 - Defaults: Master 80 · Music 50 · Ambience 60 · Effects 80 · UI 70.
 - **Slider feel:** 0–100 maps to decibels, not straight volume, so the middle of the slider sounds like the middle.
@@ -178,7 +178,7 @@ Sprint 19 (2026-10-09, built while Muzzy slept — calls made, open to change):
 - **Random volume and pitch are ±** (randomVolumeDb 2 = −2…+2 dB). The limiter catches the top.
 - **Ladder sounds get no random pitch** (it would put notes out of key). `ladder.root` is informational — the key the ladder's files are recorded in; the module doesn't retune.
 - **Loops are remembered, one-shots are not:** a loop asked for while locked / suspended / still loading starts once it can (one per name — no burst). Asking for a loop that's already playing is a no-op (`already-playing`). One-shots not loaded yet are dropped (`not-loaded`) and load for next time; effect + menu files preload right after the first tap.
-- **Mute everything** drops one-shots (`muted`) but lets loops keep running silently under the master, so unmuting brings the ambience back.
+- **Sound off** (was "Mute everything", renamed 2026-10-10 — Muzzy: "the on position is positive, the off is negative") drops one-shots (`muted`) but lets loops keep running silently under the master, so Sound on brings the ambience back. Switching it off still plays its own "off" click: the master holds for `master.muteDelayMs` (250) before fading; switching on unmutes first, then the "on" click plays. Old saves with `muteAll` are read as its opposite.
 - **Slider curve:** gain = (slider/100)² (50 → −12 dB, 0 = silent).
 - **Streaming music through `<audio>` moved to F28** — F27 decodes every file; keep beta loops short.
 - **`_ranges` / `_help` / `_labels` for sound knobs use a wildcard key** (`"sounds.*.volumeDb"`). The current Dev Kit tuning tab only knows exact paths; the Sound Board (F30) should read the wildcard.

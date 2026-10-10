@@ -16,7 +16,7 @@ describe('audio settings', () => {
   it('defaults match the UI kit Settings → Audio standard', () => {
     expect(DEFAULT_AUDIO_SETTINGS).toEqual({
       masterVolume: 80, musicVolume: 50, ambienceVolume: 60, sfxVolume: 80, uiVolume: 70,
-      muteAll: false, muteInBackground: true, mono: false,
+      sound: true, muteInBackground: true, mono: false,
     })
   })
 
@@ -27,7 +27,16 @@ describe('audio settings', () => {
 
   it('drives every bus, mute, background mute and mono', () => {
     const { target, calls } = recorder()
-    applyAudioSettings(target, { masterVolume: 100, muteAll: true })
+    applyAudioSettings(target, { masterVolume: 100, sound: false })
     expect(calls).toEqual(['master=100', 'music=50', 'ambience=60', 'sfx=80', 'ui=70', 'muted=true', 'background=true', 'mono=false'])
+  })
+
+  it('an older save with Mute everything (muteAll) comes out as Sound off / on, once — a saved Sound wins', () => {
+    expect(readAudioSettings({ muteAll: true }).sound).toBe(false)
+    expect(readAudioSettings({ muteAll: false }).sound).toBe(true)
+    expect(readAudioSettings({ muteAll: true, sound: true }).sound).toBe(true)
+    const { target, calls } = recorder()
+    applyAudioSettings(target, { masterVolume: 60, muteAll: true })
+    expect(calls).toContain('muted=true')
   })
 })

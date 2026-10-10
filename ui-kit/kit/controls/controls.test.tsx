@@ -137,6 +137,19 @@ describe('control sounds (setControlSound)', () => {
     expect(heard).toEqual(['tap', 'back', 'toggle.on', 'toggle.off'])
   })
 
+  it('a Toggle turning OFF sounds first then changes; turning ON changes first then sounds (a Sound switch is heard both ways)', () => {
+    const order: string[] = []
+    setControlSound((kind) => order.push(kind))
+    render(<>
+      <Toggle on onChange={(on) => order.push(`change ${on}`)} label="Sound" />
+      <Toggle on={false} onChange={(on) => order.push(`change ${on}`)} label="Mono" />
+    </>)
+    fireEvent.click(screen.getByRole('switch', { name: 'Sound' }))
+    fireEvent.click(screen.getByRole('switch', { name: 'Mono' }))
+    fireEvent.keyDown(screen.getByRole('switch', { name: 'Mono' }), { key: 'ArrowRight' })
+    expect(order).toEqual(['toggle.off', 'change false', 'change true', 'toggle.on', 'change true', 'toggle.on'])
+  })
+
   it('still runs the button\'s own onClick, and is silent with no listener', () => {
     let pressed = 0
     render(<Button onClick={() => pressed++}>Go</Button>)

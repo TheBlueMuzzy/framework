@@ -2,7 +2,7 @@
 
 Sound for a game. **Code never names a file**: the game says *what happened* (`playSound('seed.land')`), and `content/audio.json` says *what that sounds like* — which files, how loud, how high, how much it varies, which volume group, how often it may repeat. Swapping a placeholder for a final sound means dropping in a file and editing the JSON (or, soon, the Dev Kit Sound Board).
 
-Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.2.0**. Proven in Glyphtender (its v0.9).
+Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.2.1**. Proven in Glyphtender (its v0.9).
 
 No library: the browser's own Web Audio does it all. No runtime dependencies.
 
@@ -24,6 +24,8 @@ No library: the browser's own Web Audio does it all. No runtime dependencies.
 Kit 0.1.2 adds `audio.level(bus)` for the Dev Kit **Sound tab** (F30 — it lives in the Dev Kit: `devkit/kit/sound/`, see the Dev Kit README).
 
 Kit 0.2.0 (F28) adds music tracks (layers + intensity + rests), streaming for music + ambience, and the snapshot stack.
+
+Kit 0.2.1: the Settings row is **Sound** (`sound`, on = plays; was `muteAll` — an old save is read as its opposite), and switching it off lets the click that just started finish (`master.muteDelayMs`, 250) before the silence.
 
 Coming next: loudness check script (F31).
 

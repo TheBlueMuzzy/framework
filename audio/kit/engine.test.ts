@@ -164,6 +164,35 @@ describe('the mix', () => {
     expect(masterOf(ctx).gain.value).toBe(1)
   })
 
+  it('Sound off: the sound that just started plays out (master held for master.muteDelayMs, 250), then fades; Sound on: straight back', async () => {
+    const { audio, ctx, tap, advance } = setup()
+    await tap()
+    advance(2000) // (the audio clock is at 2 s)
+    expect(audio.play('tap')).toMatchObject({ kind: 'play' }) // the switch's own "off" click…
+    const master = masterOf(ctx).gain
+    master.calls = []
+    audio.setMuted(true) // …then the game mutes
+    expect(master.calls).toEqual([['cancel', 2], ['set', 1, 2], ['set', 1, 2.25], ['ramp', 0, 2.3]]) // held 250 ms, 50 ms fade
+    expect(audio.play('pop')).toMatchObject({ kind: 'drop', reason: 'muted' }) // a following sound: dropped at once
+    master.calls = []
+    audio.setMuted(true) // (every Settings change re-sends it: the pending fade isn't restarted)
+    expect(master.calls).toEqual([])
+    advance(1000)
+    audio.setMuted(false)
+    expect(master.calls).toEqual([['cancel', 3], ['set', 0, 3], ['ramp', 1, 3.05]])
+    expect(audio.play('tap')).toMatchObject({ kind: 'play' }) // the "on" click, after the unmute
+  })
+
+  it('master.muteDelayMs comes from content/audio.json', async () => {
+    const { audio, ctx, tap } = setup()
+    audio.setConfig({ ...CONFIG, master: { limiterDb: -1, muteDelayMs: 400 } })
+    await tap()
+    const master = masterOf(ctx).gain
+    master.calls = []
+    audio.setMuted(true)
+    expect(master.calls.at(-1)).toEqual(['ramp', 0, 0.45])
+  })
+
   it('mono: one channel at the master, folded down as speakers', async () => {
     const { audio, ctx, tap } = setup()
     await tap()

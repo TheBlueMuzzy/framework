@@ -126,7 +126,19 @@ describe('the standard Audio tab', () => {
     const audio = standard.tabs.find((tab) => tab.id === 'audio')!
     expect(audio.rows.map((row) => [row.id, row.default])).toEqual([
       ['masterVolume', 80], ['musicVolume', 50], ['ambienceVolume', 60], ['sfxVolume', 80], ['uiVolume', 70],
-      ['muteAll', false], ['muteInBackground', true], ['mono', false],
+      ['sound', true], ['muteInBackground', true], ['mono', false],
     ])
+  })
+
+  it('an older save with "Mute everything" (muteAll) comes out as Sound: muted → off, not muted → on; a saved Sound wins', async () => {
+    const standard = (await import('./settings.default.json')).default as SettingsSchema
+    localStorage.setItem('old-save', JSON.stringify({ muteAll: true, musicVolume: 20 }))
+    expect(loadSettings(standard, 'old-save')).toMatchObject({ sound: false, musicVolume: 20 })
+    expect(loadSettings(standard, 'old-save')).not.toHaveProperty('muteAll')
+    localStorage.setItem('old-save', JSON.stringify({ muteAll: false }))
+    expect(loadSettings(standard, 'old-save').sound).toBe(true)
+    localStorage.setItem('old-save', JSON.stringify({ muteAll: true, sound: true }))
+    expect(loadSettings(standard, 'old-save').sound).toBe(true)
+    localStorage.removeItem('old-save')
   })
 })
