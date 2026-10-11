@@ -49,6 +49,27 @@ describe('ScreenStack covered screens', () => {
     expect(layerOf('Menu button').hasAttribute('data-covered')).toBe(false)
   })
 
+  // 0.7.0: the first screen over the game's own layer dims it too (Settings over a main menu, like Pause over the game);
+  // the screens above it carry data-over instead. Nothing to dim (no children) or overlay mode (the overlay dims): no data-dim.
+  it('dims the game under the first screen (data-dim), screens above it carry data-over', () => {
+    render(<ScreenStack screens={testScreens}><button>Game button</button></ScreenStack>)
+    const layerOf = (text: string) => screen.getByText(text).closest('.kit-layer')!
+    act(() => screens.push('menu'))
+    expect(layerOf('Menu button').hasAttribute('data-dim')).toBe(true)
+    act(() => screens.push('shop'))
+    expect(layerOf('Shop button').hasAttribute('data-dim')).toBe(false)
+    expect(layerOf('Shop button').hasAttribute('data-over')).toBe(true)
+  })
+
+  it('no data-dim without a game layer, or in overlay mode', () => {
+    const { unmount } = render(<ScreenStack screens={testScreens} />)
+    act(() => screens.push('menu'))
+    expect(screen.getByText('Menu button').closest('.kit-layer')!.hasAttribute('data-dim')).toBe(false)
+    unmount()
+    render(<ScreenStack overlay screens={testScreens} />)
+    expect(screen.getByText('Menu button').closest('.kit-layer')!.hasAttribute('data-dim')).toBe(false)
+  })
+
   it('works the same in overlay mode', () => {
     render(<ScreenStack overlay screens={testScreens} />)
     const layerOf = (text: string) => screen.getByText(text).closest('.kit-layer')!
