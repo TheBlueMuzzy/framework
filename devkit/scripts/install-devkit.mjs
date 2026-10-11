@@ -83,7 +83,9 @@ export function wiringSteps(gameDir) {
     {
       done: text(main).includes('devkit/mount'),
       step: `${main}: start the Dev Kit (in dev always; in release builds while content/devkit.json says so):
-       if (import.meta.env.DEV || __DEVKIT_IN_RELEASE__) import('./devkit/mount').then((m) => m.mountDevKit())`,
+       if (import.meta.env.DEV) import('./devkit/mount').then((m) => m.mountDevKit())
+       else if (__DEVKIT_IN_RELEASE__) addEventListener('load', () => requestIdleCallback(() => import('./devkit/mount').then((m) => m.mountDevKit()), { timeout: 3000 }), { once: true })
+       (release builds load it after the first screen, when idle — it was ~47 KB of Glyphtender's first download; worked example: Glyphtender src/main.tsx)`,
     },
     {
       done: text(viteConfig).includes('vite-plugins/devkit/devkitVite'),

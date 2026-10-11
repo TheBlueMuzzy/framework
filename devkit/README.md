@@ -25,7 +25,7 @@ From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-ru
 - `kit/` → the game's `src/devkit/` (browser code) and `vite/` → `vite-plugins/devkit/` (build code), each with a `VERSION` stamp. Tests stay here.
 - Makes `content/devkit.json` and `src/devkit-game/tabs.ts` once; never overwrites them.
 - Prints the wiring the game still needs — for a new game:
-  1. `src/main.tsx`: `if (import.meta.env.DEV || __DEVKIT_IN_RELEASE__) import('./devkit/mount').then((m) => m.mountDevKit())`
+  1. `src/main.tsx`: in dev `import('./devkit/mount').then((m) => m.mountDevKit())` at once; in release builds (`__DEVKIT_IN_RELEASE__`) the same import after the page's `load`, in `requestIdleCallback` — so the Dev Kit isn't part of the first screen's download (Glyphtender F66: 47 KB, 2.16 → 1.60 s to Play on a slow phone). Worked example: Glyphtender `src/main.tsx`.
   2. `vite.config.ts`: `import { devkit } from './vite-plugins/devkit/devkitVite'` and `plugins: [react(), devkit()]`
   3. `tsconfig.node.json`: `"vite-plugins"` in `"include"`
   4. `package.json`: `"check:devkit": "node src/devkit/check-devkit.mjs"` (needs Playwright: `npm install -D playwright`)
