@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.6.0",
+      "date": "2026-10-10",
+      "summary": "Drag carry styles (ui-kit 0.6.1: presets A–D, carrier with lift / landings / returns / travel for AI pieces; target feedback: ghost preview, aim line, insertion marker, make room, magnetic snap) · Dev Kit 0.10.0 dropdowns (_choices) · table 0.7.1 (who played each move, swapInRack) · rooms 0.5.0 (server records who played) — proven by Glyphtender v0.7.0"
+    },
     {
       "version": "0.5.0",
       "date": "2026-10-10",

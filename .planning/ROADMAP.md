@@ -114,7 +114,7 @@ flowchart LR
   F30 -.working.-> F32
 ```
 
-## v0.7 — Drag carry styles  (proven by Glyphtender v0.11)
+## v0.7 — Drag carry styles  (proven by Glyphtender v0.11)  ✅ released 2026-10-10 in framework v0.6.0
 Goal: any game picks, per drag type, how a dragged piece is carried, what its home shows, how the drop ends and what the target shows — all previewable live in the Dev Kit. Tiles/objects in zones first; card hands (insertion marker, make room) next.
 - ✅ F53 🧱 Carry styles (ui-kit kit/drag/): carried solid|ghost + lift · origin solid|ghost|empty · valid landing settle/turn solid/fly from origin · invalid return fly back/fade · presets A Pick it up · B Lift, mark home · C Aim · D Float; Dev Kit Tuning dropdown field — should · Glyphtender sprint 23 (its F63) · built 2026-10-10 (ui-kit 0.5.0, Dev Kit 0.10.0)
 - ✅ F54 🧱 Target feedback: highlight · ghost preview · insertion marker · make room (FLIP) · tether · magnetic snap — should · needs: F53 · Glyphtender sprint 23 (its F64) · built 2026-10-10 (ui-kit 0.6.0)
