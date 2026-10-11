@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { makeReferee } from './referee'
-import { GAP, moveInRack, placesOf, rackOf, refillRack, shuffleRack } from './rack'
+import { GAP, moveInRack, placesOf, rackOf, refillRack, shuffleRack, swapInRack } from './rack'
 
 // A tiny board for the referee: cards go on cells 0–4; seat 0 may act; only even cells are free right now.
 type Card = { id: string; kind: 'card' | 'token' }
@@ -44,6 +44,12 @@ describe('rack order: nothing shifts on its own', () => {
     expect(rackOf(hand)).toEqual(['a', 'b', 'c', 'd'])
     expect(moveInRack(['a', 'b', 'c', 'd'], 0, 2)).toEqual(['b', 'c', 'a', 'd'])
     expect(moveInRack(['a', GAP, 'c'], 0, 1)).toEqual([GAP, 'a', 'c'])
+  })
+
+  it('or swap two pieces (nothing else moves); onto a gap it just moves there', () => {
+    expect(swapInRack(['a', 'b', 'c', 'd'], 0, 2)).toEqual(['c', 'b', 'a', 'd'])
+    expect(swapInRack(['a', 'b', 'c', 'd'], 3, 1)).toEqual(['a', 'd', 'c', 'b'])
+    expect(swapInRack(['a', GAP, 'c'], 0, 1)).toEqual([GAP, 'a', 'c'])
   })
 
   it('a played piece leaves a gap that the next draw fills, in place', () => {

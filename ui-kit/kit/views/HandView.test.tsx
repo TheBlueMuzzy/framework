@@ -27,6 +27,19 @@ const draw = (props: Partial<Parameters<typeof HandView<string>>[0]> = {}) =>
 const places = (container: HTMLElement) => [...container.querySelectorAll('svg > g')]
 
 describe('HandView (rack)', () => {
+  it('a carried piece’s home shows a faint mark (ghost) or nothing (empty), and keeps its attributes for a drop back home', () => {
+    const carried = rack.map((p, i) => (i === 0 ? { ...p, origin: 'ghost' as const } : i === 1 ? { ...p, origin: 'empty' as const } : p))
+    const { container } = draw({ places: carried, look: { ghostOpacity: 0.3 } })
+    const [ghost, empty] = places(container)
+    expect(ghost.getAttribute('data-carried')).toBe('ghost')
+    expect(ghost.querySelector('.art')!.closest('[data-carried-from]')!.getAttribute('opacity')).toBe('0.3')
+    expect(ghost.querySelectorAll('.slot')).toHaveLength(1) // (the empty look stays full strength)
+    expect(empty.getAttribute('data-carried')).toBe('empty')
+    expect(empty.querySelector('.art')).toBeNull()
+    expect(empty.querySelector('.slot')).not.toBeNull()
+    expect(empty.getAttribute('data-hand')).toBe('b')
+  })
+
   it('draws one group per place with the game’s attributes, and keeps the game’s class on the svg', () => {
     const { container } = draw()
     const svg = container.querySelector('svg')!
@@ -95,5 +108,41 @@ describe('HandView (rack)', () => {
     document.documentElement.setAttribute('data-reduce-motion', '')
     draw({ places: staged, stage: 'out', motion })
     expect(animate).not.toHaveBeenCalled() // reduce motion: it just happens
+  })
+  it('insertAt draws the game’s marker at that gap (before the first, between two, after the last), never when hidden', () => {
+    const gaps: number[][] = []
+    const marker = (gap: { index: number; x: number; y: number }) => { gaps.push([gap.index, gap.x, gap.y]); return <line className="marker" /> }
+    const { container, rerender } = draw({ insertAt: 2, renderMarker: marker })
+    expect(container.querySelector('[data-insert-at="2"] .marker')).not.toBeNull()
+    expect(container.querySelector('.kit-hand-marker')!.getAttribute('pointer-events')).toBe('none')
+    const again = (insertAt: number, hidden = false) =>
+      rerender(<HandView layout={layout} boxWidth={230} places={rack} renderEmpty={empty} renderPiece={art} insertAt={insertAt} renderMarker={marker} hidden={hidden} />)
+    again(0); again(4); again(9)
+    // Places at x 25, 85, 145, 205 (60 apart): gap 2 sits between b and the empty place; 0 and 4 half a step outside
+    expect(gaps).toEqual([[2, 115, 25], [0, -5, 25], [4, 235, 25], [4, 235, 25]])
+    again(1, true)
+    expect(container.querySelector('.marker')).toBeNull()
+  })
+
+  it('makeRoomAt slides the places on each side of the gap apart (look.makeRoom of a place, in all), and back', () => {
+    const shifts = (container: HTMLElement) =>
+      [...container.querySelectorAll<SVGGElement>('.kit-hand-room')].map((g) => g.style.getPropertyValue('--kit-hand-shift'))
+    const { container, rerender } = draw({ makeRoomAt: 2, look: { makeRoom: 0.4 }, motion: { shrinkTime: 0.25, growTime: 0.35, stagger: 0.08, overshoot: 0.15, roomTime: 0.2 } })
+    expect(shifts(container)).toEqual(['-10px', '-10px', '10px', '10px']) // 0.4 × 50 = 20 px of room
+    expect(container.querySelector<SVGGElement>('.kit-hand-room')!.style.getPropertyValue('--kit-hand-room-time')).toBe('0.2s')
+    // The held lift and the attributes stay on the place's own group, outside the sliding one
+    rerender(<HandView layout={layout} boxWidth={230} places={[{ ...rack[0], held: true }, ...rack.slice(1)]} renderEmpty={empty} renderPiece={art} />)
+    expect(shifts(container)).toEqual(['0px', '0px', '0px', '0px'])
+    expect(places(container)[0].getAttribute('transform')).toBe('translate(0 -4)')
+    expect(places(container)[0].querySelector(':scope > .kit-hand-room .art')).not.toBeNull()
+  })
+
+  it('making room only moves the gap’s own row of a 2-row rack; reduce motion = no slide time', () => {
+    document.documentElement.setAttribute('data-reduce-motion', '')
+    const twoRows = rackLayout({ room: 120, tileWanted: 50, places: 4, tileMin: 44, gap: 10 }) // 2 × 2
+    const { container } = render(<HandView layout={twoRows} boxWidth={110} places={rack} renderEmpty={empty} renderPiece={art} makeRoomAt={1} />)
+    const rooms = [...container.querySelectorAll<SVGGElement>('.kit-hand-room')]
+    expect(rooms.map((g) => g.style.getPropertyValue('--kit-hand-shift'))).toEqual(['-8.75px', '8.75px', '0px', '0px'])
+    expect(rooms[0].style.getPropertyValue('--kit-hand-room-time')).toBe('0s')
   })
 })

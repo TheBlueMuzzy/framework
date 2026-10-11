@@ -115,6 +115,25 @@ describe('the Tuning tab', () => {
     expect(screen.queryByText(/\[object Object\]/)).toBeNull()
   })
 
+  it('text with "_choices" gets a dropdown that sends the pick live, and ↺ goes back to the saved one', () => {
+    const seen = vi.fn()
+    const stop = onTuning('carry', seen)
+    const carry = {
+      name: 'carry',
+      data: { _choices: { 'styles.draft': { A: 'A · Pick it up', C: 'C · Aim' }, look: ['flat', 'round'] }, styles: { draft: 'A' }, look: 'odd' },
+    }
+    render(<TuningTab files={[carry]} />)
+    const draft = screen.getByLabelText('styles.draft') as HTMLSelectElement
+    expect([...draft.options].map((o) => o.text)).toEqual(['A · Pick it up', 'C · Aim'])
+    fireEvent.change(draft, { target: { value: 'C' } })
+    expect(seen).toHaveBeenLastCalledWith(expect.objectContaining({ styles: { draft: 'C' } }))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset styles.draft to the saved value (A)' }))
+    expect(draft.value).toBe('A')
+    // a saved value that isn't one of the options stays (an extra option), never changed by opening the tab
+    expect((screen.getByLabelText('look') as HTMLSelectElement).value).toBe('odd')
+    stop()
+  })
+
   it('is hidden in a game with no content/tuning files (the framework has none)', () => {
     render(<DevKit />)
     expect(screen.queryByRole('tab', { name: 'Tuning', hidden: true })).toBeNull()

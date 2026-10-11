@@ -46,6 +46,12 @@ describe('install-rooms', () => {
     expect(readJson(join(game, 'partykit.json')).name).toBe('custom')
   })
 
+  it('a game on wrangler (PartyServer on Cloudflare) gets no partykit.json', () => {
+    write(join(game, 'wrangler.json'), '{ "name": "my-game" }')
+    installRooms(game, { log: quiet })
+    expect(existsSync(join(game, 'partykit.json'))).toBe(false)
+  })
+
   it('update: replaces edited kit files, removes dropped ones, lists them', () => {
     installRooms(game, { log: quiet })
     writeFileSync(join(game, 'src/rooms/roomCodes.ts'), '// edited')

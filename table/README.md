@@ -1,6 +1,6 @@
 # Table
 
-The foundation a turn-based game's rules stand on (framework v0.4 — design: `../.planning/design/table.md`). Proven slice by slice in Glyphtender v0.6. Kit **0.6.0** — Game core + Zones & pieces + Turns & flow + Event feed + Drag referee + Rack order + Seats.
+The foundation a turn-based game's rules stand on (framework v0.4 — design: `../.planning/design/table.md`). Proven slice by slice in Glyphtender v0.6. Kit **0.7.0** — Game core + Zones & pieces + Turns & flow + Event feed + Drag referee + Rack order + Seats + who played each move.
 
 ## What a game gets (0.1.0 — Game core)
 | Part | Does |
@@ -8,6 +8,7 @@ The foundation a turn-based game's rules stand on (framework v0.4 — design: `.
 | `core.ts` — `Rules` | The one contract a game fills in: `setup` · `legalActions(state, seat)` · `check` (plain-English no) · `apply → { state, events }` · `isOver` · `toAct` · `viewFor(state, seat)`. Pure: no screen, no network. Same rules on the phone, the server, bots, sims and tests |
 | Events | Every action returns what happened, each event tagged with who may see it (`seen: 'all' \| { seats }`). `eventsFor(events, seat)` = what one seat is sent |
 | Move record | `{ setup, moves: [{ seat, action }] }` + `addMove` + `replay` — replays, bug reports, golden games, AI training data. Not the end screen's summary log |
+| Who played (0.7.0) | Each recorded move may say who played it: `by?: PlayedBy` = `'seat'` (the person) · `'bot-for-seat'` (a bot playing FOR them — idle, out of time, left, away) · `'bot'` (a bot seat from the start). `addMove(record, seat, action, by?)`; `botPlayedFor(record, seat)` → the move numbers a bot played for that person (the end screen's "a bot played these for Blue"). Optional: old records load, `replay` ignores it. Online, rooms' `room.playedBy(seatId)` gives the word |
 | Fast mode | `apply(…, { fast: true })` skips end-screen bookkeeping for bots and sims; the game plays the same |
 | `zones.ts` (0.2.0) | Pieces with stable ids (`stableIds` from the fixed box list, never the shuffle) · zone rules (`inside: all · owner · nobody`, ordered) · `zoneFor` — a seat that may not see inside gets only a count, no ids · `takePiece`, `indexOfPiece`, `idsAreUnique` |
 | `flow.ts` (0.3.0) | Where the game is (`Flow`: level + the seats that may act) · `mayAct`, `seatToAct` · order presets `snakeOrder`, `nextClockwise` (skips seats that can't play) · `TurnSteps` + `nextStep` / `undoStep` (undo goes back through this turn's steps, never past its start) |

@@ -72,12 +72,14 @@ export function partykitConfig(gameDir) {
 // Files the game gets once, then owns: [where in the game, where in templates/ (or a maker)]
 function starterFiles(gameDir) {
   const hasServer = existsSync(join(gameDir, 'party', 'server.ts'))
+  // A game served by PartyServer + wrangler (Cloudflare) has no use for partykit.json (Glyphtender, F62: it kept coming back)
+  const onWrangler = ['wrangler.json', 'wrangler.jsonc', 'wrangler.toml'].some((file) => existsSync(join(gameDir, file)))
   return [
     // The example rules only come with a new server — a game that already has party/server.ts keeps its own
     { to: 'party/server.ts', from: 'party/server.ts', why: 'the online server (builds on src/rooms/server)' },
     { to: 'party/rules.ts', from: 'party/rules.ts', why: 'an EXAMPLE game ("Count to 10") — replace with the real rules', skip: hasServer },
     { to: 'content/rooms.json', from: 'content/rooms.json', why: 'room knobs: seats, idle players, timings' },
-    { to: 'partykit.json', make: () => JSON.stringify(partykitConfig(gameDir), null, 2) + '\n', why: 'server name + local port 1999' },
+    { to: 'partykit.json', make: () => JSON.stringify(partykitConfig(gameDir), null, 2) + '\n', why: 'server name + local port 1999', skip: onWrangler },
   ].filter((file) => !file.skip)
 }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addBot, backToLobby, chooseHost, dropOut, handToBot, joinRoom, kick, newRoom,
-  publicRoom, startPlaying, takeBack, whyNotStart,
+  playedBy, publicRoom, startPlaying, takeBack, watchersTakeBack, whyNotStart,
 } from './seats'
 import type { RoomData } from './seats'
 import { readSettings } from './settings'
@@ -151,6 +151,54 @@ describe('seats: idle players and bots', () => {
     const room = lobby()
     room.seats[0].name = 'The Survivor'
     expect(addBot(room, settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })?.name).toBe('The Survivor 2')
+  })
+})
+
+describe('seats: who plays a seat (playedBy, 0.5.0)', () => {
+  it('the person · idle takeover → a bot for them · takeBack → the person again', () => {
+    const room = lobby()
+    startPlaying(room)
+    expect(playedBy(room.seats[0])).toBe('seat')
+    handToBot(room, 'seat-1') // idle too long, or the turn timer ran out
+    expect(playedBy(room.seats[0])).toBe('bot-for-seat')
+    takeBack(room, 'seat-1')
+    expect(playedBy(room.seats[0])).toBe('seat')
+  })
+
+  it('a bot the host added is a bot from the start — not a bot playing for anyone', () => {
+    const room = lobby()
+    const bot = addBot(room, settings, { profile: 'Survivor/FirstClass', name: 'The Survivor' })!
+    startPlaying(room)
+    expect(playedBy(bot)).toBe('bot')
+    expect(playedBy(addBot(lobby(), settings)!)).toBe('bot') // plain "Bot 1" too
+  })
+
+  it('left / kicked / away too long → a bot playing for them', () => {
+    const room = newRoom('BAKU')
+    joinRoom(room, ann, settings)
+    joinRoom(room, bob, settings)
+    joinRoom(room, cat, settings)
+    startPlaying(room)
+    handToBot(room, 'seat-2') // Bob pressed Leave (RoomServer also drops his connection)
+    room.seats[1].connected = false
+    kick(room, 'seat-3') // the host removed Cat
+    expect(playedBy(room.seats[1])).toBe('bot-for-seat')
+    expect(playedBy(room.seats[2])).toBe('bot-for-seat')
+    const away = lobby()
+    startPlaying(away)
+    dropOut(away, 'seat-2')
+    expect(playedBy(away.seats[1])).toBe('seat') // dropped, waiting: nobody plays for him yet
+    handToBot(away, 'seat-2') // botTakesOverAfterMs ran out
+    expect(playedBy(away.seats[1])).toBe('bot-for-seat')
+  })
+
+  it('at game over an idle-held seat goes back to its person — so ask playedBy when the move is played, not after', () => {
+    const room = lobby()
+    startPlaying(room)
+    handToBot(room, 'seat-1')
+    expect(playedBy(room.seats[0])).toBe('bot-for-seat')
+    watchersTakeBack(room)
+    expect(playedBy(room.seats[0])).toBe('seat')
   })
 })
 

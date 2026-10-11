@@ -36,5 +36,6 @@
   .gallery-hand-piece circle { fill: var(--primary); }
   .gallery-hand-piece text { fill: var(--on-primary); font-family: var(--font-display); text-anchor: middle; }
   .gallery-hand-piece .gallery-hand-ring, .gallery-hand-ring { fill: none; stroke: var(--accent); }
+  .gallery-hand-marker { fill: var(--accent); }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
 }

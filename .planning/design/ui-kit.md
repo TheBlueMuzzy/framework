@@ -54,6 +54,19 @@ Every known, non-niche screen gets a catalog entry. Two kinds, to stay lean:
 
 **Settings** is list-driven: `content/ui/settings.json` lists the rows; the screen draws them. Standard tabs: Audio (master/music/sfx/voice) · Display · Controls · Gameplay (difficulty, speed, tips) · Accessibility (text size, reduce motion/shake, colour-blind, high contrast) · Language · Account/Privacy · About (version, credits, reset progress → confirm). A game switches rows on/off; it never hand-builds a settings screen.
 
+## 4b. Dragging — carry styles + target feedback (v0.7, proven by Glyphtender v0.11, 2026-10-10)
+Three questions per drag type, each a game's pick in its content/tuning (Glyphtender: drag.json, Dev Kit dropdowns):
+- **What you carry** — `kit/drag/carry.ts` presets: A Pick it up (solid · home empty) · B Lift, mark home (solid · faint
+  home) · C Aim (ghost follows · the real piece flies on drop) · D Float (ghost · empty). Every carried piece lifts.
+- **What the target shows** — `kit/drag/target.ts`: highlight · ghost preview · tether (aim line; a game may start it
+  elsewhere — Glyphtender starts a seed's at the casting glyphling) · magnetic snap; a hand: insertion marker · make
+  room · swap places (table `swapInRack`). Show only what the drop will really do.
+- **How it ends** — a legal drop settles / turns solid / flies; a wrong one flies back / fades.
+Rules learned (Muzzy): **the AI moves like a person** — an AI's / rival's piece uses the same style, lift, speed and aim
+line (`carrier.travel`, `travellingLook`); **picking a piece up again = a new decision** (it undoes the last one);
+**straight lines, not arcs**, for pieces that don't jump; **no feedback flicker** — a zone's feedback starts only well
+past its edge and stops only back inside (two edges). Card hands (insertion marker, make room) come next.
+
 ## 5. How it behaves (the passive skill: `game-ui`)
 Kicks in on its own whenever a game needs a screen, panel, button or HUD piece, or when UI looks off or breaks on a phone. `/develop` also calls it by name for any UI task.
 1. **Style chosen?** If the game has no `style.json`: show the gallery in all 5 presets (phone + desktop screenshots) and suggest one with an MDA reason ("Cozy — warm and forgiving, fits the relaxed pillar"). You pick; it's logged in the TDD. *The only time it asks you anything.*
