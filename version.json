@@ -1,6 +1,6 @@
 {
   "name": "Game Framework",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "build": 0,
   "history": [
     {
@@ -42,6 +42,11 @@
       "version": "0.3.0",
       "date": "2026-10-03",
       "summary": "Rooms module (online rooms, harvested from Roll Better); UI kit 0.2.10 (Carousel, ScreenStack, spacing); Dev Kit 0.5.0 (Screen previews, search, sections) — first used by Glyphtender v0.3.0"
+    },
+    {
+      "version": "0.7.0",
+      "date": "2026-10-11",
+      "summary": "UI kit 0.7.0 — cards fit short screens (scroll inside themselves; Pause, Play online and lobby go two-column when short and wide; Settings tabs become a picker), every screen over the base layer dims it; Dev Kit mounts on idle in release builds (proven by Glyphtender v0.8.0)"
     }
   ]
 }
