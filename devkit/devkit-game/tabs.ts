@@ -7,8 +7,8 @@
 //      with Save (saveContentFile) and Copy for Claude (copyText) from '../devkit/saveContent'
 //   2. list it below:  { id: 'table', label: 'Table', Panel: TableTab }
 //
-// Framework tabs a game can list here: aiTab(…) (../devkit/ai/aiTabEntry) and soundTab(getAudio, { file: audioJson })
-// (../devkit/sound/soundTabEntry) — see the Dev Kit README.
+// Framework tabs a game can list here: aiTab(…) (../devkit/ai/aiTabEntry), soundTab(getAudio, { file: audioJson })
+// (../devkit/sound/soundTabEntry) and reviewTab({ id, label, load, save }) (../devkit/review/reviewTabEntry) — see the Dev Kit README.
 //
 // To plug the game into Snapshots + Bug capture: write its adapter in src/devkit-game/ (see ../devkit/devkitGame.ts)
 // and register it here, once:
