@@ -1,6 +1,6 @@
 // Runs in the framework (not copied into games): the Review list tab's thinking.
 import { describe, expect, it } from 'vitest'
-import { applyChanges, countsLine, listChanges, nextStatus, reviewForClaude, searchReview, sortReview, toggleMark } from './reviewLogic'
+import { applyChanges, countsLine, listChanges, nextStatus, pickExtra, reviewForClaude, searchReview, sortReview, toggleMark } from './reviewLogic'
 import type { ReviewItem } from './reviewTypes'
 
 const item = (label: string, status: ReviewItem['status'], detail?: string): ReviewItem => ({ id: label, label, status, detail })
@@ -76,5 +76,26 @@ describe('reviewForClaude', () => {
   })
   it('says so when nothing changed', () => {
     expect(reviewForClaude('G', 'Words', [item('wry', 'no')], {}, false)).toBe('No unsaved Words review changes in the Dev Kit (G).')
+  })
+})
+
+describe('extra marks (B = British, V = vulgar)', () => {
+  const extras = [{ id: 'british', letter: 'B', name: 'British' }, { id: 'vulgar', letter: 'V', name: 'Vulgar' }]
+  it('sort after No, in the order the game gives', () => {
+    const list = [item('a', 'vulgar'), item('b', 'british'), item('c', 'no'), item('d', 'open')]
+    expect(sortReview(list, extras).map((i) => i.label)).toEqual(['d', 'c', 'b', 'a'])
+  })
+  it('a letter marks the row; the same letter again = Open; a row click from a mark = Open', () => {
+    const w = item('maths', 'open')
+    let marks = pickExtra(w, {}, 'british')
+    expect(marks).toEqual({ maths: 'british' })
+    expect(pickExtra(w, marks, 'british')).toEqual({})
+    expect(toggleMark(w, { maths: 'vulgar' })).toEqual({})
+    marks = pickExtra(item('cock', 'yes'), {}, 'vulgar')
+    expect(marks).toEqual({ cock: 'vulgar' })
+  })
+  it('are counted and named', () => {
+    expect(countsLine([item('a', 'british'), item('b', 'open')], { b: 'vulgar' }, extras)).toBe('0 open · 0 yes · 0 no · 1 british · 1 vulgar — 1 unsaved')
+    expect(reviewForClaude('G', 'Words', [item('maths', 'open')], { maths: 'british' }, false, extras)).toContain('- maths: Open → British')
   })
 })

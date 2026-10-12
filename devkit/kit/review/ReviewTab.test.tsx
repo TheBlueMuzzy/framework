@@ -124,4 +124,27 @@ describe('reviewTab — plugged into the Dev Kit', () => {
     expect(rows()).toEqual(['ROOSTER:yes'])
     expect(screen.getByText('1 word found')).toBeTruthy()
   })
+
+  it('extra marks: a letter button marks the row, sorts after No on Save, and pressing it again goes back to Open', async () => {
+    const save = vi.fn(async (_changes: ReviewChange[]) => {})
+    const extras = [{ id: 'british', letter: 'B', name: 'British' }, { id: 'vulgar', letter: 'V', name: 'Vulgar' }]
+    const words = [...WORDS, { id: 'maths', label: 'MATHS', status: 'british' }]
+    render(<ReviewTab label="Words" what="word" load={async () => words.map((w) => ({ ...w }))} save={save} extraMarks={extras} />)
+    await act(async () => {})
+    expect(rows()).toEqual(['THY:open', 'ZYGOTES:open', 'ROOSTER:yes', 'WRY:no', 'MATHS:british'])
+    expect(screen.getByText('2 open · 1 yes · 1 no · 1 british · 0 vulgar')).toBeTruthy()
+    expect(row('MATHS').querySelector('.rv-box')!.textContent).toBe('B')
+    const vOf = (label: string) => screen.getByRole('button', { name: `${label}: mark Vulgar` })
+    fireEvent.click(vOf('THY'))
+    expect(row('THY').dataset.status).toBe('vulgar')
+    expect(screen.getByRole('button', { name: 'THY: Vulgar — press for Open' }).getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: 'THY: Vulgar — press for Open' }))
+    expect(row('THY').dataset.status).toBe('open')
+    fireEvent.click(vOf('ZYGOTES'))
+    fireEvent.click(row('MATHS')) // a row on an extra mark: one click → Open
+    expect(row('MATHS').dataset.status).toBe('open')
+    await act(async () => fireEvent.click(saveButton()))
+    expect(save).toHaveBeenCalledWith([{ id: 'zygotes', status: 'vulgar' }, { id: 'maths', status: 'open' }])
+    expect(rows()).toEqual(['MATHS:open', 'THY:open', 'ROOSTER:yes', 'WRY:no', 'ZYGOTES:vulgar'])
+  })
 })
