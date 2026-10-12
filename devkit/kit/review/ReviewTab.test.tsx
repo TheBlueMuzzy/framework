@@ -20,9 +20,21 @@ const rows = () => [...document.querySelectorAll<HTMLButtonElement>('.rv-row')].
 const row = (label: string) => [...document.querySelectorAll<HTMLButtonElement>('.rv-row')].find((r) => r.querySelector('.rv-label')!.textContent === label)!
 const saveButton = () => screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement
 
+/** A stand-in game that keeps what's saved (like a real one): load() lists it, save() writes the changes into it. */
+function fakeGame(start: ReviewItem[] = WORDS) {
+  let stored = start.map((w) => ({ ...w }))
+  return {
+    load: async () => stored.map((w) => ({ ...w })),
+    save: vi.fn(async (changes: ReviewChange[]) => {
+      stored = stored.map((w) => ({ ...w, status: changes.find((c) => c.id === w.id)?.status ?? w.status }))
+    }),
+  }
+}
+
 async function renderTab(options: { save?: (c: ReviewChange[]) => Promise<void>; load?: () => Promise<ReviewItem[]>; query?: string } = {}) {
-  const load = options.load ?? (async () => WORDS.map((w) => ({ ...w })))
-  const save = options.save ?? vi.fn(async () => {})
+  const game = fakeGame()
+  const load = options.load ?? game.load
+  const save = options.save ?? game.save
   const view = render(<ReviewTab label="Words" what="word" load={load} save={save} query={options.query ?? ''} />)
   await act(async () => {}) // let load() answer
   return { save, view }
@@ -81,6 +93,16 @@ describe('the Review list tab', () => {
     expect(screen.getByText(/Saved 2/)).toBeTruthy()
   })
 
+  it('after a good Save, loads the list again from the game — one that lists only Open rows drops the decided ones', async () => {
+    const game = fakeGame()
+    const openOnly = async () => (await game.load()).filter((w) => w.status === 'open')
+    await renderTab({ load: openOnly, save: game.save })
+    expect(rows()).toEqual(['THY:open', 'ZYGOTES:open'])
+    fireEvent.click(row('THY')) // open → yes
+    await act(async () => { fireEvent.click(saveButton()) })
+    expect(rows()).toEqual(['ZYGOTES:open'])
+  })
+
   it('a failed Save shows why in plain words and keeps the changes', async () => {
     await renderTab({ save: async () => { throw new Error('the dev server is not reachable') } })
     fireEvent.click(row('ZYGOTES'))
@@ -126,10 +148,9 @@ describe('reviewTab — plugged into the Dev Kit', () => {
   })
 
   it('extra marks: the same box cycles No → B → V → Open, shows the letter, and they sort after No on Save', async () => {
-    const save = vi.fn(async (_changes: ReviewChange[]) => {})
     const extras = [{ id: 'british', letter: 'B', name: 'British' }, { id: 'vulgar', letter: 'V', name: 'Vulgar' }]
-    const words = [...WORDS, { id: 'maths', label: 'MATHS', status: 'british' }]
-    render(<ReviewTab label="Words" what="word" load={async () => words.map((w) => ({ ...w }))} save={save} extraMarks={extras} />)
+    const { load, save } = fakeGame([...WORDS, { id: 'maths', label: 'MATHS', status: 'british' }])
+    render(<ReviewTab label="Words" what="word" load={load} save={save} extraMarks={extras} />)
     await act(async () => {})
     expect(rows()).toEqual(['THY:open', 'ZYGOTES:open', 'ROOSTER:yes', 'WRY:no', 'MATHS:british'])
     expect(screen.getByText('2 open · 1 yes · 1 no · 1 british · 0 vulgar')).toBeTruthy()
