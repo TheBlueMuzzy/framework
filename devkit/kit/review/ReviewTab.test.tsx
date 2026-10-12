@@ -125,7 +125,7 @@ describe('reviewTab — plugged into the Dev Kit', () => {
     expect(screen.getByText('1 word found')).toBeTruthy()
   })
 
-  it('extra marks: a letter button marks the row, sorts after No on Save, and pressing it again goes back to Open', async () => {
+  it('extra marks: the same box cycles No → B → V → Open, shows the letter, and they sort after No on Save', async () => {
     const save = vi.fn(async (_changes: ReviewChange[]) => {})
     const extras = [{ id: 'british', letter: 'B', name: 'British' }, { id: 'vulgar', letter: 'V', name: 'Vulgar' }]
     const words = [...WORDS, { id: 'maths', label: 'MATHS', status: 'british' }]
@@ -134,14 +134,17 @@ describe('reviewTab — plugged into the Dev Kit', () => {
     expect(rows()).toEqual(['THY:open', 'ZYGOTES:open', 'ROOSTER:yes', 'WRY:no', 'MATHS:british'])
     expect(screen.getByText('2 open · 1 yes · 1 no · 1 british · 0 vulgar')).toBeTruthy()
     expect(row('MATHS').querySelector('.rv-box')!.textContent).toBe('B')
-    const vOf = (label: string) => screen.getByRole('button', { name: `${label}: mark Vulgar` })
-    fireEvent.click(vOf('THY'))
-    expect(row('THY').dataset.status).toBe('vulgar')
-    expect(screen.getByRole('button', { name: 'THY: Vulgar — press for Open' }).getAttribute('aria-pressed')).toBe('true')
-    fireEvent.click(screen.getByRole('button', { name: 'THY: Vulgar — press for Open' }))
-    expect(row('THY').dataset.status).toBe('open')
-    fireEvent.click(vOf('ZYGOTES'))
-    fireEvent.click(row('MATHS')) // a row on an extra mark: one click → Open
+    const seen: string[] = []
+    for (let i = 0; i < 5; i++) {
+      fireEvent.click(row('THY'))
+      seen.push(`${row('THY').dataset.status}:${row('THY').querySelector('.rv-box')!.textContent}`)
+    }
+    expect(seen).toEqual(['yes:✓', 'no:✗', 'british:B', 'vulgar:V', 'open:'])
+    expect(document.querySelectorAll('.rv-list button:not(.rv-row)')).toHaveLength(0) // no extra buttons
+    for (let i = 0; i < 4; i++) fireEvent.click(row('ZYGOTES')) // → vulgar
+    expect(row('ZYGOTES').getAttribute('aria-label')).toMatch(/^ZYGOTES: Vulgar \(click for Open\)/)
+    fireEvent.click(row('MATHS')) // British → Vulgar → Open
+    fireEvent.click(row('MATHS'))
     expect(row('MATHS').dataset.status).toBe('open')
     await act(async () => fireEvent.click(saveButton()))
     expect(save).toHaveBeenCalledWith([{ id: 'zygotes', status: 'vulgar' }, { id: 'maths', status: 'open' }])
