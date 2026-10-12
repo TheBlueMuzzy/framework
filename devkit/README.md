@@ -173,6 +173,7 @@ The tab also calls `audio.setConfig` itself. Its Panel takes the Dev Kit's searc
 Adding files needs ffmpeg on the computer (Windows: `winget install Gyan.FFmpeg`, Mac: `brew install ffmpeg`).
 
 ## The Review list tab (mark items Open / Yes / No)
+**Adding any game tab:** check the desktop tab row still fits every tab (the panel is 480 px — 8 tabs ≈ 460 px, 0.11.1); past that the row turns into a carousel and tests that click a tab by name stop finding it (Glyphtender e2e:margins / e2e:devkit-ai, sprint 25). A game endpoint that writes files or uses a secret: accept only the game's own page (Origin = Host, JSON only), like the Save endpoint.
 For any list a person reviews by hand — Glyphtender's player-submitted words first. The Dev Kit never reads the game's files:
 the game hands over `load` and `save` (`kit/review/reviewTypes.ts`).
 ```ts
