@@ -7,8 +7,8 @@
 //      Not the tests: they run here, in the framework. Adds a VERSION file (module version + framework commit).
 //      Files the module no longer ships are removed — only ever inside src/rooms/.
 //   2. creates the game's own starting files — only if missing, never overwrites:
-//      party/server.ts + party/rules.ts (an example game to replace), content/rooms.json (the knobs),
-//      partykit.json (the server's name + port)
+//      party/server.ts + party/rules.ts (an example game to replace), party/worker.ts (Cloudflare's front door,
+//      PartyServer), content/rooms.json (the knobs), wrangler.json (the server's name, room storage, local port)
 //   3. prints the wiring the game still needs (packages, npm scripts, VITE_PARTY_HOST…) — only the missing bits
 // On an update it first lists which files changed, were added or were removed.
 import { execSync } from 'node:child_process'
@@ -56,7 +56,7 @@ function kitVersion() {
   return { version, commit }
 }
 
-// The game's name for PartyKit (partykit.json "name" → <name>.<user>.partykit.dev)
+// The game's name for Cloudflare (wrangler.json "name" → <name>.joebrogno.workers.dev)
 function gameName(gameDir) {
   try {
     const name = JSON.parse(readText(join(gameDir, 'package.json'))).name
@@ -65,21 +65,33 @@ function gameName(gameDir) {
   return gameDir.split(/[\\/]/).filter(Boolean).at(-1).toLowerCase().replace(/[^a-z0-9-]/g, '-')
 }
 
-export function partykitConfig(gameDir) {
-  return { name: gameName(gameDir), main: 'party/server.ts', compatibilityDate: '2024-12-01', port: PARTY_PORT }
+// PartyServer on Muzzy's own Cloudflare (Glyphtender's proven setup): one room = one Durable Object of class "Main"
+// (SQLite-backed: the free plan's kind) → /parties/main/<code>, PartySocket's default address.
+export function wranglerConfig(gameDir) {
+  return {
+    name: gameName(gameDir),
+    main: 'party/worker.ts',
+    compatibility_date: '2026-09-01',
+    durable_objects: { bindings: [{ name: 'Main', class_name: 'Main' }] },
+    migrations: [{ tag: 'v1', new_sqlite_classes: ['Main'] }],
+    observability: { enabled: true },
+    dev: { port: PARTY_PORT, ip: '0.0.0.0' },
+  }
 }
+
+const WRANGLER_FILES = ['wrangler.json', 'wrangler.jsonc', 'wrangler.toml']
 
 // Files the game gets once, then owns: [where in the game, where in templates/ (or a maker)]
 function starterFiles(gameDir) {
   const hasServer = existsSync(join(gameDir, 'party', 'server.ts'))
-  // A game served by PartyServer + wrangler (Cloudflare) has no use for partykit.json (Glyphtender, F62: it kept coming back)
-  const onWrangler = ['wrangler.json', 'wrangler.jsonc', 'wrangler.toml'].some((file) => existsSync(join(gameDir, file)))
+  const hasWrangler = WRANGLER_FILES.some((file) => existsSync(join(gameDir, file)))
   return [
     // The example rules only come with a new server — a game that already has party/server.ts keeps its own
     { to: 'party/server.ts', from: 'party/server.ts', why: 'the online server (builds on src/rooms/server)' },
     { to: 'party/rules.ts', from: 'party/rules.ts', why: 'an EXAMPLE game ("Count to 10") — replace with the real rules', skip: hasServer },
+    { to: 'party/worker.ts', from: 'party/worker.ts', why: "Cloudflare's front door (PartyServer): hands each room to party/server.ts" },
     { to: 'content/rooms.json', from: 'content/rooms.json', why: 'room knobs: seats, idle players, timings' },
-    { to: 'partykit.json', make: () => JSON.stringify(partykitConfig(gameDir), null, 2) + '\n', why: 'server name + local port 1999', skip: onWrangler },
+    { to: 'wrangler.json', make: () => JSON.stringify(wranglerConfig(gameDir), null, 2) + '\n', why: 'server name, room storage, local port 1999', skip: hasWrangler },
   ].filter((file) => !file.skip)
 }
 
@@ -93,19 +105,26 @@ export function wiringSteps(gameDir) {
   const envFiles = ['.env', '.env.local', '.env.development', '.env.development.local']
   const localHostInEnv = envFiles.find((file) => /^\s*VITE_PARTY_HOST\s*=\s*(localhost|127\.0\.0\.1)/m.test(text(file)))
   const name = gameName(gameDir)
+  const onPartyKit = existsSync(join(gameDir, 'partykit.json')) || Boolean(deps.partykit)
 
   return [
     {
-      done: Boolean(pkg.dependencies?.partysocket) && Boolean(deps.partykit),
-      step: 'Packages: npm install partysocket   then   npm install -D partykit',
+      // PartyKit's hosted platform shut down on 23 Oct 2026 — every game runs on PartyServer + wrangler now
+      done: !onPartyKit,
+      step: `Move off PartyKit (its hosted platform shut down on 23 Oct 2026): delete partykit.json, run   npm uninstall partykit
+       — party/worker.ts + wrangler.json (made above) take over. Rooms live in memory, so there's no room data to copy.`,
     },
     {
-      done: scripts['party:dev'] === 'partykit dev' && scripts['party:deploy'] === 'partykit deploy',
-      step: 'package.json "scripts": "party:dev": "partykit dev", "party:deploy": "partykit deploy"',
+      done: Boolean(pkg.dependencies?.partysocket) && Boolean(pkg.dependencies?.partyserver) && Boolean(deps.wrangler),
+      step: 'Packages: npm install partysocket partyserver   then   npm install -D wrangler',
     },
     {
-      done: /(^|\n)\s*\/?\.partykit\/?\s*(\n|$)/.test(text('.gitignore')),
-      step: '.gitignore: add the line   .partykit/   (PartyKit\'s local dev state)',
+      done: /^wrangler dev\b/.test(scripts['party:dev'] ?? '') && /^wrangler deploy\b/.test(scripts['party:deploy'] ?? ''),
+      step: 'package.json "scripts": "party:dev": "wrangler dev", "party:deploy": "wrangler deploy"',
+    },
+    {
+      done: /(^|\n)\s*\/?\.wrangler\/?\s*(\n|$)/.test(text('.gitignore')),
+      step: '.gitignore: add the line   .wrangler/   (wrangler\'s local dev state)',
     },
     {
       done: !localHostInEnv,
@@ -123,8 +142,9 @@ export function wiringSteps(gameDir) {
     },
     {
       done: false,
-      step: `Going live (Muzzy's call — public): npm run party:deploy → wss://${name}.<your-partykit-user>.partykit.dev,
-       then build the game with VITE_PARTY_HOST=${name}.<your-partykit-user>.partykit.dev (GitHub Actions: env on the build step).
+      step: `Going live (Muzzy's call — public): once per machine   npx wrangler login   (Muzzy's Cloudflare), then
+       npm run party:deploy → wss://${name}.joebrogno.workers.dev,
+       then build the game with VITE_PARTY_HOST=${name}.joebrogno.workers.dev (GitHub Actions: env on the build step).
        A front-end release does NOT update the server — deploy the server again whenever party/ or src/rooms/server/ changes.`,
     },
   ])

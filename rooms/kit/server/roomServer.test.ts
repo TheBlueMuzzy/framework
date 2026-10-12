@@ -1,4 +1,4 @@
-// RoomServer with a fake PartyKit and a tiny game ("Count to 10"): players take turns adding 1–3
+// RoomServer with a fake host (PartyServer) and a tiny game ("Count to 10"): players take turns adding 1–3
 // to a shared total; each player also holds a SECRET number only they may see.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Seat, ServerMessage } from '../protocol'
@@ -7,7 +7,7 @@ import type { GameRules, RoomTools, SeatChange } from './gameRules'
 import { RoomServer } from './roomServer'
 import type { PartyConnection, PartyRoom } from './roomServer'
 
-// ─── A fake PartyKit ────────────────────────────────────────────────
+// ─── A fake host ────────────────────────────────────────────────────
 
 class FakeParty implements PartyRoom {
   id: string

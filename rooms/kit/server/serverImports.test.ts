@@ -1,4 +1,4 @@
-// The server runs on PartyKit (Cloudflare), not in a browser: it can't use React, the Dev Kit,
+// The server runs on PartyServer (Cloudflare Workers), not in a browser: it can't use React, the Dev Kit,
 // browser storage or Vite's import.meta.env — and everything it imports is bundled into the server
 // (which has a size limit). This test keeps the server files and what they share with the game clean.
 import { readFileSync, readdirSync } from 'node:fs'

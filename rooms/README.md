@@ -1,6 +1,6 @@
 # Rooms
 
-Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.5.0** (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
+Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare — Workers free plan): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.6.0** — 0.6.0 (2026-10-12): the server runs on PartyServer + wrangler (Glyphtender's proven setup) — the installer makes `party/worker.ts` + `wrangler.json`, `server/liveConnections.ts` is in the kit, no more `partykit.json` (PartyKit's hosted platform shut down on 23 Oct 2026). (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
 
 ## What a game gets
 | Part | Does |
@@ -9,11 +9,12 @@ Online rooms for a web game (React + Vite, PartyKit on Cloudflare): make a room,
 | Identity (`identity.ts`) | `persistentId` (localStorage) = the player, owns their seat · `tabId` (sessionStorage) = this tab's connection · the player's name, remembered. Works in private windows too |
 | `useRoom(roomCode, { name, create })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`, `idleWarning` (`{ endsAt }` while your screen should show the idle bar, else null), `botPlaysForMe` (a bot holds your seat because you went idle), `active()` ("I'm here" — call it on any tap/key while it matters; throttled to one ping per 5 s, at once while warned or bot-held; 0.4.0). Reconnects by itself; StrictMode-safe |
 | Protocol (`protocol.ts`) | Every message, typed, shared by game and server. The server checks every field of every message (junk and huge messages are refused) |
+| Live connections (`server/liveConnections.ts`) | The server's own list of live sockets, one per connection id — a phone's late old-socket close never drops its new one (PartyServer's own list does). `party/worker.ts` uses it |
 | Server base (`server/roomServer.ts`) | A class the game's `party/server.ts` extends: seats, host, join, rejoin, second-tab takeover, host migration, idle players → warning → bot (and back with a tap), kick, rematch, empty-room clean-up. Sends each player **only their own view** |
 | Seat rules (`server/seats.ts`) | The rules above as plain functions (tested on their own) |
 | Timers table (`server/timers.ts`) | Every server timer by name: replace, stop, stop all, time left. A crashing timer is logged, not fatal |
 | Checks (`server/checks.ts`) | `mustBeObject`, `mustBeOneOf`, `mustBeWholeNumber`, `mustBeText`, `mustBeList`, `mustBeListWithoutRepeats`, `mustBeTrueOrFalse`, `nullOr` — for the game's `checkAction` |
-| Installer | `party/server.ts`, an example `party/rules.ts` ("Count to 10"), `content/rooms.json`, `partykit.json` — made once |
+| Installer | `party/server.ts`, an example `party/rules.ts` ("Count to 10"), `party/worker.ts` (Cloudflare's front door), `content/rooms.json`, `wrangler.json` — made once |
 
 **Stays in the game:** its rules (usually its own rules engine, shared with the phone), what each player sees (`viewFor`), the turn clock (it tells the room whose move it waits for: `room.onTheClock`), bots' moves, the screens (the UI kit has Lobby / join screens). Roll Better's dice-specific parts (rolling, locking, unlock backstops, seat picker for mid-game joiners) stay in Roll Better.
 
@@ -43,6 +44,7 @@ export default class GameServer extends RoomServer<State, Options, Action, View,
   }
 }
 ```
+`party/worker.ts` (also made by the installer) is the front door Cloudflare runs: a PartyServer class `Main` (one per room code, at `/parties/main/<code>` — PartySocket's default) that keeps a `LiveConnections` list and hands each room to `GameServer` as `{ id, getConnection }`. A game rarely edits it (Glyphtender added its own routes there).
 
 ### The game's rules — `party/rules.ts` (the plug-in API, `src/rooms/server/gameRules.ts`)
 ```ts
@@ -93,25 +95,27 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 ## Install or update
 From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run` first to see what would change).
 - `kit/` → the game's `src/rooms/` (with `server/` inside) + a `VERSION` stamp. Tests stay here. Files the module dropped are removed, only inside `src/rooms/`.
-- Makes once, never overwrites: `party/server.ts`, `party/rules.ts` (example — only when there's no `party/server.ts` yet), `content/rooms.json`, `partykit.json` (`{ "name": <package.json name>, "main": "party/server.ts", "compatibilityDate": "2024-12-01", "port": 1999 }`).
+- Makes once, never overwrites: `party/server.ts`, `party/rules.ts` (example — only when there's no `party/server.ts` yet), `party/worker.ts`, `content/rooms.json`, `wrangler.json` (name from package.json, `main: party/worker.ts`, the `Main` Durable Object + its SQLite migration `v1`, `dev: { port: 1999, ip: 0.0.0.0 }` — skipped if the game already has a wrangler file).
 - Prints only the wiring the game is missing:
-  1. `npm install partysocket` then `npm install -D partykit`
-  2. `package.json` scripts: `"party:dev": "partykit dev"`, `"party:deploy": "partykit deploy"`
-  3. `.gitignore`: `.partykit/`
-  4. `.env`: no `VITE_PARTY_HOST=localhost…` (unset for local dev — `roomClient.ts` uses the page's own address, port 1999, so a phone on the Wi-Fi reaches the PC's server; `partykit dev` listens on every address)
+  0. Still on PartyKit (`partykit.json` or the `partykit` package)? → delete `partykit.json`, `npm uninstall partykit` (rooms live in memory: nothing to copy)
+  1. `npm install partysocket partyserver` then `npm install -D wrangler`
+  2. `package.json` scripts: `"party:dev": "wrangler dev"`, `"party:deploy": "wrangler deploy"`
+  3. `.gitignore`: `.wrangler/`
+  4. `.env`: no `VITE_PARTY_HOST=localhost…` (unset for local dev — `roomClient.ts` uses the page's own address, port 1999, so a phone on the Wi-Fi reaches the PC's server; `wrangler dev` listens on every address via `dev.ip`)
   5. `tsconfig.app.json`: add `"party"` to `"include"` (so `npm run build` type-checks the server)
 - Run: `npm run party:dev` + `npm run dev` (phone: `npx vite --host`, open the Network link).
-- **Going live is Muzzy's call (public):** `npm run party:deploy` → `<name>.thebluemuzzy.partykit.dev` (Roll Better's account), then build the game with `VITE_PARTY_HOST=<name>.thebluemuzzy.partykit.dev` (GitHub Actions: `env:` on the build step). A front-end release does NOT update the server — deploy it again whenever `party/` or `src/rooms/server/` changes.
+- **Going live is Muzzy's call (public):** once per machine `npx wrangler login` (Muzzy's Cloudflare account), then `npm run party:deploy` → `<name>.joebrogno.workers.dev`, then build the game with `VITE_PARTY_HOST=<name>.joebrogno.workers.dev` (GitHub Actions: `env:` on the build step). A front-end release does NOT update the server — deploy it again (before the site) whenever `party/` or `src/rooms/server/` changes.
 
 ## Decisions
+- **2026-10-12 — PartyServer on Muzzy's own Cloudflare is the only host.** PartyKit's hosted platform (`*.partykit.dev`, `partykit deploy`) shut down on 23 Oct 2026 (deploys off 16 Oct). Glyphtender had already moved (its D46, 2026-09-30: PartyKit's shared zone was full) and proved the setup; Roll Better followed. The kit never imported PartyKit, so only the front door changed: `party/worker.ts` + `wrangler.json` instead of `partykit.json`. Free (Workers free plan, SQLite Durable Objects), local dev = live (`wrangler dev`), and the client didn't change (PartySocket's default `/parties/main/<code>`).
 - **The server base lives in the kit (`src/rooms/server/`), and `party/server.ts` imports it** — one copy target, and the game's own `tsc` checks it. Roll Better already imports `../src/...` from `party/`. The server files may only import each other + `protocol.ts` + `roomCodes.ts` (a test enforces it: no React, no Dev Kit, no browser storage, no `import.meta.env`), which also keeps the server bundle small.
-- **No PartyKit import in the kit.** `RoomServer` takes the few bits it uses (`id`, `getConnection`, `send`, `close`) as tiny interfaces; PartyKit's objects fit them. Tests use fakes, so every seat/host/rejoin rule is tested without a live server — and it was also smoke-tested against a real `partykit dev` (14/14, incl. reconnect, second tab, leave, wrong code, a LAN address).
+- **No host import in the kit.** `RoomServer` takes the few bits it uses (`id`, `getConnection`, `send`, `close`) as tiny interfaces; PartyServer's connections fit them (and PartyKit's did, which is why moving hosts was one small file). Tests use fakes, so every seat/host/rejoin rule is tested without a live server — and it was also smoke-tested against a real local server (14/14, incl. reconnect, second tab, leave, wrong code, a LAN address; Glyphtender's `e2e:online` runs two browsers against `wrangler dev`).
 - **Game state on the server, views sent automatically.** The game returns new state; the base sends each player `viewFor(state, seat)`. Per-player secrecy is the default, not an extra step (Roll Better sent everything to everyone; Glyphtender must not).
 - **`persistentId` is never sent to players** (Roll Better's `RoomPlayer` included it). It owns the seat, so anyone who saw it could take that seat and see that hand. Players get a stable `seat.id` and a `you` field instead.
 - **Rejoin always gives the seat back — even from a bot** (Roll Better refused a player whose seat had gone to a bot). A player still connected takes it back by making a move. Simpler rule, and friends who drop out aren't locked out.
 - **"Join" is sent on every socket open** (first and every reconnect); the server decides join vs rejoin by `persistentId`. No separate `connected` / `rejoin` handshake. `create: true` only on the first join: a new code already in use → `code_taken`; joining an empty code → `no_room` (Roll Better guessed "not found" on the phone).
 - **`closed` vs `error`:** `closed` = you're out, stop reconnecting (useRoom closes the socket); `error` = that request didn't happen, you're still in.
-- **Late closes are ignored.** A reconnecting tab can open its new socket before the old one's close arrives (same tab id); the seat keeps the newest connection, matched by object and then by id + `getConnection`. Don't turn on PartyKit's `hibernate` option (it would recreate connection objects and wipe in-memory rooms).
+- **Late closes are ignored.** A reconnecting tab can open its new socket before the old one's close arrives (same tab id); the seat keeps the newest connection, matched by object and then by id + `getConnection`. Don't turn on PartyServer's `hibernate` option (it would recreate connection objects and wipe in-memory rooms).
 - **Room codes: 4-letter consonant–vowel** (Glyphtender's original wished for word-based codes). Two short words would be friendlier still but need a curated word list and are slower to type on a phone; CVCV reads like a word, is quick to say, and the letters that get misheard are gone. If a game wants real words later, `makeRoomCode`/`isRoomCode` are the only places to change (server and client share them).
 - **An action that changes nothing answers only its sender.** If `onAction` returns the very same state object (e.g. "send me my view again"), only the sender gets their view — otherwise one player could make the server message everyone on demand.
 - **One connection = one seat, and a flood limit** (`maxMessagesPerSecond`, 10): never trust a raw WebSocket to behave like `useRoom`.
@@ -124,7 +128,7 @@ From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run
 - Rooms live in memory: if Cloudflare restarts the room, it's gone (same as Roll Better). Fine for a party game.
 - A *duplicated* browser tab copies sessionStorage, so both tabs share a tab id; the server keeps whichever joined last.
 - No spectators and no joining a game in progress (Roll Better's seat picker for mid-game joiners stays in Roll Better until a second game needs it).
-- The free PartyKit tier counts every message (~100k/day) — fine for turn-based games.
+- The Cloudflare Workers free plan has daily limits (100k requests; Durable Object time and messages are counted too) — fine for turn-based games. An empty in-memory room is evicted after ~1–2 min, so `keepEmptyRoomMs` is an upper bound, not a promise.
 
 ## Develop
-`npm install`, then `npm test` (room codes, identity, protocol checks, seats/host/rejoin rules, the idle clock (warn, takeover, tap back, turn timer), timers, checks, RoomServer with a fake PartyKit and a tiny game incl. private views, server-import guard, useRoom with a fake socket incl. StrictMode, installer incl. "a fresh install type-checks") and `npm run typecheck`.
+`npm install`, then `npm test` (room codes, identity, protocol checks, seats/host/rejoin rules, the idle clock (warn, takeover, tap back, turn timer), timers, checks, RoomServer with a fake host and a tiny game, live connections (late close) incl. private views, server-import guard, useRoom with a fake socket incl. StrictMode, installer incl. "a fresh install type-checks") and `npm run typecheck`.
