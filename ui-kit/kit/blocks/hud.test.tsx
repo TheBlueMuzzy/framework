@@ -129,4 +129,9 @@ describe('Pause', () => {
     expect(order.indexOf('caption')).toBeGreaterThan(order.indexOf('title'))
     expect(order.indexOf('caption')).toBeLessThan(order.findIndex((name) => name.includes('kit-menu')))
   })
+
+  it('its box wears kit-pause (its side-by-side layout on a phone on its side, blocks.css — 0.7.0)', () => {
+    render(<Pause onQuit={() => {}} />)
+    expect(document.querySelector('.kit-modal')!.classList.contains('kit-pause')).toBe(true)
+  })
 })
