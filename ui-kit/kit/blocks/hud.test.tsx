@@ -130,6 +130,17 @@ describe('Pause', () => {
     expect(order.indexOf('caption')).toBeLessThan(order.findIndex((name) => name.includes('kit-menu')))
   })
 
+  it('items: the game’s own rows sit after How to play and before Quit; a disabled one stays visible but can’t be pressed (0.8.0)', () => {
+    let pressed = 0
+    render(<Pause onHowToPlay={() => {}} onQuit={() => {}} items={[{ label: 'Submit a word', onClick: () => pressed++ }, { label: 'Later', onClick: () => pressed++, disabled: true }]} />)
+    const labels = [...document.querySelectorAll('.kit-menu button')].map((b) => b.textContent)
+    expect(labels).toEqual(['Resume', 'How to play', 'Submit a word', 'Later', 'Quit'])
+    screen.getByText('Submit a word').closest('button')!.click()
+    screen.getByText('Later').closest('button')!.click()
+    expect(pressed).toBe(1)
+    expect(screen.getByText('Later').closest('button')!.disabled).toBe(true)
+  })
+
   it('its box wears kit-pause (its side-by-side layout on a phone on its side, blocks.css — 0.7.0)', () => {
     render(<Pause onQuit={() => {}} />)
     expect(document.querySelector('.kit-modal')!.classList.contains('kit-pause')).toBe(true)
