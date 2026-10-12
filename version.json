@@ -1,6 +1,6 @@
 {
   "name": "Game Framework",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "build": 0,
   "history": [
     {
@@ -47,6 +47,11 @@
       "version": "0.7.0",
       "date": "2026-10-11",
       "summary": "UI kit 0.7.0 — cards fit short screens (scroll inside themselves; Pause, Play online and lobby go two-column when short and wide; Settings tabs become a picker), every screen over the base layer dims it; Dev Kit mounts on idle in release builds (proven by Glyphtender v0.8.0)"
+    },
+    {
+      "version": "0.8.0",
+      "date": "2026-10-12",
+      "summary": "UI kit 0.8.0: Pause takes extra rows (items). Dev Kit 0.12.3: the review list tab (Open / Yes / No, a game's own extra marks in one cycling box, search, reload after Save) — Glyphtender's Words tab"
     }
   ]
 }
