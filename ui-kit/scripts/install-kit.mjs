@@ -124,7 +124,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   const makeStyle = !existsSync(stylePath)
   const makeSettings = !existsSync(settingsPath)
   log(makeStyle ? `  create   content/ui/style.json (style: ${preset})` : '  keep     content/ui/style.json (the game\'s own)')
-  log(makeSettings ? '  create   content/ui/settings.json (every standard row; switch rows off with "on": false)' : '  keep     content/ui/settings.json (the game\'s own)')
+  log(makeSettings ? '  create   content/ui/settings.json (every standard row, but only the ones the kit wires itself are on — switch a row on when the game reads it)' : '  keep     content/ui/settings.json (the game\'s own)')
 
   // 3. Font credits
   const creditsPath = join(gameDir, 'content', 'credits.json')
@@ -148,7 +148,8 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   for (const f of sourceFiles) copyFile(join(kitDir, f), join(target, f))
   writeText(join(target, 'VERSION'), `${version}\ncommit ${commit}\n`)
   if (makeStyle) writeText(stylePath, JSON.stringify({ preset, tweaks: {} }, null, 2) + '\n')
-  if (makeSettings) copyFile(join(kitDir, 'blocks', 'settings.default.json'), settingsPath)
+  if (makeSettings) writeText(settingsPath, JSON.stringify(starterSettings(JSON.parse(readText(join(kitDir, 'blocks', 'settings.default.json')))), null, 2) + '
+')
   if (creditsReadable && (merged.added.length || merged.removed.length)) {
     writeText(creditsPath, JSON.stringify(merged.credits, null, 2) + '\n')
   }
@@ -197,6 +198,15 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
 }
 
 // Run from the command line
+/** The rows the kit makes work on its own (applyAccessibility: text size + reduce motion; the version info row). */
+export const KIT_WIRED_ROWS = ['textSize', 'reduceMotion', 'version']
+
+/** A new game's settings.json: every standard row, but only the kit-wired ones on. A row that's on and read by nothing
+ *  is a fake setting players can flip (Glyphtender shipped 12 — Graphics quality, Vibration, Tips, Reset progress…). */
+export function starterSettings(schema) {
+  return { ...schema, tabs: schema.tabs.map((tab) => ({ ...tab, rows: tab.rows.map((row) => (KIT_WIRED_ROWS.includes(row.id) ? row : { ...row, on: false })) })) }
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = process.argv.slice(2)
   const [gameDir, preset] = args.filter((a) => !a.startsWith('--'))
