@@ -62,9 +62,9 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Screen | Export | Link | What it's for |
 |---|---|---|---|
 | **Front end** | | | |
-| Main menu | `MainMenu` | `?screen=menu` | Title + big buttons. `items={[{ label: 'Play', onClick: play }, { label: 'Play online', onClick: online }]}` = your own order (first = primary, or mark `primary: true`). Phone on its side: title on the left, buttons on the right (6+ buttons: two columns, main one and `children` across both). Or the named `onContinue` / `onPlay` / `onSettings` / `onHowToPlay` / `onCredits` / `onQuit` (fixed order; ignored when `items` is given). `children` = extra buttons below |
+| Main menu | `MainMenu` | `?screen=menu` | Title + big buttons. `items={[{ label: 'Play', onClick: play }, { label: 'Play online', onClick: online }]}` = your own order (first = primary, or mark `primary: true`). Phone on its side: title on the left, buttons on the right (6+ buttons: two columns, main one and `children` across both). Or the named `onContinue` / `onPlay` / `onSettings` / `onHowToPlay` / `onCredits` / `onQuit` (fixed order; ignored when `items` is given). `children` = extra buttons below. An item with `locked: true` looks disabled but still calls `onClick`, so the game can say why (0.9.0) |
 | Mode select | `ModeSelect` | `?screen=modes` | A card per mode, then Start |
-| How to play | `HowToPlay` | `?screen=howto` | Pages to flip, with page dots |
+| How to play | `HowToPlay` | `?screen=howto` | Pages to flip, with page dots. `onSkip` = a Skip button on every page but the last (a first-game overview, 0.9.0) |
 | Credits | `Credits` | `?screen=credits` | People, then every asset from `content/credits.json` |
 | Settings | `Settings` | `?screen=settings` | Tabs + rows from `content/ui/settings.json` — never hand-built. Standard Audio tab (0.4.1): Master volume 80 · Music 50 · Ambience 60 · Sound effects 80 · Menus & buttons 70 · Sound (on/off; 0.4.4 — was "Mute everything": an old save with it on comes out as Sound off) · Mute when in the background · Mono audio — the same ids the audio module reads (`useAudioSettings`) · Tabs become the ◀ tab ▶ picker on phones AND short screens (30rem tall or less, 0.7.0); on a desktop its tall card grows to 52rem (0.7.0) |
 | **In game** | | | |
