@@ -42,9 +42,22 @@ describe('placeCallout', () => {
     expect(spot.x + size.width).toBeLessThanOrEqual(frame.right)
     expect(spot.x).toBeGreaterThanOrEqual(frame.left)
     expect(spot.x + spot.tipX).toBe(350)
-    const farCorner = { left: 360, top: 400, right: 374, bottom: 410 }
-    const pushed = placeCallout(farCorner, size, frame, 12, 'top', 20)
-    expect(pushed.tipX).toBeLessThanOrEqual(size.width - 20) // clamped clear of the rounded corner
+    // Right at the frame's edge the pointer can't aim straight from above (it would round the corner): it goes beside it
+    const farRight = { left: 360, top: 400, right: 374, bottom: 410 }
+    const beside = placeCallout(farRight, size, frame, 12, 'top', 20)
+    expect(beside.side).toBe('left')
+    expect(beside.y + beside.tipY).toBe(405)
+    // …and where no side can aim straight, the pointer stays clear of the rounded corner
+    const tight = placeCallout(farRight, { width: 358, height: 80 }, frame, 12, 'top', 20)
+    expect(tight.side).toBe('top')
+    expect(tight.tipX).toBeLessThanOrEqual(358 - 20)
+  })
+
+  it('skips a side where the pointer could not aim straight (target in a corner)', () => {
+    const bottomLeft = { left: 16, top: 784, right: 110, bottom: 828 } // centre 22 px above the frame's bottom
+    const spot = placeCallout(bottomLeft, size, frame, 12, 'right', 39)
+    expect(spot.side).toBe('top')
+    expect(spot.x + spot.tipX).toBe(63)
   })
 
   it('a point target works (no size) and auto prefers above', () => {

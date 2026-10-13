@@ -25,9 +25,16 @@ export function placeCallout(target: Box, size: Size, frame: Box, distance: numb
     if (side === 'left') return target.left - frame.left - distance - size.width
     return frame.right - target.right - distance - size.width
   }
-  // The first side it fits on; when none fits, the side with the most room (it may then have to overlap)
-  const side = order.find((s) => spare(s) >= 0) ?? order.reduce((best, s) => (spare(s) > spare(best) ? s : best))
   const centreX = (target.left + target.right) / 2, centreY = (target.top + target.bottom) / 2
+  // Can the pointer reach straight at the target's middle from this side? (Not when the target sits so close to a
+  // frame edge that the pointer would have to go round the bubble's corner.)
+  const aims = (side: CalloutSide) => side === 'top' || side === 'bottom'
+    ? centreX >= frame.left + tipInset && centreX <= frame.right - tipInset
+    : centreY >= frame.top + tipInset && centreY <= frame.bottom - tipInset
+  // The first side it fits on with the pointer aimed straight; then the first it fits on at all; when none fits,
+  // the side with the most room (it may then have to overlap)
+  const side = order.find((s) => spare(s) >= 0 && aims(s)) ?? order.find((s) => spare(s) >= 0)
+    ?? order.reduce((best, s) => (spare(s) > spare(best) ? s : best))
   const fitX = (x: number) => clamp(x, frame.left, frame.right - size.width)
   const fitY = (y: number) => clamp(y, frame.top, frame.bottom - size.height)
   let x: number, y: number

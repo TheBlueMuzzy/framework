@@ -55,8 +55,11 @@ export function Callout({ target, text, title, action, placement = 'auto', onDis
   }, [])
 
   // A pause (dim + a button) takes the focus, so keys and screen readers land on it
+  // (a frame later: a screen opening in the same moment moves the focus into itself first)
   useEffect(() => {
-    if (dim && action) bubble.current?.querySelector('button')?.focus({ preventScroll: true, focusVisible: false } as FocusOptions)
+    if (!dim || !action) return
+    const frame = schedule(() => bubble.current?.querySelector('button')?.focus({ preventScroll: true, focusVisible: false } as FocusOptions))
+    return () => cancel(frame)
   }, [dim, action])
 
   // Place it every frame while it's up: the target may move, scroll, resize or appear late. Only writes when something changed.

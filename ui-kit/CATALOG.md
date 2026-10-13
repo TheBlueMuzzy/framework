@@ -96,6 +96,9 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Tooltip | `Tooltip` | `?screen=feedback` | ⓘ tap for a hint |
 | Empty state | `EmptyState` | `?screen=feedback` | "Nothing here yet" + one action |
 | Spinner | `Spinner` | `?screen=feedback` | Waiting |
+| **Teach** (0.9.0) | | | |
+| Callout | `Callout` (+ `placeCallout`, `calloutWords`) | `?screen=teach` · `&teach=spotlight` · `&teach=point` | A speech bubble pointing at a thing: a rounded box of text with a pointer aimed at the middle of the target's near edge. No mascot. `target` = an Element, a CSS selector (looked up every frame, so it may appear later) or a screen point `{ x, y }` · `text` (≤ 12 words, verb first) · `title` · `action` ("Got it" — then ONLY the button closes it) · `placement` auto (above, else below, right, left) / top / bottom / left / right = the side to try first — it flips, then shifts, to fit the window (or the game picture, `--kit-frame-w/-h`) with the kit's edge room, prefers a side where the pointer aims straight, and never covers the target · `onDismiss` (a tap on it, or the action) · `dim` = a dark see-through screen over everything but a hole round the target (taps in the hole reach the target; a tap on the dim → `onOutsideTap`, default `onDismiss` when there's no action) · `dimAmount` 0–1 (default 0.65) · `pulse` = the target glows (an accent ring breathing; reduce motion: steady). Follows a moving / resizing / scrolling target every frame; hidden while the target is missing. As wide as its words up to 22em, so it never changes width as it moves. A popover in the top layer (above the game and every screen), wears `kit-scope`. `role="status"` (polite), or a focused dialog for `dim` + `action` (a pause) |
+| Tips memory | `useTips()` / `tipsMemory()` (+ `tipsStorageKey`) | `?screen=teach` (Tips switch, Reset) | Which one-time tips a player has seen + the Tips on / off switch (on by default). `shouldShow(id)` (on and not seen) · `seen(id)` · `markSeen(id)` · `tipsOn` / `setTipsOn` · `resetTips()` (forgets the seen ones, keeps the switch) · `seenIds`. Saved under `kit-tips:<game folder>` (named like the settings slot); works with the browser's storage blocked (lasts until reload). `tipsMemory()` = the same store from plain game code (engine events); `useTips()` re-renders on change |
 
 ## Recipes (build on first use, then move them up to Built)
 
@@ -110,7 +113,6 @@ See any Built screen live: `npm run dev` in `ui-kit/`, then `http://localhost:51
 | Language select | Settings row (selector `language`) or Screen · ListRow list | `English ✓ / Español / 日本語` |
 | Privacy / consent | Screen dialog · Panel · Text · Toggle rows · Button | `We store… [Analytics ⏻] (Accept)(Choose)` |
 | Dialogue + choices | Screen bottom slot · Panel · Avatar · Text · Stack of Button | `😀 Sam: "Roll again?" / (Yes)(No)` |
-| Tutorial coach-mark | Screen dialog (dim) · Panel near target · Text · Button · Pips | `▼ Tap here to roll  (Next ●○○)` |
 | Button prompts | Badge (key/button name) + Text in a Row, in a HUD slot | `[A] Jump  [B] Back` |
 | Inventory + item detail | Screen · Grid of Card (icon, Badge count) · Panel detail · Button | `[🗡][🧪3][ ] │ Potion · heals 5 (Use)` |
 | Quest log | Screen · Tabs (active/done) · ScrollArea · ListRow (ProgressBar) | `Find 3 keys ▓▓░ 2/3` |
