@@ -38,4 +38,11 @@
   .gallery-hand-piece .gallery-hand-ring, .gallery-hand-ring { fill: none; stroke: var(--accent); }
   .gallery-hand-marker { fill: var(--accent); }
   .gallery-colour { inline-size: 5rem; padding: var(--gap-xs); cursor: pointer; }
+  /* Callouts sample (?screen=teach): the panel, a piece that slides to and fro, and a dot at a screen point */
+  .gallery-teach { inline-size: min(20rem, 100%); }
+  .gallery-teach-track { padding-block: var(--gap-s); }
+  .gallery-teach-mover { display: block; inline-size: 1.5rem; block-size: 1.5rem; border-radius: 50%; background: var(--accent);
+    animation: gallery-teach-slide 4s ease-in-out infinite alternate; }
+  .gallery-teach-dots { block-size: 100%; background: radial-gradient(circle at 80% 88%, var(--accent) 0 0.3rem, transparent 0.35rem); }
 }
+@keyframes gallery-teach-slide { to { translate: calc(min(20rem, 100vw - 4rem) - 1.5rem - 2 * var(--gap-l)) 0; } }
