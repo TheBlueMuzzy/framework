@@ -65,6 +65,13 @@ describe('formatJson — saving over a hand-written file keeps its layout', () =
     const text = '{\n  "names": [\n    "Muzzy"\n  ],\n  "bio": { "name": "the Bully", "bio": "Loves a chase." },\n  "row": { "id": "A", "extras": { "zipf": 3 } }\n}\n'
     expect(roundTrip(text)).toBe(text)
   })
+  it('keeps a one-line object or list\'s own spacing ({"a": 1} stays tight, [ 1,2 ] stays as is) — even after an edit', () => {
+    const text = '{\n  "bios": {\n    "Scholar": {"name": "the Scholar", "bio": "Eats words."},\n    "pad": { "a": 1 }\n  },\n  "list": [ 1,2 ]\n}\n'
+    expect(roundTrip(text)).toBe(text)
+    const data = JSON.parse(text)
+    data.bios.Scholar.bio = 'Reads a lot.'
+    expect(formatJson(data, text)).toContain('    "Scholar": {"name": "the Scholar", "bio": "Reads a lot."},\n')
+  })
   it('keeps a value\'s spelling while it is unchanged (1.0, \\u escapes), writes a changed one fresh', () => {
     const text = '{\n  "max": 1.0,\n  "dash": "a\\u2014b"\n}\n'
     expect(roundTrip(text)).toBe(text)
