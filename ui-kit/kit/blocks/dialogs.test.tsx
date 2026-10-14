@@ -3,13 +3,24 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { StrictMode } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ScreenStack, screens } from '..'
-import { askConfirm, kitScreens, MAX_TOASTS, toast, toasts, ToastStack } from './dialogs'
+import { askConfirm, kitScreens, MAX_TOASTS, Modal, toast, toasts, ToastStack } from './dialogs'
 
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
   toasts.current.forEach((t) => toasts.dismiss(t.id))
   while (screens.current.length) screens.pop()
+})
+
+describe('Modal', () => {
+  it('a ‹ in its header only when onBack is given (0.10.1)', () => {
+    const onBack = vi.fn()
+    const { rerender } = render(<Modal title="Pick a word" />)
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    rerender(<Modal title="Pick a word" onBack={onBack} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(onBack).toHaveBeenCalledOnce()
+  })
 })
 
 describe('toasts', () => {

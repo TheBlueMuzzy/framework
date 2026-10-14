@@ -14,12 +14,14 @@ import { MenuHeader } from './MenuHeader'
 // className: added to the box (kit-modal), for a block's own layout (Pause: kit-pause; Confirm: kit-ask, narrower).
 // It's a menu card (0.10.0): the one menu width, the MenuHeader title row, as tall as its contents — it opens in the
 // middle and then only grows downward (Screen grow="down"). Put a ScrollArea in it for anything long.
-type ModalProps = { title: string; children?: ReactNode; actions?: ReactNode; className?: string }
-export function Modal({ title, children, actions, className }: ModalProps) {
+// onBack: a ‹ in the header (0.10.1) — for a modal that is a sub-menu (the game's Submit a word), instead of a Back
+// button in `actions`; backLabel = how a screen reader says it.
+type ModalProps = { title: string; children?: ReactNode; actions?: ReactNode; className?: string; onBack?: () => void; backLabel?: string }
+export function Modal({ title, children, actions, className, onBack, backLabel }: ModalProps) {
   return (
     <Screen dialog label={title} grow="down">
       <Panel depth={2} gap="m" className={className ? `kit-modal ${className}` : 'kit-modal'}>
-        <MenuHeader title={title} />
+        <MenuHeader title={title} onBack={onBack} backLabel={backLabel} />
         {children}
         {actions && <Row gap="s" justify="end">{actions}</Row>}
       </Panel>
