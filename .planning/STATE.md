@@ -1,12 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-v0.4.0 The Table released 2026-10-04. Now: **v0.5 The AI** (defined 2026-10-04 with Muzzy) — design `design/ai.md`, ROADMAP F19–F26. Built here first and switched on in Glyphtender beta (its v0.7, F38–F47) the same sprint.
-Next: `/sprint` in Glyphtender — F19 Brain here + Glyphtender F38 AI plug together.
+2026-10-14 — **v0.8 Dev Kit Select Mode** built overnight on branch `dev/select-mode` (Dev Kit 0.14.0: Select tab — click a thing → its knobs from Tuning / Text / Sound in one place, + Add a knob, recent list, phone bar). Proven in Glyphtender sprint 29 (its F86, e2e:devkit-select). Design `design/select-mode.md`.
+Next: Muzzy tries it in Glyphtender (its F87) → merge with Glyphtender's /deliver.
 
 ## Where we are
-Stage: define → develop   Milestone: v0.5 — The AI   Sprint: none (lined up from Glyphtender)
-Doing: planned   Branch: main   Version: 0.3.1
+Stage: develop   Milestone: v0.8 — Dev Kit Select Mode   Sprint: Glyphtender 29
+Doing: built, waiting for Muzzy   Branch: dev/select-mode   Version: 0.9.0 (Dev Kit 0.14.0 on the branch)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
