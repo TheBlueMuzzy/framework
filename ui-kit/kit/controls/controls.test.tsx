@@ -20,6 +20,14 @@ const boxes = () => screen.getAllByRole('textbox') as HTMLInputElement[]
 const code = () => boxes().map((box) => box.value).join('')
 
 describe('Selector ◀ option ▶', () => {
+  it('holds an invisible copy of every option, so it is as wide as the longest and never changes width (0.10.4)', () => {
+    const { container } = render(<SelectorDemo />)
+    const sizers = [...container.querySelectorAll('.kit-picker-sizer')]
+    expect(sizers.map((s) => s.textContent)).toEqual(['Easy', 'Normal', 'Hard'])
+    expect(sizers.every((s) => s.getAttribute('aria-hidden') === 'true')).toBe(true) // read out once, as the value
+    expect(screen.getByRole('status').textContent).toBe('Easy')
+  })
+
   it('steps with the arrow keys and wraps around', () => {
     render(<SelectorDemo />)
     const group = screen.getByRole('group', { name: 'Difficulty' })
