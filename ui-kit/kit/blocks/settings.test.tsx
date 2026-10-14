@@ -1,9 +1,21 @@
 // Settings is drawn from its list: add a row → it appears; switch it off → it's gone; values are remembered.
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ReactElement } from 'react'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { ScreenStack, screens } from '..'
 import { kitScreens } from './dialogs'
 import { loadSettings, Settings, settingsStorageKey, type SettingsSchema } from './Settings'
+
+/** "Reset to defaults" asks first (0.10.3): open Settings in a screen stack, press it, say yes. */
+function resetWithYes() {
+  fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }))
+  const ask = screen.getByRole('dialog', { name: 'Reset to defaults?' })
+  fireEvent.click(within(ask).getByRole('button', { name: 'Reset to defaults' }))
+}
+const inStack = (settings: () => ReactElement) => {
+  render(<ScreenStack screens={{ ...kitScreens, settings }} />)
+  act(() => screens.push('settings'))
+}
 
 afterEach(() => {
   cleanup()
@@ -52,9 +64,13 @@ describe('Settings', () => {
     fireEvent.click(screen.getByRole('switch', { name: 'Music' }))
     expect(loadSettings(schema()).music).toBe(false)
     cleanup()
-    render(<Settings schema={schema()} />) // opening Settings again
+    inStack(() => <Settings schema={schema()} />) // opening Settings again
     expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false')
-    fireEvent.click(screen.getByText('Reset to defaults'))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }))
+    expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false') // it asks first
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Reset to defaults?' })).getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false') // Cancel: nothing changes
+    resetWithYes()
     expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('true')
   })
 
@@ -121,13 +137,13 @@ describe('Settings', () => {
       ] },
       { id: 'only', label: 'Only headings', rows: [{ id: 'secLonely', type: 'heading', label: 'Lonely' }] },
     ] }
-    render(<Settings schema={list} />)
+    inStack(() => <Settings schema={list} />)
     expect(screen.getByRole('heading', { name: 'Play' })).toBeTruthy()
     expect(screen.queryByText('Nothing here')).toBeNull() // the next row is another heading
     expect(screen.queryByText('Switched off')).toBeNull() // its only row is off
     expect(screen.queryByRole('tab')).toBeNull() // the headings-only tab is dropped, leaving one tab: no picker
     fireEvent.click(screen.getByRole('switch', { name: 'Music' }))
-    fireEvent.click(screen.getByText('Reset to defaults'))
+    resetWithYes()
     expect(loadSettings(list).music).toBe(true)
     expect(Object.keys(loadSettings(list)).filter((id) => id.startsWith('sec'))).toEqual([]) // headings hold no value
   })
