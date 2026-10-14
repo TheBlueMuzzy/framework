@@ -24,9 +24,9 @@ export function ArrowPicker({ label, display, onStep, canPrev, canNext, prevIcon
     <div className={`kit-picker kit-${kind}`} role="group" aria-label={label} tabIndex={0} onKeyDown={onKeyDown}>
       <Button variant="ghost" icon tabIndex={-1} aria-label={`Previous ${label}`} disabled={!canPrev} onClick={() => onStep(-1)}>{prevIcon}</Button>
       {sizes ? (
-        <span className="kit-picker-value" data-sized>
+        <span className="kit-picker-sized">
           {sizes.map((size, i) => <span key={i} className="kit-picker-sizer" aria-hidden="true">{size}</span>)}
-          <output aria-live="polite">{display}</output>
+          <output className="kit-picker-value" aria-live="polite">{display}</output>
         </span>
       ) : <output className="kit-picker-value" aria-live="polite">{display}</output>}
       <Button variant="ghost" icon tabIndex={-1} aria-label={`Next ${label}`} disabled={!canNext} onClick={() => onStep(1)}>{nextIcon}</Button>
