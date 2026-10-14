@@ -57,5 +57,30 @@ describe('<Screen scroll> opens centred, then grows down', () => {
   it('a Screen without scroll is left to the CSS (centred by place-self)', () => {
     const { container } = render(<Screen><p>menu</p></Screen>)
     expect(centreOf(container).style.marginBlockStart).toBe('')
+    expect(centreOf(container).style.getPropertyValue('--kit-grow-top')).toBe('')
+  })
+})
+
+// <Screen grow="down"> (0.10.0, the menu cards): the same rule, but the screen never scrolls — the gap goes in
+// --kit-grow-top, which kit.css uses as the top margin AND takes off the card's height limit
+describe('<Screen grow="down"> opens centred, then grows down', () => {
+  const growTop = (container: HTMLElement) => centreOf(container).style.getPropertyValue('--kit-grow-top')
+
+  it('on open: the gap to the middle, as --kit-grow-top (no margin of its own, no scroll)', () => {
+    const { container } = render(<Screen grow="down"><p>card</p></Screen>)
+    expect(growTop(container)).toBe(`${300 - START_TOP}px`)
+    expect(centreOf(container).style.marginBlockStart).toBe('')
+    expect(container.querySelector('.kit-screen')!.getAttribute('data-grow')).toBe('down')
+    expect(container.querySelector('.kit-screen')!.hasAttribute('data-scroll')).toBe(false)
+  })
+
+  it('the card growing keeps its top; a window resize places it again', () => {
+    const { container, rerender } = render(<Screen grow="down"><p>1</p></Screen>)
+    centredTop = 250
+    rerender(<Screen grow="down"><p>1</p><p>an AI card opened</p></Screen>)
+    expect(growTop(container)).toBe(`${300 - START_TOP}px`)
+    screenH = 500
+    act(() => { window.dispatchEvent(new Event('resize')) })
+    expect(growTop(container)).toBe(`${250 - START_TOP}px`)
   })
 })
