@@ -207,13 +207,14 @@ Just before saving, the tab reads the file fresh from the dev server and puts on
 tab saved meanwhile (Glyphtender's AI tab writes bios into the same file) are kept. Install the Vite plugin too
 (`vite/` → `vite-plugins/devkit/`): the reload flag lives there.
 
-## The Select tab (click a thing → its knobs) — Dev Kit 0.14.0–0.15.0, framework F55/F56/F58
+## The Select tab (click a thing → its knobs) — Dev Kit 0.14.0–0.15.1, framework F55/F56/F58
 Muzzy's goal: "click on a thing > see the attributes associated with it compiled in one place > update those things and hit save."
 - The game adds **`content/devkit/select.json`** (the tab appears when it exists) — the object → knobs list Muzzy owns:
   `{ "objects": { "glyphling": { "label": "Glyphling", "help": "…", "knobs": { "Look": ["garden.pieceScale"], "Drag": ["drag.liftScale"] }, "text": ["explore.glyph"], "sounds": ["glyph.step"] } } }`
   Tuning ids are `<file>.<key path>` (a group brings all of it), text ids are en.json keys (a branch brings all of it), sounds are audio.json names.
 - The game marks what you SEE with **`data-knobs="glyphling"`** (by meaning, several ids space-separated). A kit part the game can't tag → `"find": ".kit-callout"` in the object instead.
 - Select mode on → hover = thin pink outline + name, click/tap = pick (thick; its twins dashed). Clicks don't reach the game while it's on; closing the Dev Kit turns it off. The pick + the Outline slider are remembered in this browser.
+- Desktop, select mode on: the mouse leaves the panel → it slides off to a thin pink "Dev Kit" bar on the right (the whole game shows); the mouse back over the bar → it slides in again (0.15.1). Phone: the panel is a bar at the bottom instead.
 - Under the Select tab: the pick's knobs from the real Tuning / Text / Sound panels (same edits, own Saves), "Recently on screen" (pick fast things there), "+ Add a knob" (writes select.json), ✕ on a row takes it off, problems in red.
 - **Menus and kit parts (0.15.0):** an object can list `"style": ["primary", "radius-control"]` — UI kit style values
   (content/ui/style.json token names). They're SHARED (a button's corners are every button's), and the panel says so;
