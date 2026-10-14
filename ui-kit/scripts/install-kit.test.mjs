@@ -25,7 +25,7 @@ describe('install-kit', () => {
     const settings = readJson(join(game, 'content/ui/settings.json'))
     expect(settings.tabs.length).toBeGreaterThan(0)
     // only the rows the kit wires itself start on — a game switches a row on when it reads it (no fake settings)
-    const onRows = settings.tabs.flatMap((t) => t.rows).filter((r) => r.on !== false).map((r) => r.id).sort()
+    const onRows = settings.tabs.flatMap((t) => t.rows).filter((r) => r.on !== false && r.type !== 'heading').map((r) => r.id).sort()
     expect(onRows).toEqual(['reduceMotion', 'textSize', 'version'])
     const credits = readJson(join(game, 'content/credits.json'))
     expect(credits.some((c) => c.paths.includes('src/ui/kit/fonts/nunito.woff2'))).toBe(true)

@@ -201,9 +201,11 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
 export const KIT_WIRED_ROWS = ['textSize', 'reduceMotion', 'version']
 
 /** A new game's settings.json: every standard row, but only the kit-wired ones on. A row that's on and read by nothing
- *  is a fake setting players can flip (Glyphtender shipped 12 — Graphics quality, Vibration, Tips, Reset progress…). */
+ *  is a fake setting players can flip (Glyphtender shipped 12 — Graphics quality, Vibration, Tips, Reset progress…).
+ *  Section headings stay on: one with no row on under it isn't drawn, so it shows up by itself once its rows are on. */
 export function starterSettings(schema) {
-  return { ...schema, tabs: schema.tabs.map((tab) => ({ ...tab, rows: tab.rows.map((row) => (KIT_WIRED_ROWS.includes(row.id) ? row : { ...row, on: false })) })) }
+  const keepOn = (row) => row.type === 'heading' || KIT_WIRED_ROWS.includes(row.id)
+  return { ...schema, tabs: schema.tabs.map((tab) => ({ ...tab, rows: tab.rows.map((row) => (keepOn(row) ? row : { ...row, on: false })) })) }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {

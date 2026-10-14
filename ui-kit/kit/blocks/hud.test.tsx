@@ -126,8 +126,8 @@ describe('Pause', () => {
     rerender(<Pause onQuit={() => {}} note="Small garden · 2-letter words off" />)
     expect(screen.getByText('Small garden · 2-letter words off').getAttribute('data-kind')).toBe('caption')
     const order = [...document.querySelector('.kit-modal')!.children].map((child) => child.getAttribute('data-kind') ?? child.className)
-    expect(order.indexOf('caption')).toBeGreaterThan(order.indexOf('title'))
-    expect(order.indexOf('caption')).toBeLessThan(order.findIndex((name) => name.includes('kit-menu')))
+    expect(order.indexOf('caption')).toBeGreaterThan(order.indexOf('kit-menu-header')) // (the title sits in the header, 0.10.0)
+    expect(order.indexOf('caption')).toBeLessThan(order.findIndex((name) => name.split(' ').includes('kit-menu')))
   })
 
   it('items: the game’s own rows sit after How to play and before Quit; a disabled one stays visible but can’t be pressed (0.8.0)', () => {
