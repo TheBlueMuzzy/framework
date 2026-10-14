@@ -1,0 +1,436 @@
+{
+  "_help": "Every word players read, one section per screen. Edit freely. A missing word falls back to the kit's English default.",
+  "mainMenu": {
+    "title": "Glyphtender",
+    "subtitle": "The best speller doesn't always win.",
+    "play": "Play",
+    "settings": "Settings",
+    "playOnline": "Play online",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Leave full screen"
+  },
+  "game": {
+    "players": {
+      "yellow": "Yellow",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink"
+    },
+    "turnOf": "{player}'s turn",
+    "prompts": {
+      "draft": "{player} — place a glyphling ({n} of {total})",
+      "move": "Move a glyphling",
+      "moveHeld": "Move it to a glowing hex",
+      "cast": "Plant a seed from here",
+      "castHeld": "Plant it on a pale hex",
+      "ready": "Happy? Plant it — or undo",
+      "moveOnly": "No seed to plant — end your turn",
+      "flying": "Planting…",
+      "refresh": "No Magic this turn — refresh seeds?",
+      "refreshDetail": "Tap seeds to set them aside",
+      "over": "The garden is tangled",
+      "loading": "Gathering the words…",
+      "wordsFailed": "Couldn't load the words",
+      "handoff": "Pass to {player}",
+      "othersTurn": "{player} is playing…",
+      "othersDraft": "{player} is placing a glyphling…",
+      "othersRefresh": "{player} is refreshing seeds…",
+      "waitingHost": "Waiting for the host to start the next game…",
+      "aiThinking": "{player} is thinking…"
+    },
+    "aiSeat": "{name}: the AI plays this seat",
+    "notes": {
+      "moveFirst": "Move a glyphling first",
+      "notYours": "That one isn't yours",
+      "tangled": "That glyphling is tangled — it can't move",
+      "wordsLoading": "Still gathering the words — one moment",
+      "wordsFailed": "Couldn't load the words — tap Retry",
+      "problem": "That can't be done — try again"
+    },
+    "scorePop": "+{n}",
+    "spotlightLabel": "{word} +{n}",
+    "buttons": {
+      "undo": "Undo",
+      "cast": "Plant",
+      "castMagic": "Plant · +{n}",
+      "endTurn": "End turn",
+      "shuffle": "Shuffle",
+      "refresh": "Refresh {n}",
+      "keepAll": "Keep all",
+      "menu": "Menu",
+      "results": "See results",
+      "newGame": "New game",
+      "skip": "Skip",
+      "retryWords": "Retry"
+    },
+    "pause": {
+      "title": "Paused",
+      "resume": "Back to the garden",
+      "settings": "Settings",
+      "quit": "Leave game",
+      "quitTitle": "Leave this game?",
+      "quitMessage": "The garden will be lost.",
+      "howToPlay": "Rules"
+    },
+    "pauseNote": {
+      "twoLetterOn": "2-letter words: on",
+      "twoLetterOff": "2-letter words: off"
+    },
+    "submitWord": {
+      "pauseRow": "Submit a word",
+      "placeSeed": "Place a seed first (don't plant it), then come back here to pick its letters.",
+      "title": "Submit a word",
+      "pick": "Not a word yet? Pick the one you meant.",
+      "sent": "Word submitted",
+      "tooShort": "Submitted words must be {n} or more letters",
+      "none": "No new letters line up with your seed.",
+      "back": "Back"
+    },
+    "gameOver": {
+      "label": "The end of the game",
+      "tabs": {
+        "results": "Results",
+        "story": "Story",
+        "scorecard": "Scorecard"
+      },
+      "tabsLabel": "End of game pages",
+      "seeBoard": "See board",
+      "sharedWin": "Shared win!",
+      "points": "{n} Magic",
+      "winner": "Winner",
+      "you": "You",
+      "placeLabel": "{place} place",
+      "splitWords": "Words\u00a0{words}",
+      "splitDot": "·",
+      "splitTangles": "Tangles\u00a0{tangles}",
+      "splitLabel": "{words} Magic from words, {tangles} from tangles",
+      "highlights": "Highlights",
+      "noLog": "This game was saved before the game log existed, so there's no story to tell.",
+      "awards": {
+        "lockdown": {
+          "title": "Lockdown",
+          "reason": "{other}'s glyphling: {from} moves → {to}"
+        },
+        "pincer": {
+          "title": "Pincer",
+          "reason": "Over {turns} turns you squeezed {other}'s glyphling from {from} moves to {to} ({pct}%)",
+          "reasonOne": "In one turn you squeezed {other}'s glyphling from {from} moves to {to} ({pct}%)"
+        },
+        "weedToss": {
+          "title": "Weed toss",
+          "reason": "A junk seed took {other}'s +{n} spot ({word})",
+          "reasonCut": "A junk seed cut {other}'s glyphling: {from} moves → {to}",
+          "refreshed": ", then refreshed"
+        },
+        "walledGarden": {
+          "title": "Walled garden",
+          "reason": "Walled their glyphling in, then +{n} Magic inside"
+        },
+        "throughHedge": {
+          "title": "Through the hedge",
+          "reason": "Shot over {over} of their own seeds: +{n}"
+        },
+        "completeTangle": {
+          "title": "Complete tangle",
+          "reason": "Tangled {other}'s glyphling with only their own pieces"
+        },
+        "powerPlay": {
+          "title": "Power Play",
+          "reason": "{n} words from one seed: {words}"
+        },
+        "longWord": {
+          "title": "Long word",
+          "reason": "{word}, {n} letters"
+        },
+        "hijack": {
+          "title": "Hijack",
+          "reason": "Turned {other}'s {from} into {word}: +{n}"
+        },
+        "superBridge": {
+          "title": "Super Bridge",
+          "reason": "{letter} joined {left} + {right} into {word}"
+        },
+        "bridge": {
+          "title": "Bridge",
+          "reason": "{letter} joined {left} + {right} into {word}"
+        },
+        "comeback": {
+          "title": "Biggest comeback",
+          "reason": "Was {n} behind, +{gain}, took the lead"
+        },
+        "trickster": {
+          "title": "Trickster's Victory",
+          "reason": "{other} ended the game {n} behind"
+        },
+        "calledIt": {
+          "title": "Called it",
+          "reason": "Ended the game {n} ahead, and won"
+        },
+        "closeCall": {
+          "title": "Close call",
+          "reason": "One move from tangled, got out to {n} moves"
+        }
+      },
+      "chart": {
+        "label": "Everyone's Magic, round by round",
+        "start": "Start",
+        "round": "R{n}",
+        "tangles": "Tangles",
+        "hint": "Drag the line across the chart to see what happened.",
+        "spot": "Round {round}",
+        "plays": "{round}: {list}",
+        "playsPart": "{player} {play}",
+        "playsJoin": "; ",
+        "playWordJoin": " · ",
+        "playMagic": "+{n}",
+        "playNoWords": "{letter} · no words",
+        "playMoved": "moved",
+        "playRefresh": "Refresh {n}",
+        "playKeepAll": "Refresh · kept all",
+        "playTangled": "tangled",
+        "playSkipped": "no turn · all tangled",
+        "playEnded": "no turn · the game ended",
+        "playTangleBonus": "+{n}",
+        "playNoTangleBonus": "no bonus",
+        "playByBot": "by a bot",
+        "botBandKey": "Bot played"
+      },
+      "card": {
+        "label": "Scorecard",
+        "groups": {
+          "magic": "Magic",
+          "words": "Words",
+          "play": "Play"
+        },
+        "total": "Total",
+        "wordMagic": "From words",
+        "soloMagic": "From solo words",
+        "tangleMagic": "From tangles",
+        "letters": "{n}-letter",
+        "lettersPlus": "{n}+ letters",
+        "longestWord": "Longest",
+        "bestTurn": "Best turn",
+        "multiWord": "Multi-word turns",
+        "refreshed": "Seeds refreshed",
+        "completeTangles": "Complete tangles",
+        "none": "–",
+        "best": "Best in this row"
+      },
+      "separator": " · ",
+      "and": " + ",
+      "newGame": "New game",
+      "menu": "Menu",
+      "highlightsLabel": "Highlights, one at a time"
+    },
+    "handoff": {
+      "title": "Pass to {player}",
+      "message": "{player}, the garden is yours. Tap when only you can see.",
+      "show": "Show my seeds"
+    },
+    "rules": {
+      "title": "How to play",
+      "next": "Next",
+      "back": "Back",
+      "done": "Got it",
+      "page": "Page {n} of {total}",
+      "pages": [
+        {
+          "title": "Your turn",
+          "body": "Move one of your glyphlings any distance along a leyline — it can’t pass through anything. Then plant a seed from where it landed, along any leyline, onto an empty hex."
+        },
+        {
+          "title": "Words make Magic",
+          "body": "Every word the new seed makes, on every leyline, grows Magic: one per letter, plus one for each of your own seeds in it. Made Magic? Draw a seed. Made none? You may refresh your seeds."
+        },
+        {
+          "title": "A tangled garden",
+          "body": "A glyphling with nowhere to move is tangled. When two are tangled the game ends: each rival piece next to a tangled glyphling earns its owner +3. Magic stays secret until the end — most Magic becomes Grand Glyphtender!"
+        }
+      ]
+    },
+    "reveal": {
+      "tangles": "The garden is tangled",
+      "bonus": "Tangle bonus: +{n} for {player}",
+      "counting": "Counting {player}'s Magic…",
+      "winner": "Grand Glyphtender: {names}!",
+      "winners": "Grand Glyphtenders: {names}!",
+      "and": " & ",
+      "secret": "Magic ?",
+      "magic": "{n} Magic",
+      "winnerBadge": "★",
+      "label": "The Magic reveal",
+      "skip": "Skip",
+      "pop": "+{n}",
+      "tangleDetail": "Tangles +{n}"
+    }
+  },
+  "credits": {
+    "people": [
+      {
+        "role": "Game design & art",
+        "names": [
+          "Muzzy (TheBlueMuzzy)"
+        ]
+      }
+    ]
+  },
+  "newGame": {
+    "title": "New game",
+    "players": "Players",
+    "playerN": "Player {n}",
+    "aiType": "AI Type",
+    "board": "Garden",
+    "boards": {
+      "small": "Small",
+      "large": "Large"
+    },
+    "boardDetail": "Small for 2–3 · Large for 4",
+    "twoLetterWords": "2-letter words",
+    "twoLetterDetail": "Off: words need 3+ letters",
+    "britishWords": "British spelling",
+    "britishDetail": "Count UK spellings like COLOUR",
+    "vulgarWords": "Vulgar words",
+    "vulgarDetail": "Count swear words",
+    "hideSeeds": "Hide seeds between turns",
+    "hideSeedsDetail": "Pass the device between turns",
+    "wordIndicators": "Word indicators",
+    "wordIndicatorsDetail": "Off: no word borders, no Magic numbers",
+    "start": "Start",
+    "back": "Main menu",
+    "person": "Person",
+    "ai": "AI",
+    "personality": "Personality",
+    "skill": "Skill",
+    "surprise": { "name": "Surprise me", "bio": "Random AI Personality" },
+    "needPerson": "At least one seat must be a person"
+  },
+  "online": {
+    "lobby": {
+      "title": "Play online",
+      "create": "Create a room",
+      "or": "or join a friend’s room",
+      "join": "Join",
+      "name": "Your name",
+      "room": "Room {code}",
+      "share": "Share this code",
+      "host": "Host",
+      "ready": "Ready",
+      "notReady": "Not ready",
+      "imReady": "I’m ready",
+      "notYet": "Not ready yet",
+      "start": "Start game",
+      "leave": "Leave",
+      "back": "Back",
+      "copy": "Copy",
+      "copied": "Code copied!",
+      "waitingHost": "Waiting for the host to start…",
+      "needPlayers": "Need at least {n} players",
+      "waitingReady": "Waiting for everyone to be ready",
+      "remove": "Remove",
+      "addAiTitle": "Add an AI player",
+      "addAi": "Add AI",
+      "aiDetail": "🤖 {skill}"
+    },
+    "wordSwitches": {
+      "britishOn": "British spelling on",
+      "vulgarOn": "Vulgar words on"
+    },
+    "options": {
+      "board": "Garden",
+      "auto": "Auto",
+      "boardDetail": "Auto: Small for 2–3 · Large for 4",
+      "twoLetterWords": "2-letter words",
+      "twoLetterDetail": "Off: words need 3+ letters",
+      "britishWords": "British spelling",
+      "britishDetail": "Count UK spellings like COLOUR",
+      "vulgarWords": "Vulgar words",
+      "vulgarDetail": "Count swear words",
+      "timer": "Turn timer",
+      "timerOff": "Off",
+      "timerSeconds": "{n} s",
+      "timerDetail": "When time runs out, a bot plays for them until they tap",
+      "wordIndicators": "Word indicators",
+      "wordIndicatorsDetail": "Off: no word borders, no Magic numbers"
+    },
+    "errors": {
+      "nameNeeded": "Pick a name first",
+      "no_room": "There’s no room with that code — check the letters",
+      "room_full": "That room is full (4 players)",
+      "game_started": "That room’s game has already started",
+      "kicked": "The host removed you from the room",
+      "connected_elsewhere": "You opened the game in another tab — it has your seat now",
+      "room_closed": "The room closed",
+      "code_taken": "That code is in use — making another…",
+      "name_needed": "Pick a name first",
+      "left": "You left the room",
+      "notHost": "Only the host can do that",
+      "problem": "That didn’t work — {reason}",
+      "badCode": "A room code is 4 letters, like BAKU"
+    },
+    "reconnect": {
+      "title": "Reconnecting…",
+      "message": "Connection lost — getting you back into the garden.",
+      "quit": "Leave"
+    },
+    "roomLabel": "Room: {code}",
+    "pauseTitle": "Paused · Room {code}",
+    "seats": {
+      "bot": "{name}: a bot is playing for them",
+      "away": "Away",
+      "awayLabel": "{name} is away — their seat waits for them",
+      "botLeft": "{name} left — a bot is playing for them",
+      "botIdle": "{name} is idle — a bot is playing for them",
+      "back": "{name} is back"
+    },
+    "idle": {
+      "warning": "Still there? A bot plays for you soon",
+      "botPlaying": "A bot is playing for you — tap to play",
+      "timeLeft": "Time before a bot plays for you",
+      "seconds": "{n} s"
+    }
+  },
+  "ai": {
+    "_help": "The AI opponents' names and one-line bios (stand-in text — Muzzy reviews the tone). Gentle and cozy: even the Bully is mischievous, not mean. Bios grew from the original game's flavour lines.",
+    "personality": {
+      "Scholar": {"name": "the Scholar", "type": "Scholar", "bio": "It eats words for breakfast."},
+      "Survivor": {"name": "the Survivor", "type": "Survivor", "bio": "Head on a swivel like an owl."},
+      "Strategist": {"name": "the Strategist", "type": "Strategist", "bio": "Always two moves ahead."},
+      "sprout": {"name": "Sprout", "type": "Sprout", "bio": "New to the garden, and happy you’re here."}
+    },
+    "skill": {
+      "Apprentice": "Apprentice",
+      "FirstClass": "First Class",
+      "Archmage": "Archmage",
+      "seedling": "Seedling"
+    }
+  },
+  "tutorial": {
+    "_help": "The first game teaches itself (design/tutorial.md). Callouts: one idea, 12 words or fewer, verb first.",
+    "tipsReset": "Every tip will show again",
+    "locked": "Finish your first game to unlock this.",
+    "unlocked": "Everything's unlocked!",
+    "overview": {
+      "title": "How to play",
+      "next": "Next",
+      "back": "Back",
+      "done": "Let's play!",
+      "skip": "Skip",
+      "page": "Page {n} of {total}",
+      "pages": [
+        { "title": "Move, then plant", "body": "Move one of your glyphlings, then plant a seed from where it lands." },
+        { "title": "Words make Magic", "body": "Spell words to make Magic. Most Magic wins." },
+        { "title": "A tangled garden", "body": "A glyphling that can't move is tangled. The game ends when any 2 glyphlings are tangled." }
+      ]
+    },
+    "leave": {
+      "button": "Leave tutorial",
+      "title": "Leave the tutorial game?",
+      "message": "Everything unlocks. You can replay it from Settings."
+    },
+    "replay": {
+      "title": "Replay the tutorial game?",
+      "message": "This game ends, and the tutorial game starts.",
+      "yes": "Replay"
+    }
+  }
+}

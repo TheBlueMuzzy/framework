@@ -8,6 +8,7 @@ export const menu: MenuGroup[] = [
   { title: 'Dialogs & feedback', entries: [
     { id: 'confirm', name: 'Confirm', about: '“Are you sure?” with the yes in danger red' },
     { id: 'rewards', name: 'Reward popup', about: 'A tile per reward, then Collect' },
+    { id: 'teach', name: 'Callouts', about: 'Speech-bubble tips pointing at a target: flips to fit, a dimmed pause, a point, a moving piece' },
     { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
   ] },
   { title: 'Front end', entries: [

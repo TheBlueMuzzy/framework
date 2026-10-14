@@ -130,6 +130,27 @@ describe('the plugin in a real Vite dev server', () => {
     expect((await save({ path: 'content/ui/rows.json', data: JSON.parse(handWritten) })).status).toBe(200)
     expect(readFileSync(join(game, 'content/ui/rows.json'), 'utf8')).toBe(handWritten)
   })
+  it('skips the game reload for a saved file — unless the save says reload: true (the Text tab)', async () => {
+    const plugin = server.config.plugins.find((p) => p.name === 'bmuz-devkit')!
+    const hot = (file: string) => (plugin.handleHotUpdate as (ctx: { file: string }) => unknown)({ file })
+    const file = join(game, 'content/ui/table.json')
+    expect((await save({ path: 'content/ui/table.json', data: { rows: '#111111' } })).status).toBe(200)
+    expect(hot(file)).toEqual([]) // no reload
+    expect((await save({ path: 'content/ui/table.json', data: { rows: '#222222' }, reload: true })).status).toBe(200)
+    expect(hot(file)).toBeUndefined() // Vite carries on and hot-reloads the game
+  })
+  it('a save that changes nothing leaves the file alone', async () => {
+    const file = join(game, 'content/ui/table.json')
+    const before = '{\n  "_help": "keep me",\n  "rows": "#000000"\n}\n'
+    writeFileSync(file, before)
+    const res = await save({ path: 'content/ui/table.json', data: JSON.parse(before) })
+    expect(await res.json()).toMatchObject({ ok: true, unchanged: true })
+    expect(readFileSync(file, 'utf8')).toBe(before)
+  })
+  it('serves a content/ file as it is on disk (the Text tab reads it fresh before saving)', async () => {
+    const res = await fetch(`${url}/content/ui/table.json`, { cache: 'no-store' })
+    expect(await res.json()).toEqual({ _help: 'keep me', rows: '#000000' })
+  })
   it('refuses paths outside content/', async () => {
     const res = await save({ path: 'content/../package.json', data: {} })
     expect(res.status).toBe(400)

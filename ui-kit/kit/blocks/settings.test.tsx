@@ -1,9 +1,21 @@
 // Settings is drawn from its list: add a row → it appears; switch it off → it's gone; values are remembered.
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ReactElement } from 'react'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { ScreenStack, screens } from '..'
 import { kitScreens } from './dialogs'
 import { loadSettings, Settings, settingsStorageKey, type SettingsSchema } from './Settings'
+
+/** "Reset to defaults" asks first (0.10.3): open Settings in a screen stack, press it, say yes. */
+function resetWithYes() {
+  fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }))
+  const ask = screen.getByRole('dialog', { name: 'Reset to defaults?' })
+  fireEvent.click(within(ask).getByRole('button', { name: 'Reset to defaults' }))
+}
+const inStack = (settings: () => ReactElement) => {
+  render(<ScreenStack screens={{ ...kitScreens, settings }} />)
+  act(() => screens.push('settings'))
+}
 
 afterEach(() => {
   cleanup()
@@ -52,9 +64,13 @@ describe('Settings', () => {
     fireEvent.click(screen.getByRole('switch', { name: 'Music' }))
     expect(loadSettings(schema()).music).toBe(false)
     cleanup()
-    render(<Settings schema={schema()} />) // opening Settings again
+    inStack(() => <Settings schema={schema()} />) // opening Settings again
     expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false')
-    fireEvent.click(screen.getByText('Reset to defaults'))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }))
+    expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false') // it asks first
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Reset to defaults?' })).getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('false') // Cancel: nothing changes
+    resetWithYes()
     expect(screen.getByRole('switch', { name: 'Music' }).getAttribute('aria-checked')).toBe('true')
   })
 
@@ -110,6 +126,77 @@ describe('Settings', () => {
     expect(onAction).toHaveBeenCalledWith('reset')
   })
 
+  it('heading rows draw a section title; one with nothing under it is not drawn; Reset ignores them (0.10.0)', () => {
+    const list: SettingsSchema = { tabs: [
+      { id: 'play', label: 'Play', rows: [
+        { id: 'secPlay', type: 'heading', label: 'Play' },
+        { id: 'music', type: 'toggle', label: 'Music', default: true },
+        { id: 'secEmpty', type: 'heading', label: 'Nothing here' },
+        { id: 'secOff', type: 'heading', label: 'Switched off' },
+        { id: 'hd', type: 'toggle', label: 'HD', default: true, on: false },
+      ] },
+      { id: 'only', label: 'Only headings', rows: [{ id: 'secLonely', type: 'heading', label: 'Lonely' }] },
+    ] }
+    inStack(() => <Settings schema={list} />)
+    expect(screen.getByRole('heading', { name: 'Play' })).toBeTruthy()
+    expect(screen.queryByText('Nothing here')).toBeNull() // the next row is another heading
+    expect(screen.queryByText('Switched off')).toBeNull() // its only row is off
+    expect(screen.queryByRole('tab')).toBeNull() // the headings-only tab is dropped, leaving one tab: no picker
+    fireEvent.click(screen.getByRole('switch', { name: 'Music' }))
+    resetWithYes()
+    expect(loadSettings(list).music).toBe(true)
+    expect(Object.keys(loadSettings(list)).filter((id) => id.startsWith('sec'))).toEqual([]) // headings hold no value
+  })
+
+  it('a button row with "confirm" asks first (not the red button), then calls onAction; without it, straight away', () => {
+    const onAction = vi.fn()
+    const list: SettingsSchema = { tabs: [{ id: 'account', label: 'Account', rows: [
+      { id: 'leaveTutorial', type: 'button', label: 'Leave the tutorial', button: 'Leave', confirm: 'You can play it again from the menu.' },
+      { id: 'playerName', type: 'button', label: 'Change your name' },
+    ] }] }
+    render(<ScreenStack screens={{ ...kitScreens, settings: () => <Settings schema={list} onAction={onAction} /> }} />)
+    act(() => screens.push('settings'))
+    fireEvent.click(screen.getByRole('button', { name: /Leave the tutorial/ }))
+    expect(onAction).not.toHaveBeenCalled()
+    const confirm = screen.getByRole('dialog', { name: 'Leave the tutorial?' })
+    expect(within(confirm).getByText('You can play it again from the menu.')).toBeTruthy()
+    const yes = within(confirm).getByRole('button', { name: 'Leave' })
+    expect(yes.getAttribute('data-variant')).toBe('primary')
+    fireEvent.click(yes)
+    expect(onAction).toHaveBeenCalledWith('leaveTutorial')
+    fireEvent.click(screen.getByRole('button', { name: /Change your name/ }))
+    expect(onAction).toHaveBeenLastCalledWith('playerName')
+  })
+
+  it('3 tabs or fewer: always the tab bar, never the ◀ ▶ picker; 4 or more: both (CSS picks by screen size)', () => {
+    const tabOf = (id: string) => ({ id, label: id, rows: [{ id: `${id}Row`, type: 'toggle', label: `${id} row`, default: true }] })
+    render(<Settings schema={{ tabs: ['a', 'b', 'c'].map(tabOf) }} />)
+    expect(screen.getAllByRole('tablist')).toHaveLength(1)
+    expect(document.querySelector('.kit-settings-picker')).toBeNull()
+    cleanup()
+    render(<Settings schema={{ tabs: ['a', 'b', 'c', 'd'].map(tabOf) }} />)
+    expect(document.querySelector('.kit-settings-picker')).not.toBeNull()
+  })
+
+  it('every tab is drawn in one spot (the tallest sets the size), only the current one can be seen or used', () => {
+    render(<Settings schema={schema()} />)
+    const pages = document.querySelectorAll('.kit-settings-page')
+    expect(pages).toHaveLength(2)
+    expect(pages[1].hasAttribute('inert')).toBe(true)
+    expect(screen.queryByRole('button', { name: 'Reset' })).toBeNull() // the About tab's row: hidden for now
+    fireEvent.click(screen.getByRole('tab', { name: 'About' }))
+    expect(screen.getByRole('button', { name: 'Reset' })).toBeTruthy()
+    expect(screen.queryByRole('switch', { name: 'Music' })).toBeNull()
+  })
+
+  it('has the menu header: ‹ goes back (onBack), no other Back button', () => {
+    const onBack = vi.fn()
+    render(<Settings schema={schema()} onBack={onBack} />)
+    expect(screen.getAllByRole('button', { name: 'Back' })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(onBack).toHaveBeenCalled()
+  })
+
   it('text size and reduce motion drive the whole kit', () => {
     const list: SettingsSchema = { tabs: [{ id: 'a11y', label: 'Accessibility', rows: [
       { id: 'reduceMotion', type: 'toggle', label: 'Reduce motion', default: false },
@@ -124,7 +211,7 @@ describe('the standard Audio tab', () => {
   it('has the rows the audio module reads, with the standard defaults', async () => {
     const standard = (await import('./settings.default.json')).default as SettingsSchema
     const audio = standard.tabs.find((tab) => tab.id === 'audio')!
-    expect(audio.rows.map((row) => [row.id, row.default])).toEqual([
+    expect(audio.rows.filter((row) => row.type !== 'heading').map((row) => [row.id, row.default])).toEqual([
       ['masterVolume', 80], ['musicVolume', 50], ['ambienceVolume', 60], ['sfxVolume', 80], ['uiVolume', 70],
       ['sound', true], ['muteInBackground', true], ['mono', false],
     ])

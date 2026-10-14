@@ -4,6 +4,7 @@
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
 import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import credits from '../content/credits.json'
+import { TeachSample } from './Teach'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
@@ -386,6 +387,7 @@ const samples: Record<string, ComponentType> = {
   noseats: () => <SeatPicker seats={[]} onPick={noop} onCancel={() => screens.pop()} />,
   idle: () => <IdleSample />,
   idlebot: () => <IdleSample startBot />,
+  teach: TeachSample,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 

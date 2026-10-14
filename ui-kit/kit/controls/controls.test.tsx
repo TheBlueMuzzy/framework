@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
-import { Button, RoomCodeInput, Selector, Stepper, Tabs, Toggle, setControlSound } from '.'
+import { Button, RoomCodeInput, ScrollArea, Selector, Stepper, Tabs, Toggle, setControlSound } from '.'
 
 afterEach(cleanup)
 
@@ -20,6 +20,14 @@ const boxes = () => screen.getAllByRole('textbox') as HTMLInputElement[]
 const code = () => boxes().map((box) => box.value).join('')
 
 describe('Selector ◀ option ▶', () => {
+  it('holds an invisible copy of every option, so it is as wide as the longest and never changes width (0.10.4)', () => {
+    const { container } = render(<SelectorDemo />)
+    const sizers = [...container.querySelectorAll('.kit-picker-sizer')]
+    expect(sizers.map((s) => s.textContent)).toEqual(['Easy', 'Normal', 'Hard'])
+    expect(sizers.every((s) => s.getAttribute('aria-hidden') === 'true')).toBe(true) // read out once, as the value
+    expect(screen.getByRole('status').textContent).toBe('Easy')
+  })
+
   it('steps with the arrow keys and wraps around', () => {
     render(<SelectorDemo />)
     const group = screen.getByRole('group', { name: 'Difficulty' })
@@ -163,5 +171,43 @@ describe('control sounds (setControlSound)', () => {
     render(<SelectorDemo />)
     fireEvent.click(screen.getByLabelText('Next Difficulty'))
     expect(heard).toEqual(['tap'])
+  })
+})
+
+// ScrollArea (0.10.0): no scroll bar, so it says where there's more to see — data-more-start / data-more-end drive the
+// edge fades, data-scrolls lets it keep swipes only when it really scrolls. jsdom has no layout: sizes are stood in for.
+describe('ScrollArea "more this way" flags', () => {
+  function sized(box: HTMLElement, contentH: number, boxH: number) {
+    Object.defineProperty(box, 'scrollHeight', { configurable: true, value: contentH })
+    Object.defineProperty(box, 'clientHeight', { configurable: true, value: boxH })
+  }
+  const flags = (box: HTMLElement) => ['data-scrolls', 'data-more-start', 'data-more-end'].filter((f) => box.hasAttribute(f))
+
+  it('contents that fit: no flags at all (it never catches a swipe)', () => {
+    render(<ScrollArea label="List"><p>one row</p></ScrollArea>)
+    const box = screen.getByRole('region', { name: 'List' })
+    sized(box, 100, 100)
+    fireEvent.scroll(box)
+    expect(flags(box)).toEqual([])
+  })
+
+  it('taller contents: more below at the top, more both ways in the middle, more above at the end', () => {
+    render(<ScrollArea label="List"><p>many rows</p></ScrollArea>)
+    const box = screen.getByRole('region', { name: 'List' })
+    sized(box, 500, 200)
+    box.scrollTop = 0
+    fireEvent.scroll(box)
+    expect(flags(box)).toEqual(['data-scrolls', 'data-more-end'])
+    box.scrollTop = 150
+    fireEvent.scroll(box)
+    expect(flags(box)).toEqual(['data-scrolls', 'data-more-start', 'data-more-end'])
+    box.scrollTop = 300
+    fireEvent.scroll(box)
+    expect(flags(box)).toEqual(['data-scrolls', 'data-more-start'])
+  })
+
+  it('stays keyboard-focusable (arrow keys scroll it)', () => {
+    render(<ScrollArea label="List"><p>rows</p></ScrollArea>)
+    expect(screen.getByRole('region', { name: 'List' }).tabIndex).toBe(0)
   })
 })
