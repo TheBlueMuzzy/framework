@@ -199,9 +199,12 @@ export function DevKit({ tabs = [...KIT_TABS, ...gameTabs] }: { tabs?: DevKitTab
   }
   // Select mode on a desktop: mouse off the panel → it tucks away to a bar; mouse back over it → it slides back in
   const [tucked, setTucked] = useState(false)
-  useEffect(() => {
-    if (!select.on || !open) setTucked(false)
-  }, [select.on, open])
+  const tuckable = select.on && open
+  const [wasTuckable, setWasTuckable] = useState(tuckable)
+  if (tuckable !== wasTuckable) {
+    setWasTuckable(tuckable)
+    if (!tuckable) setTucked(false) // select mode off or the panel closed: next time it starts slid in
+  }
   const tuckIfSelecting = (e: ReactPointerEvent) => {
     // The browser's own relatedTarget (React's says "window" for anything in the game's separate React root): no
     // element = the mouse left the window (off the right edge), not onto the game — stay put
