@@ -87,6 +87,13 @@ describe('the Select tab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear the pick' }))
     expect(getSelect().picked).toBeNull()
   })
+  it('Recently on screen: showing first, then the most recently seen, then never seen — each group in file order', () => {
+    act(() => setSelect({ onScreen: ['tip', 'board'], seen: { glyphling: 1000 } }))
+    render(<SelectTab />)
+    expect([...document.querySelectorAll('.sel-recent .sel-item-name')].map((n) => n.textContent)).toEqual(['Board', 'Tip', 'Glyphling'])
+    act(() => setSelect({ onScreen: [], seen: {} }))
+    expect([...document.querySelectorAll('.sel-recent .sel-item-name')].map((n) => n.textContent)).toEqual(['Board', 'Glyphling', 'Tip'])
+  })
   it('shows problems in the file in red', () => {
     resetSelect()
     initSelect({ objects: { board: { label: 'Board', knobs: { Look: ['garden.nope'] } } } })
