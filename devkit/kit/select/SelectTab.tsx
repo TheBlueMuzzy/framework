@@ -8,32 +8,17 @@
 //   + Add a knob: search every setting, text line and sound → it joins the pick (content/devkit/select.json, saved at
 //   once in dev). ✕ on a knob row takes it off. Problems in the file (a name that doesn't exist) show in red.
 import { useEffect, useState } from 'react'
-import { CAN_SAVE, copyText, saveContentFile } from '../saveContent'
+import { copyText } from '../saveContent'
 import { matchesAll, searchTerms } from '../search/searchLogic'
 import { valueAt } from '../tuning/tuningLogic'
 import { tuningFiles } from '../tuning/tuningFiles'
 import { catalog, SELECT_FILE, type Addable } from './selectFiles'
-import { checkSelectMap, countKnobs, withKnob, type KnobKind, type SelectFile, type SelectObject } from './selectMap'
-import { getSelect, OUTLINE_MIN, pickedObject, setSelect, useSelect } from './selectStore'
+import { checkSelectMap, countKnobs, withKnob, type KnobKind, type SelectObject } from './selectMap'
+import { getSelect, OUTLINE_MIN, pickedObject, saveSelectFile, setSelect, useSelect, type SaveStatus as Status } from './selectStore'
 import './select.css'
 
 const NEW_SECTION = '__new__'
 const MAX_RESULTS = 40
-
-type Status = { kind: 'ok' | 'error' | 'info'; text: string }
-
-/** Write the edited object list (dev), or say how to keep it (live build). Shared with DevKit's ✕ on a knob row. */
-export async function saveSelectFile(file: SelectFile): Promise<Status> {
-  setSelect({ file })
-  if (!CAN_SAVE) return { kind: 'info', text: 'Live build: this lasts until you refresh — Copy for Claude to keep it.' }
-  try {
-    await saveContentFile(SELECT_FILE, file)
-    setSelect({ savedFile: file })
-    return { kind: 'ok', text: `Saved ${SELECT_FILE}.` }
-  } catch (e) {
-    return { kind: 'error', text: `Couldn't save: ${(e as Error).message}` }
-  }
-}
 
 function ago(ms: number): string {
   const s = Math.round(ms / 1000)
@@ -51,9 +36,9 @@ export function SelectTab() {
   const [recentOpen, setRecentOpen] = useState(!s.picked)
   const [adding, setAdding] = useState(false)
   // The "x s ago" times tick while this tab is showing
-  const [, setTick] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
-    const timer = window.setInterval(() => setTick((t) => t + 1), 1000)
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
   }, [])
 
@@ -86,7 +71,6 @@ export function SelectTab() {
   }
 
   // Recently on screen: showing now, then by when they were last seen, then never seen (greyed)
-  const now = Date.now()
   const order = [...s.objects].sort((a, b) => {
     const rank = (o: SelectObject) => (s.onScreen.includes(o.id) ? Infinity : s.seen[o.id] ?? -Infinity)
     return rank(b) - rank(a)

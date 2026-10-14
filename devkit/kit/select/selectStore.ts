@@ -5,7 +5,8 @@
 // so they survive a refresh. Select mode itself always starts off.
 import { useSyncExternalStore } from 'react'
 import { getDevKitGame } from '../devkitGame'
-import { selectFile } from './selectFiles'
+import { CAN_SAVE, saveContentFile } from '../saveContent'
+import { SELECT_FILE, selectFile } from './selectFiles'
 import { readSelectObjects, type SelectFile, type SelectObject } from './selectMap'
 
 export type SelectState = {
@@ -98,3 +99,18 @@ export function useSelect(): SelectState {
 
 /** The picked object, if it's still in the file. */
 export const pickedObject = (s: SelectState) => s.objects.find((o) => o.id === s.picked) ?? null
+
+export type SaveStatus = { kind: 'ok' | 'error' | 'info'; text: string }
+
+/** Write the edited object list (dev), or say how to keep it (live build). Shared with DevKit's ✕ on a knob row. */
+export async function saveSelectFile(file: SelectFile): Promise<SaveStatus> {
+  setSelect({ file })
+  if (!CAN_SAVE) return { kind: 'info', text: 'Live build: this lasts until you refresh — Copy for Claude to keep it.' }
+  try {
+    await saveContentFile(SELECT_FILE, file)
+    setSelect({ savedFile: file })
+    return { kind: 'ok', text: `Saved ${SELECT_FILE}.` }
+  } catch (e) {
+    return { kind: 'error', text: `Couldn't save: ${(e as Error).message}` }
+  }
+}
