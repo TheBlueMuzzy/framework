@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { TuningTab } from '../tuning/TuningTab'
-import { allTagged, objectAt } from './domPicker'
+import { allTagged, idsOnScreen, objectAt } from './domPicker'
 import { DevKitPick, type PanelPick } from './pickContext'
 import { readSelectObjects, type SelectFile } from './selectMap'
 import { getSelect, initSelect, resetSelect, setSelect } from './selectStore'
@@ -54,6 +54,12 @@ describe('the DOM picker', () => {
     expect(objectAt(200, 200, objects)?.id).toBe('board')
     expect(objectAt(310, 305, objects)?.id).toBe('tip')
     expect(objectAt(900, 900, objects)).toBeNull()
+  })
+  it('a screen behind an open menu (inert) is never picked or counted as on screen', () => {
+    page()
+    document.getElementById('board')!.setAttribute('inert', '')
+    expect(objectAt(20, 20, objects)).toBeNull()
+    expect([...idsOnScreen(objects)]).toEqual(['tip'])
   })
 })
 
@@ -144,7 +150,7 @@ describe('a panel under the Select tab', () => {
   it('the Tuning tab shows only the pick, in the object’s sections, with ✕ to take one off', () => {
     const removed: string[] = []
     const value: PanelPick = {
-      pick: { objectId: 'glyphling', label: 'Glyphling', tuning: [{ title: 'Look', ids: ['garden.pieceScale'] }, { title: 'Drag', ids: ['drag'] }], text: [], sounds: [] },
+      pick: { objectId: 'glyphling', label: 'Glyphling', tuning: [{ title: 'Look', ids: ['garden.pieceScale'] }, { title: 'Drag', ids: ['drag'] }], text: [], sounds: [], style: [] },
       remove: (kind, id) => removed.push(`${kind}:${id}`),
     }
     render(
@@ -160,7 +166,7 @@ describe('a panel under the Select tab', () => {
     expect(removed).toEqual(['tuning:garden.pieceScale'])
   })
   it('shows nothing when the pick has no tuning', () => {
-    const value: PanelPick = { pick: { objectId: 'tip', label: 'Tip', tuning: [], text: [], sounds: [] }, remove: () => {} }
+    const value: PanelPick = { pick: { objectId: 'tip', label: 'Tip', tuning: [], text: [], sounds: [], style: [] }, remove: () => {} }
     const { container } = render(
       <DevKitPick.Provider value={value}>
         <TuningTab files={files} />

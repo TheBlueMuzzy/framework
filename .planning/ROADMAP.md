@@ -120,16 +120,18 @@ Goal: any game picks, per drag type, how a dragged piece is carried, what its ho
 - ✅ F54 🧱 Target feedback: highlight · ghost preview · insertion marker · make room (FLIP) · tether · magnetic snap — should · needs: F53 · Glyphtender sprint 23 (its F64) · built 2026-10-10 (ui-kit 0.6.0)
 
 ## v0.8 — Dev Kit Select Mode  ← current  (proven by Glyphtender v0.15) · defined 2026-10-14
-Goal: click a thing in the game → its knobs (Tuning · Text · Sound) in one place → change them → Save. Design: `design/select-mode.md` · discovery: `research/devkit-select-mode.md`.
+Goal: click a thing in the game — or a menu button, switch, tab… — → its knobs (Tuning · UI style · Text · Sound) in one place → change them → Save. Design: `design/select-mode.md` · discovery: `research/devkit-select-mode.md`.
 - 🔨 F55 🔧 Select tab + picker: select mode, pink hover / picked outlines + outline slider, the picked object's knobs from the real editors grouped by its sections, recently-on-screen list, pick + slider remembered — should · Glyphtender sprint 29 (its F86)
   why: Muzzy sees something he wants changed → one click → every knob for it → no hunting through tabs and files
 - ⏳ F56 🔧 + Add a knob / ✕ remove, checkSelectMap (unknown keys shown red + a game test), Copy for Claude of a pick — should · needs: F55 · Glyphtender sprint 29
   why: the object → knobs list grows while playing → it gets right over time without anyone planning it perfectly
+- 🔨 F58 🔧 UI kit parts in Select: a "style" knob kind (style.json token names, shared by every part of that kind) shown by the Color tab under a pick; the Color tab also edits the non-colour values (corners, outline, shadows, press feel, timings, menu sizes — styleValues.ts, slider / dropdown / box); things in an [inert] screen never picked; outlines never drawn over the Dev Kit panel; phone pick waits for the tap to finish — Dev Kit 0.15.0 · should · needs: F55 · Glyphtender sprint 29 (its F88), Muzzy 2026-10-14: "click on a button, or a toggle and update the settings for it"
 - ⏳ F57 🔧 3D picker (raycast + 3D outline, same tab) — could · needs: F55 · when a 3D game needs it
 ```mermaid
 flowchart LR
   F55[F55 Select tab + picker] --> F56[F56 Add knob + check]
   F55 --> F57[F57 3D picker]
+  F55 --> F58[F58 UI kit parts]
 ```
 
 ## Later

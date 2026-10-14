@@ -2,11 +2,12 @@
 
 ## ▶ RESUME HERE
 2026-10-14 — **v0.8 Dev Kit Select Mode** built overnight on branch `dev/select-mode` (Dev Kit 0.14.0: Select tab — click a thing → its knobs from Tuning / Text / Sound in one place, + Add a knob, recent list, phone bar). Proven in Glyphtender sprint 29 (its F86, e2e:devkit-select). Design `design/select-mode.md`.
+**+ F58 (2026-10-14 morning, Muzzy asked):** Dev Kit 0.15.0 — menus too: click a button / switch / tab… → its SHARED UI style values (the Color tab, which now also edits corners, outline, shadows, press feel, timings, menu sizes); [inert] screens never picked; outlines never over the panel; phone pick waits for the tap to finish. Glyphtender F88.
 Next: Muzzy tries it in Glyphtender (its F87) → merge with Glyphtender's /deliver.
 
 ## Where we are
 Stage: develop   Milestone: v0.8 — Dev Kit Select Mode   Sprint: Glyphtender 29
-Doing: built, waiting for Muzzy   Branch: dev/select-mode   Version: 0.9.0 (Dev Kit 0.14.0 on the branch)
+Doing: built, waiting for Muzzy   Branch: dev/select-mode   Version: 0.9.0 (Dev Kit 0.15.0 on the branch)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts

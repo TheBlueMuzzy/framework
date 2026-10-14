@@ -11,6 +11,7 @@ const file = {
       text: ['explore.glyph'],
       sounds: ['glyph.step'],
     },
+    button: { label: 'Button', find: '.kit-button', style: ['primary', 'radius-control'] },
     tip: { label: 'Tip', find: '.kit-callout', knobs: {} },
     broken: 'not an object',
   },
@@ -20,17 +21,19 @@ const known: Known = {
   tuning: ['garden.pieceScale', 'drag.liftScale', 'feel.tiers.small.grow', 'feel.tiers.big.grow'],
   text: ['explore.glyph.yours', 'explore.glyph.theirs', 'tips.first'],
   sounds: ['glyph.step', 'score.pop'],
+  style: ['primary', 'on-primary', 'radius-control'],
 }
 
 describe('readSelectObjects', () => {
   it('reads objects in order, skipping malformed ones', () => {
     const objects = readSelectObjects(file)
-    expect(objects.map((o) => o.id)).toEqual(['glyphling', 'tip'])
+    expect(objects.map((o) => o.id)).toEqual(['glyphling', 'button', 'tip'])
     expect(objects[0].knobs).toEqual([
       { title: 'Look', ids: ['garden.pieceScale'] },
       { title: 'Drag', ids: ['drag.liftScale', 'feel.tiers'] },
     ])
-    expect(objects[1]).toMatchObject({ label: 'Tip', find: '.kit-callout', text: [], sounds: [] })
+    expect(objects[1]).toMatchObject({ label: 'Button', find: '.kit-button', style: ['primary', 'radius-control'] })
+    expect(objects[2]).toMatchObject({ label: 'Tip', find: '.kit-callout', text: [], sounds: [], style: [] })
   })
   it('never throws on an empty or odd file', () => {
     expect(readSelectObjects({})).toEqual([])
@@ -56,6 +59,9 @@ describe('countKnobs', () => {
     // tuning: pieceScale + liftScale + 2 tiers · text: 2 under explore.glyph · sounds: 1
     expect(countKnobs(glyphling, known)).toBe(7)
   })
+  it('counts UI style values', () => {
+    expect(countKnobs(readSelectObjects(file)[1], known)).toBe(2)
+  })
 })
 
 describe('checkSelectMap', () => {
@@ -63,10 +69,11 @@ describe('checkSelectMap', () => {
     expect(checkSelectMap(file, known)).toEqual([])
   })
   it('names every knob that points at nothing, in plain words', () => {
-    const bad = withKnob(withKnob(withKnob(file, 'glyphling', 'tuning', 'garden.pieceScal', 'Look'), 'glyphling', 'text', 'nope'), 'tip', 'sounds', 'boom')
+    const bad = withKnob(withKnob(withKnob(withKnob(file, 'glyphling', 'tuning', 'garden.pieceScal', 'Look'), 'glyphling', 'text', 'nope'), 'tip', 'sounds', 'boom'), 'button', 'style', 'radius')
     expect(checkSelectMap(bad, known)).toEqual([
       'Glyphling · Look: "garden.pieceScal" — no tuning setting has this name',
       'Glyphling · Text: "nope" — no text line has this key',
+      'Button · Style: "radius" — no UI style value has this name',
       'Tip · Sounds: "boom" — no sound has this name',
     ])
   })
@@ -87,6 +94,11 @@ describe('withKnob / withoutKnob', () => {
     const once = withKnob(file, 'glyphling', 'sounds', 'score.pop')
     expect(withKnob(once, 'glyphling', 'sounds', 'score.pop')).toBe(once)
     expect(readSelectObjects(once)[0].sounds).toEqual(['glyph.step', 'score.pop'])
+  })
+  it('adds and takes off UI style values', () => {
+    const more = withKnob(file, 'button', 'style', 'on-primary')
+    expect(readSelectObjects(more)[1].style).toEqual(['primary', 'radius-control', 'on-primary'])
+    expect(readSelectObjects(withoutKnob(more, 'button', 'style', 'primary'))[1].style).toEqual(['radius-control', 'on-primary'])
   })
   it('makes the object if it is new', () => {
     expect(readSelectObjects(withKnob(file, 'board', 'text', 'tips.first'))).toContainEqual(
