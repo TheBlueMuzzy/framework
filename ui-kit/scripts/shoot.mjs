@@ -88,7 +88,8 @@ async function shoot(file, size, query, prepare) {
   page.errors = []
   await page.goto(`http://localhost:5180/${query}`)
   const isScreen = query.includes('screen=') && !query.includes('screen=parts')
-  await page.waitForSelector(isScreen ? '.gallery-game .kit-screen' : '.gallery')
+  // (a VISIBLE screen: Pause opens over the HUD, which then hides — the first .kit-screen on the page)
+  await page.waitForSelector(isScreen ? '.gallery-game .kit-screen >> visible=true' : '.gallery')
   await page.evaluate(() => document.fonts.ready)
   if (prepare) await prepare(page)
   // let entrances and transitions finish (Results rows arrive one after another, so they take longer)
