@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.9.0",
+      "date": "2026-10-14",
+      "summary": "UI kit 0.10.4 — tutorial parts (Callout with a pointer, tips memory + Tips switch, useNudge idle/wrong-action timer, MainMenu locked items, HowToPlay onSkip) and the menu frame (one menu width, cards open centred then grow down, ScrollArea with no scroll bar + a 'more' fade, MenuHeader ‹ · title · action, Settings section headings + confirm rows + ≤3 tabs as a bar, Selector as wide as its longest option) + Dev Kit 0.13.0 (Text tab: edit every string, search, placeholder guard) — proven by Glyphtender v0.10.0"
+    },
     {
       "version": "0.6.0",
       "date": "2026-10-10",
