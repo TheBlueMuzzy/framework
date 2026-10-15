@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import cartoon from '../../../ui-kit/kit/styles/cartoon.json'
 import { colourTokens, lineColourTokens, menuSizeTokens, optionalTokens, otherTokens } from '../../../ui-kit/kit/style/tokens'
-import { joinNumber, shapeDefault, sliderFor, UI_SHAPES, uiShapesFrom } from './styleValues'
+import { joinNumber, shapeDefault, shapesToClear, sliderFor, UI_SHAPES, uiShapesFrom } from './styleValues'
 import {
   UI_COLOURS,
   copyForClaudeText,
@@ -118,6 +118,18 @@ describe('UI shape & feel values (styleValues.ts)', () => {
   it('cover every non-colour style value the kit has (presets, optional extras, menu sizes)', () => {
     const editable = [...Object.keys(otherTokens), ...Object.keys(optionalTokens), ...Object.keys(menuSizeTokens)]
     expect(UI_SHAPES.map((s) => s.token).sort()).toEqual(editable.sort())
+  })
+  it('after a restyle only unset menu sizes are cleared — never glow or panel texture (a preset may leave them out)', () => {
+    const preset = { ...cartoon } as Record<string, unknown>
+    delete preset['glow']
+    delete preset['panel-texture']
+    delete preset['kit-menu-w']
+    const cleared = shapesToClear(preset, { 'kit-ask-w': '30rem' })
+    expect(cleared).toContain('kit-menu-w')
+    expect(cleared).not.toContain('kit-ask-w')
+    expect(cleared).not.toContain('glow')
+    expect(cleared).not.toContain('panel-texture')
+    expect(cleared.every((t) => t.startsWith('kit-'))).toBe(true)
   })
   it('menu sizes fall back to the kit CSS defaults', () => {
     for (const [token, note] of Object.entries(menuSizeTokens)) expect(shapeDefault(cartoon, token)).toBe(note.split(' ')[0])
