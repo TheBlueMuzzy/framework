@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { DevKit, type DevKitTab } from './DevKit'
+import { setSelect } from './select/selectStore'
 
 afterEach(cleanup)
 
@@ -46,6 +47,24 @@ describe('DevKit panel', () => {
     render(<DevKit />)
     expect(screen.getByText(/doesn't use the Game UI kit/)).toBeTruthy()
     expect(screen.getByText('Colour-blind preview')).toBeTruthy()
+  })
+
+  it('select mode on a desktop: the mouse leaving onto the game tucks the panel away; coming back brings it in', () => {
+    render(<><main data-testid="game" /><DevKit /></>)
+    press('`')
+    const leave = (to: Element | null) => act(() => { fireEvent.pointerLeave(panel(), { pointerType: 'mouse', relatedTarget: to }) })
+    leave(screen.getByTestId('game'))
+    expect(panel().classList.contains('is-tucked')).toBe(false) // not selecting: stays
+    act(() => setSelect({ on: true }))
+    leave(null) // off the window's edge, not onto the game: stays
+    expect(panel().classList.contains('is-tucked')).toBe(false)
+    leave(screen.getByTestId('game'))
+    expect(panel().classList.contains('is-tucked')).toBe(true)
+    act(() => { fireEvent.pointerEnter(panel(), { pointerType: 'mouse' }) })
+    expect(panel().classList.contains('is-tucked')).toBe(false)
+    leave(screen.getByTestId('game'))
+    act(() => setSelect({ on: false }))
+    expect(panel().classList.contains('is-tucked')).toBe(false) // select mode off: back in
   })
 
   it('carries the marker the release check looks for', () => {

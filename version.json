@@ -1,8 +1,13 @@
 {
   "name": "Game Framework",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "build": 0,
   "history": [
+    {
+      "version": "0.10.0",
+      "date": "2026-10-15",
+      "summary": "Dev Kit 0.16.1 — Select Mode (v0.8 F55, F56, F58): a Select tab; click a thing in the game or a UI kit part (button, switch, tab, slider, menu card…) → its tuning, text, sounds and shared UI style values in one place; select.json checked by checkSelectMap + unlistedSettings (every setting on some object); the panel tucks to a bar while selecting on a desktop; the Color tab also edits corners, outline, shadows, press feel, timings, menu sizes — proven by Glyphtender v0.11.0"
+    },
     {
       "version": "0.9.0",
       "date": "2026-10-14",

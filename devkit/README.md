@@ -207,6 +207,30 @@ Just before saving, the tab reads the file fresh from the dev server and puts on
 tab saved meanwhile (Glyphtender's AI tab writes bios into the same file) are kept. Install the Vite plugin too
 (`vite/` → `vite-plugins/devkit/`): the reload flag lives there.
 
+## The Select tab (click a thing → its knobs) — Dev Kit 0.14.0–0.16.0, framework F55/F56/F58
+Muzzy's goal: "click on a thing > see the attributes associated with it compiled in one place > update those things and hit save."
+- The game adds **`content/devkit/select.json`** (the tab appears when it exists) — the object → knobs list. Claude keeps it
+  complete; the Dev Kit only reads it (0.16.0: no + Add a knob / ✕ — Muzzy wants to trust that a click shows everything):
+  `{ "objects": { "glyphling": { "label": "Glyphling", "help": "…", "knobs": { "Look": ["garden.pieceScale"], "Drag": ["drag.liftScale"] }, "text": ["explore.glyph"], "sounds": ["glyph.step"] } } }`
+  Tuning ids are `<file>.<key path>` (a group brings all of it), text ids are en.json keys (a branch brings all of it), sounds are audio.json names.
+- The game marks what you SEE with **`data-knobs="glyphling"`** (by meaning, several ids space-separated). A kit part the game can't tag → `"find": ".kit-callout"` in the object instead.
+- Select mode on → hover = thin pink outline + name, click/tap = pick (thick; its twins dashed). Clicks don't reach the game while it's on; closing the Dev Kit turns it off and forgets the pick (0.16.0). Only the Outline slider is remembered in this browser.
+- Desktop, select mode on: the mouse leaves the panel → it slides off to a thin pink "Dev Kit" bar on the right (the whole game shows); the mouse back over the bar → it slides in again (0.15.1). Phone: the panel is a bar at the bottom instead.
+- Under the Select tab: the pick's knobs from the real Tuning / Text / Sound panels (same edits, own Saves), "Recently on screen" (pick fast things there), Copy for Claude, problems in red.
+- **Menus and kit parts (0.15.0):** an object can list `"style": ["primary", "radius-control"]` — UI kit style values
+  (content/ui/style.json token names). They're SHARED (a button's corners are every button's), and the panel says so;
+  the Color tab shows them under the pick. The Color tab itself now has a second section, **UI shape & feel**: corners,
+  outline, shadows, press feel, timings, text size, fonts, menu sizes (`color/styleValues.ts` — slider, dropdown or box).
+  Kit parts are found with `find` (`.kit-button`, `.kit-toggle`, `.kit-slider`, `.kit-picker`, `.kit-tab`, `.kit-listrow`,
+  `.kit-badge`, `.kit-modal, .kit-menu`, `.kit-card`, `.kit-toast`, `.kit-screen` — Glyphtender's select.json has all 12).
+  Anything inside an `[inert]` screen (a menu under the top one) is never picked or counted on screen.
+- Game test: `checkSelectMap(file, catalog().known)` is empty, **`unlistedSettings(file, catalog().known.tuning)` is empty**
+  (every setting is on some object — rules included, on the thing they affect), and every object has a `data-knobs` in src
+  or a `find` (Glyphtender `src/devkit-game/select.test.ts` is the template).
+- One thing = what a designer would call one thing: its parts (a glyphling's danger ring) carry its tag, so a click on
+  a part picks the whole thing and shows every knob for all its parts.
+- BMUZ rule: a new tunable setting → put it on the object it affects (the test fails until you do).
+
 ## Live tuning in the game
 The game keeps importing its own tuning JSON; it just wraps it so the Tuning tab's sliders reach it while it runs.
 `src/devkit/tuning/liveTuning.ts` has no Dev Kit code in it, so it's safe in every build (with the Dev Kit off,

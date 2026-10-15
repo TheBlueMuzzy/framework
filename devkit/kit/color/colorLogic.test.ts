@@ -1,7 +1,8 @@
 // Runs in the framework (not copied into games): checks the Color tool against the real UI kit.
 import { describe, expect, it } from 'vitest'
 import cartoon from '../../../ui-kit/kit/styles/cartoon.json'
-import { colourTokens, lineColourTokens } from '../../../ui-kit/kit/style/tokens'
+import { colourTokens, lineColourTokens, menuSizeTokens, optionalTokens, otherTokens } from '../../../ui-kit/kit/style/tokens'
+import { joinNumber, shapeDefault, shapesToClear, sliderFor, UI_SHAPES, uiShapesFrom } from './styleValues'
 import {
   UI_COLOURS,
   copyForClaudeText,
@@ -110,5 +111,51 @@ describe('copyForClaudeText', () => {
   it('works for a game tab\'s own values and file', () => {
     const text = copyForClaudeText('Roll Better', [{ name: 'Rows felt', from: '#111111', to: '#222222' }], true, false, 'Table', 'content/ui/table.json')
     expect(text).toBe('Table changes from the Dev Kit (Roll Better) — saved to content/ui/table.json:\n- Rows felt: #111111 → #222222')
+  })
+})
+
+describe('UI shape & feel values (styleValues.ts)', () => {
+  it('cover every non-colour style value the kit has (presets, optional extras, menu sizes)', () => {
+    const editable = [...Object.keys(otherTokens), ...Object.keys(optionalTokens), ...Object.keys(menuSizeTokens)]
+    expect(UI_SHAPES.map((s) => s.token).sort()).toEqual(editable.sort())
+  })
+  it('after a restyle only unset menu sizes are cleared — never glow or panel texture (a preset may leave them out)', () => {
+    const preset = { ...cartoon } as Record<string, unknown>
+    delete preset['glow']
+    delete preset['panel-texture']
+    delete preset['kit-menu-w']
+    const cleared = shapesToClear(preset, { 'kit-ask-w': '30rem' })
+    expect(cleared).toContain('kit-menu-w')
+    expect(cleared).not.toContain('kit-ask-w')
+    expect(cleared).not.toContain('glow')
+    expect(cleared).not.toContain('panel-texture')
+    expect(cleared.every((t) => t.startsWith('kit-'))).toBe(true)
+  })
+  it('menu sizes fall back to the kit CSS defaults', () => {
+    for (const [token, note] of Object.entries(menuSizeTokens)) expect(shapeDefault(cartoon, token)).toBe(note.split(' ')[0])
+  })
+  it('read from the preset, with tweaks on top', () => {
+    const shapes = uiShapesFrom(cartoon, { 'radius-control': '2rem' })
+    expect(shapes['radius-control']).toBe('2rem')
+    expect(shapes['press-scale']).toBe(String(cartoon['press-scale']))
+    expect(shapes['kit-menu-w']).toBe('36rem')
+  })
+  it('Save keeps numbers as numbers, drops values back at the preset / default, keeps tweaks it was not given', () => {
+    const values = { ...uiShapesFrom(cartoon), 'press-scale': '0.9', 'kit-menu-w': '36rem', 'radius-control': '0.5rem' }
+    expect(tweaksToSave(cartoon, values, { 'kit-menu-w': '40rem', primary: '#123456' })).toEqual({
+      primary: '#123456',
+      'press-scale': 0.9,
+      'radius-control': '0.5rem',
+    })
+  })
+  it('names them in plain words', () => {
+    expect(uiLabel('radius-control')).toBe('Button & input corners (radius-control)')
+  })
+  it('a slider in the value’s unit, stretched to reach it; none for a shadow or an unknown unit', () => {
+    expect(sliderFor('radius-control', '1rem')).toMatchObject({ n: 1, unit: 'rem', min: 0, max: 3 })
+    expect(sliderFor('radius-control', '999px')).toMatchObject({ n: 999, unit: 'px', max: 999 })
+    expect(sliderFor('depth-0', '0 2px 0 black')).toBeNull()
+    expect(sliderFor('motion-fast', '20vw')).toBeNull()
+    expect(joinNumber(0.1 + 0.2, 'rem')).toBe('0.3rem')
   })
 })
