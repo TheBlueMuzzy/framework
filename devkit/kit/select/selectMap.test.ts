@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkSelectMap, countKnobs, coveredBy, readSelectObjects, tagsOf, withKnob, withoutKnob, type Known } from './selectMap'
+import { checkSelectMap, countKnobs, coveredBy, readSelectObjects, tagsOf, unlistedSettings, type Known } from './selectMap'
 
 const file = {
   _help: 'kept',
@@ -69,7 +69,13 @@ describe('checkSelectMap', () => {
     expect(checkSelectMap(file, known)).toEqual([])
   })
   it('names every knob that points at nothing, in plain words', () => {
-    const bad = withKnob(withKnob(withKnob(withKnob(file, 'glyphling', 'tuning', 'garden.pieceScal', 'Look'), 'glyphling', 'text', 'nope'), 'tip', 'sounds', 'boom'), 'button', 'style', 'radius')
+    const bad = {
+      objects: {
+        glyphling: { label: 'Glyphling', knobs: { Look: ['garden.pieceScale', 'garden.pieceScal'] }, text: ['explore.glyph', 'nope'] },
+        button: { label: 'Button', style: ['primary', 'radius'] },
+        tip: { label: 'Tip', sounds: ['boom'] },
+      },
+    }
     expect(checkSelectMap(bad, known)).toEqual([
       'Glyphling · Look: "garden.pieceScal" — no tuning setting has this name',
       'Glyphling · Text: "nope" — no text line has this key',
@@ -82,33 +88,8 @@ describe('checkSelectMap', () => {
   })
 })
 
-describe('withKnob / withoutKnob', () => {
-  it('adds a setting to a section (new or existing) and keeps the rest of the file', () => {
-    const added = withKnob(file, 'glyphling', 'tuning', 'garden.yellow', 'Look')
-    expect(readSelectObjects(added)[0].knobs[0]).toEqual({ title: 'Look', ids: ['garden.pieceScale', 'garden.yellow'] })
-    expect(added._help).toBe('kept')
-    const fresh = withKnob(file, 'glyphling', 'tuning', 'anim.hopTime', 'Hop')
-    expect(readSelectObjects(fresh)[0].knobs.map((k) => k.title)).toEqual(['Look', 'Drag', 'Hop'])
-  })
-  it('adds text and sounds to their lists, never twice', () => {
-    const once = withKnob(file, 'glyphling', 'sounds', 'score.pop')
-    expect(withKnob(once, 'glyphling', 'sounds', 'score.pop')).toBe(once)
-    expect(readSelectObjects(once)[0].sounds).toEqual(['glyph.step', 'score.pop'])
-  })
-  it('adds and takes off UI style values', () => {
-    const more = withKnob(file, 'button', 'style', 'on-primary')
-    expect(readSelectObjects(more)[1].style).toEqual(['primary', 'radius-control', 'on-primary'])
-    expect(readSelectObjects(withoutKnob(more, 'button', 'style', 'primary'))[1].style).toEqual(['radius-control', 'on-primary'])
-  })
-  it('makes the object if it is new', () => {
-    expect(readSelectObjects(withKnob(file, 'board', 'text', 'tips.first'))).toContainEqual(
-      expect.objectContaining({ id: 'board', label: 'board', text: ['tips.first'] }),
-    )
-  })
-  it('takes a knob off, and an emptied section goes too', () => {
-    const off = withoutKnob(file, 'glyphling', 'tuning', 'garden.pieceScale')
-    expect(readSelectObjects(off)[0].knobs.map((k) => k.title)).toEqual(['Drag'])
-    expect(readSelectObjects(withoutKnob(file, 'glyphling', 'text', 'explore.glyph'))[0].text).toEqual([])
-    expect(withoutKnob(file, 'nobody', 'text', 'x')).toBe(file)
+describe('unlistedSettings', () => {
+  it('names every setting no object lists (a group covers all of it)', () => {
+    expect(unlistedSettings(file, [...known.tuning, 'garden.yellow', 'anim.hopTime'])).toEqual(['garden.yellow', 'anim.hopTime'])
   })
 })

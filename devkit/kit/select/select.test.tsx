@@ -64,17 +64,11 @@ describe('the DOM picker', () => {
 })
 
 describe('the store', () => {
-  it('remembers the pick and the outline for this game, not select mode', () => {
+  it('remembers only the outline in this browser — never the pick or select mode', () => {
     setSelect({ on: true, picked: 'glyphling', outline: 0.5 })
     resetSelect()
     initSelect(file)
-    expect(getSelect()).toMatchObject({ on: false, picked: 'glyphling', outline: 0.5 })
-  })
-  it('forgets a remembered pick that is no longer in the file', () => {
-    setSelect({ picked: 'glyphling' })
-    resetSelect()
-    initSelect({ objects: { board: { label: 'Board' } } })
-    expect(getSelect().picked).toBeNull()
+    expect(getSelect()).toMatchObject({ on: false, picked: null, outline: 0.5 })
   })
 })
 
@@ -127,16 +121,16 @@ describe('select mode catches clicks', () => {
     fireEvent.pointerDown(document.getElementById('dk')!)
     expect(devkitSawIt).toBe(1)
   })
-  it('closing the Dev Kit turns select mode off and lets clicks through again', () => {
+  it('closing the Dev Kit turns select mode off, forgets the pick, and lets clicks through again', () => {
     document.body.innerHTML = '<div data-knobs="glyphling" id="g1"></div>'
     let gameSawIt = 0
     document.getElementById('g1')!.addEventListener('pointerdown', () => gameSawIt++)
     const host = document.createElement('div')
     document.body.appendChild(host)
     const { rerender } = render(<SelectLayer panelOpen />, { container: host })
-    act(() => setSelect({ on: true }))
+    act(() => setSelect({ on: true, picked: 'glyphling' }))
     rerender(<SelectLayer panelOpen={false} />)
-    expect(getSelect().on).toBe(false)
+    expect(getSelect()).toMatchObject({ on: false, picked: null })
     fireEvent.pointerDown(document.getElementById('g1')!)
     expect(gameSawIt).toBe(1)
   })
@@ -147,11 +141,9 @@ describe('a panel under the Select tab', () => {
     { name: 'garden', data: { pieceScale: 1, hexFill: '#112233', yellow: '#ffff00', _labels: { pieceScale: 'Piece size' } } },
     { name: 'drag', data: { liftScale: 1.2, liftTime: 0.1 } },
   ]
-  it('the Tuning tab shows only the pick, in the object’s sections, with ✕ to take one off', () => {
-    const removed: string[] = []
+  it('the Tuning tab shows only the pick, in the object’s sections', () => {
     const value: PanelPick = {
       pick: { objectId: 'glyphling', label: 'Glyphling', tuning: [{ title: 'Look', ids: ['garden.pieceScale'] }, { title: 'Drag', ids: ['drag'] }], text: [], sounds: [], style: [] },
-      remove: (kind, id) => removed.push(`${kind}:${id}`),
     }
     render(
       <DevKitPick.Provider value={value}>
@@ -162,11 +154,9 @@ describe('a panel under the Select tab', () => {
     expect(document.querySelectorAll('.tt-row')).toHaveLength(3) // pieceScale + the whole drag file (liftScale, liftTime)
     expect(screen.queryByText('Yellow')).toBeNull()
     expect(screen.getByRole('button', { name: 'Save tuning' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Take garden.pieceScale off Glyphling' }))
-    expect(removed).toEqual(['tuning:garden.pieceScale'])
   })
   it('shows nothing when the pick has no tuning', () => {
-    const value: PanelPick = { pick: { objectId: 'tip', label: 'Tip', tuning: [], text: [], sounds: [], style: [] }, remove: () => {} }
+    const value: PanelPick = { pick: { objectId: 'tip', label: 'Tip', tuning: [], text: [], sounds: [], style: [] } }
     const { container } = render(
       <DevKitPick.Provider value={value}>
         <TuningTab files={files} />
