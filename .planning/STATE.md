@@ -3,6 +3,7 @@
 ## ▶ RESUME HERE
 2026-10-15 — **Released framework v0.10.0 = v0.8 Dev Kit Select Mode ✅** (Dev Kit 0.16.1: Select tab — click a thing or a menu part → every knob for it; the game's test keeps every setting on some object; desktop panel tucks to a bar while selecting; pick forgotten on close). Proven by Glyphtender v0.11.0. F57 (3D picker) waits for a 3D game.
 Next: whatever the next game sprint needs.
+2026-10-18 — **Planned v0.9 "Every game wired the same"** (F59–F66, ROADMAP): game core (live content by default, rules/looks clocks) + Dev Kit Time tool (full / half pause) are being built through Goops right now (Dev Kit 0.18.0); then the conformance pack (F61), Goops + Glyphtender pass it, starters, a framework test game. Spec: ~/.claude/config/bmuz/MODULE-CONTRACTS.md. Plan: a separate Claude session runs this milestone once F59/F60 land (one writer per repo — see ROADMAP notes).
 
 ## Where we are
 Stage: deliver   Milestone: v0.8 — Dev Kit Select Mode ✅   Sprint: —
