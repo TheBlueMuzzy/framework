@@ -16,6 +16,8 @@
   .kit-art-down { visibility: hidden; }
   .kit-button[data-art]:is(:active, [data-pressed]):not(:disabled) .kit-art-down { visibility: visible; }
   .kit-button[data-art]:is(:active, [data-pressed]):not(:disabled) .kit-art-up:has(+ .kit-art-down) { visibility: hidden; }
+  /* short windows (a phone on its side): pictures at 75%, so a row of them and their words still fit */
+  @media (max-height: 30rem) { .kit-art-face { inline-size: calc(var(--kit-art-size, 4rem) * 0.75); } }
   .kit-art-label { display: inline-flex; align-items: center; gap: var(--gap-s); min-inline-size: 0; }
   /* label hidden: read out, never shown */
   .kit-button[data-art="hidden"] { padding: var(--gap-xs); }
