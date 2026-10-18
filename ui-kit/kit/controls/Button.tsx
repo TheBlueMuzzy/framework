@@ -9,7 +9,8 @@
 //   up = the picture at rest, down = the picture while it's held (pressed in; drawn bottom-aligned in the same box,
 //   so a shorter "pushed in" picture sinks into its base). Pictures keep their own shape — never stretched.
 //   label: 'beside' (default: picture, then the words) · 'below' (words under the picture) · 'hidden' (picture only;
-//   the words are still read out). size: s / m / l = how wide the picture is (3 / 4 / 5.5rem). Still ≥ 44px to press.
+//   the words are still read out). size: s / m / l = how wide the picture is (3 / 4 / 5.5rem; l also gets heading-size
+//   words). Still ≥ 44px to press.
 import type { ButtonHTMLAttributes, CSSProperties, PointerEvent } from 'react'
 import { controlSound, type ControlSoundKind } from './controlSound'
 
