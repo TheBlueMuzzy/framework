@@ -100,6 +100,15 @@ describe('Bar width', () => {
   })
 })
 
+describe('Bar showLabel', () => {
+  it('prints the label beside the bar only when asked (screen readers already get it from the bar)', () => {
+    const { container, rerender } = render(<Bar label="Tank" value={50} />)
+    expect(container.querySelector('.kit-bar-label')).toBeNull()
+    rerender(<Bar label="Tank" value={50} showLabel />)
+    expect(container.querySelector('.kit-bar-label')?.textContent).toBe('Tank')
+  })
+})
+
 describe('PlayerChip xs', () => {
   it('xs puts name, badge and detail on one line; other sizes keep the detail below', () => {
     const lines = (size: 'xs' | 's') => {
