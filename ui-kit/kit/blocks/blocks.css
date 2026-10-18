@@ -73,11 +73,10 @@
   /* HUD: its slots let taps through to the game; only buttons and inputs catch them */
   .kit-screen > [data-slot]:has(> .kit-hud-slot) { pointer-events: none; }
   .kit-hud-slot { display: contents; }
-  /* a corner's pieces share one line while there's room (a score + pause pair wrapped needlessly on a 390px phone —
-     Goops 2026-10-17). When the other corner can't give way any more, the first pieces drop to a SECOND row under the
-     last one (wrap-reverse: pause stays on top, the score goes under it) instead of overlapping (Goops 2026-10-18:
-     a 5-digit score beside two bars on a 360px phone). */
-  .kit-screen > :is([data-slot="top-right"], [data-slot="bottom-right"]) > .kit-hud-slot > .kit-row { flex-wrap: wrap-reverse; justify-content: flex-end; }
+  /* a corner's pieces stay on one line (a score + pause pair wrapped onto 2 rows on a 390px phone — Goops 2026-10-17).
+     No room for a wide score beside the other corner? Put it in the status row (`status`) instead — a corner that wraps
+     grows taller than the HUD's room and covers the game (tried in 0.15.0, taken out in 0.15.2). */
+  .kit-screen > :is([data-slot="top-right"], [data-slot="bottom-right"]) > .kit-hud-slot > .kit-row { flex-wrap: nowrap; justify-content: flex-end; }
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
@@ -100,16 +99,14 @@
      (--kit-frame-w, 0.11.2) gets the same layout from its own width, whatever the window's width. */
   @media (max-width: 40rem) {
     .kit-screen:has(> [data-slot] > .kit-hud-slot) {
-      /* the right corner (score + pause) sizes to its pieces; the left gives way down to its smallest (bars at 2rem),
-         and past that the right corner wraps onto a second row (above) */
-      grid-template-columns: minmax(min-content, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto; /* the right corner (score + pause) sizes to its pieces; the left gives way */
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
       grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
     }
   }
   @container (max-width: 40rem) {
     .kit-screen:has(> [data-slot] > .kit-hud-slot) {
-      grid-template-columns: minmax(min-content, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
       grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
     }
