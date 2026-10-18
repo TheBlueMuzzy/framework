@@ -36,7 +36,10 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // A control past the screen's edge (part or all of it) can't be pressed — unless it sits in something that scrolls
   for (const el of allControls.filter((e) => shown(e, { onScreen: false }))) {
     const box = el.getBoundingClientRect()
-    if (box.left >= -0.5 && box.top >= -0.5 && box.right <= innerWidth + 0.5 && box.bottom <= innerHeight + 0.5) continue
+    const pageScrolls = document.documentElement.scrollHeight > innerHeight + 1 // a long page: below the fold is fine
+    const outSideways = box.left < -0.5 || box.right > innerWidth + 0.5
+    const outUpDown = !pageScrolls && (box.top < -0.5 || box.bottom > innerHeight + 0.5)
+    if (!outSideways && !outUpDown) continue
     let scrolls = false
     for (let p = el.parentElement; p && p !== document.documentElement && !scrolls; p = p.parentElement) {
       const s = getComputedStyle(p)
