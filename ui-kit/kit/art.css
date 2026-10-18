@@ -64,7 +64,12 @@
      (Margins in % are shares of the box's WIDTH, top ones too — so every number below is "picture units / width".) */
   .kit-screen > [data-slot="center"]:has(> .kit-art-stage) { place-self: stretch; }
   .kit-art-stage { inline-size: 100%; block-size: 100%; min-block-size: 0; container-type: size; display: grid; place-items: center; }
-  .kit-art-view { display: flow-root; overflow: clip; aspect-ratio: var(--kit-view-ratio);
+  .kit-art-stage[data-align="start"] { place-items: start center; }
+  .kit-art-stage[data-align="end"] { place-items: end center; }
+  /* bleed: the scene shows past the view, clipped at the stage's box grown by the screen's padding (to the window edge) */
+  .kit-art-stage[data-bleed] { overflow: clip; overflow-clip-margin: var(--gap-m); }
+  .kit-art-stage[data-bleed] .kit-art-view { overflow: visible; }
+  .kit-art-view { display: flow-root; overflow: clip; aspect-ratio: var(--kit-view-ratio); min-block-size: 0; /* (exactly its shape, never as tall as the scene in it) */
     inline-size: min(100cqw, calc(100cqh * var(--kit-view-ratio))); }
   .kit-art-scene { display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); min-block-size: 0; aspect-ratio: var(--kit-scene-ratio);
     inline-size: calc(var(--kit-scene-w) / var(--kit-view-w) * 100%);
@@ -78,12 +83,14 @@
       margin-block-start: calc(var(--kit-view-short-y) / var(--kit-view-short-w) * -100%); }
   }
   /* each layer at its own spot, all in the scene's one grid cell (later ones on top) */
-  .kit-art-layer { grid-area: 1 / 1; align-self: start; justify-self: start; display: grid; min-inline-size: 0;
+  /* (z-index: every layer its own stacking level in order — a moved / dimmed one, e.g. a pulled lever, never jumps above later ones) */
+  .kit-art-layer { grid-area: 1 / 1; align-self: start; justify-self: start; display: grid; min-inline-size: 0; z-index: 0;
     inline-size: calc(var(--kit-at-w) / var(--kit-scene-w) * 100%);
     margin-inline-start: calc(var(--kit-at-x) / var(--kit-scene-w) * 100%);
     margin-block-start: calc(var(--kit-at-y) / var(--kit-scene-w) * 100%); }
   .kit-art-layer[data-sized] { aspect-ratio: var(--kit-at-ratio); }
-  .kit-art-layer > * { grid-area: 1 / 1; min-inline-size: 0; min-block-size: 0; }
+  .kit-art-layer > *, .kit-art-layer-off > * { grid-area: 1 / 1; min-inline-size: 0; min-block-size: 0; }
+  .kit-art-layer-off { display: contents; } /* an off layer's contents: inert, while the layer itself still reads out as unavailable */
   .kit-art-layer-picture { display: block; inline-size: 100%; block-size: auto; pointer-events: none; user-select: none; }
   .kit-art-layer[data-sized] > .kit-art-layer-picture { block-size: 100%; object-fit: contain; }
   /* words on the art: sized in the picture's units (so they grow with it), never below 0.625rem; one line */
@@ -110,7 +117,7 @@
   .kit-art-layer[data-tone="muted"] { color: var(--muted); }
   /* off (does nothing yet) and dim (the rest of the machine while something else is in use): darkened, greyer */
   .kit-art-layer { transition: filter var(--motion-normal) var(--ease); }
-  .kit-art-layer:is([data-off], [data-dim]) { filter: brightness(0.42) saturate(0.55); }
+  .kit-art-layer:is([data-off], [data-dim]) { filter: brightness(0.5) saturate(0.55); }
   .kit-pull { background: none; transition: transform var(--motion-normal) var(--ease); }
   .kit-pull[data-dragging] { transition: none; }
   .kit-pull:focus-visible { outline-offset: -0.25rem; }

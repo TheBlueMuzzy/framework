@@ -52,7 +52,8 @@ describe('ArtStage + ArtLayer', () => {
     </ArtStage>)
     const [off, dim] = container.querySelectorAll('.kit-art-layer') as NodeListOf<HTMLElement>
     expect(off.dataset.off).toBe('true')
-    expect(off.hasAttribute('inert')).toBe(true)
+    expect(off.hasAttribute('inert')).toBe(false) // (inert would hide it from screen readers too)
+    expect(off.querySelector('.kit-art-layer-off')?.hasAttribute('inert')).toBe(true)
     expect(off.getAttribute('aria-disabled')).toBe('true')
     expect(screen.getByRole('img', { name: 'Reset laser — not working yet' })).toBe(off)
     expect(dim.dataset.dim).toBe('true')
