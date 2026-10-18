@@ -7,6 +7,7 @@ import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
+  ArtLayer, ArtStage, LevelMeter, PullHandle, TitleArt, type LevelStep,
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
@@ -347,6 +348,62 @@ function Seats({ startWaiting = false }: { startWaiting?: boolean }) {
     onCancel={() => (waiting ? setWaiting(false) : screens.pop())} />
 }
 
+// ── Art stage (0.12.0): a machine drawn from the game's own pictures — pull the lever (drag it down, or tap it):
+// the screen slides away and back, and the level meter fills with the XP "earned" (a level-up on the way). The repair
+// panel is drawn switched off. <Screen column>: a phone-shaped column on a wide window; title + gear at the bottom.
+const levelNeeds = (level: number) => 3000 + 500 * level
+function levelOf(total: number) {
+  let level = 1, left = total
+  while (left >= levelNeeds(level)) { left -= levelNeeds(level); level++ }
+  return { level, xp: left, max: levelNeeds(level) }
+}
+// the bar's steps from one XP total to another: one per level it passes through
+function stepsBetween(from: number, to: number): LevelStep[] {
+  const steps: LevelStep[] = []
+  let at = from
+  for (;;) {
+    const { level, xp, max } = levelOf(at)
+    const end = Math.min(max, xp + (to - at))
+    steps.push({ level, from: xp, to: end, max })
+    at += end - xp
+    if (end < max) return steps // stopped inside this level
+    if (at >= to) return [...steps, { level: level + 1, from: 0, to: 0, max: levelNeeds(level + 1) }] // ended exactly on a level-up
+  }
+}
+function ArtStageSample() {
+  const [total, setTotal] = useState(2400)
+  const [slide, setSlide] = useState<'out' | 'in' | undefined>()
+  const [steps, setSteps] = useState<LevelStep[] | undefined>()
+  const [play, setPlay] = useState(false)
+  const [hint, setHint] = useState('Pull the lever')
+  const now = levelOf(total)
+  const slideEnd = () => {
+    if (slide === 'out') { setSteps(stepsBetween(total, total + 1100)); setTotal((t) => t + 1100); setPlay(false); setSlide('in') }
+    else { setSlide(undefined); setPlay(true) }
+  }
+  return (
+    <Screen column backdrop={art('backdrop.svg')} slide={slide} onSlideEnd={slideEnd}
+      bottom={<TitleArt src={art('logo.svg')} alt="Roll Better" size="s" />}
+      bottomRight={<Button art={{ ...tealButton, label: 'hidden', size: 's' }} onClick={() => screens.push('settings')}>Settings</Button>}>
+      <ArtStage size={[400, 640]} view={[0, 40, 400, 590]} viewShort={[0, 40, 400, 330]} label="Machine">
+        <ArtLayer src={art('machine-body.svg')} at={[20, 180, 360, 440]} dim={slide === 'out'} />
+        <ArtLayer at={[64, 222, 272, 52]} text={18} dim={slide === 'out'}>
+          <LevelMeter words={{ label: 'Level' }} level={now.level} xp={now.xp} xpToNext={now.max} steps={steps} play={play}
+            art={{ fill: art('meter-fill.svg'), ratio: 20 }} onLevelUp={(level) => setHint(`Level ${level}!`)} />
+        </ArtLayer>
+        <ArtLayer at={[64, 282, 272, 22]} text={16} tone={hint.startsWith('Level') ? 'accent' : 'muted'}>{hint}</ArtLayer>
+        <ArtLayer src={art('machine-panel.svg')} at={[60, 345, 280, 170]} off label="Repair panel — not working yet" />
+        <ArtLayer at={[60, 322, 280, 20]} text={16} tone="primary" off>Repair panel</ArtLayer>
+        <ArtLayer at={[140, -110, 120, 300]}>
+          <PullHandle label="Pull the lever" travel={0.35} pulled={slide === 'out'} onPull={() => { setHint('Pull the lever'); setSlide('out') }}>
+            <img src={art('machine-lever.svg')} alt="" draggable={false} />
+          </PullHandle>
+        </ArtLayer>
+      </ArtStage>
+    </Screen>
+  )
+}
+
 // ── Every screen the stack can open, by name ──
 const samples: Record<string, ComponentType> = {
   feedback: Feedback,
@@ -358,6 +415,7 @@ const samples: Record<string, ComponentType> = {
     { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
   ]} />,
   // art skins (0.11.0): logo + backdrop + art buttons; the words still come from the game
+  artstage: ArtStageSample,
   artmenu: () => <MainMenu title="Roll Better" titleArt={art('logo.svg')} backdrop={art('backdrop.svg')} subtitle="A dice game for friends" items={[
     { label: 'Play', onClick: () => screens.push('artend'), art: redButton }, { label: 'Settings', onClick: () => screens.push('settings'), art: tealButton },
   ]} />,
@@ -380,7 +438,8 @@ const samples: Record<string, ComponentType> = {
   // dim: the end of a game over the table — the game stays visible, darkened (here over the HUD)
   endgamedim: () => <Results dim title="You win!" message="Muzzy takes it by 25 points." players={endScores} meId="a"
     onRematch={() => screens.replace('countdown')} onQuit={() => { screens.pop(); screens.pop() }} />,
-  victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')} />,
+  victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')}
+    onQuit={() => screens.pop()} onSwipeUp={() => screens.pop()} words={{ swipe: '⇧ Swipe up to go back' }} />,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   artend: () => <GameOver message="Out of lives on round 4." stats={stats} frame={woodFrame} backdrop={art('backdrop.svg')}
     art={{ retry: redButton, quit: tealButton }} onRetry={() => screens.replace('artmenu')} onQuit={() => screens.pop()} />,

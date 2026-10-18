@@ -57,7 +57,9 @@ function findProblems({ screenWidth, checkFocus }) {
 }
 
 mkdirSync('screenshots/screens', { recursive: true })
-const server = await createServer({ server: { port: 5180, strictPort: true } })
+// SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)
+const PORT = Number(process.env.SHOOT_PORT) || 5180
+const server = await createServer({ server: { port: PORT, strictPort: true } })
 await server.listen()
 const browser = await chromium.launch()
 let problemCount = 0
@@ -86,7 +88,7 @@ function report(name, problems) {
 async function shoot(file, size, query, prepare) {
   const page = await pageFor(size)
   page.errors = []
-  await page.goto(`http://localhost:5180/${query}`)
+  await page.goto(`http://localhost:${PORT}/${query}`)
   const isScreen = query.includes('screen=') && !query.includes('screen=parts')
   // (a VISIBLE screen: Pause opens over the HUD, which then hides — the first .kit-screen on the page)
   await page.waitForSelector(isScreen ? '.gallery-game .kit-screen >> visible=true' : '.gallery')
@@ -119,7 +121,7 @@ async function checkScreens(size) {
     if (await button(name).evaluate((el) => { el.focus(); return document.activeElement === el })) problems.push(`covered "${name}" took focus`)
   }
   try {
-    await page.goto('http://localhost:5180/?screen=parts')
+    await page.goto(`http://localhost:${PORT}/?screen=parts`)
     await button('Open settings').scrollIntoViewIfNeeded()
     await button('Open settings').click()
     await expectLayers(2, 'open settings')
@@ -159,7 +161,7 @@ async function checkMenu(size) {
   const page = await browser.newPage({ viewport: { width: size.width, height: size.height }, isMobile: size.mobile, hasTouch: size.mobile })
   const problems = []
   try {
-    await page.goto('http://localhost:5180/')
+    await page.goto(`http://localhost:${PORT}/`)
     await page.getByRole('button', { name: /^Credits/ }).click()
     await page.getByRole('button', { name: 'Back', exact: true }).click()
     await page.waitForSelector('.gallery', { timeout: 2000 })
