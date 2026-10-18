@@ -1,5 +1,7 @@
 /* Gallery-only styles (the "game" layer). Same rules as game code: style names only. */
 @layer game {
+  /* The Feedback sample's "Toasts at: at" — the point a game would set (its action's height), here 3/4 down the screen */
+  :root { --kit-toasts-at: 75dvh; }
   .gallery { max-inline-size: 64rem; margin-inline: auto; padding: var(--gap-l); padding-block-end: var(--gap-xl); }
 
   /* A stand-in game view for the Screen demo */

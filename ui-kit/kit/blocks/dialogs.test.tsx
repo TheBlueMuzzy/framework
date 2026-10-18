@@ -50,6 +50,13 @@ describe('ToastStack place', () => {
     rerender(<ToastStack place="bottom" />)
     expect(place()).toBe('bottom')
   })
+
+  it('place="at" (0.14.0): the bottom edge of the stack sits on the --kit-toasts-at point the game sets, and glides when it moves', () => {
+    const { container } = render(<ToastStack place="at" />)
+    expect(container.querySelector('.kit-toasts')?.getAttribute('data-place')).toBe('at')
+    // (jsdom has no layout and vitest drops CSS, so WHERE it sits is proven in a real browser: the gallery's
+    // ?screen=feedback&toasts=at, and Goops' e2e/hud-shots.mjs, which measures the stack's bottom edge at the point)
+  })
 })
 
 describe('dismissible toasts', () => {

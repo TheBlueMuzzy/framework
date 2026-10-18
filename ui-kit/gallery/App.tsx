@@ -3,7 +3,7 @@
 // Links:  ?preset=neon                    the menu in Neon
 //         ?screen=settings&preset=neon    straight into one screen (the ids are in menu.ts)
 //         ?screen=parts                   the parts page
-//         ?screen=feedback&toasts=bottom  toasts at the bottom (top, center or bottom)
+//         ?screen=feedback&toasts=bottom  toasts at the bottom (top, center, bottom, or at = a point the game sets)
 import { useEffect, useRef, useState } from 'react'
 import { applyStyle, Grid, ListRow, Panel, screens, Stack, Text, ToastStack, type StyleFile, type ToastPlace } from '../kit'
 import styleFile from './content/ui/style.json'

@@ -67,7 +67,8 @@ function Feedback() {
             <Row gap="s"><Text kind="heading">Tooltip</Text><Tooltip text="Rolling three sixes gives you a bonus turn." /></Row>
             <Row gap="m"><Spinner /><Text kind="caption">Spinner</Text></Row>
             <Stack gap="xs"><Text kind="label">Toasts at</Text>
-              <Selector label="Toasts at" options={['top', 'center', 'bottom']} value={place} onChange={moveToasts} /></Stack>
+              {/* 'at' = a point the game picks (here gallery.css sets --kit-toasts-at to 3/4 down the screen) */}
+              <Selector label="Toasts at" options={['top', 'center', 'bottom', 'at']} value={place} onChange={moveToasts} /></Stack>
           </Stack>
           <EmptyState icon="🏆" title="No trophies yet" message="Win a round to earn your first one." actionLabel="Play now" onAction={() => toast('Let’s go!')} />
         </Grid>
