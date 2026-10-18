@@ -132,7 +132,7 @@ function HudSample() {
       banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
         {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail="Up to 3 times">Hold to Roll</HudText>}</Stack>}
       bottomLeft={<ConnectionDot status="weak" />}
-      bottomRight={<Rank place={2} of={3} />}
+      bottomRight={<Row gap="s"><HudText size="s" live>{`${40 + (tick % 4) * 20}%`}</HudText><Rank place={2} of={3} /></Row>}
       actions={<Stack gap="s"><PlayerSeats players={players} activeId={turn.id} /><Row justify="center"><Button onClick={() => toast('Rolled!')}>Roll</Button></Row></Stack>}
     />
   )

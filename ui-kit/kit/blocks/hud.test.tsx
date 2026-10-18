@@ -83,6 +83,18 @@ describe('HudText', () => {
     const { container } = render(<HudText tone="accent">Locked 1!</HudText>)
     expect(container.querySelector('.kit-hud-text')?.getAttribute('data-tone')).toBe('accent')
   })
+  it('live (0.14.1): a changing reading keeps its words box (no entrance each change) and is not read out each time', () => {
+    const { container, rerender } = render(<HudText live>72%</HudText>)
+    const first = container.querySelector('.kit-stack')
+    rerender(<HudText live>71%</HudText>)
+    expect(container.querySelector('.kit-stack')).toBe(first) // the same box: its entrance animation doesn't replay
+    expect(container.textContent).toBe('71%')
+    expect(container.querySelector('.kit-hud-text')?.getAttribute('aria-live')).toBe('off')
+    rerender(<HudText>Round 1</HudText>)
+    const plain = container.querySelector('.kit-stack')
+    rerender(<HudText>Round 2</HudText>)
+    expect(container.querySelector('.kit-stack')).not.toBe(plain) // plain HudText still pops in again
+  })
   it('TurnBanner variant="plain" is HudText, not a panel', () => {
     const { container } = render(<TurnBanner variant="plain" text="Sam's turn" />)
     expect(container.querySelector('.kit-panel')).toBeNull()
