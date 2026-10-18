@@ -199,7 +199,8 @@ export function TimerRing({ seconds, total, label = 'Time left', warnAt = 5 }: T
 // change — no entrance on every change (a pressure % re-entering 10 times a second looked faded and flickered — Goops
 // F26), and it isn't read out on every change either.
 // fit (0.17.0): one line that shrinks to the room it's given (a big status between a HUD's corners on a narrow phone),
-// never below the style's body text size (the accessibility floor); with room to spare it stays at its size.
+// never below the style's body text size (the accessibility floor); with room to spare it stays at its size. Its line
+// keeps its full height either way (0.17.1), so whatever holds it never changes size when the words change.
 // numbers (0.17.0): in the style's number font — a readout ("10% PRESS") rather than words.
 type HudTextProps = { children: string; detail?: string; size?: 's' | 'm' | 'l'; tone?: 'normal' | 'accent'; pop?: boolean; live?: boolean
   fit?: boolean; numbers?: boolean }
@@ -233,10 +234,14 @@ function useFitText(box: RefObject<HTMLDivElement | null>, text: string | null) 
       lastRoom = room
       el.removeAttribute('data-fitted')
       el.style.removeProperty('--kit-fit-size')
+      el.style.removeProperty('--kit-fit-line')
       const natural = line.scrollWidth
       if (room > 0 && natural > room) {
-        const size = parseFloat(getComputedStyle(line).fontSize)
+        const { fontSize, lineHeight } = getComputedStyle(line)
+        const size = parseFloat(fontSize)
         el.style.setProperty('--kit-fit-size', `${Math.floor((size * room) / natural * 10) / 10}px`)
+        // the line keeps its own height, so the box around it never changes size as the words change (0.17.1)
+        el.style.setProperty('--kit-fit-line', lineHeight === 'normal' ? `${size * 1.2}px` : lineHeight)
         el.setAttribute('data-fitted', '')
       }
     }

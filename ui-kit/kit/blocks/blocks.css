@@ -158,7 +158,7 @@
   /* HudText fit: fills its box and stays one line; too wide → the size that fits, never under body text */
   .kit-hud-text[data-fit] { inline-size: 100%; min-inline-size: 0; }
   .kit-hud-text[data-fit] .kit-text { white-space: nowrap; }
-  .kit-hud-text[data-fitted] .kit-text { font-size: max(var(--text-body), var(--kit-fit-size)); }
+  .kit-hud-text[data-fitted] .kit-text { font-size: max(var(--text-body), var(--kit-fit-size)); line-height: var(--kit-fit-line, normal); }
 
   /* HUD dock (0.17.0): a panel on the HUD column's bottom edge, edge to edge, --kit-hud-dock-size tall (more only if
      its contents need it). The HUD's own bottom slots sit above it. It shows meters, so taps go through it to the game.
