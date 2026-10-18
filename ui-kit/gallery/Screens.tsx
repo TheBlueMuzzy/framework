@@ -138,6 +138,29 @@ function HudSample() {
   )
 }
 
+// HUD ONE ROW + DOCK (0.17.0, Goops' panel): one top row (compact score · a big status that shrinks to fit · pause),
+// and a dock on the bottom edge — three plain bars with big labels above, then one long thick bar named inside.
+// Every 1.5 s the levels move: one bar runs low (red pulse), one breaks (flash) on alternate ticks.
+function HudDockSample() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
+  const levels = [80 - (tick % 4) * 20, 60, tick % 2 ? 0 : 45]
+  const names = ['Laser', 'Controls', 'Visor']
+  return (
+    <Hud oneRow status={<HudText size="l" fit live>{`Cracks ${tick % 11} / 10`}</HudText>} vitals={<Score value={12000 + tick * 1500} compact />}
+      onPause={() => screens.push('pause')}
+      dock={<Stack gap="s">
+        <Row gap="s" justify="center">{names.map((name, i) => {
+          const low = levels[i] < 30, broken = i === 2 && levels[i] === 0
+          return <Bar key={name} plain label={name} labelAt="above" width={0.24} thickness="m" value={levels[i]}
+            variant={low ? 'danger' : 'primary'} alert={broken ? 'flash' : low ? 'pulse' : undefined} />
+        })}</Row>
+        <Row justify="center"><Bar plain label="Integrity" labelAt="inside" width={0.8} thickness="l" value={tick % 3 ? 70 : 20}
+          variant={tick % 3 ? 'accent' : 'danger'} alert={tick % 3 ? undefined : 'pulse'} /></Row>
+      </Stack>} />
+  )
+}
+
 // PLAYER CHIPS beside stand-in game rows. A game pins each chip to a 3D point itself, so here each
 // sits in a box that cuts off everything the page passes down (like a 3D library's own div would),
 // wrapped in kit-scope, which brings the style's font and colours back. Every 1.5 s the turn moves
@@ -465,6 +488,7 @@ const samples: Record<string, ComponentType> = {
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
   hud: HudSample,
+  huddock: HudDockSample,
   chips: PlayerChips,
   pinned: PinnedTable,
   hand: HandSample,
@@ -511,7 +535,7 @@ const openers: Record<string, () => void> = {
   endgamedim: () => { screens.push('hud'); screens.push('endgamedim') },
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
-const darkScreens = ['hud', 'chips', 'pinned']
+const darkScreens = ['hud', 'huddock', 'chips', 'pinned']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──

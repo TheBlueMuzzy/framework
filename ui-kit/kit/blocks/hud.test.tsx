@@ -1,7 +1,7 @@
 // HUD logic: English place names, and the +N float-up appearing when a number changes.
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
-import { Bar, Counter, HudText, ordinal, Pause, PlayerChip, TurnBanner } from './hud'
+import { Bar, Counter, Hud, HudText, ordinal, Pause, PlayerChip, Score, TurnBanner } from './hud'
 import { toMilliseconds } from './motion'
 
 afterEach(() => { cleanup(); document.documentElement.removeAttribute('data-reduce-motion') })
@@ -118,6 +118,64 @@ describe('Bar showLabel', () => {
     expect(container.querySelector('.kit-bar-label')).toBeNull()
     rerender(<Bar label="Tank" value={50} showLabel />)
     expect(container.querySelector('.kit-bar-label')?.textContent).toBe('Tank')
+  })
+})
+
+describe('Bar 0.17.0: share, label above / inside, thickness, plain, alert', () => {
+  it('a number width is a share of the row, passed to the CSS', () => {
+    const { container } = render(<Bar label="Laser" value={50} width={0.24} plain />)
+    const bar = container.querySelector<HTMLElement>('.kit-bar')!
+    expect(bar.getAttribute('data-width')).toBe('share')
+    expect(bar.style.getPropertyValue('--kit-bar-share')).toBe('0.24')
+    expect(container.querySelector('.kit-hud-chip')).toBeNull() // plain = no plate
+  })
+  it('labelAt above prints the label before the bar; inside puts it in the bar; showLabel still means beside', () => {
+    const { container, rerender } = render(<Bar label="Laser" value={50} labelAt="above" plain />)
+    expect(container.querySelector('.kit-bar-label-above')?.textContent).toBe('Laser')
+    expect(container.querySelector('.kit-bar')?.firstElementChild?.className).toBe('kit-bar-label-above')
+    rerender(<Bar label="Integrity" value={50} labelAt="inside" plain />)
+    expect(container.querySelector('.kit-bar-inside .kit-bar-label-inside')?.textContent).toBe('Integrity')
+    expect(container.querySelector('.kit-bar-inside .kit-progress')).not.toBeNull()
+    rerender(<Bar label="Tank" value={50} showLabel />)
+    expect(container.querySelector('.kit-bar-label')?.textContent).toBe('Tank')
+    expect(container.querySelector('.kit-hud-chip')?.getAttribute('data-label-at')).toBe('beside')
+  })
+  it('thickness and alert are named for the CSS; the bar is still one progressbar for screen readers', () => {
+    const { container } = render(<Bar label="Visor" value={20} thickness="m" alert="pulse" variant="danger" plain />)
+    const bar = container.querySelector('.kit-bar')!
+    expect(bar.getAttribute('data-thickness')).toBe('m')
+    expect(bar.getAttribute('data-alert')).toBe('pulse')
+    expect(screen.getAllByRole('progressbar')).toHaveLength(1)
+  })
+})
+
+describe('Hud oneRow + dock', () => {
+  it('oneRow marks the status slot; dock adds a panel beside the screen (bottom by default)', () => {
+    const { container, rerender } = render(<Hud status={<HudText fit>Cracks 0 / 10</HudText>} oneRow dock={<Bar label="Integrity" value={80} plain />} />)
+    expect(container.querySelector('[data-slot="top"] > .kit-hud-slot[data-one-row]')).not.toBeNull()
+    const dock = container.querySelector('.kit-hud-dock')!
+    expect(dock.getAttribute('data-side')).toBe('bottom')
+    expect(dock.querySelector('.kit-panel .kit-bar')).not.toBeNull()
+    expect(dock.previousElementSibling?.classList.contains('kit-screen')).toBe(true)
+    rerender(<Hud status={<HudText>Round 1</HudText>} dock={<Bar label="Integrity" value={80} plain />} dockSide="right" />)
+    expect(container.querySelector('.kit-hud-dock')?.getAttribute('data-side')).toBe('right')
+    expect(container.querySelector('[data-one-row]')).toBeNull()
+    rerender(<Hud status={<HudText>Round 1</HudText>} />)
+    expect(container.querySelector('.kit-hud-dock')).toBeNull()
+  })
+})
+
+describe('HudText fit / numbers, Score compact', () => {
+  it('fit and numbers are named for the CSS', () => {
+    const { container } = render(<HudText fit numbers>10% PRESS</HudText>)
+    const el = container.querySelector('.kit-hud-text')!
+    expect(el.hasAttribute('data-fit')).toBe(true)
+    expect(el.hasAttribute('data-numbers')).toBe(true)
+  })
+  it('compact shows just the number; the word is still the group name', () => {
+    const { container } = render(<Score value={1234} compact />)
+    expect(container.querySelector('[data-kind="caption"]')).toBeNull()
+    expect(screen.getByRole('group', { name: 'Score' })).toBeTruthy()
   })
 })
 

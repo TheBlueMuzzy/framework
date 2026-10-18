@@ -26,6 +26,7 @@ export const menu: MenuGroup[] = [
   ] },
   { title: 'In game / HUD', entries: [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },
+    { id: 'huddock', name: 'HUD: one row + dock', about: 'oneRow top (fit status, compact score) · a dock panel of bars: label above / inside, thick, low = pulse, broken = flash' },
     { id: 'chips', name: 'Player chips', about: 'Beside each row: score counts up, dim, a goal chip' },
     { id: 'pinned', name: 'Pinned to the table', about: 'PinnedBox: xs chips beside rows, sized with the table' },
     { id: 'hand', name: 'Hand: rack', about: 'HandView: a hand of plain pieces — tap to hold, swap (shrink → grow), hide' },
