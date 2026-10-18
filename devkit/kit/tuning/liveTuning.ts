@@ -47,10 +47,38 @@ export function sendTuning(file: string, data: unknown) {
 }
 
 /** A box holding the file's values; .current follows the Dev Kit's edits. For plain (non-React) code. */
+// (With the Vite plugin, every content/tuning import is already live — see liveFile below. liveTuning stays for files
+// elsewhere, special cases, and code that wants to know WHEN an edit arrives: box.current changes identity then.)
 export function liveTuning<T>(file: string, initial: T): { readonly current: T } {
   const box = { current: latestOr(file, initial) }
   onTuning<T>(file, (data) => { box.current = data })
   return box
+}
+
+/**
+ * LIVE BY DEFAULT (0.18.0): the Dev Kit's Vite plugin turns every `import x from '…/content/tuning/<name>.json'` in the
+ * game into `liveFile('<name>', <the file>)`, so the game needs no wrapping at all. The object it hands back reads the
+ * Dev Kit's latest edit of the file on EVERY property access (falling back to the file), so `tank.cameraSpeed` read in a
+ * frame loop follows the slider. Nested objects come from the current data at the moment of access, so
+ * `const R = hud.readout` inside a function is live too.
+ * What it can't follow: values COPIED once — `const speed = tank.cameraSpeed` at the top of a file, `{ ...file }` in a
+ * constructor. Read where the value is used (liveGuard.ts finds the top-of-file copies).
+ * Costs one Map lookup per top-level read; hot loops (thousands of reads a frame) copy the object once per frame.
+ * Arrays and plain values are returned as they are (not live).
+ */
+export function liveFile<T>(file: string, data: T): T {
+  if (data === null || typeof data !== 'object' || Array.isArray(data) || typeof Proxy === 'undefined') return data
+  const now = () => (latest.has(file) ? latest.get(file) : data) as object
+  return new Proxy(data as object, {
+    get: (_, key) => Reflect.get(now(), key),
+    has: (_, key) => Reflect.has(now(), key),
+    ownKeys: () => Reflect.ownKeys(now()),
+    getOwnPropertyDescriptor: (_, key) => {
+      const d = Reflect.getOwnPropertyDescriptor(now(), key)
+      if (d) d.configurable = true // (a Proxy may not call a key fixed that its target doesn't have)
+      return d
+    },
+  }) as T
 }
 
 /** Same as liveTuning, for React components: a ref that follows the Dev Kit's edits, without re-rendering. */

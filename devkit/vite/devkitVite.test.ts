@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp } from './devkitVite'
+import { devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveTuningName } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -221,5 +221,53 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     expect(readFileSync(join(game, 'public/fonts/pixel/licence.txt'), 'utf8')).toBe('free')
     expect(JSON.parse(readFileSync(join(game, 'content/ui/fonts.json'), 'utf8')).fonts).toHaveLength(1)
     expect(JSON.parse(readFileSync(join(game, 'content/credits.json'), 'utf8'))[0].light).toBe('🔴')
+  })
+})
+
+describe('live tuning by default — content/tuning imports come back live (0.18.0)', () => {
+  let game: string
+  let server: ViteDevServer
+  beforeEach(async () => {
+    game = mkdtempSync(join(tmpdir(), 'devkit-live-'))
+    mkdirSync(join(game, 'content', 'tuning'), { recursive: true })
+    mkdirSync(join(game, 'src', 'devkit', 'tuning'), { recursive: true })
+    writeFileSync(join(game, 'content', 'tuning', 'tank.json'), '{ "speed": 2, "look": { "glow": 0.5 } }')
+    writeFileSync(join(game, 'src', 'devkit', 'tuning', 'liveTuning.ts'), readFileSync(new URL('../kit/tuning/liveTuning.ts', import.meta.url), 'utf8')
+      // (no node_modules in the temp game: React's two hooks stubbed — liveFile doesn't use them)
+      .replace("import { useEffect, useRef } from 'react'", 'const useEffect = (..._: unknown[]) => {}; const useRef = <T>(current: T) => ({ current })'))
+    writeFileSync(join(game, 'src', 'game.ts'), [
+      "import tank from '../content/tuning/tank.json'",
+      "import raw from '../content/tuning/tank.json?raw'",
+      "export { tank, raw }",
+    ].join('\n'))
+    server = await createServer({ root: game, configFile: false, logLevel: 'silent', plugins: [devkit()], server: { port: 0, host: '127.0.0.1' } })
+  })
+  afterEach(async () => {
+    await server.close()
+    rmSync(game, { recursive: true, force: true })
+  })
+
+  it('names only files directly in content/tuning, with no query', () => {
+    expect(liveTuningName('C:/game/content/tuning/tank.json', 'C:/game')).toBe('tank')
+    expect(liveTuningName('c:/game/content/tuning/tank.json', 'C:\\game')).toBe('tank')
+    expect(liveTuningName('C:/game/content/tuning/tank.json?raw', 'C:/game')).toBeNull()
+    expect(liveTuningName('C:/game/content/tuning/sub/a.json', 'C:/game')).toBeNull()
+    expect(liveTuningName('C:/game/content/ui/style.json', 'C:/game')).toBeNull()
+    expect(liveTuningName('C:/game/content/tuning/notes.md', 'C:/game')).toBeNull()
+  })
+  it('the game\'s import reads the latest Dev Kit edit on every access; ?raw stays the plain text', async () => {
+    const mod = await server.ssrLoadModule('/src/game.ts') as { tank: { speed: number; look: { glow: number } }; raw: string }
+    const live = await server.ssrLoadModule('/src/devkit/tuning/liveTuning.ts') as { sendTuning: (f: string, d: unknown) => void }
+    expect(mod.tank.speed).toBe(2)
+    expect(JSON.parse(mod.raw).speed).toBe(2)
+    ;(globalThis as { window?: unknown }).window = new EventTarget() // sendTuning dispatches on window
+    try {
+      live.sendTuning('tank', { speed: 5, look: { glow: 0.9 } })
+    } finally {
+      delete (globalThis as { window?: unknown }).window
+    }
+    expect(mod.tank.speed).toBe(5)
+    expect(mod.tank.look.glow).toBe(0.9)
+    expect({ ...mod.tank }).toEqual({ speed: 5, look: { glow: 0.9 } })
   })
 })
