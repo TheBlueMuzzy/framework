@@ -1,7 +1,7 @@
 // Runs in the framework (not copied into games): checks the Color tool against the real UI kit.
 import { describe, expect, it } from 'vitest'
 import cartoon from '../../../ui-kit/kit/styles/cartoon.json'
-import { colourTokens, lineColourTokens, menuSizeTokens, optionalTokens, otherTokens } from '../../../ui-kit/kit/style/tokens'
+import { colourTokens, fontRoleTokens, lineColourTokens, menuSizeTokens, optionalTokens, otherTokens } from '../../../ui-kit/kit/style/tokens'
 import { joinNumber, shapeDefault, shapesToClear, sliderFor, UI_SHAPES, uiShapesFrom } from './styleValues'
 import {
   UI_COLOURS,
@@ -115,8 +115,8 @@ describe('copyForClaudeText', () => {
 })
 
 describe('UI shape & feel values (styleValues.ts)', () => {
-  it('cover every non-colour style value the kit has (presets, optional extras, menu sizes)', () => {
-    const editable = [...Object.keys(otherTokens), ...Object.keys(optionalTokens), ...Object.keys(menuSizeTokens)]
+  it('cover every non-colour style value the kit has (presets, optional extras, font roles, menu sizes)', () => {
+    const editable = [...Object.keys(otherTokens), ...Object.keys(optionalTokens), ...Object.keys(fontRoleTokens), ...Object.keys(menuSizeTokens)]
     expect(UI_SHAPES.map((s) => s.token).sort()).toEqual(editable.sort())
   })
   it('after a restyle only unset menu sizes are cleared — never glow or panel texture (a preset may leave them out)', () => {
@@ -133,6 +133,9 @@ describe('UI shape & feel values (styleValues.ts)', () => {
   })
   it('menu sizes fall back to the kit CSS defaults', () => {
     for (const [token, note] of Object.entries(menuSizeTokens)) expect(shapeDefault(cartoon, token)).toBe(note.split(' ')[0])
+  })
+  it('the title and heading fonts fall back to the kit default (the style display font)', () => {
+    for (const [token, value] of Object.entries(fontRoleTokens)) expect(shapeDefault(cartoon, token)).toBe(value)
   })
   it('read from the preset, with tweaks on top', () => {
     const shapes = uiShapesFrom(cartoon, { 'radius-control': '2rem' })

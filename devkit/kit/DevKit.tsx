@@ -20,6 +20,8 @@ import { gameTabs } from '../devkit-game/tabs'
 import { CaptureTab } from './capture/CaptureTab'
 import { Carousel } from './carousel/Carousel'
 import { ColorTab } from './color/ColorTab'
+import { styleStore } from './color/uiKit'
+import { FontsTab } from './fonts/FontsTab'
 import { CAN_SAVE } from './saveContent'
 import { SearchBar } from './search/SearchBar'
 import { DevKitSearch } from './search/searchContext'
@@ -60,6 +62,8 @@ const KIT_TABS: DevKitTab[] = [
   // Only when the game has content/devkit/select.json (its object → knobs list)
   ...(selectFile ? [{ id: 'select', label: 'Select', Panel: SelectTab, searchable: false }] : []),
   { id: 'color', label: 'Color', Panel: ColorTab },
+  // Only when the game has the UI kit (its fonts are the kit's text roles)
+  ...(styleStore ? [{ id: 'fonts', label: 'Fonts', Panel: FontsTab }] : []),
   // Only when the game has content/tuning/*.json files
   ...(tuningFiles.length > 0 ? [{ id: 'tuning', label: 'Tuning', Panel: TuningTab }] : []),
   // These two need the game's adapter (registerDevKitGame, devkitGame.ts); without it they say how to add it

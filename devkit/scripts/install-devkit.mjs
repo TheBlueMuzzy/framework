@@ -103,6 +103,10 @@ export function wiringSteps(gameDir) {
       step: `package.json "scripts": "check:devkit": "${CHECK_SCRIPT}"   (/deliver runs it: builds both ways and checks each)`,
     },
     {
+      done: /^\/?devkit\.local\.json\s*$/m.test(text('.gitignore')),
+      step: '.gitignore: add the line  devkit.local.json   (each computer\'s own Dev Kit settings, e.g. where its font library is — never synced)',
+    },
+    {
       done: Boolean(deps.playwright || deps['playwright-core']),
       step: 'The release check needs Playwright: npm install -D playwright   then   npx playwright install chromium',
     },

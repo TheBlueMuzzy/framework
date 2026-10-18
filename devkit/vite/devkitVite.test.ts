@@ -174,3 +174,52 @@ describe('the plugin in a real Vite dev server', () => {
     expect(res.status).toBe(403)
   })
 })
+
+describe('the font library in a real Vite dev server (the Fonts tab)', () => {
+  let base: string
+  let game: string
+  let server: ViteDevServer
+  let url: string
+  beforeEach(async () => {
+    base = mkdtempSync(join(tmpdir(), 'devkit-fontlib-'))
+    game = join(base, 'game')
+    const lib = join(base, 'library')
+    mkdirSync(join(lib, 'pixel'), { recursive: true })
+    writeFileSync(join(lib, 'pixel', 'Tiny Font.ttf'), 'not really a font')
+    writeFileSync(join(lib, 'pixel', 'licence.txt'), 'free')
+    writeFileSync(join(base, 'secret.ttf'), 'outside the library')
+    mkdirSync(join(game, 'content/ui'), { recursive: true })
+    writeFileSync(join(game, 'devkit.local.json'), JSON.stringify({ fontLibrary: lib }))
+    server = await createServer({ root: game, configFile: false, logLevel: 'silent', plugins: [devkit()], server: { port: 0, host: '127.0.0.1' } })
+    await server.listen()
+    url = server.resolvedUrls!.local[0].replace(/\/$/, '')
+  })
+  afterEach(async () => {
+    await server.close()
+    rmSync(base, { recursive: true, force: true })
+  })
+  const fontFile = (path: string) => fetch(`${url}/__devkit/font-library/file?path=${encodeURIComponent(path)}`)
+
+  it('lists the library and serves one font file — nothing outside it, nothing for another site', async () => {
+    const list = await (await fetch(`${url}/__devkit/font-library`)).json()
+    expect(list).toMatchObject({ found: true, more: false, fonts: [{ path: 'pixel/Tiny Font.ttf', name: 'Tiny Font', folder: 'pixel' }] })
+    const file = await fontFile('pixel/Tiny Font.ttf')
+    expect(file.headers.get('content-type')).toBe('font/ttf')
+    expect(await file.text()).toBe('not really a font')
+    expect((await fontFile('../secret.ttf')).status).toBe(400)
+    expect((await fontFile('pixel/licence.txt')).status).toBe(400)
+    expect((await fetch(`${url}/__devkit/font-library`, { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
+  })
+  it('Add to game copies it + its licence into public/fonts/ and lists it — only from the game page', async () => {
+    const add = (headers: Record<string, string>) => fetch(`${url}/__devkit/font-library/add`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ path: 'pixel/Tiny Font.ttf' }),
+    })
+    expect((await add({ Origin: 'http://evil.example' })).status).toBe(403)
+    const res = await add({ Origin: url })
+    expect(res.status).toBe(200)
+    expect((await res.json()).font).toMatchObject({ name: 'Tiny Font', file: 'pixel/Tiny Font.ttf', licence: 'unknown' })
+    expect(readFileSync(join(game, 'public/fonts/pixel/licence.txt'), 'utf8')).toBe('free')
+    expect(JSON.parse(readFileSync(join(game, 'content/ui/fonts.json'), 'utf8')).fonts).toHaveLength(1)
+    expect(JSON.parse(readFileSync(join(game, 'content/credits.json'), 'utf8'))[0].light).toBe('🔴')
+  })
+})
