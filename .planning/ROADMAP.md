@@ -143,6 +143,7 @@ Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows 
 - ⏳ F63 🔧 Glyphtender passes the pack (its gaps become a list → its roadmap) — must · needs: F61 · Roll Better when it comes off the shelf
 - ⏳ F64 🧱 Starters: `starters/realtime` (from Goops) + `starters/turn-based` (from Glyphtender) — tiny playable games with every module wired and the pack green on day one; /define copies one, the TDD only describes what's different — should · needs: F62, F63
 - ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change, BEFORE an update reaches a game — should · needs: F64
+- ⏳ F67 🔧 Lesson audit (BMUZ side): every checklist line in the BMUZ skills (develop ~40 lessons, game-ui, PROJECT-FILES) sorted → now automatic (delete) · becomes a pack check · becomes a default/installer step · stays prose (judgement only); skills get shorter, not longer — must · needs: F61
 - ⏳ F66 🔧 "Framework health" row on each game's planner page (module versions + pack results) — could · needs: F61
 ```mermaid
 flowchart LR
@@ -152,6 +153,7 @@ flowchart LR
   F61 --> F62[F62 Goops passes]
   F61 --> F63[F63 Glyphtender passes]
   F61 --> F66[F66 Health row]
+  F61 --> F67[F67 Lesson audit]
   F62 --> F64[F64 Starters]
   F63 --> F64
   F64 --> F65[F65 Framework test game]
