@@ -135,6 +135,7 @@ flowchart LR
 ```
 
 ## v0.9 — Every game wired the same  (proving ground: Goops, then Glyphtender) · planned 2026-10-18
+Also covers the 2026-10-18 reliability review (`~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md` — hooks, scripts, CI, evals, session hygiene: F68–F72).
 Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows for the Framework and all of our tools to function without regression." Why: Goops got the Dev Kit installed with none of its hooks — nothing live, no pause — and no test noticed; the catalog already said "live via liveTuning". Rules on paper drift; this milestone makes the right wiring automatic, tested and inherited. Spec: `~/.claude/config/bmuz/MODULE-CONTRACTS.md`.
 - 🔨 F59 🧱 Game core: live content by default (the Dev Kit's Vite plugin makes every content/tuning import live), rules clock + looks clock (`gameClock`: game timers on the rules clock), seeded mode, adapter base, error catcher — thin: no rules, no rendering — must · building in Goops (Dev Kit 0.18.0), then pulled out as its own small module
 - 🔨 F60 🔧 Dev Kit Time tool: ⏸ Full pause (rAF + CSS/Web animations + audio held, game timers via the adapter) · ◐ Half pause (rules clock stopped, looks running; shown only when the game supports it) · greyed out online — then slow motion + step one frame on the same clock (should) — must · needs: F59 · building in Goops
@@ -144,6 +145,11 @@ Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows 
 - ⏳ F64 🧱 Starters: `starters/realtime` (from Goops) + `starters/turn-based` (from Glyphtender) — tiny playable games with every module wired and the pack green on day one; /define copies one, the TDD only describes what's different — should · needs: F62, F63
 - ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change, BEFORE an update reaches a game — should · needs: F64
 - ⏳ F67 🔧 Lesson audit (BMUZ side): every checklist line in the BMUZ skills (develop ~40 lessons, game-ui, PROJECT-FILES) sorted → now automatic (delete) · becomes a pack check · becomes a default/installer step · stays prose (judgement only); skills get shorter, not longer — must · needs: F61
+- ⏳ F68 🔧 BMUZ hooks (do FIRST — touches only ~/.claude, no clash with the Goops helper): Muzzy's "never" rules as hard blocks (deny rules / PreToolUse: reset --hard, force-push, branch delete, his Chrome, Gmail) · /develop's skill registers a Stop gate (check:fast when code changed since the last green run; fast, timeout, stop_hook_active guard) · git commit refused when the typecheck fails · push/deploy to a live branch refused unless /deliver's smoke pass file exists · edits in src/ui → check-ui on that file. Show Muzzy each hook in plain words; prove each one blocks — must · needs: — · plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md
+- ⏳ F69 🔧 Scripts for fragile procedures: module install/update (runs the module's contract check), version bump, /save, /deliver → scripts (or saved Workflows); the skills shrink to "run it; if it fails, read the message" — must · needs: F61
+- ⏳ F70 🔧 CI backstop: every game repo's GitHub Actions run check:fast + the conformance pack on push — should · needs: F61
+- ⏳ F71 🔧 Evals for the BMUZ skills (BMUZ as a plugin, `claude plugin eval`): a few cases per key skill (e.g. "install the Dev Kit into a fixture game" → contract check ran, main.tsx wired); run after skill edits + model updates; Bash cases need WSL2 on Windows; costs usage per run — should · needs: F68, F69
+- ⏳ F72 🔧 Session hygiene in BMUZ: one feature per session (or per helper), STATE written between; autonomous runs start a fresh session at each feature boundary instead of the 80% checkpoint — should · needs: —
 - ⏳ F66 🔧 "Framework health" row on each game's planner page (module versions + pack results) — could · needs: F61
 ```mermaid
 flowchart LR
@@ -154,6 +160,9 @@ flowchart LR
   F61 --> F63[F63 Glyphtender passes]
   F61 --> F66[F66 Health row]
   F61 --> F67[F67 Lesson audit]
+  F68[F68 BMUZ hooks] --> F71[F71 Skill evals]
+  F61 --> F69[F69 Scripts] --> F71
+  F61 --> F70[F70 CI backstop]
   F62 --> F64[F64 Starters]
   F63 --> F64
   F64 --> F65[F65 Framework test game]
