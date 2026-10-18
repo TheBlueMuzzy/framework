@@ -59,6 +59,19 @@ describe('ToastStack place', () => {
   })
 })
 
+describe('ToastStack variant="plain" (0.15.0)', () => {
+  it('ordinary toasts are glowing words with no plate; a dismissible one keeps its plate (it can be tapped)', () => {
+    toast('Still filling')
+    toast('Tap me', { dismissible: true, seconds: 60 })
+    const { container } = render(<ToastStack variant="plain" />)
+    const words = screen.getByText('Still filling').closest('.kit-toast')!
+    expect(words.classList.contains('kit-hud-text')).toBe(true)
+    expect(words.classList.contains('kit-panel')).toBe(false)
+    expect(screen.getByText('Tap me').closest('.kit-toast')!.hasAttribute('data-plain')).toBe(false)
+    expect(container.querySelectorAll('.kit-toast[data-plain]')).toHaveLength(1)
+  })
+})
+
 describe('dismissible toasts', () => {
   it('the Close button hides it early; others stay', () => {
     toast('Saved')
