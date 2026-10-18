@@ -291,6 +291,7 @@ to search sets `searchable: false` (no box).
 - The Snapshots tab reads `content/snapshots/*.json` and saves there. Bug capture: `KEEP_MS` (60 s) and `STATE_EVERY_MS` (5 s) in `kit/capture/captureLog.ts`.
 
 ## Decisions
+- **Keys typed in the Dev Kit stay in the Dev Kit (0.17.1, `keepKeysInside` in mount.tsx).** Its host stops keydown / keyup / keypress after React has seen them, so a game's window hotkeys never fire while you type in Search (Goops: "curve" came out "cuv" — R swapped, E rotated, and the game's preventDefault ate the letters). Games should still ignore keys typed into any text box (belt and braces).
 - **Game tabs = a file the kit imports (`src/devkit-game/tabs.ts`)**, not tabs passed to `mountDevKit()`. main.tsx stays one identical line in every game, and game tools load inside the Dev Kit's own lazy chunk, so at 1.0 they vanish from the live build with the rest of it. The installer makes the file once, so the import always resolves.
 - **Two copy targets** (`src/devkit/` + `vite-plugins/devkit/`): the Vite plugin is Node code, which a game's browser tsconfig (`src/`) can't type-check.
 - **The Color tab finds the UI kit with `import.meta.glob`**, so games without the UI kit still build (they just get the colour-blind preview).
