@@ -98,7 +98,10 @@
     line-height: 1.1; place-items: center; text-align: center; white-space: nowrap; }
   .kit-art-layer[data-text][data-align="start"] { justify-items: start; text-align: start; }
   .kit-art-layer[data-text][data-align="end"] { justify-items: end; text-align: end; }
-  .kit-art-layer[data-off] { pointer-events: none; }
+  /* the scene lets taps through (its box runs past the view — a bleeding scene would cover the slots round it);
+     only the controls on it catch them */
+  .kit-art-scene, .kit-art-layer { pointer-events: none; }
+  .kit-art-layer:not([data-off]) :is(button, a, input, select, textarea, [tabindex]) { pointer-events: auto; }
 
   /* PullHandle: the look fills the handle's box; the grip (the button) is the end share you grab (--kit-pull-grip);
      the whole handle moves along its direction by --kit-pull × travel of its own length */
