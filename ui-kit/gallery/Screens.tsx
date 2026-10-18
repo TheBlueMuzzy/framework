@@ -395,7 +395,7 @@ function ArtStageSample() {
         <ArtLayer src={art('machine-panel.svg')} at={[60, 345, 280, 170]} off label="Repair panel — not working yet" />
         <ArtLayer at={[60, 322, 280, 20]} text={16} tone="primary" off>Repair panel</ArtLayer>
         <ArtLayer at={[140, -110, 120, 300]}>
-          <PullHandle label="Pull the lever" travel={0.35} pulled={slide === 'out'} onPull={() => { setHint('Pull the lever'); setSlide('out') }}>
+          <PullHandle label="Pull the lever" travel={0.35} grip={0.34} pulled={slide === 'out'} onPull={() => { setHint('Pull the lever'); setSlide('out') }}>
             <img src={art('machine-lever.svg')} alt="" draggable={false} />
           </PullHandle>
         </ArtLayer>

@@ -77,52 +77,56 @@ describe('ArtStage + ArtLayer', () => {
 })
 
 describe('PullHandle', () => {
+  // the handle (moves; carries --kit-pull and the drag state) holds the look and its grip (the button)
+  const handleOf = (grip: HTMLElement) => grip.closest('.kit-pull') as HTMLElement
   const box = (el: HTMLElement) => { el.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 100, bottom: 200, width: 100, height: 200, toJSON: () => ({}) }) }
 
-  it('a tap pulls it all the way, then calls onPull once (after the glide)', () => {
+  it('a tap on the grip pulls it all the way, then calls onPull once (after the glide); the look is unread', () => {
     vi.useFakeTimers()
     const onPull = vi.fn()
-    render(<PullHandle label="Start shift" onPull={onPull}><img alt="" src="/p.svg" /></PullHandle>)
-    const handle = screen.getByRole('button', { name: 'Start shift' })
-    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 50, clientY: 50 })
-    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 50, clientY: 50 })
-    fireEvent.click(handle)
-    expect(handle.dataset.pulled).toBe('true')
-    expect(handle.style.getPropertyValue('--kit-pull')).toBe('1')
+    const { container } = render(<PullHandle label="Start shift" onPull={onPull} grip={0.35}><img alt="" src="/p.svg" /></PullHandle>)
+    const grip = screen.getByRole('button', { name: 'Start shift' })
+    expect(container.querySelector('.kit-pull-look')?.getAttribute('aria-hidden')).toBe('true')
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull-grip')).toBe('0.35')
+    fireEvent.pointerDown(grip, { pointerId: 1, clientX: 50, clientY: 50 })
+    fireEvent.pointerUp(grip, { pointerId: 1, clientX: 50, clientY: 50 })
+    fireEvent.click(grip)
+    expect(handleOf(grip).dataset.pulled).toBe('true')
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull')).toBe('1')
     act(() => { vi.advanceTimersByTime(1000) })
     expect(onPull).toHaveBeenCalledOnce()
   })
 
-  it('a drag follows the finger; let go short of the threshold and it springs back without pulling', () => {
+  it('a drag follows the finger (travel = share of the whole handle); short of the threshold it springs back', () => {
     vi.useFakeTimers()
     const onPull = vi.fn()
     render(<PullHandle label="Pull" onPull={onPull} travel={0.5} threshold={0.6} />)
-    const handle = screen.getByRole('button', { name: 'Pull' })
-    box(handle)
-    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 50, clientY: 10 })
-    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 50, clientY: 60 }) // 50 of 100 travel = 0.5
-    expect(handle.dataset.dragging).toBe('true')
-    expect(handle.style.getPropertyValue('--kit-pull')).toBe('0.5')
-    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 50, clientY: 60 })
-    fireEvent.click(handle) // the click after a drag is not a tap
+    const grip = screen.getByRole('button', { name: 'Pull' })
+    box(handleOf(grip))
+    fireEvent.pointerDown(grip, { pointerId: 1, clientX: 50, clientY: 10 })
+    fireEvent.pointerMove(grip, { pointerId: 1, clientX: 50, clientY: 60 }) // 50 of 100 travel = 0.5
+    expect(handleOf(grip).dataset.dragging).toBe('true')
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull')).toBe('0.5')
+    fireEvent.pointerUp(grip, { pointerId: 1, clientX: 50, clientY: 60 })
+    fireEvent.click(grip) // the click after a drag is not a tap
     act(() => { vi.advanceTimersByTime(1000) })
     expect(onPull).not.toHaveBeenCalled()
-    expect(handle.style.getPropertyValue('--kit-pull')).toBe('0')
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull')).toBe('0')
   })
 
   it('a drag past the threshold finishes the pull; it never goes past the end or backwards', () => {
     vi.useFakeTimers()
     const onPull = vi.fn()
     render(<PullHandle label="Pull" onPull={onPull} />)
-    const handle = screen.getByRole('button', { name: 'Pull' })
-    box(handle)
-    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 50, clientY: 10 })
-    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 50, clientY: -50 })
-    expect(handle.style.getPropertyValue('--kit-pull')).toBe('0')
-    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 50, clientY: 400 })
-    expect(handle.style.getPropertyValue('--kit-pull')).toBe('1')
-    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 50, clientY: 400 })
-    fireEvent.click(handle)
+    const grip = screen.getByRole('button', { name: 'Pull' })
+    box(handleOf(grip))
+    fireEvent.pointerDown(grip, { pointerId: 1, clientX: 50, clientY: 10 })
+    fireEvent.pointerMove(grip, { pointerId: 1, clientX: 50, clientY: -50 })
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull')).toBe('0')
+    fireEvent.pointerMove(grip, { pointerId: 1, clientX: 50, clientY: 400 })
+    expect(handleOf(grip).style.getPropertyValue('--kit-pull')).toBe('1')
+    fireEvent.pointerUp(grip, { pointerId: 1, clientX: 50, clientY: 400 })
+    fireEvent.click(grip)
     act(() => { vi.advanceTimersByTime(1000) })
     expect(onPull).toHaveBeenCalledOnce()
   })
@@ -143,7 +147,7 @@ describe('PullHandle', () => {
 
   it('pulled keeps it at the end', () => {
     render(<PullHandle label="Pull" onPull={() => {}} pulled />)
-    expect(screen.getByRole('button').style.getPropertyValue('--kit-pull')).toBe('1')
+    expect(handleOf(screen.getByRole('button')).style.getPropertyValue('--kit-pull')).toBe('1')
   })
 })
 
