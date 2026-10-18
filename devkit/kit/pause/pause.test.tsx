@@ -5,6 +5,7 @@ import { clockPause, rulesClock } from '../gameClock'
 import { sendTuning } from '../tuning/liveTuning'
 import { devkitRaf, installFreeze, isFrozen } from './freeze'
 import { cyclePause, setDevPause } from './pause'
+import { BADGE_SPOTS, DEFAULT_BADGE_SPOT, readBadgeSpot } from './badgeSpot'
 import { PauseBadgeClosed, PauseButtons } from './PauseButtons'
 
 const nextFrame = () => new Promise<void>((done) => devkitRaf(() => done()))
@@ -134,7 +135,15 @@ describe('the buttons and badges', () => {
     render(<PauseBadgeClosed panelOpen={false} />)
     expect(screen.queryByRole('button', { name: /tap to resume/ })).toBeNull()
     act(() => setDevPause('full'))
-    fireEvent.click(document.querySelector('.devkit-pause-badge[data-mode="full"]')!) // (jsdom has no popovers: it counts as hidden)
+    const badge = document.querySelector<HTMLElement>('.devkit-pause-badge[data-mode="full"]')!
+    expect(badge.dataset.spot).toBe('left') // no pauseBadgeSpot in content/devkit.json → clear of the HUD rows at the top and bottom
+    fireEvent.click(badge) // (jsdom has no popovers: it counts as hidden)
     expect(clockPause()).toBe(null)
+  })
+  it('the badge spot comes from content/devkit.json "pauseBadgeSpot"; junk = left', () => {
+    expect(readBadgeSpot('top-right')).toBe('top-right')
+    expect(readBadgeSpot('middle')).toBe('left')
+    expect(readBadgeSpot(undefined)).toBe('left')
+    expect(BADGE_SPOTS).toContain(DEFAULT_BADGE_SPOT)
   })
 })
