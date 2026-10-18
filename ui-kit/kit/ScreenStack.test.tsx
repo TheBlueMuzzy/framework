@@ -103,3 +103,12 @@ describe('ScreenStack focus', () => {
     expect(document.activeElement).toBe(game)
   })
 })
+
+describe('overlay game box', () => {
+  it('marks the always-there layer so the HUD sits on the game picture (--kit-frame-w), not just the open screens', () => {
+    const { container, rerender } = render(<ScreenStack screens={{}}><div>hud</div></ScreenStack>)
+    expect(container.querySelector('.kit-layer')?.hasAttribute('data-framed')).toBe(false)
+    rerender(<ScreenStack overlay screens={{}}><div>hud</div></ScreenStack>)
+    expect(container.querySelector('.kit-layer')?.hasAttribute('data-framed')).toBe(true)
+  })
+})
