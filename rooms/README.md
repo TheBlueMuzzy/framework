@@ -1,6 +1,6 @@
 # Rooms
 
-Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare — Workers free plan): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.6.0** — 0.6.0 (2026-10-12): the server runs on PartyServer + wrangler (Glyphtender's proven setup) — the installer makes `party/worker.ts` + `wrangler.json`, `server/liveConnections.ts` is in the kit, no more `partykit.json` (PartyKit's hosted platform shut down on 23 Oct 2026). (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
+Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare — Workers free plan): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.7.0** — 0.7.0: its promise check (the Dev Kit adapter is off online). 0.6.0 (2026-10-12): the server runs on PartyServer + wrangler (Glyphtender's proven setup) — the installer makes `party/worker.ts` + `wrangler.json`, `server/liveConnections.ts` is in the kit, no more `partykit.json` (PartyKit's hosted platform shut down on 23 Oct 2026). (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
 
 ## What a game gets
 | Part | Does |
@@ -91,6 +91,14 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 
 ## Knobs — `content/rooms.json`
 `minSeats` (2) · `maxSeats` (4) · `idleWarnAfterMs` (30000; 0 = no warning) · `idleTakeoverAfterMs` (60000; 0 = never) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
+
+## What a game must provide
+From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`): online, **the server owns the truth** — so the Dev Kit's tools
+that change play are offline-only: the game's Dev Kit adapter answers `canRestore()` (and `canPause()`, if it has one)
+`false` while the game is online (`canRestore: () => !isOnline()`).
+
+**How it's checked — `npm run check:framework`** (0.7.0, `kit/conformance.mjs`): fails when the adapter has no
+`canRestore`, or one that's always `true`.
 
 ## Install or update
 From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run` first to see what would change).

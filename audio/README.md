@@ -2,7 +2,7 @@
 
 Sound for a game. **Code never names a file**: the game says *what happened* (`playSound('seed.land')`), and `content/audio.json` says *what that sounds like* — which files, how loud, how high, how much it varies, which volume group, how often it may repeat. Swapping a placeholder for a final sound means dropping in a file and editing the JSON (or, soon, the Dev Kit Sound Board).
 
-Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.2.1**. Proven in Glyphtender (its v0.9).
+Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.3.0** (0.3.0: the Dev Kit's full pause silences it; its promise checks). Proven in Glyphtender (its v0.9).
 
 No library: the browser's own Web Audio does it all. No runtime dependencies.
 
@@ -28,6 +28,20 @@ Kit 0.2.0 (F28) adds music tracks (layers + intensity + rests), streaming for mu
 Kit 0.2.1: the Settings row is **Sound** (`sound`, on = plays; was `muteAll` — an old save is read as its opposite), and switching it off lets the click that just started finish (`master.muteDelayMs`, 250) before the silence.
 
 Coming next: loudness check script (F31).
+
+## What a game must provide
+From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
+- **Code says what happened** — `playSound('seed.land')` — and **`content/audio.json` says what it sounds like**.
+  Game code never names a sound file and never makes its own `Audio` / `AudioContext` (the mixing, the player's
+  Settings and the Dev Kit's pause can't reach those).
+- **The Dev Kit's ⏸ Full pause silences it** — nothing to wire since 0.3.0: the engine hears the Dev Kit's
+  `devkit:pause` window event itself (full = suspended like a hidden tab, sounds asked for meanwhile are dropped;
+  resume plays on; ◐ half pause leaves sound alone). The Sound tab edits play live.
+
+**How it's checked — `npm run check:framework`** (the Dev Kit's runner runs `kit/conformance.mjs`):
+- *sounds are named in code, described in content/audio.json* — fails on a missing `content/audio.json`, and names
+  each line of game code with a sound file name or its own `new Audio(` / `new AudioContext(`.
+- *the Dev Kit's full pause silences the sound* — fails when this copy of the module is older than 0.3.0.
 
 ## Install / update in a game
 ```

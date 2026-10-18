@@ -23,6 +23,47 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note **and how it was written** (`vite/formatJson.ts`: what was on one line stays on one line, `1.0` stays `1.0`; new parts: short objects / lists of plain values on one line if they fit 120 characters) — so saving a hand-written file unchanged leaves `git diff` empty; no page reload for its own writes |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
 | Release check | `npm run check:devkit` builds the game both ways and checks each in a browser (/deliver runs it) |
+| Framework check | **0.19.0.** `npm run check:framework` runs every installed module's promise checks on the real game and says what to wire where (*What a game must provide*, below) |
+
+## What a game must provide
+The Dev Kit's job is to change the RUNNING game live (MODULE-CONTRACTS.md, `~/.claude/config/bmuz/`). A game is wired
+for it when:
+1. **Tuning is read where it's used** — every `content/tuning/*.json` import is live by default (the Vite plugin), so
+   the game only has to never copy a value once at load (`const speed = tank.cameraSpeed` at the top of a file, a
+   named import, `?raw`). A file that copies on purpose: `content/devkit.json` `"liveGuardAllow": { "src/x.ts": "why" }`.
+2. **Two clocks** (`src/devkit/gameClock.ts`): the engine ticks by `dt × rulesClock.rate`, game-logic timers are
+   `rulesClock.after / every`, presentation time is `looksClock` — never `setTimeout` / `setInterval` /
+   `performance.now()` for anything that changes the game.
+3. **An adapter** registered in `src/devkit-game/tabs.ts` (*Plug the game in*, below), with the optional
+   `conformance` section so the checks can reach live play:
+   ```ts
+   conformance: {
+     startPlay: async () => { /* from the page as it loads to live play: click Start, wait until play runs */ },
+     query: '?seed=7',      // optional: a fixed, replayable game
+   },
+   ```
+4. **Pause works**: ⏸ full pause freezes screen, clocks and state; ◐ half pause stops the rules and the state while the
+   looks run (comes free with 2).
+5. **Seeded randomness** (`?seed=`) so snapshots and captures replay; **Screens previews** for gated screens;
+   **hotkeys skip text boxes**; `data-knobs` on tunable things when the game uses Select.
+
+**How it's checked — `npm run check:framework`** (0.19.0, `kit/check-framework.mjs` → the game's `src/devkit/`). It
+finds every framework module the game has installed (its `src/…/VERSION` file), runs that module's own checks
+(`conformance.mjs`, shipped inside each kit) and prints one report; every failure says what to wire and in which file.
+`--static` = only the code checks · `--only devkit,ui` · `--port` (default 5197). Needs `playwright-core` + its
+Chromium. The Dev Kit's own checks:
+| Check | Fails when |
+|---|---|
+| a game adapter is registered | `tabs.ts` doesn't call `registerDevKitGame` |
+| every tuning file is read by the game | a `content/tuning/*.json` no code imports (its sliders change nothing) |
+| no tuning value is copied at load | `liveGuard.ts` (`copiedAtLoad`) finds a copy — file:line + the fix |
+| the Dev Kit starts and the game is plugged in | `window.__devkit` (`checkHandle.ts`, set by mount) or the adapter is missing |
+| every tuning file is live in the running game | an edit (the Tuning tab's own `devkit:tuning` event) doesn't reach the game's import — the Vite plugin isn't in |
+| ⏸ full pause stops everything | in live play, 0.7 s of full pause moves a clock, the adapter's state or a pixel — names the plain timers in game code |
+| ◐ half pause stops the rules, not the looks | in 1 s of half pause the rules clock or the state moves, or the looks clock doesn't |
+| a snapshot restores exactly | `setState(getState())` after 0.7 s of play gives a different moment (the first differing path) |
+| the game's hotkeys skip text boxes | in live play a game key handler calls `preventDefault` on keys typed into a text box, or swallows its letters |
+Without `conformance.startPlay` the last four fail with the exact lines to add to the adapter.
 
 ## Install or update
 From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-run` to see what would change first).
@@ -33,6 +74,7 @@ From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-ru
   2. `vite.config.ts`: `import { devkit } from './vite-plugins/devkit/devkitVite'` and `plugins: [react(), devkit()]`
   3. `tsconfig.node.json`: `"vite-plugins"` in `"include"`
   4. `package.json`: `"check:devkit": "node src/devkit/check-devkit.mjs"` (needs Playwright: `npm install -D playwright`)
+     and `"check:framework": "node src/devkit/check-framework.mjs"` (0.19.0 — every module's promise checks)
   5. **The live guard** (0.18.0) in the game's own tests — fails when code copies a tuning value at load, where the
      sliders can't reach it (Goops `tests/devkit-live.test.ts` is the template):
      ```ts
@@ -70,6 +112,7 @@ export const myGameAdapter: DevKitGame = {
   pauseModes: ['full', 'half'],               // optional (0.18.0): ◐ Half pause shows (it also does if the game reads rulesClock)
   pause: (mode) => physics.setPaused(mode),   // optional: machinery the clocks don't reach (a physics engine, an AI worker)
   canPause: () => !isOnline,                  // optional: left out = canRestore()
+  conformance: { startPlay: async () => { /* menu → live play */ }, query: '?seed=7' }, // optional (0.19.0): npm run check:framework
 }
 
 // src/devkit-game/tabs.ts
