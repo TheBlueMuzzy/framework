@@ -28,7 +28,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | the game's UI code keeps the kit's rules (check-ui) | `check-ui.mjs` (with the game's own `check:ui` arguments) finds raw colours, px, fonts, inline styles, stray positioning |
 | check-ui runs in check:fast | the game has no `check:ui` script |
 | nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog |
-| nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow, text is cut off, or the page is wider than the screen |
+| nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
 | no focus ring without the keyboard | a focus ring shows on the first screen without any key pressed |
 The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080, on its

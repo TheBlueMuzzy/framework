@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { SIZES, check, groupProblems } from './conformance.mjs'
+import { SIZES, check, groupProblems, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -14,6 +14,12 @@ describe('UI kit checks', () => {
     expect([...grouped.small]).toEqual([['30×30 px — "Close"', ['phone · first screen', 'desktop · first screen']]])
     expect([...grouped.overlap.keys()]).toEqual(['"Score" × "Cracks"'])
     expect([...grouped.clipped.keys()]).toEqual(['the page is wider than the screen (400 > 390)'])
+  })
+  it('says where a problem showed in few words when it showed everywhere in one phase', () => {
+    const inPlay = SIZES.map((s) => `${s.name} ${s.width}×${s.height} · in play`)
+    expect(whereText(inPlay, 14)).toBe('in play, every size')
+    expect(whereText([...inPlay, ...inPlay.map((w) => w.replace('in play', 'first screen'))], 14)).toBe('every screen, every size')
+    expect(whereText(inPlay.slice(0, 2), 14)).toBe(`${inPlay[0]}; ${inPlay[1]}`)
   })
   it('--static: runs check-ui only, and asks for a check:ui script when the game has none', async () => {
     const results = []

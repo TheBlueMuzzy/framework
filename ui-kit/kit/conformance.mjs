@@ -39,6 +39,14 @@ export function groupProblems(found) {
   return byKind
 }
 
+/** ["phone 390×844 · in play", …] → "in play, every size" when it showed at all sizes of one phase (or of both). */
+export function whereText(where, screens) {
+  if (where.length === screens) return 'every screen, every size'
+  const phases = [...new Set(where.map((w) => w.split(' · ')[1]))]
+  if (phases.length === 1 && where.length === SIZES.length) return `${phases[0]}, every size`
+  return where.join('; ')
+}
+
 export async function check(t) {
   // ---- code: the kit's rule checker ----
   {
@@ -79,7 +87,7 @@ export async function check(t) {
   for (const { kind, name, fix } of KINDS) {
     const list = grouped[kind]
     if (!list?.size) { t.pass(name, `${screens} screens, ${SIZES.length} sizes`); continue }
-    const lines = [...list].map(([text, where]) => `${text}  [${where.length === screens ? 'every size' : where.join('; ')}]`)
+    const lines = [...list].map(([text, where]) => `${text}  [${whereText(where, screens)}]`)
     t.fail(name, lines.length > 12 ? [...lines.slice(0, 12), `…and ${lines.length - 12} more`] : lines, fix)
   }
   if (grouped.error?.size) t.fail('no errors in the console', [...grouped.error.keys()].slice(0, 8), 'Fix the errors above (they happened while the screens loaded).')
