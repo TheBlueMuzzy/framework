@@ -85,7 +85,7 @@ describe('install-devkit', () => {
 
 describe('wiring steps', () => {
   it('a bare game needs every step', () => {
-    expect(wiringSteps(game).filter((w) => !w.done)).toHaveLength(5) // no tsconfig.node.json → that step is skipped
+    expect(wiringSteps(game).filter((w) => !w.done)).toHaveLength(6) // no tsconfig.node.json → that step is skipped
   })
 
   it('a wired-up game needs none', () => {
@@ -93,7 +93,7 @@ describe('wiring steps', () => {
     write(join(game, 'vite.config.ts'), "import { devkit } from './vite-plugins/devkit/devkitVite'")
     write(join(game, 'tsconfig.node.json'), '{ "include": ["vite.config.ts", "vite-plugins"] }')
     write(join(game, '.gitignore'), 'node_modules\ndevkit.local.json\n')
-    write(join(game, 'package.json'), JSON.stringify({ scripts: { 'check:devkit': 'node src/devkit/check-devkit.mjs' }, devDependencies: { 'playwright-core': '^1' } }))
+    write(join(game, 'package.json'), JSON.stringify({ scripts: { 'check:devkit': 'node src/devkit/check-devkit.mjs', 'check:framework': 'node src/devkit/check-framework.mjs' }, devDependencies: { 'playwright-core': '^1' } }))
     expect(wiringSteps(game).filter((w) => !w.done)).toEqual([])
   })
 

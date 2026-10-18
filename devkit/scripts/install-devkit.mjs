@@ -32,6 +32,7 @@ export const RELEASE_SWITCH = {
 }
 
 const CHECK_SCRIPT = 'node src/devkit/check-devkit.mjs'
+export const FRAMEWORK_CHECK_SCRIPT = 'node src/devkit/check-framework.mjs'
 
 const isTest = (path) => /\.test\./.test(path)
 const readText = (path) => readFileSync(path, 'utf8')
@@ -101,6 +102,10 @@ export function wiringSteps(gameDir) {
     {
       done: pkg.scripts?.['check:devkit'] === CHECK_SCRIPT,
       step: `package.json "scripts": "check:devkit": "${CHECK_SCRIPT}"   (/deliver runs it: builds both ways and checks each)`,
+    },
+    {
+      done: pkg.scripts?.['check:framework'] === FRAMEWORK_CHECK_SCRIPT,
+      step: `package.json "scripts": "check:framework": "${FRAMEWORK_CHECK_SCRIPT}"   (every installed module's promise checks — what the game must wire, and where; /deliver runs it)`,
     },
     {
       done: /^\/?devkit\.local\.json\s*$/m.test(text('.gitignore')),
@@ -187,7 +192,7 @@ export function installDevkit(gameDir, { dryRun = false, log = console.log } = {
   let n = 1
   if (oldFiles.length) log(`  ${n++}. Delete the old hand-made Dev Kit files listed above.`)
   for (const w of todo) log(`  ${n++}. ${w.step}`)
-  log(`  ${n}. Run the game's tests and build, press \` in npm run dev, then npm run check:devkit.`)
+  log(`  ${n}. Run the game's tests and build, press \` in npm run dev, then npm run check:devkit and npm run check:framework.`)
   log('  To add a game tool: make it in src/devkit-game/ and list it in src/devkit-game/tabs.ts.')
   return result
 }
