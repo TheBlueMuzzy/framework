@@ -1,5 +1,5 @@
-# Sprint 05 — the computer enforces Muzzy's "never" rules and the checks (not Claude's memory)
-Started 2026-10-18 · Milestone v0.9 · Features: F68
+# Sprint 05 — the computer enforces Muzzy's "never" rules and the checks (not Claude's memory), and every module tests its own promises
+Started 2026-10-18 · Milestone v0.9 · Features: F68, F61 (F61 pulled in 2026-10-18: Dev Kit 0.18.0 landed — 44b6bb9, dfeb56d; built by a helper in parallel, no shared files)
 Plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md (step 1). Everything lives in ~/.claude (scripts in
 `~/.claude/config/bmuz/hooks/`, wiring in `~/.claude/settings.json` + skill frontmatter) → synced to the laptop by /sync.
 
@@ -7,16 +7,29 @@ Plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md (step 1). Eve
 Done when: each hook blocks its "never" case and lets the normal case through — proven by a test script and one real try
 each; Muzzy has read every hook in plain words (HOOKS.md) and OK'd it; the laptop has them after /sync.
 - [x] 🤖 1. Spike: this Claude Code version can block a Bash/PowerShell command (PreToolUse deny) and a skill's frontmatter can register a Stop hook while it runs (`stop_hook_active` guard) — throwaway test, findings in Notes
-- [ ] 🤖 2. Never-rules — `hooks/guard-git.sh` (PreToolUse, Bash + PowerShell): block `reset --hard`, force-push (`--force`, `-f`, `+ref`), deleting a branch that isn't fully merged (local `-D`, remote `--delete` / `:branch`); Claude in Chrome tools → `ask` rule; Gmail stays denied — `~/.claude/settings.json`
+- [x] 🤖 2. Never-rules — `hooks/guard-git.sh` (PreToolUse, Bash + PowerShell): block `reset --hard`, force-push (`--force`, `-f`, `+ref`), deleting a branch that isn't fully merged (local `-D`, remote `--delete` / `:branch`); Claude in Chrome tools → `ask` rule; Gmail stays denied — `~/.claude/settings.json`
 - [ ] 🤖 3. Commit gate — `hooks/commit-typecheck.sh`: `git commit` in a repo with tsconfig + staged .ts/.tsx → `npx tsc -b` (time limit); fails → blocked, errors in plain words
 - [ ] 🤖 4. Live-branch gate — `hooks/live-push.sh`: push to the branch that deploys (deploy workflow's `on: push` branch) or `npm run deploy` / gh-pages → blocked when code changed since the commit in `.planning/smoke-pass` (docs / .planning only → allowed); /deliver writes the file after its smoke test — `skills/deliver/SKILL.md`, `config/bmuz/release/github-pages.md`
 - [ ] 🤖 5. Stop gate in /develop — `hooks/stop-check-fast.sh` in `skills/develop/SKILL.md` frontmatter: runs `npm run check:fast` when code changed since the last green run (commit + diff hash kept in `.git/`), time limit, `stop_hook_active` guard, skips repos without check:fast
 - [ ] 🤖 6. check-ui after edits — `hooks/check-ui-edit.sh` (PostToolUse Edit|Write on `src/ui/**`): `node src/ui/kit/check-ui.mjs <file>`, result fed back to Claude; quiet when the game has no kit
 - [ ] 🤖 7. Prove it — `hooks/test-hooks.sh`: a block + an allow case per hook from fake tool JSON; one real try each in a scratch repo; write `config/bmuz/HOOKS.md` (each hook in plain words, how to switch one off); one line in CLAUDE.md "Undo" + PROJECT-FILES pointing at it
 - [ ] 🙋 8. Read HOOKS.md and OK it → /sync so the laptop gets them
-Check: `bash ~/.claude/config/bmuz/hooks/test-hooks.sh` all green + the real tries quoted in Notes.
+Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green + the real tries quoted in Notes.
+Ask Muzzy: —
+## F61 🧱 Conformance pack
+Done when: `npm run check:framework` in a game runs every installed module's own promise checks and says in plain words what to wire and where when one fails; proven on a throwaway COPY of Goops (Goops itself = F62, the Goops session's); each module README has "What a game must provide"; the PAUSED pill no longer covers a game's top row on a 390-wide phone.
+- [ ] 🤖 1. PAUSED pill (bug from the Goops session): the closed-panel badge sits fixed top-centre over the game's top HUD row (Goops "CRACKS 0/10", 390 wide) → move it clear of game HUD (position from `content/devkit.json`, safe-area aware), Dev Kit 0.18.1 — `devkit/kit/pause/PauseButtons.tsx`, `devkit/kit/devkit.css`
+- [ ] 🤖 2. Runner `check-framework.mjs` (shipped in the Dev Kit → `src/devkit/`): finds installed modules by their `src/*/VERSION`, runs each module's checks, one plain-words report; installers add the `check:framework` script — static part: `copiedAtLoad` guard, `check-ui`, table `selfTest`, ai `check`
+- [ ] 🤖 3. Dev Kit browser checks (Playwright, own port, through the registered adapter): every `content/tuning/*.json` live · full pause (screen + rules clock still) · half pause (rules clock still, looks running) · snapshot round-trip · game hotkeys skip text boxes; adapter gets an optional `conformance` section (e.g. `startPlay`) — `devkit/kit/`
+- [ ] 🤖 4. UI kit checks on the REAL game at every size (390×844 · 360×780 · 844×390 · 768×343 · 1100 wide · 1440×900 · 1920×1080): no overlap (new), no clipping, 44 px targets — reuse `ui-kit/scripts/shoot.mjs` `findProblems` (moved into the kit) — `ui-kit/kit/`
+- [ ] 🤖 5. Audio quiet on full pause (audio listens to the Dev Kit pause, `PAUSE_EVENT`) · AI bot stops on half pause (`ai/kit/pace.ts` on the rules clock) · table replay = existing `selfTest` — each with its check
+- [ ] 🤖 6. "What a game must provide" in every module README (from MODULE-CONTRACTS.md); ui-kit gets a README
+- [ ] 🤖 7. Prove it: install into a throwaway copy of Goops → run `check:framework`; break one promise on purpose (a copied tuning value, a raw setTimeout) → the check names it and the fix; module tests + check scripts green
+- [ ] 🤖 8. BMUZ side: `check:framework` row in `~/.claude/config/bmuz/templates/check-all.mjs`, /deliver runs it, DEVKIT.md + MODULE-CONTRACTS.md point at it
+Check: the Goops-copy run quoted in Notes (pass + the deliberate break caught).
 Ask Muzzy: —
 Notes:
 - Muzzy's calls 2026-10-18: branch deletes → allowed only when already fully merged (nothing lost; /deliver's cleanup keeps working) · his Chrome → ask each time (not fully blocked) · live push → smoke pass first even for tiny code fixes on main; doc-only saves pass freely.
-- Don't touch dev/framework/devkit/ or Goops — the Goops session's helper is building F59/F60 there (uncommitted devkit/kit/tuning/* files are its work). F61 starts when the Goops session says that work has landed.
+- Goops session (2026-10-18): Dev Kit 0.18.0 live/pause landed (44b6bb9, dfeb56d) → F61 go. Goops itself stays the Goops session's (F62). Known limits it reported: restoring a snapshot of a finished shift shows the stopped tank but not the end report; the general freeze can't stop plain timers that aren't on the shared clock (exactly what F61 checks should catch).
+- F68 hooks are written in Node (`.mjs`), not bash — JSON + command parsing are reliable on both machines.
 - Spike (2026-10-18, Claude Code 2.1.303, headless `claude -p` in a scratch repo): a PreToolUse hook answering `permissionDecision: "deny"` stopped `git reset --hard` in **auto mode** (Claude saw "PreToolUse:Bash hook error: <reason>"); a skill's frontmatter `hooks: Stop:` ran at turn end after `/tstop` (lives for the rest of the session); `claude -p --settings <file>` loads that file's hooks → task 7 can prove each hook for real headlessly. Stdin has `cwd`, `tool_name`, `tool_input.command`, `permission_mode`. Stop: `stop_hook_active` guard, `{"decision":"block","reason"}`; Claude Code overrides after 8 blocks in a row.
