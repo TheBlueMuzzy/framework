@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { inlineThinker, makeThinker, serveThinking, thinkDelay, waitLeft, type Pace, type WorkerLike } from './pace'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { botWait, inlineThinker, makeThinker, paceNow, serveThinking, setPaceClock, thinkDelay, waitLeft, type Pace, type PaceClock, type WorkerLike } from './pace'
 
 const pace: Pace = { think: { turn: { min: 1, max: 2 }, default: { min: 0.5, max: 0.5 } }, speeds: { Slow: 0.5, Normal: 1, Fast: 2, Instant: 0 }, timeBudgetMs: 300 }
 
@@ -75,5 +75,44 @@ describe('thinking in the background', () => {
     await expect(t.think(1)).resolves.toBe(2)
     t.stop()
     await expect(t.think(1)).rejects.toThrow(/stopped/)
+  })
+})
+
+describe('the clock a bot waits on', () => {
+  afterEach(() => setPaceClock(null))
+
+  it('a game clock that stops (◐ half pause) stops a bot mid-think; it moves on when the clock does', () => {
+    // a hand-driven rules clock: time only moves when the test says so
+    let time = 0
+    let timers: { at: number; fn: () => void }[] = []
+    const rules: PaceClock = { now: () => time, after: (ms, fn) => { const t = { at: time + ms, fn }; timers.push(t); return () => { timers = timers.filter((x) => x !== t) } } }
+    const run = (ms: number) => { time += ms; for (const t of timers.filter((x) => x.at <= time)) { timers = timers.filter((x) => x !== t); t.fn() } }
+    setPaceClock(rules)
+    const acted = vi.fn()
+    const started = paceNow()
+    botWait(waitLeft(1500, paceNow() - started), acted)
+    run(1000)
+    expect(acted).not.toHaveBeenCalled()
+    // paused: no rules time passes, however long the wait — nothing happens
+    expect(acted).not.toHaveBeenCalled()
+    run(500)
+    expect(acted).toHaveBeenCalledOnce()
+  })
+
+  it('cancel works; without setPaceClock it is the plain browser clock', () => {
+    vi.useFakeTimers()
+    try {
+      const acted = vi.fn()
+      const cancel = botWait(100, acted)
+      cancel()
+      vi.advanceTimersByTime(200)
+      expect(acted).not.toHaveBeenCalled()
+      botWait(100, acted)
+      vi.advanceTimersByTime(100)
+      expect(acted).toHaveBeenCalledOnce()
+      expect(typeof paceNow()).toBe('number')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

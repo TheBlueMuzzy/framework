@@ -257,6 +257,23 @@ describe('hidden tab, calls, lock screen', () => {
     expect(ctx.startedSounds().length).toBe(before)
   })
 
+  it('the Dev Kit\'s full pause (its devkit:pause event) suspends like a hidden tab; half pause doesn\'t; resume plays on', async () => {
+    const { audio, ctx, win, tap } = setup()
+    await tap()
+    const pause = async (mode: 'full' | 'half' | null) => { win.dispatchEvent(new CustomEvent('devkit:pause', { detail: { mode } })); await settle() }
+    await pause('half')
+    expect(audio.state()).toBe('running')
+    await pause('full')
+    expect(ctx.suspendCalls).toBe(1)
+    expect(audio.state()).toBe('suspended')
+    expect(audio.play('pop')).toMatchObject({ kind: 'drop', reason: 'suspended' })
+    await tap() // tapping the PAUSED badge is a tap: it must not wake the audio while still paused
+    expect(audio.state()).toBe('suspended')
+    await pause(null)
+    expect(audio.state()).toBe('running')
+    expect(audio.play('pop')).toMatchObject({ kind: 'play' })
+  })
+
   it('with "mute in background" off, a hidden tab keeps playing', async () => {
     const { audio, ctx, doc, tap } = setup()
     await tap()
