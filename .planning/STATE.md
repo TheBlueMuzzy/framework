@@ -1,13 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-15 — **Released framework v0.10.0 = v0.8 Dev Kit Select Mode ✅** (Dev Kit 0.16.1: Select tab — click a thing or a menu part → every knob for it; the game's test keeps every setting on some object; desktop panel tucks to a bar while selecting; pick forgotten on close). Proven by Glyphtender v0.11.0. F57 (3D picker) waits for a 3D game.
-Next: whatever the next game sprint needs.
-2026-10-18 — **Planned v0.9 "Every game wired the same"** (F59–F66, ROADMAP): game core (live content by default, rules/looks clocks) + Dev Kit Time tool (full / half pause) are being built through Goops right now (Dev Kit 0.18.0); then the conformance pack (F61), Goops + Glyphtender pass it, starters, a framework test game. Spec: ~/.claude/config/bmuz/MODULE-CONTRACTS.md. This milestone runs in its OWN Claude session (Muzzy, 2026-10-18), which owns dev/framework + ~/.claude (BMUZ). Start with **F68 BMUZ hooks** (touches only ~/.claude). F59/F60 are being built by a helper from the Goops session right now (it writes devkit/ + Goops) — don't touch devkit/ or Goops until the Goops session says that work has landed; then F61. Goops itself stays with the Goops session (framework work on Goops goes on its own branch, merged by the Goops session). Reliability plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md.
+2026-10-18 — **Sprint 05 planned: F68 BMUZ hooks** (v0.9; SPRINT.md) — Muzzy's "never" rules + checks become hooks the harness enforces (all in ~/.claude: `config/bmuz/hooks/`, settings.json, /develop frontmatter). Muzzy's calls: merged-only branch deletes allowed · his Chrome = ask each time · live push needs a smoke pass even for tiny code fixes. Next: /develop task 1 (spike).
+Hands off `devkit/` + Goops: the Goops session's helper is building F59/F60 there (uncommitted devkit/kit/tuning/* = its work). F61 starts when the Goops session says the Dev Kit pause/live work has landed. Earlier: v0.10.0 released 2026-10-15 (Select Mode); v0.9 planned 2026-10-18 (spec ~/.claude/config/bmuz/MODULE-CONTRACTS.md, reliability plan ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md). This milestone runs in its OWN session, which owns dev/framework + ~/.claude.
 
 ## Where we are
-Stage: deliver   Milestone: v0.8 — Dev Kit Select Mode ✅   Sprint: —
-Doing: released   Branch: main   Version: 0.10.0 (Dev Kit 0.16.1)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
+Doing: F68 BMUZ hooks   Branch: main   Version: 0.10.0 (Dev Kit 0.16.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
