@@ -6,6 +6,7 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Tool | Does |
 |---|---|
 | Panel | ` / Esc / ✕ / triple-tap; ignores ` while the player types; floats above the game's popovers; stays open-able in release builds until 1.0. More tabs than fit (a phone) → ◀ ▶ + page dots, never a sideways scroll bar |
+| Pause | **Dev Kit 0.18.0.** Two buttons left of the DEV KIT title (dev and release builds): **⏸ Full pause** — everything freezes exactly as it is: the page's animation frames are held (and released on resume), CSS / Web animations, `<audio>` / `<video>` and AudioContexts pause, both of the game's clocks stop (`gameClock.ts`), then the adapter's optional `pause('full')`. The panel itself keeps working. A live edit (Tuning, Moments…) while frozen redraws ONE frame with no time passing, so you see it on the frozen picture. **◐ Half pause** — only the **rules clock** stops; the **looks clock** (pulses, glows, idle motion) keeps going. Shows only when the game reads `rulesClock` or its adapter lists `pauseModes: ['full', 'half']`. Pressing the lit button resumes, the other switches; a **PAUSED / HALF-PAUSED** badge on the title; closing the panel does NOT resume — a small badge stays at the top (tap = resume); **P** in the panel cycles off → full → half → off (a letter in a text box). Online games: both greyed out with the reason (`canPause()`, else `canRestore()`) |
 | Search | **Dev Kit 0.8.0: searches only the open tab** ("Search Tuning…", "Search Screens…"). Type and that tab filters live — case-insensitive, matching ANYWHERE in a word ("ade" finds spotlightFade), in the key (camelCase split: "trail fade" finds trailFade), its readable label, its help line, its section title and its file name; several words = all must match. Highlighted, with a count ("3 settings found") or "Nothing in Tuning matches…". Color, Tuning and AI filter their settings; Snapshots by name / summary / version; Bugs its 📍 marks; Screens by screen name, group, note, variant and moments. Tap a section title to clear the search and jump there. Picking another tab clears it. ✕ or Esc clears (the next Esc closes). 16 px text, so a phone doesn't zoom in |
 | Sections | Settings sit in titled sections that open and close ("Trails · 6"), remembered per game in this browser; chips at the top of a tab jump to one; Expand all / Collapse all; a dot on a closed section that holds an unsaved change. Sections and readable names come from the game's files (*Naming settings*, below) |
 | Color | Colour-blind preview (3 types) + the 15 UI kit colours from `content/ui/style.json`, live, with ↺ back to the preset, then "UI shape & feel" (corners, shadows, timings, fonts as text…). A game without the UI kit gets only the preview |
@@ -32,6 +33,17 @@ From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-ru
   2. `vite.config.ts`: `import { devkit } from './vite-plugins/devkit/devkitVite'` and `plugins: [react(), devkit()]`
   3. `tsconfig.node.json`: `"vite-plugins"` in `"include"`
   4. `package.json`: `"check:devkit": "node src/devkit/check-devkit.mjs"` (needs Playwright: `npm install -D playwright`)
+  5. **The live guard** (0.18.0) in the game's own tests — fails when code copies a tuning value at load, where the
+     sliders can't reach it (Goops `tests/devkit-live.test.ts` is the template):
+     ```ts
+     import { copiedAtLoad, type SourceFile } from '../src/devkit/tuning/liveGuard'
+     const sources = import.meta.glob<string>('../src/**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true })
+     const srcFiles = (): SourceFile[] => Object.entries(sources).map(([path, text]) => ({ path: path.slice(3), text }))
+     it('no tuning value is copied at load', () => expect(copiedAtLoad(srcFiles())).toEqual([]))
+     // allow: { 'src/x.ts': 'why' } for a file that copies on purpose; folders: [...] to guard more than content/tuning/
+     ```
+  6. **The clocks** (0.18.0): tick the engine by `dt × rulesClock.rate`, set `rulesClock.scale` for the game's own pause
+     menu, put game-logic timers on `rulesClock.after/every/now`, pulses and frame time on `looksClock` (Decisions: *Two clocks*).
 
 ## Add a game's own tool (a game tab)
 1. Make a component in `src/devkit-game/` — e.g. `TableTab.tsx`. Use `saveContentFile` / `copyText` / `CAN_SAVE` from `../devkit/saveContent`, `ColourRow` from `../devkit/color/ColourRow`, and the `devkit-footer` / `devkit-btn` classes for Save and Copy for Claude.
@@ -55,6 +67,9 @@ export const myGameAdapter: DevKitGame = {
   canRestore: () => !isOnline,                // MUST be false in online games (tools that affect play are offline-only)
   onEvent: (send) => store.subscribe(() => send('Blue moved to C4-3')), // optional: short lines for the capture log; return "stop"
   describe: (state) => 'turn 12 · Blue to move', // optional: one line shown next to snapshots and marks
+  pauseModes: ['full', 'half'],               // optional (0.18.0): ◐ Half pause shows (it also does if the game reads rulesClock)
+  pause: (mode) => physics.setPaused(mode),   // optional: machinery the clocks don't reach (a physics engine, an AI worker)
+  canPause: () => !isOnline,                  // optional: left out = canRestore()
 }
 
 // src/devkit-game/tabs.ts
@@ -232,24 +247,32 @@ Muzzy's goal: "click on a thing > see the attributes associated with it compiled
   a part picks the whole thing and shows every knob for all its parts.
 - BMUZ rule: a new tunable setting → put it on the object it affects (the test fails until you do).
 
-## Live tuning in the game
-The game keeps importing its own tuning JSON; it just wraps it so the Tuning tab's sliders reach it while it runs.
-`src/devkit/tuning/liveTuning.ts` has no Dev Kit code in it, so it's safe in every build (with the Dev Kit off,
-nothing sends edits and the values are simply the file's).
+## Live tuning in the game — live by default (0.18.0)
+The game imports its tuning JSON as usual, and it's live: the Dev Kit's Vite plugin hands back every
+`import x from '…/content/tuning/<name>.json'` as `liveFile('<name>', <the file>)` — an object with a getter per key
+that reads the Dev Kit's latest edit (falling back to the file). It works in dev, in every build and in vitest (with
+nothing sending edits it is just the file); `src/devkit/tuning/liveTuning.ts` has no Dev Kit code in it.
 
 ```ts
-// Plain code (utils, store) — at the top of the file:
-import physicsFile from '../../content/tuning/physics.json'
-import { liveTuning } from '../devkit/tuning/liveTuning'
-const physics = liveTuning('physics', physicsFile) // 'physics' = the file name without .json
+import tank from '../../content/tuning/tank.json'
+// …read where the value is used — this follows the slider:
+camera = stepCamera(camera, s.spin, dt, tank.cameraSpeed)
+const R = hud.readout          // fine inside a function: the nested object is the current one
+// NOT live — copied once, when the file loads (the live guard finds these):
+const speed = tank.cameraSpeed // at the top of a file
+import raw from '…/tank.json?raw'  ·  import { cameraSpeed } from '…/tank.json'
+```
+Pure engine code stays pure and live: pass it the import and read `config.fall.msPerRow` per tick (Goops' engine).
+Code that keeps its own copy (a physics loop with thousands of reads a frame) re-reads the file ONCE PER FRAME, or
+follows only the keys that changed (Goops `src/goo/shared/knobs.ts` `followFile`). The explicit API stays, for files
+elsewhere and for code that wants to know WHEN an edit arrives:
 
-// …then read .current where the value is used (never copy it into a top-level const):
-if (speed > physics.current.maxReleaseSpeed) { /* … */ }
-
-// A React / R3F component:
-import { useLiveTuning } from '../devkit/tuning/liveTuning'
-const physics = useLiveTuning('physics', physicsFile) // a ref — slider moves never re-render
-useFrame(() => { body.setLinearDamping(physics.current.damping) })
+```ts
+import physicsFile from '../../content/physics.json'          // (outside content/tuning: not live by itself)
+import { liveTuning, onTuning, useLiveTuning } from '../devkit/tuning/liveTuning'
+const physics = liveTuning('physics', physicsFile)             // a box; .current follows the edits
+const ref = useLiveTuning('physics', physicsFile)              // the same as a React ref (no re-renders)
+onTuning('hud', () => relayout())                              // run something when a file is edited
 ```
 Slider ranges: add `"_ranges": { "dice.bounce": [0, 1, 0.05] }` (min, max, step) to a tuning file when the guess is wrong
 (guess: 0 → twice the value; whole numbers step by 1 up to at least 10; negatives from twice the value up to its opposite).
@@ -291,6 +314,39 @@ to search sets `searchable: false` (no box).
 - The Snapshots tab reads `content/snapshots/*.json` and saves there. Bug capture: `KEEP_MS` (60 s) and `STATE_EVERY_MS` (5 s) in `kit/capture/captureLog.ts`.
 
 ## Decisions
+- **Live by default, through the Vite plugin, not by wrapping every import (0.18.0).** Goops shipped with its tuning
+  imported straight from the JSON, so every slider did nothing until a reload — wrapping each import by hand is
+  exactly what gets forgotten. The plugin turns each `content/tuning/*.json` import into `liveFile(name, data)`.
+  **A getter object, not a Proxy:** a Proxy can't go through `structuredClone` or `postMessage` (57 Goops engine tests
+  clone their config and all failed with one), a getter object can — the catch is that it only knows the file's own
+  keys (edits change values, never keys). Cost: a getter + a Map lookup per top-level read (a million reads in well
+  under a second, tested); Goops' goo physics follows its files once a frame instead (`followFile`). The Dev Kit's own
+  tools read the plain file (`?devkit-file`), so dirty marks and ↺ still compare with what's on disk. The
+  `devkit:tuning` event itself is the edit (whoever sends it), so tests and e2e scripts can drive it.
+- **The live guard is a source check for copies made at load (0.18.0), plus an e2e per game.** What the plugin can't
+  make live is a value COPIED once: a top-of-file `const x = file.key`, a `?raw` or named import. `copiedAtLoad` finds
+  those with plain text rules (quick, no compiler, few false alarms: a function, a `liveTuning(…)` call, another name
+  for the import, strings and object keys don't count). What it can't see — a copy inside a constructor or factory, a
+  default parameter of something made once (Goops' drop guide had one) — is why each game also proves a few knobs
+  live in an e2e (Goops `e2e/devkit-live.mjs`). A "send an edit to every file and see if anything changes" checker
+  was weighed and left out: many knobs only show in a rare moment (a rupture, a broken machine), so it would cry wolf.
+- **Two clocks, shared (`gameClock.ts`, 0.18.0).** Every game runs a **rules clock** (anything that can change what
+  happens: falling, timers, AI moves, physics that decides results) and a **looks clock** (presentation only: blinks,
+  pulses, glows, idle jiggle). The test: *if the end of an animation changes the game, it's on the rules clock.* The
+  Dev Kit drives both: Full pause stops both, Half pause stops only the rules clock. The game's own pause menu / slow
+  motion sets `rulesClock.scale`; the Dev Kit never touches it (its pause sits on top), so resuming always goes back
+  to the game's own speed. Timers (`after` / `every`) run on the browser's setTimeout, re-timed when a clock's rate
+  changes — plain, and they work in node tests. A game that ticks by `rulesClock.rate` and takes its frame time from
+  `looksClock` gets half pause for free and resumes from a full pause without a jump. The adapter's `pause()` stays
+  as an extra for machinery the clocks don't reach.
+- **Full pause freezes any game without its help (0.18.0, `pause/freeze.ts`).** mountDevKit patches
+  requestAnimationFrame once: while frozen, frames are queued and released on resume; the Dev Kit's own loops use the
+  real one (`devkitRaf`), and its own animations are skipped when CSS / Web animations are paused (a sweep every
+  200 ms catches ones that start while frozen). What a generic freeze can't stop — plain setTimeout,
+  `performance.now()` — is the game's part (the clocks). A live edit while frozen runs the held frames once with the
+  last frame's time (no time passes), so the frozen picture shows the edit.
+- **Pause is offline-only, like Restore:** `canPause()` (default `canRestore()`) — pausing an online game would stop
+  it for everyone. Closing the panel doesn't resume (Muzzy may want to look at the game); a small badge stays.
 - **Keys typed in the Dev Kit stay in the Dev Kit (0.17.1, `keepKeysInside` in mount.tsx).** Its host stops keydown / keyup / keypress after React has seen them, so a game's window hotkeys never fire while you type in Search (Goops: "curve" came out "cuv" — R swapped, E rotated, and the game's preventDefault ate the letters). Games should still ignore keys typed into any text box (belt and braces).
 - **Game tabs = a file the kit imports (`src/devkit-game/tabs.ts`)**, not tabs passed to `mountDevKit()`. main.tsx stays one identical line in every game, and game tools load inside the Dev Kit's own lazy chunk, so at 1.0 they vanish from the live build with the rest of it. The installer makes the file once, so the import always resolves.
 - **Two copy targets** (`src/devkit/` + `vite-plugins/devkit/`): the Vite plugin is Node code, which a game's browser tsconfig (`src/`) can't type-check.
@@ -353,6 +409,6 @@ to search sets `searchable: false` (no box).
 - **formatJson keeps a one-line object's own spacing** (0.13.0): Glyphtender's en.json writes bios as `{"name": …}` (no inner spaces); a no-change save used to rewrite them as `{ "name": … }`.
 
 ## Develop
-`npm install`, then `npm test` (panel, Sound tab (list, knobs, A/B, files + upload + credits, mixer, log, wildcard notes, waveform maths, the knobs matching audio/kit/config.ts; Music section: tracks, layers, intensity, rests, the music knobs matching config.ts), save-audio + credit endpoints (path safety; conversion when ffmpeg is installed), AI tab (editor, save, copy, watch, check, search), Review list tab (Open/Yes/No cycle, order + no re-sort until Save, Save sends only changes, failed save/load, search), Text tab (flatten / unflatten keep order + lists, {placeholder} check holds Save, search, fresh-read save, no-change save byte-identical on Glyphtender's en.json), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
+`npm install`, then `npm test` (panel, Sound tab (list, knobs, A/B, files + upload + credits, mixer, log, wildcard notes, waveform maths, the knobs matching audio/kit/config.ts; Music section: tracks, layers, intensity, rests, the music knobs matching config.ts), save-audio + credit endpoints (path safety; conversion when ffmpeg is installed), AI tab (editor, save, copy, watch, check, search), Review list tab (Open/Yes/No cycle, order + no re-sort until Save, Save sends only changes, failed save/load, search), Text tab (flatten / unflatten keep order + lists, {placeholder} check holds Save, search, fresh-read save, no-change save byte-identical on Glyphtender's en.json), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, live files (liveFile) + the Vite live-JSON step + the live guard, the two clocks (gameClock) + Pause (generic freeze, adapter calls, buttons, badges, P), game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
 - Before a version goes out, install it into a game and run the game's `npm run lint` too: the framework has no ESLint, and the games run React's hooks rules (Dev Kit 0.8.0 went out with 3 errors — setState inside an effect, a non-component export from a .tsx — fixed in 0.8.1).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).

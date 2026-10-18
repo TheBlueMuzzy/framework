@@ -53,6 +53,8 @@ export function copiedAtLoad(files: SourceFile[], { folders = ['content/tuning/'
       for (let j = i + 1; j < lines.length && /^(\s|[)\]}])/.test(lines[j]); j++) rhs += '\n' + lines[j] // its following lines
       if (/^\s*(async\s+)?(function\b|\([^)]*\)\s*(:[^=]+)?=>|[A-Za-z_$][\w$]*\s*=>)/.test(rhs)) continue // a function: reads when called
       if (/^\s*(use)?liveTuning\s*\(/.test(rhs)) continue
+      const alias = rhs.trim().replace(/;$/, '').replace(/\s+as\s+[\w$<>[\],\s|.]+$/, '').trim()
+      if (live.has(alias)) continue // another name for the live object itself (`const PALETTE = file as Palette`) is still live
       const body = stripStrings(rhs.split('=>')[0]) // a value made by calling a function written inline still copies; an arrow's body doesn't run now
       for (const name of live) {
         if (new RegExp(`(^|[^\\w$.])${name.replace(/\$/g, '\\$')}\\b(?!\\s*:)`).test(body)) {

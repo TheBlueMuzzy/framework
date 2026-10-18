@@ -13,6 +13,7 @@ describe('copiedAtLoad — game code that would not follow the Tuning sliders', 
       'export function speed() { return tank.cameraSpeed }',
       "const live = liveTuning('tank', tank)",
       'const KEYS = { tank: 1 }',
+      'export const TANK: Record<string, number> = tank as Record<string, number>', // another name for the live object
     ].join('\n'))
     expect(copiedAtLoad([ok])).toEqual([])
   })

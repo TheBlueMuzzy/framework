@@ -37,3 +37,19 @@ describe('liveFile — a tuning import that follows the Dev Kit (what the Vite p
     expect(performance.now() - start).toBeLessThan(1000)
   })
 })
+
+describe('liveFile works where a plain object does', () => {
+  it('structuredClone (and so postMessage to a worker) copies the current values', () => {
+    const t = liveFile('lf-clone', { speed: 1, look: { glow: 2 } })
+    sendTuning('lf-clone', { speed: 4, look: { glow: 3 } })
+    expect(structuredClone(t)).toEqual({ speed: 4, look: { glow: 3 } })
+  })
+})
+
+describe('the devkit:tuning event is the edit, whoever sends it', () => {
+  it('a plain event (no sendTuning) reaches a live file too', () => {
+    const t = liveFile('lf-event', { speed: 1 })
+    window.dispatchEvent(new CustomEvent('devkit:tuning', { detail: { file: 'lf-event', data: { speed: 6 } } }))
+    expect(t.speed).toBe(6)
+  })
+})

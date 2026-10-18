@@ -25,6 +25,14 @@ type TuningDetail = { file: string; data: unknown }
 // The Dev Kit's latest edit of each file — so code that starts later (a die made next round) gets it too
 const latest = new Map<string, unknown>()
 const latestOr = <T>(file: string, initial: T) => (latest.has(file) ? (latest.get(file) as T) : initial)
+// The event itself is the edit, whoever sends it (sendTuning, a test, an e2e script): remember it first, so live files
+// (liveFile) and every listener after this one see the same values
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener(TUNING_EVENT, (e) => {
+    const detail = (e as CustomEvent<TuningDetail>).detail
+    if (typeof detail?.file === 'string') latest.set(detail.file, detail.data)
+  })
+}
 
 /** Call `onChange` with the new data every time the Dev Kit edits this file. Returns a function that stops listening. */
 export function onTuning<T>(file: string, onChange: (data: T) => void): () => void {
@@ -63,22 +71,24 @@ export function liveTuning<T>(file: string, initial: T): { readonly current: T }
  * `const R = hud.readout` inside a function is live too.
  * What it can't follow: values COPIED once — `const speed = tank.cameraSpeed` at the top of a file, `{ ...file }` in a
  * constructor. Read where the value is used (liveGuard.ts finds the top-of-file copies).
- * Costs one Map lookup per top-level read; hot loops (thousands of reads a frame) copy the object once per frame.
+ * Costs a getter call + one Map lookup per top-level read; hot loops (thousands of reads a frame) copy the object once per frame.
  * Arrays and plain values are returned as they are (not live).
  */
 export function liveFile<T>(file: string, data: T): T {
-  if (data === null || typeof data !== 'object' || Array.isArray(data) || typeof Proxy === 'undefined') return data
-  const now = () => (latest.has(file) ? latest.get(file) : data) as object
-  return new Proxy(data as object, {
-    get: (_, key) => Reflect.get(now(), key),
-    has: (_, key) => Reflect.has(now(), key),
-    ownKeys: () => Reflect.ownKeys(now()),
-    getOwnPropertyDescriptor: (_, key) => {
-      const d = Reflect.getOwnPropertyDescriptor(now(), key)
-      if (d) d.configurable = true // (a Proxy may not call a key fixed that its target doesn't have)
-      return d
-    },
-  }) as T
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) return data
+  const now = () => (latest.has(file) ? latest.get(file) : data) as Record<string, unknown>
+  // One getter per top-level key (not a Proxy: a getter object still works with structuredClone, postMessage to a
+  // worker, spread and JSON.stringify — a Proxy throws in the first two). Edits change values, never the keys.
+  const live = {} as Record<string, unknown>
+  for (const key of Object.keys(data)) {
+    Object.defineProperty(live, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => now()[key],
+      set: (value) => { now()[key] = value }, // (code that tweaks its tuning in place keeps working)
+    })
+  }
+  return live as T
 }
 
 /** Same as liveTuning, for React components: a ref that follows the Dev Kit's edits, without re-rendering. */
