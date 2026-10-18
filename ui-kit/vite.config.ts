@@ -7,5 +7,5 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5180, strictPort: true },
   build: { outDir: '../dist', emptyOutDir: true },
-  test: { root: '.', environment: 'jsdom', include: ['kit/**/*.test.ts?(x)', 'scripts/**/*.test.mjs'] },
+  test: { root: '.', environment: 'jsdom', include: ['kit/**/*.test.ts?(x)', 'kit/**/*.test.mjs', 'scripts/**/*.test.mjs'] },
 })
