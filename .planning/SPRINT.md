@@ -23,7 +23,7 @@ Done when: `npm run check:framework` in a game runs every installed module's own
 - [x] 🤖 3. Dev Kit browser checks (Playwright, own port, through the registered adapter): every `content/tuning/*.json` live · full pause (screen + rules clock still) · half pause (rules clock still, looks running) · snapshot round-trip · game hotkeys skip text boxes; adapter gets an optional `conformance` section (e.g. `startPlay`) — `devkit/kit/`
 - [x] 🤖 4. UI kit checks on the REAL game at every size (390×844 · 360×780 · 844×390 · 768×343 · 1100 wide · 1440×900 · 1920×1080): no overlap (new), no clipping, 44 px targets — reuse `ui-kit/scripts/shoot.mjs` `findProblems` (moved into the kit) — `ui-kit/kit/`
 - [x] 🤖 5. Audio quiet on full pause (audio listens to the Dev Kit pause, `PAUSE_EVENT`) · AI bot stops on half pause (`ai/kit/pace.ts` on the rules clock) · table replay = existing `selfTest` — each with its check
-- [ ] 🤖 6. "What a game must provide" in every module README (from MODULE-CONTRACTS.md); ui-kit gets a README
+- [x] 🤖 6. "What a game must provide" in every module README (from MODULE-CONTRACTS.md); ui-kit gets a README
 - [ ] 🤖 7. Prove it: install into a throwaway copy of Goops → run `check:framework`; break one promise on purpose (a copied tuning value, a raw setTimeout) → the check names it and the fix; module tests + check scripts green
 - [ ] 🤖 8. BMUZ side: `check:framework` row in `~/.claude/config/bmuz/templates/check-all.mjs`, /deliver runs it, DEVKIT.md + MODULE-CONTRACTS.md point at it
 Check: the Goops-copy run quoted in Notes (pass + the deliberate break caught).
