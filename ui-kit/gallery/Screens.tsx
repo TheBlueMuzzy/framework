@@ -7,7 +7,7 @@ import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
-  ArtLayer, ArtStage, LevelMeter, PullHandle, TitleArt, type LevelStep,
+  ArtLayer, ArtStage, LevelMeter, PullHandle, SnapControl, TitleArt, type LevelStep,
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
@@ -404,6 +404,44 @@ function ArtStageSample() {
   )
 }
 
+// 0.13.0: a repair panel — two sliders (drag or tap; the blinking lamp says which end), a dial that turns to corners
+function SnapSample() {
+  const [want] = useState(() => [Math.random() < 0.5 ? 0 : 2, Math.random() < 0.5 ? 0 : 2])
+  const [pos, setPos] = useState([1, 1])
+  const [corner, setCorner] = useState(0)
+  const [wrong, setWrong] = useState([0, 0])
+  const done = pos.every((p, i) => p === want[i])
+  const rows = [40, 130]
+  const move = (i: number) => (j: number) => {
+    if (j !== 1 && j !== want[i]) setWrong((w) => w.map((n, k) => (k === i ? n + 1 : n))) // the wrong end: a little "no" (it still moves)
+    setPos((p) => p.map((v, k) => (k === i ? j : v)))
+  }
+  return (
+    <Screen column backdrop={art('backdrop.svg')} bottom={<HudText tone={done ? 'accent' : 'normal'}>{done ? 'Fixed!' : 'Push each slider to its lit lamp'}</HudText>}>
+      <ArtStage size={[400, 260]} label="Repair panel">
+        <ArtLayer src={art('repair-panel.svg')} at={[0, 0, 400, 260]} />
+        {rows.map((y, i) => [0, 2].map((end) => (
+          <ArtLayer key={`${i}-${end}`} src={art(want[i] === end && pos[i] !== end ? 'lamp-on.svg' : 'lamp-off.svg')}
+            at={[end ? 228 : 7, y + 12, 26, 26]} blink={want[i] === end && pos[i] !== end ? 'fast' : undefined} />
+        )))}
+        {rows.map((y, i) => (
+          <ArtLayer key={i} at={[40, y, 180, 50]} shake={wrong[i]}>
+            <SnapControl label={`Slider ${i + 1}`} stops={3} knob={0.25} value={pos[i]} onChange={move(i)}
+              valueText={(v) => ['left', 'middle', 'right'][v]}>
+              <img src={art('repair-knob.svg')} alt="" draggable={false} />
+            </SnapControl>
+          </ArtLayer>
+        ))}
+        <ArtLayer at={[275, 95, 110, 110]}>
+          <SnapControl kind="turn" label="Dial" angles={[315, 45, 135, 225]} value={corner} onChange={setCorner}>
+            <img src={art('repair-dial.svg')} alt="" draggable={false} />
+          </SnapControl>
+        </ArtLayer>
+      </ArtStage>
+    </Screen>
+  )
+}
+
 // ── Every screen the stack can open, by name ──
 const samples: Record<string, ComponentType> = {
   feedback: Feedback,
@@ -416,6 +454,7 @@ const samples: Record<string, ComponentType> = {
   ]} />,
   // art skins (0.11.0): logo + backdrop + art buttons; the words still come from the game
   artstage: ArtStageSample,
+  snap: SnapSample,
   artmenu: () => <MainMenu title="Roll Better" titleArt={art('logo.svg')} backdrop={art('backdrop.svg')} subtitle="A dice game for friends" items={[
     { label: 'Play', onClick: () => screens.push('artend'), art: redButton }, { label: 'Settings', onClick: () => screens.push('settings'), art: tealButton },
   ]} />,
