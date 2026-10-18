@@ -14,6 +14,11 @@ import {
 } from '../kit'
 
 const noop = () => {}
+// A game's own art (gallery/public/art/ — simple stand-ins): button pictures up / down, a logo, a backdrop, a frame
+const art = (file: string) => `${import.meta.env.BASE_URL}art/${file}`
+const redButton = { up: art('red-up.svg'), down: art('red-down.svg') }
+const tealButton = { up: art('teal-up.svg'), down: art('teal-down.svg') }
+const woodFrame = { src: art('frame.svg'), slice: [56, 56, 56, 56] as [number, number, number, number], scale: 0.0625, ink: 'on-game' as const }
 
 // ── Sample data ──
 const modes = [
@@ -352,6 +357,10 @@ const samples: Record<string, ComponentType> = {
     { label: 'Settings', onClick: () => screens.push('settings') }, { label: 'How to play', onClick: () => screens.push('howto') },
     { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
   ]} />,
+  // art skins (0.11.0): logo + backdrop + art buttons; the words still come from the game
+  artmenu: () => <MainMenu title="Roll Better" titleArt={art('logo.svg')} backdrop={art('backdrop.svg')} subtitle="A dice game for friends" items={[
+    { label: 'Play', onClick: () => screens.push('artend'), art: redButton }, { label: 'Settings', onClick: () => screens.push('settings'), art: tealButton },
+  ]} />,
   modes: Modes,
   scrolling: ScrollingMenu,
   howto: () => <HowToPlay pages={howPages} />,
@@ -373,6 +382,8 @@ const samples: Record<string, ComponentType> = {
     onRematch={() => screens.replace('countdown')} onQuit={() => { screens.pop(); screens.pop() }} />,
   victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')} />,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
+  artend: () => <GameOver message="Out of lives on round 4." stats={stats} frame={woodFrame} backdrop={art('backdrop.svg')}
+    art={{ retry: redButton, quit: tealButton }} onRetry={() => screens.replace('artmenu')} onQuit={() => screens.pop()} />,
   postgame: () => (
     <PostGame onRematch={() => screens.replace('countdown')} onLobby={() => screens.replace('room')} onQuit={() => screens.pop()}>
       <Text kind="caption">2 of 4 players want a rematch</Text>

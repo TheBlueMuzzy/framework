@@ -13,6 +13,7 @@ export const menu: MenuGroup[] = [
   ] },
   { title: 'Front end', entries: [
     { id: 'menu', name: 'Main menu', about: 'The game’s name and its big buttons, in the game’s own order' },
+    { id: 'artmenu', name: 'Main menu: game art', about: 'The game’s own pictures: logo, backdrop, art buttons (hold one: its pushed-in picture shows)' },
     { id: 'modes', name: 'Mode select', about: 'A card per mode, then Start' },
     { id: 'howto', name: 'How to play', about: 'Pages to flip through' },
     { id: 'credits', name: 'Credits', about: 'People, then the kit’s fonts from credits.json' },
@@ -37,6 +38,7 @@ export const menu: MenuGroup[] = [
     { id: 'endgamedim', name: 'Results: over the game', about: 'dim: the game stays visible behind, darkened' },
     { id: 'victory', name: 'Victory', about: 'The big win, with stats' },
     { id: 'gameover', name: 'Game over', about: 'Try again or quit' },
+    { id: 'artend', name: 'Game over: game art', about: 'The report inside the game’s frame picture (corners never stretch), art buttons' },
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },
   ] },
   { title: 'Online', entries: [
