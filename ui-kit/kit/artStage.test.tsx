@@ -131,6 +131,18 @@ describe('PullHandle', () => {
     expect(onPull).toHaveBeenCalledOnce()
   })
 
+  it('let go at the end: it acts straight away, no glide to wait for (0.15.1)', () => {
+    vi.useFakeTimers()
+    const onPull = vi.fn()
+    render(<PullHandle label="Pull" onPull={onPull} />)
+    const grip = screen.getByRole('button', { name: 'Pull' })
+    box(handleOf(grip))
+    fireEvent.pointerDown(grip, { pointerId: 1, clientX: 50, clientY: 10 })
+    fireEvent.pointerMove(grip, { pointerId: 1, clientX: 50, clientY: 400 })
+    fireEvent.pointerUp(grip, { pointerId: 1, clientX: 50, clientY: 400 })
+    expect(onPull).toHaveBeenCalledOnce() // no timers advanced
+  })
+
   it('keys: its own arrow pulls it (Enter / Space click it like any button); disabled does nothing', () => {
     vi.useFakeTimers()
     const onPull = vi.fn()
