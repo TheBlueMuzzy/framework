@@ -140,7 +140,7 @@ Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows 
 - 🔨 F59 🧱 Game core: live content by default (the Dev Kit's Vite plugin makes every content/tuning import live), rules clock + looks clock (`gameClock`: game timers on the rules clock), seeded mode, adapter base, error catcher — thin: no rules, no rendering — must · building in Goops (Dev Kit 0.18.0), then pulled out as its own small module
 - 🔨 F60 🔧 Dev Kit Time tool: ⏸ Full pause (rAF + CSS/Web animations + audio held, game timers via the adapter) · ◐ Half pause (rules clock stopped, looks running; shown only when the game supports it) · greyed out online — then slow motion + step one frame on the same clock (should) — must · needs: F59 · building in Goops
 - ✅ F61 🧱 Conformance pack: each module ships tests of its own promises (Dev Kit: every tuning file live, both pauses, snapshot round-trip, hotkeys skip text boxes · UI kit: no overlap / clipping / 44 px targets at every size · Audio: quiet on full pause · Table/AI: replay + bot stops on half pause); one command `check:framework` in every game's check:full and /deliver; each module README gets "What a game must provide" — must · needs: F59, F60 · sprint 5
-- 🟢 F62 🔧 Goops passes the pack — must · needs: F61
+- 🟢 F62 🔧 Goops passes the pack — must · needs: F61 · includes: Goops gets `check:framework` (it has neither the script nor the checks yet) and the GitHub checks workflow (F70)
 - ✅ F63 🔧 Glyphtender passes the pack (its gaps become a list → its roadmap) — must · needs: F61 · sprint 09 (all 6 pieces newest on Glyphtender dev/framework-checks, ships at its /deliver; half pause = its F89, a known gap; Dev Kit 0.20.2) · Roll Better when it comes off the shelf
 - ⏳ F64 🧱 Starters: `starters/realtime` (from Goops) + `starters/turn-based` (from Glyphtender) — tiny playable games with every module wired and the pack green on day one; /define copies one, the TDD only describes what's different — should · needs: F62, F63
 - ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change, BEFORE an update reaches a game — should · needs: F64
@@ -153,6 +153,11 @@ Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows 
 - ✅ F73 🔧 Standard hand-off card (Muzzy 2026-10-18: "I never want to see it any other way going forward! BMUZ standardizes the experience of designing as a non-technical person."): every turn with work ends with the card in `~/.claude/config/bmuz/templates/handoff.md` (Done · You'll see · Try it links · Proof · Questions · Next `/command` — what it covers) or the progress line; a Stop hook sends anything else back — must · needs: F68 · sprint 5
 - ✅ F74 🔧 Self-improving loop (Muzzy 2026-10-18: "when finishing a milestone, analyze it all and see if any lessons or structure/methods can be ported to BMUZ/Framework in an ever-flowing self-improving loop"): /deliver of a milestone runs a retro — what went wrong / was repeated / was built game-only that others need → each becomes a hook, a check, a script, a framework module piece, or a checklist line (BMUZ-PLAN rule); a Stop check makes sure the retro ran and its items landed somewhere — must · needs: F67
 - ✅ F66 🔧 "Framework health" row on each game's planner page (module versions + pack results) — could · needs: F61 · sprint 08 built it; Muzzy 2026-10-19: too technical → sprint 09 redoes it in plain words
+- ⏳ F75 🔧 "Done" means reviewed + fully checked: guard-git's `Fxx: done` also needs STATE's `Reviewed through` and `Last full check` to cover the feature (today the review and full check are honour-system; F72 only checks that STATE changed) — should · needs: F72 · from the Oct 18 list audit (2026-10-19)
+- 🟢 F76 🔧 Settings-row check: every Settings row that's switched on is read by the game — a UI kit conformance check (Glyphtender once shipped 12 dead rows) — should · needs: F61 · from the Oct 18 list audit
+- 🟢 F77 🔧 "Update available" at session start: a game whose framework pieces are behind the newest hears it when the session starts, not only when a UI task remembers to compare VERSION files — should · needs: — · from the Oct 18 list audit
+- 🟢 F78 🔧 Safety guards: no secret (.env…) staged on ANY commit (today only /save refuses) · ask before `git checkout <file>` / `git restore` wipes uncommitted work (Goops F17 lost a file) · `.claude/worktrees/` + `.planning/ppp.html` added to a game's .gitignore by itself · `.playwright-mcp/` cleaned up by itself — should · needs: F68 · from the Oct 18 list audit
+- 🟢 F79 🔧 One check run at a time in every game: Glyphtender's check-all.mjs gets the template's lock (the template has it, the game's copy predates it) — should · needs: — · from the Oct 18 list audit
 ```mermaid
 flowchart LR
   F59[F59 Game core] --> F60[F60 Time tool]
@@ -170,9 +175,15 @@ flowchart LR
   F62 --> F64[F64 Starters]
   F63 --> F64
   F64 --> F65[F65 Framework test game]
+  F72[F72 Session hygiene] --> F75[F75 Done = reviewed + checked]
+  F61 --> F76[F76 Settings-row check]
+  F68 --> F78[F78 Safety guards]
+  F77[F77 Update notice]
+  F79[F79 Check-run lock]
 ```
 
 ## Later
+- **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
 - **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
 - **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
