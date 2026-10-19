@@ -27,6 +27,8 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
+- Security reviewed: a898caf (2026-10-19, v0.10.0 → dev/conformance: no high/medium issues; 1 low → ROADMAP Ideas)
+- Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 

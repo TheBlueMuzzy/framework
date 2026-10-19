@@ -227,6 +227,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-19 — **check-framework `t.run` builds one shell string** (security review, low): `devkit/kit/check-framework.mjs` runs with `shell: true` and quotes only spaces and `"`, so a game test file named with `$( )` or `;` would run a command. Not an escalation (the checks already run the game's own code) — pass an argument list instead.
 - 2026-10-19 — **UI kit gallery still has 56 older problems** (found by F88's shoot run, older checks): 34 cut-off texts (Results names, the Room share line) + 22 overlaps (Feedback toast, lobby, hud screens) — the kit's own demos should pass its own checks.
 - 2026-10-19 — **Hand to Goops' session (found by F88, read-only on a scratch copy):** the new quality bars pass; 5 older gaps — 27 art files not in credits, 2 🔴 fonts (gb_boot, Press Start DX), no code reads content/credits.json, Settings "Version" row has no text, no `conformance.startPlay` in the adapter (only the first screen gets checked).
 - 2026-10-19 — **Hand to Goops' session (found by today's plan-lint fix, read-only):** F33, F49, F53 are ⏳ but everything they need is done — set them 🟢 (or add `· waits: <what>`).
