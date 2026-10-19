@@ -185,6 +185,36 @@ flowchart LR
   F78 --> F80
 ```
 
+## v0.10 — A whole studio around one designer  · planned 2026-10-19 (from F80's studio gap list)
+Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should too… simulate having a full team of checks and SOPs… as automated as possible because the people who use BMUZ (me) won't KNOW what to do." Each feature is one studio role's routine (producer, QA, release engineer, tech lead…), done by a trigger, never by memory. Source: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md` §4 (ranked by what would hurt a solo designer most). Already landing in F80: release checklist inside release.mjs, live check after a deploy, rollback, the look-back trigger. Order is Muzzy's call at /sprint.
+- 🟢 F81 🔧 Producer's eye at every session start: sprint age ("Sprint 07 is 9 days old, the last 3 took ~4"), days to the milestone's `target:` date + musts done, features stuck in 🔨/🎛️ with no commits for 7+ days, open 🙋 tasks + `Ask Muzzy:` count, fixes waiting for Muzzy's check; plan-lint flags ⏳ features that became ready; archive-sprint refuses without a 3-line mini retro (went well · went wrong · change) — should · needs: — · gap ranks 4, 5, 11
+- ⏳ F82 🔧 Is the live game up? Session start does a 3-second check of STATE's Live URL and says "the live site is DOWN" only when it is; live-check.mjs also pings the room server's health URL — should · needs: F80 · gap rank 1
+- ⏳ F83 🔧 Stage-release checks (alpha / beta / 1.0): release.mjs refuses a stage release without `.planning/archive/release-checks/<stage>.md` naming the devices tried, a first-time player who played without help, store-page screenshots newer than the last stage, TDD §7 compliance for the platform (privacy, age rating), no stand-in art left (beta+), and at 1.0 the name/trademark check + press kit — should · needs: F80 · gap ranks 7, 13, 16
+- ⏳ F84 🔧 Patch notes players can read: release.mjs writes the bullets to CHANGELOG.md + `.planning/archive/releases/vX.Y.Z.md` (ready to paste into itch) and refuses without them — should · needs: F80 · gap rank 9
+- 🟢 F85 🔧 Dependency + licence audit: /checkup runs `npm audit`, `npm outdated` and a licence summary per game (monthly), names high-risk packages and GPL code in a shipping game in plain words — should · needs: — · gap rank 8
+- 🟢 F86 🧱 Old saves keep working: a check:fast test template that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress — should · needs: — · gap rank 10
+- 🟢 F87 🔧 QA routine: plan-lint requires a `Check:` line under every sprint feature and a `Checked:` note before `Fnn: done`; an open P1 older than the sprint start that isn't a sprint task is flagged; /play's watch mode writes a playtest log (`.planning/research/playtests/<date>.md`) a stage release asks for — should · needs: — · QA lead rows
+- 🟢 F88 🔧 Quality bars in check:framework: text contrast, a reduce-motion setting, a volume setting when the audio module is in, nothing touching a card's edge, cards that don't grow mid-sequence (CLAUDE.md's "breathing room" rule, now checked) — should · needs: — · gap rank 12 + art/audio rows
+- 💤 F89 🧱 Crash reports from players: a framework piece (window.onerror → a small Cloudflare worker that counts errors; opt-in play counts later, tied to the privacy policy); session start says "3 new errors from players since last time" — could · needs: — · gap rank 6 (large)
+- 💤 F90 🔧 Coding standards as lint rules: no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · needs: — · gap rank 14
+- 💤 F91 🔧 Localization readiness: player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · needs: — · gap rank 15
+- 💤 F92 🔧 Tech lead's routine: a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · needs: — · tech lead rows
+```mermaid
+flowchart LR
+  F80[F80 Everything triggers] --> F82[F82 Live game up]
+  F80 --> F83[F83 Stage-release checks]
+  F80 --> F84[F84 Patch notes]
+  F81[F81 Producer's eye]
+  F85[F85 Dependency audit]
+  F86[F86 Old saves]
+  F87[F87 QA routine]
+  F88[F88 Quality bars]
+  F89[F89 Crash reports]
+  F90[F90 Lint standards]
+  F91[F91 Localization]
+  F92[F92 Tech lead routine]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
