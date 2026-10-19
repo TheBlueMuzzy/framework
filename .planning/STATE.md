@@ -1,12 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 05 planned: F68 BMUZ hooks** (v0.9; SPRINT.md) — Muzzy's "never" rules + checks become hooks the harness enforces (all in ~/.claude: `config/bmuz/hooks/`, settings.json, /develop frontmatter). Muzzy's calls: merged-only branch deletes allowed · his Chrome = ask each time · live push needs a smoke pass even for tiny code fixes. Next: /develop task 1 (spike).
-Hands off `devkit/` + Goops: the Goops session's helper is building F59/F60 there (uncommitted devkit/kit/tuning/* = its work). F61 starts when the Goops session says the Dev Kit pause/live work has landed. Earlier: v0.10.0 released 2026-10-15 (Select Mode); v0.9 planned 2026-10-18 (spec ~/.claude/config/bmuz/MODULE-CONTRACTS.md, reliability plan ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md). This milestone runs in its OWN session, which owns dev/framework + ~/.claude.
+2026-10-18 — **Sprint 05 (F68 + F61) built, autonomous run.**
+- **F68 BMUZ hooks ✔ built** (all in ~/.claude, not this repo): never-rules (reset --hard, force-push, unmerged branch deletes refused; Chrome asks) · commit gate (type check) · live gate (no push to a deploying branch / deploy command without `.planning/smoke-pass`) · /develop Stop gate (check:fast) · check-ui after UI edits. Proof: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` 84/84 + a real headless try of each. Plain words: `~/.claude/config/bmuz/HOOKS.md`. **Muzzy: read HOOKS.md and OK it → then /sync** (the laptop doesn't have the hooks yet).
+- **F61 Conformance pack** lives on branch `dev/conformance` (pushed; its SPRINT.md is the current one): `npm run check:framework` (Dev Kit 0.19.0, UI kit 0.18.0, Audio 0.3.0, AI 0.2.0, Rooms 0.7.0, Table 0.8.0) proven on a copy of Goops (PASS + 5 deliberate breaks caught). Review fixes in progress by a helper. PAUSED pill fix is on main already (Dev Kit 0.18.1, b6854bd) — **tell the Goops session it can update.**
+- Next: F61 review fixes → show Muzzy → F62 (Goops passes — the Goops session adds `conformance: { startPlay, query }` to its adapter) / F63 (Glyphtender: bots on setTimeout, check:ui red today, no `smoke` script).
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
-Doing: F68 BMUZ hooks   Branch: main   Version: 0.10.0 (Dev Kit 0.16.1)
+Doing: F68 done (Muzzy OK pending) · F61 review fixes   Branch: main + dev/conformance   Version: 0.10.0 (Dev Kit 0.16.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
