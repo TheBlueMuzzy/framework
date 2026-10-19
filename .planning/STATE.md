@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 15 built + reviewed, waiting for Muzzy's OK: F86 Saves module (layers 0 + 1)** — saves 0.1.0 on `dev/v0-10` (pushed): settings / progress / run / slots saves, version stamps + step upgrades, safe writes + backups, progress fields that combine (lifetime stats add up across devices), golden-save tests in check:framework, a save code + storage-health warnings. Research: `.planning/research/saves.md`; layers 2–8 = F93–F99. On "approved": F86 ✅ → `F86: done` → retro → archive → /deliver (framework update) or /sprint. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **F86 approved (sprint 15 done): the Saves module, layers 0 + 1** — saves 0.1.0 on `dev/v0-10` (pushed). Next: ask Muzzy the 3-line retro → archive-sprint → /deliver (framework update v0.10.2: merge dev/v0-10). Research: `.planning/research/saves.md`; layers 2–8 = F93–F99 (⏳ → 🟢 now F86 is done). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
 - Try-it server: scratch Glyphtender copy with the module (`~/Documents/dev/.scratch/framework-f86/glyphtender`, port 5193). Each game's switch-over steps: ROADMAP Ideas + `saves/README.md`.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
@@ -13,7 +13,7 @@ Reviewed through: framework a12d841 (sprint 15 review: 7 findings + 2 minor, all
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 15 — saved games survive every update
-Doing: F86 — building   Branch: dev/v0-10   Version: 0.10.1 (UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2)
+Doing: F86 done — retro, then /deliver   Branch: dev/v0-10   Version: 0.10.1 (UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.1
 
 ## Key facts
