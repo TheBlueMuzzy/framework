@@ -3,11 +3,12 @@
 // here ever throws: a refused read is "nothing saved", a refused write is reported back.
 // Tests (and later the phone / desktop builds, F98) pass their own storage with the same three methods.
 
-/** The three things a save needs from a storage. localStorage has them; so does memoryStorage below. */
+/** What a save needs from a storage. localStorage has it all; so does memoryStorage below. A storage without
+ *  removeItem (an older game's test helper) works too: a removed copy is written as "" instead (read as nothing). */
 export interface StorageLike {
   getItem(key: string): string | null
   setItem(key: string, value: string): void
-  removeItem(key: string): void
+  removeItem?(key: string): void
 }
 
 /** The browser's localStorage, or null where there is none (tests in Node, a browser that blocks it). */
@@ -44,7 +45,8 @@ export function writeKey(storage: StorageLike | null, key: string, value: string
 
 export function removeKey(storage: StorageLike | null, key: string): void {
   try {
-    storage?.removeItem(key)
+    if (storage?.removeItem) storage.removeItem(key)
+    else if (storage && storage.getItem(key) !== null) storage.setItem(key, '')
   } catch {
     // refused: nothing to do
   }
@@ -59,6 +61,7 @@ export function isFullError(error: unknown): boolean {
 /** A pretend storage for tests: keeps keys in memory. `full = true` makes every write fail like a full browser storage;
  *  `blocked = true` makes every read and write throw like a browser that refuses storage. */
 export interface MemoryStorage extends StorageLike {
+  removeItem(key: string): void
   data: Record<string, string>
   full: boolean
   blocked: boolean

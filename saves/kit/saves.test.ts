@@ -268,6 +268,18 @@ describe('createSave — runs, slots, keys', () => {
     expect(problems[0]).toContain('start with the game\'s name')
   })
 
+  it('a storage with only getItem + setItem works too (a clear writes "" — read as nothing)', () => {
+    const data: Record<string, string> = {}
+    const storage = { getItem: (k: string) => data[k] ?? null, setItem: (k: string, v: string) => { data[k] = v } }
+    const run = createSave({ key: 'test:run', kind: 'run', version: 1, fresh: { turn: 0 }, storage, onProblem: quiet })
+    run.save({ turn: 2 })
+    run.save({ turn: 3 })
+    expect(run.load()).toEqual({ turn: 3 })
+    run.clear()
+    expect(run.load()).toEqual({ turn: 0 })
+    expect(run.report().problems).toEqual([])
+  })
+
   it('withStorage: the same save somewhere else', () => {
     const a = memoryStorage()
     const b = memoryStorage()
