@@ -144,12 +144,14 @@ Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows 
 - ⏳ F63 🔧 Glyphtender passes the pack (its gaps become a list → its roadmap) — must · needs: F61 · Roll Better when it comes off the shelf
 - ⏳ F64 🧱 Starters: `starters/realtime` (from Goops) + `starters/turn-based` (from Glyphtender) — tiny playable games with every module wired and the pack green on day one; /define copies one, the TDD only describes what's different — should · needs: F62, F63
 - ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change, BEFORE an update reaches a game — should · needs: F64
-- ⏳ F67 🔧 Lesson audit (BMUZ side): every checklist line in the BMUZ skills (develop ~40 lessons, game-ui, PROJECT-FILES) sorted → now automatic (delete) · becomes a pack check · becomes a default/installer step · stays prose (judgement only); skills get shorter, not longer — must · needs: F61
+- 🟢 F67 🔧 Lesson audit (BMUZ side) — first pass done 2026-10-18: ~45 candidates in `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md` (⭐ = best value; build `plan-lint.mjs` first): every checklist line in the BMUZ skills (develop ~40 lessons, game-ui, PROJECT-FILES) sorted → now automatic (delete) · becomes a pack check · becomes a default/installer step · stays prose (judgement only); skills get shorter, not longer — must · needs: F61
 - 🔨 F68 🔧 BMUZ hooks (do FIRST — touches only ~/.claude, no clash with the Goops helper): Muzzy's "never" rules as hard blocks (deny rules / PreToolUse: reset --hard, force-push, branch delete, his Chrome, Gmail) · /develop's skill registers a Stop gate (check:fast when code changed since the last green run; fast, timeout, stop_hook_active guard) · git commit refused when the typecheck fails · push/deploy to a live branch refused unless /deliver's smoke pass file exists · edits in src/ui → check-ui on that file. Show Muzzy each hook in plain words; prove each one blocks — must · needs: — · plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md · sprint 5
 - ⏳ F69 🔧 Scripts for fragile procedures: module install/update (runs the module's contract check), version bump, /save, /deliver → scripts (or saved Workflows); the skills shrink to "run it; if it fails, read the message" — must · needs: F61
 - ⏳ F70 🔧 CI backstop: every game repo's GitHub Actions run check:fast + the conformance pack on push — should · needs: F61
 - ⏳ F71 🔧 Evals for the BMUZ skills (BMUZ as a plugin, `claude plugin eval`): a few cases per key skill (e.g. "install the Dev Kit into a fixture game" → contract check ran, main.tsx wired); run after skill edits + model updates; Bash cases need WSL2 on Windows; costs usage per run — should · needs: F68, F69
 - ⏳ F72 🔧 Session hygiene in BMUZ: one feature per session (or per helper), STATE written between; autonomous runs start a fresh session at each feature boundary instead of the 80% checkpoint — should · needs: —
+- 🔨 F73 🔧 Standard hand-off card (Muzzy 2026-10-18: "I never want to see it any other way going forward! BMUZ standardizes the experience of designing as a non-technical person."): every turn with work ends with the card in `~/.claude/config/bmuz/templates/handoff.md` (Done · You'll see · Try it links · Proof · Questions · Next `/command` — what it covers) or the progress line; a Stop hook sends anything else back — must · needs: F68 · sprint 5
+- ⏳ F74 🔧 Self-improving loop (Muzzy 2026-10-18: "when finishing a milestone, analyze it all and see if any lessons or structure/methods can be ported to BMUZ/Framework in an ever-flowing self-improving loop"): /deliver of a milestone runs a retro — what went wrong / was repeated / was built game-only that others need → each becomes a hook, a check, a script, a framework module piece, or a checklist line (BMUZ-PLAN rule); a Stop check makes sure the retro ran and its items landed somewhere — must · needs: F67
 - ⏳ F66 🔧 "Framework health" row on each game's planner page (module versions + pack results) — could · needs: F61
 ```mermaid
 flowchart LR
@@ -161,6 +163,8 @@ flowchart LR
   F61 --> F66[F66 Health row]
   F61 --> F67[F67 Lesson audit]
   F68[F68 BMUZ hooks] --> F71[F71 Skill evals]
+  F68 --> F73[F73 Hand-off card]
+  F67 --> F74[F74 Self-improving loop]
   F61 --> F69[F69 Scripts] --> F71
   F61 --> F70[F70 CI backstop]
   F62 --> F64[F64 Starters]
