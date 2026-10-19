@@ -4,7 +4,9 @@
 //            the kit's names, page-wide game CSS in @layer game-base
 //   Browser: at every size (phones both ways, a short landscape, laptop, desktop, HD) — on the first screen and in
 //            live play (the Dev Kit adapter's conformance.startPlay): nothing overlaps, nothing is clipped or wider than
-//            the screen, every tap target is 44 px, no focus ring without the keyboard (uiProblems.mjs)
+//            the screen, every tap target is 44 px, no focus ring without the keyboard (uiProblems.mjs) — and (0.21.0)
+//            text is easy to read, nothing touches its box's edge, cards keep their size while they fill in
+//   Settings: every row that's on is read by the game; reduce motion is on (and master volume, with the audio module)
 export const title = 'UI kit'
 
 export const SIZES = [
@@ -22,6 +24,10 @@ const KINDS = [
   { kind: 'clipped', also: ['wider'], name: 'nothing is clipped or wider than the screen', fix: 'Leave room inside scroll areas and panels (padding, not a tighter box); let text wrap or shrink (the kit\'s text sizes), and keep the page inside the screen width.' },
   { kind: 'small', name: 'every tap target is at least 44 px', fix: 'Use the kit\'s Button / IconButton (they\'re 44 px) or give the control min-width / min-height of the kit\'s tap size.' },
   { kind: 'focus', name: 'no focus ring without the keyboard', fix: 'Focus rings only on :focus-visible (the kit\'s controls do this) — don\'t call focus() on a control at start-up without { focusVisible: false }.' },
+  // 0.21.0 — quality bars a player notices (Muzzy's rules, now checked)
+  { kind: 'faint', name: 'text is easy to read (contrast)', fix: 'Put text in the style\'s colour for its background (on-surface on surface, on-primary on primary…), not a faded or see-through one — 4.5:1, or 3:1 for big text. Quieter text = smaller (caption), not paler.' },
+  { kind: 'edge', name: 'nothing touches the edge of its box', fix: 'Give the box padding on every side (the kit\'s gap names) so its text, icons, avatars and badges never touch its edge. Something meant to run edge to edge (a cover picture, a divider) → data-ui-bleed on it.' },
+  { kind: 'grows', name: 'cards keep their size while they fill in', fix: 'Make the card its final size from the start — room for everything it can hold (a min size from the kit\'s sizes, numbers in a slot wide enough for their biggest value) — so filling in never pushes things around.' },
 ]
 
 /** problems per screen ("phone · menu" → ["small: 30×30 px — "Close"", …]) → one row per kind: each problem + where. */
@@ -335,9 +341,36 @@ function checkSettings(t) {
   return t.pass(SETTINGS_CHECK, `${read + kit} rows on: ${read} read by the game, ${kit} handled by the kit / audio module`)
 }
 
+// ---- comfort rows (0.21.0) ----
+// Two Settings rows aren't optional: Reduce motion (motion makes some players ill — the kit applies it everywhere) is
+// always switched on, and with the audio module installed, Master volume (one slider that turns the whole game down).
+export const COMFORT_CHECK = 'Settings has the comfort rows (reduce motion, and volume with sound)'
+export const COMFORT_ROWS = {
+  reduceMotion: { tab: 'Accessibility', row: '{ "id": "reduceMotion", "type": "toggle", "label": "Reduce motion", "detail": "Fewer moving and flashing effects", "default": false }', why: 'players that motion makes ill can\'t calm it down' },
+  masterVolume: { tab: 'Audio', row: '{ "id": "masterVolume", "type": "slider", "label": "Master volume", "default": 80 }', why: 'players can\'t turn the whole game down in one go', audio: true },
+}
+
+/** The comfort rows that aren't switched on: ['reduceMotion', …] (masterVolume only counts when audio is installed). */
+export function missingComfortRows(schema, { audio = false } = {}) {
+  const on = new Set(liveRows(schema).map((row) => row.id))
+  return Object.entries(COMFORT_ROWS).filter(([id, rule]) => (!rule.audio || audio) && !on.has(id)).map(([id]) => id)
+}
+
+export function checkComfortForTest(t) { return checkComfort(t) }
+function checkComfort(t) {
+  const schema = t.json(SETTINGS_FILE)
+  const audio = t.has?.('audio') ?? false
+  const missing = missingComfortRows(schema, { audio })
+  if (!missing.length) return t.pass(COMFORT_CHECK, audio ? 'reduce motion + master volume' : 'reduce motion (no audio module, so no volume needed)')
+  const problems = missing.map((id) => `"${id}" isn't switched on in ${SETTINGS_FILE}${schema ? '' : ' (the file is missing)'} — ${COMFORT_ROWS[id].why}`)
+  const rows = missing.map((id) => `${COMFORT_ROWS[id].tab} tab: ${COMFORT_ROWS[id].row}`).join('\n')
+  t.fail(COMFORT_CHECK, problems, `Add the row to ${SETTINGS_FILE} (or take away its "on": false):\n${rows}\nThe kit applies reduce motion by itself; the audio module reads master volume once the game passes the values to applyAudioSettings.`)
+}
+
 export async function check(t) {
   await checkCredits(t)
   checkSettings(t)
+  checkComfort(t)
 
   // ---- code: the kit's rule checker ----
   {

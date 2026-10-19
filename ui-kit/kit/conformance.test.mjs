@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { SETTINGS_CHECK, SIZES, check, checkSettingsForTest, checkUiArgs, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, settingsProblems, stripComments, whereText } from './conformance.mjs'
+import defaultSettings from './blocks/settings.default.json'
+import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, settingsProblems, stripComments, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -43,11 +44,12 @@ describe('UI kit checks', () => {
     expect(results.map((r) => [r.name, r.ok ?? 'skip'])).toEqual([
       ['every asset is credited', true],
       ['every Settings row that\'s switched on is read by the game', true],
+      [COMFORT_CHECK, false], // no settings file at all → no reduce motion
       ['the game\'s UI code keeps the kit\'s rules (check-ui)', true],
       ['check-ui runs in check:fast', false],
       ['the game at every size', 'skip'],
     ])
-    expect(results[2].detail).toBe('node src/ui/kit/check-ui.mjs src/ui --css src')
+    expect(results[3].detail).toBe('node src/ui/kit/check-ui.mjs src/ui --css src')
   })
 })
 
@@ -220,5 +222,34 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
   })
   it('no content/ui/settings.json → nothing to check', () => {
     expect(run(null, [])[0]).toEqual({ name: SETTINGS_CHECK, ok: true, detail: 'no content/ui/settings.json' })
+  })
+})
+
+describe('comfort rows (0.21.0): reduce motion always, master volume with the audio module', () => {
+  const schema = (ids, off = []) => ({ tabs: [{ id: 'a', label: 'Accessibility', rows: ids.map((id) => ({ id, type: 'toggle', label: id, ...(off.includes(id) ? { on: false } : {}) })) }] })
+  const run = (s, installed = []) => {
+    const results = []
+    checkComfortForTest({
+      json: () => s, has: (id) => installed.includes(id),
+      pass: (name, detail) => results.push({ name, ok: true, detail }),
+      fail: (name, problems, fix) => results.push({ name, ok: false, problems, fix }),
+    })
+    return results[0]
+  }
+  it('a Settings without reduce motion (or with it switched off) fails, saying the row to add', () => {
+    const r = run(schema(['tips']))
+    expect(r).toMatchObject({ name: COMFORT_CHECK, ok: false })
+    expect(r.problems).toEqual(['"reduceMotion" isn\'t switched on in content/ui/settings.json — players that motion makes ill can\'t calm it down'])
+    expect(r.fix).toContain('"id": "reduceMotion"')
+    expect(missingComfortRows(schema(['reduceMotion'], ['reduceMotion']))).toEqual(['reduceMotion'])
+    expect(run(null).problems[0]).toContain('(the file is missing)')
+  })
+  it('master volume is needed only when the audio module is installed', () => {
+    expect(run(schema(['reduceMotion']))).toMatchObject({ ok: true, detail: 'reduce motion (no audio module, so no volume needed)' })
+    expect(run(schema(['reduceMotion']), ['audio']).problems).toEqual(['"masterVolume" isn\'t switched on in content/ui/settings.json — players can\'t turn the whole game down in one go'])
+    expect(run(schema(['reduceMotion', 'masterVolume']), ['audio'])).toMatchObject({ ok: true, detail: 'reduce motion + master volume' })
+  })
+  it('the kit\'s own default Settings has both', () => {
+    expect(missingComfortRows(defaultSettings, { audio: true })).toEqual([])
   })
 })
