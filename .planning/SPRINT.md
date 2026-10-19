@@ -9,6 +9,8 @@ Done when: a game repo's GitHub Actions run check:fast + check:framework on ever
 - [ ] 🤖 3. Prove it: a push shows green on GitHub; a deliberately broken commit shows red, then is reverted (git revert, no force-push) — glyphtender dev/framework-checks
 - [ ] 🤖 4. BMUZ wiring: /deliver refuses to merge while the branch's latest run is red (`gh run list`), and new-game setup copies the workflow — ~/.claude/skills/deliver/SKILL.md, config/bmuz/scripts/release.mjs, config/bmuz/SETUP-AND-CONVERT.md
 - [ ] 🤖 5. Goops gets the workflow as a task in F62 (its session is busy now) — .planning/ROADMAP.md
+- [ ] 🤖 6. The framework gets its own linter: one shared ESLint setup + `npm run lint`, install-module refuses a module that fails it, GitHub runs it, the manual line comes out of /develop — framework/eslint.config.js, ~/.claude/config/bmuz/scripts/install-module.mjs
+- [ ] 🤖 7. Audit the Oct 18 review list: every item landed (where) or not; not landed → a roadmap item; the look-back template checks that review lists landed — config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md, templates/lookback.md
 Check: Glyphtender's Actions tab shows a green run on dev/framework-checks and the red-then-green pair from task 3.
 Ask Muzzy: —
 
@@ -24,3 +26,4 @@ Ask Muzzy: —
 Notes:
 - Muzzy 2026-10-19 (F72): after an approved feature, **save + keep going** in the same chat (not "suggest /clear").
 - F72 build (2026-10-19): /develop "Approved" = STATE + `F08: done` + /save, keep going; unattended runs → one fresh helper per feature (develop skill + CLAUDE.md Autonomous Mode); guard-git refuses a `Fxx: done` (also `Fxx + Fyy: done`) when STATE.md is not in the commit and has not changed since the feature's first commit (only in repos with .planning/STATE.md); HOOKS.md row 14; test-hooks 212/212 (7 new: blocks stale, allows updated / already-updated, not-done commits, non-BMUZ repos).
+- Muzzy 2026-10-19: "so why didn't you think of it?" The framework linter WAS on the Oct 18 list (HOOK-CANDIDATES: "installers run a module's own checks + lint and refuse on red"); F69 built the tests + type check and dropped lint without logging it. Cause: F69 was checked against its own Done-when, never against the list it came from. → tasks 6 + 7.
