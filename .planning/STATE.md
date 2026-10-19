@@ -1,16 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 05 done — Muzzy approved F68, F61, F73.**
-- **F68 BMUZ hooks** + **F73 hand-off card** live in ~/.claude (synced to the laptop): `~/.claude/config/bmuz/HOOKS.md` (7 hooks in plain words), proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` (94/94). Every work turn ends with the card (`templates/handoff.md`) — Muzzy: "I never want to see it any other way going forward!"
-- **F61 Conformance pack** on branch `dev/conformance` (pushed; merges to main at /deliver): `npm run check:framework` — Dev Kit 0.19.1, UI kit 0.18.1, Audio 0.3.1, AI 0.2.1, Rooms 0.7.0, Table 0.8.0. PAUSED pill fix already on main (Dev Kit 0.18.1) — tell the Goops session.
-- Ready next (🟢): **F67** lesson audit → build the ⭐ hooks in `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md`, plan-file checker (`plan-lint.mjs`) first · F62 Goops passes (Goops session: adapter `conformance: { startPlay, query }`) · F63 Glyphtender passes (bots on setTimeout, check:ui red, no `smoke` script) · F69 scripts · F70 CI · F72 session hygiene · F66 health row. Then F74 self-improving loop (needs F67).
-- Sprint 05 archive: `.planning/archive/sprints/sprint-05.md` on dev/conformance (arrives on main with /deliver).
-- Next: `/sprint` — plan Sprint 06 (suggest F67's ⭐ hooks).
+2026-10-18 — **Sprint 06 started: F67 (the audit's ⭐ rules become hooks) then F74 (milestone look-back loop).** Tasks: `.planning/SPRINT.md`.
+- Hooks live in `~/.claude/config/bmuz/hooks/` (+ `~/.claude/settings.json`); proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs`; plain-words list `~/.claude/config/bmuz/HOOKS.md`. Push ~/.claude via claude-config, laptop `/sync`.
+- F61 still waits on `dev/conformance` for /deliver (Dev Kit 0.19.1 etc.). Goops session: Dev Kit 0.18.1 (PAUSED pill fix) is on main.
+- Next: `/develop` — F67 task 1, the plan-file checker `plan-lint.mjs`.
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
-Doing: Sprint 05 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 06
+Doing: F67 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
