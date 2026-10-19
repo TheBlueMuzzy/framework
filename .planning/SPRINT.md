@@ -2,7 +2,7 @@
 Started 2026-10-19 · Milestone v0.9 · Features: F71, F66
 Skill tests live with the skills in `~/.claude/` (→ laptop via /sync); the health row is `templates/ppp/build-ppp.mjs` + the Dev Kit's `check-framework.mjs` (framework code → `dev/conformance`).
 
-## F71 🔧 Skill tests (evals)
+## F71 🔧 Skill tests (evals) — ✅ approved 2026-10-19
 Done when: a small suite of cases runs the key BMUZ skills in a throwaway game and scores what they did; a deliberately broken skill makes its case fail; /checkup offers the run after skill edits or a model update (Muzzy's call A).
 - [x] 🤖 1. Spike — `claude plugin eval` against the BMUZ skills (skills dir in place, or a thin plugin wrapper): case + grader format, sandbox, what one case costs → Notes
 - [x] 🤖 2. Fixture game — a tiny throwaway game the cases copy fresh (plan files, SPRINT, version.json, a git remote, room for the Dev Kit)
