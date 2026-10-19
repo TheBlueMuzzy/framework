@@ -1,0 +1,28 @@
+# Sprint 13 — BMUZ acts as Muzzy's producer and QA lead
+Started 2026-10-19 · Milestone v0.10 · Features: F81, F87
+First sprint of v0.10 "A whole studio around one designer" (Muzzy 2026-10-19: "If a real indie studio would do something, we should too"). A producer keeps the schedule visible and catches stalls; a QA lead makes sure every feature has a test plan and a record of what was checked. All work is in `~/.claude/` (BMUZ hooks, scripts, skills) → laptop via /save's setup sync; games and framework modules are untouched.
+
+## F81 🔧 Producer's eye
+Done when: a session started in a game prints the sprint line every time ("Sprint 07 · day 9 (the last 3 took ~4)") plus, only when they need attention, the milestone target ("alpha target: 5 days left · musts 6/9", once a `target:` date is set), features stuck in 🔨/🎛️ with no commits for 7+ days, and what's waiting on Muzzy (🙋 tasks, fixes to check); archiving a sprint asks for a 3-line retro first.
+- [ ] 🤖 1. Milestone `target: <date>` on a ROADMAP milestone heading, read by the plan reader; PROJECT-FILES format line — ~/.claude/config/bmuz/templates/ppp/plan-reader.mjs, ~/.claude/config/bmuz/PROJECT-FILES.md
+- [ ] 🤖 2. Session start: the sprint line — sprint number, day N from SPRINT.md "Started", the average length of the last 3 archived sprints — ~/.claude/config/bmuz/session-start.sh
+- [ ] 🤖 3. Session start, attention lines only: days to the milestone target + musts done · features 🔨/🎛️ with no commits for 7+ days · open 🙋 tasks + fixes waiting for Muzzy's check — ~/.claude/config/bmuz/session-start.sh
+- [ ] 🤖 4. archive-sprint refuses without a `Retro:` block (went well · went wrong · change) in SPRINT.md; /sprint and /develop say to ask Muzzy for it — ~/.claude/config/bmuz/scripts/archive-sprint.mjs, ~/.claude/skills/develop/SKILL.md
+- [x] 🤖 5. plan-lint: a ⏳ feature whose needs are all done → "set it 🟢" (built in F80 task 5) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [ ] 🤖 6. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
+Check: session start in a fake game with a 9-day-old sprint, a target 5 days out and a feature untouched for 8 days prints exactly those lines; a healthy game prints only the sprint line; archive-sprint refuses without a Retro block.
+Ask Muzzy: —
+
+## F87 🔧 QA routine
+Done when: every feature in a sprint has a `Check:` line (its test plan), `Fnn: done` needs a `Checked:` line saying what was tested and how it went, an open P1 older than the sprint start that isn't a sprint task is flagged, and /play's watch mode writes a playtest log that a stage release (alpha/beta/1.0) asks for.
+- [ ] 🤖 1. plan-lint: every `## Fnn` in SPRINT.md has a `Check:` line — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [ ] 🤖 2. guard-git: `Fnn: done` refused without a `Checked:` line in that feature's SPRINT section; PROJECT-FILES SPRINT format — ~/.claude/config/bmuz/hooks/guard-git.mjs, ~/.claude/config/bmuz/PROJECT-FILES.md
+- [ ] 🤖 3. plan-lint: an open P1 older than the sprint's start that isn't a sprint task → flagged — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [ ] 🤖 4. Playtest log: /play's watch mode writes `.planning/research/playtests/<date>.md`; release.mjs stage releases refuse without one since the last stage tag — ~/.claude/skills/live-playtest/SKILL.md, ~/.claude/skills/play/SKILL.md, ~/.claude/config/bmuz/scripts/release.mjs
+- [ ] 🤖 5. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
+Check: plan-lint flags a sprint feature without Check:; guard-git refuses `F08: done` without Checked: and allows it with one; a stage release without a playtest log is refused, with one it passes.
+Ask Muzzy: —
+
+Notes:
+- Muzzy 2026-10-19 (sprint 13 OK): status block = the sprint line always + only the lines that need attention ("aligned with your suggestion"); yes to marking his CLAUDE.md rule lines ①/②/③ (done at sprint start — see below).
+- This sprint's own features carry `Check:` lines already, so F87 doesn't send its own sprint back.

@@ -1,9 +1,9 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **F80 Everything triggers: approved by Muzzy (2026-10-19), sprint 12 archived** (sprint 12, all 8 tasks ticked — `.planning/SPRINT.md` Notes has the whole story). Every BMUZ step is now ① automatic, ② checked (refused until on record) or ③ judgement with a reason; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **Sprint 13 started: BMUZ acts as Muzzy's producer + QA lead (F81, F87)** — `.planning/SPRINT.md`. Before it: F80 Everything triggers approved (2026-10-19), sprint 12 archived (sprint 12, all 8 tasks ticked — `.planning/SPRINT.md` Notes has the whole story). Every BMUZ step is now ① automatic, ② checked (refused until on record) or ③ judgement with a reason; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: `/sprint` — plan sprint 13 from v0.10 (F81, F85–F88 ready). Ask Muzzy: CLAUDE.md is his file — 19 rule lines unmarked; proposed marks are in SPRINT Notes (task 5).
+- Next: `/develop` — F81 tasks 1–4 (session-start status block: sprint line always + attention lines only, Muzzy's pick), then F87.
 - Next after F80: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. New milestone **v0.10 "A whole studio around one designer"** (F81–F92) is planned — ready now: F81 producer's eye, F85 dependency audit, F86 old saves, F87 QA routine, F88 quality bars.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
@@ -12,8 +12,8 @@
 Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 13:18 (F80 review: 11 findings — 1 could lose the laptop's setup changes, 6 false alarms/nags — all fixed + tests)
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (12 done)
-Doing: — (plan sprint 13)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 13 — BMUZ acts as producer + QA lead
+Doing: F81 Producer's eye, then F87 QA routine   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
