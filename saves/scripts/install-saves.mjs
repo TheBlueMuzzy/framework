@@ -51,6 +51,12 @@ function kitVersion() {
 export function installSaves(gameDir, { dryRun = false, log = console.log } = {}) {
   const game = resolve(gameDir)
   const target = join(game, KIT_TARGET)
+  // A src/saves/ with files but no VERSION isn't ours (the game's own save code): never touch it.
+  if (listFiles(target).length && !existsSync(join(target, 'VERSION'))) {
+    const refused = `${KIT_TARGET}/ already holds the game's own files (no VERSION, so not this module's) — nothing was installed or removed. Rename that folder (e.g. src/save/), then run the installer again.`
+    log(`Saves module: ${refused}`)
+    return { refused, changed: [], removed: [], starter: [] }
+  }
   const hasUiKit = existsSync(join(game, 'src/ui/kit/VERSION'))
   const kitFiles = listFiles(join(savesDir, 'kit'))
     .filter((f) => !isTest(f) && f !== 'VERSION')
@@ -90,5 +96,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     console.log('Usage: node scripts/install-saves.mjs <game-folder> [--dry-run]')
     process.exit(1)
   }
-  installSaves(gameDir, { dryRun: process.argv.includes('--dry-run') })
+  const result = installSaves(gameDir, { dryRun: process.argv.includes('--dry-run') })
+  if (result.refused) process.exit(1)
 }

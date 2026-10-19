@@ -8,7 +8,8 @@
 // A code = <GAME>-<format><z|j>-<data>. z = compressed (the browser's own CompressionStream), j = plain (an old
 // browser without it). The data is { game, made, saves: { <key>: <record> } } — each save's record exactly as the save
 // keeps it (with its version), so a code made today still loads in every later build (upgrades run on it).
-// Loading checks EVERY save in the code before writing ANY: a bad code never wipes the player's save.
+// Loading checks EVERY save in the code before writing ANY: a bad code never wipes the player's save. (If the browser
+// then refuses a write part-way — full storage — the result names exactly which saves were and weren't restored.)
 // Progress saves are MERGED with what's here (each field by its rule — a pasted older code can't lose progress);
 // settings, runs and slots are replaced. Either way the copy it replaces stays as the newest backup.
 import type { Save, SaveRecord, SlotSaves } from './saves'
@@ -25,6 +26,8 @@ export const CODE_WORDS = {
   nothingForThisGame: 'That save code has no saves for this game.',
   newerSave: 'That save code comes from a newer version of the game. Reload the page to update the game, then try again.',
   notSaved: (why: string) => `The save code is fine, but it couldn't be saved here: ${why}`,
+  partly: (restored: string[], notRestored: string[], why: string) =>
+    `Part of the save code was loaded (${restored.join(', ')}), but not all of it (${notRestored.join(', ')}): ${why}`,
 }
 
 /** The game's name in a code: the start of the first save's key ("goops-progress" → "GOOPS"). */
@@ -59,9 +62,11 @@ export async function makeSaveCode(saves: AnySave[], now = new Date()): Promise<
 
 export type CodeResult =
   | { ok: true; restored: string[]; skipped: string[] }
-  | { ok: false; message: string }
+  /** restored / notRestored are there when writing started: then restored names what DID change (empty = nothing). */
+  | { ok: false; message: string; restored?: string[]; notRestored?: string[] }
 
-/** A pasted code (or a file's text) → checked, then written. { ok: false, message } = nothing was changed. */
+/** A pasted code (or a file's text) → checked, then written. { ok: false } without `restored` (or with it empty) =
+ *  nothing was changed; with saves in `restored`, those were (the message says so). */
 export async function readSaveCode(code: string, saves: AnySave[]): Promise<CodeResult> {
   const text = (code ?? '').replace(/\s+/g, '')
   if (!text) return { ok: false, message: CODE_WORDS.empty }
@@ -92,16 +97,22 @@ export async function readSaveCode(code: string, saves: AnySave[]): Promise<Code
   }
   if (!plan.length) return { ok: false, message: CODE_WORDS.nothingForThisGame }
 
-  // 2. write them: progress merges with what's here, everything else is replaced (the old copy becomes a backup)
+  // 2. write them: progress merges with what's here, everything else is replaced (the old copy becomes a backup).
+  //    The browser can still refuse a write part-way (full storage): every save is tried, and the result names
+  //    exactly which were restored and which weren't — never "nothing changed" when something did.
   const restored: string[] = []
+  const notRestored: string[] = []
+  let why = ''
   for (const { target, record } of plan) {
     const here = target.kind === 'progress' ? target.exportRecord() : null
     const mine = here && here.version === target.version ? target.checkRecord(here) : null
     const result = target.restoreRecord(mine?.ok ? target.merge(mine.record, record) : record)
-    if (!result.ok) return { ok: false, message: CODE_WORDS.notSaved(result.message) }
-    restored.push(target.key)
+    if (result.ok) restored.push(target.key)
+    else { notRestored.push(target.key); why ||= result.message }
   }
-  return { ok: true, restored, skipped }
+  if (!notRestored.length) return { ok: true, restored, skipped }
+  if (!restored.length) return { ok: false, message: CODE_WORDS.notSaved(why), restored, notRestored }
+  return { ok: false, message: CODE_WORDS.partly(restored, notRestored, why), restored, notRestored }
 }
 
 /** Which save a key in a code belongs to: a save's own key, or "<slots key>/<id>" → that slot. */

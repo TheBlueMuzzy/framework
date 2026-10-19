@@ -10,11 +10,11 @@ No library: localStorage, the browser's own CompressionStream, and nothing else 
 | File | Does |
 |---|---|
 | `index.ts` | The public API (below) — import from `src/saves` |
-| `saves.ts` | **The core.** `createSave` — game-prefixed keys, version stamp, step-by-step upgrades, missing fields filled with today's defaults (never over the player's values), one whole-record write that's read back before it counts, 2 rolling backups (newest GOOD copy wins), a newer build's save kept untouched, full storage caught. Never throws. `kind: 'slots'` → one save per slot + a list |
+| `saves.ts` | **The core.** `createSave` — game-prefixed keys, version stamp, step-by-step upgrades, missing fields filled with today's defaults (never over the player's values), one whole-record write that's read back before it counts, 2 rolling backups (newest GOOD copy wins), a newer build's save kept untouched (in any copy — this build then never writes), full storage caught (backups older than the newest good copy make room; that copy itself never goes). A write that doesn't read back is undone. Never throws. `kind: 'slots'` → one save per slot + a list |
 | `progress.ts` | How two copies of progress combine (for the cloud later, F96): `highest` · `add-up` (counted per device, so two devices' "games played" SUM) · `collect` (every unlock once) · `newest` |
 | `fill.ts` | Fill in what's missing after loading (and why a changed default doesn't reach old saves on its own) |
 | `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked) |
-| `saveCode.ts` | The save code: `GAME-1z-…` (compressed) copy-paste text and the same as a `.txt` file. Every save in a code is checked before ANY is written — a bad code never wipes a save. Progress is merged, other saves replaced (the old copy stays as a backup) |
+| `saveCode.ts` | The save code: `GAME-1z-…` (compressed) copy-paste text and the same as a `.txt` file. Every save in a code is checked before ANY is written — a bad code never wipes a save. Progress is merged, other saves replaced (the old copy stays as a backup). If the browser still refuses a write part-way (full storage), the result names exactly which saves were and weren't restored |
 | `health.ts` | Will this browser keep the saves? Warnings in plain words: storage blocked · looks like a private window · itch.io's frame · another site's frame · Safari's 7-day rule · persist refused. `askToKeepSaves()` = `navigator.storage.persist()` |
 | `nudge.ts` | "Back up your save" after real progress since the last code (never nagging — content/saves.json) |
 | `settingsRow.ts` | The Settings rows (`Your save` · `Saved: On this device` · `Save code ›`) for the UI kit's Settings |
@@ -40,7 +40,7 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`), "Saves":
 node ~/.claude/config/bmuz/scripts/install-module.mjs saves .        (from the game folder — the safe way: tests first)
 node ../../framework/saves/scripts/install-saves.mjs . --dry-run       (just show what would change)
 ```
-Copies `kit/` → `<game>/src/saves/` with a VERSION stamp (tests stay here; `ui/` only with the UI kit), removes files the module no longer ships (only inside `src/saves/`), and gives the game **once**: `content/saves.json` and `tests/saves/saves.test.ts` — after that they're the game's, never overwritten. If the game's ESLint doesn't ignore `src/saves`, it lints it too (that's fine: the kit passes the games' rules).
+Copies `kit/` → `<game>/src/saves/` with a VERSION stamp (tests stay here; `ui/` only with the UI kit), removes files the module no longer ships (only inside `src/saves/`), refuses (and touches nothing) when `src/saves/` already holds the game's own files with no VERSION, and gives the game **once**: `content/saves.json` and `tests/saves/saves.test.ts` — after that they're the game's, never overwritten. If the game's ESLint doesn't ignore `src/saves`, it lints it too (that's fine: the kit passes the games' rules).
 
 ## Hooking it up
 ```ts

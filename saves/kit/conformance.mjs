@@ -29,7 +29,7 @@ export function findSaves(files) {
     while ((match = call.exec(text))) {
       const line = text.slice(0, match.index).split('\n').length
       const where = `${path}:${line}`
-      const body = text.slice(match.index, match.index + 2000)
+      const body = topLevelOptions(text, match.index + match[0].length)
       const key = valueOf(body.match(/\bkey\s*:\s*([^,\n}]+)/)?.[1], text, 'string')
       const version = valueOf(body.match(/\bversion\s*:\s*([^,\n}]+)/)?.[1], text, 'number')
       if (key === null || version === null) {
@@ -40,6 +40,33 @@ export function findSaves(files) {
     }
   }
   return found
+}
+
+/**
+ * The options object's OWN top level, from just after "createSave(" to its closing ")": anything nested deeper
+ * (fresh: { version: 9 }) is blanked out, and nothing after the call is read (a neighbour's `version: 5`).
+ * Strings are skipped over whole, so a bracket inside one doesn't count.
+ */
+function topLevelOptions(text, start) {
+  let depth = 0
+  let out = ''
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i]
+    if (ch === '"' || ch === "'" || ch === '`') {
+      let end = i + 1
+      while (end < text.length && text[end] !== ch) end += text[end] === '\\' ? 2 : 1
+      out += depth === 1 ? text.slice(i, end + 1) : ' '
+      i = end
+      continue
+    }
+    if (ch === '(' || ch === '{' || ch === '[') depth++
+    if (ch === ')' || ch === '}' || ch === ']') {
+      if (depth === 0) break // the call's own ")"
+      depth--
+    }
+    out += depth === 1 ? ch : ' '
+  }
+  return out
 }
 
 /** 'goops-progress' → the string · 2 → 2 · NAME → the value of `const NAME = …` in the same file · else null */

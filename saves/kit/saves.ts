@@ -142,6 +142,19 @@ type Outcome<T> =
   | { state: 'newer'; version: number }
   | { state: 'damaged'; problem: string }
 
+/** Per-device parts as stored (or pasted in a code) → only real counts: whole objects of numbers ≥ 0.
+ *  Anything else ("3" as text, -1, null) is dropped, so a part can never be added as text or go negative. */
+function cleanCounts(raw: unknown): SaveRecord['counts'] {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined
+  const out: Record<string, Record<string, number>> = {}
+  for (const [field, parts] of Object.entries(raw)) {
+    if (!parts || typeof parts !== 'object' || Array.isArray(parts)) continue
+    const good = Object.entries(parts).filter((part): part is [string, number] => typeof part[1] === 'number' && Number.isFinite(part[1]) && part[1] >= 0)
+    if (good.length) out[field] = Object.fromEntries(good)
+  }
+  return Object.keys(out).length ? out : undefined
+}
+
 const isRecordShaped = (value: unknown): value is SaveRecord =>
   !!value && typeof value === 'object' && typeof (value as SaveRecord).save === 'string' && 'data' in value
 
@@ -171,7 +184,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
       version0 = parsed.version
       data = parsed.data
       savedAt = typeof parsed.savedAt === 'string' ? parsed.savedAt : ''
-      counts = parsed.counts && typeof parsed.counts === 'object' ? parsed.counts : undefined
+      counts = cleanCounts(parsed.counts)
     } else {
       let old: { version: number; data: unknown } | null = null
       try { old = oldSave ? oldSave(parsed) : null } catch { old = null }
@@ -253,14 +266,19 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
     }
   }
 
-  /** Is the newest copy a newer build's? (Checked on every write, not remembered: another tab may have written it.) */
+  /** Is ANY copy (the newest or a backup) a newer build's? Then this build never writes: writing would slide that copy
+   *  down the backups and, a few saves later, out. (Checked on every write, not remembered: another tab may write.) */
   function newerVersionStored(): number | null {
-    const outcome = readCopy(readKey(storage, key))
-    return outcome.state === 'newer' ? outcome.version : null
+    for (const k of copyKeys()) {
+      const outcome = readCopy(readKey(storage, k))
+      if (outcome.state === 'newer') return outcome.version
+    }
+    return null
   }
 
   /** The safe write: the old newest copy (if good) slides down into the backups, the new one is written whole,
-   *  read back and compared. Storage full → the oldest backups are dropped to make room, then one more try. */
+   *  read back and compared. Storage full → backups OLDER than the newest good copy are dropped to make room (never
+   *  the newest good copy itself), then one more try. */
   function writeRecord(record: SaveRecord<T>): SaveResult {
     let text: string
     try { text = JSON.stringify(record) } catch (error) {
@@ -270,7 +288,8 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
     if (newer !== null) return { ok: false, reason: 'newer', message: NOTES.newer }
     const before = readKey(storage, key)
     const backups = savesConfig().backups
-    if (before !== null && before !== text && readCopy(before).state === 'good') {
+    const slid = before !== null && before !== text && readCopy(before).state === 'good'
+    if (slid) {
       // slide: ~(n-1) → ~n … ~1 → ~2, then the newest → ~1 (a broken newest copy never pushes a good backup out)
       for (let n = backups; n >= 2; n--) {
         const older = readKey(storage, backupKey(key, n - 1))
@@ -279,15 +298,23 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
       if (backups >= 1) writeKey(storage, backupKey(key, 1), before)
     }
     for (let n = backups + 1; n <= MAX_BACKUPS; n++) removeKey(storage, backupKey(key, n)) // fewer backups configured now
+    // Which backups may go to make room: if the newest copy was good, it is still in place until this write works,
+    // so every backup may go. If not, the newest good copy is a backup (~g) — only the ones older than it may go.
+    const newestGoodBackup = slid ? 0 : (Array.from({ length: backups }, (_, i) => i + 1).find((n) => readCopy(readKey(storage, backupKey(key, n))).state === 'good') ?? 0)
+    const keepsGoodCopy = slid || newestGoodBackup > 0
     let problem = writeKey(storage, key, text)
-    for (let n = backups; problem === 'full' && n >= 1; n--) {
+    for (let n = backups; problem === 'full' && n > newestGoodBackup; n--) {
       removeKey(storage, backupKey(key, n)) // make room: the oldest copy goes first
       problem = writeKey(storage, key, text)
     }
-    if (problem === 'full') return { ok: false, reason: 'full', message: 'The browser\'s storage for this game is full, so this wasn\'t saved. The game keeps running; your last save is still there.' }
+    if (problem === 'full') {
+      return { ok: false, reason: 'full', message: `The browser's storage for this game is full, so this wasn't saved. The game keeps running${keepsGoodCopy ? '; your last good save is still there' : ''}.` }
+    }
     if (problem === 'blocked') return { ok: false, reason: 'blocked', message: 'This browser won\'t let the game save (a private window, or storage is blocked). Your progress lasts until you close the page.' }
     if (readKey(storage, key) !== text) {
+      // whatever did get written isn't what was meant: the copy before comes back, or (none before) nothing is left
       if (before !== null) writeKey(storage, key, before)
+      else removeKey(storage, key)
       return { ok: false, reason: 'not-kept', message: 'The save didn\'t read back the same, so the previous one was kept.' }
     }
     return { ok: true }
@@ -295,7 +322,8 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
 
   function save(data: T): SaveResult {
     try {
-      const previous = readCopy(readKey(storage, key))
+      // the copy load() would use (it may be a backup when the newest is broken) — its per-device parts carry on
+      const { outcome: previous } = newestGood()
       const counts = kind === 'progress' && fields
         ? countDevices({ storage, key, fields, data, previous: previous.state === 'good' ? previous.record : null })
         : undefined
@@ -312,10 +340,10 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
   }
 
   function exportRecord(): SaveRecord | null {
-    const text = readKey(storage, key)
-    const { outcome } = newestGood()
+    const { outcome, index } = newestGood()
     if (outcome.state === 'good') return outcome.record
-    if (outcome.state === 'newer') { try { return JSON.parse(text ?? 'null') } catch { return null } }
+    // a newer build's copy, untouched — the one newestGood found (it may be a backup)
+    if (outcome.state === 'newer') { try { return JSON.parse(readKey(storage, copyKeys()[index]) ?? 'null') } catch { return null } }
     return null
   }
 

@@ -34,6 +34,13 @@ describe('finding saves in game code', () => {
     expect(findSaves([{ path: 'c.ts', text: '// createSave({ key: "x:y", version: 1 })\n/* createSave({ key: "x:z", version: 1 }) */' }])).toEqual([])
   })
 
+  it('key and version come from the call\'s own options — not a field inside fresh, not a neighbour after the call (review)', () => {
+    const text = "const a = createSave({ key: 'a:b', kind: 'settings', fresh: { version: 9, key: 'x' }, version: 2 })\nconst b = createSave({ key: 'c:d', kind: 'run', fresh: {} })\nconst other = { version: 5 }\n"
+    const [first, second] = findSaves([{ path: 'n.ts', text }])
+    expect(first).toEqual({ where: 'n.ts:1', key: 'a:b', version: 2 })
+    expect(second.problem).toContain('can\'t read its version')
+  })
+
   it('missing versions: several files for one version count once', () => {
     expect(missingVersions('glyphtender:new-game', 3, ['tests/saves/glyphtender_new-game-v1.json', 'tests/saves/glyphtender_new-game-v1-old.json', 'tests/saves/glyphtender_new-game-v3.json'])).toEqual([2])
   })

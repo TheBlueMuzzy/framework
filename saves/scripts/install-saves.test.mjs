@@ -15,6 +15,7 @@ describe('install-saves', () => {
   it('copies the kit without its tests, stamps VERSION, and removes files the module no longer ships', () => {
     const game = newGame()
     mkdirSync(join(game, 'src/saves'), { recursive: true })
+    writeFileSync(join(game, 'src/saves/VERSION'), '0.0.1 (framework abc)\n') // an earlier install of this module
     writeFileSync(join(game, 'src/saves/old.ts'), '// gone from the kit')
     installSaves(game, { log: quiet })
     expect(existsSync(join(game, 'src/saves/saves.ts'))).toBe(true)
@@ -51,6 +52,19 @@ describe('install-saves', () => {
     expect(starter).toEqual([])
     expect(readFileSync(join(game, 'content/saves.json'), 'utf8')).toBe('{ "backups": 3 }')
     expect(readFileSync(join(game, 'tests/saves/saves.test.ts'), 'utf8')).toBe('// mine')
+  })
+
+  it('a game with its OWN src/saves/ (no VERSION — not ours) is refused in plain words, and nothing of it is touched', () => {
+    const game = newGame()
+    mkdirSync(join(game, 'src/saves'), { recursive: true })
+    writeFileSync(join(game, 'src/saves/mySlots.ts'), '// the game\'s own')
+    const lines = []
+    const result = installSaves(game, { log: (l) => lines.push(l) })
+    expect(result.refused).toContain('src/saves/ already holds the game\'s own files')
+    expect(readFileSync(join(game, 'src/saves/mySlots.ts'), 'utf8')).toBe('// the game\'s own')
+    expect(existsSync(join(game, 'src/saves/saves.ts'))).toBe(false)
+    expect(existsSync(join(game, 'content'))).toBe(false)
+    expect(lines.join('\n')).toContain('src/saves/ already holds')
   })
 
   it('a dry run changes nothing', () => {

@@ -108,6 +108,22 @@ describe('save code', () => {
     expect(await readSaveCode(await makeSaveCode([extra]), b.saves)).toEqual({ ok: false, message: CODE_WORDS.nothingForThisGame })
   })
 
+  it('a write refused part-way (review fix 4) says exactly which saves were restored and which weren\'t', async () => {
+    const a = device()
+    a.progress.save({ totalXp: 10, gamesPlayed: 1, unlocks: [] })
+    a.settings.save({ volume: 20 })
+    const code = await makeSaveCode(a.saves)
+    const progressStorage = memoryStorage()
+    const settingsStorage = memoryStorage()
+    settingsStorage.full = true
+    const b = device(progressStorage)
+    const settings = b.settings.withStorage(settingsStorage)
+    const result = await readSaveCode(code, [b.progress, settings])
+    expect(result).toMatchObject({ ok: false, restored: ['goops-progress'], notRestored: ['goops:settings'] })
+    expect(!result.ok && result.message).toContain('Part of the save code was loaded')
+    expect(b.progress.load().totalXp).toBe(10)
+  })
+
   it('slots travel one record per slot', async () => {
     const make = (storage = memoryStorage()) => createSave({ key: 'rpg:slots', kind: 'slots', version: 1, storage, onProblem: quiet, fresh: { level: 1 } })
     const a = make()
