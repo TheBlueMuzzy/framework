@@ -9,7 +9,7 @@ Done when: a game repo's GitHub Actions run check:fast + check:framework on ever
 - [x] 🤖 3. Prove it: a push shows green on GitHub; a deliberately broken commit shows red, then is reverted (git revert, no force-push) — glyphtender dev/framework-checks
 - [x] 🤖 4. BMUZ wiring: /deliver refuses to merge while the branch's latest run is red (`gh run list`), and new-game setup copies the workflow — ~/.claude/skills/deliver/SKILL.md, config/bmuz/scripts/release.mjs, config/bmuz/SETUP-AND-CONVERT.md
 - [x] 🤖 5. Goops gets the workflow as a task in F62 (its session is busy now) — .planning/ROADMAP.md
-- [ ] 🤖 6. The framework gets its own linter, in 3 layers: a hook lints each code file Claude edits (framework + games, like check-ui-edit), install-module refuses a module that fails it, GitHub runs it; the manual line comes out of /develop — framework/eslint.config.js, ~/.claude/config/bmuz/hooks/, scripts/install-module.mjs
+- [x] 🤖 6. The framework gets its own linter, in 3 layers: a hook lints each code file Claude edits (framework + games, like check-ui-edit), install-module refuses a module that fails it, GitHub runs it; the manual line comes out of /develop — framework/eslint.config.js, ~/.claude/config/bmuz/hooks/, scripts/install-module.mjs
 - [x] 🤖 7. Audit the Oct 18 review list: every item landed (where) or not; not landed → a roadmap item; the look-back template checks that review lists landed — config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md, templates/lookback.md
 Check: Glyphtender's Actions tab shows a green run on dev/framework-checks and the red-then-green pair from task 3.
 Ask Muzzy: —
@@ -33,9 +33,9 @@ Ask Muzzy: —
 
 ## F79 🔧 One check run at a time in every game (pulled in 2026-10-19, from the audit)
 Done when: every game's check-all.mjs refuses a second run while one is going (the template's lock), and an old copy without it gets flagged instead of silently trusted.
-- [ ] 🤖 1. Glyphtender's check-all.mjs gets the template's lock (on dev/framework-checks) — glyphtender/scripts/check-all.mjs
-- [ ] 🤖 2. Prove it: a second run while one is going is refused, Ctrl+C frees the lock — glyphtender
-- [ ] 🤖 3. /checkup (and install-module) flag a game whose check-all.mjs has no lock, with the fix — ~/.claude/config/bmuz/checkup.sh, scripts/install-module.mjs
+- [x] 🤖 1. Glyphtender's check-all.mjs gets the template's lock (on dev/framework-checks) — glyphtender/scripts/check-all.mjs
+- [x] 🤖 2. Prove it: a second run while one is going is refused, Ctrl+C frees the lock — glyphtender
+- [x] 🤖 3. /checkup (and install-module) flag a game whose check-all.mjs has no lock, with the fix — ~/.claude/config/bmuz/checkup.sh, scripts/install-module.mjs
 Check: two runs at once in Glyphtender → the second refuses with a plain message.
 Ask Muzzy: —
 
@@ -47,3 +47,5 @@ Notes:
 - F79 task 3, part 1 (2026-10-19): /checkup section 7 "same safety kit in every game" (lock · GitHub checks · check:framework, each ✗ names the fix). First run: glyphtender ✗ lock · goops ✗ GitHub checks + check:framework (→ F62) · roll-better ✗ check:framework (on the shelf → its roadmap when it comes off) · windchime ✓. install-module flag comes with task 6.
 - F70 tasks 1–4 (2026-10-19, helper; verified by Claude): `templates/checks.yml` (check:fast + check:framework with Playwright's Chromium, failure artifacts) · Glyphtender `.github/workflows/checks.yml` on dev/framework-checks: green https://github.com/TheBlueMuzzy/glyphtender/actions/runs/39269954849 → deliberate red …/39270522272 → revert green …/39270859941 · `scripts/checks-gate.mjs` + release.mjs: /deliver refuses on red / running / unchecked (warns when no workflow or no gh) · SETUP step 7, PROJECT-FILES Checks, develop + deliver skills. Root cause of the first reds: 5 whole-real-AI-game tests had the default 5 s (4–8 s on GitHub's runner); they got the 30 s their siblings already had. check:fast now runs half as many checks at once as there are cores. test-scripts 74/74.
 - ⚠ The F70 helper ran the full skill tests unasked (10:31 AM, $1.39), against Muzzy's rule A. Fix: `test-skills.mjs` now refuses without `--muzzy-said-yes` (checkup + evals README updated), so a written rule became an enforced one.
+- F70 task 6 (2026-10-19): framework linter, 3 layers. ① lint-edit hook (HOOKS.md row 15; lints each edited JS/TS file with the project's own eslint, `--no-ignore` only inside the framework) · ② install-module runs test/typecheck/check-ui/check-devkit/**lint** and refuses on red (refuses too when the framework root has no eslint installed → "npm install once") · ③ framework `.github/workflows/checks.yml`: every module's own checks, one job each — all 6 green https://github.com/TheBlueMuzzy/framework/actions/runs/39272336297 (first run: ui-kit red only because GitHub had no browser for its layout test → Playwright Chromium step). Framework lint found 37 errors → fixed: ui-kit 0.19.1 (refs read/written while drawing: ScreenStack, Countdown, SnapControl, gallery), Dev Kit 0.20.3 + audio 0.3.2 (tests only). /develop's 2 manual lines replaced by one pointer. test-scripts install-module 9/9.
+- F79 (2026-10-19): Glyphtender check-all.mjs has the lock (5a56e8f) — proven: a second run refused with a plain message, the lock cleared after the first finished · /checkup section 7 + install-module both name a game whose check-all has no lock.
