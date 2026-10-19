@@ -1,14 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 06 started: F67 (the audit's ⭐ rules become hooks) then F74 (milestone look-back loop).** Tasks: `.planning/SPRINT.md`.
-- Hooks live in `~/.claude/config/bmuz/hooks/` (+ `~/.claude/settings.json`); proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs`; plain-words list `~/.claude/config/bmuz/HOOKS.md`. Push ~/.claude via claude-config, laptop `/sync`.
-- F61 still waits on `dev/conformance` for /deliver (Dev Kit 0.19.1 etc.). Goops session: Dev Kit 0.18.1 (PAUSED pill fix) is on main.
-- Next: `/develop` — F67 task 1, the plan-file checker `plan-lint.mjs`.
+2026-10-18 — **Sprint 06: F67 + F74 built and proven — waiting for Muzzy's look** (`~/.claude/config/bmuz/HOOKS.md` rows 8–13; first look-back `.planning/archive/lookbacks/v0.9.md` on dev/conformance).
+- Proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` 202/202 + real tries + a helper review (all fixed). Synced to claude-config 1af42a1 — laptop needs `/sync`.
+- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the look-back; merges at /deliver. Goops session: Dev Kit 0.18.1 (PAUSED pill) on main; F67's findings for the game sessions are in ROADMAP Ideas.
+- Muzzy: read HOOKS.md rows 8–13 + the v0.9 look-back → "approved" (F74 🙋 4: did it catch what matters?).
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 06
-Doing: F67 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
+Doing: F67 + F74 — waiting for Muzzy   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
