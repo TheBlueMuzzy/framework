@@ -6,13 +6,14 @@
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.19.2 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver.
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.19.0, so 0.19.2 comes with its next update), GitHub checks green, check-run lock. It ships at its own /deliver.
 - Left in v0.9: **F62 Goops** (now includes check:framework + GitHub checks; waits for the Goops session), F76 Settings-row check, F77 update notice at session start, F78 safety guards, F64/F65 starters (need F62).
-- Next: `/sprint` — F76 + F77 + F78 while Goops is busy.
+- **Sprint 11 planned: F76 Settings check · F77 update notice · F78 safety guards.** Tasks: `.planning/SPRINT.md`.
+- Next: `/develop` — three helpers in parallel (UI kit · session start · git/save guards).
 
 Reviewed through: framework 55b97d7 · Glyphtender 5a56e8f · ~/.claude as of 2026-10-19 11:00 (sprint 10 review: 2 findings, both fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (10 done)
-Doing: — (pick the next sprint)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.19.2)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 11
+Doing: F76 + F77 + F78 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.19.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
