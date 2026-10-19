@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.18.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.20.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -27,6 +27,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 |---|---|
 | the game's UI code keeps the kit's rules (check-ui) | `check-ui.mjs` (with the game's own `check:ui` arguments) finds raw colours, px, fonts, inline styles, stray positioning |
 | check-ui runs in check:fast | the game has no `check:ui` script |
+| every Settings row that's switched on is read by the game | (0.20.0) a row in `content/ui/settings.json` shows in Settings but nothing in the game's own code reads its id (`values.tips`, `id === 'resetTips'`, `info={{ version }}`) — or a link row opens a placeholder address. Skipped: headings, rows with `"on": false`, text size + reduce motion (the kit applies them), links, info rows with their own text, and the Audio rows once the game passes the values to `applyAudioSettings` |
 | nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog |
 | nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
@@ -45,6 +46,8 @@ gallery's `npm run shoot` uses the same one.
   the opener in its layout effect, Countdown keeps the latest `onDone` from an effect, SnapControl's dial angle is state; same behaviour.
   0.19.2 (review): a screen that focuses its own field as it opens (autoFocus) gets in before that effect, so ScreenStack
   remembers recent focus and takes the newest thing outside the new screen as the opener. Closing it hands focus back again.
+  0.20.0: a new check — every Settings row that's switched on must be read by the game, so no switch shows that does
+  nothing (Glyphtender once shipped 12). Runs with `--static` too, so `check:fast` catches it.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
