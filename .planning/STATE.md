@@ -1,16 +1,18 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 09 done: F63 Glyphtender passes the framework's checks + F66 the planner's Framework row in plain words, both approved** (`archive/sprints/sprint-09.md`).
-- Glyphtender: all 6 pieces newest on its branch `dev/framework-checks` (pushed; ships at ITS /deliver as a patch). Half pause = its F89 (a known gap in content/devkit.json). Its B029/B030 are test-only P3s.
-- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + UI kit 0.19.0 + **Dev Kit 0.20.2** (import without a page, the installer adds check:framework, known gaps, the tab row wraps on desktop) + the first look-back; merges at /deliver. build-ppp compares against the framework's main checkout, so the planner shows the newest pieces only after that merge.
-- Left in v0.9: **F62 Goops** (waits for the other session's F59/F60 on `dev/m1-core-shift`), F70 CI backstop, F72 session hygiene (both should), F64/F65 starters (should, need F62).
-- **Sprint 10 planned: F70 GitHub re-checks every push + F72 every feature boundary saved (Muzzy: save + keep going, no /clear nudges).** Tasks: `.planning/SPRINT.md`.
-- Next: `/develop` — F70 task 1, the shared GitHub workflow template.
+2026-10-19 — **Sprint 10 done: mistakes get caught even when nobody's watching. F70 GitHub checks + framework linter, F72 features end with STATE current, F75 done = review + full check on record, F79 one check run at a time, all approved** (`archive/sprints/sprint-10.md`).
+- Muzzy's aim (2026-10-19): **a bulletproof SOP, so every user and every game gets the same treatment.** Prefer code (hooks, checks, scripts) over written rules. The Oct 18 list audit (`~/.claude/config/bmuz/reviews/2026-10-18-reliability/AUDIT-2026-10-19.md`) gave F75–F79; F76/F77/F78 are left.
+- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.19.2 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver.
+- Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.19.0, so 0.19.2 comes with its next update), GitHub checks green, check-run lock. It ships at its own /deliver.
+- Left in v0.9: **F62 Goops** (now includes check:framework + GitHub checks; waits for the Goops session), F76 Settings-row check, F77 update notice at session start, F78 safety guards, F64/F65 starters (need F62).
+- Next: `/sprint` — F76 + F77 + F78 while Goops is busy.
+
+Reviewed through: framework 55b97d7 · Glyphtender 5a56e8f · ~/.claude as of 2026-10-19 11:00 (sprint 10 review: 2 findings, both fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 10
-Doing: F70 — next up   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.2)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (10 done)
+Doing: — (pick the next sprint)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.19.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
