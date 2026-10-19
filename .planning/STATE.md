@@ -1,14 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 07: F69 built and proven — waiting for Muzzy's look.** Six scripts in `~/.claude/config/bmuz/scripts/` (list in plain words: `~/.claude/config/bmuz/HOOKS.md` "Scripts"); the skills call them.
-- Proof `node ~/.claude/config/bmuz/scripts/test-scripts.mjs` 49/49 + real uses + a helper review (8 fixed) — SPRINT Notes. Hooks `test-hooks.mjs` still all green. Laptop needs `/sync`.
-- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the first look-back; merges at /deliver.
-- Muzzy: read HOOKS.md "Scripts" → "approved". Then `/sprint` (ready: F63 Glyphtender passes · F70 CI · F72 session hygiene · F66 health row · F71 skill evals now unblocked by F69).
+2026-10-19 — **Sprint 08 started: F71 skill tests (`claude plugin eval`) then F66 the planner's Framework row.** Tasks: `.planning/SPRINT.md`. (Sprint 07 done: F69 scripts approved — `archive/sprints/sprint-07.md`.)
+- Muzzy's call on skill-test cost: A — run only after skill edits / a model update, when he says yes in /checkup.
+- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the first look-back; merges at /deliver. Laptop needs `/sync` (scripts + hooks).
+- Next: `/develop` — F71 task 1, the spike.
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 07
-Doing: F69 — waiting for Muzzy   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 08
+Doing: F71 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
