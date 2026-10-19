@@ -114,6 +114,15 @@ export function adapterFile(root) {
   return ['.ts', '.tsx', '/index.ts'].map((e) => base + e).find((p) => existsSync(join(root, p))) ?? base
 }
 
+/** Where the dev server really serves the game: Vite's own resolved address (https:// when the game's vite.config
+ *  serves HTTPS, e.g. basicSsl() for phone testing), with its base path. */
+export function serverUrl(server, port) {
+  const local = server.resolvedUrls?.local?.[0]
+  if (local) return local.endsWith('/') ? local : local + '/'
+  const https = !!server.config?.server?.https
+  return `${https ? 'https' : 'http'}://127.0.0.1:${port}${server.config?.base ?? '/'}`
+}
+
 function portInUse(port) {
   return new Promise((resolve) => {
     const sock = net.connect({ port, host: '127.0.0.1' })
@@ -142,7 +151,7 @@ function makeShared(root, port) {
         await s.listen()
         listening = true
       }
-      return `http://127.0.0.1:${port}${s.config.base ?? '/'}`
+      return serverUrl(s, port)
     },
     async browser() {
       if (browser) return browser
@@ -208,7 +217,8 @@ export function makeTester({ root, module, modules, shared, staticOnly, results 
     async page({ width = 1280, height = 800, mobile = false } = {}) {
       const base = await shared.url()
       const browser = await shared.browser()
-      const context = await browser.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 })
+      // ignoreHTTPSErrors: a game served over local HTTPS (basicSsl(), for phone testing) has a self-made certificate
+      const context = await browser.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1, ignoreHTTPSErrors: true })
       const page = await context.newPage()
       page.errors = []
       page.on('pageerror', (e) => page.errors.push(e.message))

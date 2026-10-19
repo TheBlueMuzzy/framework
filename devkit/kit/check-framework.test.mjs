@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DEFAULT_PORT, adapterFile, findModules, formatReport, gameCode, linesMatching, makeTester, readArgs } from './check-framework.mjs'
-import { firstDiff, nudged } from './conformance.mjs'
+import { DEFAULT_PORT, adapterFile, findModules, formatReport, gameCode, linesMatching, makeTester, readArgs, serverUrl } from './check-framework.mjs'
+import { firstDiff, nudged, unreadTuning } from './conformance.mjs'
 
 let game
 const write = (path, text) => { mkdirSync(dirname(join(game, path)), { recursive: true }); writeFileSync(join(game, path), text) }
@@ -97,5 +97,19 @@ describe('Dev Kit checks: helpers', () => {
     expect(nudged({ list: [1, 2], colour: '#fff' })).toEqual({ data: { list: [1, 2], colour: '#fff~' }, key: 'colour' })
     expect(nudged([1, 2])).toBe(null)
     expect(nudged({ _only: 'notes' })).toBe(null)
+  })
+})
+
+describe('review fixes', () => {
+  it('serverUrl: Vite\'s own address — https when the game serves HTTPS (basicSsl), with the base path', () => {
+    expect(serverUrl({ resolvedUrls: { local: ['https://127.0.0.1:5292/goops/'] }, config: {} }, 5292)).toBe('https://127.0.0.1:5292/goops/')
+    expect(serverUrl({ config: { base: '/g/', server: { https: {} } } }, 5292)).toBe('https://127.0.0.1:5292/g/')
+    expect(serverUrl({ config: { base: '/' } }, 5292)).toBe('http://127.0.0.1:5292/')
+  })
+  it('a tuning file only a test or the adapter imports is NOT read by the game', () => {
+    write('src/devkit-game/gAdapter.ts', "import tank from '../../content/tuning/tank.json'")
+    write('tests/fall.test.ts', "import fall from '../content/tuning/fall.json'")
+    write('src/engine/hud.ts', "import hud from '../../content/tuning/hud.json'")
+    expect(unreadTuning(['tank', 'fall', 'hud'], gameCode(game))).toEqual(['tank', 'fall'])
   })
 })

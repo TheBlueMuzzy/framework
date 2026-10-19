@@ -49,6 +49,11 @@ export function nudged(data) {
   return null
 }
 
+/** Tuning files no GAME code imports (tests and the Dev Kit adapter don't count: they aren't the game reading it). */
+export function unreadTuning(names, gameFiles) {
+  return names.filter((name) => !gameFiles.some((f) => f.text.includes(`content/tuning/${name}.json`)))
+}
+
 export async function check(t) {
   const adapter = t.adapterFile()
   if (adapter) t.pass('a game adapter is registered', adapter)
@@ -57,10 +62,9 @@ export async function check(t) {
 
   // ---- live tuning (code) ----
   const tuning = t.files({ dirs: ['content/tuning'], exts: /\.json$/ }).map((f) => f.path.replace(/^content\/tuning\//, '').replace(/\.json$/, ''))
-  const code = t.files({ skip: ['src/devkit'] })
   if (!tuning.length) t.skip('every tuning file is read by the game', 'no content/tuning/*.json files')
   else {
-    const unread = tuning.filter((name) => !code.some((f) => f.text.includes(`content/tuning/${name}.json`)))
+    const unread = unreadTuning(tuning, t.gameCode())
     if (unread.length) t.fail('every tuning file is read by the game', unread.map((n) => `content/tuning/${n}.json — no game code imports it, so its sliders change nothing`),
       'Import it where the values are used (import x from \'…/content/tuning/<name>.json\'), or delete the file if it\'s left over.')
     else t.pass('every tuning file is read by the game', `${tuning.length} files`)
@@ -127,23 +131,45 @@ export async function check(t) {
     const blocked = await page.evaluate(() => window.__devkit.pauseBlocked())
     const suspects = () => listSome(t.linesMatching(t.gameCode(), TIMERS), 'more plain timers in game code')
 
+    // Does play change the state on its own? (A turn-based game waiting for a move doesn't — then "nothing moved while
+    // paused" proves little, and the pause checks say so instead of claiming a pass they didn't earn.)
+    const before = await state()
+    await page.waitForTimeout(700)
+    const moves = !!firstDiff(before, await state())
+    const provesLittle = 'the state didn\'t change in 0.7 s of play either (waiting for the player?), so this proves little'
+
+    // Pictures nothing can freeze — an animated GIF / WebP / APNG, an SVG's own <animate>, a text box's blinking caret —
+    // are hidden while the screen is compared, so they can't fail a game that's frozen fine
+    const UNFREEZABLE = 'animated images (GIF / WebP / APNG), SVG <animate>, a focused text box\'s caret'
+    const hideUnfreezable = (on) => page.evaluate((hide) => {
+      document.getElementById('__framework-check-hide')?.remove()
+      if (!hide) return
+      document.activeElement?.blur?.()
+      const style = document.createElement('style')
+      style.id = '__framework-check-hide'
+      style.textContent = 'img[src*=".gif" i], img[src*=".webp" i], img[src*=".apng" i], svg:has(animate, animateTransform, animateMotion, set) { visibility: hidden !important; } * { caret-color: transparent !important; }'
+      document.head.appendChild(style)
+    }, on)
+
     // ⏸ Full pause
     if (blocked) t.skip(playChecks[0], blocked)
     else {
       await setPause('full')
+      await hideUnfreezable(true)
       await page.waitForTimeout(150)
       const [s0, c0, shot0] = [await state(), await clocks(), await page.screenshot()]
       await page.waitForTimeout(700)
       const [s1, c1, shot1] = [await state(), await clocks(), await page.screenshot()]
+      await hideUnfreezable(false)
       await setPause(null)
       const problems = []
       if (Math.abs(c1.rules - c0.rules) > 1 || Math.abs(c1.looks - c0.looks) > 1) problems.push(`the clocks moved while frozen (rules +${Math.round(c1.rules - c0.rules)} ms, looks +${Math.round(c1.looks - c0.looks)} ms)`)
       const diff = firstDiff(s0, s1)
       if (diff) problems.push(`the game's state changed in 0.7 s of full pause — ${diff}`, 'Something in game logic runs on a plain timer the freeze can\'t hold. Suspects:', ...suspects().map((l) => '  ' + l))
-      else if (!shot0.equals(shot1)) problems.push('the screen still moved in 0.7 s of full pause (the state didn\'t) — a picture driven by a plain timer, setInterval or performance.now()')
+      else if (!shot0.equals(shot1)) problems.push(`the screen still moved in 0.7 s of full pause (the state didn't) — a picture driven by a plain timer, setInterval or performance.now(). (Already left out of the comparison: ${UNFREEZABLE}.)`)
       if (problems.length) t.fail(playChecks[0], problems,
         'Game logic timers → rulesClock.after / every (src/devkit/gameClock.ts); presentation time → looksClock.now(); never setTimeout / setInterval / performance.now() for anything that moves.')
-      else t.pass(playChecks[0], 'screen, both clocks and the game\'s state stood still for 0.7 s')
+      else t.pass(playChecks[0], moves ? 'screen, both clocks and the game\'s state stood still for 0.7 s' : `clocks and screen stood still — but ${provesLittle}`)
     }
 
     // ◐ Half pause
@@ -165,28 +191,33 @@ export async function check(t) {
       if (diff) problems.push(`the game's state changed in 1 s of half pause — ${diff}`, 'Game logic is still running on its own time. Suspects (plain timers in game code):', ...suspects().map((l) => '  ' + l))
       if (problems.length) t.fail(playChecks[1], problems,
         'Tick the engine by dt × rulesClock.rate (not plain dt), and game-logic timers on rulesClock.after / every — src/devkit/gameClock.ts.')
-      else t.pass(playChecks[1], `state + rules clock still for 1 s, looks clock ran ${Math.round(c1.looks - c0.looks)} ms`)
+      else t.pass(playChecks[1], moves ? `state + rules clock still for 1 s, looks clock ran ${Math.round(c1.looks - c0.looks)} ms` : `rules clock still, looks clock ran — but ${provesLittle}`)
     }
 
-    // A snapshot restores exactly
+    // A snapshot restores exactly — compared while paused (half if the game can, else full), so play can't move on
+    // between the restore and the read
     const canRestore = await page.evaluate(() => { try { return window.__devkit.game().canRestore() } catch { return false } })
     if (!canRestore) t.skip(playChecks[2], 'canRestore() is false (an online game)')
     else {
       const saved = await state()
       await page.waitForTimeout(700)
-      const result = await page.evaluate(async (s) => {
-        const game = window.__devkit.game()
-        window.__devkit.pause('half')
+      const mode = canHalf ? 'half' : 'full'
+      const result = await page.evaluate(async ({ s, mode }) => {
+        const kit = window.__devkit, game = kit.game()
+        kit.pause(mode)
+        if (kit.paused() !== mode) return { unpaused: kit.pauseBlocked() || `the Dev Kit couldn't ${mode}-pause the game` }
         try { game.setState(s) } catch (e) { return { error: e?.message ?? String(e) } }
-        await new Promise((r) => setTimeout(r, 300)) // a restore may finish on the next frame
+        await new Promise((r) => setTimeout(r, 300)) // a restore may finish a moment later
         return { after: JSON.parse(JSON.stringify(game.getState())) }
-      }, saved)
-      if (result.error) t.fail(playChecks[2], [`setState(getState()) threw: ${result.error}`], `${adapter}: setState must take back anything getState() gave.`)
+      }, { s: saved, mode })
+      if (result.unpaused) t.skip(playChecks[2], `${result.unpaused} — so play would move on between the restore and the check`)
+      else if (result.error) t.fail(playChecks[2], [`setState(getState()) threw: ${result.error}`], `${adapter}: setState must take back anything getState() gave.`)
       else {
         const diff = firstDiff(saved, result.after)
         if (diff) t.fail(playChecks[2], [`restoring a moment gave a different moment — ${diff}`], `${adapter}: setState must put back everything getState() saved (and getState must save everything that matters).`)
-        else t.pass(playChecks[2], 'getState → play 0.7 s → setState → the same moment')
+        else t.pass(playChecks[2], `getState → play 0.7 s → setState (${mode}-paused) → the same moment${moves ? '' : ` — but ${provesLittle}`}`)
       }
+      await setPause(null)
 
       // The game's hotkeys skip text boxes — in live play (games ignore keys while paused). The sign a handler took a
       // key: it called preventDefault (games do, for their keys). In a text box first, then outside one (a key there
