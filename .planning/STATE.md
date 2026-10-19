@@ -1,15 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 05 (F68 + F61) built, autonomous run.**
-- **F68 BMUZ hooks ✔ built** (all in ~/.claude, not this repo): never-rules (reset --hard, force-push, unmerged branch deletes refused; Chrome asks) · commit gate (type check) · live gate (no push to a deploying branch / deploy command without `.planning/smoke-pass`) · /develop Stop gate (check:fast) · check-ui after UI edits. Proof: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` 94/94 + a real headless try of each. Plain words: `~/.claude/config/bmuz/HOOKS.md`. **Muzzy: read HOOKS.md and OK it → then /sync** (the laptop doesn't have the hooks yet).
-- **F61 Conformance pack** lives on branch `dev/conformance` (pushed; its SPRINT.md is the current one): `npm run check:framework` (Dev Kit 0.19.0, UI kit 0.18.0, Audio 0.3.0, AI 0.2.0, Rooms 0.7.0, Table 0.8.0) proven on a copy of Goops (PASS + 5 deliberate breaks caught). Reviewed + 7 review fixes (Dev Kit 0.19.1, UI kit 0.18.1, Audio 0.3.1, AI 0.2.1) — checked first-hand: 6 suites green, Goops copy PASS 14/14, a raw-timer break caught. Merges to main at /deliver. PAUSED pill fix is on main already (Dev Kit 0.18.1, b6854bd) — **tell the Goops session it can update.**
-- **F73 hand-off card ✔ built** (Muzzy: "I never want to see it any other way going forward!"): `~/.claude/config/bmuz/templates/handoff.md` + a Stop hook. F67 first pass: `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md` (~45 candidates, ⭐ best). F74 self-improving loop added (Muzzy's milestone-retro idea).
-- Next: F61 review fixes → show Muzzy → F62 (Goops passes — the Goops session adds `conformance: { startPlay, query }` to its adapter) / F63 (Glyphtender: bots on setTimeout, check:ui red today, no `smoke` script).
+2026-10-18 — **Sprint 05 done — Muzzy approved F68, F61, F73.**
+- **F68 BMUZ hooks** + **F73 hand-off card** live in ~/.claude (synced to the laptop): `~/.claude/config/bmuz/HOOKS.md` (7 hooks in plain words), proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` (94/94). Every work turn ends with the card (`templates/handoff.md`) — Muzzy: "I never want to see it any other way going forward!"
+- **F61 Conformance pack** on branch `dev/conformance` (pushed; merges to main at /deliver): `npm run check:framework` — Dev Kit 0.19.1, UI kit 0.18.1, Audio 0.3.1, AI 0.2.1, Rooms 0.7.0, Table 0.8.0. PAUSED pill fix already on main (Dev Kit 0.18.1) — tell the Goops session.
+- Ready next (🟢): **F67** lesson audit → build the ⭐ hooks in `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md`, plan-file checker (`plan-lint.mjs`) first · F62 Goops passes (Goops session: adapter `conformance: { startPlay, query }`) · F63 Glyphtender passes (bots on setTimeout, check:ui red, no `smoke` script) · F69 scripts · F70 CI · F72 session hygiene · F66 health row. Then F74 self-improving loop (needs F67).
+- Next: `/sprint` — plan Sprint 06 (suggest F67's ⭐ hooks).
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
-Doing: F68 done (Muzzy OK pending) · F61 review fixes   Branch: main + dev/conformance   Version: 0.10.0 (Dev Kit 0.16.1)
+Doing: Sprint 05 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (Dev Kit 0.16.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
