@@ -4,7 +4,7 @@ Glyphtender work goes on its own branch `dev/framework-checks` (its live site on
 
 ## F63 🔧 Glyphtender passes the pack
 Done when: Glyphtender runs the newest UI kit + Dev Kit, `check:framework` is part of its check:full, and every gap it finds is either fixed or a line on Glyphtender's ROADMAP.
-- [ ] 🤖 1. Spike — UI kit 0.10.4 → 0.19.0 and Dev Kit 0.16.1 → 0.20.0 on a throwaway copy: what breaks, how big → Notes — glyphtender/src/ui/kit, src/devkit
+- [x] 🤖 1. Spike — UI kit 0.10.4 → 0.19.0 and Dev Kit 0.16.1 → 0.20.0 on a throwaway copy: what breaks, how big → Notes — glyphtender/src/ui/kit, src/devkit
 - [ ] 🤖 2. Install both with install-module on `dev/framework-checks`, fix what breaks, check:fast green — glyphtender/src/ui/kit, src/devkit, package.json
 - [ ] 🤖 3. Run check:framework → every red becomes a line on Glyphtender's ROADMAP (or a bug) — glyphtender/.planning/ROADMAP.md
 - [ ] 🤖 4. Fix the small gaps (each under ~15 min); the rest stay on its roadmap — glyphtender/src
