@@ -10,7 +10,7 @@ Done when: each ⭐ rule is enforced by a hook or check (blocks / reminds at the
 - [x] 🤖 3. Blocks — `hooks/guard-edits.mjs` + `guard-git.mjs`: editing a game's kit copy (`src/ui/kit/`, `src/devkit/`) · `F\d+:` code commits / merges into main outside /deliver (planning + docs commits stay fine) · a check piped into tail/grep/Select-Object · heredoc / `python -c` writing code with backslashes · `live-push.mjs`: an open P0 in BUGS.md blocks going live
 - [x] 🤖 4. Sprint nudge — Stop: code committed this turn but SPRINT.md unchanged → "log it as a task"
 - [x] 🤖 5. Credits check — framework `ui-kit` conformance (on `dev/conformance`): every art/sound file in `content/credits.json`, no 🔴, every 🟡 shown on the Credits screen
-- [ ] 🤖 6. Shrink the skills — delete the develop / deliver / save / ppp / bug lines that are now automatic, point to HOOKS.md
+- [x] 🤖 6. Shrink the skills — delete the develop / deliver / save / ppp / bug lines that are now automatic, point to HOOKS.md
 - [ ] 🤖 7. Prove it — test-hooks cases for every new hook + one real headless try each; HOOKS.md rows
 Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green + the real tries quoted in Notes.
 Ask Muzzy: —
