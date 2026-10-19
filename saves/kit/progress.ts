@@ -88,7 +88,8 @@ export function mergeRecords<T>(kind: SaveKind, fields: FieldRules<T> | undefine
       const partsB = newer.counts?.[field] ?? earlierPart(newer, field)
       const parts: Record<string, number> = {}
       for (const device of new Set([...Object.keys(partsA), ...Object.keys(partsB)])) {
-        parts[device] = Math.max(partsA[device] ?? 0, partsB[device] ?? 0)
+        // (own parts only — a device named "constructor" must not read the built-in one and turn the total into NaN)
+        parts[device] = Math.max(Object.hasOwn(partsA, device) ? partsA[device] : 0, Object.hasOwn(partsB, device) ? partsB[device] : 0)
       }
       counts[field] = parts
       data[field] = sum(parts)

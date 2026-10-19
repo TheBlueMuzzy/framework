@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CODE_WORDS, gameLabel, makeSaveCode, readSaveCode, saveFileName } from './saveCode'
+import { CODE_WORDS, MAX_CODE_CHARS, MAX_UNPACKED_BYTES, gameLabel, makeSaveCode, readSaveCode, saveFileName } from './saveCode'
 import { createSave } from './saves'
 import { memoryStorage } from './storage'
 
@@ -122,6 +122,36 @@ describe('save code', () => {
     expect(result).toMatchObject({ ok: false, restored: ['goops-progress'], notRestored: ['goops:settings'] })
     expect(!result.ok && result.message).toContain('Part of the save code was loaded')
     expect(b.progress.load().totalXp).toBe(10)
+  })
+
+  // security review (2026-10-19): a code is untrusted text anyone can post
+  const asCode = (content: unknown) => `GOOPS-1j-${Buffer.from(JSON.stringify(content)).toString('base64url')}`
+
+  it('a code far bigger than any real save is refused before it is unpacked; nothing changes', async () => {
+    const here = device()
+    here.settings.save({ volume: 40 })
+    const result = await readSaveCode(`GOOPS-1j-${'A'.repeat(MAX_CODE_CHARS)}`, here.saves)
+    expect(result).toEqual({ ok: false, message: CODE_WORDS.tooBig })
+    expect(here.settings.load()).toEqual({ volume: 40 })
+  })
+
+  it('a small code that would unpack into megabytes (a "zip bomb") stops early and is refused', async () => {
+    const huge = new Uint8Array(MAX_UNPACKED_BYTES * 2) // all zeros: packs down to a few KB
+    const stream = new Blob([huge]).stream().pipeThrough(new CompressionStream('deflate-raw'))
+    const packed = Buffer.from(await new Response(stream).arrayBuffer()).toString('base64url')
+    expect(packed.length).toBeLessThan(MAX_CODE_CHARS)
+    const result = await readSaveCode(`GOOPS-1z-${packed}`, device().saves)
+    expect(result).toEqual({ ok: false, message: CODE_WORDS.tooBig })
+  })
+
+  it('a device part named like a built-in ("constructor") can\'t turn an add-up stat into nothing', async () => {
+    const here = device()
+    here.progress.save({ totalXp: 10, gamesPlayed: 3, unlocks: [] })
+    const record = { save: 'goops-progress', version: 2, savedAt: Date.now(), data: { totalXp: 0, gamesPlayed: 5, unlocks: [] }, counts: { gamesPlayed: { constructor: 5, __proto__: 7 } } }
+    await readSaveCode(asCode({ saves: { 'goops-progress': record } }), here.saves)
+    const games = here.progress.load().gamesPlayed
+    expect(Number.isFinite(games)).toBe(true)
+    expect(games).toBeGreaterThanOrEqual(3)
   })
 
   it('slots travel one record per slot', async () => {

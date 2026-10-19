@@ -149,7 +149,8 @@ function cleanCounts(raw: unknown): SaveRecord['counts'] {
   const out: Record<string, Record<string, number>> = {}
   for (const [field, parts] of Object.entries(raw)) {
     if (!parts || typeof parts !== 'object' || Array.isArray(parts)) continue
-    const good = Object.entries(parts).filter((part): part is [string, number] => typeof part[1] === 'number' && Number.isFinite(part[1]) && part[1] >= 0)
+    // (device names that are built-in object names — __proto__, constructor… — dropped too: security review)
+    const good = Object.entries(parts).filter((part): part is [string, number] => !(part[0] in Object.prototype) && typeof part[1] === 'number' && Number.isFinite(part[1]) && part[1] >= 0)
     if (good.length) out[field] = Object.fromEntries(good)
   }
   return Object.keys(out).length ? out : undefined

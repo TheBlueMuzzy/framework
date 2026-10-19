@@ -17,12 +17,19 @@ import type { Save, SaveRecord, SlotSaves } from './saves'
 export const SAVE_CODE_FORMAT = 1
 type AnySave = Save<any> | SlotSaves<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
 
+// A code is untrusted text (anyone can post "my 100% save, paste this"): a real save is a few KB, so anything far
+// bigger is refused before it's unpacked, and unpacking stops early — a tiny code can't swell into hundreds of MB
+// and freeze the tab, or fill the storage other games share on itch.io (security review, 2026-10-19)
+export const MAX_CODE_CHARS = 300_000
+export const MAX_UNPACKED_BYTES = 2_000_000
+
 export const CODE_WORDS = {
   empty: 'Paste a save code first.',
   notACode: 'That isn\'t a save code. Copy the whole code and try again.',
   otherGame: (game: string) => `That save code is for another game (${game}).`,
   newerFormat: 'That save code comes from a newer version of the game. Reload the page to update the game, then try again.',
   damaged: 'That save code is damaged or incomplete. Copy the whole code again and paste it here.',
+  tooBig: 'That save code is far bigger than any real save, so it wasn\'t loaded.',
   nothingForThisGame: 'That save code has no saves for this game.',
   newerSave: 'That save code comes from a newer version of the game. Reload the page to update the game, then try again.',
   notSaved: (why: string) => `The save code is fine, but it couldn't be saved here: ${why}`,
@@ -70,6 +77,7 @@ export type CodeResult =
 export async function readSaveCode(code: string, saves: AnySave[]): Promise<CodeResult> {
   const text = (code ?? '').replace(/\s+/g, '')
   if (!text) return { ok: false, message: CODE_WORDS.empty }
+  if (text.length > MAX_CODE_CHARS) return { ok: false, message: CODE_WORDS.tooBig }
   const match = text.match(/^([A-Za-z0-9]+)-(\d+)([zj])-([A-Za-z0-9_-]+)$/)
   if (!match) return { ok: false, message: CODE_WORDS.notACode }
   const [, label, format, packing, data] = match
@@ -78,8 +86,9 @@ export async function readSaveCode(code: string, saves: AnySave[]): Promise<Code
   let content: { saves?: Record<string, unknown> }
   try {
     const bytes = fromBase64Url(data)
-    const json = new TextDecoder().decode(packing === 'z' ? await decompress(bytes) : bytes)
-    content = JSON.parse(json)
+    const unpacked = packing === 'z' ? await decompress(bytes) : bytes
+    if (!unpacked) return { ok: false, message: CODE_WORDS.tooBig }
+    content = JSON.parse(new TextDecoder().decode(unpacked))
   } catch {
     return { ok: false, message: CODE_WORDS.damaged }
   }
@@ -151,7 +160,8 @@ export function downloadSaveFile(code: string, fileName: string): boolean {
 
 /** A file the player picked → its text (then readSaveCode). */
 export async function readSaveFile(file: Blob): Promise<string> {
-  return await file.text()
+  // only as much as a code may be (+1, so a bigger file is still told "too big", not read whole)
+  return await file.slice(0, MAX_CODE_CHARS + 1).text()
 }
 
 /** Copy text to the clipboard. Inside a frame from another site (itch.io) the clipboard API is often refused, so the
@@ -189,9 +199,22 @@ async function compress(bytes: Uint8Array): Promise<Uint8Array | null> {
   }
 }
 
-async function decompress(bytes: Uint8Array): Promise<Uint8Array> {
-  const stream = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw'))
-  return new Uint8Array(await new Response(stream).arrayBuffer())
+/** Unpacks a code; null when it would grow past MAX_UNPACKED_BYTES (it stops reading there). */
+async function decompress(bytes: Uint8Array): Promise<Uint8Array | null> {
+  const reader = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader()
+  const pieces: Uint8Array[] = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.length
+    if (size > MAX_UNPACKED_BYTES) { void reader.cancel(); return null }
+    pieces.push(value)
+  }
+  const out = new Uint8Array(size)
+  let at = 0
+  for (const piece of pieces) { out.set(piece, at); at += piece.length }
+  return out
 }
 
 /** Bytes → letters, digits, - and _ only (safe in a chat message, a URL, a file name). */
