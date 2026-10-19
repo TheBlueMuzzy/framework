@@ -8,6 +8,7 @@ Done when: the UI kit's checks fail when a row in a game's `content/ui/settings.
 - [x] 🤖 2. UI kit conformance check (static): every switched-on row id is read in game code outside the kit copies; plain-words sentence for the planner — ui-kit/kit/conformance.mjs, ~/.claude/config/bmuz/templates/ppp/framework-words.mjs
 - [x] 🤖 3. Tests: a dead row → red · a read row → green · kit-handled rows skipped — ui-kit/kit/conformance tests
 - [x] 🤖 4. Run it on Glyphtender: fix dead rows, or list them on its roadmap / known gaps — glyphtender (dev/framework-checks)
+- [x] 🤖 5. Every game's check:fast runs the framework's code checks (Muzzy: yes, mid-sprint) — glyphtender/scripts/check-all.mjs (57f9b64), ~/.claude/config/bmuz/checkup.sh
 Check: the new check red on a fake dead row, green on Glyphtender after task 4.
 Ask Muzzy: —
 
