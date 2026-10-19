@@ -1,20 +1,20 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **F88 approved (sprint 14 done): check:framework flags faint text, things touching their box's edge, cards that grow while filling in, and a Settings without reduce motion / volume** — UI kit 0.21.0 on `dev/conformance` (worktree `.claude/worktrees/agent-a24e65cae835fd08b`, pushed). Next: ask Muzzy the 3-line retro → archive-sprint → **/deliver the framework** (Muzzy said yes 2026-10-19: merge dev/conformance — F61, F76, F88, UI kit 0.21.0, Dev Kit 0.20.3, audio 0.3.2 — into main). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **Released v0.10.1 (framework update)**: dev/conformance merged into main — the conformance pack `check:framework` (F61), Settings-row check (F76), quality bars (F88), UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2, the framework linter + GitHub checks. Games get it by updating their modules (`install-module.mjs`). Next: /sprint (or /roadmap) — ready in v0.10: F82–F85, F86 Saves module (its own sprint). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: retro → archive sprint 14 → `/deliver` (merge.mjs + release.mjs; the framework needs `Release: none (library)` + `Security reviewed: <commit>` in Key facts — release.mjs lists what's missing). F86 is now a Saves module (versioning inside), its own sprint later.
+- Next: `/sprint` for sprint 15. Glyphtender `dev/framework-checks` and Goops (F62) can now take the merged modules from main.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
-- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + F88 + **UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
+- dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
 Reviewed through: framework a898caf (sprint 14 review: 4 findings, 3 fixed + tests, 1 kept on purpose) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 14 — check:framework catches what a player would notice
-Doing: F88 done — retro, then /deliver   Branch: dev/conformance (plans on main)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
-Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
+Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (14 archived)
+Doing: released v0.10.1 — next /sprint   Branch: main   Version: 0.10.1 (UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2)
+Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.1
 
 ## Key facts
 **What this is**
@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-19 — Released v0.10.1: every game can now run one framework check that catches overlap, cut-off and faint text, things touching their card's edge, cards that grow, missing comfort settings, unread Settings rows and missing credits.
 - 2026-10-19 — F88 approved: the framework check now flags faint text, anything touching its card's edge, cards that grow while filling in, and a Settings without reduce motion (or volume, with sound). UI kit 0.21.0. Planner fix: features with a note after "needs:" are flagged ready again.
 - 2026-10-19 — Sprint 13 approved + archived: session starts now show the sprint day and only what needs attention; features need a test plan and a "what was checked" note before they count as done. Retro: Claude should lead on technical solutions earlier and more critically.
 - 2026-10-19 — Sprint 13 built + reviewed: every session start shows the sprint day and only what needs Muzzy (a deadline, a stalled feature, things to check); a sprint can't be filed without a 3-line retro; every feature has a test plan and a record of what was checked; playtests get logged; one check run at a time per game.
