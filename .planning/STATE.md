@@ -1,14 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 06: F67 + F74 built and proven — waiting for Muzzy's look** (`~/.claude/config/bmuz/HOOKS.md` rows 8–13; first look-back `.planning/archive/lookbacks/v0.9.md` on dev/conformance).
-- Proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` 202/202 + real tries + a helper review (all fixed). Synced to claude-config 1af42a1 — laptop needs `/sync`.
-- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the look-back; merges at /deliver. Goops session: Dev Kit 0.18.1 (PAUSED pill) on main; F67's findings for the game sessions are in ROADMAP Ideas.
-- Muzzy: read HOOKS.md rows 8–13 + the v0.9 look-back → "approved" (F74 🙋 4: did it catch what matters?).
+2026-10-18 — **Sprint 06 done — Muzzy approved F67 (⭐ hooks, HOOKS.md rows 8–13) and F74 (milestone look-back).** Archive: `.planning/archive/sprints/sprint-06.md`.
+- Proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` 202/202. Synced to claude-config 1af42a1 — laptop needs `/sync`.
+- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the first look-back (`.planning/archive/lookbacks/v0.9.md`); merges at /deliver. F67's findings for the game sessions are in ROADMAP Ideas (2026-10-18).
+- Next: `/sprint` — Sprint 07 (ready: F63 Glyphtender passes · F69 scripts · F70 CI · F72 session hygiene · F66 health row; F62 is the Goops session's).
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 06
-Doing: F67 + F74 — waiting for Muzzy   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
+Doing: Sprint 06 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
