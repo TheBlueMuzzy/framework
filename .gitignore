@@ -6,3 +6,5 @@ dist/
 .planning/STATE.md.bak
 screenshots/
 .claude/worktrees/
+# BMUZ: helper worktrees + the rebuilt planner page are never committed
+.planning/ppp.html
