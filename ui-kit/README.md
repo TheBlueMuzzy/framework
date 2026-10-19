@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.20.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.21.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -20,6 +20,13 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
   `"check:ui": "node src/ui/kit/check-ui.mjs src/ui --css src"`.
 - **Screens built from the kit's parts and slots** (Screen slots, Row, Stack, the HUD slots) so nothing overlaps,
   nothing is clipped and every tap target is 44 px — on a phone both ways, a short landscape, a laptop and a desktop.
+- **Quality bars a player notices** (0.21.0, checked in the browser): text easy to read against what's behind it (4.5:1,
+  3:1 for big text — use the style's on-… colours, not faded ones); nothing touching its box's edge — padding on every
+  side of every card, chip, badge and button (`data-ui-bleed` on a cover picture or divider meant to run edge to edge);
+  and a card that fills in during a sequence is its final size from the start (the kit's `Card` / `PlayerChip` watch
+  themselves; a game's own card: `const fixed = useFixedSize()` → `<div ref={fixed}>`).
+- **Comfort rows in Settings** (0.21.0): `reduceMotion` switched on in `content/ui/settings.json` — always; and
+  `masterVolume` too when the audio module is installed. The kit's default settings file has both.
 
 ## How it's checked — `npm run check:framework`
 The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/conformance.mjs` on the game:
@@ -32,6 +39,10 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
 | no focus ring without the keyboard | a focus ring shows on the first screen without any key pressed |
+| Settings has the comfort rows (reduce motion, and volume with sound) | (0.21.0) `reduceMotion` isn't switched on in `content/ui/settings.json` (or the file is missing) — or, with the audio module installed, `masterVolume` isn't. Reads files only, so it runs with `--static` too |
+| text is easy to read (contrast) | (0.21.0) text under 4.5:1 against what's painted behind it (3:1 for 24 px, or 18.66 px bold) — see-through colours and faded text mixed in. Skipped where it can't be judged: over a picture, gradient, canvas or video, with an outline or shadow, and disabled controls |
+| nothing touches the edge of its box | (0.21.0) text, an icon, a picture, an avatar or a badge less than 2 px from the inside edge of the drawn box around it (a border, a shadow or its own background) — not inside a scroll area, not marked `data-ui-bleed`, not hanging outside the box |
+| cards keep their size while they fill in | (0.21.0) a `Card` / `PlayerChip` (or a game's own `useFixedSize` box) grew by more than 1 px after it settled (fonts loaded + two frames). The screen or the style changing starts it over; shrinking is fine |
 The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080, on its
 first screen and in live play (through the Dev Kit adapter's `conformance.startPlay`), and say at which sizes each
 problem shows. They skip the Dev Kit, hidden / inert / `aria-hidden` things, text for screen readers only, and
@@ -52,6 +63,12 @@ gallery's `npm run shoot` uses the same one.
   destructuring from them, an action id compared (`id === 'sound'`), `info={{ … }}` or `useSetting('sound')` — so a dead
   row with a common word for an id (sound, theme, hints) no longer passes because `assets.sound` sits elsewhere. And a
   string like `import.meta.glob('./sfx/*.mp3')` no longer looks like the start of a comment that hides the code below it.
+  0.21.0: quality bars a player notices, now checked instead of only remembered — faint text (contrast), anything
+  touching its box's edge, a card that grows while it fills in (`useFixedSize`, on `Card` and `PlayerChip`), and the
+  Settings comfort rows (reduce motion always, master volume with the audio module). What they caught in the kit's
+  own gallery, fixed: avatar initials in a player's colour were faint (now white or black, whichever reads); PlayerChip
+  grew as its score counted up (a fixed score slot, `scoreDigits`; the "+N" takes no room); xs chips and their badges
+  touched their edges (more room); an icon button's glyph at 200% text touched its edge (a little side padding).
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
