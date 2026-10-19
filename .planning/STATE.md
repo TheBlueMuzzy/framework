@@ -1,15 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 15 started: F86 Saves module, layers 0 + 1** of the researched design (`.planning/research/saves.md`): settings / progress / run / slots saves with version stamps, step upgrades, safe writes + backups, progress fields that say how they combine (lifetime stats add up across devices), golden-save tests, a save code + storage-health warnings (Safari 7-day rule, itch frame, private windows). Layers 2–8 = F93–F99. On `dev/v0-10` (plans + code), proven on scratch copies of Goops + Glyphtender; plan in `.planning/SPRINT.md`. Released v0.10.1 just before. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **Sprint 15 built + reviewed, waiting for Muzzy's OK: F86 Saves module (layers 0 + 1)** — saves 0.1.0 on `dev/v0-10` (pushed): settings / progress / run / slots saves, version stamps + step upgrades, safe writes + backups, progress fields that combine (lifetime stats add up across devices), golden-save tests in check:framework, a save code + storage-health warnings. Research: `.planning/research/saves.md`; layers 2–8 = F93–F99. On "approved": F86 ✅ → `F86: done` → retro → archive → /deliver (framework update) or /sprint. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: build F86 tasks 1–6, review, hand to Muzzy. Ready later in v0.10: F82–F85.
+- Try-it server: scratch Glyphtender copy with the module (`~/Documents/dev/.scratch/framework-f86/glyphtender`, port 5193). Each game's switch-over steps: ROADMAP Ideas + `saves/README.md`.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
-Reviewed through: framework a898caf (sprint 14 review: 4 findings, 3 fixed + tests, 1 kept on purpose) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
+Reviewed through: framework a12d841 (sprint 15 review: 7 findings + 2 minor, all fixed + tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 15 — saved games survive every update
