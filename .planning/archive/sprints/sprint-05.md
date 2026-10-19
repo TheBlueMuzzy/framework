@@ -13,7 +13,7 @@ each; Muzzy has read every hook in plain words (HOOKS.md) and OK'd it; the lapto
 - [x] 🤖 5. Stop gate in /develop — `hooks/stop-check-fast.sh` in `skills/develop/SKILL.md` frontmatter: runs `npm run check:fast` when code changed since the last green run (commit + diff hash kept in `.git/`), time limit, `stop_hook_active` guard, skips repos without check:fast
 - [x] 🤖 6. check-ui after edits — `hooks/check-ui-edit.sh` (PostToolUse Edit|Write on `src/ui/**`): `node src/ui/kit/check-ui.mjs <file>`, result fed back to Claude; quiet when the game has no kit
 - [x] 🤖 7. Prove it — `hooks/test-hooks.sh`: a block + an allow case per hook from fake tool JSON; one real try each in a scratch repo; write `config/bmuz/HOOKS.md` (each hook in plain words, how to switch one off); one line in CLAUDE.md "Undo" + PROJECT-FILES pointing at it
-- [ ] 🙋 8. Read HOOKS.md and OK it → /sync so the laptop gets them
+- [x] 🙋 8. Read HOOKS.md and OK it → /sync so the laptop gets them
 Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green (94/94 with F73, 2026-10-18) + the real tries quoted in Notes.
 Ask Muzzy: —
 ## F73 🔧 Standard hand-off card
@@ -22,7 +22,7 @@ Done when: every turn in which Claude did work ends with the card (or the progre
 - [x] 🤖 2. Stop hook `hooks/handoff-check.mjs` (global): reads this turn from the conversation log; work (Edit/Write or a commit) → card or progress line required, labels read from the template; sent back once (no loops)
 - [x] 🤖 3. Prove it — 10 cases in test-hooks (94/94 total) + a run on this session's real log (plain "All done" → sent back; progress line → allowed)
 - [x] 🤖 4. Docs — /develop §4, CLAUDE.md, HOOKS.md row 7 (+ Muzzy's questions answered: hook 4 covers every project, hook 6 isn't visual)
-- [ ] 🙋 5. Muzzy: look at the next hand-off — is this the format you want?
+- [x] 🙋 5. Muzzy: look at the next hand-off — is this the format you want?
 Check: the next hand-off arrives as the card.
 
 ## F61 🧱 Conformance pack
@@ -65,3 +65,4 @@ Notes:
 - Commit gate fix found while merging: `tsc -b` wrote tsconfig.tsbuildinfo beside each framework module's tsconfig → single projects now get `tsc -p … --incremental false` (no cache file), `-b` only where a tsconfig lists references (Vite games keep their cache in node_modules/.tmp).
 - F61 review fixes (bded6b7 · 8885684 · 4fc08b9 · 23e6c5c — UI kit 0.18.1, Dev Kit 0.19.1, Audio 0.3.1, AI 0.2.1): overlap only counts visible parts (cut by clipping ancestors) and only when both show before anything else that paints; snapshot check pauses half-or-full and skips when it can't pause; pause checks say "proves little" when play doesn't change the state; full-pause screenshots hide animated images / SVG <animate> / the caret; runner uses Vite's resolved URL (HTTPS ok); tab switch during full pause keeps audio silent; AI timer scan = a hint on thinkDelay/waitLeft code; check:ui args stop at &&; "tuning read" counts game code only. Goops copy re-run: PASS 14, breaks 1–5 still caught.
 - Review fixes checked first-hand (2026-10-18): 6 suites green (devkit 448 · ui-kit 349 · audio 128 · table 47 · ai 47 · rooms 113), all type-check; Goops copy `check:framework` → PASS 14/14; a raw setInterval added to the copy → full pause, half pause and snapshot all FAIL naming score 19 → 40 + the suspects. Small follow-up: when a plain timer is the cause, the snapshot failure still blames the adapter's setState (the pause failures above it name the timer) — say "if the pause checks failed too, fix those first". Module READMEs still name the x.y.0 versions; the gallery's 63 overlaps / 34 cut-offs were counted before the overlap fix (recount when the UI-kit gallery gets its fix).
+- 2026-10-18: Muzzy approved F68 (hooks + /sync), F73 (card as is) and F61. Sprint done.
