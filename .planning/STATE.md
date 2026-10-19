@@ -1,18 +1,18 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 11 done: every game gets the same guard rails, automatically. F76 Settings-row check, F77 update notice at session start, F78 safety guards, all approved** (`archive/sprints/sprint-11.md`). Sprint 10 before it: F70 GitHub checks + framework linter, F72, F75, F79.
-- Muzzy's aim (2026-10-19): **a bulletproof SOP, so every user and every game gets the same treatment.** His rule: "'only runs when it remembers' is a bad thing. 'always runs because it triggers' is much more solid." → **F80 "Everything triggers" is next (sprint 12)**: every BMUZ skill gone through line by line, each step ① automatic · ② judgement but checked (like F75) · ③ judgement only (rare). Remembered-only → ① or ②, /save + /deliver first (every step inside their scripts; ending a session with unpushed work becomes a guard). Standing rule: a new "always do X" line names its kind; the look-back flags remembered-only lines. ROADMAP F80 has the full scope.
+2026-10-19 — **Sprint 12 planned: every BMUZ step runs by itself or gets checked (F80 Everything triggers)** — `.planning/SPRINT.md`, 7 tasks, all 🤖, all in `~/.claude/` (skills + config/bmuz → laptop via /sync). Sprint 11 (F76–F78) approved and archived.
+- Muzzy's rule: "'only runs when it remembers' is a bad thing. 'always runs because it triggers' is much more solid." Kinds: ① automatic · ② judgement but checked · ③ judgement only (rare, with a reason).
+- Next: `/develop` → task 1, the line-by-line audit of every skill → give it to a helper; it writes `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`. Then /save + /deliver scripts (tasks 2–3), the session-end guard (4).
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver. Until then the session-start update notice compares against main (older), so it stays quiet.
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.20.1), GitHub checks green, check-run lock, check:fast runs the framework code checks. It ships at its own /deliver.
-- Left in v0.9: **F80 Everything triggers** (next), **F62 Goops** (waits for the Goops session; includes check:framework, GitHub checks, its Settings `version` row placeholder), F64/F65 starters (need F62).
-- Next: `/sprint` — plan sprint 12 = F80 (the audit of every skill is the first, biggest task: give it to a helper).
+- Left in v0.9 after F80: **F62 Goops** (waits for the Goops session), F64/F65 starters (need F62).
 
 Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 11:50 (sprint 11 review: 4 findings, all fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (11 done)
-Doing: — (plan sprint 12: F80)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 12 — every BMUZ step runs by itself or gets checked
+Doing: F80 Everything triggers (task 1: the audit)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
