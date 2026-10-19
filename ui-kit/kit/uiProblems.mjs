@@ -6,6 +6,13 @@
 //              screen edge (and not in something that scrolls), or text cut off
 //   "overlap:" two things on screen sit on top of each other (text over text, a control over text…) — new in 0.18.0
 //   "focus:"   a focus ring showing although nobody used the keyboard
+//   "faint:"   text too faint to read against what's behind it: under 4.5:1, or 3:1 for big text (24 px, or 18.66 px
+//              bold) — the WCAG AA line. Skipped where it can't be judged: text over a picture, gradient, canvas or
+//              video, text with an outline or shadow (Cartoon ink, Neon glow), and disabled controls. — 0.21.0
+//   "edge:"    something in a drawn box (a card, chip, badge, button: a border, shadow or its own background) closer than
+//              2 px to the box's inside edge — text, an icon, a picture, an avatar or a badge. Things meant to run edge
+//              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area are skipped. — 0.21.0
+//   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
 // (a game's on-purpose overlap, e.g. a title drawn over its own shadow copy), and things covered by something else
@@ -102,11 +109,146 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     return s.backgroundColor !== 'rgba(0, 0, 0, 0)' || s.backgroundImage !== 'none' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
   }
   const part = (el, x) => el === x || x.contains(el) // x itself or something inside it
+
+  // ---- colours (0.21.0) ----
+  // A colour as [r, g, b, alpha] whatever way CSS wrote it (rgb(), color-mix(), oklch()…): the browser paints it on
+  // one pixel and we read the pixel back.
+  const pixel = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true })
+  const colours = new Map()
+  const rgba = (css) => {
+    if (!colours.has(css)) {
+      pixel.clearRect(0, 0, 1, 1)
+      pixel.fillStyle = 'rgba(0, 0, 0, 0)'
+      pixel.fillStyle = css
+      pixel.fillRect(0, 0, 1, 1)
+      const [r, g, b, a] = pixel.getImageData(0, 0, 1, 1).data
+      colours.set(css, [r, g, b, a / 255])
+    }
+    return colours.get(css)
+  }
+  const seeThrough = (css) => rgba(css)[3] < 0.05
+  // One colour laid over another (both [r, g, b, alpha]; the one under is solid) → the solid colour you see
+  const over = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3])).concat(1)
+  const light = ([r, g, b]) => { // WCAG relative luminance
+    const f = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+  }
+  const contrast = (a, b) => { const [hi, lo] = [light(a), light(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05) }
+  const pictureLike = (el) => ['IMG', 'CANVAS', 'VIDEO', 'svg', 'PICTURE'].includes(el.tagName) || getComputedStyle(el).backgroundImage !== 'none'
+
+  // Faint text: the text's colour against everything painted behind it at the middle of its first line (going down from
+  // the text: each background colour until a solid one; see-through ones mixed in; the page itself is white).
+  // Fading by opacity counts on the text and its holders up to its background — a faded whole card (dim) fades its
+  // background too, so it's left alone. Returns the plain-words problem, or '' (fine, or can't be judged).
+  const faintText = (el) => {
+    if (el.closest('svg, [disabled], [aria-disabled="true"]')) return ''
+    const s = getComputedStyle(el)
+    if (s.textShadow !== 'none' || parseFloat(s.webkitTextStrokeWidth) > 0) return '' // an outline or glow: can't judge
+    const words = [...el.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim())
+    const range = document.createRange()
+    range.selectNodeContents(words)
+    const line = range.getClientRects()[0]
+    if (!line) return ''
+    const x = line.left + line.width / 2, y = line.top + line.height / 2
+    if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return ''
+    const layers = []
+    let reached = false
+    for (const below of document.elementsFromPoint(x, y)) {
+      if (!reached) {
+        if (below === el) reached = true
+        else if (el.contains(below)) continue // a word inside the text (a <strong>)
+        else if (paints(below)) return '' // something covers the text here
+        else continue
+      }
+      if (pictureLike(below)) return ''
+      const bg = rgba(getComputedStyle(below).backgroundColor)
+      if (bg[3] > 0.01) layers.push(bg)
+      if (bg[3] > 0.99) break
+    }
+    if (!reached) return ''
+    const behind = layers.reduceRight((under, top) => over(top, under), [255, 255, 255, 1])
+    let alpha = rgba(s.color)[3]
+    for (let e = el; e && e !== document.documentElement && seeThrough(getComputedStyle(e).backgroundColor); e = e.parentElement) alpha *= Number(getComputedStyle(e).opacity)
+    if (alpha < 0.05) return '' // invisible text (e.g. a gradient painted through it): not "faint"
+    const ratio = contrast(over([...rgba(s.color).slice(0, 3), alpha], behind), behind)
+    const size = parseFloat(s.fontSize)
+    const big = size >= 24 || (size >= 18.66 && Number(s.fontWeight) >= 700)
+    const needs = big ? 3 : 4.5
+    return ratio < needs ? `${ratio.toFixed(1)}:1 against its background (needs ${needs}:1${big ? ' for big text' : ''})` : ''
+  }
+
+  // ---- breathing room (0.21.0) ----
+  // A drawn box: a border all round, a shadow, a picture or gradient, or its own background colour (different from the
+  // one it sits on). A line on one side only is a divider (list rows), not a box. The page and anything as big as the
+  // screen don't count.
+  const drawsBox = (el) => {
+    if (el === document.body || el === document.documentElement) return false
+    const box = el.getBoundingClientRect()
+    if (box.width >= innerWidth - 1 && box.height >= innerHeight - 1) return false
+    const s = getComputedStyle(el)
+    if (['Top', 'Right', 'Bottom', 'Left'].every((side) => parseFloat(s[`border${side}Width`]) > 0 && !seeThrough(s[`border${side}Color`]))) return true
+    if (s.boxShadow !== 'none' || s.backgroundImage !== 'none') return true
+    if (seeThrough(s.backgroundColor)) return false
+    let p = el.parentElement
+    while (p && seeThrough(getComputedStyle(p).backgroundColor)) p = p.parentElement
+    return !p || getComputedStyle(p).backgroundColor !== s.backgroundColor
+  }
+  const scrolls = (el) => { const s = getComputedStyle(el); return /(auto|scroll)/.test(s.overflowX + s.overflowY) && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) }
+  // Words are measured by the words themselves (not their element, which may be wider): side to side as wide as they
+  // run, top to bottom one font size per line (the letters — not the extra space a font keeps above and below them).
+  const wordsBox = (nodes) => {
+    const range = document.createRange()
+    const rects = nodes.flatMap((n) => {
+      range.selectNodeContents(n)
+      const size = parseFloat(getComputedStyle(n.parentElement).fontSize)
+      return [...range.getClientRects()].map((r) => ({ left: r.left, right: r.right, top: (r.top + r.bottom - size) / 2, bottom: (r.top + r.bottom + size) / 2 }))
+    })
+    if (!rects.length) return null
+    return { left: Math.min(...rects.map((r) => r.left)), top: Math.min(...rects.map((r) => r.top)), right: Math.max(...rects.map((r) => r.right)), bottom: Math.max(...rects.map((r) => r.bottom)) }
+  }
+  const wordsIn = (el, deep) => {
+    if (!deep) return [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim())
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+    const out = []
+    while (walker.nextNode()) if (walker.currentNode.textContent.trim()) out.push(walker.currentNode)
+    return out
+  }
+  // Text, an icon or a picture closer than 2 px to the inside edge of the box around it → the plain-words problem, or ''.
+  // Text: its own box counts too (a badge's words). A picture, avatar or badge is measured against the box it sits in;
+  // an icon made of a character (role="img" around ★) by its character.
+  const tooClose = (el, isText) => {
+    if (!shown(el) || el.closest('[data-ui-bleed]') || el.parentElement?.closest('svg')) return '' // (an svg's own insides: its icon counts as one)
+    const boxItem = ['IMG', 'svg', 'CANVAS', 'VIDEO'].includes(el.tagName) || el.matches('.kit-avatar, .kit-badge')
+    const content = !isText && boxItem ? el.getBoundingClientRect() : wordsBox(wordsIn(el, !isText))
+    if (!content) return ''
+    let box = isText ? el : el.parentElement
+    for (; box && !drawsBox(box); box = box.parentElement) if (scrolls(box)) return ''
+    if (!box || scrolls(box)) return ''
+    const b = box.getBoundingClientRect()
+    const s = getComputedStyle(box)
+    const inside = { left: b.left + parseFloat(s.borderLeftWidth), top: b.top + parseFloat(s.borderTopWidth), right: b.right - parseFloat(s.borderRightWidth), bottom: b.bottom - parseFloat(s.borderBottomWidth) }
+    const midX = (content.left + content.right) / 2, midY = (content.top + content.bottom) / 2
+    if (midX < b.left || midX > b.right || midY < b.top || midY > b.bottom) return '' // it sits outside the box, not in it
+    const room = Math.min(content.left - inside.left, content.top - inside.top, inside.right - content.right, inside.bottom - content.bottom)
+    if (room >= 1.5) return ''
+    const what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
+    return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
+  }
+
   const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')
   hitAll.textContent = '* { pointer-events: auto !important; }'
   document.head.appendChild(hitAll)
   try {
+    for (const el of texts) {
+      const faint = faintText(el)
+      if (faint) problems.push(`faint: "${name(el)}" is hard to read — ${faint}`)
+    }
+    const items = [...texts.map((el) => [el, true]), ...[...document.querySelectorAll('img, svg, canvas, video, .kit-avatar, .kit-badge, [role="img"]')].map((el) => [el, false])]
+    for (const [el, isText] of items) {
+      const edge = tooClose(el, isText)
+      if (edge) problems.push(`edge: "${name(el)}" ${edge}`)
+    }
     for (let i = 0; i < things.length; i++) {
       for (let j = i + 1; j < things.length; j++) {
         const a = things[i], b = things[j]
@@ -127,6 +269,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   } finally {
     hitAll.remove()
   }
+
+  // Cards that grew after they appeared — noted as it happens by the kit's useFixedSize (fixedSize.ts, dev builds)
+  for (const g of window.__uiGrowth ?? []) problems.push(`grows: "${g.name}" grew from ${g.from} to ${g.to} px after it appeared`)
 
   const ring = checkFocus && document.querySelector(':focus-visible')
   if (ring && !ring.closest('#devkit-root')) problems.push(`focus: a focus ring shows without keyboard use — "${name(ring)}"`)

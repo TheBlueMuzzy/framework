@@ -11,7 +11,7 @@ export function Avatar({ name, src, active, color }: AvatarProps) {
   return (
     <span className="kit-avatar" data-state={active ? 'active' : undefined} role="img" aria-label={name}
       style={{ '--kit-avatar-color': color } as CSSProperties}>
-      {src ? <img src={src} alt="" /> : initials}
+      {src ? <img src={src} alt="" data-ui-bleed /> : initials /* (the picture fills its circle on purpose: data-ui-bleed) */}
     </span>
   )
 }
