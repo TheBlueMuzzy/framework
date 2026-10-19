@@ -11,15 +11,15 @@ Done when: each ⭐ rule is enforced by a hook or check (blocks / reminds at the
 - [x] 🤖 4. Sprint nudge — Stop: code committed this turn but SPRINT.md unchanged → "log it as a task"
 - [x] 🤖 5. Credits check — framework `ui-kit` conformance (on `dev/conformance`): every art/sound file in `content/credits.json`, no 🔴, every 🟡 shown on the Credits screen
 - [x] 🤖 6. Shrink the skills — delete the develop / deliver / save / ppp / bug lines that are now automatic, point to HOOKS.md
-- [ ] 🤖 7. Prove it — test-hooks cases for every new hook + one real headless try each; HOOKS.md rows
+- [x] 🤖 7. Prove it — test-hooks cases for every new hook + one real headless try each; HOOKS.md rows
 Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green + the real tries quoted in Notes.
 Ask Muzzy: —
 
 ## F74 🔧 Self-improving loop
 Done when: a milestone's /deliver ends with a short look-back whose every item lands in a real file (hook, check, script, framework piece or checklist line); a Stop check catches a look-back that didn't happen; the first one (v0.9 so far) is written.
-- [ ] 🤖 1. Look-back template — `~/.claude/config/bmuz/templates/lookback.md` + a step in `skills/deliver/SKILL.md` (what went wrong · what got repeated · what one game built that others need → its home)
-- [ ] 🤖 2. Look-back check — Stop: a milestone /deliver turn without a look-back file, or an item without a home that exists → sent back
-- [ ] 🤖 3. First run — look-back on v0.9 so far → `.planning/archive/lookbacks/v0.9.md`, each item landed
+- [x] 🤖 1. Look-back template — `~/.claude/config/bmuz/templates/lookback.md` + a step in `skills/deliver/SKILL.md` (what went wrong · what got repeated · what one game built that others need → its home)
+- [x] 🤖 2. Look-back check — Stop: a milestone /deliver turn without a look-back file, or an item without a home that exists → sent back
+- [x] 🤖 3. First run — look-back on v0.9 so far → `.planning/archive/lookbacks/v0.9.md`, each item landed
 - [ ] 🙋 4. Muzzy reads the first look-back: did it catch what matters to you?
 Check: test-hooks cases for the look-back check + the v0.9 look-back's items all point at real files.
 Ask Muzzy: —
@@ -30,3 +30,5 @@ Notes:
 - F67 task 3: `hooks/guard-edits.mjs` (kit copies by VERSION file · piped checks unless `set -o pipefail` · heredoc/python/node writing code with a backslash) + guard-git (an `F08:` commit with code on main, merging a work branch into main unless /deliver ran this session) + live-push (open P0). "Files in this commit" moved into lib.mjs (`commitFiles`) for both commit hooks. Live tries: a piped test run in this session was refused; I wrote two hook edits through Python heredocs earlier this task — exactly what the new rule now refuses.
 - F67 task 4: `hooks/stop-plan-check.mjs` also sends Claude back when plan-lint rebuilt the planner page but it was not republished (STATE "Planner (PPP):" link; republish marker in .git). The turn reader moved to lib.mjs (`readTurn`), shared with handoff-check.
 - F67 task 5: UI kit 0.19.0 on dev/conformance (e832699): credits check, static, runs first in the UI kit checks; PROJECT-FILES now says own work is listed too (🟢 "own work"). Real try, read-only: Glyphtender all green (173 files); Goops 26 own-art files unlisted, 2 fonts marked 🔴 still in public/, no code reads credits.json; Roll Better favicon + 2 app icons unlisted — for those sessions.
+- F67 task 7: test-hooks 202/202 (was 94). Real tries (headless `claude -p`, throwaway repos): kit-copy edit refused, file untouched ✓ · bedtime → the /save note was injected ✓ · an `F08:` commit on main went THROUGH at first (file made + added + committed on one line, so it didn't exist yet when the hook looked) → fixed in lib `commitFiles`, refused on the re-try ✓ · sprint nudge fired, but Claude looked for SPRINT.md in the wrong folder → message names the full path; then it logged the task under "## Extras", which the planner never shows → plan-lint now flags tasks under a non-feature heading (and found Goops's "Play-test fixes" section doing exactly that). Review (helper): 5 real bugs fixed — PowerShell here-string commit messages, the pipe rule blocking plain searches (`grep vitest | head`), read-only `sed -n` taken for `sed -i`, quoted paths with spaces, the planner/look-back checks missing plan-only edits or a look-back from an earlier turn; plus `checkout -b x main`, "/deliver" merely mentioned in a file. Live false alarm: the bedtime note fired on the helper's report ("shutting down") → helper reports no longer count, phrase removed. Synced: claude-config 1af42a1.
+- F74 tasks 1–3: `templates/lookback.md` + /deliver §7c (+ CLAUDE.md "Reflection" line: a hook or check before a checklist line) · the check lives in `hooks/stop-plan-check.mjs` (#3: milestone tag / "Release vX.Y.0" without a look-back → sent back; every item's home must be a real file) · first look-back `.planning/archive/lookbacks/v0.9.md` on dev/conformance (281b3f2): 15 lessons, every home checked to exist. Findings for other sessions → ROADMAP Ideas (2026-10-18).
