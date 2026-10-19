@@ -47,12 +47,18 @@ export function whereText(where, screens) {
   return where.join('; ')
 }
 
+/** The folders the game's own check:ui script gives check-ui.mjs — up to the next command (&&, ;, |) — or the default. */
+export function checkUiArgs(script = '') {
+  if (!script.includes('check-ui.mjs')) return ['src/ui', '--css', 'src']
+  return script.split('check-ui.mjs')[1].split(/&&|\|\||;|\|/)[0].trim().split(/\s+/).filter(Boolean)
+}
+
 export async function check(t) {
   // ---- code: the kit's rule checker ----
   {
     const name = 'the game\'s UI code keeps the kit\'s rules (check-ui)'
     const script = t.scripts()['check:ui'] ?? ''
-    const args = script.includes('check-ui.mjs') ? script.split('check-ui.mjs')[1].trim().split(/\s+/).filter(Boolean) : ['src/ui', '--css', 'src']
+    const args = checkUiArgs(script)
     const run = t.run('node', [`${t.rel}/check-ui.mjs`, ...args])
     if (run.code === 0) t.pass(name, `node ${t.rel}/check-ui.mjs ${args.join(' ')}`)
     else t.fail(name, run.out.split(/\r?\n/).filter((l) => l.trim() && !l.startsWith('✓')).slice(0, 15),

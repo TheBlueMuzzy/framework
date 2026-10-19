@@ -15,11 +15,26 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   const problems = []
   const SKIP = '#devkit-root, [data-ui-check="skip"], [inert], [aria-hidden="true"]'
   const name = (el) => (el.getAttribute('aria-label') ?? el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 30) || `<${el.tagName.toLowerCase()}>`
+  // The part of an element you can actually see: its box cut by every ancestor that hides overflow (a scroll area, a
+  // panel) and by the screen — null when nothing of it shows (a row scrolled out of its list)
+  const visibleBox = (el) => {
+    const b = el.getBoundingClientRect()
+    let left = b.left, top = b.top, right = b.right, bottom = b.bottom
+    for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+      const s = getComputedStyle(p)
+      if (s.overflowX === 'visible' && s.overflowY === 'visible') continue
+      const c = p.getBoundingClientRect()
+      if (s.overflowX !== 'visible') { left = Math.max(left, c.left); right = Math.min(right, c.right) }
+      if (s.overflowY !== 'visible') { top = Math.max(top, c.top); bottom = Math.min(bottom, c.bottom) }
+    }
+    left = Math.max(left, 0); top = Math.max(top, 0); right = Math.min(right, innerWidth); bottom = Math.min(bottom, innerHeight)
+    return right - left > 0.5 && bottom - top > 0.5 ? { left, top, right, bottom } : null
+  }
   const shown = (el, { onScreen = true } = {}) => {
     if (el.closest(SKIP)) return false
     const box = el.getBoundingClientRect()
     if (box.width <= 2 || box.height <= 2) return false // hidden, or "for screen readers only" (1×1, clipped away)
-    if (onScreen && (box.right <= 0 || box.bottom <= 0 || box.left >= innerWidth || box.top >= innerHeight)) return false
+    if (onScreen && !visibleBox(el)) return false // off the screen, or scrolled out of its box
     let opacity = 1
     for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
       const s = getComputedStyle(e)
@@ -71,11 +86,13 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     if ((s.overflowX === 'hidden' || s.overflowX === 'clip') && el.scrollWidth > el.clientWidth + 1) problems.push(`clipped: text cut off — "${name(el)}"`)
   }
 
-  // Overlap: two shown things whose boxes cross (and neither holds the other) — unless something else that paints
-  // (a dialog, a panel) is on top of both there. What's on top is asked of the browser with every element hit-testable
-  // for a moment (HUD words are often pointer-events: none, which elementsFromPoint would look through).
+  // Overlap: two shown things whose VISIBLE parts cross (each cut by the boxes that clip it) and neither holds the
+  // other — and both really show at that point: going down from the top, both are reached before anything else that
+  // paints (a dialog over the HUD, the scroll area's own background). What's on top is asked of the browser with every
+  // element hit-testable for a moment (HUD words are often pointer-events: none, which elementsFromPoint looks through).
   const things = [...new Set([...controls, ...texts])]
   const crossing = (a, b) => {
+    if (!a || !b) return null
     const left = Math.max(a.left, b.left), right = Math.min(a.right, b.right), top = Math.max(a.top, b.top), bottom = Math.min(a.bottom, b.bottom)
     return right - left > 2 && bottom - top > 2 ? { x: (left + right) / 2, y: (top + bottom) / 2 } : null
   }
@@ -84,8 +101,8 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const s = getComputedStyle(el)
     return s.backgroundColor !== 'rgba(0, 0, 0, 0)' || s.backgroundImage !== 'none' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
   }
-  const related = (el, x) => el === x || el.contains(x) || x.contains(el)
-  const boxes = things.map((el) => el.getBoundingClientRect())
+  const part = (el, x) => el === x || x.contains(el) // x itself or something inside it
+  const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')
   hitAll.textContent = '* { pointer-events: auto !important; }'
   document.head.appendChild(hitAll)
@@ -96,12 +113,15 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
         if (a.contains(b) || b.contains(a)) continue
         const at = crossing(boxes[i], boxes[j])
         if (!at) continue
-        let seen = false
+        let seenA = false, seenB = false
         for (const el of document.elementsFromPoint(at.x, at.y)) {
-          if (related(el, a) || related(el, b)) { seen = true; break }
-          if (paints(el)) break // covered by something else (a dialog over the HUD)
+          if (part(el, a)) seenA = true
+          else if (part(el, b)) seenB = true
+          else if (el.contains(a) && el.contains(b)) continue // a box around both: under them
+          else if (paints(el)) break // something else — or one's own card / dialog — covers the other there
+          if (seenA && seenB) break
         }
-        if (seen) problems.push(`overlap: "${name(a)}" × "${name(b)}"`)
+        if (seenA && seenB) problems.push(`overlap: "${name(a)}" × "${name(b)}"`)
       }
     }
   } finally {

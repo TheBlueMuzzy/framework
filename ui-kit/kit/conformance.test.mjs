@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { SIZES, check, groupProblems, whereText } from './conformance.mjs'
+import { SIZES, check, checkUiArgs, groupProblems, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -20,6 +20,11 @@ describe('UI kit checks', () => {
     expect(whereText(inPlay, 14)).toBe('in play, every size')
     expect(whereText([...inPlay, ...inPlay.map((w) => w.replace('in play', 'first screen'))], 14)).toBe('every screen, every size')
     expect(whereText(inPlay.slice(0, 2), 14)).toBe(`${inPlay[0]}; ${inPlay[1]}`)
+  })
+  it('reads the game\'s check:ui folders up to the next command', () => {
+    expect(checkUiArgs('node src/ui/kit/check-ui.mjs src/ui src/game --css src && node scripts/other.mjs')).toEqual(['src/ui', 'src/game', '--css', 'src'])
+    expect(checkUiArgs('node src/ui/kit/check-ui.mjs src/ui; echo done')).toEqual(['src/ui'])
+    expect(checkUiArgs('')).toEqual(['src/ui', '--css', 'src'])
   })
   it('--static: runs check-ui only, and asks for a check:ui script when the game has none', async () => {
     const results = []
