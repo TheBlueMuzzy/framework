@@ -1,5 +1,5 @@
 # Sprint 08 — BMUZ tests its own skills, and every game's planner shows whether its framework pieces are healthy
-Started 2026-10-19 · Milestone v0.9 · Features: F71, F66
+Started 2026-10-19 · Milestone v0.9 · Features: F71 (F66 carried to sprint 09)
 Skill tests live with the skills in `~/.claude/` (→ laptop via /sync); the health row is `templates/ppp/build-ppp.mjs` + the Dev Kit's `check-framework.mjs` (framework code → `dev/conformance`).
 
 ## F71 🔧 Skill tests (evals) — ✅ approved 2026-10-19
@@ -13,14 +13,8 @@ Done when: a small suite of cases runs the key BMUZ skills in a throwaway game a
 Check: the suite's report all green, and red for the broken skill.
 Ask Muzzy: —
 
-## F66 🔧 Framework health row on the planner
-Done when: every game's planner page has a "Framework" row — each module's version vs the framework's newest, and the last check:framework result with its date.
-- [x] 🤖 1. `check-framework.mjs` writes `e2e-shots/framework.json` (per module pass/fail, date, commit) — Dev Kit on dev/conformance
-- [x] 🤖 2. `build-ppp.mjs` draws the Framework row (versions vs newest, last results, how long ago)
-- [x] 🤖 3. Prove it on copies of Goops + Glyphtender (games untouched), shots at phone + desktop
-- [ ] 🙋 4. Muzzy looks at the row on a planner
-Check: the row shows on both copies at 390 and 1440 wide, versions match the VERSION files.
-Ask Muzzy: —
+## Carried to sprint 09 — the Framework row (F66)
+Built here (tasks 1–3: framework.json from check:framework, the planner's Framework band, proven on copies), but **not approved**. Muzzy, 2026-10-19, on the 1440 shot: "honestly i don't know what i'm looking at when i look at it. It doesn't look like i can make any decisions based on what is present. it's technical and i just dont know that stuff". → Sprint 09 redoes the band in plain words.
 
 Notes:
 - F71 spike (2026-10-19, Claude Code 2.1.303): cases live in each skill's folder (`~/.claude/skills/<skill>/evals/<case>/` — prompt.md + case.yaml + setup.sh + graders/*.md); run `claude plugin eval ~/.claude/skills/<skill> --runs 1 --ablation none --scaffold --trust-plugin --allow-tools Write Edit --max-cost-usd 2`. Graders: regex (on a file or the last message), tool_used, tool_order, file_exists — free; llm costs. No "run a script" grader. **One case ≈ $0.17–0.27, 37–76 s.** The setup script runs under Git Bash fine. **But Bash/PowerShell inside a case is refused on plain Windows (needs a WSL2 Linux — the PC has WSL2 switched on but no Linux installed)** → git commit/push cases (/save, /develop, installs) can't run here yet. Each run is sealed: no CLAUDE.md, no hooks, no ~/.claude/config — so a skill must state the formats it writes itself. FIRST FINDING: /sprint wrote tasks "🤖 1 Spike" (no dot — it copied the chat view's example, since PROJECT-FILES.md isn't in the sandbox) → the sprint skill now spells the file's task line; the case went 0.75 → 1.00. Results folders stay out of the laptop sync (config-sync NOISE).
