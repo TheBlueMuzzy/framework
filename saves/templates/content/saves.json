@@ -1,0 +1,17 @@
+{
+  "_help": {
+    "backups": "How many older copies of each save are kept beside the current one (0-5). If the newest copy is ever broken (the browser closed mid-write, a bug), the game loads the newest good copy instead. Each copy takes the same space as the save.",
+    "nudge.afterProgress": "How much progress (the game decides what one point is: a finished game, a level, an unlock) before the game suggests \"Back up your save\" (copy the save code). 0 = never suggest it.",
+    "nudge.minDaysBetween": "At least this many days between two \"Back up your save\" suggestions, so it never nags.",
+    "nudge.onlyWhenAtRisk": "true = only suggest a backup when this browser might wipe saves (Safari's 7-day rule, a private window, the itch.io frame, blocked storage). false = suggest it to everyone.",
+    "storageAllowed": "Files of game code that may still use the browser's storage directly instead of the saves module, each with why — e.g. { \"file\": \"src/ui/online/session.ts\", \"why\": \"the room code for rejoining (rooms module, until F95)\" }. check:framework lists every other file that does."
+  },
+  "_ranges": {
+    "backups": [0, 5, 1],
+    "nudge.afterProgress": [0, 100, 1],
+    "nudge.minDaysBetween": [0, 60, 1]
+  },
+  "backups": 2,
+  "nudge": { "afterProgress": 10, "minDaysBetween": 7, "onlyWhenAtRisk": false },
+  "storageAllowed": []
+}
