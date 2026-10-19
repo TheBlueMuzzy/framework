@@ -1,19 +1,18 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 10 done: mistakes get caught even when nobody's watching. F70 GitHub checks + framework linter, F72 features end with STATE current, F75 done = review + full check on record, F79 one check run at a time, all approved** (`archive/sprints/sprint-10.md`).
-- Muzzy's aim (2026-10-19): **a bulletproof SOP, so every user and every game gets the same treatment.** Prefer code (hooks, checks, scripts) over written rules. The Oct 18 list audit (`~/.claude/config/bmuz/reviews/2026-10-18-reliability/AUDIT-2026-10-19.md`) gave F75–F79; F76/F77/F78 are left.
-- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.19.2 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver.
-- Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.19.0, so 0.19.2 comes with its next update), GitHub checks green, check-run lock. It ships at its own /deliver.
-- Left in v0.9: **F62 Goops** (now includes check:framework + GitHub checks; waits for the Goops session), F76 Settings-row check, F77 update notice at session start, F78 safety guards, F64/F65 starters (need F62).
-- **Sprint 11 planned: F76 Settings check · F77 update notice · F78 safety guards.** Tasks: `.planning/SPRINT.md`.
-- Next: `/develop` — three helpers in parallel (UI kit · session start · git/save guards).
+2026-10-19 — **Sprint 11 done: every game gets the same guard rails, automatically. F76 Settings-row check, F77 update notice at session start, F78 safety guards, all approved** (`archive/sprints/sprint-11.md`). Sprint 10 before it: F70 GitHub checks + framework linter, F72, F75, F79.
+- Muzzy's aim (2026-10-19): **a bulletproof SOP, so every user and every game gets the same treatment.** His rule: "'only runs when it remembers' is a bad thing. 'always runs because it triggers' is much more solid." → **F80 "Everything triggers" is next (sprint 12)**: every BMUZ skill gone through line by line, each step ① automatic · ② judgement but checked (like F75) · ③ judgement only (rare). Remembered-only → ① or ②, /save + /deliver first (every step inside their scripts; ending a session with unpushed work becomes a guard). Standing rule: a new "always do X" line names its kind; the look-back flags remembered-only lines. ROADMAP F80 has the full scope.
+- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver. Until then the session-start update notice compares against main (older), so it stays quiet.
+- Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.20.1), GitHub checks green, check-run lock, check:fast runs the framework code checks. It ships at its own /deliver.
+- Left in v0.9: **F80 Everything triggers** (next), **F62 Goops** (waits for the Goops session; includes check:framework, GitHub checks, its Settings `version` row placeholder), F64/F65 starters (need F62).
+- Next: `/sprint` — plan sprint 12 = F80 (the audit of every skill is the first, biggest task: give it to a helper).
 
-Reviewed through: framework 55b97d7 · Glyphtender 5a56e8f · ~/.claude as of 2026-10-19 11:00 (sprint 10 review: 2 findings, both fixed)
+Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 11:50 (sprint 11 review: 4 findings, all fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 11
-Doing: F76 + F77 + F78 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.19.2)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (11 done)
+Doing: — (plan sprint 12: F80)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
