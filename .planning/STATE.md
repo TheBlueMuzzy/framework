@@ -9,7 +9,7 @@
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
-Doing: Sprint 05 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (Dev Kit 0.16.1)
+Doing: Sprint 05 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
