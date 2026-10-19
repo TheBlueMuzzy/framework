@@ -65,10 +65,22 @@ Chromium. The Dev Kit's own checks:
 | the game's hotkeys skip text boxes | in live play a game key handler calls `preventDefault` on keys typed into a text box, or swallows its letters |
 Without `conformance.startPlay` the last four fail with the exact lines to add to the adapter.
 
+**Known gaps** (0.20.1) — a promise the game knowingly doesn't keep yet, planned on its roadmap. List it in
+`content/devkit.json`:
+```json
+"knownGaps": [{ "check": "◐ half pause stops the rules, not the looks", "why": "turns move on when animations finish", "roadmap": "F12" }]
+```
+`check` is the check's exact name from the report. A listed check that fails shows as `○ … — KNOWN GAP (roadmap F12): why`
+and the run still passes (exit 0); `e2e-shots/framework.json` keeps it in each module's `knownGaps: [{ name, why, roadmap }]`
+(not in `failed`), so the planner can say what's still to build. A listed check that passes now prints a reminder to take
+it off the list (`gapsToRemove`). A listed name that no check has fails as *every known gap names a real check* — a typo or
+a renamed check (judged on full runs only: `--static` / `--only` don't run every check).
+
 ## Install or update
 From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-run` to see what would change first).
 - `kit/` → the game's `src/devkit/` (browser code) and `vite/` → `vite-plugins/devkit/` (build code), each with a `VERSION` stamp. Tests stay here.
 - Makes `content/devkit.json` and `src/devkit-game/tabs.ts` once; never overwrites them.
+- Adds `"check:framework"` to the game's `package.json` scripts and `devkit.local.json` to its `.gitignore` (0.20.1) — only when missing, so a re-run changes nothing; a game's own different `check:framework` is left alone.
 - Prints the wiring the game still needs — for a new game:
   1. `src/main.tsx`: in dev `import('./devkit/mount').then((m) => m.mountDevKit())` at once; in release builds (`__DEVKIT_IN_RELEASE__`) the same import after the page's `load`, in `requestIdleCallback` — so the Dev Kit isn't part of the first screen's download (Glyphtender F66: 47 KB, 2.16 → 1.60 s to Play on a slow phone). Worked example: Glyphtender `src/main.tsx`.
   2. `vite.config.ts`: `import { devkit } from './vite-plugins/devkit/devkitVite'` and `plugins: [react(), devkit()]`
@@ -443,7 +455,7 @@ to search sets `searchable: false` (no box).
 - **Sound files are converted on the dev server with the system ffmpeg, not ffmpeg-static** (0.7.0): no 70 MB download in every game for a tool only the designer's machine uses; a missing ffmpeg says how to install it. The onset trim is the B026 rule (first sample ≥ 10 % of the peak, minus 4 ms, 3 ms fade-in), skipped for music + ambience.
 - **The Music section's intensity slider is live-only** (0.9.0): intensity is something the GAME sets moment to moment (the reveal raises it), so it isn't a value in content/audio.json — the slider is for hearing the layers fade. Rests run on their own in the engine; the "Now" line polls `musicState()` 4 times a second, and Rest now / Come back now (`restMusic` / `endMusicRest`) test them without waiting a minute.
 - **The Sound tab only sends a real edit** (0.9.1): it remembers what it last sent, so React running its effect again with nothing changed (StrictMode, the Dev Kit's hidden tabs reconnecting) no longer re-sends its copy of content/audio.json — that undid other live edits of the file (a Moments audio knob, an e2e's setConfig). Found in Glyphtender sprint 21.
-- **The Color and Fonts tabs share ONE copy of the style values** (0.17.0, `color/styleStore.ts`): both edit content/ui/style.json and all tabs stay mounted, so with a copy each, a font picked in Fonts was undone the next time Color restyled the page, and a Color Save wrote its stale font values back over the Fonts tab's. Now every change goes through the store (which calls the kit's applyStyle), and each tab saves only its own values — the rest of the file's tweaks stay exactly as saved.
+- **The Color and Fonts tabs share ONE copy of the style values** (0.17.0, `color/styleStore.ts`): both edit content/ui/style.json and all tabs stay mounted, so with a copy each, a font picked in Fonts was undone the next time Color restyled the page, and a Color Save wrote its stale font values back over the Fonts tab's. Now every change goes through the store (which calls the kit's applyStyle), and each tab saves only its own values — the rest of the file's tweaks stay exactly as saved. The store is built as `color/uiKit.ts` loads, so it must not touch the page until its first change (0.20.1): a game's own Node test that imports Dev Kit files has no `document` (Glyphtender's `select.test.ts` crashed "document is not defined" from 0.17.0 to 0.20.0) — `styleStore.node.test.ts` guards it.
 - **Fonts: library fonts are tried from the dev server, never copied until Add to game** (0.17.0, Muzzy: "I have a huge font library in my pc"): trying hundreds of fonts must not litter public/fonts/; but Save may only point at a font the game ships (a live build has no font library), so it waits for Add to game. Added fonts start 🔴 `unknown` — the Dev Kit can't read a licence; a person (or Claude) does and fixes fonts.json.
 - **Fonts: one value per role, the font's name + a plain fallback** (`'Press Start DX', system-ui, sans-serif`): readable in style.json, and the role's first font name is how the tab knows which font is in use. Title and heading left unset follow the style's own display font, so presets keep their look.
 

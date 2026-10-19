@@ -269,40 +269,105 @@ export function makeTester({ root, module, modules, shared, staticOnly, results 
   return t
 }
 
-const symbols = { ok: '✓', bad: '✗', skip: '–' }
+// KNOWN GAPS (0.20.1) — a promise the game knowingly doesn't keep yet, planned on its roadmap. Listed in
+// content/devkit.json (the Dev Kit's game file, beside liveGuardAllow):
+//   "knownGaps": [{ "check": "<the check's exact name>", "why": "<plain words>", "roadmap": "F12" }]
+// A listed check that fails shows as a known gap (its why + roadmap), not a failure — the run still passes.
+// A listed check that passes now → a reminder to take it off the list. A listed name no check has → a failure
+// (a typo or a renamed check would otherwise hide a real failure later).
+export const KNOWN_GAPS_FILE = 'content/devkit.json'
+export const KNOWN_GAPS_CHECK = 'every known gap names a real check'
+
+/** content/devkit.json "knownGaps" → { gaps: [{ check, why, roadmap }], problems: [lines] } */
+export function readKnownGaps(root) {
+  let file = null
+  try { file = JSON.parse(readFileSync(join(root, KNOWN_GAPS_FILE), 'utf8')) } catch { return { gaps: [], problems: [] } }
+  const list = file?.knownGaps
+  if (list === undefined) return { gaps: [], problems: [] }
+  if (!Array.isArray(list)) return { gaps: [], problems: [`${KNOWN_GAPS_FILE} "knownGaps" must be a list of { "check", "why", "roadmap" }.`] }
+  const problems = []
+  const gaps = list.filter((g, i) => {
+    if (g && typeof g.check === 'string' && g.check) return true
+    problems.push(`${KNOWN_GAPS_FILE} "knownGaps" entry ${i + 1} has no "check" name.`)
+    return false
+  }).map((g) => ({ check: g.check, why: g.why ?? '', roadmap: g.roadmap ?? '' }))
+  return { gaps, problems }
+}
+
+/**
+ * Marks the results: a failing listed check gets knownGap { why, roadmap }; a passing one gets gapNowPasses.
+ * complete = every check ran (not --only / --static), so a name no result has is really unknown → a failure in the Dev Kit's section.
+ */
+export function applyKnownGaps(sections, { gaps, problems }, { complete = true } = {}) {
+  if (!gaps.length && !problems.length) return
+  const all = sections.flatMap((s) => s.results)
+  const unknown = []
+  for (const gap of gaps) {
+    const matches = all.filter((r) => r.name === gap.check)
+    if (!matches.length) unknown.push(gap.check)
+    for (const r of matches) {
+      if (r.ok) r.gapNowPasses = true
+      else if (!r.skipped) r.knownGap = { why: gap.why, roadmap: gap.roadmap }
+    }
+  }
+  const home = sections.find((s) => s.rel === 'src/devkit') ?? sections[0]
+  if (!home) return
+  const bad = [...problems, ...(complete ? unknown.map((name) => `"${name}" — no check has this name (a typo, or the check was renamed).`) : [])]
+  if (bad.length) home.results.push({ name: KNOWN_GAPS_CHECK, ok: false, problems: bad, fix: `Fix the name in ${KNOWN_GAPS_FILE} "knownGaps" to the exact check name in this report, or remove the entry.` })
+  else if (complete) home.results.push({ name: KNOWN_GAPS_CHECK, ok: true, detail: `${gaps.length} listed in ${KNOWN_GAPS_FILE}` })
+}
+
+const symbols = { ok: '✓', bad: '✗', skip: '–', gap: '○' }
+const isFailure = (r) => !r.ok && !r.skipped && !r.knownGap
+const gapLabel = (g) => (g.roadmap ? ` (roadmap ${g.roadmap})` : '')
 
 /** The report as plain text lines. */
 export function formatReport(gameName, sections) {
   const lines = []
   const all = sections.flatMap((s) => s.results)
-  const failed = all.filter((r) => !r.ok && !r.skipped)
+  const failed = all.filter(isFailure)
+  const known = all.filter((r) => r.knownGap)
+  const nowPass = all.filter((r) => r.gapNowPasses)
   lines.push(`Framework check — ${gameName}: ${sections.map((s) => `${s.title} ${s.version}`).join(' · ') || 'no framework modules found'}`)
   for (const s of sections) {
     lines.push('', `${s.title} ${s.version} (${s.rel}/)`)
     for (const r of s.results) {
+      if (r.knownGap) {
+        lines.push(`  ${symbols.gap} ${r.name} — KNOWN GAP${gapLabel(r.knownGap)}: ${r.knownGap.why}`)
+        for (const p of r.problems ?? []) lines.push(`      ${p.replace(/\n/g, '\n      ')}`)
+        continue
+      }
       lines.push(`  ${r.skipped ? symbols.skip : r.ok ? symbols.ok : symbols.bad} ${r.name}${r.detail ? ` — ${r.detail}` : ''}`)
-      if (!r.ok && !r.skipped) {
+      if (r.gapNowPasses) lines.push(`      ! it passes now — take it off "knownGaps" in ${KNOWN_GAPS_FILE}`)
+      if (isFailure(r)) {
         for (const p of r.problems ?? []) lines.push(`      ${p.replace(/\n/g, '\n      ')}`)
         if (r.fix) lines.push(`      FIX: ${r.fix.replace(/\n/g, '\n      ')}`)
       }
     }
   }
   const skipped = all.filter((r) => r.skipped).length
+  const kept = all.filter((r) => r.ok).length
   lines.push('', failed.length
     ? `FAIL — ${failed.length} promise${failed.length === 1 ? '' : 's'} not kept: ${failed.map((r) => r.name).join(' · ')}`
-    : `PASS — ${all.length - skipped} check${all.length - skipped === 1 ? '' : 's'} kept${skipped ? `, ${skipped} skipped` : ''}`)
+    : `PASS — ${kept} check${kept === 1 ? '' : 's'} kept${known.length ? `, ${known.length} known gap${known.length === 1 ? '' : 's'} (${known.map((r) => r.name + gapLabel(r.knownGap)).join(' · ')})` : ''}${skipped ? `, ${skipped} skipped` : ''}`)
+  if (nowPass.length) lines.push(`! ${nowPass.length} known gap${nowPass.length === 1 ? '' : 's'} pass${nowPass.length === 1 ? 'es' : ''} now — take ${nowPass.length === 1 ? 'it' : 'them'} off "knownGaps" in ${KNOWN_GAPS_FILE}: ${nowPass.map((r) => r.name).join(' · ')}`)
   return { text: lines.join('\n'), failed: failed.length }
 }
 
-/** One run in a few numbers, for the planner's Framework row (F66): per module passed / failed / skipped. */
+/**
+ * One run in a few numbers, for the planner's Framework row (F66): per module passed / failed / skipped, plus
+ * knownGaps (failing, but listed: [{ name, why, roadmap }]) and gapsToRemove (listed, but passing now: [names]).
+ */
 export function healthSummary(sections, { date = new Date().toISOString(), commit = '', only = null } = {}) {
   return {
     date, commit, only,
     modules: sections.map((s) => ({
       id: s.rel.split('/')[1] ?? s.title, title: s.title, version: s.version,
       passed: s.results.filter((r) => r.ok).length,
-      failed: s.results.filter((r) => !r.ok && !r.skipped).map((r) => r.name),
+      failed: s.results.filter(isFailure).map((r) => r.name),
       skipped: s.results.filter((r) => r.skipped).length,
+      knownGaps: s.results.filter((r) => r.knownGap).map((r) => ({ name: r.name, ...r.knownGap })),
+      gapsToRemove: s.results.filter((r) => r.gapNowPasses).map((r) => r.name),
     })),
   }
 }
@@ -348,6 +413,7 @@ async function main() {
   } finally {
     await shared.close()
   }
+  applyKnownGaps(sections, readKnownGaps(root), { complete: !only && !staticOnly }) // --static / --only don't run every check
   const { text, failed } = formatReport(gameName, sections)
   console.log('\n' + text)
   let commit = ''

@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DEFAULT_PORT, adapterFile, findModules, formatReport, gameCode, healthSummary, linesMatching, makeTester, readArgs, saveHealth, serverUrl } from './check-framework.mjs'
+import { DEFAULT_PORT, KNOWN_GAPS_CHECK, adapterFile, applyKnownGaps, readKnownGaps, findModules, formatReport, gameCode, healthSummary, linesMatching, makeTester, readArgs, saveHealth, serverUrl } from './check-framework.mjs'
 import { firstDiff, nudged, unreadTuning } from './conformance.mjs'
 
 let game
@@ -122,8 +122,8 @@ describe('health file for the planner (F66)', () => {
   it('sums each module up: passed, the failed names, skipped', () => {
     const s = healthSummary(sections, { date: '2026-10-19T00:00:00.000Z', commit: 'abc1234' })
     expect(s.modules).toEqual([
-      { id: 'devkit', title: 'Dev Kit', version: '0.19.1', passed: 1, failed: ['b'], skipped: 1 },
-      { id: 'ui', title: 'UI kit', version: '0.19.0', passed: 1, failed: [], skipped: 0 },
+      { id: 'devkit', title: 'Dev Kit', version: '0.19.1', passed: 1, failed: ['b'], skipped: 1, knownGaps: [], gapsToRemove: [] },
+      { id: 'ui', title: 'UI kit', version: '0.19.0', passed: 1, failed: [], skipped: 0, knownGaps: [], gapsToRemove: [] },
     ])
     expect(s.commit).toBe('abc1234')
   })
@@ -133,5 +133,61 @@ describe('health file for the planner (F66)', () => {
     const saved = JSON.parse(readFileSync(join(game, 'e2e-shots', 'framework.json'), 'utf8'))
     expect(saved.full.commit).toBe('full1')
     expect(saved.static.commit).toBe('quick')
+  })
+})
+
+describe('known gaps (0.20.1)', () => {
+  const HALF = '◐ half pause stops the rules, not the looks'
+  const run = () => [
+    { title: 'Dev Kit', version: '0.20.1', rel: 'src/devkit', results: [
+      { name: 'a', ok: true },
+      { name: HALF, ok: false, problems: ['the rules clock moved 1000 ms'], fix: 'Tick by rulesClock.rate' },
+    ] },
+    { title: 'UI kit', version: '0.19.0', rel: 'src/ui/kit', results: [{ name: 'no inline styles', ok: true }] },
+  ]
+  const listed = (entries) => { write('content/devkit.json', JSON.stringify({ inReleaseBuilds: true, knownGaps: entries })); return readKnownGaps(game) }
+
+  it('a listed failing check is a known gap (why + roadmap), not a failure: the run passes and framework.json keeps it apart', () => {
+    const sections = run()
+    applyKnownGaps(sections, listed([{ check: HALF, why: 'turns move on when animations finish', roadmap: 'F99' }]))
+    const { text, failed } = formatReport('g', sections)
+    expect(failed).toBe(0)
+    expect(text).toContain(`○ ${HALF} — KNOWN GAP (roadmap F99): turns move on when animations finish`)
+    expect(text).toContain(`✓ ${KNOWN_GAPS_CHECK}`)
+    expect(text).toMatch(/PASS — 3 checks kept, 1 known gap \(◐ half pause stops the rules, not the looks \(roadmap F99\)\)$/)
+    const dk = healthSummary(sections).modules[0]
+    expect(dk.failed).toEqual([])
+    expect(dk.knownGaps).toEqual([{ name: HALF, why: 'turns move on when animations finish', roadmap: 'F99' }])
+  })
+
+  it('a listed check that passes now → a reminder to take it off the list (not a failure)', () => {
+    const sections = run()
+    applyKnownGaps(sections, listed([{ check: 'no inline styles', why: 'x', roadmap: 'F1' }]))
+    const { text, failed } = formatReport('g', sections)
+    expect(failed).toBe(1) // the half pause one isn't listed: still a real failure
+    expect(text).toContain('! it passes now — take it off "knownGaps" in content/devkit.json')
+    expect(text).toMatch(/! 1 known gap passes now — take it off "knownGaps" in content\/devkit\.json: no inline styles$/)
+    expect(healthSummary(sections).modules[1].gapsToRemove).toEqual(['no inline styles'])
+  })
+
+  it('a listed name no check has is a failure (typo / renamed check) — only judged when every check ran', () => {
+    const sections = run()
+    applyKnownGaps(sections, listed([{ check: HALF, why: 'w', roadmap: 'TBD' }, { check: '◐ half pause stop the rules', why: 'typo' }]))
+    const { text, failed } = formatReport('g', sections)
+    expect(failed).toBe(1)
+    expect(text).toContain(`✗ ${KNOWN_GAPS_CHECK}\n      "◐ half pause stop the rules" — no check has this name`)
+    const partial = run()
+    applyKnownGaps(partial, listed([{ check: 'a browser check' }]), { complete: false }) // --static / --only
+    expect(formatReport('g', partial).failed).toBe(1) // just the unlisted half pause one
+    expect(partial[0].results.some((r) => r.name === KNOWN_GAPS_CHECK)).toBe(false)
+  })
+
+  it('no file / no list → nothing changes; a broken list is a failure', () => {
+    expect(readKnownGaps(game)).toEqual({ gaps: [], problems: [] })
+    const sections = run()
+    applyKnownGaps(sections, readKnownGaps(game))
+    expect(sections[0].results).toHaveLength(2)
+    write('content/devkit.json', JSON.stringify({ knownGaps: { check: HALF } }))
+    expect(readKnownGaps(game).problems[0]).toMatch(/must be a list/)
   })
 })
