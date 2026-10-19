@@ -192,7 +192,7 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - 🟢 F83 🔧 Stage-release checks (alpha / beta / 1.0): release.mjs refuses a stage release without `.planning/archive/release-checks/<stage>.md` naming the devices tried, a first-time player who played without help, store-page screenshots newer than the last stage, TDD §7 compliance for the platform (privacy, age rating), no stand-in art left (beta+), and at 1.0 the name/trademark check + press kit — should · needs: F80 · gap ranks 7, 13, 16
 - 🟢 F84 🔧 Patch notes players can read: release.mjs writes the bullets to CHANGELOG.md + `.planning/archive/releases/vX.Y.Z.md` (ready to paste into itch) and refuses without them — should · needs: F80 · gap rank 9
 - 🟢 F85 🔧 Dependency + licence audit: /checkup runs `npm audit`, `npm outdated` and a licence summary per game (monthly), names high-risk packages and GPL code in a shipping game in plain words — should · gap rank 8
-- 🟢 F86 🧱 Old saves keep working: a check:fast test template that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress — should · gap rank 10
+- 🟢 F86 🧱 Saves module (Muzzy 2026-10-19: "saves would be the module, versioning is a feature of that module"): a framework module games copy in for saving/loading; every save carries a version stamp and each release adds a small upgrade step for older saves; ships a check:fast test that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress. Its own sprint. (No game versions its saves today: Goops, Glyphtender, Roll Better use localStorage unversioned) — should · gap rank 10
 - ✅ F87 🔧 QA routine: plan-lint requires a `Check:` line under every sprint feature and a `Checked:` note before `Fnn: done`; an open P1 older than the sprint start that isn't a sprint task is flagged; /play's watch mode writes a playtest log (`.planning/research/playtests/<date>.md`) a stage release asks for — should · QA lead rows · sprint 13
 - 🔨 F88 🔧 Quality bars in check:framework: text contrast, a reduce-motion setting, a volume setting when the audio module is in, nothing touching a card's edge, cards that don't grow mid-sequence (CLAUDE.md's "breathing room" rule, now checked) — should · gap rank 12 + art/audio rows · sprint 14
 - 💤 F89 🧱 Crash reports from players: a framework piece (window.onerror → a small Cloudflare worker that counts errors; opt-in play counts later, tied to the privacy policy); session start says "3 new errors from players since last time" — could · gap rank 6 (large)
@@ -206,7 +206,7 @@ flowchart LR
   F80 --> F84[F84 Patch notes]
   F81[F81 Producer's eye]
   F85[F85 Dependency audit]
-  F86[F86 Old saves]
+  F86[F86 Saves module]
   F87[F87 QA routine]
   F88[F88 Quality bars]
   F89[F89 Crash reports]

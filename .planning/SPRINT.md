@@ -14,5 +14,5 @@ Check: a test screen with faint text, a badge touching the edge and a card that 
 Ask Muzzy: —
 
 Notes:
-- Muzzy 2026-10-19 (sprint 14 plan): /develop = yes to F88 alone. Open from the plan (not blocking): F86 reshaped into a "versioned saves" 🧱 module for its own sprint (no game versions its saves today) · ship the framework with /deliver right after this sprint (dev/conformance is 40 commits ahead).
+- Muzzy 2026-10-19 (sprint 14 plan): /develop = yes to F88 alone. F86 → a Saves module, versioning one of its features, its own sprint ("saves would be the module, versioning is a feature of that module") — ROADMAP updated. **After this sprint: /deliver the framework** — merge dev/conformance (40+ commits) into main (Muzzy: "yes. deliver/merge it!").
 - Found while planning: plan-lint's ready rule went quiet when a roadmap line had any note after `needs:` ("· gap rank 1") → F82–F84 were never flagged. Fixed in ~/.claude plan-lint (+2 tests); Goops F33/F49/F53 noted in Ideas for its session.
