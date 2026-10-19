@@ -26,7 +26,10 @@ Done when: no commit can include a secret or Playwright leftovers, Claude is ask
 - [ ] 🤖 3. save.mjs: a game's .gitignore gets `.claude/worktrees/` and `.planning/ppp.html` if missing, committed with the save — scripts/save.mjs
 - [ ] 🤖 4. Stop hook: delete `.playwright-mcp/` in the project folder at the end of a turn — hooks/
 - [ ] 🤖 5. Tests for 1–4 + HOOKS.md rows — hooks/test-hooks.mjs, scripts/test-scripts.mjs, HOOKS.md
+- [ ] 🤖 6. save.mjs runs cleanup.sh itself (not "remembered" from the skill text) and prints its line — scripts/save.mjs
+- [ ] 🤖 7. One scratch place for Claude's throwaway copies + proof shots (`~/Documents/dev/.scratch/<project>-<what>/`); cleanup.sh empties entries untouched for a day; the develop skill + helper briefs point there — cleanup.sh, ~/.claude/skills/develop/SKILL.md
 Check: test-hooks + test-scripts green, each guard proven to block / ask / fix.
 Ask Muzzy: —
 
 Notes:
+- Muzzy 2026-10-19: "is there a hook for bmuz to clean up the screenshot files it makes?" Answer: cleanup.sh existed (Oct 4) but ran only when the /save and /deliver text was remembered; nothing covered Claude's own copies outside projects (~/spike 800 MB + ~/ppp-proof 240 MB). With his OK: both deleted (the half-pause experiment kept as glyphtender/.planning/research/f89-half-pause-spike.patch, 6b0f495) → F78 tasks 6–7.
