@@ -1,15 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 08 started: F71 skill tests (`claude plugin eval`) then F66 the planner's Framework row.** Tasks: `.planning/SPRINT.md`. (Sprint 07 done: F69 scripts approved — `archive/sprints/sprint-07.md`.)
-- Muzzy's call on skill-test cost: A — run only after skill edits / a model update, when he says yes in /checkup.
-- dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the first look-back; merges at /deliver. Laptop needs `/sync` (scripts + hooks).
-- F66 Framework row built + proven (🙋 Muzzy to look: `C:\Users\Muzzy\ppp-proof\goops-390.png`). F71 built: skill tests 6/6 green ($1.39 a full run); a broken copy of /deliver goes red as it should. Recipe + lessons: `~/.claude/config/bmuz/evals/README.md`. Waiting on Muzzy's OK for F71 + his look at F66.
-- Next: Muzzy approves F71 + F66 → sprint 08 done → `/sync` (skill-test changes live in ~/.claude) → laptop gets WSL Ubuntu when it needs to run tests.
+2026-10-19 — **Sprint 09 planned: F63 Glyphtender passes the framework's checks + F66 the planner's Framework row redone in plain words.** Tasks: `.planning/SPRINT.md`. (Sprint 08 done: F71 skill tests approved, 6/6 green — `archive/sprints/sprint-08.md`; F66 carried over: Muzzy found it too technical to act on.)
+- Muzzy 2026-10-19: Glyphtender first, ONE game this sprint — Goops (F62) waits for the other session's F59/F60 on `dev/m1-core-shift`.
+- Glyphtender work on its own branch `dev/framework-checks` (live site untouched until its /deliver).
+- dev/conformance (pushed) holds F61 + UI kit 0.19.0 + Dev Kit 0.20.0 + the first look-back; merges at /deliver. Skill-test changes synced (7e6a167); laptop to-do #6 = WSL Ubuntu, only when needed.
+- Next: `/develop` — F63 task 1, the spike (UI kit 0.10.4 → 0.19.0, Dev Kit 0.16.1 → 0.20.0 on a throwaway copy).
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 08
-Doing: F71 — building   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 09
+Doing: F63 — next up (spike)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
