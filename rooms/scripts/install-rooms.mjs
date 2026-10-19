@@ -16,6 +16,15 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpat
 import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+// npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
+// (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
+export function checkFrameworkStep(gameDir) {
+  let scripts = {}
+  try { scripts = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).scripts ?? {} } catch { /* no package.json */ }
+  if (scripts['check:framework']) return null
+  return 'package.json "scripts": "check:framework": "node src/devkit/check-framework.mjs"   (comes with the Dev Kit: runs every installed module\'s promise checks, this one\'s too, and says what to wire where)'
+}
+
 const roomsDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/rooms'
 export const PARTY_PORT = 1999
@@ -213,6 +222,7 @@ export function installRooms(gameDir, { dryRun = false, log = console.log } = {}
 
   log('\nDone. Next steps:')
   printSteps(gameDir, log)
+  { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
   return result
 }
 

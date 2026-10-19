@@ -208,7 +208,7 @@ export class FakeAudioContext {
     return this.nodes.filter((n): n is FakeMediaSource => n instanceof FakeMediaSource)
   }
   createBuffer(_channels: number, length: number, rate: number) { return { duration: length / rate } }
-  decodeAudioData(_data: ArrayBuffer) {
+  decodeAudioData() {
     this.decoded++
     return Promise.resolve({ duration: 1 })
   }

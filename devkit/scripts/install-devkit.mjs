@@ -7,7 +7,9 @@
 //      Not the tests: they run here, in the framework. Each gets a VERSION file (kit version + framework commit).
 //      Files the kit no longer ships are removed — only ever inside those two folders.
 //   2. creates src/devkit-game/tabs.ts (the game's own tabs) and content/devkit.json — only if missing, never overwrites
-//   3. prints the wiring the game still needs (main.tsx, vite.config, package.json) — only the missing bits
+//   3. adds the two wiring lines that are pure bookkeeping (0.20.1): "check:framework" in package.json's scripts and
+//      devkit.local.json in .gitignore — only when missing, so re-running changes nothing
+//   4. prints the wiring the game still needs (main.tsx, vite.config, package.json) — only the missing bits
 // On an update it first lists which kit files changed, were added or were removed.
 import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
@@ -32,6 +34,7 @@ export const RELEASE_SWITCH = {
 }
 
 const CHECK_SCRIPT = 'node src/devkit/check-devkit.mjs'
+export const FRAMEWORK_CHECK_SCRIPT = 'node src/devkit/check-framework.mjs'
 
 const isTest = (path) => /\.test\./.test(path)
 const readText = (path) => readFileSync(path, 'utf8')
@@ -103,6 +106,10 @@ export function wiringSteps(gameDir) {
       step: `package.json "scripts": "check:devkit": "${CHECK_SCRIPT}"   (/deliver runs it: builds both ways and checks each)`,
     },
     {
+      done: pkg.scripts?.['check:framework'] === FRAMEWORK_CHECK_SCRIPT,
+      step: `package.json "scripts": "check:framework": "${FRAMEWORK_CHECK_SCRIPT}"   (every installed module's promise checks — what the game must wire, and where; /deliver runs it)`,
+    },
+    {
       done: /^\/?devkit\.local\.json\s*$/m.test(text('.gitignore')),
       step: '.gitignore: add the line  devkit.local.json   (each computer\'s own Dev Kit settings, e.g. where its font library is — never synced)',
     },
@@ -111,6 +118,36 @@ export function wiringSteps(gameDir) {
       step: 'The release check needs Playwright: npm install -D playwright   then   npx playwright install chromium',
     },
   ]
+}
+
+// The two bits of wiring the installer does itself (0.20.1) — each only when missing, so a re-run changes nothing.
+// A game's own different "check:framework" is left alone (the wiring step still points it out).
+export function addBookkeeping(gameDir, { dryRun = false, log = console.log } = {}) {
+  const added = []
+  const pkgPath = join(gameDir, 'package.json')
+  if (existsSync(pkgPath)) {
+    const text = readText(pkgPath)
+    let pkg = null
+    try { pkg = JSON.parse(text) } catch { log('  ! package.json could not be read — add the check:framework script by hand') }
+    if (pkg && pkg.scripts?.['check:framework'] === undefined) {
+      pkg.scripts = { ...pkg.scripts, 'check:framework': FRAMEWORK_CHECK_SCRIPT }
+      const indent = text.match(/^[ \t]+(?=")/m)?.[0] ?? '  '
+      const eol = text.includes('\r\n') ? '\r\n' : '\n'
+      if (!dryRun) writeText(pkgPath, JSON.stringify(pkg, null, indent).replaceAll('\n', eol) + eol)
+      added.push('package.json "check:framework" script')
+    }
+  }
+  const ignorePath = join(gameDir, '.gitignore')
+  const ignore = existsSync(ignorePath) ? readText(ignorePath) : ''
+  if (!/^\/?devkit\.local\.json\s*$/m.test(ignore)) {
+    const eol = ignore.includes('\r\n') ? '\r\n' : '\n'
+    const end = ignore && !ignore.endsWith('\n') ? eol : ''
+    const block = `${ignore ? eol : ''}# each computer's own Dev Kit settings (Dev Kit 0.17+)${eol}devkit.local.json${eol}`
+    if (!dryRun) writeText(ignorePath, ignore + end + block)
+    added.push('.gitignore line devkit.local.json')
+  }
+  for (const a of added) log(`  ${dryRun ? 'would add' : 'add     '} ${a}`)
+  return added
 }
 
 export function installDevkit(gameDir, { dryRun = false, log = console.log } = {}) {
@@ -169,7 +206,8 @@ export function installDevkit(gameDir, { dryRun = false, log = console.log } = {
     log(`  ! Old hand-made Dev Kit files — the kit replaces them; delete them:\n${oldFiles.map((f) => `      ${f}`).join('\n')}`)
   }
 
-  const result = { plans, isUpdate, makeTabs, makeSwitch, oldFiles }
+  const bookkeeping = addBookkeeping(gameDir, { dryRun: true, log })
+  const result = { plans, isUpdate, makeTabs, makeSwitch, oldFiles, bookkeeping }
   if (dryRun) { log('\nDry run: nothing was changed.'); return result }
 
   // Copy
@@ -180,6 +218,7 @@ export function installDevkit(gameDir, { dryRun = false, log = console.log } = {
   }
   if (makeTabs) copyFile(join(devkitDir, 'devkit-game', 'tabs.ts'), tabsPath)
   if (makeSwitch) writeText(switchPath, JSON.stringify(RELEASE_SWITCH, null, 2) + '\n')
+  addBookkeeping(gameDir, { log: () => {} }) // listed above as "would add"
 
   // Next steps, in plain English — only what the game doesn't have yet
   const todo = wiringSteps(gameDir).filter((w) => !w.done)
@@ -187,7 +226,7 @@ export function installDevkit(gameDir, { dryRun = false, log = console.log } = {
   let n = 1
   if (oldFiles.length) log(`  ${n++}. Delete the old hand-made Dev Kit files listed above.`)
   for (const w of todo) log(`  ${n++}. ${w.step}`)
-  log(`  ${n}. Run the game's tests and build, press \` in npm run dev, then npm run check:devkit.`)
+  log(`  ${n}. Run the game's tests and build, press \` in npm run dev, then npm run check:devkit and npm run check:framework.`)
   log('  To add a game tool: make it in src/devkit-game/ and list it in src/devkit-game/tabs.ts.')
   return result
 }

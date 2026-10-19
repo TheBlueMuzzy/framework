@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "install-audio": "node scripts/install-audio.mjs"
   },

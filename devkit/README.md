@@ -5,7 +5,7 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 ## What a game gets
 | Tool | Does |
 |---|---|
-| Panel | ` / Esc / ✕ / triple-tap; ignores ` while the player types; floats above the game's popovers; stays open-able in release builds until 1.0. More tabs than fit (a phone) → ◀ ▶ + page dots, never a sideways scroll bar |
+| Panel | ` / Esc / ✕ / triple-tap; ignores ` while the player types; floats above the game's popovers; stays open-able in release builds until 1.0. More tabs than fit (a phone) → ◀ ▶ + page dots, never a sideways scroll bar; on a desktop every tab is always in view (a second row when needed, 0.20.2) |
 | Pause | **Dev Kit 0.18.0.** Two buttons left of the DEV KIT title (dev and release builds): **⏸ Full pause** — everything freezes exactly as it is: the page's animation frames are held (and released on resume), CSS / Web animations, `<audio>` / `<video>` and AudioContexts pause, both of the game's clocks stop (`gameClock.ts`), then the adapter's optional `pause('full')`. The panel itself keeps working. A live edit (Tuning, Moments…) while frozen redraws ONE frame with no time passing, so you see it on the frozen picture. **◐ Half pause** — only the **rules clock** stops; the **looks clock** (pulses, glows, idle motion) keeps going. Shows only when the game reads `rulesClock` or its adapter lists `pauseModes: ['full', 'half']`. Pressing the lit button resumes, the other switches; a **PAUSED / HALF-PAUSED** badge on the title; closing the panel does NOT resume — a small **⏸ PAUSED** badge stays on screen (tap = resume), by default in the middle of the left edge — clear of the HUD rows games put at the top and bottom (0.18.1; it used to sit top-centre over Goops's "CRACKS 0/10"); `content/devkit.json` `"pauseBadgeSpot"` moves it (`left` · `right` · `top` · `bottom` · `top-left` · `top-right` · `bottom-left` · `bottom-right`), always inside the phone's safe area; **P** in the panel cycles off → full → half → off (a letter in a text box). Online games: both greyed out with the reason (`canPause()`, else `canRestore()`) |
 | Search | **Dev Kit 0.8.0: searches only the open tab** ("Search Tuning…", "Search Screens…"). Type and that tab filters live — case-insensitive, matching ANYWHERE in a word ("ade" finds spotlightFade), in the key (camelCase split: "trail fade" finds trailFade), its readable label, its help line, its section title and its file name; several words = all must match. Highlighted, with a count ("3 settings found") or "Nothing in Tuning matches…". Color, Tuning and AI filter their settings; Snapshots by name / summary / version; Bugs its 📍 marks; Screens by screen name, group, note, variant and moments. Tap a section title to clear the search and jump there. Picking another tab clears it. ✕ or Esc clears (the next Esc closes). 16 px text, so a phone doesn't zoom in |
 | Sections | Settings sit in titled sections that open and close ("Trails · 6"), remembered per game in this browser; chips at the top of a tab jump to one; Expand all / Collapse all; a dot on a closed section that holds an unsaved change. Sections and readable names come from the game's files (*Naming settings*, below) |
@@ -23,16 +23,70 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note **and how it was written** (`vite/formatJson.ts`: what was on one line stays on one line, `1.0` stays `1.0`; new parts: short objects / lists of plain values on one line if they fit 120 characters) — so saving a hand-written file unchanged leaves `git diff` empty; no page reload for its own writes |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
 | Release check | `npm run check:devkit` builds the game both ways and checks each in a browser (/deliver runs it) |
+| Framework check | **0.19.0.** `npm run check:framework` runs every installed module's promise checks on the real game and says what to wire where (*What a game must provide*, below) |
+
+## What a game must provide
+The Dev Kit's job is to change the RUNNING game live (MODULE-CONTRACTS.md, `~/.claude/config/bmuz/`). A game is wired
+for it when:
+1. **Tuning is read where it's used** — every `content/tuning/*.json` import is live by default (the Vite plugin), so
+   the game only has to never copy a value once at load (`const speed = tank.cameraSpeed` at the top of a file, a
+   named import, `?raw`). A file that copies on purpose: `content/devkit.json` `"liveGuardAllow": { "src/x.ts": "why" }`.
+2. **Two clocks** (`src/devkit/gameClock.ts`): the engine ticks by `dt × rulesClock.rate`, game-logic timers are
+   `rulesClock.after / every`, presentation time is `looksClock` — never `setTimeout` / `setInterval` /
+   `performance.now()` for anything that changes the game.
+3. **An adapter** registered in `src/devkit-game/tabs.ts` (*Plug the game in*, below), with the optional
+   `conformance` section so the checks can reach live play:
+   ```ts
+   conformance: {
+     startPlay: async () => { /* from the page as it loads to live play: click Start, wait until play runs */ },
+     query: '?seed=7',      // optional: a fixed, replayable game
+   },
+   ```
+4. **Pause works**: ⏸ full pause freezes screen, clocks and state; ◐ half pause stops the rules and the state while the
+   looks run (comes free with 2).
+5. **Seeded randomness** (`?seed=`) so snapshots and captures replay; **Screens previews** for gated screens;
+   **hotkeys skip text boxes**; `data-knobs` on tunable things when the game uses Select.
+
+**How it's checked — `npm run check:framework`** (0.19.0, `kit/check-framework.mjs` → the game's `src/devkit/`). It
+finds every framework module the game has installed (its `src/…/VERSION` file), runs that module's own checks
+(`conformance.mjs`, shipped inside each kit) and prints one report; every failure says what to wire and in which file.
+`--static` = only the code checks · `--only devkit,ui` · `--port` (default 5197). Needs `playwright-core` + its
+Chromium. The Dev Kit's own checks:
+| Check | Fails when |
+|---|---|
+| a game adapter is registered | `tabs.ts` doesn't call `registerDevKitGame` |
+| every tuning file is read by the game | a `content/tuning/*.json` no code imports (its sliders change nothing) |
+| no tuning value is copied at load | `liveGuard.ts` (`copiedAtLoad`) finds a copy — file:line + the fix |
+| the Dev Kit starts and the game is plugged in | `window.__devkit` (`checkHandle.ts`, set by mount) or the adapter is missing |
+| every tuning file is live in the running game | an edit (the Tuning tab's own `devkit:tuning` event) doesn't reach the game's import — the Vite plugin isn't in |
+| ⏸ full pause stops everything | in live play, 0.7 s of full pause moves a clock, the adapter's state or a pixel — names the plain timers in game code |
+| ◐ half pause stops the rules, not the looks | in 1 s of half pause the rules clock or the state moves, or the looks clock doesn't |
+| a snapshot restores exactly | `setState(getState())` after 0.7 s of play gives a different moment (the first differing path) |
+| the game's hotkeys skip text boxes | in live play a game key handler calls `preventDefault` on keys typed into a text box, or swallows its letters |
+Without `conformance.startPlay` the last four fail with the exact lines to add to the adapter.
+
+**Known gaps** (0.20.1) — a promise the game knowingly doesn't keep yet, planned on its roadmap. List it in
+`content/devkit.json`:
+```json
+"knownGaps": [{ "check": "◐ half pause stops the rules, not the looks", "why": "turns move on when animations finish", "roadmap": "F12" }]
+```
+`check` is the check's exact name from the report. A listed check that fails shows as `○ … — KNOWN GAP (roadmap F12): why`
+and the run still passes (exit 0); `e2e-shots/framework.json` keeps it in each module's `knownGaps: [{ name, why, roadmap }]`
+(not in `failed`), so the planner can say what's still to build. A listed check that passes now prints a reminder to take
+it off the list (`gapsToRemove`). A listed name that no check has fails as *every known gap names a real check* — a typo or
+a renamed check (judged on full runs only: `--static` / `--only` don't run every check).
 
 ## Install or update
 From this folder: `node scripts/install-devkit.mjs <game-folder>` (add `--dry-run` to see what would change first).
 - `kit/` → the game's `src/devkit/` (browser code) and `vite/` → `vite-plugins/devkit/` (build code), each with a `VERSION` stamp. Tests stay here.
 - Makes `content/devkit.json` and `src/devkit-game/tabs.ts` once; never overwrites them.
+- Adds `"check:framework"` to the game's `package.json` scripts and `devkit.local.json` to its `.gitignore` (0.20.1) — only when missing, so a re-run changes nothing; a game's own different `check:framework` is left alone.
 - Prints the wiring the game still needs — for a new game:
   1. `src/main.tsx`: in dev `import('./devkit/mount').then((m) => m.mountDevKit())` at once; in release builds (`__DEVKIT_IN_RELEASE__`) the same import after the page's `load`, in `requestIdleCallback` — so the Dev Kit isn't part of the first screen's download (Glyphtender F66: 47 KB, 2.16 → 1.60 s to Play on a slow phone). Worked example: Glyphtender `src/main.tsx`.
   2. `vite.config.ts`: `import { devkit } from './vite-plugins/devkit/devkitVite'` and `plugins: [react(), devkit()]`
   3. `tsconfig.node.json`: `"vite-plugins"` in `"include"`
   4. `package.json`: `"check:devkit": "node src/devkit/check-devkit.mjs"` (needs Playwright: `npm install -D playwright`)
+     and `"check:framework": "node src/devkit/check-framework.mjs"` (0.19.0 — every module's promise checks)
   5. **The live guard** (0.18.0) in the game's own tests — fails when code copies a tuning value at load, where the
      sliders can't reach it (Goops `tests/devkit-live.test.ts` is the template):
      ```ts
@@ -70,6 +124,7 @@ export const myGameAdapter: DevKitGame = {
   pauseModes: ['full', 'half'],               // optional (0.18.0): ◐ Half pause shows (it also does if the game reads rulesClock)
   pause: (mode) => physics.setPaused(mode),   // optional: machinery the clocks don't reach (a physics engine, an AI worker)
   canPause: () => !isOnline,                  // optional: left out = canRestore()
+  conformance: { startPlay: async () => { /* menu → live play */ }, query: '?seed=7' }, // optional (0.19.0): npm run check:framework
 }
 
 // src/devkit-game/tabs.ts
@@ -190,7 +245,7 @@ The tab also calls `audio.setConfig` itself. Its Panel takes the Dev Kit's searc
 Adding files needs ffmpeg on the computer (Windows: `winget install Gyan.FFmpeg`, Mac: `brew install ffmpeg`).
 
 ## The Review list tab (mark items Open / Yes / No)
-**Adding any game tab:** check the desktop tab row still fits every tab (the panel is 480 px — 8 tabs ≈ 460 px, 0.11.1); past that the row turns into a carousel and tests that click a tab by name stop finding it (Glyphtender e2e:margins / e2e:devkit-ai, sprint 25). A game endpoint that writes files or uses a secret: accept only the game's own page (Origin = Host, JSON only), like the Save endpoint.
+**Adding any game tab:** on a desktop every tab stays in view — about 10 fit one row of the 540 px panel, more wrap onto a second row (0.20.2); on a phone the row is a carousel, so a test that opens a tab there must page to it (◀ as well as ▶ — the tab may be on an earlier page). A game endpoint that writes files or uses a secret: accept only the game's own page (Origin = Host, JSON only), like the Save endpoint.
 For any list a person reviews by hand — Glyphtender's player-submitted words first. The Dev Kit never reads the game's files:
 the game hands over `load` and `save` (`kit/review/reviewTypes.ts`).
 ```ts
@@ -383,6 +438,7 @@ to search sets `searchable: false` (no box).
   whole items (the window is clipped to them), dots show where you are; nothing shows cut in half, nothing scrolls by accident, and a desktop never shows a
   scroll bar. The selected tab / a keyboard-focused item is always turned to. The paging is plain maths (`carouselPages.ts`, tested).
 - **The tool tabs have their own full-width row** under a small title + ✕ row (Muzzy, 0.4.2: "the tabs/carousels move below it to take advantage of the full width of the panel") — more tabs per carousel page, and the title stays.
+- **On a desktop the tabs wrap instead of paging** (0.20.2). The promise was "every tab fits one row on a desktop", kept by hand each time a tab was added (wider panel, tighter padding). The kit's own Fonts tab (0.17.0) broke it unnoticed: Glyphtender's 11 tabs need ~550 px, the panel is 540 (and only 533 on a 1066 px window, half its width), so Text and Words sat behind ▶ (its e2e:margins caught it). Squeezing again would only last until the next tab, and widening hides more of the game; a second row costs ~28 px of height and never needs revisiting. CSS only (`devkit.css`): the carousel then measures everything as fitting and draws no arrows. Phones and short windows (under 500 px tall) keep the carousel — there the height is the scarce thing.
 - **Search over the panel, sections inside the tabs** (Muzzy, 0.5.0: "it's SOO hard to find attributes … if the devkit is difficult to use, it becomes useless"). One box filters every settings tab at once, because Muzzy remembers *what* a knob does, not which tab or file it's in. Plain substring matching (no fuzzy ranking): predictable, and "what you typed is inside the word" is exactly what he asked for. The tabs stay mounted while searching (all tabs share one scrolling area) so unsaved edits survive, and a tab filters itself from the search text (a React context), so game tabs need no new props. Sections and labels live **in the content files** (`_labels`, `_sections`, next to `_help`) so Muzzy can rename and regroup in Obsidian, and Save keeps them.
 - **Sections start closed** (when a tab has more than one), so a tab opens as a short list of titles + counts — the index itself; the chips are for jumping when sections are open.
 - **The AI tab is a game tab the kit provides (`aiTab(…)`), not a kit tab** (0.6.0). Only games with an AI opponent want it, and its data (personalities, skills, bios) and its live parts (watch, check) are the game's — so the game lists it in `tabs.ts` with its plug, like Snapshots' adapter. The tab edits whole items in memory and Save writes each changed file whole with `{...file, personalities: list}` — `_help` / `_labels` / `_sections` ride along untouched.
@@ -400,7 +456,7 @@ to search sets `searchable: false` (no box).
 - **Sound files are converted on the dev server with the system ffmpeg, not ffmpeg-static** (0.7.0): no 70 MB download in every game for a tool only the designer's machine uses; a missing ffmpeg says how to install it. The onset trim is the B026 rule (first sample ≥ 10 % of the peak, minus 4 ms, 3 ms fade-in), skipped for music + ambience.
 - **The Music section's intensity slider is live-only** (0.9.0): intensity is something the GAME sets moment to moment (the reveal raises it), so it isn't a value in content/audio.json — the slider is for hearing the layers fade. Rests run on their own in the engine; the "Now" line polls `musicState()` 4 times a second, and Rest now / Come back now (`restMusic` / `endMusicRest`) test them without waiting a minute.
 - **The Sound tab only sends a real edit** (0.9.1): it remembers what it last sent, so React running its effect again with nothing changed (StrictMode, the Dev Kit's hidden tabs reconnecting) no longer re-sends its copy of content/audio.json — that undid other live edits of the file (a Moments audio knob, an e2e's setConfig). Found in Glyphtender sprint 21.
-- **The Color and Fonts tabs share ONE copy of the style values** (0.17.0, `color/styleStore.ts`): both edit content/ui/style.json and all tabs stay mounted, so with a copy each, a font picked in Fonts was undone the next time Color restyled the page, and a Color Save wrote its stale font values back over the Fonts tab's. Now every change goes through the store (which calls the kit's applyStyle), and each tab saves only its own values — the rest of the file's tweaks stay exactly as saved.
+- **The Color and Fonts tabs share ONE copy of the style values** (0.17.0, `color/styleStore.ts`): both edit content/ui/style.json and all tabs stay mounted, so with a copy each, a font picked in Fonts was undone the next time Color restyled the page, and a Color Save wrote its stale font values back over the Fonts tab's. Now every change goes through the store (which calls the kit's applyStyle), and each tab saves only its own values — the rest of the file's tweaks stay exactly as saved. The store is built as `color/uiKit.ts` loads, so it must not touch the page until its first change (0.20.1): a game's own Node test that imports Dev Kit files has no `document` (Glyphtender's `select.test.ts` crashed "document is not defined" from 0.17.0 to 0.20.0) — `styleStore.node.test.ts` guards it.
 - **Fonts: library fonts are tried from the dev server, never copied until Add to game** (0.17.0, Muzzy: "I have a huge font library in my pc"): trying hundreds of fonts must not litter public/fonts/; but Save may only point at a font the game ships (a live build has no font library), so it waits for Add to game. Added fonts start 🔴 `unknown` — the Dev Kit can't read a licence; a person (or Claude) does and fixes fonts.json.
 - **Fonts: one value per role, the font's name + a plain fallback** (`'Press Start DX', system-ui, sans-serif`): readable in style.json, and the role's first font name is how the tab knows which font is in use. Title and heading left unset follow the style's own display font, so presets keep their look.
 
@@ -411,5 +467,5 @@ to search sets `searchable: false` (no box).
 
 ## Develop
 `npm install`, then `npm test` (panel, Sound tab (list, knobs, A/B, files + upload + credits, mixer, log, wildcard notes, waveform maths, the knobs matching audio/kit/config.ts; Music section: tracks, layers, intensity, rests, the music knobs matching config.ts), save-audio + credit endpoints (path safety; conversion when ffmpeg is installed), AI tab (editor, save, copy, watch, check, search), Review list tab (Open/Yes/No cycle, order + no re-sort until Save, Save sends only changes, failed save/load, search), Text tab (flatten / unflatten keep order + lists, {placeholder} check holds Save, search, fresh-read save, no-change save byte-identical on Glyphtender's en.json), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, live files (liveFile) + the Vite live-JSON step + the live guard, the two clocks (gameClock) + Pause (generic freeze, adapter calls, buttons, badges, P), game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
-- Before a version goes out, install it into a game and run the game's `npm run lint` too: the framework has no ESLint, and the games run React's hooks rules (Dev Kit 0.8.0 went out with 3 errors — setState inside an effect, a non-component export from a .tsx — fixed in 0.8.1).
+- `npm run lint` — the framework's one ESLint setup (`../eslint.config.js`, the games' rules; `npm install` once in the framework root). Before 0.20.3 the framework had no ESLint and games ignore their kit copies, so Dev Kit 0.8.0 went out with 3 hooks errors that only showed up inside Glyphtender. 0.20.3: the Sound/AI tab tests lost their `any`s and an unused parameter (tests only, no behaviour change).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).

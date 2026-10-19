@@ -5,6 +5,7 @@ import { Panel, Row, Screen, Stack } from '../layout'
 import { Avatar, Badge, Button, ProgressBar, Text } from '../controls'
 import { screens } from '../screens'
 import { askConfirm, Modal } from './dialogs'
+import { useFixedSize } from '../fixedSize'
 import { useCountUp } from './motion'
 import { fill } from './words'
 
@@ -292,15 +293,18 @@ export function PlayerSeats({ players, activeId }: { players: Seat[]; activeId?:
 //   avatar: a picture; avatar={false} hides it — with icon, that makes a goal/target chip.
 // The score counts up when it rises (and floats up "+N" — floatUps={false} when the game already flies the points
 // in itself); with reduce motion on it just changes.
+//   scoreDigits (0.21.0): room for a score this many digits long from the start (default 2, i.e. up to 99) — give the
+//         biggest score the game can reach, so 99 → 100 never widens the chip.
 // Like every HUD piece it never catches taps: the game underneath gets them.
+// It keeps its size once it's on screen (0.21.0, useFixedSize): a score going from 9 to 10 mustn't shove its neighbours.
 export const playerChipWords = { score: '{n} points' }
 export type PlayerChipProps = {
   name: string; showName?: boolean; color?: string; avatar?: string | false; icon?: ReactNode
-  score?: number; scoreIcon?: ReactNode; detail?: ReactNode; badge?: ReactNode
+  score?: number; scoreDigits?: number; scoreIcon?: ReactNode; detail?: ReactNode; badge?: ReactNode
   active?: boolean; dim?: boolean; size?: 'xs' | 's' | 'm'; floatUps?: boolean; words?: Partial<typeof playerChipWords>
 }
 export function PlayerChip({
-  name, showName = true, color, avatar, icon, score, scoreIcon = '★', detail, badge,
+  name, showName = true, color, avatar, icon, score, scoreDigits = 2, scoreIcon = '★', detail, badge,
   active, dim, size = 'm', floatUps = true, words,
 }: PlayerChipProps) {
   const w = { ...playerChipWords, ...words }
@@ -308,8 +312,10 @@ export function PlayerChip({
   const floats = useFloatUps(score ?? 0)
   const oneLine = size === 'xs' // the detail sits beside the name and badge instead of on a line below
   const hasNameLine = showName || badge || (oneLine && detail)
+  const fixed = useFixedSize()
   return (
-    <Row gap={size === 'm' ? 's' : 'xs'} className="kit-hud-chip kit-player-chip kit-nowrap" role="group" aria-label={name}
+    // (a plain kit-row div, not <Row>: React 18 hands a ref only to real elements)
+    <div ref={fixed} className="kit-row kit-hud-chip kit-player-chip kit-nowrap" data-gap={size === 'm' ? 's' : 'xs'} role="group" aria-label={name}
       data-state={active ? 'active' : undefined} data-dim={dim || undefined} data-size={size}>
       {icon && <span className="kit-player-chip-icon" aria-hidden="true">{icon}</span>}
       {!icon && avatar !== false && <Avatar name={name} src={avatar || undefined} color={color} active={active} />}
@@ -328,12 +334,12 @@ export function PlayerChip({
       {score !== undefined && (
         <span className="kit-player-chip-score" role="img" aria-label={fill(w.score, { n: score })}>
           <span className="kit-player-chip-star" aria-hidden="true">{scoreIcon}</span>
-          <span className="kit-float-anchor" aria-hidden="true">
+          <span className="kit-float-anchor" aria-hidden="true" style={{ '--kit-digits': Math.max(scoreDigits, String(score).length) } as CSSProperties}>
             <Text kind={size === 'm' ? 'heading' : 'label'}>{shownScore}</Text>{floatUps && floats}
           </span>
         </span>
       )}
-    </Row>
+    </div>
   )
 }
 

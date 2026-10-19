@@ -1,0 +1,61 @@
+# Framework checks on GitHub (F70): every push re-runs each module's own checks — the same ones install-module.mjs
+# runs before a module may go into a game — so a red module is seen here before anyone installs it.
+# One job per module, side by side. The linter's one setup lives at the framework root (eslint.config.js), so that
+# gets installed first; each module then installs its own packages and runs test / typecheck / check-ui / lint.
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch cancels the run still going
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  module:
+    name: ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # one red module doesn't hide the others' results
+      matrix:
+        module: [devkit, ui-kit, audio, table, ai, rooms]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            ${{ matrix.module }}/package-lock.json
+
+      - name: Install the linter (framework root)
+        run: npm ci
+
+      - name: Install the module's packages
+        working-directory: ${{ matrix.module }}
+        run: npm ci
+
+      # Some module tests open a real browser (ui-kit's layout checks): Playwright's own Chromium, never a system Chrome
+      - name: Browser for tests that need one
+        working-directory: ${{ matrix.module }}
+        run: |
+          if [ -d node_modules/playwright ] || [ -d node_modules/playwright-core ]; then
+            npx playwright install --with-deps chromium
+          fi
+
+      # Only the checks this module has (the same list install-module.mjs runs)
+      - name: Module checks
+        working-directory: ${{ matrix.module }}
+        run: |
+          for check in test typecheck check-ui lint; do
+            if node -e "process.exit(require('./package.json').scripts?.['$check'] ? 0 : 1)"; then
+              echo "::group::npm run $check"
+              npm run "$check"
+              echo "::endgroup::"
+            fi
+          done

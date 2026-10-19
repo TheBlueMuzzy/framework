@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "install-table": "node scripts/install-table.mjs"
   },

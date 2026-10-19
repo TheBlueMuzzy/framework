@@ -11,6 +11,7 @@ import { mkdirSync, readdirSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
+import { findProblems } from '../kit/uiProblems.mjs'
 
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
@@ -25,36 +26,9 @@ const sizes = {
   desktop: { name: 'desktop', width: 1440, height: 900, mobile: false },
 }
 
-// Finds anything wider than the screen, visible controls smaller than 44×44, and a focus ring
-// that shows although nobody used the keyboard. (Phones quietly zoom out to fit wide pages,
-// so compare against the real screen width.)
-function findProblems({ screenWidth, checkFocus }) {
-  const problems = []
-  if (document.documentElement.scrollWidth > screenWidth) {
-    problems.push(`page is wider than the screen (${document.documentElement.scrollWidth} > ${screenWidth})`)
-  }
-  for (const el of document.querySelectorAll('button, input, [role="switch"], [role="tab"], [tabindex="0"]')) {
-    const box = el.getBoundingClientRect()
-    if (box.width === 0) continue // hidden
-    if (box.width < 43.5 || box.height < 43.5) {
-      problems.push(`small target ${Math.round(box.width)}×${Math.round(box.height)}: ${el.getAttribute('aria-label') ?? el.textContent?.trim()}`)
-    }
-    // Clipped inside a box: a scroll area or panel that hides overflow cuts off outlines and drop shadows
-    // drawn just outside a control (Cartoon's ink). Controls need a little room from the box's left/right edge.
-    for (let clip = el.parentElement; clip && clip !== document.body; clip = clip.parentElement) {
-      if (getComputedStyle(clip).overflowX === 'visible') continue
-      const edge = clip.getBoundingClientRect()
-      const room = 3 // px of clearance for an outline or shadow
-      if (box.left < edge.left + room - 0.5 || box.right > edge.right - room + 0.5) {
-        problems.push(`clipped at the edge of a box: ${el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 30)}`)
-      }
-      break // only the nearest clipping box matters
-    }
-  }
-  const ring = checkFocus && document.querySelector(':focus-visible')
-  if (ring) problems.push(`focus ring showing without keyboard use: ${ring.getAttribute('aria-label') ?? ring.textContent?.trim().slice(0, 30)}`)
-  return problems
-}
+// What's wrong on screen (wider than the screen, controls under 44×44, clipped, overlapping, a focus ring with no
+// keyboard use) — the same check a game's npm run check:framework runs on the real game (kit/uiProblems.mjs).
+// (Phones quietly zoom out to fit wide pages, so it compares against the real screen width.)
 
 mkdirSync('screenshots/screens', { recursive: true })
 // SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)

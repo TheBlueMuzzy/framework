@@ -71,6 +71,37 @@ describe('install-devkit', () => {
     expect(existsSync(join(game, 'vite-plugins'))).toBe(false)
   })
 
+  it('adds "check:framework" to package.json and devkit.local.json to .gitignore — once (a re-run changes nothing)', () => {
+    write(join(game, 'package.json'), '{\r\n    "name": "g",\r\n    "scripts": {\r\n        "dev": "vite"\r\n    }\r\n}\r\n')
+    write(join(game, '.gitignore'), 'node_modules')
+    installDevkit(game, { log: quiet })
+    const pkgText = readFileSync(join(game, 'package.json'), 'utf8')
+    expect(JSON.parse(pkgText).scripts).toEqual({ dev: 'vite', 'check:framework': 'node src/devkit/check-framework.mjs' })
+    expect(pkgText).toMatch(/^ {4}"name"/m) // the game's own indent and line endings are kept
+    expect(pkgText.endsWith('}\r\n')).toBe(true)
+    const ignoreText = readFileSync(join(game, '.gitignore'), 'utf8')
+    expect(ignoreText.startsWith('node_modules\n')).toBe(true)
+    expect(ignoreText).toMatch(/^devkit\.local\.json$/m)
+    expect(wiringSteps(game).some((w) => !w.done && /check:framework|devkit\.local/.test(w.step))).toBe(false)
+
+    const lines = []
+    const again = installDevkit(game, { log: (line) => lines.push(line) })
+    expect(again.bookkeeping).toEqual([])
+    expect(readFileSync(join(game, 'package.json'), 'utf8')).toBe(pkgText)
+    expect(readFileSync(join(game, '.gitignore'), 'utf8')).toBe(ignoreText)
+  })
+
+  it("leaves a game's own different check:framework alone; a dry run only says what it would add", () => {
+    write(join(game, 'package.json'), JSON.stringify({ scripts: { 'check:framework': 'node my-check.mjs' } }))
+    const lines = []
+    const result = installDevkit(game, { dryRun: true, log: (line) => lines.push(line) })
+    expect(result.bookkeeping).toEqual(['.gitignore line devkit.local.json'])
+    expect(lines.join('\n')).toMatch(/would add .gitignore line devkit\.local\.json/)
+    expect(existsSync(join(game, '.gitignore'))).toBe(false)
+    installDevkit(game, { log: quiet })
+    expect(readJson(join(game, 'package.json')).scripts['check:framework']).toBe('node my-check.mjs')
+  })
+
   it('never deletes anything outside src/devkit, vite-plugins/devkit', () => {
     write(join(game, 'src/devkit-game/MyTab.tsx'), 'mine')
     write(join(game, 'src/App.tsx'), 'app')
@@ -85,7 +116,7 @@ describe('install-devkit', () => {
 
 describe('wiring steps', () => {
   it('a bare game needs every step', () => {
-    expect(wiringSteps(game).filter((w) => !w.done)).toHaveLength(5) // no tsconfig.node.json → that step is skipped
+    expect(wiringSteps(game).filter((w) => !w.done)).toHaveLength(6) // no tsconfig.node.json → that step is skipped
   })
 
   it('a wired-up game needs none', () => {
@@ -93,7 +124,7 @@ describe('wiring steps', () => {
     write(join(game, 'vite.config.ts'), "import { devkit } from './vite-plugins/devkit/devkitVite'")
     write(join(game, 'tsconfig.node.json'), '{ "include": ["vite.config.ts", "vite-plugins"] }')
     write(join(game, '.gitignore'), 'node_modules\ndevkit.local.json\n')
-    write(join(game, 'package.json'), JSON.stringify({ scripts: { 'check:devkit': 'node src/devkit/check-devkit.mjs' }, devDependencies: { 'playwright-core': '^1' } }))
+    write(join(game, 'package.json'), JSON.stringify({ scripts: { 'check:devkit': 'node src/devkit/check-devkit.mjs', 'check:framework': 'node src/devkit/check-framework.mjs' }, devDependencies: { 'playwright-core': '^1' } }))
     expect(wiringSteps(game).filter((w) => !w.done)).toEqual([])
   })
 

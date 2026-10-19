@@ -14,6 +14,15 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpat
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+// npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
+// (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
+export function checkFrameworkStep(gameDir) {
+  let scripts = {}
+  try { scripts = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).scripts ?? {} } catch { /* no package.json */ }
+  if (scripts['check:framework']) return null
+  return 'package.json "scripts": "check:framework": "node src/devkit/check-framework.mjs"   (comes with the Dev Kit: runs every installed module\'s promise checks, this one\'s too, and says what to wire where)'
+}
+
 const uiKitDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const kitDir = join(uiKitDir, 'kit')
 const presetNames = readdirSync(join(kitDir, 'styles')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
@@ -193,6 +202,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   if (eslintConfig && !readText(join(gameDir, eslintConfig)).includes('src/ui/kit')) {
     log(`  ESLint: add 'src/ui/kit' to the ignores in ${eslintConfig} (the kit is checked in the framework).`)
   }
+  { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
   return { added, changed, removed, isUpdate }
 }
 

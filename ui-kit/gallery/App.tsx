@@ -24,7 +24,7 @@ export function App() {
   // Which page is showing: null = the menu, 'parts', or a screen id. The link always says it too.
   const [page, setPage] = useState(() => param('screen'))
   const pageNow = useRef(page)
-  pageNow.current = page
+  useEffect(() => { pageNow.current = page })
   const linkTo = (to: string | null) => {
     const query = new URLSearchParams()
     if (to) query.set('screen', to)

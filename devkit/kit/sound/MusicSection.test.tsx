@@ -19,12 +19,17 @@ const FILE: RawAudio = {
   },
 }
 
+/** The parts of the live config the tests read back */
+type LiveMusicConfig = {
+  music: { tracks: Record<string, { restSeconds?: number[]; loop?: boolean; layers: Record<string, { fullAtIntensity?: number }> }> }
+}
+
 /** A stand-in engine with music */
 function fakeAudio(withMusic = true) {
   let config: unknown = null
   let music: SoundMusicState = { track: null, phase: 'off', play: 0, playsBeforeRest: 0, restLeftMs: 0, intensity: 0, layers: [] }
   const audio = {
-    config: () => config as any,
+    config: () => config as LiveMusicConfig,
     setMusic: (next: Partial<SoundMusicState>) => { music = { ...music, ...next } },
     play: vi.fn(),
     stop: vi.fn(),

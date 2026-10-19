@@ -39,6 +39,20 @@ export interface DevKitGame {
   pauseModes?: ('full' | 'half')[]
   /** Optional: may the Dev Kit pause right now? Left out = canRestore() (an online game can't stop for everyone). */
   canPause?: () => boolean
+  /**
+   * Optional (0.19.0): what `npm run check:framework` needs to test the game's promises in a real browser
+   * (src/devkit/check-framework.mjs). Without it, the checks that need live play say exactly what to add here.
+   */
+  conformance?: DevKitConformance
+}
+
+/** The game's help for the framework checks. Runs in the page. */
+export interface DevKitConformance {
+  /** From the page as it first loads (a menu, a title screen) to live play — e.g. click Start and wait until the
+   *  first piece falls. Resolve once play is running. */
+  startPlay: () => void | Promise<void>
+  /** Optional: the address query the checks open the game with — e.g. '?seed=7' for a fixed, replayable game. */
+  query?: string
 }
 
 let current: DevKitGame | null = null

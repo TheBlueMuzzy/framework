@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "install-rooms": "node scripts/install-rooms.mjs"
   },
