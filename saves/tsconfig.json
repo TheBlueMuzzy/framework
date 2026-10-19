@@ -14,7 +14,11 @@
     "noUnusedParameters": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    "paths": {
+      "react": ["../ui-kit/node_modules/@types/react"],
+      "react/*": ["../ui-kit/node_modules/@types/react/*"]
+    }
   },
   "include": ["kit"]
 }
