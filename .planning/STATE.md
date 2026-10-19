@@ -1,10 +1,10 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 13 built + reviewed, waiting for Muzzy's OK: F81 producer notes at session start, F87 QA routine** (+ one check:fast at a time per project, from the Goops session's note) — `.planning/SPRINT.md` Notes. On "approved": F81 + F87 ✅ → `F81 + F87: done` → ask Muzzy the 3-line retro → archive-sprint → /save → /sprint 14. Before it: F80 Everything triggers approved (2026-10-19), sprint 12 archived (sprint 12, all 8 tasks ticked — `.planning/SPRINT.md` Notes has the whole story). Every BMUZ step is now ① automatic, ② checked (refused until on record) or ③ judgement with a reason; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **Sprint 13 done + archived** (F81 producer notes at session start, F87 QA routine, + one check:fast at a time per project) — Muzzy approved, retro taken (`.planning/archive/sprints/sprint-13.md`). Retro lesson → CLAUDE.md "Skeptical Self-Review": Claude leads on the technical side and recommends sturdier approaches (hooks/scripts/checks, simpler designs) up front, unprompted — Muzzy: "get to the tech solutions earlier for me by being more critical." Next: **/sprint 14** — no sprint is open. Before it: F80 Everything triggers (sprint 12). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: Muzzy approves F81 + F87 (or asks for changes). Goops' session: its F30/F32 need Check: lines (ROADMAP Ideas).
-- Next after F80: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. New milestone **v0.10 "A whole studio around one designer"** (F81–F92) is planned — ready now: F81 producer's eye, F85 dependency audit, F86 old saves, F87 QA routine, F88 quality bars.
+- Next: `/sprint` to plan sprint 14. Ready in v0.10: F85 dependency + licence audit, F86 old saves keep working, F88 quality bars (F82–F84 also ready now that F80 is done — plan-lint will say). Goops' session: its F30/F32 need Check: lines (ROADMAP Ideas).
+- Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
@@ -12,8 +12,8 @@
 Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40 (sprint 13 review: 8 findings, all fixed + tests; F80 review before it: 11, all fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 13 — BMUZ acts as producer + QA lead
-Doing: F81 Producer's eye, then F87 QA routine   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (13 archived)
+Doing: planning sprint 14   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
@@ -31,6 +31,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-19 — Sprint 13 approved + archived: session starts now show the sprint day and only what needs attention; features need a test plan and a "what was checked" note before they count as done. Retro: Claude should lead on technical solutions earlier and more critically.
 - 2026-10-19 — Sprint 13 built + reviewed: every session start shows the sprint day and only what needs Muzzy (a deadline, a stalled feature, things to check); a sprint can't be filed without a 3-line retro; every feature has a test plan and a record of what was checked; playtests get logged; one check run at a time per game.
 - 2026-10-19 — F80 Everything triggers built + reviewed: /save and /deliver steps now run inside their scripts or are refused until done; saying "going to bed" with unpushed work can't end the turn; merge / live-check / rollback are one command each; every new rule must say how it happens. New milestone v0.10 "A whole studio around one designer" (F81–F92).
 - 2026-10-19 — Sprints 05–07 (one long session): BMUZ hooks + the hand-off card (F68, F73), the conformance pack `check:framework` (F61), the audit's ⭐ rules as hooks + the milestone look-back (F67, F74), and fragile jobs as scripts (F69: install, release, save, archive, musts, stop servers).
@@ -40,4 +41,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-09-28 — Sprint 03 done: F06 game-ui skill (+ catalog, install-kit, shipped checker, pick sheet, BMUZ wiring); F07 Roll Better Settings rebuilt in Cartoon (408 hand-made lines gone), kit 0.1.0 → 0.1.3 from the try-out. Muzzy approved.
 - 2026-09-28 — Sprint 02 done: F04 built screens (~36, blocks 959 lines), F05 gallery menu + 116 screenshots; Pixel body font → VT323; focus rings keyboard-only. Muzzy approved.
 - 2026-09-28 — Sprint 01 done: F01 parts + style engine, F02 5 styles, F03 screen stack (Back/Esc, inert, style transitions); 74 tests. Muzzy approved all three.
-- 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.
