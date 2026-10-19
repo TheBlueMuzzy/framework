@@ -1,12 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-18 — **Sprint 05 planned: F68 BMUZ hooks** (v0.9; SPRINT.md) — Muzzy's "never" rules + checks become hooks the harness enforces (all in ~/.claude: `config/bmuz/hooks/`, settings.json, /develop frontmatter). Muzzy's calls: merged-only branch deletes allowed · his Chrome = ask each time · live push needs a smoke pass even for tiny code fixes. Next: /develop task 1 (spike).
-Hands off `devkit/` + Goops: the Goops session's helper is building F59/F60 there (uncommitted devkit/kit/tuning/* = its work). F61 starts when the Goops session says the Dev Kit pause/live work has landed. Earlier: v0.10.0 released 2026-10-15 (Select Mode); v0.9 planned 2026-10-18 (spec ~/.claude/config/bmuz/MODULE-CONTRACTS.md, reliability plan ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md). This milestone runs in its OWN session, which owns dev/framework + ~/.claude.
+2026-10-18 — **Sprint 05 done — Muzzy approved F68, F61, F73.**
+- **F68 BMUZ hooks** + **F73 hand-off card** live in ~/.claude (synced to the laptop): `~/.claude/config/bmuz/HOOKS.md` (7 hooks in plain words), proof `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` (94/94). Every work turn ends with the card (`templates/handoff.md`) — Muzzy: "I never want to see it any other way going forward!"
+- **F61 Conformance pack** on branch `dev/conformance` (pushed; merges to main at /deliver): `npm run check:framework` — Dev Kit 0.19.1, UI kit 0.18.1, Audio 0.3.1, AI 0.2.1, Rooms 0.7.0, Table 0.8.0. PAUSED pill fix already on main (Dev Kit 0.18.1) — tell the Goops session.
+- Ready next (🟢): **F67** lesson audit → build the ⭐ hooks in `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md`, plan-file checker (`plan-lint.mjs`) first · F62 Goops passes (Goops session: adapter `conformance: { startPlay, query }`) · F63 Glyphtender passes (bots on setTimeout, check:ui red, no `smoke` script) · F69 scripts · F70 CI · F72 session hygiene · F66 health row. Then F74 self-improving loop (needs F67).
+- Next: `/sprint` — plan Sprint 06 (suggest F67's ⭐ hooks).
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 05
-Doing: F68 BMUZ hooks   Branch: main   Version: 0.10.0 (Dev Kit 0.16.1)
+Doing: Sprint 05 done   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.19.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
