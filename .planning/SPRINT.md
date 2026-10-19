@@ -14,12 +14,13 @@ Ask Muzzy: —
 
 ## F72 🔧 Session hygiene: every feature boundary saved, unattended runs stay fresh
 Done when: every feature that turns ✅ leaves STATE's RESUME HERE + a /save behind (checked by a hook, not memory), the chat keeps going (Muzzy 2026-10-19: "Save + keep going" — no /clear nudges), and unattended runs ("just go") hand each feature to a fresh helper instead of filling one chat to the 80% warning.
-- [ ] 🤖 1. /develop "Approved": STATE RESUME HERE replaced + /save in the same turn, then carry on in the chat — ~/.claude/skills/develop/SKILL.md
-- [ ] 🤖 2. Autonomous mode: each feature goes to one fresh helper (brief = STATE + SPRINT + the feature), the main chat only plans, merges, checks and saves — ~/.claude/CLAUDE.md "Autonomous Mode", ~/.claude/skills/develop/SKILL.md
-- [ ] 🤖 3. Hook: an `Fxx: done` commit whose STATE RESUME HERE wasn't touched since the feature started is refused with the reason — ~/.claude/config/bmuz/hooks/
-- [ ] 🤖 4. HOOKS.md row + hook tests (prove it blocks, prove it passes) — ~/.claude/config/bmuz/HOOKS.md, hooks/test-hooks.mjs
+- [x] 🤖 1. /develop "Approved": STATE RESUME HERE replaced + /save in the same turn, then carry on in the chat — ~/.claude/skills/develop/SKILL.md
+- [x] 🤖 2. Autonomous mode: each feature goes to one fresh helper (brief = STATE + SPRINT + the feature), the main chat only plans, merges, checks and saves — ~/.claude/CLAUDE.md "Autonomous Mode", ~/.claude/skills/develop/SKILL.md
+- [x] 🤖 3. Hook: an `Fxx: done` commit whose STATE RESUME HERE wasn't touched since the feature started is refused with the reason — ~/.claude/config/bmuz/hooks/
+- [x] 🤖 4. HOOKS.md row + hook tests (prove it blocks, prove it passes) — ~/.claude/config/bmuz/HOOKS.md, hooks/test-hooks.mjs
 Check: test-hooks green including the new hook; a fake `Fxx: done` without a STATE change is refused, with one it passes.
 Ask Muzzy: —
 
 Notes:
 - Muzzy 2026-10-19 (F72): after an approved feature, **save + keep going** in the same chat (not "suggest /clear").
+- F72 build (2026-10-19): /develop "Approved" = STATE + `F08: done` + /save, keep going; unattended runs → one fresh helper per feature (develop skill + CLAUDE.md Autonomous Mode); guard-git refuses a `Fxx: done` (also `Fxx + Fyy: done`) when STATE.md is not in the commit and has not changed since the feature's first commit (only in repos with .planning/STATE.md); HOOKS.md row 14; test-hooks 212/212 (7 new: blocks stale, allows updated / already-updated, not-done commits, non-BMUZ repos).
