@@ -5,11 +5,12 @@
 - Glyphtender: all 6 pieces newest on its branch `dev/framework-checks` (pushed; ships at ITS /deliver as a patch). Half pause = its F89 (a known gap in content/devkit.json). Its B029/B030 are test-only P3s.
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + UI kit 0.19.0 + **Dev Kit 0.20.2** (import without a page, the installer adds check:framework, known gaps, the tab row wraps on desktop) + the first look-back; merges at /deliver. build-ppp compares against the framework's main checkout, so the planner shows the newest pieces only after that merge.
 - Left in v0.9: **F62 Goops** (waits for the other session's F59/F60 on `dev/m1-core-shift`), F70 CI backstop, F72 session hygiene (both should), F64/F65 starters (should, need F62).
-- Next: `/sprint`: F70 + F72 while Goops is busy, or F62 if the Goops session is done.
+- **Sprint 10 planned: F70 GitHub re-checks every push + F72 every feature boundary saved (Muzzy: save + keep going, no /clear nudges).** Tasks: `.planning/SPRINT.md`.
+- Next: `/develop` — F70 task 1, the shared GitHub workflow template.
 
 ## Where we are
-Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: — (09 done)
-Doing: — (pick the next sprint)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.2)
+Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 10
+Doing: F70 — next up   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
