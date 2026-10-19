@@ -4,12 +4,12 @@ First sprint of v0.10 "A whole studio around one designer" (Muzzy 2026-10-19: "I
 
 ## F81 🔧 Producer's eye
 Done when: a session started in a game prints the sprint line every time ("Sprint 07 · day 9 (the last 3 took ~4)") plus, only when they need attention, the milestone target ("alpha target: 5 days left · musts 6/9", once a `target:` date is set), features stuck in 🔨/🎛️ with no commits for 7+ days, and what's waiting on Muzzy (🙋 tasks, fixes to check); archiving a sprint asks for a 3-line retro first.
-- [ ] 🤖 1. Milestone `target: <date>` on a ROADMAP milestone heading, read by the plan reader; PROJECT-FILES format line — ~/.claude/config/bmuz/templates/ppp/plan-reader.mjs, ~/.claude/config/bmuz/PROJECT-FILES.md
-- [ ] 🤖 2. Session start: the sprint line — sprint number, day N from SPRINT.md "Started", the average length of the last 3 archived sprints — ~/.claude/config/bmuz/session-start.sh
-- [ ] 🤖 3. Session start, attention lines only: days to the milestone target + musts done · features 🔨/🎛️ with no commits for 7+ days · open 🙋 tasks + fixes waiting for Muzzy's check — ~/.claude/config/bmuz/session-start.sh
-- [ ] 🤖 4. archive-sprint refuses without a `Retro:` block (went well · went wrong · change) in SPRINT.md; /sprint and /develop say to ask Muzzy for it — ~/.claude/config/bmuz/scripts/archive-sprint.mjs, ~/.claude/skills/develop/SKILL.md
+- [x] 🤖 1. Milestone `target: <date>` on a ROADMAP milestone heading, read by the plan reader; PROJECT-FILES format line — ~/.claude/config/bmuz/templates/ppp/plan-reader.mjs, ~/.claude/config/bmuz/PROJECT-FILES.md
+- [x] 🤖 2. Session start: the sprint line — sprint number, day N from SPRINT.md "Started", the average length of the last 3 archived sprints — ~/.claude/config/bmuz/session-start.sh
+- [x] 🤖 3. Session start, attention lines only: days to the milestone target + musts done · features 🔨/🎛️ with no commits for 7+ days · open 🙋 tasks + fixes waiting for Muzzy's check — ~/.claude/config/bmuz/session-start.sh
+- [x] 🤖 4. archive-sprint refuses without a `Retro:` block (went well · went wrong · change) in SPRINT.md; /sprint and /develop say to ask Muzzy for it — ~/.claude/config/bmuz/scripts/archive-sprint.mjs, ~/.claude/skills/develop/SKILL.md
 - [x] 🤖 5. plan-lint: a ⏳ feature whose needs are all done → "set it 🟢" (built in F80 task 5) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
-- [ ] 🤖 6. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
+- [x] 🤖 6. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
 Check: session start in a fake game with a 9-day-old sprint, a target 5 days out and a feature untouched for 8 days prints exactly those lines; a healthy game prints only the sprint line; archive-sprint refuses without a Retro block.
 Ask Muzzy: —
 
@@ -27,3 +27,4 @@ Notes:
 - Muzzy 2026-10-19 (sprint 13 OK): status block = the sprint line always + only the lines that need attention ("aligned with your suggestion"); yes to marking his CLAUDE.md rule lines ①/②/③ (done at sprint start — see below).
 - This sprint's own features carry `Check:` lines already, so F87 doesn't send its own sprint back.
 - CLAUDE.md marks (Muzzy: yes): all 19 rule lines now end with their kind, his wording untouched — ① 3 (undo guards, context checkpoint, gws never synced) · ② 8 (dependencies, focus, tweakables in UI, "your game", hand-off card, progress line, verify) · ③ 8 (manner, design judgement; breathing room until F88, R3F + game numbers until F90). rule-kind --all: CLAUDE.md 19 → 0.
+- F81 (helper; Claude re-ran it on the framework + Goops, read-only): new hooks/producer-notes.mjs, called by session-start.sh (~0.1 s, git only). Sprint line always ("📅 Sprint 13 · day 1 (the last 3 took ~1 day)"); ⚠ lines only when needed: target within 14 days or overdue + musts, a 🔨/🎛️ sprint feature with no commits for 7+ days (sprint 7+ days old), 🙋 tasks + P0/P1 fixes waiting for Muzzy's check. Goops today: "⚠ Waiting on you: 1 task (try them: wording, timing, pointers)". plan-reader reads `· target: YYYY-MM-DD` on milestone headings + SPRINT Started + Retro. archive-sprint refuses without a 3-line Retro (went well · went wrong · change); the look-back reads every sprint's Retro. test-hooks +7, test-scripts +3. Found: the framework ROADMAP still marked v0.5 `← current` → moved to v0.10 (a target date only shows on the current milestone).
