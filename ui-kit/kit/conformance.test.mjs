@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { SETTINGS_CHECK, SIZES, check, checkSettingsForTest, checkUiArgs, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, settingsProblems, whereText } from './conformance.mjs'
+import { SETTINGS_CHECK, SIZES, check, checkSettingsForTest, checkUiArgs, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, settingsProblems, stripComments, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -136,6 +136,55 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     expect(fileReadsRow("switch (id) { case 'credits': open() }", 'credits')).toBe(true)
     expect(fileReadsRow('<Settings info={{ version: v }} />', 'version')).toBe(true)
     expect(fileReadsRow('const { aiSpeed } = values', 'aiSpeed')).toBe(true)
+  })
+  it('comments go, but strings and regexes that look like comments stay code', () => {
+    const glob = "const sfx = import.meta.glob('./sfx/*.mp3')\nconst on = values.tips\nconst x = 1 /* note */"
+    expect(stripComments(glob)).toBe("const sfx = import.meta.glob('./sfx/*.mp3')\nconst on = values.tips\nconst x = 1 ")
+    expect(fileReadsRow(glob, 'tips')).toBe(true) // the glob's /* used to hide every line down to the next */
+    expect(fileReadsRow("const a = `./sfx/*.mp3`\nconst on = values.tips // */", 'tips')).toBe(true)
+    expect(fileReadsRow('const a = `${n > 1 ? `x/*` : "y"}`\nconst on = values.tips\n/* */', 'tips')).toBe(true)
+    expect(fileReadsRow("const re = /['\"]/g\nconst on = values.tips", 'tips')).toBe(true)
+    expect(fileReadsRow("const re = /\\/*x/\nconst on = values.tips", 'tips')).toBe(true)
+    expect(fileReadsRow("<p>Don't</p>\nconst on = values.tips", 'tips')).toBe(true) // an apostrophe ends at the line's end
+    expect(fileReadsRow('const half = a / 2 // values.tips', 'tips')).toBe(false)
+    expect(fileReadsRow('/* values.tips\n*/ const x = 1', 'tips')).toBe(false)
+  })
+  it('a common-word id used for other things is NOT a read (a dead row stays red)', () => {
+    const elsewhere = [
+      "const s = assets.sound\nplay(s, { theme: 'dark' })",
+      "const style = { theme: 'dark', hints: 3 }\nif (mode === 'difficulty') x()",
+      "const label = words['language']\nconst { sound } = assets\nconst list = ['sound', 'theme']",
+      "import text from '../../content/text/en.json'\nconst w = text.tutorial.hints",
+    ].map((text, i) => ({ path: `src/game/f${i}.ts`, text }))
+    for (const id of ['sound', 'theme', 'hints', 'difficulty', 'language']) {
+      expect(elsewhere.some((f) => fileReadsRow(f.text, id)), id).toBe(false)
+    }
+    const found = settingsProblems(tab(['sound', 'theme', 'hints', 'difficulty', 'language'].map((id) => ({ id, type: 'toggle', label: id }))), elsewhere)
+    expect(found.dead.map((r) => r.id)).toEqual(['sound', 'theme', 'hints', 'difficulty', 'language'])
+  })
+  it('each way games really read a setting → green', () => {
+    const reads = [
+      ['const on = values.theme', 'theme'],
+      ['const on = values?.theme', 'theme'],
+      ["const on = settings['theme']", 'theme'],
+      ['const on = gameSettings.current.theme', 'theme'],
+      ['const on = myPrefs.theme', 'theme'],
+      ['const speed = useGameSettings.getState().aiSpeed', 'aiSpeed'],
+      ['const { theme, hints: h = 2 } = values', 'hints'],
+      ['const { theme } = loadedSettings', 'theme'],
+      ['const apply = ({ theme }: SettingsValues) => theme', 'theme'],
+      ["if (id === 'sound') x()", 'sound'],
+      ["if ('sound' === id) x()", 'sound'],
+      ["if (rowId == 'sound') x()", 'sound'],
+      ["if (changed !== 'fullscreen') return", 'fullscreen'],
+      ["switch (id) { case 'credits': open() }", 'credits'],
+      ['<Settings info={{ language }} />', 'language'],
+      ["<Settings info={{ language: 'English' }} />", 'language'],
+      ["const on = useSetting('hints')", 'hints'],
+      ["const on = getSetting('hints')", 'hints'],
+      ["const on = setting('hints')", 'hints'],
+    ]
+    for (const [text, id] of reads) expect(fileReadsRow(text, id), text).toBe(true)
   })
   it('skips rows the kit handles: headings, text size, reduce motion, links, info with its own text, Audio once wired', () => {
     const schema = { tabs: [
