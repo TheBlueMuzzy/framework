@@ -27,8 +27,11 @@ export function fillMissing<T>(saved: unknown, fresh: T): FillResult<T> {
   return { value, added, replaced }
 }
 
+/** How `replaced` names the save itself (its data wasn't even the right kind — loading treats that copy as broken). */
+export const WHOLE_SAVE = '(the whole save)'
+
 function fill(saved: unknown, fresh: unknown, path: string, added: string[], replaced: string[]): unknown {
-  const here = path || '(the whole save)'
+  const here = path || WHOLE_SAVE
   if (isPlainObject(fresh)) {
     if (!isPlainObject(saved)) {
       replaced.push(here)

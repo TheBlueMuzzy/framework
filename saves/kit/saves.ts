@@ -20,7 +20,7 @@
 // A save from a NEWER build (the player opened an older version, e.g. after a rollback) is kept untouched: the game
 // runs on fresh values, never writes over it, and report().note says so in plain words.
 import { savesConfig } from './config'
-import { copyData, fillMissing } from './fill'
+import { copyData, fillMissing, WHOLE_SAVE } from './fill'
 import { countDevices, mergeRecords, type FieldRules } from './progress'
 import { browserStorage, readKey, removeKey, writeKey, type StorageLike } from './storage'
 
@@ -191,6 +191,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
       }
     }
     const filled = fillMissing(data, options.fresh)
+    if (filled.replaced.includes(WHOLE_SAVE)) return { state: 'damaged', problem: `its data is the wrong kind (${Array.isArray(data) ? 'a list' : typeof data})` }
     let value = filled.value
     if (clean) {
       try { value = clean(value) } catch (error) { return { state: 'damaged', problem: `the game's clean-up stopped: ${(error as Error)?.message ?? error}` } }

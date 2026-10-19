@@ -146,7 +146,9 @@ describe('createSave — safe writes and backups', () => {
   })
 
   it('empty, wrong-type and other-save copies fall back to the backup', () => {
-    for (const broken of ['', '   ', 'null', '42', '"text"', JSON.stringify({ save: 'other:save', version: 1, data: {} }), JSON.stringify({ save: 'test:progress', version: 'two', data: {} })]) {
+    const record = (fields: object) => JSON.stringify({ save: 'test:progress', version: 1, savedAt: '', ...fields })
+    for (const broken of ['', '   ', 'null', '42', '"text"', JSON.stringify({ save: 'other:save', version: 1, data: {} }), record({ version: 'two', data: {} }),
+      record({ data: 42 }), record({ data: [1, 2] }), record({ data: null })]) {
       const storage = memoryStorage()
       const save = progressSave(storage)
       save.save({ ...fresh, totalXp: 10 })
