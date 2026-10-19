@@ -1,9 +1,9 @@
 // @vitest-environment node
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DEFAULT_PORT, adapterFile, findModules, formatReport, gameCode, linesMatching, makeTester, readArgs, serverUrl } from './check-framework.mjs'
+import { DEFAULT_PORT, adapterFile, findModules, formatReport, gameCode, healthSummary, linesMatching, makeTester, readArgs, saveHealth, serverUrl } from './check-framework.mjs'
 import { firstDiff, nudged, unreadTuning } from './conformance.mjs'
 
 let game
@@ -111,5 +111,27 @@ describe('review fixes', () => {
     write('tests/fall.test.ts', "import fall from '../content/tuning/fall.json'")
     write('src/engine/hud.ts', "import hud from '../../content/tuning/hud.json'")
     expect(unreadTuning(['tank', 'fall', 'hud'], gameCode(game))).toEqual(['tank', 'fall'])
+  })
+})
+
+describe('health file for the planner (F66)', () => {
+  const sections = [
+    { title: 'Dev Kit', version: '0.19.1', rel: 'src/devkit', results: [{ name: 'a', ok: true }, { name: 'b', ok: false }, { name: 'c', skipped: true }] },
+    { title: 'UI kit', version: '0.19.0', rel: 'src/ui/kit', results: [{ name: 'd', ok: true }] },
+  ]
+  it('sums each module up: passed, the failed names, skipped', () => {
+    const s = healthSummary(sections, { date: '2026-10-19T00:00:00.000Z', commit: 'abc1234' })
+    expect(s.modules).toEqual([
+      { id: 'devkit', title: 'Dev Kit', version: '0.19.1', passed: 1, failed: ['b'], skipped: 1 },
+      { id: 'ui', title: 'UI kit', version: '0.19.0', passed: 1, failed: [], skipped: 0 },
+    ])
+    expect(s.commit).toBe('abc1234')
+  })
+  it('keeps the last full run when a --static run is saved', () => {
+    saveHealth(game, healthSummary(sections, { commit: 'full1' }), false)
+    saveHealth(game, healthSummary(sections, { commit: 'quick' }), true)
+    const saved = JSON.parse(readFileSync(join(game, 'e2e-shots', 'framework.json'), 'utf8'))
+    expect(saved.full.commit).toBe('full1')
+    expect(saved.static.commit).toBe('quick')
   })
 })

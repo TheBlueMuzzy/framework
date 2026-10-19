@@ -20,7 +20,7 @@
 // `t` (the tester) is made by makeTester below — its comments are the API.
 import { spawnSync } from 'node:child_process'
 import net from 'node:net'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -294,6 +294,29 @@ export function formatReport(gameName, sections) {
   return { text: lines.join('\n'), failed: failed.length }
 }
 
+/** One run in a few numbers, for the planner's Framework row (F66): per module passed / failed / skipped. */
+export function healthSummary(sections, { date = new Date().toISOString(), commit = '', only = null } = {}) {
+  return {
+    date, commit, only,
+    modules: sections.map((s) => ({
+      id: s.rel.split('/')[1] ?? s.title, title: s.title, version: s.version,
+      passed: s.results.filter((r) => r.ok).length,
+      failed: s.results.filter((r) => !r.ok && !r.skipped).map((r) => r.name),
+      skipped: s.results.filter((r) => r.skipped).length,
+    })),
+  }
+}
+
+/** e2e-shots/framework.json keeps the last full run and the last --static run apart (check:fast's quick run doesn't hide the last full one). */
+export function saveHealth(root, summary, staticOnly) {
+  const file = join(root, 'e2e-shots', 'framework.json')
+  let saved = {}
+  try { saved = JSON.parse(readFileSync(file, 'utf8')) } catch { /* first run */ }
+  saved[staticOnly ? 'static' : 'full'] = summary
+  mkdirSync(join(root, 'e2e-shots'), { recursive: true })
+  writeFileSync(file, `${JSON.stringify(saved, null, 2)}\n`)
+}
+
 async function main() {
   const root = fileURLToPath(new URL('../../', import.meta.url)) // src/devkit/ → the game folder
   const { port, staticOnly, only } = readArgs(process.argv.slice(2))
@@ -327,6 +350,9 @@ async function main() {
   }
   const { text, failed } = formatReport(gameName, sections)
   console.log('\n' + text)
+  let commit = ''
+  try { commit = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout.trim() } catch { /* not a repo */ }
+  try { saveHealth(root, healthSummary(sections, { commit, only }), staticOnly) } catch (e) { console.log(`(couldn't save e2e-shots/framework.json: ${e.message})`) }
   process.exit(failed ? 1 : 0)
 }
 
