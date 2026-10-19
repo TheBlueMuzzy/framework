@@ -9,7 +9,7 @@ Done when: Glyphtender runs the newest UI kit + Dev Kit, `check:framework` is pa
 - [x] 🤖 3. Run check:framework → every red becomes a line on Glyphtender's ROADMAP (or a bug) — glyphtender/.planning/ROADMAP.md
 - [x] 🤖 4. Fix the small gaps (each under ~15 min); the rest stay on its roadmap — glyphtender/src
 - [x] 🤖 5. check:full green incl. check:framework; record Last full check in its STATE — glyphtender/.planning/STATE.md
-- [ ] 🙋 6. Play one game of Glyphtender on your phone — nothing looks or plays differently
+- [x] 🙋 6. Play one game of Glyphtender on your phone — nothing looks or plays differently
 Check: Glyphtender's check:full all green with check:framework in it; its VERSION files match the framework's newest.
 Ask Muzzy: —
 
@@ -20,7 +20,7 @@ Muzzy, 2026-10-19: "I don't know what I'm looking at … it doesn't look like I 
 - [x] 🤖 2. Rewrite the row: healthy → one line "✅ Framework pieces up to date and working (checked today)"; otherwise one plain sentence per problem + who fixes it and how ("A newer Dev Kit is out — Claude updates it in the next /develop"); the technical detail goes behind a "details" fold — templates/ppp/build-ppp.mjs
 - [x] 🤖 3. Plain-words lines for every check the pack can fail (a list in build-ppp, each written for a non-engineer) — templates/ppp/build-ppp.mjs
 - [x] 🤖 4. Prove it on the Glyphtender planner before and after F63 (red → green), shots at 390 + 1440 — glyphtender/.planning
-- [ ] 🙋 5. Muzzy reads the row — can you tell what (if anything) needs doing?
+- [x] 🙋 5. Muzzy reads the row — can you tell what (if anything) needs doing?
 Check: a non-engineer can say from the row alone whether anything needs doing; no command, file or version number shows unless "details" is opened.
 Ask Muzzy: —
 
@@ -31,3 +31,4 @@ Notes:
 - F63 tasks 2–4 (2026-10-19, helper + Claude): Dev Kit **0.20.1** on dev/conformance (`ca88922` import without a page + the installer adds `check:framework` / `devkit.local.json`; `b3626bf` known gaps: `content/devkit.json` → `knownGaps: [{check, why, roadmap}]`, framework.json gets `knownGaps` + `gapsToRemove`). Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, the spike's small fixes, check:ui in check:fast, check:framework in check:full (alone, port 5298), half pause → Glyphtender **F89** (Later). check:framework: "PASS — 23 checks kept, 1 known gap". Planner: a known gap shows as 📌 "Planned for later (F89 on the roadmap): …" and still counts as all good (hint "all good · 1 planned for later"); 13/13 ppp tests.
 - F63 review (low, 2026-10-19): no real bugs in the Dev Kit 0.20.1 commits or Glyphtender game code. Limit by design: a known gap covers its whole check, so a NEW reason for the same check failing still reads as "known gap" (its problem lines still print). Glyphtender F89 removes the gap. Reviewed through: framework b3626bf · Glyphtender e8032bb.
 - F63 task 5 (2026-10-19): Glyphtender check:full 34/37 → 3 fixed (margins = the Dev Kit Fonts tab broke "every tab in view on desktop" → **Dev Kit 0.20.2** wraps the tab row on desktop, 7e80f0a; devkit-sound = its phone tab picker only pressed ▶; end = intermittent boot stall → Glyphtender B029) + Dev Kit area 10/10. Glyphtender B030: other e2e tab pickers press ▶ only. F66 task 4: real Glyphtender planner before "2 things to sort — Claude handles both" → after "all good · 1 planned for later" + 📌 F89 (`C:\Users\Muzzy\ppp-proof\glyphtender-after-*-v2.png`).
+- Muzzy 2026-10-19: F63 "plays the same — approved" (phone); F66 "yes, clear — approved".
