@@ -4,10 +4,10 @@ From the Oct 18 list audit (`~/.claude/config/bmuz/reviews/2026-10-18-reliabilit
 
 ## F76 🔧 Every Settings switch actually does something
 Done when: the UI kit's checks fail when a row in a game's `content/ui/settings.json` is switched on but nothing in the game reads it (rows the kit handles itself, like the Audio tab, are skipped), the planner says it in plain words, and Glyphtender passes or has its gaps on its roadmap.
-- [ ] 🤖 1. Find how games read a setting (Glyphtender, Goops, the kit's Settings block) so the check has one thing to look for → Notes — ui-kit/kit/blocks/Settings.tsx, glyphtender/src
-- [ ] 🤖 2. UI kit conformance check (static): every switched-on row id is read in game code outside the kit copies; plain-words sentence for the planner — ui-kit/kit/conformance.mjs, ~/.claude/config/bmuz/templates/ppp/framework-words.mjs
-- [ ] 🤖 3. Tests: a dead row → red · a read row → green · kit-handled rows skipped — ui-kit/kit/conformance tests
-- [ ] 🤖 4. Run it on Glyphtender: fix dead rows, or list them on its roadmap / known gaps — glyphtender (dev/framework-checks)
+- [x] 🤖 1. Find how games read a setting (Glyphtender, Goops, the kit's Settings block) so the check has one thing to look for → Notes — ui-kit/kit/blocks/Settings.tsx, glyphtender/src
+- [x] 🤖 2. UI kit conformance check (static): every switched-on row id is read in game code outside the kit copies; plain-words sentence for the planner — ui-kit/kit/conformance.mjs, ~/.claude/config/bmuz/templates/ppp/framework-words.mjs
+- [x] 🤖 3. Tests: a dead row → red · a read row → green · kit-handled rows skipped — ui-kit/kit/conformance tests
+- [x] 🤖 4. Run it on Glyphtender: fix dead rows, or list them on its roadmap / known gaps — glyphtender (dev/framework-checks)
 Check: the new check red on a fake dead row, green on Glyphtender after task 4.
 Ask Muzzy: —
 
@@ -33,3 +33,4 @@ Ask Muzzy: —
 
 Notes:
 - Muzzy 2026-10-19: "is there a hook for bmuz to clean up the screenshot files it makes?" Answer: cleanup.sh existed (Oct 4) but ran only when the /save and /deliver text was remembered; nothing covered Claude's own copies outside projects (~/spike 800 MB + ~/ppp-proof 240 MB). With his OK: both deleted (the half-pause experiment kept as glyphtender/.planning/research/f89-half-pause-spike.patch, 6b0f495) → F78 tasks 6–7.
+- F76 (2026-10-19, helper; Claude re-ran it on Glyphtender: ✓ "19 rows on: 8 read by the game, 11 handled by the kit / audio module"): UI kit **0.20.0** check "every Settings row that's switched on is read by the game" (static; reads = quoted id / object key / `.id`, not words from JSON or comments; info rows need `info={{ id }}`; kit-handled rows skipped; a placeholder example.com link fails) · 7 tests (ui-kit 360/360) · planner sentence (13/13) · Glyphtender 0.19.0 → 0.20.0 (38b7b62), check:framework 24 kept + known gap F89. Found elsewhere: **Goops' `version` row shows the placeholder** (no `info` text) → F62 · **Roll Better's privacy link is still example.com** → its Later note. Gap: games' check:fast doesn't run `check:framework --static`, so module checks only run at install + check:full.
