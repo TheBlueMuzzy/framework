@@ -9,7 +9,7 @@ Done when: installing a module, releasing, saving, archiving a sprint, the musts
 - [x] 🤖 3. `scripts/save.mjs "<summary>"` — build bump, STATE Log ≤10 (older → archive/log.md), commit, push; "safe to switch machines" only when the push really landed
 - [x] 🤖 4. `scripts/archive-sprint.mjs` + `scripts/musts-check.mjs <stage>` (plan reader) — archive only a finished sprint; list open `must:<stage>` features
 - [x] 🤖 5. `scripts/stop-servers.mjs [port|name]` (Windows: whole process tree) + a lock in `templates/check-all.mjs` (no second check run at once)
-- [ ] 🤖 6. Shrink /save, /deliver, /develop, /sprint, /play: "run it; if it fails, read the message"
+- [x] 🤖 6. Shrink /save, /deliver, /develop, /sprint, /play: "run it; if it fails, read the message"
 - [ ] 🤖 7. Prove it — `scripts/test-scripts.mjs` (throwaway repos) + one real use each; list in HOOKS.md
 Check: `node ~/.claude/config/bmuz/scripts/test-scripts.mjs` all green + the real uses quoted in Notes.
 Ask Muzzy: —
