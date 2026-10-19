@@ -1,18 +1,19 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 12 planned: every BMUZ step runs by itself or gets checked (F80 Everything triggers)** — `.planning/SPRINT.md`, 7 tasks, all 🤖, all in `~/.claude/` (skills + config/bmuz → laptop via /sync). Sprint 11 (F76–F78) approved and archived.
-- Muzzy's rule: "'only runs when it remembers' is a bad thing. 'always runs because it triggers' is much more solid." Kinds: ① automatic · ② judgement but checked · ③ judgement only (rare, with a reason).
-- Next: `/develop` → task 1, the line-by-line audit of every skill → give it to a helper; it writes `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`. Then /save + /deliver scripts (tasks 2–3), the session-end guard (4).
-- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver. Until then the session-start update notice compares against main (older), so it stays quiet.
-- Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest (UI kit 0.20.1), GitHub checks green, check-run lock, check:fast runs the framework code checks. It ships at its own /deliver.
-- Left in v0.9 after F80: **F62 Goops** (waits for the Goops session), F64/F65 starters (need F62).
+2026-10-19 — **F80 Everything triggers: built, reviewed, waiting for Muzzy's OK** (sprint 12, all 8 tasks ticked — `.planning/SPRINT.md` Notes has the whole story). Every BMUZ step is now ① automatic, ② checked (refused until on record) or ③ judgement with a reason; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+- What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
+- Muzzy: approve F80 ("approved") → `F80: done`, then archive sprint 12 and /save. Ask Muzzy: CLAUDE.md is his file — 19 rule lines unmarked; proposed marks are in SPRINT Notes (task 5).
+- Next after F80: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. New milestone **v0.10 "A whole studio around one designer"** (F81–F92) is planned — ready now: F81 producer's eye, F85 dependency audit, F86 old saves, F87 QA routine, F88 quality bars.
+- The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
+- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
+- Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
-Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 11:50 (sprint 11 review: 4 findings, all fixed)
+Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 13:18 (F80 review: 11 findings — 1 could lose the laptop's setup changes, 6 false alarms/nags — all fixed + tests)
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 12 — every BMUZ step runs by itself or gets checked
-Doing: F80 Everything triggers (task 1: the audit)   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
+Doing: F80 Everything triggers — built + reviewed, waiting for approval   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
@@ -30,6 +31,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-19 — F80 Everything triggers built + reviewed: /save and /deliver steps now run inside their scripts or are refused until done; saying "going to bed" with unpushed work can't end the turn; merge / live-check / rollback are one command each; every new rule must say how it happens. New milestone v0.10 "A whole studio around one designer" (F81–F92).
 - 2026-10-19 — Sprints 05–07 (one long session): BMUZ hooks + the hand-off card (F68, F73), the conformance pack `check:framework` (F61), the audit's ⭐ rules as hooks + the milestone look-back (F67, F74), and fragile jobs as scripts (F69: install, release, save, archive, musts, stop servers).
 - 2026-10-15 — Released v0.10.0: Dev Kit Select Mode (0.14.0–0.16.1) — proven by Glyphtender v0.11.0; review fix: Color tab keeps glow / panel texture.
 - 2026-09-29 — Sprint 04 built autonomously: F08 Dev Kit module, F09 Roll Better on it, F10 kit 0.2 (7 gaps), F11 Roll Better on kit 0.2.2 (+2 gaps found in the move). Reviews clean; 2 small save-endpoint hardenings (Dev Kit 0.1.1).
