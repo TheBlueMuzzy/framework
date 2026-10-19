@@ -25,7 +25,7 @@ Done when: `npm run check:framework` in a game runs every installed module's own
 - [x] 🤖 5. Audio quiet on full pause (audio listens to the Dev Kit pause, `PAUSE_EVENT`) · AI bot stops on half pause (`ai/kit/pace.ts` on the rules clock) · table replay = existing `selfTest` — each with its check
 - [x] 🤖 6. "What a game must provide" in every module README (from MODULE-CONTRACTS.md); ui-kit gets a README
 - [x] 🤖 7. Prove it: install into a throwaway copy of Goops → run `check:framework`; break one promise on purpose (a copied tuning value, a raw setTimeout) → the check names it and the fix; module tests + check scripts green
-- [ ] 🤖 8. BMUZ side: `check:framework` row in `~/.claude/config/bmuz/templates/check-all.mjs`, /deliver runs it, DEVKIT.md + MODULE-CONTRACTS.md point at it
+- [x] 🤖 8. BMUZ side: `check:framework` row in `~/.claude/config/bmuz/templates/check-all.mjs`, /deliver runs it, DEVKIT.md + MODULE-CONTRACTS.md point at it
 Check: the Goops-copy run quoted in Notes (pass + the deliberate break caught).
 Ask Muzzy: —
 Notes:
@@ -51,3 +51,6 @@ Notes:
   - Break 4, the text-box guard removed from Goops's keyDown → "✗ the game's hotkeys skip text boxes — the game's key handler took ArrowLeft, ArrowRight, ArrowUp typed in a text box … src/input/controls.ts:155".
   - Break 5, the crack count slid 3rem over the score → at first PASSED (HUD words are pointer-events: none, elementFromPoint looked through them) → fixed (a6a7dac: elementsFromPoint with everything hit-testable for a moment) → "✗ nothing overlaps — "0" × "CRACKS 0 / 10" [phone 390×844 · in play; small phone 360×780 · in play; laptop 1100×800 · in play]".
   - Lesson (not game-specific, for the BMUZ develop checklist — this helper can't edit ~/.claude): elementFromPoint / elementsFromPoint skip pointer-events: none, so a "what's on top here?" test misses HUD words unless every element is made hit-testable for that moment.
+- F61 checked first-hand by Claude (2026-10-18): all 6 modules' tests green on dev/conformance (devkit 446 · ui-kit 345 · audio 127 · table 47 · ai 47 · rooms 113), every module type-checks, ui-kit check-ui passes; fresh pill shots at 390×844 + 844×390 (mid-left, clear of CRACKS and the bottom bars). Pill fix cherry-picked to main as b6854bd (Dev Kit 0.18.1) for the Goops session; the rest stays on `dev/conformance` until /deliver. Task 8: check-all template rows (`framework (code)` --static in FAST, `framework` --port 5409 in E2E), /deliver runs check:framework, DEVKIT.md row + MODULE-CONTRACTS pointer; lesson → develop skill (elementsFromPoint skips pointer-events: none).
+- Open from F61 for later: the new checks find 63 overlaps + 34 cut-off texts in the ui-kit GALLERY (kit demos, not games) → a UI-kit fix feature; Glyphtender's bots on setTimeout → F63.
+- Commit gate fix found while merging: `tsc -b` wrote tsconfig.tsbuildinfo beside each framework module's tsconfig → single projects now get `tsc -p … --incremental false` (no cache file), `-b` only where a tsconfig lists references (Vite games keep their cache in node_modules/.tmp).
