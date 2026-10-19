@@ -39,6 +39,18 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
   const depth = stack.length
   const top = depth ? `${depth}-${stack[depth - 1]}` : '' // which screen is on top, e.g. "2-shop"
   const last = useRef({ depth, top }) // the stack as the focus code last saw it
+  const recentFocus = useRef<Element[]>([]) // the last few focused things, newest last
+
+  // A screen that focuses its own field as it opens (autoFocus, or its own effect) does so BEFORE the effect below
+  // notes the opener — so remember recent focus and take the newest one outside the new screen (review, 0.19.2).
+  useEffect(() => {
+    const note = (event: FocusEvent) => {
+      if (!(event.target instanceof Element)) return
+      recentFocus.current = [...recentFocus.current.filter(el => el !== event.target), event.target].slice(-8)
+    }
+    document.addEventListener('focusin', note)
+    return () => document.removeEventListener('focusin', note)
+  }, [])
 
   // Everything under the top screen is inert. Set straight on the page (not as an inert={…} prop,
   // which only React 19 understands), and before the focus code below runs, so a closing screen's
@@ -49,7 +61,13 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
   useLayoutEffect(() => {
     // A screen just opened: note what had focus, before the screen below turns inert and drops it.
     // (Here, not while drawing: React's rules say refs are read and written only in effects and handlers.)
-    if (depth > last.current.depth) openers.current[depth - 1] = document.activeElement
+    if (depth > last.current.depth) {
+      const opened = layers.current[depth]
+      const outside = (el: Element | null) => !!el && !opened?.contains(el)
+      openers.current[depth - 1] = outside(document.activeElement)
+        ? document.activeElement
+        : [...recentFocus.current].reverse().find(el => outside(el) && el.isConnected) ?? null
+    }
     layers.current.forEach((layer, i) => {
       layer?.toggleAttribute('inert', i < depth)
       layer?.toggleAttribute('data-covered', i > 0 && i < depth)

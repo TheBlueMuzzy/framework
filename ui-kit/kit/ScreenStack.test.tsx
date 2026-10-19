@@ -102,6 +102,17 @@ describe('ScreenStack focus', () => {
     act(() => screens.pop()) // the swapped-in screen still hands focus back to what opened the first one
     expect(document.activeElement).toBe(game)
   })
+
+  it('a screen that focuses its own field as it opens (autoFocus) still hands focus back to its opener (0.19.2)', () => {
+    const withField = { ...testScreens, name: () => <input aria-label="Your name" autoFocus /> }
+    render(<ScreenStack screens={withField}><button>Game button</button></ScreenStack>)
+    const game = screen.getByText('Game button')
+    game.focus()
+    act(() => screens.push('name'))
+    expect(document.activeElement).toBe(screen.getByLabelText('Your name'))
+    act(() => screens.pop())
+    expect(document.activeElement).toBe(game)
+  })
 })
 
 describe('overlay game box', () => {
