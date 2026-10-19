@@ -13,24 +13,7 @@ import { HEALTH_WORDS, type SaveHealth } from '../health'
 import type { BackupNudge } from '../nudge'
 import type { Save, SlotSaves } from '../saves'
 import { copyText, downloadSaveFile, makeSaveCode, readSaveCode, readSaveFile, saveFileName } from '../saveCode'
-
-export const SAVE_PANEL_WORDS = {
-  title: 'Save code',
-  intro: 'Your save code holds all your progress. Keep a copy somewhere safe, or paste it into the game on another device.',
-  yourCode: 'Your save code',
-  copy: 'Copy code',
-  copied: 'Save code copied.',
-  copyFailed: 'Couldn\'t copy it — select the code and copy it yourself.',
-  download: 'Download file',
-  downloadFailed: 'This browser couldn\'t download the file — copy the code instead.',
-  paste: 'Paste a save code',
-  load: 'Load code',
-  loadFile: 'Load a file',
-  askTitle: 'Load this save?',
-  askMessage: 'Progress is combined with what\'s on this device (nothing is lost); other saved choices are replaced. The save on this device is kept as a backup.',
-  loaded: 'Save loaded.',
-  close: 'Close',
-}
+import { SAVE_PANEL_WORDS } from './panelWords'
 
 type AnySave = Save<any> | SlotSaves<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
 
