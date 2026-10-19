@@ -1,6 +1,6 @@
 [
-  { "id": "zippy", "name": "Zippy", "color": "#e8553d", "badge": "bot", "detail": "Score 12 · Locks 5/8" },
-  { "id": "bolt", "name": "Bolt", "color": "#2f8fd8", "badge": "bot", "detail": "Score 4 · Locks 2/8" },
-  { "id": "pip", "name": "Pip", "color": "#3a9d5d", "badge": "bot", "detail": "Score 9 · Locks 4/8" },
+  { "id": "zippy", "name": "Zippy", "color": "#c8402a", "badge": "bot", "detail": "Score 12 · Locks 5/8" },
+  { "id": "bolt", "name": "Bolt", "color": "#1f74b8", "badge": "bot", "detail": "Score 4 · Locks 2/8" },
+  { "id": "pip", "name": "Pip", "color": "#2b7d4c", "badge": "bot", "detail": "Score 9 · Locks 4/8" },
   { "id": "sam", "name": "Sam Rivera", "color": "#8a55c9", "badge": "left", "detail": "Score 15 · Locks 6/8" }
 ]

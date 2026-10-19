@@ -39,6 +39,14 @@ describe('PlayerChip', () => {
     expect(container.querySelector('[aria-label="12 points"]')).toBeTruthy()
     expect(container.querySelector('.kit-player-chip')?.getAttribute('data-state')).toBe('active')
   })
+  it('keeps room for its biggest score from the start (scoreDigits, default 2), and the avatar knows it has its own colour', () => {
+    const digits = (el: Element) => (el.querySelector('.kit-float-anchor') as HTMLElement).style.getPropertyValue('--kit-digits')
+    const { container, rerender } = render(<PlayerChip name="Muzzy" color="#e8553d" score={3} />)
+    expect(digits(container)).toBe('2')
+    rerender(<PlayerChip name="Muzzy" color="#e8553d" score={3} scoreDigits={3} />)
+    expect(digits(container)).toBe('3')
+    expect(container.querySelector('.kit-avatar')?.hasAttribute('data-color')).toBe(true)
+  })
   it('a goal chip: an icon instead of the avatar', () => {
     const { container } = render(<PlayerChip name="Goal" icon="◎" score={30} />)
     expect(container.querySelector('.kit-avatar')).toBeNull()

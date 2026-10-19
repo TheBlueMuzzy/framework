@@ -293,16 +293,18 @@ export function PlayerSeats({ players, activeId }: { players: Seat[]; activeId?:
 //   avatar: a picture; avatar={false} hides it — with icon, that makes a goal/target chip.
 // The score counts up when it rises (and floats up "+N" — floatUps={false} when the game already flies the points
 // in itself); with reduce motion on it just changes.
+//   scoreDigits (0.21.0): room for a score this many digits long from the start (default 2, i.e. up to 99) — give the
+//         biggest score the game can reach, so 99 → 100 never widens the chip.
 // Like every HUD piece it never catches taps: the game underneath gets them.
 // It keeps its size once it's on screen (0.21.0, useFixedSize): a score going from 9 to 10 mustn't shove its neighbours.
 export const playerChipWords = { score: '{n} points' }
 export type PlayerChipProps = {
   name: string; showName?: boolean; color?: string; avatar?: string | false; icon?: ReactNode
-  score?: number; scoreIcon?: ReactNode; detail?: ReactNode; badge?: ReactNode
+  score?: number; scoreDigits?: number; scoreIcon?: ReactNode; detail?: ReactNode; badge?: ReactNode
   active?: boolean; dim?: boolean; size?: 'xs' | 's' | 'm'; floatUps?: boolean; words?: Partial<typeof playerChipWords>
 }
 export function PlayerChip({
-  name, showName = true, color, avatar, icon, score, scoreIcon = '★', detail, badge,
+  name, showName = true, color, avatar, icon, score, scoreDigits = 2, scoreIcon = '★', detail, badge,
   active, dim, size = 'm', floatUps = true, words,
 }: PlayerChipProps) {
   const w = { ...playerChipWords, ...words }
@@ -332,7 +334,7 @@ export function PlayerChip({
       {score !== undefined && (
         <span className="kit-player-chip-score" role="img" aria-label={fill(w.score, { n: score })}>
           <span className="kit-player-chip-star" aria-hidden="true">{scoreIcon}</span>
-          <span className="kit-float-anchor" aria-hidden="true">
+          <span className="kit-float-anchor" aria-hidden="true" style={{ '--kit-digits': Math.max(scoreDigits, String(score).length) } as CSSProperties}>
             <Text kind={size === 'm' ? 'heading' : 'label'}>{shownScore}</Text>{floatUps && floats}
           </span>
         </span>
