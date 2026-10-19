@@ -1,5 +1,5 @@
 # Sprint 05 — the computer enforces Muzzy's "never" rules and the checks (not Claude's memory), and every module tests its own promises
-Started 2026-10-18 · Milestone v0.9 · Features: F68, F61 (F61 pulled in 2026-10-18: Dev Kit 0.18.0 landed — 44b6bb9, dfeb56d; built by a helper in parallel, no shared files)
+Started 2026-10-18 · Milestone v0.9 · Features: F68, F61, F73 (F73 added 2026-10-18 at Muzzy's ask; F61 pulled in 2026-10-18: Dev Kit 0.18.0 landed — 44b6bb9, dfeb56d; built by a helper in parallel, no shared files)
 Plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md (step 1). Everything lives in ~/.claude (scripts in
 `~/.claude/config/bmuz/hooks/`, wiring in `~/.claude/settings.json` + skill frontmatter) → synced to the laptop by /sync.
 
@@ -14,8 +14,17 @@ each; Muzzy has read every hook in plain words (HOOKS.md) and OK'd it; the lapto
 - [x] 🤖 6. check-ui after edits — `hooks/check-ui-edit.sh` (PostToolUse Edit|Write on `src/ui/**`): `node src/ui/kit/check-ui.mjs <file>`, result fed back to Claude; quiet when the game has no kit
 - [x] 🤖 7. Prove it — `hooks/test-hooks.sh`: a block + an allow case per hook from fake tool JSON; one real try each in a scratch repo; write `config/bmuz/HOOKS.md` (each hook in plain words, how to switch one off); one line in CLAUDE.md "Undo" + PROJECT-FILES pointing at it
 - [ ] 🙋 8. Read HOOKS.md and OK it → /sync so the laptop gets them
-Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green (83/83, 2026-10-18) + the real tries quoted in Notes.
+Check: `node ~/.claude/config/bmuz/hooks/test-hooks.mjs` all green (94/94 with F73, 2026-10-18) + the real tries quoted in Notes.
 Ask Muzzy: —
+## F73 🔧 Standard hand-off card
+Done when: every turn in which Claude did work ends with the card (or the progress line while work still runs) — enforced by a Stop hook, proven on fake and real conversation logs; Muzzy sees it at the next hand-off.
+- [x] 🤖 1. Template Muzzy can edit — `~/.claude/config/bmuz/templates/handoff.md` (Done · You'll see · Try it · Proof · Questions · Next `/command` — what it covers; progress line format)
+- [x] 🤖 2. Stop hook `hooks/handoff-check.mjs` (global): reads this turn from the conversation log; work (Edit/Write or a commit) → card or progress line required, labels read from the template; sent back once (no loops)
+- [x] 🤖 3. Prove it — 10 cases in test-hooks (94/94 total) + a run on this session's real log (plain "All done" → sent back; progress line → allowed)
+- [x] 🤖 4. Docs — /develop §4, CLAUDE.md, HOOKS.md row 7 (+ Muzzy's questions answered: hook 4 covers every project, hook 6 isn't visual)
+- [ ] 🙋 5. Muzzy: look at the next hand-off — is this the format you want?
+Check: the next hand-off arrives as the card.
+
 ## F61 🧱 Conformance pack
 Done when: `npm run check:framework` in a game runs every installed module's own promise checks and says in plain words what to wire and where when one fails; proven on a throwaway COPY of Goops (Goops itself = F62, the Goops session's); each module README has "What a game must provide"; the PAUSED pill no longer covers a game's top row on a 390-wide phone.
 - [x] 🤖 1. PAUSED pill (bug from the Goops session): the closed-panel badge sits fixed top-centre over the game's top HUD row (Goops "CRACKS 0/10", 390 wide) → move it clear of game HUD (position from `content/devkit.json`, safe-area aware), Dev Kit 0.18.1 — `devkit/kit/pause/PauseButtons.tsx`, `devkit/kit/devkit.css`
