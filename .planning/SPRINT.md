@@ -11,6 +11,7 @@ Done when: a session started in a game prints the sprint line every time ("Sprin
 - [x] 🤖 5. plan-lint: a ⏳ feature whose needs are all done → "set it 🟢" (built in F80 task 5) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
 - [x] 🤖 6. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
 Check: session start in a fake game with a 9-day-old sprint, a target 5 days out and a feature untouched for 8 days prints exactly those lines; a healthy game prints only the sprint line; archive-sprint refuses without a Retro block.
+Checked: session-start-producer suite 9/9 (the 9-day sprint prints exactly the sprint line + target + stalled F08; healthy → sprint line only; ❓ decisions and mid-sprint additions not "stalled"; a future start date → no "day -N") · archive-retro 9/9 (no retro → refused; Obsidian-style retros read) · real runs: framework "📅 Sprint 13 · day 1 (the last 3 took ~1 day)", Goops adds "⚠ Waiting on you: 1 task (try them: wording, timing, pointers)" · test-hooks 496/496, test-scripts 203/203.
 Ask Muzzy: —
 
 ## F87 🔧 QA routine
@@ -22,6 +23,7 @@ Done when: every feature in a sprint has a `Check:` line (its test plan), `Fnn: 
 - [x] 🤖 5. Tests + HOOKS.md rows — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/config/bmuz/HOOKS.md
 - [x] 🤖 6. One check:fast at a time per project (Muzzy, relaying the Goops session: two runs at once collide in dist/) — wait for the other run, reuse its pass — ~/.claude/config/bmuz/hooks/lib.mjs
 Check: plan-lint flags a sprint feature without Check:; guard-git refuses `F08: done` without Checked: and allows it with one; a stage release without a playtest log is refused, with one it passes.
+Checked: qa-routine suite green (no Check: → flagged; "- Check:" / "**Check**:" count; F08: done without Checked: → refused, with one / as a bullet / in an archived sprint → allowed; lowercase "f08: done" still checked; old P1 flagged) · release-playtest suite green (stage release without a playtest log refused, with one passes, --no-playtest-ok recorded) · lock: stop-check-fast suite 19/19 (a busy run → wait and leave it; a dead lock taken over; the other run's pass reused) · real projects read-only: only Goops F30 + F32 missing Check: · test-hooks 496/496, test-scripts 203/203.
 Ask Muzzy: —
 
 Notes:
