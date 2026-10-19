@@ -6,7 +6,7 @@
 - After F88 is approved + sprint 14 archived: **/deliver the framework** (Muzzy said yes 2026-10-19) — merge dev/conformance into main. F86 is now a Saves module (versioning inside), its own sprint later. Ready later in v0.10: F82–F85. Goops' session: F30/F32 need Check: lines; F33/F49/F53 ready (ROADMAP Ideas).
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
-- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
+- dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + F88 + **UI kit 0.21.0 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
 Reviewed through: framework a898caf (sprint 14 review: 4 findings, 3 fixed + tests, 1 kept on purpose) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
