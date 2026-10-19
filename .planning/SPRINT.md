@@ -4,7 +4,7 @@ Scripts live in `~/.claude/config/bmuz/scripts/` (plain Node, like the hooks) �
 
 ## F69 🔧 Scripts for fragile procedures
 Done when: installing a module, releasing, saving, archiving a sprint, the musts check and stopping servers are each one command that refuses with a plain-words reason instead of half-finishing; the skills say "run it; if it fails, read the message"; each script proven in throwaway repos + one real use.
-- [ ] 🤖 1. `scripts/install-module.mjs <module> <game>` — refuses when the module's own tests/checks are red in the framework; dry run, then the module's installer; then `check:framework --static --only <module>` in the game; prints the steps left
+- [x] 🤖 1. `scripts/install-module.mjs <module> <game>` — refuses when the module's own tests/checks are red in the framework; dry run, then the module's installer; then `check:framework --static --only <module>` in the game; prints the steps left
 - [ ] 🤖 2. `scripts/release.mjs <update|milestone|stage|major> [--dry-run]` — version bump per `references/versioning.md`, version.json history, package.json sync, commit `Release vX.Y.Z: …` + tag (no push — /deliver pushes after the smoke pass)
 - [ ] 🤖 3. `scripts/save.mjs "<summary>"` — build bump, STATE Log ≤10 (older → archive/log.md), commit, push; "safe to switch machines" only when the push really landed
 - [ ] 🤖 4. `scripts/archive-sprint.mjs` + `scripts/musts-check.mjs <stage>` (plan reader) — archive only a finished sprint; list open `must:<stage>` features
