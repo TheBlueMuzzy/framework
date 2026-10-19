@@ -47,7 +47,7 @@ gallery's `npm run shoot` uses the same one.
   0.19.2 (review): a screen that focuses its own field as it opens (autoFocus) gets in before that effect, so ScreenStack
   remembers recent focus and takes the newest thing outside the new screen as the opener. Closing it hands focus back again.
   0.20.0: a new check — every Settings row that's switched on must be read by the game, so no switch shows that does
-  nothing (Glyphtender once shipped 12). Runs with `--static` too, so `check:fast` catches it.
+  nothing (Glyphtender once shipped 12). It only reads code, so it runs with `--static` too (the module installer's game check).
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
