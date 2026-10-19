@@ -1,6 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { SIZES, check, checkUiArgs, groupProblems, whereText } from './conformance.mjs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { SIZES, check, checkUiArgs, creditProblems, groupProblems, listAssets, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -29,7 +32,8 @@ describe('UI kit checks', () => {
   it('--static: runs check-ui only, and asks for a check:ui script when the game has none', async () => {
     const results = []
     const t = {
-      rel: 'src/ui/kit', staticOnly: true, scripts: () => ({}),
+      root: join(tmpdir(), 'no-such-game'), rel: 'src/ui/kit', staticOnly: true, scripts: () => ({}),
+      json: () => null, gameCode: () => [],
       run: (cmd, args) => ({ code: 0, out: `${cmd} ${args.join(' ')}` }),
       pass: (name, detail) => results.push({ name, ok: true, detail }),
       fail: (name, problems, fix) => results.push({ name, ok: false, problems, fix }),
@@ -37,10 +41,55 @@ describe('UI kit checks', () => {
     }
     await check(t)
     expect(results.map((r) => [r.name, r.ok ?? 'skip'])).toEqual([
+      ['every asset is credited', true],
       ['the game\'s UI code keeps the kit\'s rules (check-ui)', true],
       ['check-ui runs in check:fast', false],
       ['the game at every size', 'skip'],
     ])
-    expect(results[0].detail).toBe('node src/ui/kit/check-ui.mjs src/ui --css src')
+    expect(results[1].detail).toBe('node src/ui/kit/check-ui.mjs src/ui --css src')
+  })
+})
+
+describe('credits', () => {
+  const dir = (name) => ({ name, isDirectory: () => true })
+  const file = (name) => ({ name, isDirectory: () => false })
+  const tree = {
+    public: [dir('art'), file('favicon.svg'), file('robots.txt')],
+    'public/art': [file('hero.png')],
+    src: [dir('ui'), dir('devkit')],
+    'src/ui': [dir('kit')],
+    'src/ui/kit': [dir('fonts'), file('Button.tsx')],
+    'src/ui/kit/fonts': [file('nunito.woff2')],
+    'src/devkit': [file('dev-only.png')],
+  }
+  const readdir = (rel) => { if (!tree[rel]) throw new Error('no such folder'); return tree[rel] }
+  it('lists the art, sound and fonts the game ships — not dev-only folders or code', () => {
+    expect(listAssets('/game', readdir).sort()).toEqual(['public/art/hero.png', 'public/favicon.svg', 'src/ui/kit/fonts/nunito.woff2'])
+  })
+  it('finds unlisted files (a folder ending in / covers everything in it), 🔴 entries and 🟡 without a credit line', () => {
+    const assets = ['public/art/hero.png', 'public/favicon.svg', 'src/ui/kit/fonts/nunito.woff2']
+    const entries = [
+      { paths: ['public/art/'], source: 'Muzzy', light: '🟢' },
+      { paths: ['src/ui/kit/fonts/nunito.woff2'], source: 'Google Fonts', light: '🟡', credit: '' },
+      { paths: ['public/x.mp3'], source: 'Some site', light: '🔴' },
+    ]
+    const found = creditProblems(assets, entries)
+    expect(found.unlisted).toEqual(['public/favicon.svg'])
+    expect(found.red).toEqual(['Some site (public/x.mp3)'])
+    expect(found.noCredit).toEqual(['Google Fonts (src/ui/kit/fonts/nunito.woff2)'])
+  })
+  it('all listed, credited and shown → three passes', async () => {
+    const results = []
+    const root = mkdtempSync(join(tmpdir(), 'credits-'))
+    mkdirSync(join(root, 'public')); writeFileSync(join(root, 'public', 'a.png'), '')
+    const t = {
+      root, json: () => [{ paths: ['public/a.png'], source: 'Kenney', light: '🟡', credit: 'Kenney.nl' }],
+      gameCode: () => [{ path: 'src/ui/menus.tsx', text: "import credits from '../../content/credits.json'" }],
+      pass: (name) => results.push([name, true]), fail: (name) => results.push([name, false]),
+    }
+    const { checkCreditsForTest } = await import('./conformance.mjs')
+    await checkCreditsForTest(t)
+    expect(results).toEqual([['every asset is credited', true], ['nothing 🔴 ships', true], ['every 🟡 credit is shown', true]])
+    rmSync(root, { recursive: true, force: true })
   })
 })

@@ -53,7 +53,69 @@ export function checkUiArgs(script = '') {
   return script.split('check-ui.mjs')[1].split(/&&|\|\||;|\|/)[0].trim().split(/\s+/).filter(Boolean)
 }
 
+// ---- credits (PROJECT-FILES "content/credits.json") ----
+// Every font / picture / sound / model the game ships is listed in content/credits.json (our own work too, as 🟢 "own
+// work", so the check can tell it apart from a forgotten download); nothing 🔴 ships; every 🟡 has its credit line,
+// and the game shows the file on its Credits screen (the kit's Credits reads it).
+export const ASSET_EXTS = /\.(png|jpe?g|webp|gif|svg|avif|ico|mp3|ogg|wav|m4a|flac|webm|mp4|woff2?|ttf|otf|glb|gltf|fbx|obj|hdr|ktx2)$/i
+const NOT_SHIPPED = ['node_modules', 'dist', 'e2e-shots', 'test-results', '.planning', '.claude', 'src/devkit', 'src/devkit-game', 'e2e', 'tests', 'scripts']
+
+/** The asset files the game ships (public/, src/, content/), as "public/art/a.png". */
+export function listAssets(root, readdir, dirs = ['public', 'src', 'content']) {
+  const out = []
+  const walk = (rel) => {
+    let entries
+    try { entries = readdir(rel) } catch { return }
+    for (const entry of entries) {
+      const path = `${rel}/${entry.name}`
+      if (NOT_SHIPPED.some((s) => path === s || path.startsWith(`${s}/`))) continue
+      if (entry.isDirectory()) walk(path)
+      else if (ASSET_EXTS.test(entry.name)) out.push(path)
+    }
+  }
+  for (const d of dirs) walk(d)
+  return out
+}
+
+/** What's wrong with the credits: { unlisted: [paths], red: [lines], noCredit: [lines] } (empty lists = fine). */
+export function creditProblems(assets, entries) {
+  const listed = (path) => entries.some((e) => (e.paths ?? []).some((p) => p === path || (p.endsWith('/') && path.startsWith(p))))
+  const name = (e) => `${e.source ?? '?'} (${(e.paths ?? []).join(', ')})`
+  return {
+    unlisted: assets.filter((a) => !listed(a)),
+    red: entries.filter((e) => e.light === '🔴').map(name),
+    noCredit: entries.filter((e) => e.light === '🟡' && !String(e.credit ?? '').trim()).map(name),
+  }
+}
+
+export async function checkCreditsForTest(t) { return checkCredits(t) }
+async function checkCredits(t) {
+  const { readdirSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const assets = listAssets(t.root, (rel) => readdirSync(join(t.root, rel), { withFileTypes: true }))
+  const entries = t.json('content/credits.json')
+  if (!entries) {
+    if (!assets.length) return t.pass('every asset is credited', 'no art, sound or font files')
+    return t.fail('every asset is credited', [`content/credits.json is missing (or not valid JSON) — ${assets.length} asset file(s) to list, e.g. ${assets.slice(0, 3).join(', ')}`],
+      'Make content/credits.json (format: ~/.claude/config/bmuz/PROJECT-FILES.md) and list every file — our own work too, as 🟢 "own work".')
+  }
+  const { unlisted, red, noCredit } = creditProblems(assets, Array.isArray(entries) ? entries : [])
+  if (unlisted.length) t.fail('every asset is credited', [...unlisted.slice(0, 12), ...(unlisted.length > 12 ? [`…and ${unlisted.length - 12} more`] : [])],
+    'List each file (or its folder, ending in /) in content/credits.json with source, author, licence and light (indie-toolkit.md) — our own work too, as 🟢 "own work".')
+  else t.pass('every asset is credited', `${assets.length} files`)
+  if (red.length) t.fail('nothing 🔴 ships', red, 'A 🔴 licence can\'t ship: swap the asset for one we may use (placeholder ladder in indie-toolkit.md).')
+  else t.pass('nothing 🔴 ships')
+  const yellow = (Array.isArray(entries) ? entries : []).filter((e) => e.light === '🟡')
+  if (!yellow.length) return t.pass('every 🟡 credit is shown', 'none needed')
+  const shown = t.gameCode().some((f) => /content\/credits\.json['"]/.test(f.text))
+  const problems = [...noCredit.map((n) => `no "credit" line: ${n}`), ...(shown ? [] : ['no game code reads content/credits.json, so the Credits screen can\'t show the 🟡 lines'])]
+  if (problems.length) t.fail('every 🟡 credit is shown', problems, 'Give each 🟡 entry its "credit" text, and pass the file to the kit\'s Credits screen: import credits from \'../../content/credits.json\' → <Credits assets={credits} />.')
+  else t.pass('every 🟡 credit is shown', `${yellow.length} on the Credits screen`)
+}
+
 export async function check(t) {
+  await checkCredits(t)
+
   // ---- code: the kit's rule checker ----
   {
     const name = 'the game\'s UI code keeps the kit\'s rules (check-ui)'
