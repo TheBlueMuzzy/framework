@@ -85,6 +85,14 @@ describe('findProblems — quality bars', () => {
     ])
   })
 
+  it('edge: words are measured by their ink — a ‹ in a snug icon button has room; a "+4" floating away is not judged', async () => {
+    const found = await problemsOn(`<div style="margin:20px">
+      <button style="width:44px;height:44px;padding:0;font-size:39px;line-height:1;background:#fff;border:1px solid #333">‹</button>
+      <span style="display:inline-block;background:#336;color:#fff;padding:4px">7<span style="display:inline-block;position:relative;top:-8px;animation:up 5s">+4</span></span></div>
+      <style>@keyframes up { to { transform: translateY(-30px) } }</style>`)
+    expect(only('edge', found)).toEqual([])
+  })
+
   it('edge: a picture marked data-ui-bleed may run edge to edge; a badge hanging outside the card is not "in" it', async () => {
     const found = await problemsOn(`<div style="${card};padding:0;margin:20px;position:relative;overflow:hidden">
       <img data-ui-bleed alt="" style="display:block;width:100%;height:60px;background:#933">

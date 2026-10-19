@@ -11,7 +11,8 @@
 //              video, text with an outline or shadow (Cartoon ink, Neon glow), and disabled controls. — 0.21.0
 //   "edge:"    something in a drawn box (a card, chip, badge, button: a border, shadow or its own background) closer than
 //              2 px to the box's inside edge — text, an icon, a picture, an avatar or a badge. Things meant to run edge
-//              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area are skipped. — 0.21.0
+//              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
+//              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
@@ -195,13 +196,21 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   }
   const scrolls = (el) => { const s = getComputedStyle(el); return /(auto|scroll)/.test(s.overflowX + s.overflowY) && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) }
   // Words are measured by the words themselves (not their element, which may be wider): side to side as wide as they
-  // run, top to bottom one font size per line (the letters — not the extra space a font keeps above and below them).
+  // run, top to bottom by their ink — the letters' real top and bottom (the browser measures them in that font), not
+  // the extra space a font keeps above and below (a ‹ in an icon button is much smaller than its line).
   const wordsBox = (nodes) => {
     const range = document.createRange()
     const rects = nodes.flatMap((n) => {
       range.selectNodeContents(n)
-      const size = parseFloat(getComputedStyle(n.parentElement).fontSize)
-      return [...range.getClientRects()].map((r) => ({ left: r.left, right: r.right, top: (r.top + r.bottom - size) / 2, bottom: (r.top + r.bottom + size) / 2 }))
+      const s = getComputedStyle(n.parentElement)
+      pixel.font = s.font
+      const words = n.textContent.trim()
+      const ink = pixel.measureText(s.textTransform === 'uppercase' ? words.toUpperCase() : words)
+      return [...range.getClientRects()].map((r) => {
+        const scale = r.height / (ink.fontBoundingBoxAscent + ink.fontBoundingBoxDescent) // < 1 when shrunk (a pinned chip)
+        const baseline = r.top + ink.fontBoundingBoxAscent * scale // a line's box starts that far above its baseline
+        return { left: r.left, right: r.right, top: baseline - ink.actualBoundingBoxAscent * scale, bottom: baseline + ink.actualBoundingBoxDescent * scale }
+      })
     })
     if (!rects.length) return null
     return { left: Math.min(...rects.map((r) => r.left)), top: Math.min(...rects.map((r) => r.top)), right: Math.max(...rects.map((r) => r.right)), bottom: Math.max(...rects.map((r) => r.bottom)) }
@@ -210,14 +219,16 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     if (!deep) return [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim())
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
     const out = []
-    while (walker.nextNode()) if (walker.currentNode.textContent.trim()) out.push(walker.currentNode)
+    while (walker.nextNode()) if (walker.currentNode.textContent.trim() && !moving(walker.currentNode.parentElement)) out.push(walker.currentNode)
     return out
   }
+  // Something moving right now (a "+4" floating up and away) is passing by, not sitting in the box: not judged
+  const moving = (el) => el.getAnimations?.().some((a) => a.playState === 'running') ?? false
   // Text, an icon or a picture closer than 2 px to the inside edge of the box around it → the plain-words problem, or ''.
   // Text: its own box counts too (a badge's words). A picture, avatar or badge is measured against the box it sits in;
   // an icon made of a character (role="img" around ★) by its character.
   const tooClose = (el, isText) => {
-    if (!shown(el) || el.closest('[data-ui-bleed]') || el.parentElement?.closest('svg')) return '' // (an svg's own insides: its icon counts as one)
+    if (!shown(el) || moving(el) || el.closest('[data-ui-bleed]') || el.parentElement?.closest('svg')) return '' // (an svg's own insides: its icon counts as one)
     const boxItem = ['IMG', 'svg', 'CANVAS', 'VIDEO'].includes(el.tagName) || el.matches('.kit-avatar, .kit-badge')
     const content = !isText && boxItem ? el.getBoundingClientRect() : wordsBox(wordsIn(el, !isText))
     if (!content) return ''
