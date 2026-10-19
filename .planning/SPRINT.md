@@ -8,7 +8,7 @@ Done when: installing a module, releasing, saving, archiving a sprint, the musts
 - [x] 🤖 2. `scripts/release.mjs <update|milestone|stage|major> [--dry-run]` — version bump per `references/versioning.md`, version.json history, package.json sync, commit `Release vX.Y.Z: …` + tag (no push — /deliver pushes after the smoke pass)
 - [x] 🤖 3. `scripts/save.mjs "<summary>"` — build bump, STATE Log ≤10 (older → archive/log.md), commit, push; "safe to switch machines" only when the push really landed
 - [x] 🤖 4. `scripts/archive-sprint.mjs` + `scripts/musts-check.mjs <stage>` (plan reader) — archive only a finished sprint; list open `must:<stage>` features
-- [ ] 🤖 5. `scripts/stop-servers.mjs [port|name]` (Windows: whole process tree) + a lock in `templates/check-all.mjs` (no second check run at once)
+- [x] 🤖 5. `scripts/stop-servers.mjs [port|name]` (Windows: whole process tree) + a lock in `templates/check-all.mjs` (no second check run at once)
 - [ ] 🤖 6. Shrink /save, /deliver, /develop, /sprint, /play: "run it; if it fails, read the message"
 - [ ] 🤖 7. Prove it — `scripts/test-scripts.mjs` (throwaway repos) + one real use each; list in HOOKS.md
 Check: `node ~/.claude/config/bmuz/scripts/test-scripts.mjs` all green + the real uses quoted in Notes.
