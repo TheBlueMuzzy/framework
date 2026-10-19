@@ -38,6 +38,7 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
   const openers = useRef<(Element | null)[]>([]) // what had focus when each screen opened
   const depth = stack.length
   const top = depth ? `${depth}-${stack[depth - 1]}` : '' // which screen is on top, e.g. "2-shop"
+  const last = useRef({ depth, top }) // the stack as the focus code last saw it
 
   // Everything under the top screen is inert. Set straight on the page (not as an inert={…} prop,
   // which only React 19 understands), and before the focus code below runs, so a closing screen's
@@ -46,6 +47,9 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
   // Open screens under the top one (layers 1 … depth-1) are hidden too: data-covered → visibility hidden (kit.css),
   // which keeps their scroll position and state for when they come back.
   useLayoutEffect(() => {
+    // A screen just opened: note what had focus, before the screen below turns inert and drops it.
+    // (Here, not while drawing: React's rules say refs are read and written only in effects and handlers.)
+    if (depth > last.current.depth) openers.current[depth - 1] = document.activeElement
     layers.current.forEach((layer, i) => {
       layer?.toggleAttribute('inert', i < depth)
       layer?.toggleAttribute('data-covered', i > 0 && i < depth)
@@ -54,9 +58,6 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
 
   // Keyboard/gamepad focus: into a screen when it opens (or is swapped in by replace),
   // back to its opener when it closes.
-  const last = useRef({ depth, top })
-  // Noted while drawing, before the screen below turns inert and drops its focus.
-  if (depth > last.current.depth) openers.current[depth - 1] = document.activeElement
   useEffect(() => {
     if (depth < last.current.depth) {
       (openers.current[depth] as HTMLElement | null)?.focus?.()
