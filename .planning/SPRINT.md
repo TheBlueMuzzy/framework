@@ -26,3 +26,4 @@ Ask Muzzy: —
 Notes:
 - Muzzy 2026-10-19 (sprint 13 OK): status block = the sprint line always + only the lines that need attention ("aligned with your suggestion"); yes to marking his CLAUDE.md rule lines ①/②/③ (done at sprint start — see below).
 - This sprint's own features carry `Check:` lines already, so F87 doesn't send its own sprint back.
+- CLAUDE.md marks (Muzzy: yes): all 19 rule lines now end with their kind, his wording untouched — ① 3 (undo guards, context checkpoint, gws never synced) · ② 8 (dependencies, focus, tweakables in UI, "your game", hand-off card, progress line, verify) · ③ 8 (manner, design judgement; breathing room until F88, R3F + game numbers until F90). rule-kind --all: CLAUDE.md 19 → 0.
