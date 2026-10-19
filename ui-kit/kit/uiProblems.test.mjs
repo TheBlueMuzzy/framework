@@ -125,5 +125,32 @@ describe('findProblems — quality bars', () => {
     await frames(2)
     const found = await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false })
     expect(only('grows', found).map((p) => p.replace(/from .*/, ''))).toEqual(['grows: "Round 3+ 40 pointsand more" grew ', 'grows: "Cy" grew '])
+    // read once: the next screen's check doesn't blame these again
+    expect(only('grows', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
+  })
+
+  it('grows: a card that widens because its column did, or once its picture has loaded, is not flagged', async () => {
+    await page.setContent(`<!doctype html><style>body{margin:0;font:16px sans-serif} #column{width:200px} .card{padding:12px;background:#fff;border:2px solid #333}</style>
+      <div id="column"><div class="card" id="widens">Level 2</div></div>
+      <div class="card" id="picture" style="display:inline-block">Reward <img id="img" alt=""></div>`)
+    const frames = (n) => page.evaluate((count) => new Promise((done) => { const step = (left) => (left ? requestAnimationFrame(() => step(left - 1)) : done()); step(count) }), n)
+    await page.evaluate((code) => {
+      const watch = new Function(`return (${code})`)()
+      // the picture is still loading when the card appears (a src that answers later)
+      const img = document.getElementById('img')
+      Object.defineProperty(img, 'complete', { configurable: true, get: () => false })
+      watch(document.getElementById('widens'))
+      watch(document.getElementById('picture'))
+    }, watchFixedSize.toString())
+    await frames(4)
+    await page.evaluate(() => {
+      document.getElementById('column').style.width = '320px' // a sidebar went away
+      const img = document.getElementById('img')
+      img.style.cssText = 'width:60px;height:60px;display:inline-block;background:#c90'
+      delete img.complete
+      img.dispatchEvent(new Event('load'))
+    })
+    await frames(6)
+    expect(only('grows', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
   })
 })

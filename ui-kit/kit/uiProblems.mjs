@@ -224,7 +224,8 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   }
   // Something moving right now (a "+4" floating up and away) is passing by, not sitting in the box: not judged
   const moving = (el) => el.getAnimations?.().some((a) => a.playState === 'running') ?? false
-  // Text, an icon or a picture closer than 2 px to the inside edge of the box around it → the plain-words problem, or ''.
+  // Text, an icon or a picture closer than ~2 px to the inside edge of the box around it → the plain-words problem, or ''.
+  // (flagged under 1.5 px, so half a pixel of rounding doesn't count)
   // Text: its own box counts too (a badge's words). A picture, avatar or badge is measured against the box it sits in;
   // an icon made of a character (role="img" around ★) by its character.
   const tooClose = (el, isText) => {
@@ -282,7 +283,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   }
 
   // Cards that grew after they appeared — noted as it happens by the kit's useFixedSize (fixedSize.ts, dev builds)
+  // (emptied once read, so growth seen on the first screen isn't blamed again on the next one)
   for (const g of window.__uiGrowth ?? []) problems.push(`grows: "${g.name}" grew from ${g.from} to ${g.to} px after it appeared`)
+  window.__uiGrowth = []
 
   const ring = checkFocus && document.querySelector(':focus-visible')
   if (ring && !ring.closest('#devkit-root')) problems.push(`focus: a focus ring shows without keyboard use — "${name(ring)}"`)

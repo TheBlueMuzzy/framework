@@ -340,7 +340,10 @@
   .kit-avatar { background: var(--kit-avatar-color, var(--primary)); color: var(--on-primary); font-family: var(--font-body); text-transform: none; }
   /* A player's own colour (0.21.0): initials in white on a dark colour, black on a light one — whichever reads
      (on-primary was made for the style's primary, not for every player colour; the contrast check caught it) */
-  .kit-avatar[data-color] { color: oklch(from var(--kit-avatar-color) clamp(0, (0.65 - l) * 1000, 1) 0 0); }
+  /* (older browsers — Safari before 18, Firefox before 128 — skip it and keep on-primary, instead of losing the colour) */
+  @supports (color: oklch(from red l c h)) {
+    .kit-avatar[data-color] { color: oklch(from var(--kit-avatar-color) clamp(0, (0.65 - l) * 1000, 1) 0 0); }
+  }
   .kit-avatar[data-state="active"] { outline: 0.1875rem solid var(--accent); outline-offset: 0.125rem; }
 
   .kit-progress { background: var(--border); }
