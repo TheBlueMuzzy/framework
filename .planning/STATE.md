@@ -4,8 +4,8 @@
 2026-10-19 — **Sprint 08 started: F71 skill tests (`claude plugin eval`) then F66 the planner's Framework row.** Tasks: `.planning/SPRINT.md`. (Sprint 07 done: F69 scripts approved — `archive/sprints/sprint-07.md`.)
 - Muzzy's call on skill-test cost: A — run only after skill edits / a model update, when he says yes in /checkup.
 - dev/conformance (pushed) holds F61 + UI kit 0.19.0 credits check + the first look-back; merges at /deliver. Laptop needs `/sync` (scripts + hooks).
-- F66 Framework row built + proven (🙋 Muzzy to look: `C:\Users\Muzzy\ppp-proof\goops-390.png`). F71: WSL2 Ubuntu + Claude Code set up; 6 skill-test cases written, first run 3/5 green — exact next steps in SPRINT Notes "F71 status".
-- Next: `/develop` — F71: fix the bug + deliver cases (read their traces), re-run, then break a skill on purpose.
+- F66 Framework row built + proven (🙋 Muzzy to look: `C:\Users\Muzzy\ppp-proof\goops-390.png`). F71 built: skill tests 6/6 green ($1.39 a full run); a broken copy of /deliver goes red as it should. Recipe + lessons: `~/.claude/config/bmuz/evals/README.md`. Waiting on Muzzy's OK for F71 + his look at F66.
+- Next: Muzzy approves F71 + F66 → sprint 08 done → `/sync` (skill-test changes live in ~/.claude) → laptop gets WSL Ubuntu when it needs to run tests.
 
 ## Where we are
 Stage: develop   Milestone: v0.9 — Every game wired the same   Sprint: 08
