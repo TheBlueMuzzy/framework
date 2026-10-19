@@ -5,7 +5,7 @@ List: `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md` 
 
 ## F67 🔧 Lesson audit → the ⭐ hooks
 Done when: each ⭐ rule is enforced by a hook or check (blocks / reminds at the right moment, lets the normal case through), proven by test-hooks + one real try each; HOOKS.md lists them in plain words; the skill lines they replace are gone.
-- [ ] 🤖 1. Plan-file checker — `hooks/plan-lint.mjs` (PostToolUse on `.planning/{ROADMAP,SPRINT,BUGS,STATE}.md`), reader shared with `templates/ppp/build-ppp.mjs`: `needs:` → real IDs, Mermaid matches, 3–8 tasks per feature, BUGS "Open:" count right + fixed P0/P1 have `Guarded by:`, STATE ≤120 lines; then rebuilds `.planning/ppp.html`
+- [x] 🤖 1. Plan-file checker — `hooks/plan-lint.mjs` (PostToolUse on `.planning/{ROADMAP,SPRINT,BUGS,STATE}.md`), reader shared with `templates/ppp/build-ppp.mjs`: `needs:` → real IDs, Mermaid matches, 3–8 tasks per feature, BUGS "Open:" count right + fixed P0/P1 have `Guarded by:`, STATE ≤120 lines; then rebuilds `.planning/ppp.html`
 - [ ] 🤖 2. Session moments — `hooks/session-moments.mjs` (UserPromptSubmit): CTX ≥80% in `~/.claude/ctx-used.txt` (this session's ID) → "finish, write it down, /save"; "going to bed / switching machines / done for now" → "/save"
 - [ ] 🤖 3. Blocks — `hooks/guard-edits.mjs` + `guard-git.mjs`: editing a game's kit copy (`src/ui/kit/`, `src/devkit/`) · `F\d+:` code commits / merges into main outside /deliver (planning + docs commits stay fine) · a check piped into tail/grep/Select-Object · heredoc / `python -c` writing code with backslashes · `live-push.mjs`: an open P0 in BUGS.md blocks going live
 - [ ] 🤖 4. Sprint nudge — Stop: code committed this turn but SPRINT.md unchanged → "log it as a task"
@@ -26,3 +26,4 @@ Ask Muzzy: —
 
 Notes:
 - Decided (technical): "no feature code on main" counts code files only — planning/doc commits on main stay fine (as today). Muzzy's tiny-fix rule still holds: a commit without an `F\d+:` prefix isn't blocked.
+- F67 task 1: the reader moved to `templates/ppp/plan-reader.mjs` (build-ppp draws byte-identical pages for all 6 projects). The hook only reports problems that are NEW since the last commit, so old history doesn't nag; `node ~/.claude/config/bmuz/hooks/plan-lint.mjs <project>` lists everything. First sweep found real ones elsewhere (left for those sessions): Glyphtender F31–F36 + F46 needs hidden by a later " — " (planner shows no needs), B026 used twice, B024 verified but under Open, Open count off; Goops F02b/F15 done but need F02 (Discover), F27 ❓ with 4 tasks; Roll Better 7 fixed bugs under Open, Log 22 entries; framework F61 done while F59/F60 still building (Goops session's). Fixed here: framework F23's needs were hidden the same way.
