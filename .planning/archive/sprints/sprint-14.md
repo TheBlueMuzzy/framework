@@ -20,3 +20,8 @@ Notes:
 - F88 (helper; Claude re-ran the kit's checks, looked at shots, fixed the review): checks in ui-kit/kit/uiProblems.mjs ("faint:", "edge:", "grows:"), new kit/fixedSize.ts (useFixedSize on Card + PlayerChip, dev builds only), comfort-rows check in conformance.mjs (also runs with --static). Kit's own misses fixed: avatar initials pick white/black by the player's colour; PlayerChip's score has a fixed slot (`scoreDigits`, default 2 — a game with 3-digit scores passes 3); xs chips + badges and icon buttons at 200% text got room. UI kit 0.21.0. Decisions: can't-judge (text over pictures/gradients, outlined/glowing text) is skipped, not flagged; Panel isn't watched (menus open centred, then grow down on purpose); `data-ui-bleed` lets a picture run edge to edge.
 - Sprint 14 review (helper; Claude fixed 3 of 4 + tests): ① every Card was watched, so a card whose column widened or whose picture loaded late was flagged → growth now counts only when something inside the card changed (Claude's first fix, watching the column's width, would have broken chips in shrink-to-fit rows — replaced) and pictures are waited for · ② avatar initials' colour rule needs Safari 18 / Firefox 128 → older browsers keep on-primary (@supports) · ③ growth seen on the first screen was blamed again on the next → read once · ④ a game with no Settings file fails the comfort check → kept on purpose (the bar is that every game has reduce motion).
 
+
+Retro:
+- went well: "happy to move forward. all is good so far."
+- went wrong: nothing named (Muzzy: "all is good so far")
+- change: none asked for — keep going straight to /deliver of the framework as planned
