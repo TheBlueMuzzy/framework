@@ -1,9 +1,9 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 13 done + archived** (F81 producer notes at session start, F87 QA routine, + one check:fast at a time per project) — Muzzy approved, retro taken (`.planning/archive/sprints/sprint-13.md`). Retro lesson → CLAUDE.md "Skeptical Self-Review": Claude leads on the technical side and recommends sturdier approaches (hooks/scripts/checks, simpler designs) up front, unprompted — Muzzy: "get to the tech solutions earlier for me by being more critical." Next: **/sprint 14** — no sprint is open. Before it: F80 Everything triggers (sprint 12). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit + studio gap list: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
+2026-10-19 — **Sprint 14 started: F88 quality bars in check:framework** (contrast, breathing room, fixed-size cards, reduce-motion/volume settings) — built on `dev/conformance` (worktree `.claude/worktrees/agent-a24e65cae835fd08b`), plan in `.planning/SPRINT.md`. Next: build tasks 1–6, Full check, review, hand to Muzzy. Sprint 13 archived with retro → CLAUDE.md: Claude leads on technical solutions, critically and early. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md`.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: `/sprint` to plan sprint 14. Ready in v0.10: F85 dependency + licence audit, F86 old saves keep working, F88 quality bars (F82–F84 also ready now that F80 is done — plan-lint will say). Goops' session: its F30/F32 need Check: lines (ROADMAP Ideas).
+- Waiting on Muzzy (from the sprint 14 plan, not blocking): reshape F86 into a "versioned saves" module (no game versions its saves) · /deliver the framework right after this sprint. Ready later in v0.10: F82–F85. Goops' session: F30/F32 need Check: lines; F33/F49/F53 ready (ROADMAP Ideas).
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance (pushed, worktree `.claude/worktrees/agent-a24e65cae835fd08b`) holds F61 + **UI kit 0.20.1 · Dev Kit 0.20.3 · audio 0.3.2** + the framework linter (root eslint.config.js; `npm install` once at the root after the merge) + `.github/workflows/checks.yml`; merges at /deliver (now with merge.mjs).
@@ -12,8 +12,8 @@
 Reviewed through: framework 1e30635 · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40 (sprint 13 review: 8 findings, all fixed + tests; F80 review before it: 11, all fixed)
 
 ## Where we are
-Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (13 archived)
-Doing: planning sprint 14   Branch: main (+ dev/conformance)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 14 — check:framework catches what a player would notice
+Doing: F88 — building   Branch: dev/conformance (plans on main)   Version: 0.10.0 (main: Dev Kit 0.18.1 · dev/conformance: Dev Kit 0.20.3, UI kit 0.20.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.2.0
 
 ## Key facts
