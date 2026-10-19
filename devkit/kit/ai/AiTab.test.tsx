@@ -19,7 +19,7 @@ afterEach(() => {
 })
 
 const saves = () => {
-  const fetchMock = vi.fn(async (..._args: unknown[]) => new Response('{"ok":true}', { status: 200 }))
+  const fetchMock = vi.fn<(...args: unknown[]) => Promise<Response>>(async () => new Response('{"ok":true}', { status: 200 }))
   vi.stubGlobal('fetch', fetchMock)
   return () => fetchMock.mock.calls.map(([, init]) => JSON.parse((init as RequestInit).body as string) as { path: string; data: Record<string, unknown> })
 }

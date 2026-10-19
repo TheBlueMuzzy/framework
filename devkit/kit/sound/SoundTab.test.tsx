@@ -21,15 +21,18 @@ const FILE: RawAudio = {
   },
 }
 
+/** The parts of the live config the tests read back */
+type LiveConfig = { sounds: Record<string, { volumeDb?: number; files?: string[] }>; buses: Record<string, number> }
+
 /** A stand-in engine that remembers what it was asked */
 function fakeAudio() {
   const listeners = new Set<(e: SoundLogEntry) => void>()
   const calls: string[] = []
   let config: unknown = null
-  const audio: SoundBoardAudio & { calls: string[]; config: () => any; emit: (e: SoundLogEntry) => void } = {
+  const audio: SoundBoardAudio & { calls: string[]; config: () => unknown; emit: (e: SoundLogEntry) => void } = {
     calls,
     config: () => config,
-    play: vi.fn((name: string) => { calls.push(`play ${name} ${JSON.stringify((config as any)?.sounds?.[name]?.files ?? null)}`) }),
+    play: vi.fn((name: string) => { calls.push(`play ${name} ${JSON.stringify((config as LiveConfig | null)?.sounds?.[name]?.files ?? null)}`) }),
     stop: vi.fn((name: string) => { calls.push(`stop ${name}`) }),
     setConfig: vi.fn((raw: unknown) => { config = raw }),
     preload: vi.fn(async (names?: string[]) => { calls.push(`preload ${names?.join(',')}`) }),
@@ -126,7 +129,7 @@ describe('the Sound tab', () => {
     const slider = screen.getByRole('slider', { name: /sounds\.seed\.land\.volumeDb slider/ })
     expect(slider.getAttribute('min')).toBe('-40')
     fireEvent.change(slider, { target: { value: '-10' } })
-    expect((audio.config() as any).sounds['seed.land'].volumeDb).toBe(-10)
+    expect((audio.config() as LiveConfig).sounds['seed.land'].volumeDb).toBe(-10)
     expect(heard.at(-1)).toMatchObject({ file: 'audio', data: { sounds: { 'seed.land': { volumeDb: -10 } } } })
     window.removeEventListener(TUNING_EVENT, listener)
 
@@ -146,7 +149,7 @@ describe('the Sound tab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'seed.land' }))
     fireEvent.change(screen.getByRole('slider', { name: /seed\.land\.volumeDb slider/ }), { target: { value: '-10' } })
     fireEvent.click(screen.getByRole('button', { name: /Reset sounds\.seed\.land\.volumeDb/ }))
-    expect((audio.config() as any).sounds['seed.land'].volumeDb).toBe(-3)
+    expect((audio.config() as LiveConfig).sounds['seed.land'].volumeDb).toBe(-3)
   })
 
   it('A / B: both play the picked file — A as saved, B as edited', async () => {
@@ -155,14 +158,14 @@ describe('the Sound tab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'seed.land' }))
     fireEvent.change(screen.getByRole('slider', { name: /seed\.land\.volumeDb slider/ }), { target: { value: '-10' } })
     fireEvent.click(screen.getByRole('button', { name: 'sfx/sfx_seed_land_02.mp3' })) // pick the second file
-    const configsAtPlay: any[] = []
-    ;(audio.play as ReturnType<typeof vi.fn>).mockImplementation(() => { configsAtPlay.push(audio.config()) })
+    const configsAtPlay: LiveConfig[] = []
+    ;(audio.play as ReturnType<typeof vi.fn>).mockImplementation(() => { configsAtPlay.push(audio.config() as LiveConfig) })
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: '▶ A saved' })) })
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: '▶ B edit' })) })
     expect(configsAtPlay.map((c) => c.sounds['seed.land'].files)).toEqual([['sfx/sfx_seed_land_02.mp3'], ['sfx/sfx_seed_land_02.mp3']])
     expect(configsAtPlay.map((c) => c.sounds['seed.land'].volumeDb)).toEqual([-3, -10])
     // the game goes on with the edit
-    expect((audio.config() as any).sounds['seed.land']).toMatchObject({ volumeDb: -10, files: ['sfx/sfx_seed_land_01.mp3', 'sfx/sfx_seed_land_02.mp3'] })
+    expect((audio.config() as LiveConfig).sounds['seed.land']).toMatchObject({ volumeDb: -10, files: ['sfx/sfx_seed_land_01.mp3', 'sfx/sfx_seed_land_02.mp3'] })
   })
 
   it('"game plays A" swaps the live config to the saved sound until the next edit', () => {
@@ -171,9 +174,9 @@ describe('the Sound tab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'seed.land' }))
     fireEvent.change(screen.getByRole('slider', { name: /seed\.land\.volumeDb slider/ }), { target: { value: '-10' } })
     fireEvent.click(screen.getByRole('checkbox', { name: /game plays A/ }))
-    expect((audio.config() as any).sounds['seed.land'].volumeDb).toBe(-3)
+    expect((audio.config() as LiveConfig).sounds['seed.land'].volumeDb).toBe(-3)
     fireEvent.click(screen.getByRole('checkbox', { name: /game plays A/ }))
-    expect((audio.config() as any).sounds['seed.land'].volumeDb).toBe(-10)
+    expect((audio.config() as LiveConfig).sounds['seed.land'].volumeDb).toBe(-10)
   })
 
   it('files: reorder and remove change the sound\'s list', () => {
@@ -181,9 +184,9 @@ describe('the Sound tab', () => {
     renderTab(audio)
     fireEvent.click(screen.getByRole('button', { name: 'seed.land' }))
     fireEvent.click(screen.getByRole('button', { name: 'Move sfx/sfx_seed_land_02.mp3 up' }))
-    expect((audio.config() as any).sounds['seed.land'].files).toEqual(['sfx/sfx_seed_land_02.mp3', 'sfx/sfx_seed_land_01.mp3'])
+    expect((audio.config() as LiveConfig).sounds['seed.land'].files).toEqual(['sfx/sfx_seed_land_02.mp3', 'sfx/sfx_seed_land_01.mp3'])
     fireEvent.click(screen.getByRole('button', { name: 'Remove sfx/sfx_seed_land_01.mp3 from this sound' }))
-    expect((audio.config() as any).sounds['seed.land'].files).toEqual(['sfx/sfx_seed_land_02.mp3'])
+    expect((audio.config() as LiveConfig).sounds['seed.land'].files).toEqual(['sfx/sfx_seed_land_02.mp3'])
   })
 
   it('a picked file is sent to save-audio, added as a variant, then credits are asked', async () => {
@@ -200,7 +203,7 @@ describe('the Sound tab', () => {
     const [url] = devkitCalls()[0]
     expect(url).toBe('/__devkit/save-audio?folder=sfx&stem=sfx_seed_land&bus=sfx&ext=wav')
     expect(audio.reloadFile).toHaveBeenCalledWith('sfx/sfx_seed_land_03.mp3')
-    expect((audio.config() as any).sounds['seed.land'].files).toContain('sfx/sfx_seed_land_03.mp3')
+    expect((audio.config() as LiveConfig).sounds['seed.land'].files).toContain('sfx/sfx_seed_land_03.mp3')
     expect(screen.getByText(/silent start trimmed: 42 ms/)).toBeTruthy()
     // credits
     const credits = screen.getByRole('group', { name: 'Credits' })
@@ -218,7 +221,7 @@ describe('the Sound tab', () => {
     renderTab(audio)
     fireEvent.click(screen.getByRole('button', { name: /Mixer/ }))
     fireEvent.change(screen.getByRole('slider', { name: /buses\.music slider/ }), { target: { value: '-14' } })
-    expect((audio.config() as any).buses.music).toBe(-14)
+    expect((audio.config() as LiveConfig).buses.music).toBe(-14)
     fireEvent.click(screen.getByRole('button', { name: 'paused' }))
     expect(audio.snapshot).toHaveBeenCalledWith('paused')
     fireEvent.click(screen.getByRole('button', { name: 'normal' }))
