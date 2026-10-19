@@ -16,13 +16,14 @@ export async function check(t) {
     const name = 'bots wait on the rules clock (half pause stops a bot mid-think)'
     const code = t.gameCode()
     const handsOver = t.linesMatching(code, /\bsetPaceClock\s*\(\s*rulesClock\b/)
-    const usesPace = code.filter((f) => /ai\/kit\/pace['"]/.test(f.text))
-    const plain = t.linesMatching(usesPace, /\b(setTimeout|setInterval)\s*\(|\bperformance\.now\s*\(|\bDate\.now\s*\(/)
-    const problems = []
-    if (!handsOver.length) problems.push('Nothing calls setPaceClock(rulesClock), so bots wait on the browser\'s clock and keep thinking through a pause.')
-    if (plain.length) problems.push('Bot code that waits on a plain timer:', ...plain.slice(0, 8).map((l) => '  ' + l))
-    if (problems.length) t.fail(name, problems,
-      `At start-up: import { setPaceClock } from './${t.rel.replace(/^src\//, '')}/pace' and import { rulesClock } from './devkit/gameClock', then setPaceClock(rulesClock). In the bot: paceNow() for "started", botWait(ms, act) instead of setTimeout.`)
-    else t.pass(name, handsOver[0])
+    // Bot code = files that work out a bot's think-moment (thinkDelay / waitLeft), however they import the kit
+    // (./ai/kit/pace or the ./ai/kit index). Their plain timers are only a HINT: a file can use setTimeout for other
+    // things, so the promise itself is "the clock is handed over"
+    const botCode = code.filter((f) => /\b(thinkDelay|waitLeft)\s*\(/.test(f.text))
+    const plain = t.linesMatching(botCode, /\b(setTimeout|setInterval)\s*\(|\bperformance\.now\s*\(/)
+    const hint = plain.length ? ['Bot code that may still wait on a plain timer (check these):', ...plain.slice(0, 8).map((l) => '  ' + l)] : []
+    const fix = `At start-up: import { setPaceClock } from './${t.rel.replace(/^src\//, '')}/pace' and import { rulesClock } from './devkit/gameClock', then setPaceClock(rulesClock). In the bot: paceNow() for "started", botWait(ms, act) instead of setTimeout.`
+    if (!handsOver.length) t.fail(name, ['Nothing calls setPaceClock(rulesClock), so bots wait on the browser\'s clock and keep thinking through a pause.', ...hint], fix)
+    else t.pass(name, hint.length ? `${handsOver[0]} — hint: ${plain.length} plain-timer line${plain.length === 1 ? '' : 's'} in bot code (${plain[0]})` : handsOver[0])
   }
 }
