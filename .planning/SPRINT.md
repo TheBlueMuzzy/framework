@@ -25,9 +25,9 @@ Ask Muzzy: —
 
 ## F75 🔧 "Done" means reviewed + fully checked (pulled in 2026-10-19, from the audit)
 Done when: a `Fxx: done` commit is refused unless STATE's `Reviewed through:` and `Last full check:` lines name commits from this feature (at or after its first commit) — the per-feature review and full check stop being honour-system.
-- [ ] 🤖 1. guard-git: read both lines from STATE (the staged version if STATE is in the commit), check each named commit is at/after the feature's first commit; plain-words refusal saying which is missing — ~/.claude/config/bmuz/hooks/guard-git.mjs
-- [ ] 🤖 2. Tests: missing review → refused · old full check → refused · both current → allowed · a project with no check:full (no e2e) → full check not required — hooks/test-hooks.mjs
-- [ ] 🤖 3. HOOKS.md row 14 + the develop skill's review / full-check lines say the hook enforces them — ~/.claude/config/bmuz/HOOKS.md, ~/.claude/skills/develop/SKILL.md
+- [x] 🤖 1. guard-git: read both lines from STATE (the staged version if STATE is in the commit), check each named commit is at/after the feature's first commit; plain-words refusal saying which is missing — ~/.claude/config/bmuz/hooks/guard-git.mjs
+- [x] 🤖 2. Tests: missing review → refused · old full check → refused · both current → allowed · a project with no check:full (no e2e) → full check not required — hooks/test-hooks.mjs
+- [x] 🤖 3. HOOKS.md row 14 + the develop skill's review / full-check lines say the hook enforces them — ~/.claude/config/bmuz/HOOKS.md, ~/.claude/skills/develop/SKILL.md
 Check: test-hooks green; a done commit without a current review line is refused.
 Ask Muzzy: —
 
