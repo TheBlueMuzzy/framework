@@ -372,6 +372,7 @@ export function createAudio(rawConfig: unknown, options: AudioOptions = {}): Aud
   function onVisibility() {
     hidden = doc?.visibilityState === 'hidden'
     if (!ctx || !unlockedOnce) return
+    if (devPaused) return // the Dev Kit's full pause holds it, whatever the tab does — its resume plays on
     if (hidden && muteInBackground) {
       ctx.suspend().catch(() => {})
     } else if (ctx.state !== 'running') {

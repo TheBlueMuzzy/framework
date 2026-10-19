@@ -274,6 +274,21 @@ describe('hidden tab, calls, lock screen', () => {
     expect(audio.play('pop')).toMatchObject({ kind: 'play' })
   })
 
+  it('full pause, switch tabs, come back: still silent until the Dev Kit resumes', async () => {
+    const { audio, ctx, win, doc, tap } = setup()
+    await tap()
+    win.dispatchEvent(new CustomEvent('devkit:pause', { detail: { mode: 'full' } }))
+    await settle()
+    doc.setVisibility('hidden')
+    doc.setVisibility('visible')
+    await settle()
+    expect(ctx.state).not.toBe('running')
+    expect(audio.state()).toBe('suspended')
+    win.dispatchEvent(new CustomEvent('devkit:pause', { detail: { mode: null } }))
+    await settle()
+    expect(audio.state()).toBe('running')
+  })
+
   it('with "mute in background" off, a hidden tab keeps playing', async () => {
     const { audio, ctx, doc, tap } = setup()
     await tap()
