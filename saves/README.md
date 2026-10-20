@@ -117,6 +117,9 @@ oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGo
 ```
 Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORDS`, `RUN_WORDS`, the panel's `words`) can be replaced.
 
+## Privacy
+Every save stays on this device (the browser's storage) unless the player copies a save code. Online rejoin (rooms kit 0.9.0, F95) keeps the room code and the player id on this device too; they only go to the game's own room server, to get the player back into their seat. Nothing is sent anywhere else.
+
 ## `content/saves.json`
 `backups` (0–5, default 2: older copies beside each save) · `nudge.afterProgress` (points before "back up your save", 0 = never; default 10) · `nudge.minDaysBetween` (default 7) · `nudge.onlyWhenAtRisk` (default false) · `storageAllowed` ([{ file, why }]). `_help` / `_ranges` follow the Dev Kit convention.
 

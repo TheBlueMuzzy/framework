@@ -77,6 +77,8 @@ gallery's `npm run shoot` uses the same one.
   lets "free for commercial and non-commercial use" through.
   0.23.0 (F93): `MainMenu` buttons can carry a second line inside them (`continueDetail` for Continue, `items[].detail`)
   — Continue's "Turn 7 · 5 min ago" from the saves module's run resume. Inside the button, so the menu never jumps.
+  Also (F95): `rejoinWords` + `welcomeBackLine()` in the online blocks — "Rejoin match", "That match has ended", "You're
+  back — a bot played 4 turns for you" — for the rooms kit's rejoin (a MainMenu `items` entry).
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
