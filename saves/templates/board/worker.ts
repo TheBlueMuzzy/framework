@@ -32,27 +32,36 @@ function THE_GAME_GOES_HERE(): never {
  *  replay takes longer than the plan's CPU time per request (Workers Free: 10 ms). Measure it (`npm run board:dev`
  *  logs "replay … ms" for each game) and set it to match. */
 const CHECK_LATER = true
+/** How many moves one alarm replays (each alarm has the same CPU limit as a request). Measure it too: the alarm logs
+ *  "replay (alarm): N moves in X ms" — keep X well under 10. */
+const MOVES_PER_ALARM = 10
 // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 // The few Cloudflare shapes used here (written out, so the game needs no Cloudflare type package)
 type SqlStorage = { exec(sql: string, ...values: (string | number)[]): { toArray(): Record<string, unknown>[] }; readonly databaseSize: number }
 interface ObjectState { storage: { sql: SqlStorage; getAlarm(): Promise<number | null>; setAlarm(time: number): Promise<void> } }
 interface ObjectStub { fetch(request: Request): Promise<Response> }
-interface Env { DailyBoard: { idFromName(name: string): unknown; get(id: unknown): ObjectStub } }
+interface Env {
+  DailyBoard: { idFromName(name: string): unknown; get(id: unknown): ObjectStub }
+  /** Measuring / e2e only: `wrangler dev --var CHECK_NOW:1` = every game is replayed inside its request (to time it). Never set on the live server. */
+  CHECK_NOW?: string
+}
 
 const settings = readSavesConfig(savesJson).board
 
 export class DailyBoard {
   private state: ObjectState
+  private checkLater: boolean
   private sqlite: SqlStorage
   private secret: string
 
-  constructor(state: ObjectState) {
+  constructor(state: ObjectState, env: Env) {
     this.state = state
+    this.checkLater = CHECK_LATER && env.CHECK_NOW !== '1'
     this.sqlite = state.storage.sql
     this.query('CREATE TABLE IF NOT EXISTS scores (day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, score REAL NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (day, player))')
     this.query('CREATE INDEX IF NOT EXISTS scores_by_rank ON scores (day, score DESC, at)')
-    this.query('CREATE TABLE IF NOT EXISTS waiting (id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, record TEXT NOT NULL, at INTEGER NOT NULL)')
+    this.query('CREATE TABLE IF NOT EXISTS waiting (id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, record TEXT NOT NULL, at INTEGER NOT NULL, progress INTEGER NOT NULL DEFAULT 0, state TEXT)')
     this.query('CREATE TABLE IF NOT EXISTS counts (who TEXT NOT NULL, what TEXT NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (who, what, day))')
     // The secret for the keyed hashes of addresses and player ids: made once at random, kept here, never sent anywhere
     this.query('CREATE TABLE IF NOT EXISTS secret (v TEXT NOT NULL)')
@@ -70,7 +79,7 @@ export class DailyBoard {
 
   async fetch(request: Request): Promise<Response> {
     const response = await handleBoard(request, {
-      rows: this.rows(), game, settings, secret: this.secret, checkLater: CHECK_LATER,
+      rows: this.rows(), game, settings, secret: this.secret, checkLater: this.checkLater,
       address: request.headers.get('CF-Connecting-IP') ?? 'unknown', // Cloudflare always sets it on the live server
       timed: (ms, moves) => console.log(`replay: ${moves} moves in ${ms.toFixed(1)} ms`),
     })
@@ -78,11 +87,12 @@ export class DailyBoard {
     return response
   }
 
-  /** Cloudflare calls this at the alarm's time: check ONE waiting game (each alarm has its own CPU time), tidy old
-   *  days, then come back at once if more games wait, else at the next midnight (UTC) while anything is stored. */
+  /** Cloudflare calls this at the alarm's time: one step (MOVES_PER_ALARM moves) of the oldest waiting game — each alarm
+   *  has its own CPU time — and a tidy of old days; then it comes back at once if games still wait, else at the next
+   *  midnight (UTC) while anything is stored. */
   async alarm(): Promise<void> {
     const rows = this.rows()
-    const left = checkWaiting({ rows, game, settings, secret: this.secret, timed: (ms, moves) => console.log(`replay (alarm): ${moves} moves in ${ms.toFixed(1)} ms`) })
+    const left = checkWaiting({ rows, game, timed: (ms, moves) => console.log(`replay (alarm): ${moves} moves in ${ms.toFixed(1)} ms`) }, MOVES_PER_ALARM)
     tidyBoard(rows, settings)
     if (left > 0) await this.state.storage.setAlarm(Date.now())
     else if (rows.anything()) await this.state.storage.setAlarm(nextMidnight())
@@ -113,8 +123,10 @@ export class DailyBoard {
       higher: (day, score) => Number(this.query('SELECT COUNT(*) AS n FROM scores WHERE day = ? AND score > ?', day, score)[0]?.n ?? 0),
       wait: (g) => { this.query('INSERT INTO waiting (day, player, name, record, at) VALUES (?, ?, ?, ?, ?)', g.day, g.player, g.name, g.record, g.at) },
       waiting: (n) => this.query('SELECT * FROM waiting ORDER BY id LIMIT ?', n)
-        .map((r) => ({ id: Number(r.id), day: String(r.day), player: String(r.player), name: String(r.name), record: String(r.record), at: Number(r.at) })),
+        .map((r) => ({ id: Number(r.id), day: String(r.day), player: String(r.player), name: String(r.name), record: String(r.record), at: Number(r.at),
+          progress: Number(r.progress), state: r.state === null ? null : String(r.state) })),
       waitingFor: (day, player) => Number(this.query('SELECT COUNT(*) AS n FROM waiting WHERE day = ? AND player = ?', day, player)[0]?.n ?? 0),
+      stepWaiting: (id, progress, state) => { this.query('UPDATE waiting SET progress = ?, state = ? WHERE id = ?', progress, state, id) },
       doneWaiting: (id) => { this.query('DELETE FROM waiting WHERE id = ?', id) },
       remove: (day, player) => {
         const there = this.query('SELECT (SELECT COUNT(*) FROM scores WHERE day = ? AND player = ?) + (SELECT COUNT(*) FROM waiting WHERE day = ? AND player = ?) AS n', day, player, day, player)

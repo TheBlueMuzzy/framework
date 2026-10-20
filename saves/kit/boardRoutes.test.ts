@@ -284,6 +284,23 @@ describe('checking later (a replay too slow for one request)', () => {
     expect(board).toMatchObject({ checking: 0, refused: 1, mine: { rank: 1, name: 'ADA', score: scoreOf(finished) } })
     expect(rows.queue).toHaveLength(0)
   })
+
+  it('step by step: a few moves per alarm (each inside the CPU limit) → the same score as one whole replay; a bad move mid-way → refused', async () => {
+    const { rows, context, call, send } = setup({ checkLater: true }, { dailyTries: 0 })
+    await send()
+    const forged = { ...finished, moves: finished.moves.map((m, i) => (i === 5 ? { ...m, action: { type: 'win' } } : m)) }
+    await send(forged)
+    const steps: number[] = []
+    let alarms = 0
+    while (checkWaiting({ ...context, timed: (_ms, moves) => steps.push(moves) }, 2) > 0) {
+      alarms++
+      if (rows.queue[0]?.id === 1) expect(rows.queue[0].progress).toBe(Math.min(finished.moves.length, 2 * alarms)) // where it got to is kept
+    }
+    expect(steps.every((n) => n <= 2)).toBe(true)
+    expect(alarms).toBeGreaterThanOrEqual(Math.ceil(finished.moves.length / 2) - 1)
+    const board = (await call('/board/day', { player: PLAYER })).body
+    expect(board).toMatchObject({ checking: 0, refused: 1, mine: { score: scoreOf(finished) } })
+  })
 })
 
 describe('kept for keepDays, then deleted', () => {
