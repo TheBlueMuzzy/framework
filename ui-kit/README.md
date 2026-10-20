@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.24.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.25.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -85,6 +85,9 @@ gallery's `npm run shoot` uses the same one.
   too (unless `info` gives its own); `info={{ version }}` still works, and the Settings-row check counts either.
   And `MainMenu` on a phone on its side counts its extra buttons (children) toward the two-column switch at six:
   Glyphtender's 5 items + Full screen stayed one column and ran off the top once its version footer took a row.
+  0.25.0 (F103, from Goops): `ScreenStack` always has the kit's own screens (Confirm) under the game's — a game's own
+  `confirm` still wins — so `...kitScreens` is no longer needed (Goops' Settings had none: Replay lessons' confirm drew
+  an empty layer on top and nothing happened). A pushed name with no screen warns in the console, naming it, and closes.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

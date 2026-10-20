@@ -172,7 +172,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
        applyStyle(style)
        applyAccessibility(loadSettings(settings))
   2. Draw menus and dialogs through the screen stack, once, around the game:
-       <ScreenStack screens={{ ...kitScreens, settings: () => <Settings schema={settings} /> }}>
+       <ScreenStack screens={{ settings: () => <Settings schema={settings} /> }}>
          <Game />
        </ScreenStack>
        <ToastStack />

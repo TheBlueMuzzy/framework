@@ -3,6 +3,8 @@
 //     <GameHud />            ← the always-there bottom layer
 //   </ScreenStack>
 // Each screen is a component that returns a <Screen>. A dialog is just <Screen dialog> pushed on top.
+// The kit's own screens (kitScreens: confirm) are always added under yours — no need to list them (0.25.0).
+// A name pushed that has no screen warns in the console and closes again.
 // Everything under the top screen is inert: it can't be clicked, tapped or focused. Open screens under the top one
 // are also hidden (so a Pause panel never peeks out from behind the Rules opened from it): only the top screen shows,
 // over one dim (a screen opened over another always dims, dialog or not — and so does the first screen opened over the
@@ -20,6 +22,7 @@
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
 import { screens as store } from './screens'
 import { moveFocus } from './arrowKeys'
+import { kitScreens } from './blocks/dialogs'
 
 // Until a key is pressed, a screen that opens shouldn't show the keyboard focus ring
 // (browsers show it for focus moved by code before any click or key, e.g. a screen opened at load).
@@ -105,10 +108,26 @@ export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [depth])
 
+  // The kit's own screens (confirm, for askConfirm in Settings and Pause) are always there, under the game's:
+  // a game's own screen with the same name still wins (0.25.0 — before, a game that left out ...kitScreens got an
+  // empty layer on top, so a confirm button in Settings seemed to do nothing).
+  const all: Record<string, ComponentType> = { ...kitScreens, ...screens }
+
+  // A screen pushed with no component under that name: say so (naming it) and close it again, instead of leaving an
+  // invisible layer on top that makes everything under it inert. (Checked whenever it's the top screen.)
+  const missingTop = depth && !all[stack[depth - 1]] ? top : ''
+  useEffect(() => {
+    const name = store.current[store.current.length - 1]
+    // still that screen on top (React's StrictMode runs this twice while developing — close it once, not Settings too)
+    if (!missingTop || `${store.current.length}-${name}` !== missingTop) return
+    console.warn(`ScreenStack: no screen named "${name}" was given — add it to <ScreenStack screens={{ ${name}: … }}>. Closed it.`)
+    store.pop()
+  }, [missingTop])
+
   // overlay mode dims the game with the overlay itself; without children there's nothing under the first screen to dim
   const dimsGame = !overlay && children != null && children !== false
   const open = stack.map((name, i) => {
-    const Screen = screens[name]
+    const Screen = all[name]
     return (
       // data-over: opened on top of another screen — it carries the dim (the one under it is hidden), there at once.
       // data-dim: the first screen, opened over the game's own layer (a main menu, a lobby, the game) — dims it too,

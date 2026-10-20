@@ -16,7 +16,7 @@ Ask Muzzy: —
 
 ## F103 🔧 Kit fixes from Goops
 Done when: a confirm button inside Settings works even when a game forgets `...kitScreens`; the Bar row can share space "at most" its share and the dock panel can have tight side padding as kit options (Goops' two app.css overrides and their check:ui warnings can go); the Dev Kit's check warns when the closed-panel PAUSED pill sits on the game's HUD, naming `pauseBadgeSpot`.
-- [ ] 🤖 7. ScreenStack always knows the kit's own screens (confirm …) — a game's own screens still win; a pushed screen with no entry warns instead of drawing an empty layer — ui-kit/kit/ScreenStack.tsx
+- [x] 🤖 7. ScreenStack always knows the kit's own screens (confirm …) — a game's own screens still win; a pushed screen with no entry warns instead of drawing an empty layer — ui-kit/kit/ScreenStack.tsx
 - [ ] 🤖 8. Bar row "at most its share" + dock panel tight side padding as kit options (style names, no px in parts) — ui-kit/kit/blocks/blocks.css
 - [ ] 🤖 9. Dev Kit check: the closed-panel PAUSED pill vs the game's HUD at phone sizes → a warning that names content/devkit.json `pauseBadgeSpot` — devkit/kit/devkit.css
 - [ ] 🤖 10. Proof in a scratch Goops (PORTRAIT ONLY — never 844×390 for Goops): its two overrides removed, the new options used, the 2 check:ui warnings gone, Replay lessons confirm works without `...kitScreens`; shots 390×844, 360×780, 1440×900 — ui-kit/README.md

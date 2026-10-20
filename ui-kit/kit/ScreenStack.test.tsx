@@ -1,7 +1,8 @@
 // Keyboard/gamepad focus follows the top screen: in when it opens or is swapped, back to the opener when it closes.
-import { afterEach, describe, expect, it } from 'vitest'
-import { act, cleanup, render, screen } from '@testing-library/react'
-import { ScreenStack, screens } from '.'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { StrictMode } from 'react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { askConfirm, ScreenStack, screens } from '.'
 
 afterEach(() => {
   cleanup()
@@ -121,5 +122,47 @@ describe('overlay game box', () => {
     expect(container.querySelector('.kit-layer')?.hasAttribute('data-framed')).toBe(false)
     rerender(<ScreenStack overlay screens={{}}><div>hud</div></ScreenStack>)
     expect(container.querySelector('.kit-layer')?.hasAttribute('data-framed')).toBe(true)
+  })
+})
+
+describe('ScreenStack kit screens (0.25.0)', () => {
+  // Goops' start console: a Settings shown without ...kitScreens — its Replay lessons confirm did nothing.
+  it('a confirm from Settings works without ...kitScreens in the game list', () => {
+    const onConfirm = vi.fn()
+    const settings = () => <button onClick={() => askConfirm({ title: 'Replay lessons?', onConfirm, words: { yes: 'Replay' } })}>Replay lessons</button>
+    render(<ScreenStack screens={{ settings }}><button>Game button</button></ScreenStack>)
+    act(() => screens.push('settings'))
+    fireEvent.click(screen.getByText('Replay lessons'))
+    const ask = screen.getByRole('dialog', { name: 'Replay lessons?' })
+    fireEvent.click(within(ask).getByRole('button', { name: 'Replay' }))
+    expect(onConfirm).toHaveBeenCalledOnce()
+    expect(screens.current).toEqual(['settings']) // back on Settings
+  })
+
+  it('a game screen named confirm still wins over the kit one', () => {
+    render(<ScreenStack screens={{ confirm: () => <p>Game confirm</p> }} />)
+    act(() => screens.push('confirm'))
+    expect(screen.getByText('Game confirm')).toBeTruthy()
+  })
+
+  it('a pushed name with no screen warns (naming it) and closes again — no invisible layer on top', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<ScreenStack screens={testScreens}><button>Game button</button></ScreenStack>)
+    act(() => screens.push('menu'))
+    act(() => screens.push('shpo'))
+    expect(warn).toHaveBeenCalledOnce()
+    expect(String(warn.mock.calls[0][0])).toContain('"shpo"')
+    expect(screens.current).toEqual(['menu'])
+    const layer = screen.getByText('Menu button').closest('.kit-layer')!
+    expect(layer.hasAttribute('inert')).toBe(false) // the menu takes taps again
+    warn.mockRestore()
+  })
+
+  it('closes a missing screen once under StrictMode (not the screen under it too)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    act(() => { screens.push('menu'); screens.push('nope') })
+    render(<StrictMode><ScreenStack screens={testScreens} /></StrictMode>)
+    expect(screens.current).toEqual(['menu'])
+    warn.mockRestore()
   })
 })
