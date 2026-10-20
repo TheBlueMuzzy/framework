@@ -4,7 +4,7 @@
 // SeatPicker: a tap on a seat picks it; waiting swaps the list for Joining… + Cancel; no seats → the empty message.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { copyText, IdleWarning, Lobby, SeatPicker } from './online'
+import { copyText, IdleWarning, Lobby, SeatPicker, welcomeBackLine } from './online'
 import { toasts } from './dialogs'
 
 afterEach(cleanup)
@@ -163,5 +163,14 @@ describe('IdleWarning', () => {
     expect(screen.getByText('30s')).toBeTruthy()
     act(() => { vi.advanceTimersByTime(3_000) })
     expect(screen.getByText('27s')).toBeTruthy()
+  })
+})
+
+describe('Rejoin words', () => {
+  it('the back-in line names the bot turns (none, one, many), in the game words if given', () => {
+    expect(welcomeBackLine(0)).toBe('You’re back')
+    expect(welcomeBackLine(1)).toBe('You’re back — a bot played 1 turn for you')
+    expect(welcomeBackLine(4)).toBe('You’re back — a bot played 4 turns for you')
+    expect(welcomeBackLine(2, { backTurns: 'Welcome back! The bot took {n} turns.' })).toBe('Welcome back! The bot took 2 turns.')
   })
 })

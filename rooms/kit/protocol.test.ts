@@ -7,6 +7,10 @@ describe('protocol: checking what players send', () => {
   it('accepts every room message in its right shape', () => {
     expect(send({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678', create: true }))
       .toEqual({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678', create: true })
+    // a rejoin never creates, whatever it says (0.9.0)
+    expect(send({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678', create: true, rejoin: true }))
+      .toEqual({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678', create: false, rejoin: true })
+    expect(send({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678', create: false, rejoin: 'yes' })).toBeNull()
     expect(send({ type: 'leave' })).toEqual({ type: 'leave' })
     expect(send({ type: 'ready', ready: false })).toEqual({ type: 'ready', ready: false })
     expect(send({ type: 'start', options: { board: 'big' } })).toEqual({ type: 'start', options: { board: 'big' } })

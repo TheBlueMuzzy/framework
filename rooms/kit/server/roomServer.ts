@@ -62,6 +62,9 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   private onClock = new Set<string>()
   /** Seats whose screen shows the idle warning right now. */
   private warned = new Set<string>()
+  /** Turns a bot played for a player while they were away (seat id → count), told to them when they're back
+   *  ("a bot played 3 turns for you"). A "turn" = each time the game put that seat on the clock while a bot held it. */
+  private botTurns = new Map<string, number>()
   /** true while a game callback runs (so update() can't clash with it). */
   private insideGameCode = false
   private tools: RoomTools<State, Event>
@@ -151,6 +154,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
           const stillAway = findSeat(this.data, seatId)
           if (!stillAway || stillAway.kind !== 'human' || stillAway.connected) return
           handToBot(this.data, seatId)
+          if (this.onClock.has(seatId)) this.countBotTurn(seatId) // (taken over mid-turn: the bot plays this one)
           this.log(`a bot took ${stillAway.name}'s seat (away too long)`)
           this.seatChanged(seatId, 'bot')
           this.afterSeatsChanged()
@@ -213,6 +217,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     if (wasAway) this.seatChanged(seat.id, 'back')
     this.afterSeatsChanged()
     if (this.game !== null) this.sendView(seat)
+    if (wasAway && this.data.phase !== 'lobby') this.sayWelcomeBack(seat.id)
   }
 
   private handleLeave(connection: PartyConnection, seat: SeatRecord): void {
@@ -225,6 +230,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     } else {
       handToBot(this.data, seat.id)
       seat.connected = false
+      if (this.onClock.has(seat.id)) this.countBotTurn(seat.id)
       this.seatChanged(seat.id, 'bot')
     }
     this.sendClosed(connection, 'left')
@@ -253,6 +259,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.insideGameCode = false
     }
     this.log(`game started with ${this.data.seats.length} seats`)
+    this.botTurns.clear() // (a rematch: last game's count is old news)
     startPlaying(this.data)
     this.game = state
     this.afterGameChanged()
@@ -295,6 +302,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     if (this.data.phase !== 'over') return this.sendError(connection, 'not_now', 'The game isn\'t over yet.')
     backToLobby(this.data)
     this.game = null
+    this.botTurns.clear()
     this.clearIdleClocks()
     this.timers.stopAll() // nothing to wait for in the lobby
     this.sendToEveryone({ type: 'view', view: null })
@@ -346,6 +354,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   /** The owner, still connected, is active again while a bot plays their seat: it's theirs again, at once. */
   private takeSeatBack(seat: SeatRecord): void {
     takeBack(this.data, seat.id)
+    this.botTurns.delete(seat.id) // (they were watching: they saw the bot's turns)
     this.log(`${seat.name} took their seat back from the bot`)
     this.restartIdleClock(seat.id)
     this.seatChanged(seat.id, 'back')
@@ -383,7 +392,9 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       if (!this.onClock.has(seatId)) this.stopIdleClock(seatId)
     }
     for (const seatId of this.onClock) {
-      if (!before.has(seatId)) this.restartIdleClock(seatId)
+      if (before.has(seatId)) continue
+      this.restartIdleClock(seatId)
+      this.countBotTurn(seatId) // (only counts if a bot holds this seat for its player)
     }
   }
 
@@ -421,10 +432,29 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     const seat = findSeat(this.data, seatId)
     if (this.data.phase !== 'playing' || !seat || seat.kind !== 'human') return
     handToBot(this.data, seatId)
+    if (this.onClock.has(seatId)) this.countBotTurn(seatId) // (taken over mid-turn: the bot plays this one)
     this.timers.stop(botTakeoverTimer(seatId)) // (if they'd dropped out as well, the bot already has it)
     this.log(`a bot took ${seat.name}'s seat (${why})`)
     this.seatChanged(seatId, 'bot')
     this.afterSeatsChanged()
+  }
+
+  // ─── Back after being away ────────────────────────────────────────
+  // A player who closed the tab (or lost the connection) and comes back is told how many of their turns a bot played
+  // meanwhile — so the game can say "You're back — a bot played 3 turns for you" instead of leaving them to guess why
+  // the board moved on. (Rooms 0.9.0, F95.)
+
+  /** The game put this seat on the clock, or a bot took it mid-turn: if a bot plays it for its player, count it. */
+  private countBotTurn(seatId: string): void {
+    const seat = findSeat(this.data, seatId)
+    if (!seat || playedBy(seat) !== 'bot-for-seat') return
+    this.botTurns.set(seatId, (this.botTurns.get(seatId) ?? 0) + 1)
+  }
+
+  /** Only to the player who's back: how many turns the bot played for them. Then the count starts again. */
+  private sayWelcomeBack(seatId: string): void {
+    this.sendToSeat(seatId, { type: 'back', botTurns: this.botTurns.get(seatId) ?? 0 })
+    this.botTurns.delete(seatId)
   }
 
   /** Tell the game a seat changed (if it wants to know). */
@@ -500,6 +530,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.clearIdleClocks()
     this.timers.stopAll()
     this.game = null
+    this.botTurns.clear()
     this.data = newRoom(this.party.id)
   }
 
