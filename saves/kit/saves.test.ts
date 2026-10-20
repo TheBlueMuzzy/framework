@@ -232,6 +232,42 @@ describe('createSave — a save from a newer build', () => {
     expect(storage.data['test:progress']).toBe(newer)
     expect(save.exportRecord()).toMatchObject({ version: 4, data: { totalXp: 999 } }) // a save code can still carry it
   })
+
+  it('clear({ evenNewer }) removes it all the same (only a run asks for that)', () => {
+    const storage = memoryStorage({ 'test:progress': JSON.stringify({ save: 'test:progress', version: 4, savedAt: '', data: {} }) })
+    progressSave(storage).clear({ evenNewer: true })
+    expect(Object.keys(storage.data)).toEqual([])
+  })
+})
+
+describe('peek — is something saved, from when, without loading it', () => {
+  it('nothing saved → null', () => {
+    expect(progressSave().peek()).toBeNull()
+  })
+
+  it('a good save → its data (complete, as load() gives it) and when it was written', () => {
+    const storage = memoryStorage({ 'test:progress': JSON.stringify({ save: 'test:progress', version: 1, savedAt: '2026-10-20T09:00:00.000Z', data: { totalXp: 50 } }) })
+    expect(progressSave(storage).peek()).toEqual({ state: 'good', savedAt: '2026-10-20T09:00:00.000Z', data: { ...fresh, totalXp: 50 } })
+  })
+
+  it('changes nothing: no report, no damaged copy set aside, nothing written', () => {
+    const good = JSON.stringify({ save: 'test:progress', version: 1, savedAt: '2026-10-20T09:00:00.000Z', data: { totalXp: 7 } })
+    const storage = memoryStorage({ 'test:progress': '{cut off', 'test:progress~1': good })
+    const save = progressSave(storage)
+    expect(save.peek()).toMatchObject({ state: 'good', data: { totalXp: 7 } }) // the backup load() would use
+    expect(Object.keys(storage.data).sort()).toEqual(['test:progress', 'test:progress~1'])
+    expect(save.report().from).toBe('fresh') // load() was never called
+  })
+
+  it('a newer build\'s save → newer, with its version and time', () => {
+    const storage = memoryStorage({ 'test:progress': JSON.stringify({ save: 'test:progress', version: 4, savedAt: '2026-10-20T09:00:00.000Z', data: {} }) })
+    expect(progressSave(storage).peek()).toEqual({ state: 'newer', savedAt: '2026-10-20T09:00:00.000Z', version: 4 })
+  })
+
+  it('only broken copies → damaged, and why', () => {
+    const storage = memoryStorage({ 'test:progress': '{', 'test:progress~1': '42' })
+    expect(progressSave(storage).peek()).toMatchObject({ state: 'damaged', savedAt: '', problem: expect.stringContaining('not JSON') })
+  })
 })
 
 describe('createSave — runs, slots, keys', () => {

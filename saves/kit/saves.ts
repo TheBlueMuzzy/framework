@@ -85,6 +85,13 @@ export interface LoadReport {
   note: string | null
 }
 
+/** What peek() found: a usable save (what load() would give, and when it was written), a newer build's (kept), or
+ *  only broken copies. savedAt is '' when it isn't known (a save from before the module, a broken copy). */
+export type SavePeek<T> =
+  | { state: 'good'; savedAt: string; data: T }
+  | { state: 'newer'; savedAt: string; version: number }
+  | { state: 'damaged'; savedAt: string; problem: string }
+
 export type SaveResult =
   | { ok: true }
   | { ok: false; reason: 'full' | 'blocked' | 'newer' | 'not-kept' | 'not-data'; message: string }
@@ -97,8 +104,12 @@ export interface Save<T> {
   load(): T
   /** Write the whole save as one record; the copy it replaces becomes the newest backup. Never throws. */
   save(data: T): SaveResult
-  /** Remove every copy (a run that ended, "reset progress"). A newer build's save is kept. */
-  clear(): void
+  /** Remove every copy (a run that ended, "reset progress"). A newer build's save is kept — unless evenNewer
+   *  (only a run uses it: run.ts says why). */
+  clear(options?: { evenNewer?: boolean }): void
+  /** Is something saved, from when — without loading it: no upgrade report, nothing written (a damaged copy isn't
+   *  even set aside). null = nothing saved. The Continue button asks this (run.ts). */
+  peek(): SavePeek<T> | null
   /** What the last load() found. */
   report(): LoadReport
   /** The record as load() sees it (today's version) — or a newer build's, untouched. For save codes. null = nothing saved. */
@@ -225,8 +236,9 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
   /** Every copy, newest first: the save, then its backups. */
   const copyKeys = () => [key, ...Array.from({ length: MAX_BACKUPS }, (_, i) => backupKey(key, i + 1))]
 
-  /** The newest good copy (or newer / nothing), with the problems of the copies skipped on the way. */
-  function newestGood(): { outcome: Outcome<T>; index: number; problems: string[] } {
+  /** The newest good copy (or newer / nothing), with the problems of the copies skipped on the way.
+   *  setAside: a broken newest copy is kept at <key>~damaged for a look later (peek() writes nothing, so it says no). */
+  function newestGood(setAside = true): { outcome: Outcome<T>; index: number; problems: string[] } {
     const problems: string[] = []
     const keys = copyKeys()
     for (let i = 0; i < keys.length; i++) {
@@ -235,7 +247,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
       if (outcome.state === 'good' || outcome.state === 'newer') return { outcome, index: i, problems }
       if (outcome.state === 'damaged') {
         problems.push(`${i === 0 ? 'the save' : `backup ${i}`}: ${outcome.problem}`)
-        if (i === 0 && text !== null && readKey(storage, damagedKey(key)) !== text) writeKey(storage, damagedKey(key), text) // kept for a look later
+        if (setAside && i === 0 && text !== null && readKey(storage, damagedKey(key)) !== text) writeKey(storage, damagedKey(key), text) // kept for a look later
       }
     }
     return { outcome: { state: 'empty' }, index: -1, problems }
@@ -334,10 +346,31 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
     }
   }
 
-  function clear() {
-    if (newerVersionStored() !== null) return
+  function clear({ evenNewer = false }: { evenNewer?: boolean } = {}) {
+    if (!evenNewer && newerVersionStored() !== null) return
     for (const k of copyKeys()) removeKey(storage, k)
     removeKey(storage, damagedKey(key))
+  }
+
+  /** When a stored copy says it was written (its savedAt), or '' when it doesn't say. */
+  function savedAtOf(k: string): string {
+    try {
+      const parsed: unknown = JSON.parse(readKey(storage, k) ?? 'null')
+      return isRecordShaped(parsed) && typeof parsed.savedAt === 'string' ? parsed.savedAt : ''
+    } catch {
+      return ''
+    }
+  }
+
+  function peek(): SavePeek<T> | null {
+    try {
+      const { outcome, index, problems } = newestGood(false)
+      if (outcome.state === 'good') return { state: 'good', savedAt: outcome.record.savedAt, data: outcome.record.data }
+      if (outcome.state === 'newer') return { state: 'newer', savedAt: savedAtOf(copyKeys()[index]), version: outcome.version }
+      return problems.length ? { state: 'damaged', savedAt: savedAtOf(key), problem: problems.join('; ') } : null
+    } catch (error) {
+      return { state: 'damaged', savedAt: '', problem: String(error) }
+    }
   }
 
   function exportRecord(): SaveRecord | null {
@@ -368,7 +401,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
   }
 
   return {
-    key, kind, version, load, save, clear, exportRecord, checkRecord, restoreRecord,
+    key, kind, version, load, save, clear, peek, exportRecord, checkRecord, restoreRecord,
     report: () => lastReport,
     merge: (a, b) => mergeRecords(kind, fields, a, b),
     withStorage: (other) => makeSave({ ...options, storage: other }, recordName, storageKey),
