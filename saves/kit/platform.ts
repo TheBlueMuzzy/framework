@@ -102,9 +102,16 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
     changes.set(COPIED_MARKER, '1')
   }
 
+  let soon = false
   function schedule() {
-    if (timer !== null || problem === 'load' || closed) return
-    timer = setTimeout(() => { timer = null; void flush() }, delayMs)
+    if (problem === 'load' || closed) return
+    // The page is hiding or closing (the game's own hide save — run.ts — comes after ours): no waiting, the app may be
+    // killed any moment. Right after this save's writes (one batch), not after the timer.
+    if (page?.document?.visibilityState === 'hidden') {
+      if (!soon) { soon = true; queueMicrotask(() => { soon = false; void flush() }) }
+      return
+    }
+    if (timer === null) timer = setTimeout(() => { timer = null; void flush() }, delayMs)
   }
 
   async function writeBatch(): Promise<WriteProblem | null> {
@@ -141,6 +148,7 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
     // The changes already queued keep retrying on their own timer.
     if (problem === 'full') throw Object.assign(new Error(`the ${backend.name} is full`), { name: 'QuotaExceededError' })
     if (problem === 'blocked') throw new Error(`the ${backend.name} refused the last write`)
+    if ((memory.get(key) ?? null) === value) return // nothing new (a hide save of the same run): nothing to write
     if (value === null) memory.delete(key)
     else memory.set(key, value)
     changes.set(key, value)

@@ -110,6 +110,29 @@ describe('openSaves — the same kit on a slow storage', () => {
     expect(page.listening()).toBe(0) // deaf to the page now
   })
 
+  it("the game's own hide save (run.ts listens AFTER openSaves) goes out at once too, not after the timer (proof finding)", async () => {
+    const page = fakePage()
+    const disk = slowBackend({}, { waitMs: 1 })
+    await open(disk, { game: 'mygame', delayMs: 60_000, page: page.page })
+    page.page.document.addEventListener('visibilitychange', () => { opened!.setItem('mygame:run', 'what the game has now') })
+    page.fire('visibilitychange')
+    await wait(10)
+    expect(disk.data['mygame:run']).toBe('what the game has now')
+    expect(opened!.waiting()).toBe(0)
+  })
+
+  it('writing the same value again writes nothing', async () => {
+    const disk = slowBackend({ 'mygame:run': 'turn 4' })
+    await open(disk, { game: 'mygame' })
+    opened!.setItem('mygame:run', 'turn 4')
+    opened!.removeItem('mygame:nothing')
+    expect(opened!.waiting()).toBe(0)
+    opened!.setItem('mygame:run', 'turn 5')
+    opened!.setItem('mygame:run', 'turn 4') // back to what's on disk: still written (it's what the game said last)
+    await opened!.flush()
+    expect(disk.data['mygame:run']).toBe('turn 4')
+  })
+
   it('a run (Continue) autosaves through it like in a browser', async () => {
     const disk = slowBackend()
     await open(disk, { game: 'mygame' })
