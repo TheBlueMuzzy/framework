@@ -209,8 +209,10 @@ export function useRoom<View = unknown, Action = unknown, Options = unknown, Eve
   const mySeat = current.room?.seats.find((seat) => seat.id === current.you) ?? null
   // The match is over for us without anyone choosing it: the room closed, or the one we came back for is gone.
   // (A plain join to a wrong code is still a join error — 'no_room' says "no room with that code" there.)
+  // (A rejoin that finds we were kicked while away: the match is over for us too — not a join error. Review F95.)
   const matchEnded = current.status === 'closed'
-    && (current.closedReason === 'room_closed' || (current.closedReason === 'no_room' && identity.rejoin === true))
+    && (current.closedReason === 'room_closed'
+      || (identity.rejoin === true && (current.closedReason === 'no_room' || current.closedReason === 'kicked')))
 
   // Only send while we're really in the room (a message queued during a reconnect would arrive before our join)
   const sendMessage = useCallback((message: ClientMessage): boolean => {

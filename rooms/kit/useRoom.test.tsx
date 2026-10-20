@@ -303,6 +303,13 @@ describe('useRoom: rejoin', () => {
     expect(join.result.current.matchEnded).toBe(false)
   })
 
+  it('kicked while away, found on the rejoin → matchEnded too, not a join error (review F95)', () => {
+    const rejoin = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false, rejoin: true }))
+    sockets[0].open()
+    sockets[0].receive({ type: 'closed', reason: 'kicked', message: 'The host removed you.' })
+    expect(rejoin.result.current.matchEnded).toBe(true)
+  })
+
   it('back in → cameBack says how many turns the bot played, until cleared', () => {
     const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false, rejoin: true }))
     sockets[0].open()

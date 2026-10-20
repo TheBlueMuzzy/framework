@@ -532,16 +532,16 @@ describe('RoomServer: rejoin after closing the tab (0.9.0, F95)', () => {
     expect(back.last('back')).toEqual({ type: 'back', botTurns: 3 })
     expect(ann.received.some((m) => m.type === 'back')).toBe(false) // only to the one who's back
     drop(back)
-    expect(join('tab-bob-3', 'Bob', BOB).last('back')).toEqual({ type: 'back', botTurns: 0 }) // the count started again
+    expect(join('tab-bob-3', 'Bob', BOB).last('back')).toBeUndefined() // the count started again: nothing to say
   })
 
-  it('a quick reconnect (no bot yet) is "back" with 0 turns; turns the player watched (idle → tap) are not counted', () => {
+  it('a quick reconnect or a reload (no bot turns) says nothing — no "You\'re back" toast; turns the player watched (idle → tap) are not counted (review F95)', () => {
     const { ann, bob } = startGame()
     send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
     vi.advanceTimersByTime(60_000) // Bob idles: the bot plays for him, he's still here
     send(bob, { type: 'active' }) // a tap: his again
     drop(bob)
-    expect(join('tab-bob-2', 'Bob', BOB).last('back')).toEqual({ type: 'back', botTurns: 0 })
+    expect(join('tab-bob-2', 'Bob', BOB).last('back')).toBeUndefined()
   })
 
   it('nobody "back" in the lobby', () => {

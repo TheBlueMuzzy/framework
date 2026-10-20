@@ -451,10 +451,12 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.botTurns.set(seatId, (this.botTurns.get(seatId) ?? 0) + 1)
   }
 
-  /** Only to the player who's back: how many turns the bot played for them. Then the count starts again. */
+  /** Only to the player who's back: how many turns the bot played for them. Then the count starts again.
+   *  Nothing played for them (a reload, a 2-second Wi-Fi drop) → nothing to say: no "You're back" toast (review F95). */
   private sayWelcomeBack(seatId: string): void {
-    this.sendToSeat(seatId, { type: 'back', botTurns: this.botTurns.get(seatId) ?? 0 })
+    const botTurns = this.botTurns.get(seatId) ?? 0
     this.botTurns.delete(seatId)
+    if (botTurns > 0) this.sendToSeat(seatId, { type: 'back', botTurns })
   }
 
   /** Tell the game a seat changed (if it wants to know). */
