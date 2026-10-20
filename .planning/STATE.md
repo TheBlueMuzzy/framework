@@ -1,19 +1,19 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Released v0.10.3 (framework update): patch notes + the dependency/licence check** — the first release with real patch notes (`.planning/archive/releases/v0.10.3.md`, CHANGELOG.md). UI kit 0.22.1: Credits links the game's open-source licences; non-commercial licences count as 🔴. A one-week wait on brand-new package versions everywhere. Next: /sprint (or /roadmap) — ready in v0.10: F82 live-game check, F83 stage-release checks, save layers F93/F95/F96/F97/F99. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
-- What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Found by checkup §8: Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas, for its session).
-- Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
+2026-10-20 — **Sprint 17 planned: releases and live games get watched for you** — F82 (session start says "the live site is DOWN" only when it is; the rooms kit gets a /health address live-check pings) + F83 (an alpha / beta / 1.0 release refuses without a filled-in release checklist; no stand-in art from beta on). Next: /develop starts F82 task 1 (rooms kit /health). Muzzy (2026-10-20): "I want you to do all of them" → the rest of v0.10 is queued: 18 F93 run resume + F95 online rejoin · 19 F96 link-code cloud + F94 seed/move log · 20 F97 stores/Steam + F98 checked leaderboards + F99 Unity port (queue in SPRINT.md).
+- Muzzy: task 9 — read the release checklist template once it's written (anything a real alpha/beta check needs that's missing?).
+- Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
+- Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
-- dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
+- Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
 Reviewed through: framework 20196de (sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (16 archived)
-Doing: released v0.10.3 — next /sprint   Branch: main   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 17 — releases and live games get watched for you (F82, F83)
+Doing: Sprint 17 planned — next /develop (F82 task 1)   Branch: main   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
