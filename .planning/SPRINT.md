@@ -9,7 +9,7 @@ Done when: the whole saves kit takes its storage from one switch, a game can ope
 - [x] 🤖 3. The start-up layer: `openSaves(backend)` awaits `loadAll()` into memory, then sync reads + background writes (debounced), `flushSaves()` on visibilitychange / pagehide, a failing backend reported like a full storage; a localStorage backend + a slow stand-in for tests — saves/kit/platform.ts
 - [x] 🤖 4. The save format written down for any language: the envelope, version stamp, keys and `~` copies, upgrade rule, "a newer save is never overwritten", the golden-save file shape — saves/FORMAT.md
 - [x] 🤖 5. Tests: game code unchanged on the slow stand-in, reads instant after open, writes land after flush, a write cut off mid-way leaves the last good copy, no kit file but storage.ts touches localStorage — saves/kit/platform.test.ts
-- [ ] 🤖 6. README "Phone, desktop and Unity later" (what's ready, what the store run-through adds, the research link) + MODULE-CONTRACTS line (a game opens its saves before the first read) — saves/README.md
+- [x] 🤖 6. README "Phone, desktop and Unity later" (what's ready, what the store run-through adds, the research link) + MODULE-CONTRACTS line (a game opens its saves before the first read) — saves/README.md
 Check: saves tests + tsc + lint green; scratch Glyphtender plays the same with its saves opened through the slow stand-in (Continue still works after a reload); measured load ms + writes per minute on record; FORMAT.md checked against the golden saves (every field named exists in them).
 Ask Muzzy: —
 

@@ -2,18 +2,19 @@
 
 The player's saves — settings, progress, a run in progress, save slots — kept so that **no update, broken write, full storage or browser habit loses them**. The game says *what* it saves (`createSave({ key, kind, version, fresh, upgrades })`); the module keeps it versioned, upgraded step by step, backed up, and copyable as a **save code**.
 
-Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; the other layers are F95–F99). Kit **0.5.0**. Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
+Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.6.0**. Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
 
 No library: localStorage, the browser's own CompressionStream, and nothing else at run time (the optional link-code cloud and Daily board are small workers of the game's own on Cloudflare — no packages but wrangler).
 
-## What a game gets (0.5.0)
+## What a game gets (0.6.0)
 | File | Does |
 |---|---|
 | `index.ts` | The public API (below) — import from `src/saves` |
 | `saves.ts` | **The core.** `createSave` — game-prefixed keys, version stamp, step-by-step upgrades, missing fields filled with today's defaults (never over the player's values), one whole-record write that's read back before it counts, 2 rolling backups (newest GOOD copy wins), a newer build's save kept untouched (in any copy — this build then never writes), full storage caught (backups older than the newest good copy make room; that copy itself never goes). A write that doesn't read back is undone. Never throws. `kind: 'slots'` → one save per slot + a list |
 | `progress.ts` | How two copies of progress combine (for the cloud later, F96): `highest` · `add-up` (counted per device, so two devices' "games played" SUM) · `collect` (every unlock once) · `newest` |
 | `fill.ts` | Fill in what's missing after loading (and why a changed default doesn't reach old saves on its own) |
-| `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked) |
+| `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked). **0.6.0:** `setSavesStorage(storage, { native? })` — one switch for the whole kit (every save, run, link code, board memory and the health check); a save made before the switch follows it too |
+| `platform.ts` | **Saves on any platform (0.6.0, F101).** `openSaves(backend, { game })` — a phone or desktop storage that answers later: every key loaded once at start-up, then instant reads and background writes (a few at once), written at once when the page hides or closes; a storage that can't be read is never written over; a failed write stays queued and the kit reports it; the first launch copies the game's browser saves over once. `browserBackend(game)` and `slowBackend()` (tests) |
 | `saveCode.ts` | The save code: `GAME-1z-…` (compressed) copy-paste text and the same as a `.txt` file. Every save in a code is checked before ANY is written — a bad code never wipes a save. Progress is merged, other saves replaced (the old copy stays as a backup). If the browser still refuses a write part-way (full storage), the result names exactly which saves were and weren't restored |
 | `health.ts` | Will this browser keep the saves? Warnings in plain words: storage blocked · looks like a private window · itch.io's frame · another site's frame · Safari's 7-day rule · persist refused. `askToKeepSaves()` = `navigator.storage.persist()` |
 | `nudge.ts` | "Back up your save" after real progress since the last code (never nagging — content/saves.json) |
@@ -30,6 +31,7 @@ No library: localStorage, the browser's own CompressionStream, and nothing else 
 | `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage, and (0.2.0) `checkRunEnds` — used by the game's `tests/saves/saves.test.ts` |
 | `config.ts` | `content/saves.json`: backups, nudge, cloud (keepDays 7, wrongTriesPerHour 10, uploadsPerHour 20), board (dailyTries 1, keepDays 7, sendsPerDay 30, show 10) |
 | `conformance.mjs` | Its check:framework checks |
+| `../FORMAT.md` | The save format for any language (keys, records, loading, saving, golden saves) — what a C# or other version is built from; `kit/format.test.ts` keeps it true |
 
 ## What a game must provide
 From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`), "Saves":
@@ -145,6 +147,20 @@ A finished **Daily game** (layer 3) goes to the game's own board worker as its *
 - **Who a player is:** a random 128-bit id made once on the device (`<game>:board`), sent only to the board, kept there only as a keyed hash; it's also the proof for "Remove my score". Clearing the browser = a new player.
 - **Measuring / e2e:** `wrangler dev -c board/wrangler.json --var CHECK_NOW:1` = each game replayed inside its request (to time a whole replay; never set live).
 
+### Phone, desktop and Unity — ready, built later (0.6.0, F101)
+A web game needs nothing here. A phone app (Capacitor) or desktop app (Electron, Steam) build opens its saves once
+before anything reads one, and the whole kit then uses them — game code stays the same:
+```ts
+// main.tsx, before rendering
+await openSaves(myPlatformBackend, { game: 'glyphtender' })   // a SavesBackend: name, native, loadAll(), write(changes)
+```
+What's ready: the switch, the start-up layer, the first-launch copy, the health check without browser warnings, the
+format (`FORMAT.md`). What the store run-through adds (ROADMAP F97, research in `.planning/research/saves.md`
+"Layers 6 + 8"): the Capacitor Preferences backend, the Electron files backend (a key and its backups in one JSON file
+in `userData/saves`, written safely by the main process through a narrow preload bridge, one window at a time) and the
+Steam Auto-Cloud settings for that folder. A Unity game (F99) reads and writes the same records under
+`persistentDataPath`, built from `FORMAT.md` and tested on the same golden saves.
+
 ## Golden saves
 A real save from each version, committed as `tests/saves/<key>-v<N>.json` — several per version are fine (`goops-progress-v1-before-the-module.json`):
 ```json
@@ -177,6 +193,8 @@ handleBoard(request, { rows, game, settings, address, secret?, checkLater?, now?
 checkSaveHealth(env?) → Promise<{ canSave, kept, inFrame, onItch, warnings: [{ id, level: risk|note, message }] }> · askToKeepSaves() · healthLine(health)
 createBackupNudge(game, { storage?, config?, now? }) → { noteProgress(n?), backedUp(), due(health?), shown() }
 SAVE_SETTINGS_ROWS · SAVE_CODE_ROW · SAVE_HEALTH_ROW · HEALTH_WORDS · CODE_WORDS · NUDGE_WORDS · NOTES
+openSaves(backend, { game, copyFrom?, delayMs?, page?, onProblem?, useForKit? }) → Promise<storage + flush() · waiting() · problem() · loadMs · close()> · browserBackend(game) · slowBackend(start?, { waitMs?, native? }) · COPIED_MARKER
+setSavesStorage(storage, { native? }) · savesStorage() · savesOnNativeStorage() · switchedStorage
 setSavesConfig(json) · readSavesConfig(json) · memoryStorage(start?) · mergeRecords(kind, fields, a, b) · fillMissing(saved, fresh)
 oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds
 ```
