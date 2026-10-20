@@ -65,6 +65,36 @@ function playLive(seed: number, rulesVersion: number | string = 3) {
   return { state, record, prints }
 }
 
+describe('replayRun with a hostile record — a leaderboard server replays what strangers send (review F94)', () => {
+  const opts = { rulesVersion: 3 }
+  it('a sparse moves list (holes) is damaged, not a crash', () => {
+    const holes = { rulesVersion: 3, setup: { players: 2, seed: 1 }, moves: new Array(5) } as unknown as RunRecord<RaceSetup, RaceAction>
+    expect(replayRun(race, holes, opts)).toMatchObject({ ok: false, reason: 'damaged' })
+  })
+
+  it('more moves than maxMoves → refused before anything is replayed', () => {
+    const many = recordRun<RaceSetup, RaceAction>({ rulesVersion: 3, setup: { players: 2, seed: 1 }, moves: Array.from({ length: 1001 }, (_, i) => ({ seat: i % 2, action: { type: 'pass' } })) })
+    let setups = 0
+    const counted = { ...race, setup: (s: RaceSetup) => { setups++; return race.setup(s) } }
+    expect(replayRun(counted, many, { ...opts, maxMoves: 1000 })).toMatchObject({ ok: false, reason: 'damaged' })
+    expect(setups).toBe(0)
+  })
+
+  it('a view or an everyMove that throws → "different", never a throw', () => {
+    const { record, state } = playLive(7)
+    expect(replayRun(race, record, { ...opts, matches: { live: state, view: () => { throw new Error('boom') } } })).toMatchObject({ ok: false, reason: 'different' })
+    expect(replayRun(race, record, { ...opts, everyMove: () => { throw new Error('boom') } })).toMatchObject({ ok: false, reason: 'different' })
+  })
+
+  it('rules that change what they\'re handed never edit the record', () => {
+    const { record } = playLive(7)
+    const before = JSON.stringify(record)
+    const meddling = { ...race, apply: (s: Race, seat: number, a: RaceAction) => { (a as { type: string }).type = 'pass'; return race.apply(s, seat, { type: 'pass' }) } }
+    replayRun(meddling, record, opts)
+    expect(JSON.stringify(record)).toBe(before)
+  })
+})
+
 describe('replayRun — the same setup + the same moves = the same game', () => {
   it('rebuilds the live game exactly, at every move, not just the end', () => {
     for (const seed of [1, 42, 2026, 0x7fffffff]) {

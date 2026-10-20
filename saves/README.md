@@ -143,7 +143,7 @@ createRun<T>({ key, version, fresh, upgrades?, summary?, snapshot?, storage?, on
   → run.autosave(data) · run.pending() → { savedAt, summary, canContinue } | null · run.resume() → { ok, data } | { ok: false, reason: none|newer|damaged, message }
     run.end() · run.save (the Save underneath) · run.withStorage(storage)
 continueLine(pending, now?, words?) → "Turn 7 · 5 min ago" · timeAgo(savedAt, now?, words?) · RUN_WORDS
-recordRun({ rulesVersion, setup, moves? }) · addRunMove(record, seat, action, by?) · replayRun(rules, record, { rulesVersion, matches?: { live, view? }, everyMove?, words? })
+recordRun({ rulesVersion, setup, moves? }) · addRunMove(record, seat, action, by?) · replayRun(rules, record, { rulesVersion, matches?: { live, view? }, everyMove?, words?, maxMoves? }) — maxMoves: a server replaying records strangers send refuses longer ones up front
   → { ok, state } | { ok: false, reason: other-version|move-refused|damaged|different, message, move? } · sameResult(live, replayed, view?) · dailySeed(gameId, when?) · utcDay(when?) · REPLAY_WORDS
 ui/useContinue(run, onResume, words?) → { onContinue?, continueDetail? } for the UI kit's MainMenu
 makeSaveCode(saves) → Promise<string> · readSaveCode(code, saves) → Promise<{ ok, restored, skipped } | { ok: false, message }>

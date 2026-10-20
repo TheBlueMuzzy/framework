@@ -176,6 +176,17 @@ describe('seed + move log (layer 3, 0.4.0)', () => {
     expect(results.at(-1).fix).toContain('sameResult')
   })
 
+  it('a replay test only in a comment doesn\'t count; one written with its types does (review F94)', async () => {
+    const commented = { path: 'tests/record.test.ts', text: '// replayRun(rules, record) then sameResult(live, back)\n' }
+    const failed = tester({ code: [keeper], testFiles: [commented] })
+    await check(failed.t)
+    expect(failed.results.at(-1).ok).toBe(false)
+    const typed = { path: 'tests/record.test.ts', text: 'const back = replayRun<Game, Action, Setup>(rules, record, { rulesVersion: 1 })\nexpect(sameResult<Game>(live, back.state)).toBe(true)\n' }
+    const passed = tester({ code: [{ path: 'src/r.ts', text: 'recordRun<Setup<Deep>, Action>({ rulesVersion: 1, setup })\n' }], testFiles: [typed] })
+    await check(passed.t)
+    expect(passed.results.at(-1).ok).toBe(true)
+  })
+
   it('recordRun in a comment isn\'t a record', async () => {
     const { t, results } = tester({ code: [{ path: 'a.ts', text: '// later: recordRun({ rulesVersion: 1, setup })\n' }] })
     await check(t)

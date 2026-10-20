@@ -95,28 +95,53 @@ export function replayRun<State, Action, Setup>(
     matches?: { live: State | string; view?: (state: State) => unknown }
     everyMove?: (state: State, move: number) => void
     words?: Partial<typeof REPLAY_WORDS>
+    /** The most moves a real game of this kind can have. A record with more is refused before replaying — a server
+     *  replaying records strangers send (a leaderboard, F98) can't be kept busy by a million passes (review F94). */
+    maxMoves?: number
   },
 ): ReplayResult<State> {
   const w = { ...REPLAY_WORDS, ...options.words }
-  if (!looksLikeRecord(record)) return { ok: false, reason: 'damaged', message: w.damaged }
+  const damaged = { ok: false as const, reason: 'damaged' as const, message: w.damaged }
+  const moveCount = (record as { moves?: unknown })?.moves
+  if (Array.isArray(moveCount) && options.maxMoves !== undefined && moveCount.length > options.maxMoves) return damaged
+  if (!looksLikeRecord(record)) return damaged
   if (record.rulesVersion !== options.rulesVersion) return { ok: false, reason: 'other-version', message: w.otherVersion }
+  // A copy: the rules may change the objects they're handed, and the record belongs to the live game (review F94)
+  let copy: RunRecord<Setup, Action>
+  try {
+    copy = JSON.parse(JSON.stringify(record))
+  } catch {
+    return damaged
+  }
   let state: State
   try {
-    state = rules.setup(record.setup)
+    state = rules.setup(copy.setup)
   } catch {
-    return { ok: false, reason: 'damaged', message: w.damaged }
+    return damaged
   }
-  for (let i = 0; i < record.moves.length; i++) {
-    const { seat, action } = record.moves[i]
+  for (let i = 0; i < copy.moves.length; i++) {
     try {
+      const { seat, action } = copy.moves[i]
       if (rules.check(state, seat, action) !== null) return { ok: false, reason: 'move-refused', message: w.moveRefused, move: i + 1 }
       state = rules.apply(state, seat, action).state // normal mode, not fast: the end screen's bookkeeping comes back too
     } catch {
       return { ok: false, reason: 'move-refused', message: w.moveRefused, move: i + 1 }
     }
-    options.everyMove?.(state, i + 1)
+    try {
+      options.everyMove?.(state, i + 1)
+    } catch {
+      return { ok: false, reason: 'different', message: w.different } // (a test's fingerprint check broke: not the same game)
+    }
   }
-  if (options.matches && !sameResult(options.matches.live, state, options.matches.view)) return { ok: false, reason: 'different', message: w.different }
+  if (options.matches) {
+    let same = false
+    try {
+      same = sameResult(options.matches.live, state, options.matches.view)
+    } catch {
+      same = false // (a view that throws, or a state JSON can't write: can't prove it's the same game)
+    }
+    if (!same) return { ok: false, reason: 'different', message: w.different }
+  }
   return { ok: true, state }
 }
 
@@ -161,6 +186,11 @@ export function dailySeed(gameId: string, when: Date | number | string = Date.no
 function looksLikeRecord(record: unknown): record is RunRecord<unknown, unknown> {
   if (!record || typeof record !== 'object') return false
   const r = record as Partial<RunRecord<unknown, unknown>>
-  return (typeof r.rulesVersion === 'number' || typeof r.rulesVersion === 'string') && r.setup !== undefined && Array.isArray(r.moves)
-    && r.moves.every((m) => !!m && typeof m === 'object' && Number.isInteger(m.seat) && 'action' in m)
+  if (!((typeof r.rulesVersion === 'number' || typeof r.rulesVersion === 'string') && r.setup !== undefined && Array.isArray(r.moves))) return false
+  // a plain loop, not .every(): .every() skips the holes in a sparse array, which would then crash the replay (review F94)
+  for (let i = 0; i < r.moves.length; i++) {
+    const m = r.moves[i]
+    if (!m || typeof m !== 'object' || !Number.isInteger(m.seat) || !('action' in m)) return false
+  }
+  return true
 }

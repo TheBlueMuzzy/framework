@@ -181,12 +181,15 @@ export async function check(t) {
     // clock or Math.random would make Continue land on a different board. Only a test that replays and compares proves it.
     const name = 'a game kept as seed + moves has a replay test'
     // (recordRun<GameSetup, Action>({ … }) counts too — Glyphtender's record.ts writes it with its types)
-    const keeps = code.filter((f) => /\brecordRun\s*(<[^>]*>)?\s*\(/.test(withoutComments(f.text)))
+    // (types may nest — recordRun<Foo<Bar>, A>( — so anything up to the "(" counts; review F94)
+    const called = (name, text) => new RegExp(`\\b${name}\\s*(<[\\s\\S]*?>)?\\s*\\(`).test(withoutComments(text))
+    const keeps = code.filter((f) => called('recordRun', f.text))
     if (!keeps.length) {
       t.skip(name, 'no recordRun in the game\'s code')
     } else {
       const tests = t.files({ dirs: ['tests', 'src'], skip: [t.rel] }).filter((f) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(f.path))
-      const replays = tests.filter((f) => /\breplayRun\s*\(/.test(f.text) && /\bsameResult\s*\(/.test(f.text))
+      // (a replay only in a comment doesn't count; replayRun<S, A, Setup>( does — review F94)
+      const replays = tests.filter((f) => called('replayRun', f.text) && called('sameResult', f.text))
       if (replays.length) t.pass(name, replays.map((f) => f.path).join(' · '))
       else t.fail(name, [`${keeps.map((f) => f.path).join(', ')} keep${keeps.length === 1 ? 's' : ''} a record (recordRun), but no test replays one and compares it with the live game.`], 'Add a test that plays a game the way the screen does (people + AI moves into the record), then replayRun(rules, record, { rulesVersion }) and expect sameResult(live, replayed, fingerprint) — after every move if you can (README → Seed + move log).')
     }
