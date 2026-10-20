@@ -2,11 +2,11 @@
 
 The player's saves — settings, progress, a run in progress, save slots — kept so that **no update, broken write, full storage or browser habit loses them**. The game says *what* it saves (`createSave({ key, kind, version, fresh, upgrades })`); the module keeps it versioned, upgraded step by step, backed up, and copyable as a **save code**.
 
-Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; layers 3–8 are F94–F99). Kit **0.2.0**. Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed) — see *Proof* below.
+Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F96 = layer 5, link codes; the other layers are F94–F99). Kit **0.3.0**. Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed) — see *Proof* below.
 
-No library: localStorage, the browser's own CompressionStream, and nothing else at run time.
+No library: localStorage, the browser's own CompressionStream, and nothing else at run time (the optional link-code cloud is a small worker of the game's own on Cloudflare — no packages but wrangler).
 
-## What a game gets (0.2.0)
+## What a game gets (0.3.0)
 | File | Does |
 |---|---|
 | `index.ts` | The public API (below) — import from `src/saves` |
@@ -18,11 +18,13 @@ No library: localStorage, the browser's own CompressionStream, and nothing else 
 | `health.ts` | Will this browser keep the saves? Warnings in plain words: storage blocked · looks like a private window · itch.io's frame · another site's frame · Safari's 7-day rule · persist refused. `askToKeepSaves()` = `navigator.storage.persist()` |
 | `nudge.ts` | "Back up your save" after real progress since the last code (never nagging — content/saves.json) |
 | `settingsRow.ts` | The Settings rows (`Your save` · `Saved: On this device` · `Save code ›`) for the UI kit's Settings |
-| `ui/SaveCodePanel.tsx` | The Save code screen (copy / download / paste / load a file), built from UI kit parts. **Only installed when the game has the UI kit** (the module's one link to another module, kept optional) |
+| `ui/SaveCodePanel.tsx` | The Save code screen (copy / download / paste / load a file; 0.3.0: + **Link code** — make / copy / type one, "Delete my data", the privacy line — when given `cloud`), built from UI kit parts. **Only installed when the game has the UI kit** (the module's one link to another module, kept optional) |
 | `run.ts` | **Run resume (0.2.0).** `createRun` — a game in progress saved at the game's break points (`autosave`) and when the tab hides or closes, `pending()` for the Continue button without loading it, `resume()`, and `end()` that wipes every copy (backups and a newer build's too) so a finished game never comes back. A newer build's or damaged run → "This game can't be continued", wiped, never a crash. `continueLine` → "Turn 7 · 5 min ago" |
 | `ui/useContinue.ts` | The main menu's Continue (0.2.0): `{ onContinue, continueDetail }` for the UI kit's MainMenu when a run is waiting, `{}` when not; a can't-continue run → a toast and Continue goes. UI kit only, like the panel |
+| `cloud.ts` | **Link codes (0.3.0, F96).** `makeLinkCode` sends the save code to the game's own server → "K7QM-2XRP" (8 characters, no O/0 or I/1); `loadLinkCode` brings it in through `readSaveCode` (same checks; progress merged by each field's rule); `deleteLinkCode` = "Delete my data"; `linkCodeHere`; `cloudAddress(import.meta.env.VITE_SAVES_CLOUD)`. Offline first: no network → one plain sentence (`CLOUD_WORDS`), nothing changed |
+| `cloudRoutes.ts` | The cloud's web addresses (`/saves/link` · `/saves/get` · `/saves/delete` · `/health`) as plain Requests → Responses with the store passed in — tested without Cloudflare. Size cap (the save code's 300,000 characters), wrong codes per address per hour, new codes per address per hour, addresses kept only scrambled for the hour |
 | `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage, and (0.2.0) `checkRunEnds` — used by the game's `tests/saves/saves.test.ts` |
-| `config.ts` | `content/saves.json`: backups, nudge |
+| `config.ts` | `content/saves.json`: backups, nudge, cloud (keepDays 7, wrongTriesPerHour 10, uploadsPerHour 20) |
 | `conformance.mjs` | Its check:framework checks |
 
 ## What a game must provide
@@ -87,6 +89,17 @@ Then list it in `tests/saves/saves.test.ts` → `RUNS: [{ run: matchRun, sample 
 - **A newer build's run or a damaged one** shows Continue with just its time; pressing it says "This game can't be continued…" (`RUN_WORDS.cantContinue`) and wipes it. Unlike progress, a newer build's run is not kept: while it sits there this build can't write the key at all, so no new run could ever be saved.
 - Online games aren't runs: the server holds the match (rejoin is F95).
 
+### Link codes — the save on another device without copy-paste (layer 5, 0.3.0)
+The save code is long; a **link code** is 8 characters (`K7QM-2XRP`, no O/0 or I/1). The game's own small server (a SQLite Durable Object on Muzzy's Cloudflare) keeps the save code under it for `cloud.keepDays` (7), then deletes it; on the other device the save comes in through `readSaveCode` — checked first, progress **merged** by each field's rule (best kept, counts added). Decisions + why: `../.planning/design/saves.md` → Layer 5.
+1. `node ~/.claude/config/bmuz/scripts/install-module.mjs saves . --cloud` → `cloud/worker.ts` + `cloud/wrangler.json` (`<game>-saves`, local port 1998), then the printed steps: `npm install -D wrangler`, `"cloud:dev": "wrangler dev -c cloud/wrangler.json"`, `"cloud:deploy": "wrangler deploy -c cloud/wrangler.json"`, `.wrangler/` in .gitignore.
+2. The Save code screen: `<SaveCodePanel saves={…} cloud={{ url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }} … />`. No `VITE_SAVES_CLOUD` and not on this PC / the Wi-Fi → no cloud → no Link code part (the rest of the screen as before).
+3. Try it: `npm run cloud:dev` + `npm run dev` → Settings → Save code → Make a link code, then type it in another browser.
+4. **Going live is Muzzy's call** (a public server that keeps players' saves): `npx wrangler login` once, `npm run cloud:deploy`, then build the game with `VITE_SAVES_CLOUD=<game>-saves.joebrogno.workers.dev`. Deploy the cloud again when `cloud/`, `src/saves/cloudRoutes.ts` or content/saves.json `cloud` change.
+- **A fetch doesn't delete the code** (a third device, or a retry after the other device's storage was full); "Delete my data" does, from either device. Wrong, expired and deleted codes get the same answer.
+- **Guess limit:** `cloud.wrongTriesPerHour` wrong codes from one address → every try from it is refused until the hour ends; `cloud.uploadsPerHour` new codes per address per hour. The address is kept only as a scrambled number, only for that hour.
+- **Free plan fit** (Cloudflare docs, 2026-10-20): Workers 100,000 requests/day · Durable Objects 100,000 requests/day (alarms count), 100,000 SQLite rows written/day (`setAlarm` = 1), 5 million rows read/day, 1 GB per object (5 GB per account), 2 MB per row, 10 ms CPU per request. A link code ≈ 1–2 rows written; the object stops making new codes at 900 MB.
+- **Test server:** `wrangler dev -c cloud/wrangler.json --var TEST_KEEP_SECONDS:5` = codes last 5 seconds (never set live).
+
 ## Golden saves
 A real save from each version, committed as `tests/saves/<key>-v<N>.json` — several per version are fine (`goops-progress-v1-before-the-module.json`):
 ```json
@@ -109,6 +122,8 @@ continueLine(pending, now?, words?) → "Turn 7 · 5 min ago" · timeAgo(savedAt
 ui/useContinue(run, onResume, words?) → { onContinue?, continueDetail? } for the UI kit's MainMenu
 makeSaveCode(saves) → Promise<string> · readSaveCode(code, saves) → Promise<{ ok, restored, skipped } | { ok: false, message }>
 saveFileName(saves) · downloadSaveFile(code, name) · readSaveFile(file) · copyText(text)
+makeLinkCode(saves, cloud) → { ok, link, expiresAt } | { ok: false, message } · loadLinkCode(typed, saves, cloud) → CodeResult · deleteLinkCode(saves, cloud) · linkCodeHere(saves) · cloudAddress(env?) · CLOUD_WORDS   (cloud = { url, storage?, fetch?, online?, timeoutMs? })
+handleCloud(request, { rows, settings, address, now?, keepMs? }) · memoryCloudRows() · readLinkCode · showLinkCode · newLinkCode   (cloudRoutes.ts — the worker's side)
 checkSaveHealth(env?) → Promise<{ canSave, kept, inFrame, onItch, warnings: [{ id, level: risk|note, message }] }> · askToKeepSaves() · healthLine(health)
 createBackupNudge(game, { storage?, config?, now? }) → { noteProgress(n?), backedUp(), due(health?), shown() }
 SAVE_SETTINGS_ROWS · SAVE_CODE_ROW · SAVE_HEALTH_ROW · HEALTH_WORDS · CODE_WORDS · NUDGE_WORDS · NOTES
@@ -118,10 +133,13 @@ oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGo
 Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORDS`, `RUN_WORDS`, the panel's `words`) can be replaced.
 
 ## Privacy
-Every save stays on this device (the browser's storage) unless the player copies a save code. Online rejoin (rooms kit 0.9.0, F95) keeps the room code and the player id on this device too; they only go to the game's own room server, to get the player back into their seat. Nothing is sent anywhere else.
+Every save stays on this device (the browser's storage) unless the player copies a save code. Online rejoin (rooms kit 0.9.0, F95) keeps the room code and the player id on this device too; they only go to the game's own room server, to get the player back into their seat. With a link code (0.3.0, only when the player makes one): a copy of the save code — nothing else, no name, no account — goes to the game's own server on Cloudflare for `cloud.keepDays` (7) days, then deletes itself; "Delete my data" removes it at once; the player's address is used only to count wrong tries, kept scrambled for an hour. The Save code screen says this in one line (`CLOUD_WORDS.privacy`). Nothing is sent anywhere else.
 
 ## `content/saves.json`
-`backups` (0–5, default 2: older copies beside each save) · `nudge.afterProgress` (points before "back up your save", 0 = never; default 10) · `nudge.minDaysBetween` (default 7) · `nudge.onlyWhenAtRisk` (default false) · `storageAllowed` ([{ file, why }]). `_help` / `_ranges` follow the Dev Kit convention.
+`backups` (0–5, default 2: older copies beside each save) · `nudge.afterProgress` (points before "back up your save", 0 = never; default 10) · `nudge.minDaysBetween` (default 7) · `nudge.onlyWhenAtRisk` (default false) · `cloud.keepDays` (1–30, default 7 — Muzzy 2026-10-20) · `cloud.wrongTriesPerHour` (default 10) · `cloud.uploadsPerHour` (default 20) · `storageAllowed` ([{ file, why }]). `_help` / `_ranges` follow the Dev Kit convention.
+
+## Proof (F96, 2026-10-20) — a scratch Goops in `~/Documents/dev/.scratch/goops-f96/`
+Saves 0.3.0 installed with `--cloud`; `src/progress/save.ts` moved onto `createSave` (totalXp / scrapsSpent `highest`, plus a scratch-only `shiftsPlayed` `add-up`), Settings → Gameplay → Save code with `cloud={{ url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }}`. The cloud worker under `wrangler dev` (port 4999, `--persist-to` a scratch folder), the game under vite (5394), Playwright's Chromium with separate browser profiles (`e2e/f96-cloud.mjs`): A (5000 XP, 10 scraps, 4 shifts) makes `7QL8-XFJ3`; B (3000, 50, 2) types it in lower case with a space → **5000 XP, 50 scraps, 6 shifts**; after A's "Delete my data" the code says "That link code didn't work…" and changes nothing; with `TEST_KEEP_SECONDS:5` a 6-second-old code fails the same way (the object's alarm ran twice, ok); 20 wrong codes from one address → 9 "didn't work" then 11 "Too many wrong link codes…" (the 10th wrong try of the hour was the deleted code); the worker blocked (route aborted) → "Couldn't reach the game's server…" for both Make and Get, progress untouched; no page errors. The worker typechecks against the game's tsconfig (`erasableSyntaxOnly` on). Screens at 390×844 and 1440×900: nothing touches the card's sides, the privacy line at the end of the card's scroll.
 
 ## Proof (F93, 2026-10-20) — a scratch Glyphtender in `~/Documents/dev/.scratch/glyphtender-f93/`
 UI kit 0.23.0 + saves 0.2.0 installed with install-module; `src/game/run.ts` (a local game's table: state, options, seats, stats; autosave when a turn or the phase changes, `end()` on game over / leaving / a new game), Continue in `src/ui/menus.tsx` (`useContinue`, "Turn {n}" in content/text). In Playwright's Chromium: a game vs the AI → the draft + 3 turns → reload → **Continue · Turn 4 · just now** → Continue lands on the same turn (board, hands, seats identical); a 5-minute-old save reads "Turn 4 · 5 min ago"; finishing the game (`playRest`) → no copy left, no Continue after a reload; a new game left from the menu → the same; a version-7 run planted → Continue with "3 hours ago" → "This game can't be continued…" toast, wiped, no page errors. Menu screenshots with and without Continue at 390×844 and 1440×900. Its 824 tests pass; check:framework Saves: golden copy ✓, save tests ✓ (`checkRunEnds`), "a run cleared at the end never comes back" ✓ (the direct-storage check still lists the game's known gaps, see F86 below).
