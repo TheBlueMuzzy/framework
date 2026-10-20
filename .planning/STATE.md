@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **F84 + F85 approved (sprint 16 done): patch notes + dependency/licence check.** Next: retro → archive → /deliver v0.10.3 (merge dev/v0-10, `release.mjs update --draft-notes`, show Muzzy the notes, release). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
+2026-10-20 — **Released v0.10.3 (framework update): patch notes + the dependency/licence check** — the first release with real patch notes (`.planning/archive/releases/v0.10.3.md`, CHANGELOG.md). UI kit 0.22.1: Credits links the game's open-source licences; non-commercial licences count as 🔴. A one-week wait on brand-new package versions everywhere. Next: /sprint (or /roadmap) — ready in v0.10: F82 live-game check, F83 stage-release checks, save layers F93/F95/F96/F97/F99. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
 - Found by checkup §8: Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas, for its session).
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
@@ -12,9 +12,9 @@
 Reviewed through: framework 20196de (sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 16 — every release says what changed and ships nothing risky
-Doing: F84 + F85 done — /deliver   Branch: dev/v0-10   Version: 0.10.2 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
-Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.2
+Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (16 archived)
+Doing: released v0.10.3 — next /sprint   Branch: main   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
 **What this is**
@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-20 — Released v0.10.3: every release now carries patch notes players can read, and refuses risky code packages; games can show their open-source licences in Credits.
 - 2026-10-19 — Released v0.10.2: games can install the Saves module — saved games survive updates, broken writes and (with a save code) browsers that wipe data.
 - 2026-10-19 — F86 approved: games get a Saves module — saves upgrade safely across updates, keep backups, combine lifetime stats across devices, and players can copy a save code; the game check fails a save with no old copy to test.
 - 2026-10-19 — Released v0.10.1: every game can now run one framework check that catches overlap, cut-off and faint text, things touching their card's edge, cards that grow, missing comfort settings, unread Settings rows and missing credits.

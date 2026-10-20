@@ -1,0 +1,11 @@
+v0.10.3 — 2026-10-20
+
+The Credits screen can now show the licences of the open-source code a game ships, and the credits check catches art or sound that may not be used commercially. Every framework module now waits a week before taking a brand-new package version.
+
+BREAKING
+• Credits with a non-commercial licence (CC BY-NC, "personal use only", "non-commercial use only") now count as 🔴, so the framework check fails until that asset is replaced. To upgrade: update the UI kit, run the framework check, and replace any asset it names.
+
+NEW
+• Credits screen: an "Open-source code" section with an "Open-source licences" button, shown only when the game has a third-party-notices.txt (each release writes one).
+• Credits check: licences that allow commercial use ("free for commercial and non-commercial use") stay fine; only the licence itself is read, not the credit line.
+• A one-week wait on brand-new package versions in the framework and every module, against poisoned package releases like the 2025 npm worm.
