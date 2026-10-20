@@ -91,6 +91,28 @@ gallery's `npm run shoot` uses the same one.
   And two HUD options for a narrow phone, so a game needs no app.css restyle (each one was a check:ui warning in Goops):
   `Bar width={0.3} atMost` — the bars in a row share its room evenly, each at most its share (never narrower than its
   label) · `Hud dockTight` — the dock panel's sides get `--gap-s` instead of `--gap-m`.
+- **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
+  copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
+  1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
+     `… install-module.mjs devkit .` (0.18.0 → 0.21.0); then `npm run check:ui`, tests, build.
+  2. `src/ui/App.tsx`: drop `...kitScreens` from the three screen lists (and from the import) — the stack has them now.
+     Machine bars: `<Bar … width={… bars.machineWidth} atMost …>`; the HUD: `<Hud … dockTight />`.
+  3. `src/ui/app.css`: delete the `.hud-machines > .kit-bar { … }` rule and the `.kit-hud-dock > .kit-panel:has(.hud-panel) { … }`
+     rule (+ their comments); keep `.hud-machines { flex-wrap: nowrap; }`. check:ui's 2 warnings go.
+  4. `content/devkit.json`: leave `pauseBadgeSpot` out (= "left", clear at 390 and 360) — or pick "left" / "right";
+     check:framework names the clear spots if the HUD changes. ("top", where Dev Kit 0.18.0 drew it, covers CRACKS.)
+  5. Goops' adapter has no `conformance.startPlay`, so check:framework's play checks have never run on it. Add one
+     (the scratch's: `query: '?rank=6'`, mark the lessons seen via `window.__goopsSeen`, click Start shift, wait for
+     `status === 'playing'` and no `.kit-art-stage`, up to 25 s) — all 10 Dev Kit checks then pass. Its own
+     `check:framework` script (`check:ui && check:devkit`) is worth pointing at `node src/devkit/check-framework.mjs`.
+  6. The version module replaces Goops' own copy: `… install-module.mjs version .`, then `versionPlugin()` in
+     vite.config.ts instead of the `goops-version-meta` plugin + the `GOOPS_VERSION` define; `src/version.ts` → import
+     `versionLabel` from `./version` (keep `content/text/en.json console.version` only if its words differ from "vX.Y.Z.B");
+     `e2e/start.mjs` `expectedVersion` / `checkVersion` → `src/version/e2e.mjs`; `GOOPS_BUILD` → `VERSION_BUILD`
+     (e2e/sw-update.mjs); deploy.js → `builtVersion()`; `<Settings version={versionLabel}>` (and drop About → Version's
+     `info`). The console footer is Goops' own (no MainMenu) — the version check's "menu" line may need a known gap.
+  Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
+  public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
