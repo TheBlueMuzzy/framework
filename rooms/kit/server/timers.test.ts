@@ -61,3 +61,41 @@ describe('timers table', () => {
     expect(log).toHaveBeenCalledWith('timer "turn" failed: oops')
   })
 })
+
+describe('timers table: surviving a restart (0.10.0, F100)', () => {
+  it('says when each running timer ends (what the room saves)', () => {
+    vi.setSystemTime(1_000_000)
+    const timers = new Timers()
+    timers.start('turn', 30_000, () => {})
+    timers.start('room:match-expires', 7 * 86_400_000, () => {})
+    expect(timers.endTimes()).toEqual({ turn: 1_030_000, 'room:match-expires': 1_000_000 + 7 * 86_400_000 })
+  })
+
+  it('runDue fires every timer that is due now (the storage alarm woke the room), and only those', () => {
+    const timers = new Timers()
+    const due = vi.fn()
+    const later = vi.fn()
+    timers.start('due', 0, due)
+    timers.start('later', 5000, later)
+    timers.runDue()
+    expect(due).toHaveBeenCalledOnce()
+    expect(later).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(5000)
+    expect(due).toHaveBeenCalledOnce() // (never twice: runDue took it off the table)
+    expect(later).toHaveBeenCalledOnce()
+  })
+
+  it('a wait longer than setTimeout can do (30 days) fires on time, not at once', () => {
+    const timers = new Timers()
+    const done = vi.fn()
+    const thirtyDays = 30 * 86_400_000
+    timers.start('room:match-expires', thirtyDays, done)
+    vi.advanceTimersByTime(1000)
+    expect(done).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(thirtyDays - 1001)
+    expect(done).not.toHaveBeenCalled()
+    expect(timers.isRunning('room:match-expires')).toBe(true)
+    vi.advanceTimersByTime(1)
+    expect(done).toHaveBeenCalledOnce()
+  })
+})
