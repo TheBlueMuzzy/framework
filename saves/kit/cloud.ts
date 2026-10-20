@@ -60,11 +60,17 @@ export type LinkResult = { ok: true; link: string; expiresAt: number } | { ok: f
  * cloud (null), and the Save code screen doesn't show link codes at all.
  */
 export function cloudAddress(envValue?: string | null, page: { protocol: string; hostname: string } | null = typeof location === 'undefined' ? null : location): string | null {
+  return serverAddress(envValue, CLOUD_PORT, page)
+}
+
+/** A small server of the game's own (the cloud, the board — F98): the build's setting, else the PC's own on `port` when
+ *  the page is on this PC or the Wi-Fi, else none (null). */
+export function serverAddress(envValue: string | null | undefined, port: number, page: { protocol: string; hostname: string } | null): string | null {
   const set = (envValue ?? '').trim().replace(/\/+$/, '')
   if (set) return /^https?:\/\//.test(set) ? set : `https://${set}`
   if (!page) return null
   const local = /^(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[\w-]+\.local)$/.test(page.hostname)
-  return local ? `http://${page.hostname}:${CLOUD_PORT}` : null
+  return local ? `http://${page.hostname}:${port}` : null
 }
 
 // --- the link code this device made or used (so "Delete my data" knows what to delete) ---------------------------
@@ -84,10 +90,11 @@ export function linkCodeHere(saves: AnySave[], { storage, now = () => Date.now()
 
 // --- talking to the server ----------------------------------------------------------------------------------------
 
-type Answer = { ok: true; body: Record<string, unknown> } | { ok: false; code: string }
+export type Answer = { ok: true; body: Record<string, unknown> } | { ok: false; code: string }
 
-/** One POST to the cloud. Never throws: no network / timed out → code 'offline'; a broken answer → 'server'. */
-async function ask(path: string, body: unknown, options: CloudOptions): Promise<Answer> {
+/** One POST to the cloud (or the board, board.ts). Never throws: no network / timed out → code 'offline'; a broken
+ *  answer → 'server'. */
+export async function ask(path: string, body: unknown, options: CloudOptions): Promise<Answer> {
   if (!options.url) return { ok: false, code: 'offline' }
   if (!(options.online?.() ?? (typeof navigator === 'undefined' || navigator.onLine !== false))) return { ok: false, code: 'offline' }
   const controller = new AbortController()
