@@ -310,7 +310,7 @@ export function applyKnownGaps(sections, { gaps, problems }, { complete = true }
     const matches = all.filter((r) => r.name === gap.check)
     if (!matches.length) unknown.push(gap.check)
     for (const r of matches) {
-      if (r.ok) r.gapNowPasses = true
+      if (r.ok && !r.warning) r.gapNowPasses = true // (a check that only warns still has its gap)
       else if (!r.skipped) r.knownGap = { why: gap.why, roadmap: gap.roadmap }
     }
   }

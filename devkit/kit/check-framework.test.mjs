@@ -183,6 +183,14 @@ describe('known gaps (0.20.1)', () => {
     expect(healthSummary(sections).modules[1].gapsToRemove).toEqual(['no inline styles'])
   })
 
+  it('a listed check that only WARNS still has its gap — no "passes now" reminder (F103 review)', () => {
+    const sections = run()
+    sections[1].results[0] = { name: 'no inline styles', ok: true, warning: true, problems: ['still covers CRACKS'] }
+    applyKnownGaps(sections, listed([{ check: 'no inline styles', why: 'x', roadmap: 'F1' }]))
+    expect(sections[1].results[0].gapNowPasses).toBeUndefined()
+    expect(formatReport('g', sections).text).not.toContain('it passes now')
+  })
+
   it('a listed name no check has is a failure (typo / renamed check) — only judged when every check ran', () => {
     const sections = run()
     applyKnownGaps(sections, listed([{ check: HALF, why: 'w', roadmap: 'TBD' }, { check: '◐ half pause stop the rules', why: 'typo' }]))

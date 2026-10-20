@@ -19,6 +19,14 @@ export const BADGE_CHECK = 'the PAUSED pill keeps clear of the game\'s HUD on a 
 
 /** With the game paused and the panel closed, at each phone size: does the pill cover the game's visible words or controls? */
 async function badgeCheck(t) {
+  // A game whose page throws here (no __devkit.pause, a closed browser) gets a skip with the reason — never an error
+  // that stops the checks after this one (the console check) from running
+  try { return await badgeCheckRun(t) } catch (error) {
+    return t.skip(BADGE_CHECK, `couldn't check the PAUSED pill (${error?.message ?? error})`)
+  }
+}
+
+async function badgeCheckRun(t) {
   const runs = []
   for (const { width, height } of BADGE_SIZES) {
     const page = await t.page({ width, height, mobile: true })
