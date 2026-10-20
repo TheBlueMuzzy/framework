@@ -207,7 +207,7 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - ✅ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96 · sprint 20
 - 💤 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
 - ✅ F100 🧱 Rooms: a match waits until it ends — the room's seats + game state kept in the Durable Object's storage, so a player can rejoin hours later and a server restart doesn't lose the match (Muzzy 2026-10-20: "until the match ends") — should · needs: F95 · sprint 19
-- 🔨 F101 🧱 Saves: ready for any platform — one storage switch for the whole kit, saves opened from a slow (async) storage at start-up then read instantly, writes in the background and forced out on hide/quit, the save format written down for any language (FORMAT.md); the seams F97 / F99 plug into later — should · needs: F86 · sprint 21
+- ✅ F101 🧱 Saves: ready for any platform — one storage switch for the whole kit, saves opened from a slow (async) storage at start-up then read instantly, writes in the background and forced out on hide/quit, the save format written down for any language (FORMAT.md); the seams F97 / F99 plug into later — should · needs: F86 · sprint 21
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]

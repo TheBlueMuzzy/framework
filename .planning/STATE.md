@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 21 built (waiting for OK): F101 saves ready for any platform** on `dev/v0-10` (saves 0.6.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call): one storage switch for the whole kit, `openSaves` (every key loaded once at start-up, background writes, written at once on hide, a failing storage never loses or drops a save), the first launch copies browser saves over, `saves/FORMAT.md` for a C# / other version, the installer names worker files from an older template. Proven in a scratch Glyphtender on a slow stand-in storage. **Next: Muzzy's OK on F101 → `F101: done`, then the sprint retro.** F97 (stores/Steam) + F99 (Unity) wait (💤).
+2026-10-20 — **Sprint 21 done (F101 approved): saves ready for any platform** on `dev/v0-10` (saves 0.6.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call): one storage switch, `openSaves` for slow phone/desktop storages, the first-launch copy, `saves/FORMAT.md`, installer warns about worker files from an older template. **Next: Muzzy's 3-line retro → archive sprint 21 → /sprint 22.** v0.10's save layers are done except F97 (stores/Steam) + F99 (Unity), which wait (💤) for a real store build / Unity game.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework baa7e0c (sprint 21 review: F101 1 real bug + close()
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 21 — saves that can move to any platform later (F101)
-Doing: Sprint 21 — F101 built, waiting for OK   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
+Doing: Sprint 21 done — retro, then /sprint 22   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
