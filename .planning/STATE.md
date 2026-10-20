@@ -43,4 +43,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-20 — Sprint 18 built (waiting for OK): games can offer Continue for an unfinished game and Rejoin match for an online match left mid-game.
 - 2026-10-20 — F82 + F83 approved: session start warns when a live game or its online server is down, and alpha / beta / 1.0 releases need a filled-in release checklist.
 - 2026-10-20 — Sprint 17 built (waiting for OK): session start now says when a live game or its room server is down, and alpha / beta / 1.0 releases need a filled-in release checklist (no stand-in art from beta).
-- 2026-10-20 — Released v0.10.3: every release now carries patch notes players can read, and refuses risky code packages; games can show their open-source licences in Credits.

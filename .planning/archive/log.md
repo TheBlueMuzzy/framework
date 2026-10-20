@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-20 — Released v0.10.3: every release now carries patch notes players can read, and refuses risky code packages; games can show their open-source licences in Credits.
 - 2026-10-19 — Released v0.10.2: games can install the Saves module — saved games survive updates, broken writes and (with a save code) browsers that wipe data.
 - 2026-10-19 — F86 approved: games get a Saves module — saves upgrade safely across updates, keep backups, combine lifetime stats across devices, and players can copy a save code; the game check fails a save with no old copy to test.
 - 2026-10-19 — Released v0.10.1: every game can now run one framework check that catches overlap, cut-off and faint text, things touching their card's edge, cards that grow, missing comfort settings, unread Settings rows and missing credits.
