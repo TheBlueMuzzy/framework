@@ -5,7 +5,7 @@
     "idleWarnAfterMs": "A player whose move the game is waiting for, who does nothing (no tap, no key, no move) this long in ms, sees a draining bar: a bot takes over soon. 0 = no warning.",
     "idleTakeoverAfterMs": "…and after this long (ms) a bot plays their seat, mid-turn, until they tap anything. 0 = never.",
     "botTakesOverAfterMs": "A player who drops out mid-game gets a bot after this long, in ms (0 = never). They can still come back.",
-    "keepEmptyRoomMs": "Everyone gone mid-game: how long (ms) the room waits for someone to come back before it's cleared.",
+    "keepEmptyRoomMs": "Everyone gone mid-game: how long (ms) the room waits for someone to come back (\"Rejoin match\") before it's cleared. 300000 = 5 minutes.",
     "allowBots": "May the host add bot seats in the lobby? (The game's rules must then play for bots.)",
     "maxMessagesPerSecond": "Messages one player's connection may send per second; more are dropped unread (flooding). 0 = no limit."
   },
@@ -14,7 +14,7 @@
   "idleWarnAfterMs": 30000,
   "idleTakeoverAfterMs": 60000,
   "botTakesOverAfterMs": 60000,
-  "keepEmptyRoomMs": 60000,
+  "keepEmptyRoomMs": 300000,
   "allowBots": false,
   "maxMessagesPerSecond": 10
 }

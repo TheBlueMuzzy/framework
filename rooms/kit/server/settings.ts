@@ -14,7 +14,8 @@ export interface RoomSettings {
   idleTakeoverAfterMs: number
   /** A player who drops out mid-game gets their seat handed to a bot after this long (0 = never). They can still come back and take it. */
   botTakesOverAfterMs: number
-  /** Everyone gone mid-game: the room waits this long for someone to come back, then it's cleared. */
+  /** Everyone gone mid-game: the room waits this long for someone to come back ("Rejoin match"), then it's cleared.
+   *  5 minutes (Muzzy, 2026-10-20 — was 60 s): long enough to find the tab again or restart a phone. */
   keepEmptyRoomMs: number
   /** May the host add bot seats in the lobby? (The game must then play for bots — see README.) */
   allowBots: boolean
@@ -28,7 +29,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   idleWarnAfterMs: 30_000,
   idleTakeoverAfterMs: 60_000,
   botTakesOverAfterMs: 60_000,
-  keepEmptyRoomMs: 60_000,
+  keepEmptyRoomMs: 300_000,
   allowBots: false,
   maxMessagesPerSecond: 10,
 }

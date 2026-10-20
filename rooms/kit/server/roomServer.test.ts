@@ -495,4 +495,78 @@ describe('RoomServer: the game', () => {
     expect(server.game).toBeNull()
     expect(join('tab-bob', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
   })
+
+  it('the wait is a setting: 5 minutes unless the game says otherwise (keepEmptyRoomMs)', () => {
+    server = new RoomServer(party, countToTen, { minSeats: 2, maxSeats: 3 })
+    const { ann, bob } = startGame()
+    drop(ann)
+    drop(bob)
+    vi.advanceTimersByTime(299_999)
+    expect(server.game).not.toBeNull()
+    vi.advanceTimersByTime(1)
+    expect(server.game).toBeNull()
+  })
+})
+
+describe('RoomServer: rejoin after closing the tab (0.9.0, F95)', () => {
+  /** Like join(), but "Rejoin match" from the menu. */
+  const rejoin = (tabId: string, name: string, persistentId: string) => {
+    const connection = connect(tabId)
+    send(connection, { type: 'join', name, persistentId, create: false, rejoin: true })
+    return connection
+  }
+
+  it('back into the same seat (from the bot), told how many turns the bot played meanwhile', () => {
+    const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    drop(bob) // Bob closes the tab
+    vi.advanceTimersByTime(60_000) // away too long: the bot takes his seat, mid-turn → its 1st turn
+    expect(seatNamed('Bob').kind).toBe('bot')
+    roomTools!.onTheClock(['seat-1']) // (this tiny game's bot doesn't move: play the turns round by hand)
+    roomTools!.onTheClock(['seat-2']) // the bot's 2nd turn
+    roomTools!.onTheClock(['seat-1'])
+    roomTools!.onTheClock(['seat-2']) // 3rd
+    const back = rejoin('tab-bob-2', 'Bob', BOB)
+    expect(back.last('room')?.you).toBe('seat-2')
+    expect(seatNamed('Bob')).toMatchObject({ kind: 'human', connected: true })
+    expect(back.last('back')).toEqual({ type: 'back', botTurns: 3 })
+    expect(ann.received.some((m) => m.type === 'back')).toBe(false) // only to the one who's back
+    drop(back)
+    expect(join('tab-bob-3', 'Bob', BOB).last('back')).toEqual({ type: 'back', botTurns: 0 }) // the count started again
+  })
+
+  it('a quick reconnect (no bot yet) is "back" with 0 turns; turns the player watched (idle → tap) are not counted', () => {
+    const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    vi.advanceTimersByTime(60_000) // Bob idles: the bot plays for him, he's still here
+    send(bob, { type: 'active' }) // a tap: his again
+    drop(bob)
+    expect(join('tab-bob-2', 'Bob', BOB).last('back')).toEqual({ type: 'back', botTurns: 0 })
+  })
+
+  it('nobody "back" in the lobby', () => {
+    join('tab-ann', 'Ann', ANN, true)
+    const bob = join('tab-bob', 'Bob', BOB)
+    expect(bob.last('back')).toBeUndefined()
+  })
+
+  it('the room was cleared while everyone was away → no_room, and nothing new is made', () => {
+    const { ann, bob } = startGame()
+    drop(ann)
+    drop(bob)
+    vi.advanceTimersByTime(60_000) // (this test's keepEmptyRoomMs)
+    const late = rejoin('tab-bob-2', 'Bob', BOB)
+    expect(late.last('closed')?.reason).toBe('no_room')
+    expect(server.data.seats).toEqual([])
+  })
+
+  it('the code was reused by strangers meanwhile → no_room, not a seat in their lobby', () => {
+    const { ann, bob } = startGame()
+    drop(ann)
+    drop(bob)
+    vi.advanceTimersByTime(60_000)
+    join('tab-cat', 'Cat', CAT, true) // someone new makes a room with the same code
+    expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
+    expect(seats().map((s) => s.name)).toEqual(['Cat'])
+  })
 })
