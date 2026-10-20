@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Sprint 16 built + reviewed, waiting for Muzzy's OK: F84 patch notes + F85 dependency/licence check** — release.mjs drafts each release's notes from its commits (`--draft-notes`), refuses until edited (no DRAFT, Highlights, no dev talk), writes CHANGELOG.md + itch text; every release checks shipped packages (security high, GPL-family/no licence refused) and writes third-party-notices.txt (Credits links it, UI kit 0.22.1); 7-day wait on new package versions (.npmrc, npm 11.21.0 here, laptop to-do in HUB.md); /checkup §8. On "approved": F84 + F85 ✅ → `F84 + F85: done` → retro → archive → /deliver (v0.10.3 — the framework's own first release with notes: `release.mjs update --draft-notes` first). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
+2026-10-19 — **F84 + F85 approved (sprint 16 done): patch notes + dependency/licence check.** Next: retro → archive → /deliver v0.10.3 (merge dev/v0-10, `release.mjs update --draft-notes`, show Muzzy the notes, release). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
 - Found by checkup §8: Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas, for its session).
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
@@ -13,7 +13,7 @@ Reviewed through: framework 20196de (sprint 16 review: 3 findings + 1 rough edge
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 16 — every release says what changed and ships nothing risky
-Doing: F84 — building   Branch: dev/v0-10   Version: 0.10.2 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Doing: F84 + F85 done — /deliver   Branch: dev/v0-10   Version: 0.10.2 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.2
 
 ## Key facts
