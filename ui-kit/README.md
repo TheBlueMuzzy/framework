@@ -88,6 +88,9 @@ gallery's `npm run shoot` uses the same one.
   0.25.0 (F103, from Goops): `ScreenStack` always has the kit's own screens (Confirm) under the game's — a game's own
   `confirm` still wins — so `...kitScreens` is no longer needed (Goops' Settings had none: Replay lessons' confirm drew
   an empty layer on top and nothing happened). A pushed name with no screen warns in the console, naming it, and closes.
+  And two HUD options for a narrow phone, so a game needs no app.css restyle (each one was a check:ui warning in Goops):
+  `Bar width={0.3} atMost` — the bars in a row share its room evenly, each at most its share (never narrower than its
+  label) · `Hud dockTight` — the dock panel's sides get `--gap-s` instead of `--gap-m`.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

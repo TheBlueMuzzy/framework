@@ -126,7 +126,10 @@
   .kit-hud-chip[data-width="l"] { --kit-bar-w: 14rem; }
   /* Bar 0.17.0. A share of its row (width={0.24}): that much of the row, never narrower than its label above */
   :is(.kit-hud-chip, .kit-bar)[data-width="share"] { flex: none; inline-size: calc(var(--kit-bar-share) * 100%); min-inline-size: max-content; max-inline-size: 100%; }
-  .kit-hud-chip[data-width="share"] > .kit-progress { flex: 1 1 auto; inline-size: auto; }
+  .kit-hud-chip:is([data-width="share"], [data-width="at-most"]) > .kit-progress { flex: 1 1 auto; inline-size: auto; }
+  /* 0.25.0 (Goops): width={0.3} atMost — the bars in a row share its room evenly, each at most its share (and never
+     narrower than its label), instead of exactly its share: three named bars fit a narrow phone */
+  :is(.kit-hud-chip, .kit-bar)[data-width="at-most"] { flex: 1 1 0; inline-size: auto; min-inline-size: max-content; max-inline-size: min(100%, calc(var(--kit-bar-share) * 100%)); }
   /* plain (no plate): the same row of icon · label · bar, on whatever it sits on */
   .kit-bar { display: flex; align-items: center; gap: var(--gap-s); min-inline-size: 0; }
   .kit-bar > :is(.kit-progress, .kit-bar-inside) { flex: 1 1 6rem; min-inline-size: 2rem; }
@@ -176,6 +179,8 @@
   /* right: a column in the bottom-right corner, as tall as its contents (a phone on its side) */
   .kit-hud-dock[data-side="right"] { inset-inline-end: var(--gap-m); inset-block-end: var(--gap-m); inline-size: var(--kit-hud-dock-size, 12rem); }
   .kit-hud-dock > .kit-panel { padding: var(--gap-s) var(--gap-m); justify-content: center; min-block-size: 0; }
+  /* dockTight (0.25.0, Goops): the panel's sides get the small gap instead of the medium one — still clear of the edge */
+  .kit-hud-dock[data-tight] > .kit-panel { padding-inline: var(--gap-s); }
   .kit-screen:has(+ .kit-hud-dock[data-side="bottom"]) { padding-block-end: calc(var(--kit-hud-dock-size, 6rem) + var(--gap-m)); }
   .kit-banner { align-items: center; text-align: center; }
   /* +N float-up: stacked on top of its number (same grid cell), so no positioning needed */

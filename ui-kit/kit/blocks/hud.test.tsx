@@ -157,6 +157,25 @@ describe('Bar 0.17.0: share, label above / inside, thickness, plain, alert', () 
   })
 })
 
+// (their CSS rules: blocksCss.test.mjs)
+describe('0.25.0 (Goops): Bar atMost + Hud dockTight', () => {
+  it('atMost turns a share into "at most its share" (data-width="at-most"), the share still passed to the CSS', () => {
+    const { container, rerender } = render(<Bar label="Laser" value={50} width={0.3} atMost plain />)
+    const bar = container.querySelector<HTMLElement>('.kit-bar')!
+    expect(bar.getAttribute('data-width')).toBe('at-most')
+    expect(bar.style.getPropertyValue('--kit-bar-share')).toBe('0.3')
+    rerender(<Bar label="Laser" value={50} width="m" atMost plain />) // no share: atMost means nothing
+    expect(container.querySelector('.kit-bar')!.getAttribute('data-width')).toBe('m')
+  })
+
+  it('dockTight marks the dock (data-tight) and its CSS uses the small gap style name', () => {
+    const { container, rerender } = render(<Hud dock={<Bar label="Integrity" value={80} plain />} dockTight />)
+    expect(container.querySelector('.kit-hud-dock')!.hasAttribute('data-tight')).toBe(true)
+    rerender(<Hud dock={<Bar label="Integrity" value={80} plain />} />)
+    expect(container.querySelector('.kit-hud-dock')!.hasAttribute('data-tight')).toBe(false)
+  })
+})
+
 describe('Hud oneRow + dock', () => {
   it('oneRow marks the status slot; dock adds a panel beside the screen (bottom by default)', () => {
     const { container, rerender } = render(<Hud status={<HudText fit>Cracks 0 / 10</HudText>} oneRow dock={<Bar label="Integrity" value={80} plain />} />)
