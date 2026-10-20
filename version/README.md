@@ -56,6 +56,13 @@ installer, then its checks in the game). The installer copies `kit/` → `src/ve
 
 **Stores, later:** X.Y.Z → `versionName`, the build count → `versionCode` (noted for the store run-through, not built).
 
+## Proven (F102, 2026-10-20)
+In a scratch Glyphtender (`.scratch/glyphtender-f102`, `e2e/f102-version.mjs`): v0.11.0.0 the same on the menu footer,
+both Settings tabs and a Dev Kit bug file at 390×844, 360×780, 844×390, 768×343, 1100×800, 1440×900 and 1920×1080;
+the meta tag = version.json; a version.json bump on a running dev server shows without a restart; a release build
+passes checkVersion fresh and is refused in plain words once version.json moves on. check:framework: the six Version
+checks pass wired, and five fail (the sixth, the browser one, skipped with --static) before the wiring.
+
 ## Develop
 `npm install`, then `npm test` (version.json reading + plain errors, the plugin in a real Vite server, `versionLabel`,
 the e2e helper on a stand-in page, the checks on real little game folders through the Dev Kit's tester, the

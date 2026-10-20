@@ -9,7 +9,7 @@ Done when: a game installs `version/` and, from its version.json alone (the file
 - [x] 🤖 3. UI kit Settings: a version line at the bottom of every tab (`version` prop), so a game needs no About tab — ui-kit/kit/blocks/Settings.tsx
 - [x] 🤖 4. Dev Kit: the adapter's `version` documented and shown in the same "vX.Y.Z.B" form — devkit/README.md
 - [x] 🤖 5. conformance.mjs for check:framework (plugin in vite.config, label on the menu + Settings, an e2e calls checkVersion) + installer + install-module's module list + MODULE-CONTRACTS line + README — version/ (new module folder beside saves/), ~/.claude/config/bmuz/scripts/install-module.mjs
-- [ ] 🤖 6. Proof: scratch Glyphtender installs it — menu + Settings show v0.10.3.B, a bug file carries it, a stale build is refused by checkVersion; screenshots at every size — version/README.md
+- [x] 🤖 6. Proof: scratch Glyphtender installs it — menu + Settings show v0.10.3.B, a bug file carries it, a stale build is refused by checkVersion; screenshots at every size — version/README.md
 Check: version tests + tsc + lint green; scratch Glyphtender shows the same vX.Y.Z.B on the menu footer, Settings (every tab) and a Dev Kit bug file; its meta tag matches version.json; checkVersion passes on a fresh build and fails with the plain message on a stale one; check:framework's version checks pass there and fail on a game without the wiring; screenshots 390×844, 360×780, 844×390, ~768×343, ~1100 wide, 1440×900, 1920×1080 looked at.
 Ask Muzzy: —
 
@@ -26,3 +26,9 @@ Ask Muzzy: —
 Notes:
 - Plan-lint: only the old F61 / F59 / F60 line (Goops' session). No open P0/P1 bugs.
 - Technical calls (Claude): one format everywhere = "vX.Y.Z.B" with the v (Goops' choice; the Dev Kit README's "0.1.0.12" example changes); the version sits at the bottom of every Settings tab, not an About tab (Goops: "there is NO Settings footer slot"); the module is shaped like saves/ and audio/ (kit/ + conformance.mjs + scripts/install-version.mjs); stores later map X.Y.Z → versionName and the build count → versionCode (noted for the store run-through, not built).
+- F102 built (helper): version/ 0.1.0 (25 tests) · UI kit 0.24.0 · Dev Kit 0.20.5. Names: env override `VERSION_BUILD`, define `import.meta.env.APP_VERSION` (typed by src/version/env.d.ts — nothing for the game to add). The plugin also restarts the dev server when version.json changes, so a /save bump never leaves a stale dev page (proven: v0.11.0.1 shown without a restart).
+- Surprise 1: Vitest ignores `define` for `import.meta.env.*` — the game's own tests saw "dev". The plugin now also hands Vitest `test.env.APP_VERSION` (tested).
+- Surprise 2: the menu footer pushed Glyphtender's main menu off the top on a phone on its side (Play clipped, footer over Full screen at 844×390 / 768×343 — check:framework caught it). Root cause: MainMenu's two-column switch counted only `items`, not its extra buttons (5 items + Full screen stayed one column). Fixed in the kit (UI kit 0.24.0, `data-many`, extras counted).
+- Surprise 3: the line under the Settings pages cost a phone on its side a whole row (768×343 showed ONE row). On short screens (≤ 30rem tall) the version sits at the right of the Settings header instead — same spot on every tab, no height taken.
+- Proof scratch: the scratch had version 0.11.0 (build 0), so it shows v0.11.0.0, not v0.10.3.B. Its About → Version row was switched off (the footer replaces it; with it on, Gameplay shows the version twice). Over the main menu, Settings shows the dimmed menu's own footer below the card — the menu behind, not a second Settings line.
+- Pre-existing, not F102: the scratch's Saves check ("saves through the module") fails the same way in the f101 scratch.
