@@ -177,7 +177,7 @@ describe('openSaves — nothing is lost when the storage fails', () => {
 
 describe('openSaves — the first launch as an app copies the browser saves once', () => {
   it("copies this game's keys, not other games', and never over what the app already has", async () => {
-    const browser = oldBrowser({ 'mygame:progress': 'from the browser', 'MyGame:settings': 'b', 'mygame:run': 'old run', 'othergame:x': 'no' })
+    const browser = oldBrowser({ 'mygame:progress': 'from the browser', 'MyGame:settings': 'b', 'mygame:run': 'old run', 'othergame:x': 'no', 'mygamedeluxe:progress': 'no', mygame: 'no' })
     const disk = slowBackend({ 'mygame:run': 'the app run' })
     await open(disk, { game: 'mygame', copyFrom: browser })
     await opened!.flush()

@@ -84,11 +84,10 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
   // First launch as an app: the game's browser saves come along once (kept in the browser too, just in case).
   const copyFrom = options.copyFrom === undefined ? browserList() : options.copyFrom
   if (problem === null && copyFrom && !memory.has(COPIED_MARKER)) {
-    const prefix = game.toLowerCase()
     try {
       for (let i = 0; i < copyFrom.length; i++) {
         const key = copyFrom.key(i)
-        if (key === null || !key.toLowerCase().startsWith(prefix) || memory.has(key)) continue // what the app has wins
+        if (key === null || !isGameKey(key, game) || memory.has(key)) continue // what the app has wins
         const value = copyFrom.getItem(key)
         if (value !== null) { memory.set(key, value); changes.set(key, value) }
       }
@@ -165,6 +164,13 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
   return opened
 }
 
+/** Is this one of the game's keys? Its name, then a separator (the kit's key rule, saves.ts) — so "goops" never takes
+ *  "goopsdeluxe:progress" from a storage two games share (itch.io). Any case: "MyGame:settings" is mygame's. */
+function isGameKey(key: string, game: string): boolean {
+  const name = game.toLowerCase()
+  return key.toLowerCase().startsWith(name) && /[-:_.]/.test(key.charAt(name.length))
+}
+
 function browserList() {
   const storage = browserStorage()
   return storage && 'length' in storage && 'key' in storage ? (storage as Storage) : null
@@ -175,7 +181,6 @@ function browserList() {
 /** The browser's localStorage as a backend, for one game's keys — a web build that wants the same start-up path as
  *  its app build, and the stand-in for proofs. Not native (the browser's risks still apply). */
 export function browserBackend(game: string, storage: Storage | null = browserList()): SavesBackend {
-  const prefix = game.toLowerCase()
   return {
     name: 'browser storage',
     native: false,
@@ -184,7 +189,7 @@ export function browserBackend(game: string, storage: Storage | null = browserLi
       const all: Record<string, string> = {}
       for (let i = 0; i < storage.length; i++) {
         const key = storage.key(i)
-        if (key === null || !(key.toLowerCase().startsWith(prefix) || key === COPIED_MARKER)) continue
+        if (key === null || !(isGameKey(key, game) || key === COPIED_MARKER)) continue
         const value = storage.getItem(key)
         if (value !== null) all[key] = value
       }
