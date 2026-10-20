@@ -7,8 +7,9 @@
 //   const saves = await openSaves(myBackend, { game: 'glyphtender' })   // in main.tsx, before rendering
 //
 // What can't be lost: a failed load never lets the kit write (an empty memory would overwrite the real saves);
-// a failed write stays queued and goes out with the next one; the kit is told (its writes report "full" /
-// "blocked", like a full browser storage) until a write gets through. Research: .planning/research/saves.md
+// a failed write stays queued and is tried again a moment later; meanwhile new saves are refused before they touch
+// anything (the kit reports "full" / "blocked", like a full browser storage), so what the player is told is what
+// reaches the storage. Research: .planning/research/saves.md
 // "Layers 6 + 8". The phone / desktop backends themselves come with the store run-through (ROADMAP F97).
 
 import { browserStorage, setSavesStorage, type StorageLike, type WriteProblem } from './storage'
@@ -36,8 +37,9 @@ export interface OpenedSaves extends StorageLike {
   problem(): WriteProblem | 'load' | null
   /** How long loading every key took (ms), for the start-up budget. */
   loadMs: number
-  /** Stop: no more timers or page listeners (tests, or a game switching storage again). */
-  close(): void
+  /** Stop: writes what's waiting, then no more timers, page listeners or writes (a later write is refused — the kit
+   *  reports "blocked" until the game switches storage again with setSavesStorage / openSaves). Tests use it too. */
+  close(): Promise<WriteProblem | null>
 }
 
 export interface OpenSavesOptions {
@@ -48,6 +50,8 @@ export interface OpenSavesOptions {
   copyFrom?: (StorageLike & { length: number; key(index: number): string | null }) | null
   /** Wait this long after a change before writing, so a few changes go out together (ms, default 250). */
   delayMs?: number
+  /** After a failed write, try the waiting changes again this long later (ms, default 2000). */
+  retryMs?: number
   /** Where to listen for "the page is hidden / closing" (default: the real document and window; null = don't). */
   page?: { document?: EventTarget & { visibilityState?: string }; window?: EventTarget } | null
   /** Told each time a write or the load fails (default: console.warn). */
@@ -70,6 +74,8 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
   let problem: WriteProblem | 'load' | null = null
   let timer: ReturnType<typeof setTimeout> | null = null
   let writing: Promise<WriteProblem | null> | null = null
+  let closed = false
+  const retryMs = options.retryMs ?? 2000
 
   const started = now()
   try {
@@ -97,7 +103,7 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
   }
 
   function schedule() {
-    if (timer !== null || problem === 'load') return
+    if (timer !== null || problem === 'load' || closed) return
     timer = setTimeout(() => { timer = null; void flush() }, delayMs)
   }
 
@@ -112,7 +118,8 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
       // Put the batch back under anything changed since (newer values win), so it goes out with the next write.
       for (const [key, value] of Object.entries(batch)) if (!changes.has(key)) changes.set(key, value)
       problem = isFull(error) ? 'full' : 'blocked'
-      onProblem(`couldn't write to the ${backend.name} (${(error as Error)?.message ?? error}) — kept, will try again with the next save`)
+      onProblem(`couldn't write to the ${backend.name} (${(error as Error)?.message ?? error}) — kept, trying again in ${retryMs / 1000} s; new saves wait until it works`)
+      if (timer === null && !closed) timer = setTimeout(() => { timer = null; void flush() }, retryMs)
       return problem
     }
   }
@@ -127,14 +134,17 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
   }
 
   function change(key: string, value: string | null) {
+    if (closed) throw new Error(`the ${backend.name} was closed`)
     if (problem === 'load') throw new Error('storage is blocked') // never write over saves we couldn't read
+    // While writes are failing, a change is REFUSED before it touches anything, so what the kit is told ("not saved")
+    // is what will happen: its "make room" step (dropping old backups) can't quietly reach the storage later.
+    // The changes already queued keep retrying on their own timer.
+    if (problem === 'full') throw Object.assign(new Error(`the ${backend.name} is full`), { name: 'QuotaExceededError' })
+    if (problem === 'blocked') throw new Error(`the ${backend.name} refused the last write`)
     if (value === null) memory.delete(key)
     else memory.set(key, value)
     changes.set(key, value)
     schedule()
-    // Kept in memory and queued either way; the kit is told a write isn't reaching the storage yet.
-    if (problem === 'full') throw Object.assign(new Error(`the ${backend.name} is full`), { name: 'QuotaExceededError' })
-    if (problem === 'blocked') throw new Error(`the ${backend.name} refused the last write`)
   }
 
   const page = options.page === undefined
@@ -153,10 +163,13 @@ export async function openSaves(backend: SavesBackend, options: OpenSavesOptions
     waiting: () => changes.size,
     problem: () => problem,
     loadMs,
-    close() {
-      if (timer !== null) { clearTimeout(timer); timer = null }
+    async close() {
       page?.document?.removeEventListener('visibilitychange', onHide)
       page?.window?.removeEventListener('pagehide', onLeave)
+      const result = await flush() // what's waiting goes out first
+      closed = true
+      if (timer !== null) { clearTimeout(timer); timer = null }
+      return result
     },
   }
   if (useForKit) setSavesStorage(opened, { native: backend.native })

@@ -22,7 +22,15 @@ function oldBrowser(start: Record<string, string>) {
 function fakePage() {
   const document = Object.assign(new EventTarget(), { visibilityState: 'visible' })
   const window = new EventTarget()
+  let listening = 0
+  for (const target of [document, window]) {
+    const add = target.addEventListener.bind(target)
+    const remove = target.removeEventListener.bind(target)
+    target.addEventListener = (...args: Parameters<EventTarget['addEventListener']>) => { listening++; add(...args) }
+    target.removeEventListener = (...args: Parameters<EventTarget['removeEventListener']>) => { listening--; remove(...args) }
+  }
   return {
+    listening: () => listening,
     page: { document, window },
     fire(type: string) {
       if (type === 'visibilitychange') document.visibilityState = 'hidden'
@@ -35,8 +43,8 @@ const progress = () => createSave({ key: 'mygame:progress', kind: 'progress', ve
 let opened: OpenedSaves | null = null
 const open = async (...args: Parameters<typeof openSaves>) => (opened = await openSaves(args[0], { page: null, copyFrom: null, onProblem: () => {}, ...args[1] }))
 
-afterEach(() => {
-  opened?.close()
+afterEach(async () => {
+  await opened?.close()
   opened = null
   setSavesStorage(undefined)
 })
@@ -97,11 +105,9 @@ describe('openSaves — the same kit on a slow storage', () => {
     page.fire('pagehide')
     await wait(10)
     expect(disk.data['mygame:run']).toBe('turn 5')
-    opened!.close() // deaf to the page now
-    opened!.setItem('mygame:run', 'turn 6')
-    page.fire('pagehide')
-    await wait(10)
-    expect(disk.data['mygame:run']).toBe('turn 5')
+    expect(page.listening()).toBe(2)
+    await opened!.close()
+    expect(page.listening()).toBe(0) // deaf to the page now
   })
 
   it('a run (Continue) autosaves through it like in a browser', async () => {
@@ -144,21 +150,63 @@ describe('openSaves — nothing is lost when the storage fails', () => {
     expect(disk.data['mygame:progress']).toBe('the real save')
   })
 
-  it('a full disk → the kit reports "full"; the change is kept and goes out once there is room', async () => {
+  it('a full disk → the waiting change is kept and retried; new saves are refused ("full") until it works', async () => {
     const disk = slowBackend({}, { waitMs: 1 })
-    await open(disk, { game: 'mygame' })
+    await open(disk, { game: 'mygame', retryMs: 30 })
     const save = progress()
     expect(save.save({ stars: 1 }).ok).toBe(true)
     disk.failWrites = 'full'
     expect(await opened!.flush()).toBe('full')
     expect(opened!.problem()).toBe('full')
-    expect(save.save({ stars: 2 })).toMatchObject({ ok: false, reason: 'full' }) // told, like a full browser storage
-    expect(opened!.waiting()).toBeGreaterThan(0)
+    expect(save.save({ stars: 2 })).toMatchObject({ ok: false, reason: 'full' }) // told, like a full browser storage…
+    expect(save.load()).toEqual({ stars: 1 }) // …and true: nothing changed
+    disk.failWrites = null
+    await wait(80) // the retry timer, nobody calls flush
+    expect(opened!.problem()).toBeNull()
+    expect(JSON.parse(disk.data['mygame:progress']).data).toEqual({ stars: 1 }) // the change that was waiting, not lost
+    expect(save.save({ stars: 3 }).ok).toBe(true)
+    await opened!.flush()
+    expect(JSON.parse(disk.data['mygame:progress']).data).toEqual({ stars: 3 })
+  })
+
+  it("the kit's \"make room\" step while the disk is full never deletes backups on the disk (review finding)", async () => {
+    const disk = slowBackend({}, { waitMs: 1 })
+    await open(disk, { game: 'mygame' })
+    const save = progress()
+    for (const stars of [1, 2, 3]) save.save({ stars })
+    await opened!.flush()
+    const backups = () => ['mygame:progress', 'mygame:progress~1', 'mygame:progress~2'].map((k) => disk.data[k] && JSON.parse(disk.data[k]).data.stars)
+    expect(backups()).toEqual([3, 2, 1])
+    disk.failWrites = 'full'
+    save.save({ stars: 4 }) // accepted, waiting
+    await opened!.flush() // fails: full
+    for (const stars of [5, 6]) expect(save.save({ stars }).ok).toBe(false) // the kit tries to drop old backups to make room
     disk.failWrites = null
     expect(await opened!.flush()).toBeNull()
-    expect(opened!.problem()).toBeNull()
-    expect(JSON.parse(disk.data['mygame:progress']).data).toEqual({ stars: 2 }) // the queued change, not lost
-    expect(save.save({ stars: 3 }).ok).toBe(true)
+    expect(backups()).toEqual([4, 3, 2]) // 4 slid in as normal; no backup was dropped by the refused saves
+  })
+
+  it('the health probe leaves nothing behind while writes fail', async () => {
+    const disk = slowBackend({}, { waitMs: 1 })
+    await open(disk, { game: 'mygame' })
+    opened!.setItem('mygame:x', '1')
+    disk.failWrites = 'blocked'
+    await opened!.flush()
+    expect((await checkSaveHealth({ storage: opened!, userAgent: '', crossSiteFrame: false, hostname: '', standalone: false, native: true })).canSave).toBe(false)
+    disk.failWrites = null
+    await opened!.flush()
+    expect(Object.keys(disk.data)).toEqual(['mygame:x'])
+  })
+
+  it('close() writes what is waiting, then refuses writes and starts no timers', async () => {
+    const disk = slowBackend({}, { waitMs: 1 })
+    await open(disk, { game: 'mygame', delayMs: 60_000 })
+    opened!.setItem('mygame:a', '1')
+    expect(await opened!.close()).toBeNull()
+    expect(disk.data['mygame:a']).toBe('1')
+    expect(() => opened!.setItem('mygame:a', '2')).toThrow(/closed/)
+    expect(progress().save({ stars: 1 })).toMatchObject({ ok: false, reason: 'blocked' }) // the kit still points here: told, not lost silently
+    expect(opened!.waiting()).toBe(0)
   })
 
   it('a refused write leaves the last good copy on disk', async () => {
