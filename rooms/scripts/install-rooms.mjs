@@ -140,6 +140,12 @@ export function wiringSteps(gameDir) {
       step: `${localHostInEnv}: remove VITE_PARTY_HOST=localhost… — for local dev leave it unset, so a phone on the Wi-Fi reaches the PC's server (src/rooms/roomClient.ts picks the page's own address, port ${PARTY_PORT})`,
     },
     {
+      // F82: live-check.mjs pings /health after a deploy — the template has it, older workers don't
+      done: !existsSync(join(gameDir, 'party', 'worker.ts')) || /healthResponse\(/.test(text('party/worker.ts')),
+      step: `party/worker.ts: answer /health so live-check can tell the server is up —
+       import { healthResponse } from '../src/rooms/server/health'   then first in fetch():   const health = healthResponse(request); if (health) return health`,
+    },
+    {
       done: /["/]party["/]/.test(text('tsconfig.app.json')) || !existsSync(join(gameDir, 'tsconfig.app.json')),
       step: 'tsconfig.app.json: add "party" to "include" (so npm run build type-checks the server too)',
     },

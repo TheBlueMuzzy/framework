@@ -119,6 +119,16 @@ describe('install-rooms', () => {
     expect(missing()).toMatch(/npm uninstall partykit/)
   })
 
+  it('an older worker without /health is told to add it; the template has it', () => {
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    expect(missing()).not.toMatch(/answer \/health/) // no worker yet → nothing to say
+    write(join(game, 'party/worker.ts'), 'export default { fetch() { return routePartykitRequest() } }')
+    expect(missing()).toMatch(/party\/worker\.ts: answer \/health/)
+    rmSync(join(game, 'party/worker.ts'))
+    installRooms(game, { log: quiet })
+    expect(missing()).not.toMatch(/answer \/health/)
+  })
+
   it('wrangler.json name comes from package.json', () => {
     expect(wranglerConfig(game).name).toBe('my-game')
   })

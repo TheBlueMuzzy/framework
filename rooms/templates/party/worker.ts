@@ -7,6 +7,7 @@
 // the address PartySocket uses by default, so the game's client needs nothing special.
 import { Server, routePartykitRequest } from 'partyserver'
 import type { Connection } from 'partyserver'
+import { healthResponse } from '../src/rooms/server/health'
 import { LiveConnections } from '../src/rooms/server/liveConnections'
 import GameServer from './server'
 
@@ -42,6 +43,9 @@ export class Main extends Server {
 
 export default {
   async fetch(request: Request, env: Record<string, unknown>): Promise<Response> {
+    // /health: "the server is up" for live-check.mjs — no room opened
+    const health = healthResponse(request)
+    if (health) return health
     return (await routePartykitRequest(request, env)) ?? new Response('Not found', { status: 404 })
   },
 }
