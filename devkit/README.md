@@ -63,7 +63,9 @@ Chromium. The Dev Kit's own checks:
 | ◐ half pause stops the rules, not the looks | in 1 s of half pause the rules clock or the state moves, or the looks clock doesn't |
 | a snapshot restores exactly | `setState(getState())` after 0.7 s of play gives a different moment (the first differing path) |
 | the game's hotkeys skip text boxes | in live play a game key handler calls `preventDefault` on keys typed into a text box, or swallows its letters |
-Without `conformance.startPlay` the last four fail with the exact lines to add to the adapter.
+| the PAUSED pill keeps clear of the game's HUD on a phone | **a warning, not a failure** (0.21.0): at 390×844 and 360×780 (upright), in live play, fully paused with the panel closed, the ⏸ PAUSED pill covers the game's visible words or controls — names the size and the words, and the `content/devkit.json` `"pauseBadgeSpot"` values that are clear at every phone size (`pause/badgeClear.mjs`; HUD words that ignore taps count too) |
+Without `conformance.startPlay` the play checks fail with the exact lines to add to the adapter. A warning (`!`) prints its
+problems and fix like a failure but the run still passes (and `e2e-shots/framework.json` lists it under `warnings`).
 
 **Known gaps** (0.20.1) — a promise the game knowingly doesn't keep yet, planned on its roadmap. List it in
 `content/devkit.json`:
@@ -362,7 +364,7 @@ to search sets `searchable: false` (no box).
 
 ## Knobs
 - `content/devkit.json` → `inReleaseBuilds` (the switch above).
-- `content/devkit.json` → `pauseBadgeSpot` (0.18.1): where the closed-panel PAUSED badge sits — `left` (default) · `right` · `top` · `bottom` · `top-left` · `top-right` · `bottom-left` · `bottom-right`. Pick a spot the game's HUD leaves free.
+- `content/devkit.json` → `pauseBadgeSpot` (0.18.1): where the closed-panel PAUSED badge sits — `left` (default) · `right` · `top` · `bottom` · `top-left` · `top-right` · `bottom-left` · `bottom-right`. Pick a spot the game's HUD leaves free — `check:framework` warns when it isn't, and lists the spots that are (0.21.0).
 - The Color tab reads and saves `content/ui/style.json` (the UI kit's file).
 - The Fonts tab saves the four font values into the same `content/ui/style.json`; the game's own fonts are listed in `content/ui/fonts.json` (UI kit CATALOG: *Fonts: three text roles*), and the game declares them at start-up with the kit's `loadGameFonts(fontsJson, import.meta.env.BASE_URL)`.
 - **The font library folder** (Fonts tab): `<home>/Downloads/Font` by default (the user name differs per computer — it's found, never typed). Another folder: `devkit.local.json` in the game's folder — `{ "fontLibrary": "D:/Fonts" }` — git-ignored (the installer asks for the `.gitignore` line), so each computer keeps its own; or the `DEVKIT_FONT_LIBRARY` environment variable for one run. The dev server (`vite/fontLibrary.ts`): `GET /__devkit/font-library` (the list, up to 5,000), `GET /__devkit/font-library/file?path=` (one font, for a preview), `POST /__devkit/font-library/add { path }` (copy into the game). Read-only toward the library: only font files are listed or served, only from inside that folder (no `..`, no links leading out), nothing there is ever run or changed; a request from another site is refused, and Add follows the Save endpoint's same-page rules.
@@ -473,4 +475,7 @@ to search sets `searchable: false` (no box).
 - 0.20.5 (framework F102): one version format kit-wide, "vX.Y.Z.B" — the adapter's `version` is the version module's
   `versionLabel` and is stamped as given on snapshots and bug files; the Snapshots tab shows an older adapter's
   "0.1.0.12" as v0.1.0.12 (`versionTag`, never "vv…"). `check:framework` knows the version module (`src/version/`).
+- 0.21.0 (framework F103, from Goops): `check:framework` warns when the closed-panel PAUSED pill sits on the game's HUD
+  on an upright phone (Goops' "CRACKS 0/10" at 390), naming `content/devkit.json` `"pauseBadgeSpot"` and the spots that
+  are clear. Checks can now `t.warn(name, problems, fix)` — shown like a failure, the run still passes.
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
