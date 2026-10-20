@@ -93,3 +93,13 @@ describe('BADGE_SPOTS', () => {
     for (const spot of BADGE_SPOTS) expect(devkitCss).toContain(`.devkit-pause-badge[data-spot='${spot}']`)
   })
 })
+
+describe('which phones the pill check uses (F104)', () => {
+  it('upright phones — unless the game says "orientation": "landscape" in content/ui/style.json', async () => {
+    const { badgeSizes, BADGE_SIZES, BADGE_SIZES_SIDEWAYS } = await import('../conformance.mjs')
+    expect(badgeSizes(null)).toBe(BADGE_SIZES)
+    expect(badgeSizes({ orientation: 'portrait' })).toBe(BADGE_SIZES)
+    expect(badgeSizes({ orientation: 'landscape' })).toBe(BADGE_SIZES_SIDEWAYS)
+    expect(BADGE_SIZES.every((s) => s.height > s.width) && BADGE_SIZES_SIDEWAYS.every((s) => s.width > s.height)).toBe(true)
+  })
+})

@@ -13,8 +13,12 @@ import { badgeOverHud, judgeBadge, BADGE_SPOTS } from './pause/badgeClear.mjs'
 export const title = 'Dev Kit'
 
 // Phones held upright: the sizes where a HUD has the least room. (Not sideways: some games are portrait only — Goops —
-// and show just a "turn your phone" card there.)
+// and show just a "turn your phone" card there.) A game whose content/ui/style.json says "orientation": "landscape"
+// (F104 — the UI kit's setting, read here directly: a game can have the Dev Kit without the UI kit) is checked on its
+// side instead.
 export const BADGE_SIZES = [{ width: 390, height: 844 }, { width: 360, height: 780 }]
+export const BADGE_SIZES_SIDEWAYS = [{ width: 844, height: 390 }, { width: 768, height: 343 }]
+export const badgeSizes = (style) => (style?.orientation === 'landscape' ? BADGE_SIZES_SIDEWAYS : BADGE_SIZES)
 export const BADGE_CHECK = 'the PAUSED pill keeps clear of the game\'s HUD on a phone'
 
 /** With the game paused and the panel closed, at each phone size: does the pill cover the game's visible words or controls? */
@@ -28,7 +32,7 @@ async function badgeCheck(t) {
 
 async function badgeCheckRun(t) {
   const runs = []
-  for (const { width, height } of BADGE_SIZES) {
+  for (const { width, height } of badgeSizes(t.json('content/ui/style.json'))) {
     const page = await t.page({ width, height, mobile: true })
     try {
       const reason = await t.startPlay(page)
