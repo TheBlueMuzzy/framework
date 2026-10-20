@@ -9,7 +9,7 @@
 - dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
-Reviewed through: framework edf3810 (sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
+Reviewed through: framework e98126d (d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
 Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (15 archived)
@@ -27,7 +27,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
-- Security reviewed: edf3810 (2026-10-19, v0.10.1 → dev/v0-10: no high/medium; 2 low in save codes — size limits, built-in device names — fixed + tests that failed first)
+- Security reviewed: e98126d (2026-10-19, v0.10.1 → dev/v0-10, last 3 commits by Claude — workflow lists modules from repo folders only, no secrets, no event text: no high/medium; 2 low in save codes — size limits, built-in device names — fixed + tests that failed first)
 - Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
