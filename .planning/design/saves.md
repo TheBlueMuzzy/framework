@@ -1,4 +1,4 @@
-# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2, F94 = layer 3, F96 = layer 5)
+# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2, F94 = layer 3, F96 = layer 5, F98 = layer 7)
 
 Research first: `../research/saves.md` (2026-10-19). Muzzy 2026-10-19, on the first plan that only covered what our three games already did:
 > "sounds like you need to research before you design then" → research → "ok. makes sense" (layers 0 + 1 now, layers 2–8 → F93–F99).
@@ -74,6 +74,35 @@ The save code, but short enough to type: the player's save code goes to **the ga
 | **Where the game finds it** | `cloudAddress(import.meta.env.VITE_SAVES_CLOUD)` — set at build for the live game; unset on localhost / the Wi-Fi = the PC's own `:1998`; unset anywhere else = no cloud, so the Link code part isn't shown | Like the rooms kit's VITE_PARTY_HOST |
 | **The routes** | `kit/cloudRoutes.ts` — plain web Requests in, Responses out, the store passed in (Glyphtender's `wordsRoutes.ts` pattern): tested without Cloudflare. The worker only stores rows and sets alarms | |
 | **Going live** | Muzzy's call (a public server): `npx wrangler deploy -c cloud/wrangler.json` | |
+
+## Layer 7 — checked leaderboards: the Daily board (F98, kit 0.5.0)
+A finished Daily game (layer 3) goes to **the game's own board worker** as its record; the server replays it with **the game's own rules** and keeps the score **it** computed, under 3 letters (arcade style — Muzzy). A public server address from the first brief → designed secure from the start (sprint 19 rule), on F96's pattern and its review fixes.
+
+| Decision | What | Why |
+|---|---|---|
+| **The score** | Only what the server's replay computes (`BoardGame.score(state)` of the replayed end state). Any `score` in the body or the record is never read | The whole point: a sent score is a claim, a replay is a fact |
+| **The game's rules** | `board/worker.ts` imports the game's own `rules(setup)`, `dailySetup(day)`, `score`, `RULES_VERSION` (Glyphtender: `src/engine/rules` + `src/game/record`, the word list bundled as text like `party/`) — never a copy | The server and the phone can't disagree; a rules change reaches the board with the next deploy |
+| **Today's game only** | The record's setup must equal `dailySetup(day)` (compared by content, field order ignored) for today or yesterday (a game started just before midnight UTC) | Otherwise a player could pick a lucky seed |
+| **Version** | `record.rulesVersion` must equal the server's → else `other-version`, before any replay | An old record under new rules would be a different game |
+| **Size** | Body ≤ 100,000 characters (a game is ~8,000); moves ≤ `maxMoves` (Glyphtender 400; a game is ~70–100) — refused unread | A replay is CPU: never start one that can't be real |
+| **Names** | Exactly 3 letters A–Z (typed loosely, kept in capitals), a short blocked list (`BLOCKED_NAMES`, a game may pass its own) | No free text on a public board — nothing to moderate |
+| **Who a player is** | A random 128-bit id made once on the device (`<game>:board`), sent only to the board, stored only as a keyed hash | No accounts (research → Privacy). The id is also the **proof for "Remove my score"** — nobody else has it, so no separate removal token |
+| **dailyTries** | Per game, `content/saves.json` `board.dailyTries`: 1 = the first finished game only · N = the best of the first N · 0 = unlimited; the installer ASKS (Muzzy 2026-10-20: "based on the game, like the 7 or 30 days"). Counted per player id per day; a game the replay refuses still used its try; removing a score never gives one back | Arcade-fair by default; the designer decides what fits the game |
+| **Limits** | Per address (IPv6 by /64) `board.sendsPerDay` (30) sends a day — good or bad, counted BEFORE anything is checked; server-wide 3,000 sends a day (`SERVER_SENDS_PER_DAY`: ~20 rows written per game checked step by step; the free plan's SQLite allows 100,000 rows written a day); wrong "remove" tries 10 per address a day, 2,000 server-wide | A flood stops at the limit, forged or not |
+| **Many at once** | Every `await` (body, hashes) happens first; the checks, the counts and the replay itself run with no waiting in between | A Durable Object can't interleave 30 requests between a check and its count (review F96) |
+| **Addresses** | Only an HMAC-SHA-256 keyed hash with the worker's own random secret (made once, kept in its SQLite, never sent), for the day it counts in + yesterday | Personal data (GDPR); the secret stops anyone undoing the hash by trying every address |
+| **Retention** | `board.keepDays` (7): the alarm deletes older days at midnight UTC; counts from before yesterday | Nothing piles up |
+| **CPU** | Workers Free: **10 ms CPU per invocation — a request AND an alarm** (Cloudflare docs: Workers limits, updated 2026-10-12; Durable Objects limits, updated 2026-06-01). A whole Glyphtender replay measured **9–18 ms** in the local worker → **checked later**: a sent game waits ("Checking your game…"), the object's alarm replays `MOVES_PER_ALARM` (10) moves at a time and keeps the game between steps as JSON (steps measured 1–5 ms). Per-request replay stays available (`checkLater: false`) for a light game | One alarm per whole game would hit the same 10 ms. Moves, not a clock: on Cloudflare `performance.now()` doesn't move while code runs |
+| **Privacy line** | On the board: what's kept (3 letters, score, the game's moves — no account, no other name), where (the game's own server, Cloudflare), how long (keepDays), "Remove my score" deletes it now | research → Privacy |
+| **Going live** | Muzzy's call (public): `npm run board:deploy` + `VITE_SAVES_BOARD` at build | |
+
+**What a cheater can still do** (the replay proves the game is LEGAL, not that a person played it alone):
+- **Practise first.** The Daily game is the same for everyone all day and runs on the device, so a player can play it as often as they like (or replay it in a fresh browser) and send only the best run — with `dailyTries: 1` the server counts one *sent* game, not one *played* game. The fix is a start token from the server when the Daily game starts (the server then counts started games) — an Idea, not built.
+- **Play both seats.** The AI's moves are in the record (marked `by: 'bot'`, which the server can't check); a cheater can write the AI's moves too, choosing ones that set up big words. The fix is a deterministic AI the server re-runs (the AI's moves are then recomputed, not read) — the AI module would have to promise it.
+- **Use a solver.** A bot that finds the best legal moves produces a legal record — any leaderboard without a watched game has this.
+- **Many player ids.** A cleared browser is a new player: more tries and more names on the board, up to `sendsPerDay` per address (30) and more with many addresses (until the 3,000 a day server cap).
+- **Fill the day** with legal low scores from many addresses up to the server cap ("busy" for everyone until midnight UTC) — a nuisance, not a wrong score.
+- **Guessing** a player id (128 bits) or a removal is hopeless and limited; names and days hide nothing (the board is public).
 
 ## Decisions
 - **The record:** `{ save: <key>, version, savedAt, data, counts? }` — `save` marks it as ours and which save it is (a record pasted under the wrong key is refused). Kept as JSON text in localStorage (5 MiB is plenty for layer 0; IndexedDB later only if a game needs more).

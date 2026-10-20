@@ -97,16 +97,17 @@ export function BoardPanel({ board, words: wordsIn }: BoardPanelProps) {
     <Modal title={words.title} onBack={() => screens.pop()} backLabel={words.close}>
       <ScrollArea label={words.title}>
         <Stack gap="m">
-          <Text kind="caption">{words.day(shownDay)}</Text>
-          <Text kind="body">{status}</Text>
+          {/* the day and the game's try rule, then the name + Send, and right under them what happened (sent, checking,
+              your score, refused) — so the answer to a press is next to the button pressed */}
+          <Text kind="caption">{`${words.day(shownDay)} · ${BOARD_WORDS.triesLine(day?.tries.allowed ?? settings.dailyTries)}`}</Text>
+          <TextInput
+            label={words.yourName} value={name} maxLength={3} autoComplete="off" autoCapitalize="characters" spellCheck={false}
+            onChange={(e) => setName(e.currentTarget.value.toUpperCase().replace(/[^A-Z]/g, ''))} disabled={!waiting} data-board-name=""
+          />
           <Row gap="s">
-            <TextInput
-              label={words.yourName} value={name} maxLength={3} autoComplete="off" autoCapitalize="characters" spellCheck={false}
-              onChange={(e) => setName(e.currentTarget.value.toUpperCase().replace(/[^A-Z]/g, ''))} disabled={!waiting} data-board-name=""
-            />
             <Button variant="primary" onClick={send} disabled={!waiting || name.length !== 3} loading={busy}>{words.send}</Button>
           </Row>
-          <Text kind="caption">{BOARD_WORDS.triesLine(day?.tries.allowed ?? settings.dailyTries)}</Text>
+          <Text kind="body">{status}</Text>
           <Stack gap="xs">
             {lines.map((line, i) => (
               <ListRow key={i} label={line ? `${line.rank}. ${line.name}` : `${i + 1}. ${words.empty}`}>
