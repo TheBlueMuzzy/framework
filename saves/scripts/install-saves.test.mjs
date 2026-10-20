@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { cloudWiringSteps, cloudWranglerConfig, installSaves } from './install-saves.mjs'
+import { boardWiringSteps, boardWranglerConfig, cloudWiringSteps, cloudWranglerConfig, installSaves } from './install-saves.mjs'
 
 const quiet = () => {}
 const newGame = ({ uiKit = false } = {}) => {
@@ -98,6 +98,47 @@ describe('install-saves', () => {
     const again = installSaves(game, { log: quiet })
     expect(again.starter).toEqual([])
     expect(readFileSync(join(game, 'cloud/worker.ts'), 'utf8')).toBe('// mine')
+  })
+
+  it('--board gives board/worker.ts + board/wrangler.json once, ASKS for dailyTries, then prints only the missing wiring (F98)', () => {
+    const game = newGame()
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'glyphtender', devDependencies: {} }))
+    const lines = []
+    const { starter } = installSaves(game, { board: true, log: (l) => lines.push(l) })
+    expect(starter).toEqual(['content/saves.json', 'tests/saves/saves.test.ts', 'board/worker.ts', 'board/wrangler.json'])
+    expect(readFileSync(join(game, 'board/worker.ts'), 'utf8')).toContain('export class DailyBoard')
+    expect(boardWranglerConfig(game)).toMatchObject({
+      name: 'glyphtender-board', main: 'worker.ts', migrations: [{ tag: 'v1', new_sqlite_classes: ['DailyBoard'] }], dev: { port: 1996 },
+    })
+    expect(JSON.parse(readFileSync(join(game, 'board/wrangler.json'), 'utf8'))).toEqual(boardWranglerConfig(game))
+    const said = lines.join('\n')
+    expect(said).toMatch(/Choose how many Daily games count per player per day for THIS game.*"dailyTries": 1.*1 = only the first.*0 = unlimited/s)
+    expect(said).toContain('fill in THE GAME')
+    expect(said).toContain('"board:dev": "wrangler dev -c board/wrangler.json"')
+    expect(said).toContain('10 ms of CPU per request')
+    expect(said).toContain('Going live (Muzzy\'s call')
+    expect(said).toContain('glyphtender-board.joebrogno.workers.dev')
+
+    // the saves.json is the game's own now: its number is the game's choice (an older one without "board" still asks)
+    const missing = () => boardWiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    expect(missing()).not.toMatch(/dailyTries/)
+    writeFileSync(join(game, 'content/saves.json'), JSON.stringify({ backups: 2 }))
+    expect(missing()).toMatch(/dailyTries/)
+    writeFileSync(join(game, 'content/saves.json'), JSON.stringify({ backups: 2, board: { dailyTries: 3 } }))
+    expect(missing()).not.toMatch(/dailyTries/)
+
+    // wired up → only Try it + Going live are left; the game's board/worker.ts is never overwritten; no --board needed any more
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'glyphtender', devDependencies: { wrangler: '^4' },
+      scripts: { 'board:dev': 'wrangler dev -c board/wrangler.json', 'board:deploy': 'wrangler deploy -c board/wrangler.json' } }))
+    writeFileSync(join(game, '.gitignore'), '.wrangler/\n')
+    mkdirSync(join(game, 'src/game'), { recursive: true })
+    writeFileSync(join(game, 'src/game/board.ts'), 'keepForBoard(record, day, board)')
+    writeFileSync(join(game, 'src/menus.tsx'), 'dailyBoard: () => <BoardPanel board={board} />')
+    writeFileSync(join(game, 'board/worker.ts'), '// mine: const game = { rulesVersion: RULES_VERSION }')
+    expect(boardWiringSteps(game).filter((w) => !w.done).map((w) => w.step.slice(0, 7))).toEqual(['Try it:', 'Going l'])
+    const again = installSaves(game, { log: quiet })
+    expect(again.starter).toEqual([])
+    expect(readFileSync(join(game, 'board/worker.ts'), 'utf8')).toContain('// mine')
   })
 
   it('a dry run changes nothing', () => {

@@ -29,21 +29,26 @@ export function BoardPanel({ board, words: wordsIn }: BoardPanelProps) {
   const words = { ...BOARD_PANEL_WORDS, ...wordsIn }
   const settings = savesConfig().board
   const [day, setDay] = useState<BoardDay | null>(null)
-  const [status, setStatus] = useState<string>(words.loading)
+  /** A sentence from the last answer (offline, refused…) — shown instead of the usual status line until the next one. */
+  const [note, setNote] = useState<string | null>(null)
   const [name, setName] = useState(() => lastBoardName(board))
   const [waiting, setWaiting] = useState(() => waitingForBoard(board))
   const [busy, setBusy] = useState(false)
 
-  /** The board as the server just sent it, and the status line from what it says about this device. */
+  /** The board as the server just sent it (or why it couldn't). */
   const show = useCallback((answer: Awaited<ReturnType<typeof loadBoard>>) => {
-    if (!answer.ok) { setStatus(answer.message); return }
+    if (!answer.ok) { setNote(answer.message); return }
     setDay(answer)
-    if (answer.checking > 0) setStatus(words.checking)
-    else if (answer.mine) setStatus(words.yourScore(answer.mine.score, answer.mine.rank))
-    else if (waitingForBoard(board)) setStatus(words.readyToSend)
-    else if (answer.refused > 0) setStatus(BOARD_WORDS.refused)
-    else setStatus(words.noScore)
-  }, [board, words.checking, words.noScore, words.readyToSend, words.yourScore]) // (words: a new object each render)
+    setNote(null)
+  }, [])
+  // The status line: what the board says about this device right now
+  const status = note ?? (
+    !day ? words.loading
+      : day.checking > 0 ? words.checking
+        : day.mine ? words.yourScore(day.mine.score, day.mine.rank)
+          : waiting ? words.readyToSend
+            : day.refused > 0 ? BOARD_WORDS.refused
+              : words.noScore)
   const refresh = useCallback(async () => show(await loadBoard(board, waitingForBoard(board)?.day)), [board, show])
 
   useEffect(() => {
@@ -67,7 +72,7 @@ export function BoardPanel({ board, words: wordsIn }: BoardPanelProps) {
     setWaiting(waitingForBoard(board))
     if (!sent.ok) {
       toast(sent.message, { variant: 'danger', seconds: 6 })
-      setStatus(sent.message)
+      setNote(sent.message)
       return
     }
     await refresh()
