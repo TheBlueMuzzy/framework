@@ -22,7 +22,7 @@
 import { savesConfig } from './config'
 import { copyData, fillMissing, WHOLE_SAVE } from './fill'
 import { countDevices, mergeRecords, type FieldRules } from './progress'
-import { browserStorage, readKey, removeKey, writeKey, type StorageLike } from './storage'
+import { switchedStorage, readKey, removeKey, writeKey, type StorageLike } from './storage'
 
 /** What is saved: settings (volume, reduce motion) · progress (XP, unlocks, lifetime stats — the precious one) ·
  *  run (a game in progress — made with createRun, run.ts, which wipes it whole when the run ends) · slots (several self-contained saves, see slot()). */
@@ -180,7 +180,7 @@ export function createSave<T>(options: SaveOptions<T>): Save<T> | SlotSaves<T> {
 /** One save at `storageKey` whose records are named `recordName` (the same for every slot of a slots save). */
 function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = recordName): Save<T> {
   const { kind, version, upgrades = {}, fields, oldSave, clean, onProblem = (m: string) => console.warn(`[saves] ${storageKey}: ${m}`) } = options
-  const storage = options.storage === undefined ? browserStorage() : options.storage
+  const storage = options.storage === undefined ? switchedStorage : options.storage
   const key = storageKey
   let lastReport: LoadReport = { from: 'fresh', added: [], replaced: [], problems: [], note: null }
   warnAboutKey(options.key, onProblem)
@@ -409,7 +409,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
 }
 
 function createSlots<T>(options: SaveOptions<T>): SlotSaves<T> {
-  const storage = options.storage === undefined ? browserStorage() : options.storage
+  const storage = options.storage === undefined ? switchedStorage : options.storage
   // The list of slots is itself a small save: { slots: { "<id>": "<savedAt>" } }
   const list = makeSave<{ slots: Record<string, string> }>({ key: `${options.key}/list`, kind: 'settings', version: 1, fresh: { slots: {} }, storage, onProblem: options.onProblem }, `${options.key}/list`)
   function slot(id: string): Save<T> {
