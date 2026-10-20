@@ -80,7 +80,8 @@ gallery's `npm run shoot` uses the same one.
   Also (F95): `rejoinWords` + `welcomeBackLine()` in the online blocks — "Rejoin match", "That match has ended", "You're
   back — a bot played 4 turns for you" — for the rooms kit's rejoin (a MainMenu `items` entry).
   0.24.0 (F102): `Settings` takes `version` ("vX.Y.Z.B" — the version module's `versionLabel`): one quiet caption line
-  under the pages, the same spot on every tab, so a game needs no About tab. It fills an info row with id "version"
+  under the pages, the same spot on every tab, so a game needs no About tab (short screens, 30rem tall or less: at the
+  right of the header instead, so a phone on its side keeps its rows). It fills an info row with id "version"
   too (unless `info` gives its own); `info={{ version }}` still works, and the Settings-row check counts either.
   And `MainMenu` on a phone on its side counts its extra buttons (children) toward the two-column switch at six:
   Glyphtender's 5 items + Full screen stayed one column and ran off the top once its version footer took a row.

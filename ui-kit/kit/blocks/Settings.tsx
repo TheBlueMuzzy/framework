@@ -192,7 +192,10 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
   return (
     <Screen label={w.title} grow="down">
       <Panel depth={2} gap="m" className="kit-wide">
-        <MenuHeader title={w.title} onBack={onBack} backLabel={w.back} />
+        {/* The version (0.24.0) on a short screen (a phone on its side): at the right of the header, where it takes no
+            height from the rows (blocks.css swaps it with the line under the pages) */}
+        <MenuHeader title={w.title} onBack={onBack} backLabel={w.back}
+          action={version && <span className="kit-settings-version-top"><Text kind="caption">{version}</Text></span>} />
         {/* 3 tabs or fewer: always the tab bar, on one line. More: phones and short screens get ◀ Audio ▶ instead
             (8 tabs would fill half the screen). One tab: no picker at all. */}
         {tabs.length > 1 && tabs.length <= 3 && <div className="kit-settings-few"><Tabs {...tabPicker} /></div>}
@@ -217,7 +220,8 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
             })}
           </div>
         )}
-        {/* The version (0.24.0): below the pages, so it's in the same spot on every tab and never scrolls away */}
+        {/* The version (0.24.0): below the pages, so it's in the same spot on every tab and never scrolls away
+            (short screens: in the header instead) */}
         {version && <Row justify="center" className="kit-settings-version"><Text kind="caption">{version}</Text></Row>}
       </Panel>
     </Screen>

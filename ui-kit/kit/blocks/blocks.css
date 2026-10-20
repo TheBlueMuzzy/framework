@@ -66,6 +66,13 @@
   /* A section heading row ("type": "heading"): breathing room above it, except at the very top */
   .kit-settings-heading { padding-block: var(--gap-l) var(--gap-xs); }
   .kit-settings-heading:first-child { padding-block-start: 0; }
+  /* The version (0.24.0): one line under the pages, the same on every tab — and on a short screen at the right of the
+     header instead, so a phone on its side keeps its rows (the line under the pages would cost one) */
+  .kit-settings-version-top { display: none; }
+  @media (max-height: 30rem) {
+    .kit-settings-version-top { display: inline; }
+    .kit-settings-version { display: none; }
+  }
 
   /* Pips: little segments (lives, hearts, page dots) */
   .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }

@@ -202,6 +202,8 @@ describe('Settings', () => {
     const lines = () => [...container.querySelectorAll('.kit-settings-version')]
     expect(lines().map((l) => l.textContent)).toEqual(['v0.11.0.4'])
     expect(lines()[0].closest('.kit-settings-pages')).toBe(null)
+    // its short-screen place: the header's right (blocks.css shows one or the other)
+    expect(container.querySelector('.kit-menu-header-action .kit-settings-version-top')?.textContent).toBe('v0.11.0.4')
     fireEvent.click(screen.getByRole('tab', { name: 'About' }))
     expect(lines().map((l) => l.textContent)).toEqual(['v0.11.0.4'])
   })
@@ -213,7 +215,7 @@ describe('Settings', () => {
     expect(screen.getByText('v1.2.3')).toBeTruthy()
     unmount()
     render(<Settings schema={list()} version="v0.11.0.4" />)
-    expect(screen.getAllByText('v0.11.0.4')).toHaveLength(2) // the row + the bottom line
+    expect(screen.getAllByText('v0.11.0.4')).toHaveLength(3) // the row + the bottom line + the header's (short screens only)
   })
 
   it('text size and reduce motion drive the whole kit', () => {
