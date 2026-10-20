@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 21 started: F101 saves ready for any platform** (one storage switch, saves opened from a slow storage at start-up, the save format written down) on `dev/v0-10` (saves 0.5.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Re-scoped from F97 + F99 (Muzzy left it to Claude): the phone / desktop / Steam backends and the C# code wait for the store run-through and the first Unity game (💤; research kept in `.planning/research/saves.md` "Layers 6 + 8"). **Next: /develop F101 task 1 — measure start-up load + writes per minute in a scratch Glyphtender.** After this sprint: Claude recommends taking a real game through the new save layers (they're proven only in scratch copies so far).
+2026-10-20 — **Sprint 21 started: F101 saves ready for any platform** (one storage switch, saves opened from a slow storage at start-up, the save format written down) on `dev/v0-10` (saves 0.5.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Re-scoped from F97 + F99 (Muzzy left it to Claude): the phone / desktop / Steam backends and the C# code wait for the store run-through and the first Unity game (💤; research kept in `.planning/research/saves.md` "Layers 6 + 8"). **Next: /develop F101 task 1 — measure start-up load + writes per minute in a scratch Glyphtender.**
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -17,6 +17,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 
 ## Key facts
 **What this is**
+- Muzzy 2026-10-20: build the framework as solid as possible BEFORE putting it into a game, then change it as games teach us ("having it ready and then modifying it as needed as we learn things is okay with me") — scratch-copy proofs are the norm; don't push to take a real game through each layer. Parts that hang on outside versions/accounts (store backends, Unity C#) still wait until a real build uses them.
 - The Game Framework (BMUZ-PLAN step 2): reusable modules that games copy in with a version stamp; improvements get harvested back. Plan: `~/.claude/config/bmuz/BMUZ-PLAN.md`.
 - Modules are copied into games (a framework change never breaks a finished game). UI kit copy goes to a game's `src/ui/kit/`.
 **Rules (UI kit)**
