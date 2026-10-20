@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { forgetLastRoom, LAST_ROOM_MAX_AGE_MS, matchToRejoin, readLastRoom, rememberLastRoom } from './lastRoom'
+import { forgetLastRoom, LAST_ROOM_MAX_AGE_MS, matchToRejoin, readLastRoom, rememberLastRoom, roomBeforeReload } from './lastRoom'
 
 afterEach(() => {
   localStorage.clear()
+  sessionStorage.clear()
   vi.restoreAllMocks()
 })
 
@@ -46,6 +47,21 @@ describe('last room (Rejoin match)', () => {
     rememberLastRoom('MOTE', 'playing', 1)
     forgetLastRoom()
     expect(readLastRoom(1)).toBeNull()
+  })
+
+  it('a reload goes straight back: this tab keeps its own copy (lobby or match, not a finished game); forget clears it too', () => {
+    expect(roomBeforeReload(1)).toBeNull() // a new tab
+    rememberLastRoom('BAKU', 'lobby', 1)
+    expect(roomBeforeReload(1)).toEqual({ code: 'BAKU', savedAt: 1, phase: 'lobby' })
+    rememberLastRoom('BAKU', 'over', 1)
+    expect(roomBeforeReload(1)).toBeNull()
+    rememberLastRoom('BAKU', 'playing', 1)
+    sessionStorage.clear() // the tab was closed: only the device's copy is left — the menu offers it
+    expect(roomBeforeReload(1)).toBeNull()
+    expect(matchToRejoin(1)?.code).toBe('BAKU')
+    rememberLastRoom('BAKU', 'playing', 1)
+    forgetLastRoom('BAKU')
+    expect(roomBeforeReload(1)).toBeNull()
   })
 
   it('blocked storage: no offer, nothing throws', () => {

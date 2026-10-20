@@ -7,8 +7,10 @@
 // forgotten when the player leaves on purpose, is kicked, the game is over, or the room is closed / gone.
 // The game only ASKS: `matchToRejoin()` → the record when there's a match worth offering, else null.
 //
-// Why localStorage and not sessionStorage: closing the tab wipes sessionStorage — and getting back after closing the
-// tab is the whole point. (The seat itself is owned by the player id, identity.ts — also localStorage.)
+// Why localStorage: closing the tab wipes sessionStorage — and getting back after closing the tab is the whole point.
+// (The seat itself is owned by the player id, identity.ts — also localStorage.) A copy also goes in THIS tab's
+// sessionStorage, so a reload goes straight back in without the menu (`roomBeforeReload()`) — only in the tab that was
+// in the room, never another tab of the same game (that would take the seat from the tab still playing).
 // Privacy: the code stays on this device and is only ever sent to the game's own room server.
 //
 // Every read and write is wrapped: private windows or blocked storage just mean no Rejoin offer.
@@ -16,6 +18,7 @@ import type { RoomPhase } from './protocol'
 import { isRoomCode } from './roomCodes'
 
 const LAST_ROOM_KEY = 'rooms:last-room'
+const TAB_ROOM_KEY = 'rooms:tab-room' // (sessionStorage: this tab only)
 
 /**
  * How old a remembered room may be and still be offered. `savedAt` moves on with every room message while the tab is
@@ -35,12 +38,33 @@ export interface LastRoom {
 
 /** Remember this room (useRoom calls it with every room message). */
 export function rememberLastRoom(code: string, phase: RoomPhase, now = Date.now()): void {
-  const record: LastRoom = { code, savedAt: now, phase }
+  const text = JSON.stringify({ code, savedAt: now, phase } satisfies LastRoom)
+  writeIn(() => localStorage, LAST_ROOM_KEY, text) // this device: Rejoin match after the tab closed
+  writeIn(() => sessionStorage, TAB_ROOM_KEY, text) // this tab: straight back in after a reload
+}
+
+function writeIn(storage: () => Storage, key: string, text: string): void {
   try {
-    localStorage.setItem(LAST_ROOM_KEY, JSON.stringify(record))
+    storage().setItem(key, text)
   } catch {
     // no storage: no Rejoin offer, nothing breaks
   }
+}
+
+/**
+ * The room THIS tab was in before a reload (lobby or match), to go straight back in — or null (a new tab, a closed
+ * tab, a finished game, too old). In a match, join it as a rejoin; in a lobby, as a plain join (the lobby seat went
+ * when the page unloaded).
+ */
+export function roomBeforeReload(now = Date.now(), maxAgeMs = LAST_ROOM_MAX_AGE_MS): LastRoom | null {
+  let record: unknown
+  try {
+    record = JSON.parse(sessionStorage.getItem(TAB_ROOM_KEY) ?? 'null')
+  } catch {
+    return null
+  }
+  if (!isLastRoom(record) || record.phase === 'over' || now - record.savedAt > maxAgeMs) return null
+  return record
 }
 
 /** The room this device was last in, or null (none, damaged, or older than the age limit — then it's forgotten). */
@@ -72,16 +96,21 @@ export function matchToRejoin(now = Date.now(), maxAgeMs = LAST_ROOM_MAX_AGE_MS)
 
 /** Forget the remembered room. With a code: only if it's that room (an old room's goodbye never wipes a newer one). */
 export function forgetLastRoom(code?: string): void {
+  forgetIn(() => localStorage, LAST_ROOM_KEY, code)
+  forgetIn(() => sessionStorage, TAB_ROOM_KEY, code)
+}
+
+function forgetIn(storage: () => Storage, key: string, code?: string): void {
   try {
     if (code !== undefined) {
-      const text = localStorage.getItem(LAST_ROOM_KEY)
+      const text = storage().getItem(key)
       const record: unknown = text ? JSON.parse(text) : null
       if (isLastRoom(record) && record.code !== code) return
     }
-    localStorage.removeItem(LAST_ROOM_KEY)
+    storage().removeItem(key)
   } catch {
     // no storage (or a damaged record we couldn't read): try to clear it anyway
-    try { localStorage.removeItem(LAST_ROOM_KEY) } catch { /* nothing to do */ }
+    try { storage().removeItem(key) } catch { /* nothing to do */ }
   }
 }
 

@@ -7,7 +7,7 @@ Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare
 |---|---|
 | Room codes (`roomCodes.ts`) | 4 letters, consonant–vowel (BAKU, MOTE, ZIRA): easy to say out loud, no C/Q/W/X/Y, a short rude-word list is never handed out. Typing is forgiving (`ba-ku`, `M0T1` work). 6,400 codes; a clash is caught (`code_taken`) |
 | Identity (`identity.ts`) | `persistentId` (localStorage) = the player, owns their seat · `tabId` (sessionStorage) = this tab's connection · the player's name, remembered. Works in private windows too |
-| Last room (`lastRoom.ts`, 0.9.0) | `{ code, savedAt, phase }` in localStorage (`rooms:last-room`) — kept up to date by `useRoom`, forgotten on leave / kick / game over / a closed or missing room. `matchToRejoin()` → the match to offer as "Rejoin match" (only one being played, at most 3 hours since this device last heard from it), else null |
+| Last room (`lastRoom.ts`, 0.9.0) | `{ code, savedAt, phase }` in localStorage (`rooms:last-room`) — kept up to date by `useRoom`, forgotten on leave / kick / game over / a closed or missing room. `matchToRejoin()` → the match to offer as "Rejoin match" (only one being played, at most 3 hours since this device last heard from it), else null. `roomBeforeReload()` → the room THIS tab was in before a reload (its own sessionStorage copy, `rooms:tab-room`), to go straight back in without the menu |
 | `useRoom(roomCode, { name, create, rejoin? })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`, `idleWarning` (`{ endsAt }` while your screen should show the idle bar, else null), `botPlaysForMe` (a bot holds your seat because you went idle), `active()` ("I'm here" — call it on any tap/key while it matters; throttled to one ping per 5 s, at once while warned or bot-held; 0.4.0), `matchEnded` (the match you were rejoining is gone, or the room closed — "That match has ended"; 0.9.0), `cameBack` (`{ botTurns }` once you're back in a game after being away) + `clearCameBack()`. Reconnects by itself; StrictMode-safe |
 | Protocol (`protocol.ts`) | Every message, typed, shared by game and server. The server checks every field of every message (junk and huge messages are refused) |
 | Live connections (`server/liveConnections.ts`) | The server's own list of live sockets, one per connection id — a phone's late old-socket close never drops its new one (PartyServer's own list does). `party/worker.ts` uses it |
@@ -96,7 +96,12 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 ### Rejoin — back into a match after closing the tab (0.9.0)
 Don't keep the room code yourself (sessionStorage forgets it when the tab closes; the check below fails on it) — `useRoom` remembers it in `lastRoom.ts` and forgets it at the right moments. The words are the UI kit's `rejoinWords` / `welcomeBackLine` (online.tsx); MainMenu takes the item through its `items` list.
 ```tsx
-import { matchToRejoin } from '../rooms/lastRoom'
+import { matchToRejoin, roomBeforeReload } from '../rooms/lastRoom'
+
+// A reload goes straight back in (this tab only): a match as a rejoin, a lobby as a plain join (its seat went on unload)
+const reloaded = roomBeforeReload()
+const [code, setCode] = useState(reloaded?.code ?? null)
+const [rejoining, setRejoining] = useState(reloaded?.phase === 'playing')
 
 // Main menu: the item only while there's a match to go back to
 const rejoin = matchToRejoin()
