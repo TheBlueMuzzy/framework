@@ -4,7 +4,7 @@ From sprint 22's retro (change: "a game says 'portrait only' once and every chec
 
 ## F104 🔧 Portrait only, said once
 Done when: a game's content/ui/style.json can say `"orientation": "portrait"`; check:framework (UI kit part), the kit's screenshot script and the Dev Kit's phone checks then skip the phone-on-its-side sizes and say "skipped — portrait only" (desktop sizes stay: a portrait game still runs in a desktop window); a game that doesn't say it is checked at all 7 sizes as before; helper briefs name it; breathing room in briefs is measured to the visible art, not the CSS box (retro).
-- [ ] 🤖 1. `orientation` in style.json ("any" default · "portrait" · "landscape"), read once, and SIZES filtered by it (phone-on-its-side sizes out for portrait, upright phones out for landscape), reported as skipped — ui-kit/kit/conformance.mjs
+- [x] 🤖 1. `orientation` in style.json ("any" default · "portrait" · "landscape"), read once, and SIZES filtered by it (phone-on-its-side sizes out for portrait, upright phones out for landscape), reported as skipped — ui-kit/kit/conformance.mjs
 - [ ] 🤖 2. The screenshot script honours it — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 3. Dev Kit checks with their own phone sizes honour it (the pill check already upright-only; any other size loop) — devkit/kit/check-framework.mjs
 - [ ] 🤖 4. Skills: the develop skill's size list and game-ui say "minus the sizes the game's orientation rules out", and breathing room is measured to the visible frame/art, not the CSS box (sprint 22 retro) — ~/.claude/skills/develop/SKILL.md

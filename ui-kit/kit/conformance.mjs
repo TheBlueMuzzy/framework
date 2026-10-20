@@ -2,7 +2,8 @@
 // MODULE-CONTRACTS.md "UI kit", tested on the REAL game:
 //   Code:    the kit's rule checker (check-ui.mjs) passes on the game's UI code — words, looks, sizes and layout from
 //            the kit's names, page-wide game CSS in @layer game-base
-//   Browser: at every size (phones both ways, a short landscape, laptop, desktop, HD) — on the first screen and in
+//   Browser: at every size (phones both ways, a short landscape, laptop, desktop, HD — minus the ones the game's
+//            content/ui/style.json "orientation" rules out, 0.26.0) — on the first screen and in
 //            live play (the Dev Kit adapter's conformance.startPlay): nothing overlaps, nothing is clipped or wider than
 //            the screen, every tap target is 44 px, no focus ring without the keyboard (uiProblems.mjs) — and (0.21.0)
 //            text is easy to read, nothing touches its box's edge, cards keep their size while they fill in
@@ -45,11 +46,33 @@ export function groupProblems(found) {
   return byKind
 }
 
+// ---- which way up the game plays (0.26.0, F104) ----
+// content/ui/style.json "orientation": "any" (default) · "portrait" (a phone on its side is never checked — Goops:
+// "the game is not expected to function in horizontal/landscape mode. ever.") · "landscape" (an upright phone isn't).
+// Desktop windows stay either way: a portrait game still runs in a desktop browser.
+export const ORIENTATIONS = ['any', 'portrait', 'landscape']
+const sideways = (s) => s.mobile && s.width > s.height
+const upright = (s) => s.mobile && s.height > s.width
+
+/** style.json's value → { orientation, problem } (a value the kit doesn't know → "any", and a problem to warn about). */
+export function readOrientation(style) {
+  const value = style?.orientation
+  if (value === undefined) return { orientation: 'any', problem: null }
+  if (ORIENTATIONS.includes(value)) return { orientation: value, problem: null }
+  return { orientation: 'any', problem: `content/ui/style.json "orientation": ${JSON.stringify(value)} isn't one of ${ORIENTATIONS.map((o) => `"${o}"`).join(', ')} — checking every size.` }
+}
+
+/** The sizes to check for that orientation, and the ones left out. */
+export function sizesFor(orientation = 'any') {
+  const keep = orientation === 'portrait' ? (s) => !sideways(s) : orientation === 'landscape' ? (s) => !upright(s) : () => true
+  return { sizes: SIZES.filter(keep), skipped: SIZES.filter((s) => !keep(s)) }
+}
+
 /** ["phone 390×844 · in play", …] → "in play, every size" when it showed at all sizes of one phase (or of both). */
-export function whereText(where, screens) {
+export function whereText(where, screens, sizeCount = SIZES.length) {
   if (where.length === screens) return 'every screen, every size'
   const phases = [...new Set(where.map((w) => w.split(' · ')[1]))]
-  if (phases.length === 1 && where.length === SIZES.length) return `${phases[0]}, every size`
+  if (phases.length === 1 && where.length === sizeCount) return `${phases[0]}, every size`
   return where.join('; ')
 }
 
@@ -406,9 +429,13 @@ export async function check(t) {
 
   // ---- browser: the real game at every size ----
   const { findProblems } = await import('./uiProblems.mjs')
+  const { orientation, problem } = readOrientation(t.json('content/ui/style.json'))
+  if (problem) (t.warn ?? t.fail)('content/ui/style.json "orientation" is one the kit knows', [problem], `"orientation": "any" · "portrait" · "landscape"`)
+  const { sizes, skipped } = sizesFor(orientation)
+  if (skipped.length) t.skip(`the game ${orientation === 'portrait' ? 'on a phone on its side' : 'on an upright phone'}`, `${orientation} only (content/ui/style.json "orientation") — ${skipped.map((s) => `${s.width}×${s.height}`).join(', ')} not checked`)
   const found = {}
   let playReason = ''
-  for (const size of SIZES) {
+  for (const size of sizes) {
     const page = await t.page(size)
     try {
       const label = `${size.name} ${size.width}×${size.height}`
@@ -427,8 +454,8 @@ export async function check(t) {
   const screens = Object.keys(found).length
   for (const { kind, name, fix } of KINDS) {
     const list = grouped[kind]
-    if (!list?.size) { t.pass(name, `${screens} screens, ${SIZES.length} sizes`); continue }
-    const lines = [...list].map(([text, where]) => `${text}  [${whereText(where, screens)}]`)
+    if (!list?.size) { t.pass(name, `${screens} screens, ${sizes.length} sizes`); continue }
+    const lines = [...list].map(([text, where]) => `${text}  [${whereText(where, screens, sizes.length)}]`)
     t.fail(name, lines.length > 12 ? [...lines.slice(0, 12), `…and ${lines.length - 12} more`] : lines, fix)
   }
   if (grouped.error?.size) t.fail('no errors in the console', [...grouped.error.keys()].slice(0, 8), 'Fix the errors above (they happened while the screens loaded).')
