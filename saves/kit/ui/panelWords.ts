@@ -33,3 +33,24 @@ export const SAVE_PANEL_WORDS = {
   deleteMessage: 'This deletes your link code and the copy of your save on the game\'s server, now. The save on this device stays.',
   delete: 'Delete',
 }
+
+// The Daily board screen's words (BoardPanel.tsx, F98). The server's own sentences (offline, refused, no tries left,
+// the privacy line…) are BOARD_WORDS in ../board.ts.
+export const BOARD_PANEL_WORDS = {
+  title: 'Daily board',
+  close: 'Close',
+  day: (day: string) => `Daily game · ${day}`,
+  yourName: 'Your 3 letters',
+  send: 'Send my score',
+  readyToSend: 'Your Daily game is finished — put your 3 letters on the board.',
+  checking: 'Checking your game… the board replays every move before it counts.',
+  yourScore: (score: number, rank: number) => `Your score: ${score} · #${rank} today (checked by the board).`,
+  noScore: 'No score of yours on today\'s board yet.',
+  empty: '—',
+  you: 'You',
+  remove: 'Remove my score',
+  removeTitle: 'Remove your score?',
+  removeMessage: 'This deletes your 3 letters and your score from today\'s board, now. It doesn\'t give you another try.',
+  removeYes: 'Remove',
+  loading: 'Loading the board…',
+}
