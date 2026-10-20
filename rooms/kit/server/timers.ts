@@ -27,9 +27,13 @@ const LONGEST_WAIT_MS = 2_147_483_647
 export class Timers {
   private running = new Map<string, RunningTimer>()
   private log: (message: string) => void
+  // Told after any timer fires — the room then saves, so the stored match never keeps a timer that already ran and
+  // the storage alarm moves on to the next one (review F100)
+  private onFired: () => void
 
-  constructor(log: (message: string) => void = console.log) {
+  constructor(log: (message: string) => void = console.log, onFired: () => void = () => {}) {
     this.log = log
+    this.onFired = onFired
   }
 
   /** Run `whenDone` after `ms`. A timer with the same name is replaced (never two of one kind). */
@@ -105,5 +109,6 @@ export class Timers {
     } catch (error) {
       this.log(`timer "${name}" failed: ${error instanceof Error ? error.message : String(error)}`)
     }
+    this.onFired()
   }
 }

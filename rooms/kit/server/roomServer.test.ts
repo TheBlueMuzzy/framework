@@ -727,6 +727,28 @@ describe('RoomServer: a match waits until it ends — kept in storage (0.10.0, F
     expect(server.game).not.toBeNull()
   })
 
+  it('the alarm goes off a moment early (nothing due yet): the alarm is still set again, so the match can still end (review F100)', async () => {
+    startGame()
+    await settle()
+    const wake = stored.wake
+    stored.wake = null // the worker: an alarm goes off once
+    server.wakeUp()
+    await settle()
+    expect(stored.wake).toBe(wake)
+  })
+
+  it('a timer that fires without changing the match is still saved as gone — it can\'t fire again after a restart (review F100)', async () => {
+    startGame()
+    let fired = 0
+    server.timers.start('game-chime', 5_000, () => { fired++ }) // a game timer that only, say, plays a sound
+    await settle()
+    expect(JSON.parse(stored.stored!).timersEndAt['game-chime']).toBeDefined()
+    vi.advanceTimersByTime(5_000)
+    await settle()
+    expect(fired).toBe(1)
+    expect(JSON.parse(stored.stored!).timersEndAt['game-chime']).toBeUndefined()
+  })
+
   it('wiped at game over — and kept again for the rematch; wiped back in the lobby', async () => {
     const { ann, bob } = startGame()
     for (let i = 0; i < 4; i++) {

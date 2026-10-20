@@ -87,6 +87,8 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   private saveComing = false
   /** What storage holds now (the packed match), null = nothing — so an unchanged room is never written twice. */
   private lastSaved: string | null = null
+  /** The storage alarm went off: the next save tells the worker when to wake again, even if the match looks the same. */
+  private reportAlarm = false
   /** Why this game's state can't be saved (a Map, a Date… — see jsonProblem), or null. Then it lives in memory only. */
   private cantSave: string | null = null
   private tools: RoomTools<State, Event>
@@ -95,7 +97,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.party = party
     this.rules = rules
     this.settings = readSettings(settings)
-    this.timers = new Timers((message) => this.log(message))
+    this.timers = new Timers((message) => this.log(message), () => this.changed())
     this.data = newRoom(party.id)
     this.tools = {
       code: party.id,
@@ -193,6 +195,11 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   /** The storage alarm woke the room: run every timer that's due now. (party/worker.ts onAlarm) */
   wakeUp(): void {
     this.timers.runDue()
+    // The worker's alarm is spent: always say when to wake next, even if nothing that's kept changed (the alarm can
+    // also go off a moment early, with nothing due yet) — otherwise no alarm is set again and the match never ends
+    // (review F100)
+    this.reportAlarm = true
+    this.changed()
   }
 
   /** A connection that broke with an error counts as dropped, like a close. */
@@ -622,7 +629,9 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       return
     }
     const text = JSON.stringify(saved)
-    if (text === this.lastSaved) return // (nothing that's kept changed)
+    const mustReport = this.reportAlarm
+    this.reportAlarm = false
+    if (text === this.lastSaved && !mustReport) return // (nothing that's kept changed)
     this.lastSaved = text
     this.party.saveRoom?.(text, wakeUpAt(saved))
   }
