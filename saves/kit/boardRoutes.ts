@@ -38,7 +38,7 @@ export interface BoardGame<State, Action, Setup> {
 
 /** What one hashed someone did on one day: sent a game (address), used a try (player), a game the replay refused
  *  (player), a wrong "remove" (address). */
-export type BoardCount = 'send' | 'try' | 'refused' | 'wrong'
+export type BoardCount = 'send' | 'try' | 'refused' | 'wrong' | 'work'
 
 /** One player's best score on one day. `player` is the keyed hash of their id, never the id. */
 export interface BoardScore {
@@ -61,12 +61,15 @@ export interface WaitingGame {
   at: number
   progress: number
   state: string | null
+  /** How many alarm steps have STARTED on this game (saved before each step, so a step that dies is still counted). */
+  attempts: number
 }
 
 /** The rows the routes need. The worker keeps them in its SQLite; the tests in memory (memoryBoardRows). */
 export interface BoardRows {
   count(who: string, what: BoardCount, day: string): number
-  bump(who: string, what: BoardCount, day: string): void
+  /** +1 (or + `by`) on that count. */
+  bump(who: string, what: BoardCount, day: string, by?: number): void
   score(day: string, player: string): BoardScore | null
   /** Add, or replace that player's row for that day. */
   putScore(row: BoardScore): void
@@ -74,11 +77,13 @@ export interface BoardRows {
   top(day: string, n: number): BoardScore[]
   /** How many scores that day are higher than `score` (a rank is this + 1: ties share a place). */
   higher(day: string, score: number): number
-  wait(game: Omit<WaitingGame, 'id' | 'progress' | 'state'>): void
+  wait(game: Omit<WaitingGame, 'id' | 'progress' | 'state' | 'attempts'>): void
+  /** A step is about to start on this waiting game: attempts + 1 (the worker makes sure it's saved before replaying). */
+  attemptWaiting(id: number): void
   /** The oldest waiting games, up to `n`. */
   waiting(n: number): WaitingGame[]
   waitingFor(day: string, player: string): number
-  /** Where a waiting game's replay got to (moves done, the game after them as JSON). */
+  /** Where a waiting game's replay got to (moves done, the game after them as JSON) — and attempts back to 0. */
   stepWaiting(id: number, progress: number, state: string): void
   doneWaiting(id: number): void
   /** "Remove my score": that player's score and waiting games for that day. false = there was nothing. */
@@ -103,7 +108,7 @@ export function memoryBoardRows(): BoardRows & { scores: BoardScore[]; queue: Wa
     queue,
     counts,
     count: (who, what, day) => counts.get(`${who}|${what}|${day}`) ?? 0,
-    bump: (who, what, day) => { counts.set(`${who}|${what}|${day}`, (counts.get(`${who}|${what}|${day}`) ?? 0) + 1) },
+    bump: (who, what, day, by = 1) => { counts.set(`${who}|${what}|${day}`, (counts.get(`${who}|${what}|${day}`) ?? 0) + by) },
     score: (day, player) => scores.find((s) => s.day === day && s.player === player) ?? null,
     putScore: (row) => {
       const at = scores.findIndex((s) => s.day === row.day && s.player === row.player)
@@ -112,12 +117,13 @@ export function memoryBoardRows(): BoardRows & { scores: BoardScore[]; queue: Wa
     },
     top: (day, n) => scores.filter((s) => s.day === day).sort(best).slice(0, n),
     higher: (day, score) => scores.filter((s) => s.day === day && s.score > score).length,
-    wait: (game) => { queue.push({ ...game, id: nextId++, progress: 0, state: null }) },
+    wait: (game) => { queue.push({ ...game, id: nextId++, progress: 0, state: null, attempts: 0 }) },
+    attemptWaiting: (id) => { const game = queue.find((g) => g.id === id); if (game) game.attempts += 1 },
     waiting: (n) => queue.slice(0, n),
     waitingFor: (day, player) => queue.filter((g) => g.day === day && g.player === player).length,
     stepWaiting: (id, progress, state) => {
       const game = queue.find((g) => g.id === id)
-      if (game) Object.assign(game, { progress, state })
+      if (game) Object.assign(game, { progress, state, attempts: 0 }) // (a step that finished: the tries start again)
     },
     doneWaiting: (id) => { const at = queue.findIndex((g) => g.id === id); if (at >= 0) queue.splice(at, 1) },
     remove: (day, player) => {
@@ -195,6 +201,10 @@ export interface BoardContext<State, Action, Setup> {
   maxStoredBytes?: number
   /** Games the whole server takes in a day (default SERVER_SENDS_PER_DAY). */
   serverSendsPerDay?: number
+  /** Rows of checking work the whole server takes in a day (default SERVER_WORK_PER_DAY). */
+  serverWorkPerDay?: number
+  /** Replay moves per alarm step (the worker's MOVES_PER_ALARM) — how a game's work is counted. */
+  movesPerStep?: number
   blockedNames?: string[]
   /** Hears how long each replay took (ms) and how many moves it had — the worker logs it. */
   timed?: (ms: number, moves: number) => void
@@ -205,6 +215,15 @@ export interface BoardContext<State, Action, Setup> {
  *  an alarm), and the free plan's SQLite allows 100,000 rows written a day — so 3,000 games, then "busy" until
  *  midnight UTC. A game expecting more players a day moves to the paid plan and raises it. */
 export const SERVER_SENDS_PER_DAY = 3_000
+/** The real budget: rows the board may write in a day for checking games (one per replay step + a few per game). A
+ *  long game costs more than a short one, so 3,000 long games can't spend the free plan's 100,000 rows written a day
+ *  on their own (review F98). The rest of the 100,000 is left for counts, scores and the tidy-up. */
+export const SERVER_WORK_PER_DAY = 60_000
+/** Replay moves per alarm step, unless the worker says otherwise — what a game's work is measured in. */
+export const MOVES_PER_STEP = 10
+/** A waiting game whose step has started this many times without finishing (it ran out of time, or broke) is
+ *  refused and dropped — so one bad game can't hold up every game behind it (review F98). */
+export const MAX_STEP_ATTEMPTS = 3
 /** Wrong "remove my score" tries one address may make in a day, and the whole server. */
 export const WRONG_REMOVES_PER_DAY = 10
 export const SERVER_WRONG_PER_DAY = 2_000
@@ -273,8 +292,15 @@ export async function handleBoard<State, Action, Setup>(request: Request, contex
     if (record.rulesVersion !== game.rulesVersion) return refuse('other-version', 409)
     if (record.moves.length > game.maxMoves) return refuse('too-big', 413)
     if (!sameSetup(record.setup, game.dailySetup(day))) return refuse('not-todays-game', 422) // a seed of the player's choosing
+    // From here the replay starts from the SERVER's own daily setup, never the copy the player sent (JSON-equal isn't
+    // always the same value: -0, a float for a whole number…) — review F98
+    record.setup = game.dailySetup(day)
     if (settings.dailyTries > 0 && rows.count(player, 'try', day) >= settings.dailyTries) return refuse('no-tries-left', 429)
     if (rows.storedBytes() + JSON.stringify(record).length > (context.maxStoredBytes ?? MAX_STORED_BYTES)) return refuse('server-full', 507)
+    // its share of the day's checking work: one row per replay step, plus a few for the game itself
+    const work = Math.ceil(record.moves.length / (context.movesPerStep ?? MOVES_PER_STEP)) + 3
+    if (rows.count(EVERYONE, 'work', today) + work > (context.serverWorkPerDay ?? SERVER_WORK_PER_DAY)) return refuse('server-busy', 429)
+    rows.bump(EVERYONE, 'work', today, work)
     rows.bump(player, 'try', day) // a try is a finished game sent — one the replay refuses used its try too
     if (context.checkLater) {
       rows.wait({ day, player, name, record: JSON.stringify(record), at: now })
@@ -337,7 +363,12 @@ function replayPart<State, Action, Setup>(game: BoardGame<State, Action, Setup>,
 /** The replay is done: the score IT computed goes on the board (the player's best of the day), or the game is refused. */
 function keepScore<State, Action, Setup>(context: Pick<BoardContext<State, Action, Setup>, 'rows' | 'game'>, sent: Sent<Setup, Action>, back: ReturnType<typeof replayPart<State, Action, Setup>>): Checked {
   const { rows, game } = context
-  const score = back.ok ? game.score(back.state) : null
+  let score: number | null = null
+  try {
+    score = back.ok ? game.score(back.state) : null
+  } catch {
+    score = null // (the game's score() broke on this state: refused, never a crash — review F98)
+  }
   if (!back.ok || score === null || !Number.isFinite(score)) {
     rows.bump(sent.player, 'refused', sent.day)
     return { ok: false, code: back.ok ? 'not-finished' : back.reason }
@@ -377,14 +408,30 @@ export function checkWaiting<State, Action, Setup>(context: Pick<BoardContext<St
     rows.doneWaiting(waiting.id)
     return rows.waiting(1).length
   }
+  // Steps keep dying on this game (out of CPU time, or broken): refuse it and move on — never hold up the queue.
+  // (attempts counts steps STARTED: the worker saves the +1 before calling this — see attemptWaiting.)
+  if (waiting.attempts > MAX_STEP_ATTEMPTS) {
+    rows.doneWaiting(waiting.id)
+    rows.bump(waiting.player, 'refused', waiting.day)
+    return rows.waiting(1).length
+  }
   const to = Math.min(record.moves.length, waiting.progress + Math.max(1, movesPerStep))
   const started = performance.now()
   const back = replayPart(context.game, record, start, waiting.progress, to)
   context.timed?.(performance.now() - started, to - waiting.progress)
-  if (back.ok && to < record.moves.length) rows.stepWaiting(waiting.id, to, JSON.stringify(back.state)) // more next alarm
+  let saved: string | null = null
+  if (back.ok && to < record.moves.length) {
+    try {
+      saved = JSON.stringify(back.state)
+    } catch {
+      saved = null // (a state JSON can't write: it can't wait for the next step — refused below)
+    }
+  }
+  if (saved !== null) rows.stepWaiting(waiting.id, to, saved) // more next alarm
   else {
     rows.doneWaiting(waiting.id)
-    keepScore(context, { ...waiting, record }, back)
+    const finished = back.ok && to >= record.moves.length
+    keepScore(context, { ...waiting, record }, finished ? back : { ok: false as const, reason: 'damaged' as const, message: '' })
   }
   return rows.waiting(1).length
 }

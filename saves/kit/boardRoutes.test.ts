@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  BLOCKED_NAMES, checkWaiting, handleBoard, keyedHash, memoryBoardRows, nextMidnight, readArcadeName, sameSetup, SERVER_SENDS_PER_DAY,
+  BLOCKED_NAMES, checkWaiting, handleBoard, keyedHash, MAX_STEP_ATTEMPTS, memoryBoardRows, MOVES_PER_STEP, nextMidnight, readArcadeName, sameSetup, SERVER_SENDS_PER_DAY,
   tidyBoard, WRONG_REMOVES_PER_DAY, type BoardContext, type BoardGame,
 } from './boardRoutes'
 import { DEFAULT_SAVES_CONFIG, type BoardConfig } from './config'
@@ -300,6 +300,40 @@ describe('checking later (a replay too slow for one request)', () => {
     expect(alarms).toBeGreaterThanOrEqual(Math.ceil(finished.moves.length / 2) - 1)
     const board = (await call('/board/day', { player: PLAYER })).body
     expect(board).toMatchObject({ checking: 0, refused: 1, mine: { score: scoreOf(finished) } })
+  })
+
+  it('a game whose step keeps dying (out of CPU time) is dropped after a few tries — the games behind it still get checked (review F98)', async () => {
+    const { rows, context, call, send } = setup({ checkLater: true }, { dailyTries: 0 })
+    await send() // the stuck one
+    await send(finished, { player: OTHER }) // a good one behind it
+    // the worker counts each step BEFORE running it; here every step on game 1 "dies" before checkWaiting returns
+    for (let i = 0; i < MAX_STEP_ATTEMPTS + 1; i++) rows.attemptWaiting(1)
+    checkWaiting(context, 2) // → game 1 dropped as refused
+    expect(rows.queue.map((g) => g.id)).toEqual([2])
+    while (checkWaiting(context, 2) > 0) { /* game 2, step by step — attempts start again after each finished step */ }
+    expect((await call('/board/day', { player: OTHER })).body.mine).toMatchObject({ score: scoreOf(finished) })
+    expect((await call('/board/day', { player: PLAYER })).body).toMatchObject({ refused: 1, mine: null })
+  })
+
+  it('a score() that throws on the replayed game → refused, never a crash (review F98)', async () => {
+    const { send } = setup({ game: { ...raceBoard, score: () => { throw new Error('boom') } } })
+    expect((await send()).body).toEqual({ ok: false, code: 'not-finished' })
+  })
+})
+
+describe('the day\'s work budget (review F98)', () => {
+  it('long games cost more: the server stops taking games once the day\'s checking work is spent, whatever the game count', async () => {
+    const { send } = setup({ checkLater: true, serverWorkPerDay: 3 * (Math.ceil(finished.moves.length / MOVES_PER_STEP) + 3) }, { dailyTries: 0, sendsPerDay: 100 })
+    const answers = []
+    for (let i = 0; i < 5; i++) answers.push((await send(finished, { player: `${OTHER.slice(0, -1)}${i}` }, { address: `198.51.100.${i}` })).body)
+    expect(answers.filter((a) => a.ok)).toHaveLength(3)
+    expect(answers.at(-1)).toEqual({ ok: false, code: 'server-busy' })
+  })
+
+  it('the replay starts from the server\'s own daily setup, not the copy that was sent (review F98)', async () => {
+    const { rows, send } = setup({ checkLater: true })
+    await send()
+    expect(JSON.parse(rows.queue[0].record).setup).toEqual(raceBoard.dailySetup(TODAY))
   })
 })
 

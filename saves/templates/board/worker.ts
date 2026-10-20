@@ -39,7 +39,7 @@ const MOVES_PER_ALARM = 10
 
 // The few Cloudflare shapes used here (written out, so the game needs no Cloudflare type package)
 type SqlStorage = { exec(sql: string, ...values: (string | number)[]): { toArray(): Record<string, unknown>[] }; readonly databaseSize: number }
-interface ObjectState { storage: { sql: SqlStorage; getAlarm(): Promise<number | null>; setAlarm(time: number): Promise<void> } }
+interface ObjectState { storage: { sql: SqlStorage; getAlarm(): Promise<number | null>; setAlarm(time: number): Promise<void>; sync(): Promise<void> } }
 interface ObjectStub { fetch(request: Request): Promise<Response> }
 interface Env {
   DailyBoard: { idFromName(name: string): unknown; get(id: unknown): ObjectStub }
@@ -61,7 +61,7 @@ export class DailyBoard {
     this.sqlite = state.storage.sql
     this.query('CREATE TABLE IF NOT EXISTS scores (day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, score REAL NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (day, player))')
     this.query('CREATE INDEX IF NOT EXISTS scores_by_rank ON scores (day, score DESC, at)')
-    this.query('CREATE TABLE IF NOT EXISTS waiting (id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, record TEXT NOT NULL, at INTEGER NOT NULL, progress INTEGER NOT NULL DEFAULT 0, state TEXT)')
+    this.query('CREATE TABLE IF NOT EXISTS waiting (id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, player TEXT NOT NULL, name TEXT NOT NULL, record TEXT NOT NULL, at INTEGER NOT NULL, progress INTEGER NOT NULL DEFAULT 0, state TEXT, attempts INTEGER NOT NULL DEFAULT 0)')
     this.query('CREATE TABLE IF NOT EXISTS counts (who TEXT NOT NULL, what TEXT NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (who, what, day))')
     // The secret for the keyed hashes of addresses and player ids: made once at random, kept here, never sent anywhere
     this.query('CREATE TABLE IF NOT EXISTS secret (v TEXT NOT NULL)')
@@ -79,7 +79,7 @@ export class DailyBoard {
 
   async fetch(request: Request): Promise<Response> {
     const response = await handleBoard(request, {
-      rows: this.rows(), game, settings, secret: this.secret, checkLater: this.checkLater,
+      rows: this.rows(), game, settings, secret: this.secret, checkLater: this.checkLater, movesPerStep: MOVES_PER_ALARM,
       address: request.headers.get('CF-Connecting-IP') ?? 'unknown', // Cloudflare always sets it on the live server
       timed: (ms, moves) => console.log(`replay: ${moves} moves in ${ms.toFixed(1)} ms`),
     })
@@ -92,6 +92,13 @@ export class DailyBoard {
    *  midnight (UTC) while anything is stored. */
   async alarm(): Promise<void> {
     const rows = this.rows()
+    // Count this step BEFORE it runs, and wait until that's really saved: a step that runs out of CPU time is stopped
+    // with its writes lost — counted first, a game that always dies is dropped after a few tries (review F98)
+    const [next] = rows.waiting(1)
+    if (next) {
+      rows.attemptWaiting(next.id)
+      await this.state.storage.sync()
+    }
     const left = checkWaiting({ rows, game, timed: (ms, moves) => console.log(`replay (alarm): ${moves} moves in ${ms.toFixed(1)} ms`) }, MOVES_PER_ALARM)
     tidyBoard(rows, settings)
     if (left > 0) await this.state.storage.setAlarm(Date.now())
@@ -109,8 +116,8 @@ export class DailyBoard {
     const asScore = (r: Record<string, unknown>): BoardScore => ({ day: String(r.day), player: String(r.player), name: String(r.name), score: Number(r.score), at: Number(r.at) })
     return {
       count: (who, what: BoardCount, day) => Number(this.query('SELECT n FROM counts WHERE who = ? AND what = ? AND day = ?', who, what, day)[0]?.n ?? 0),
-      bump: (who, what: BoardCount, day) => {
-        this.query('INSERT INTO counts (who, what, day, n) VALUES (?, ?, ?, 1) ON CONFLICT (who, what, day) DO UPDATE SET n = n + 1', who, what, day)
+      bump: (who, what: BoardCount, day, by = 1) => {
+        this.query('INSERT INTO counts (who, what, day, n) VALUES (?, ?, ?, ?) ON CONFLICT (who, what, day) DO UPDATE SET n = n + ?', who, what, day, by, by)
       },
       score: (day, player) => {
         const found = this.query('SELECT * FROM scores WHERE day = ? AND player = ?', day, player)[0]
@@ -124,9 +131,10 @@ export class DailyBoard {
       wait: (g) => { this.query('INSERT INTO waiting (day, player, name, record, at) VALUES (?, ?, ?, ?, ?)', g.day, g.player, g.name, g.record, g.at) },
       waiting: (n) => this.query('SELECT * FROM waiting ORDER BY id LIMIT ?', n)
         .map((r) => ({ id: Number(r.id), day: String(r.day), player: String(r.player), name: String(r.name), record: String(r.record), at: Number(r.at),
-          progress: Number(r.progress), state: r.state === null ? null : String(r.state) })),
+          progress: Number(r.progress), state: r.state === null ? null : String(r.state), attempts: Number(r.attempts ?? 0) })),
+      attemptWaiting: (id) => { this.query('UPDATE waiting SET attempts = attempts + 1 WHERE id = ?', id) },
       waitingFor: (day, player) => Number(this.query('SELECT COUNT(*) AS n FROM waiting WHERE day = ? AND player = ?', day, player)[0]?.n ?? 0),
-      stepWaiting: (id, progress, state) => { this.query('UPDATE waiting SET progress = ?, state = ? WHERE id = ?', progress, state, id) },
+      stepWaiting: (id, progress, state) => { this.query('UPDATE waiting SET progress = ?, state = ?, attempts = 0 WHERE id = ?', progress, state, id) },
       doneWaiting: (id) => { this.query('DELETE FROM waiting WHERE id = ?', id) },
       remove: (day, player) => {
         const there = this.query('SELECT (SELECT COUNT(*) FROM scores WHERE day = ? AND player = ?) + (SELECT COUNT(*) FROM waiting WHERE day = ? AND player = ?) AS n', day, player, day, player)
