@@ -656,6 +656,12 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   restore(raw: unknown): boolean {
     const saved = readSavedRoom(raw)
     if (!saved || saved.data.code !== this.party.id) return false
+    // Nobody moved for keepMatchDays while the room slept: that match has ended — it never comes back, not even for a moment
+    const expires = saved.timersEndAt[MATCH_EXPIRES_TIMER]
+    if (expires !== undefined && expires <= Date.now()) {
+      this.log('the saved match ended while the room was asleep (keepMatchDays)')
+      return false
+    }
     this.data = saved.data
     this.game = saved.game as State
     this.botTurns = new Map(Object.entries(saved.botTurns))

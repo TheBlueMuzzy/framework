@@ -705,17 +705,26 @@ describe('RoomServer: a match waits until it ends — kept in storage (0.10.0, F
     expect(stored.wake).toBe(Math.min(...Object.values(JSON.parse(stored.stored!).timersEndAt as Record<string, number>)))
   })
 
-  it('woken up after keepMatchDays (the alarm, nobody there) → the match ends at once', async () => {
+  it('woken up after keepMatchDays (the alarm, nobody there) → the match has ended: not loaded back, the caller wipes it', async () => {
     const { ann, bob } = startGame()
     drop(ann)
     drop(bob)
     await settle()
     vi.setSystemTime(Date.now() + 2 * DAY) // (the server was off all that time)
+    expect(restartServer()).toBe(false)
+    expect(server.game).toBeNull()
+    expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
+  })
+
+  it('woken up by the alarm while the match is still on: what is due runs (a player away too long gets the bot)', async () => {
+    const { bob } = startGame()
+    drop(bob)
+    await settle()
+    vi.setSystemTime(Date.now() + 61_000) // (asleep past Bob's away timer)
     restartServer()
     server.wakeUp()
-    await settle()
-    expect(server.game).toBeNull()
-    expect(stored.stored).toBeNull()
+    expect(seatNamed('Bob').kind).toBe('bot')
+    expect(server.game).not.toBeNull()
   })
 
   it('wiped at game over — and kept again for the rematch; wiped back in the lobby', async () => {
