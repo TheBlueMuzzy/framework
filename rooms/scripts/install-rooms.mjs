@@ -104,8 +104,18 @@ function starterFiles(gameDir) {
   ].filter((file) => !file.skip)
 }
 
-// The wiring a game needs, as { done, step } — so only the missing steps are printed
-export function wiringSteps(gameDir) {
+// How long an unfinished match is kept: the game's content/rooms.json "keepMatchDays", or null when it doesn't say
+export function keepMatchDaysOf(gameDir) {
+  try {
+    const value = JSON.parse(readText(join(gameDir, 'content', 'rooms.json'))).keepMatchDays
+    return typeof value === 'number' ? value : null
+  } catch { return null }
+}
+
+// The wiring a game needs, as { done, step } — so only the missing steps are printed.
+// `justMade` = the starter files this install just created (a rooms.json fresh from the template still needs its
+// keepMatchDays chosen for this game).
+export function wiringSteps(gameDir, { justMade = [] } = {}) {
   const text = (file) => (existsSync(join(gameDir, file)) ? readText(join(gameDir, file)) : '')
   let pkg = {}
   try { pkg = JSON.parse(text('package.json') || '{}') } catch { /* unreadable: every package step shows */ }
@@ -115,6 +125,12 @@ export function wiringSteps(gameDir) {
   const localHostInEnv = envFiles.find((file) => /^\s*VITE_PARTY_HOST\s*=\s*(localhost|127\.0\.0\.1)/m.test(text(file)))
   const name = gameName(gameDir)
   const onPartyKit = existsSync(join(gameDir, 'partykit.json')) || Boolean(deps.partykit)
+  const keepMatchDays = keepMatchDaysOf(gameDir)
+  const worker = text('party/worker.ts')
+  // The game's own server files: does it run timers of its own (a turn clock), and start them again after a restart?
+  const partyCode = existsSync(join(gameDir, 'party'))
+    ? readdirSync(join(gameDir, 'party')).filter((f) => /\.ts$/.test(f) && !isTest(f)).map((f) => text(`party/${f}`)).join('\n')
+    : ''
 
   return [
     {
@@ -144,6 +160,26 @@ export function wiringSteps(gameDir) {
       done: !existsSync(join(gameDir, 'party', 'worker.ts')) || /healthResponse\(/.test(text('party/worker.ts')),
       step: `party/worker.ts: answer /health so live-check can tell the server is up —
        import { healthResponse } from '../src/rooms/server/health'   then first in fetch():   const health = healthResponse(request); if (health) return health`,
+    },
+    {
+      // F100 (0.10.0): a match being played is kept in the room's storage — the template does it, older workers don't
+      done: !worker || (/saveRoom:/.test(worker) && /\.restore\(/.test(worker) && /onAlarm\(/.test(worker)),
+      step: `party/worker.ts: keep a match in the room's storage, so a server restart loses nothing and players can come back days later —
+       copy the storage parts of framework/rooms/templates/party/worker.ts: RoomStorage + the constructor, saveRoom in onStart
+       (async: load the saved match with room.restore), keep(), onAlarm(). wrangler.json's Main must be a SQLite class (new_sqlite_classes).`,
+    },
+    {
+      // F100: the room starts its own timers again after a restart; the game's own (a turn clock) need rules.onRestore
+      done: !/timers\.start\(/.test(partyCode) || /onRestore/.test(partyCode),
+      step: `party/: the game starts timers of its own (room.timers.start) — add onRestore(state, room, timersEndAt) to its rules, so after a
+       server restart its clocks go on for the time that was left (README "Kept until it ends").`,
+    },
+    {
+      // F100 (Muzzy 2026-10-20): how long a match waits depends on the game's style — the designer picks it, not the default
+      done: keepMatchDays !== null && !justMade.includes('content/rooms.json'),
+      step: `Choose how long an unfinished match is kept for THIS game: content/rooms.json "keepMatchDays" (now ${keepMatchDays ?? 7}) — days after
+       its last move before it ends ("That match has ended"). A live game ~7 · an async game played over days (Scrabble-with-friends) ~30 · any number.
+       A game-style decision (settle it at /define); change it any time in content/rooms.json (Dev Kit or Obsidian).`,
     },
     {
       done: /["/]party["/]/.test(text('tsconfig.app.json')) || !existsSync(join(gameDir, 'tsconfig.app.json')),
@@ -227,14 +263,14 @@ export function installRooms(gameDir, { dryRun = false, log = console.log } = {}
   }
 
   log('\nDone. Next steps:')
-  printSteps(gameDir, log)
+  printSteps(gameDir, log, starters.filter((file) => !file.exists).map((file) => file.to))
   { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
   return result
 }
 
 // Next steps, in plain English — only what the game doesn't have yet
-function printSteps(gameDir, log) {
-  const todo = wiringSteps(gameDir).filter((w) => !w.done)
+function printSteps(gameDir, log, justMade = []) {
+  const todo = wiringSteps(gameDir, { justMade }).filter((w) => !w.done)
   todo.forEach((w, i) => log(`  ${i + 1}. ${w.step}`))
   log('  How a game uses it: framework/rooms/README.md ("Use it in a game").')
 }
