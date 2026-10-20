@@ -49,3 +49,8 @@ Notes:
 - F103 helper surprises: Goops' adapter has no `conformance.startPlay`, so its Dev Kit pause / snapshot / hotkey checks have never run (added in the scratch: all 10 pass); Goops' credits.json lacks art + fonts and two fonts have no licence 🔴 (Goops' own, pre-existing) — both in the hand-over note. The helper ran one full check:framework in the scratch whose UI part checked sideways sizes (results not used) → ROADMAP Idea "portrait only once".
 - F103 review (helper): no correctness bugs (ScreenStack merge order + no remounts + StrictMode, atMost / dockTight scoped, badgeClear restores in finally, warnings never change pass/fail). Claude fixed its 2 minor notes + a test: a known gap whose check only warns was told "passes now"; a pill check whose page throws escaped check() and skipped the console check → now a skip with the reason. Left: `replace('missing')` closes that layer (better than an invisible one).
 - Muzzy 2026-10-20: "approved" (F103).
+
+Retro: (Claude's draft — Muzzy 2026-10-20: "use the draft")
+- went well: both features came from what the Goops session actually ran into, and one helper per feature kept the main chat small
+- went wrong: reviews still caught real misses in the new checks (a Settings type read as a tag), a helper's "9 px of room" was measured to the box not the visible art, and the proof checked Goops sideways though it's portrait only
+- change: check "is there room?" against the visible art, not just the box; a game says "portrait only" once and every check honours it
