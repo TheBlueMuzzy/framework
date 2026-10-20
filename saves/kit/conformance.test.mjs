@@ -2,14 +2,14 @@
 import { describe, expect, it } from 'vitest'
 import { check, findSaves, missingVersions } from './conformance.mjs'
 
-function tester({ code = [], goldens = [], savesJson = { storageAllowed: [] }, saveTest = true, saveTestText = '', vitest = true, runResult = { code: 0, out: '' } }) {
+function tester({ code = [], goldens = [], savesJson = { storageAllowed: [] }, saveTest = true, saveTestText = '', testFiles = [], vitest = true, runResult = { code: 0, out: '' } }) {
   const results = []
   const ran = []
   const linesMatching = (files, re) => files.flatMap((f) => f.text.split('\n').map((l, i) => (re.test(l.replace(/\/\/.*$/, '')) ? `${f.path}:${i + 1}  ${l.trim()}` : null)).filter(Boolean))
   const t = {
     rel: 'src/saves', version: '0.1.0',
     gameCode: () => code, linesMatching,
-    files: () => goldens.map((path) => ({ path, text: '{}' })),
+    files: (opts) => (opts?.dirs?.includes('tests/saves') ? goldens.map((path) => ({ path, text: '{}' })) : testFiles),
     read: (p) => (p === 'tests/saves/saves.test.ts' ? saveTestText : ''),
     json: (p) => (p === 'content/saves.json' ? savesJson : null),
     exists: (p) => (p === 'tests/saves/saves.test.ts' ? saveTest : p === 'node_modules/vitest' ? vitest : false),
@@ -51,7 +51,7 @@ describe('Saves checks', () => {
   it('a game with golden saves for every version, passing tests and no direct storage passes', async () => {
     const { t, results, ran } = tester({ code: [goopsSave], goldens: ['tests/saves/goops-progress-v1.json', 'tests/saves/goops-progress-v2.json'] })
     await check(t)
-    expect(results.map((r) => r.ok ?? 'skipped')).toEqual([true, true, 'skipped', true]) // no run in Goops
+    expect(results.map((r) => r.ok ?? 'skipped')).toEqual([true, true, 'skipped', true, 'skipped']) // no run in Goops, no record
     expect(ran).toEqual(['npx vitest run tests/saves/saves.test.ts'])
   })
 
@@ -101,7 +101,7 @@ describe('Saves checks — a run (createRun)', () => {
     const own = { path: 'src/saves/run.ts', text: 'export function createRun(options) { return createSave({ key: options.key, version: options.version }) }\n' }
     const { t, results } = tester({ code: [own, runFile, endsIt], goldens, saveTestText: listed })
     await check(t)
-    expect(results.map((r) => r.ok)).toEqual([true, true, true, true])
+    expect(results.map((r) => r.ok)).toEqual([true, true, true, true, undefined])
   })
 
   it('a run is found like a save (key, version, its name) — so it needs golden saves too', () => {
@@ -111,7 +111,7 @@ describe('Saves checks — a run (createRun)', () => {
   it('ended in the game\'s code and tested with checkRunEnds → passes', async () => {
     const { t, results } = tester({ code: [runFile, endsIt], goldens, saveTestText: listed })
     await check(t)
-    expect(results.map((r) => r.ok)).toEqual([true, true, true, true])
+    expect(results.map((r) => r.ok)).toEqual([true, true, true, true, undefined])
     expect(results[2].detail).toBe('glyphtender:run: matchRun.end()')
   })
 
@@ -140,5 +140,37 @@ describe('Saves checks — a run (createRun)', () => {
     const { t, results } = tester({ code: [{ path: 'a.ts', text: "register(createRun({ key: 'x:run', version: 1, fresh }))" }], goldens: ['tests/saves/x_run-v1.json'], saveTestText: listed })
     await check(t)
     expect(results[2].problems[0]).toContain('give it a name')
+  })
+})
+
+describe('seed + move log (layer 3, 0.4.0)', () => {
+  const keeper = { path: 'src/store/gameStore.ts', text: 'const record = recordRun({ rulesVersion: RULES_VERSION, setup })\n' }
+  const replayTest = { path: 'tests/record.test.ts', text: 'const back = replayRun(rules, record, { rulesVersion: 1 })\nexpect(sameResult(live, back.state, fingerprint)).toBe(true)\n' }
+
+  it('no recordRun in the game: skipped', async () => {
+    const { t, results } = tester({ code: [goopsSave] })
+    await check(t)
+    expect(results.at(-1)).toMatchObject({ name: 'a game kept as seed + moves has a replay test', skipped: true })
+  })
+
+  it('a record kept and a test that replays it and compares → passes, naming the test', async () => {
+    const { t, results } = tester({ code: [keeper], testFiles: [replayTest] })
+    await check(t)
+    expect(results.at(-1)).toMatchObject({ ok: true, detail: 'tests/record.test.ts' })
+  })
+
+  it('a record kept but no replay test (or one that never compares) → fails with the fix', async () => {
+    const onlyReplays = { path: 'src/store/x.test.ts', text: 'replayRun(rules, record, { rulesVersion: 1 })\n' }
+    const { t, results } = tester({ code: [keeper], testFiles: [onlyReplays, { path: 'tests/record.ts', text: replayTest.text }] })
+    await check(t)
+    expect(results.at(-1).ok).toBe(false)
+    expect(results.at(-1).problems[0]).toContain('src/store/gameStore.ts keeps a record')
+    expect(results.at(-1).fix).toContain('sameResult')
+  })
+
+  it('recordRun in a comment isn\'t a record', async () => {
+    const { t, results } = tester({ code: [{ path: 'a.ts', text: '// later: recordRun({ rulesVersion: 1, setup })\n' }] })
+    await check(t)
+    expect(results.at(-1).skipped).toBe(true)
   })
 })
