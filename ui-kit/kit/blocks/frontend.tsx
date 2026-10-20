@@ -1,7 +1,7 @@
 // FRONT END — MainMenu, ModeSelect, HowToPlay, Credits.
 // Each one is a screen: open it with screens.push('…'), and Back / Esc close it.
 // A button only appears when you pass its function (no onQuit → no Quit button).
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Grid, Panel, Row, Screen, Stack } from '../layout'
 import { Button, Card, Badge, ScrollArea, Text, type ButtonArt } from '../controls'
 import { screens } from '../screens'
@@ -126,14 +126,19 @@ export function HowToPlay({ pages, onDone = () => screens.pop(), onSkip, onClose
 
 // CREDITS — the people, then every font/art/sound credit from the game's content/credits.json
 // (pass the file's contents as `assets`). Entries without a credit line use author + licence. ‹ (top left) goes back.
-export const creditsWords = { title: 'Credits', assets: 'Fonts, art & sound', back: 'Back' }
+// notices (0.22.0): the licence texts of the code packages the game ships — release.mjs writes them to
+// public/third-party-notices.txt at each release (F85). When that file is there, a button opens it; no file → no button.
+// Pass another address, or false to leave it out.
+export const creditsWords = { title: 'Credits', assets: 'Fonts, art & sound', code: 'Open-source code', notices: 'Open-source licences', back: 'Back' }
 type CreditEntry = { credit?: string; author?: string; licence?: string; url?: string }
 type CreditsProps = {
   people?: { role: string; names: string[] }[]; assets?: CreditEntry[]
+  notices?: string | false
   onBack?: () => void; words?: Partial<typeof creditsWords>
 }
-export function Credits({ people = [], assets = [], onBack = () => screens.pop(), words }: CreditsProps) {
+export function Credits({ people = [], assets = [], notices = 'third-party-notices.txt', onBack = () => screens.pop(), words }: CreditsProps) {
   const w = { ...creditsWords, ...words }
+  const hasNotices = useFileExists(notices)
   return (
     <Screen label={w.title} grow="down">
       <Panel depth={2} gap="m" className="kit-modal">
@@ -152,9 +157,30 @@ export function Credits({ people = [], assets = [], onBack = () => screens.pop()
                 {assets.map((a, i) => <Text key={i} kind="caption">{a.credit ?? `${a.author}, ${a.licence}`}</Text>)}
               </Stack>
             )}
+            {hasNotices && notices && (
+              <Stack gap="xs">
+                <Text kind="heading">{w.code}</Text>
+                <Button variant="ghost" onClick={() => window.open(notices, '_blank', 'noopener')}>{w.notices}</Button>
+              </Stack>
+            )}
           </Stack>
         </ScrollArea>
       </Panel>
     </Screen>
   )
+}
+
+// Is this text file really there? (A dev server answers every unknown address with the game's own page, so only a
+// plain-text answer counts.) False until it knows.
+function useFileExists(url: string | false) {
+  const [found, setFound] = useState(false)
+  useEffect(() => {
+    if (!url || typeof fetch !== 'function') return
+    let live = true
+    fetch(url, { method: 'HEAD' })
+      .then((r) => { if (live) setFound(r.ok && (r.headers.get('content-type') ?? '').includes('text/plain')) })
+      .catch(() => {})
+    return () => { live = false }
+  }, [url])
+  return found
 }

@@ -83,13 +83,18 @@ export function listAssets(root, readdir, dirs = ['public', 'src', 'content']) {
   return out
 }
 
+// A non-commercial licence (CC-BY-NC, "non-commercial use only") counts as 🔴 whatever light it was given (0.22.0, F85):
+// it forbids any money — tips, ads, a store page — and Steam won't take it.
+export const NON_COMMERCIAL = /\bNC\b|non-?commercial/i
+const isNonCommercial = (e) => NON_COMMERCIAL.test(`${e.licence ?? ''} ${e.credit ?? ''}`)
+
 /** What's wrong with the credits: { unlisted: [paths], red: [lines], noCredit: [lines] } (empty lists = fine). */
 export function creditProblems(assets, entries) {
   const listed = (path) => entries.some((e) => (e.paths ?? []).some((p) => p === path || (p.endsWith('/') && path.startsWith(p))))
   const name = (e) => `${e.source ?? '?'} (${(e.paths ?? []).join(', ')})`
   return {
     unlisted: assets.filter((a) => !listed(a)),
-    red: entries.filter((e) => e.light === '🔴').map(name),
+    red: entries.filter((e) => e.light === '🔴' || isNonCommercial(e)).map((e) => (e.light !== '🔴' ? `${name(e)} — "${e.licence ?? e.credit}" is non-commercial: no tips, ads or store sales with it` : name(e))),
     noCredit: entries.filter((e) => e.light === '🟡' && !String(e.credit ?? '').trim()).map(name),
   }
 }

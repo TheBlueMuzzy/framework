@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.21.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.22.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -42,6 +42,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | Settings has the comfort rows (reduce motion, and volume with sound) | (0.21.0) `reduceMotion` isn't switched on in `content/ui/settings.json` (or the file is missing) — or, with the audio module installed, `masterVolume` isn't. Reads files only, so it runs with `--static` too |
 | text is easy to read (contrast) | (0.21.0) text under 4.5:1 against what's painted behind it (3:1 for 24 px, or 18.66 px bold) — see-through colours and faded text mixed in. Skipped where it can't be judged: over a picture, gradient, canvas or video, with an outline or shadow, and disabled controls |
 | nothing touches the edge of its box | (0.21.0) text, an icon, a picture, an avatar or a badge less than 2 px from the inside edge of the drawn box around it (a border, a shadow or its own background) — not inside a scroll area, not marked `data-ui-bleed`, not hanging outside the box |
+| nothing 🔴 ships (credits) | an entry in `content/credits.json` is 🔴 — or (0.22.0) its licence or credit line says non-commercial (CC-BY-NC, "NC", "non-commercial use"), whatever light it was given: it forbids tips, ads and store sales, and Steam won't take it |
 | cards keep their size while they fill in | (0.21.0) a `Card` / `PlayerChip` (or a game's own `useFixedSize` box) grew by more than 1 px after it settled (fonts loaded + two frames). The screen or the style changing starts it over; shrinking is fine |
 The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080, on its
 first screen and in live play (through the Dev Kit adapter's `conformance.startPlay`), and say at which sizes each
@@ -69,6 +70,9 @@ gallery's `npm run shoot` uses the same one.
   own gallery, fixed: avatar initials in a player's colour were faint (now white or black, whichever reads); PlayerChip
   grew as its score counted up (a fixed score slot, `scoreDigits`; the "+N" takes no room); xs chips and their badges
   touched their edges (more room); an icon button's glyph at 200% text touched its edge (a little side padding).
+  0.22.0 (F85): `Credits` shows an "Open-source code" button that opens `third-party-notices.txt` (the licence texts
+  release.mjs writes into the game's `public/` at each release) — only when that file is really there; `notices={false}`
+  leaves it out. And a non-commercial licence (CC-BY-NC) in `content/credits.json` now counts as 🔴.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

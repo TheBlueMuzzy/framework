@@ -77,6 +77,14 @@ describe('credits', () => {
       { paths: ['public/x.mp3'], source: 'Some site', light: '🔴' },
     ]
     const found = creditProblems(assets, entries)
+    expect(creditProblems([], [
+      { paths: ['public/boom.ogg'], source: 'Freesound', light: '🟡', licence: 'CC-BY-NC-4.0', credit: 'Boom by X' },
+      { paths: ['public/hum.ogg'], source: 'Some pack', light: '🟢', licence: 'free for non-commercial use' },
+      { paths: ['public/ok.ogg'], source: 'Kenney', light: '🟢', licence: 'CC0-1.0' },
+    ]).red).toEqual([ // 0.22.0: a non-commercial licence is 🔴 whatever light it was given
+      'Freesound (public/boom.ogg) — "CC-BY-NC-4.0" is non-commercial: no tips, ads or store sales with it',
+      'Some pack (public/hum.ogg) — "free for non-commercial use" is non-commercial: no tips, ads or store sales with it',
+    ])
     expect(found.unlisted).toEqual(['public/favicon.svg'])
     expect(found.red).toEqual(['Some site (public/x.mp3)'])
     expect(found.noCredit).toEqual(['Google Fonts (src/ui/kit/fonts/nunito.woff2)'])
