@@ -172,6 +172,9 @@ describe('install-saves — worker files that fell behind the kit (F101 proof)',
     writeFileSync(join(game, 'cloud/worker.ts'), '// an old cloud worker\n')
     writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts'))
     expect(staleWorkers(game).map((s) => [s.file, s.from, s.to])).toEqual([['cloud/worker.ts', 1, 2]])
+    const lines = []
+    installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
+    expect(lines.join('\n')).toMatch(/cloud\/worker\.ts was made from an older template \(no version line/)
     rmSync(game, { recursive: true, force: true })
   })
 

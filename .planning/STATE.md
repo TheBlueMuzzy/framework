@@ -1,18 +1,18 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 21 started: F101 saves ready for any platform** (one storage switch, saves opened from a slow storage at start-up, the save format written down) on `dev/v0-10` (saves 0.5.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Re-scoped from F97 + F99 (Muzzy left it to Claude): the phone / desktop / Steam backends and the C# code wait for the store run-through and the first Unity game (💤; research kept in `.planning/research/saves.md` "Layers 6 + 8"). **Next: /develop F101 task 1 — measure start-up load + writes per minute in a scratch Glyphtender.**
+2026-10-20 — **Sprint 21 built (waiting for OK): F101 saves ready for any platform** on `dev/v0-10` (saves 0.6.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call): one storage switch for the whole kit, `openSaves` (every key loaded once at start-up, background writes, written at once on hide, a failing storage never loses or drops a save), the first launch copies browser saves over, `saves/FORMAT.md` for a C# / other version, the installer names worker files from an older template. Proven in a scratch Glyphtender on a slow stand-in storage. **Next: Muzzy's OK on F101 → `F101: done`, then the sprint retro.** F97 (stores/Steam) + F99 (Unity) wait (💤).
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
-Reviewed through: framework e69af07 (sprint 20 review: F94 5 hardening fixes + F98 3 security fixes, all + tests; sprint 19 review: F96 4 security findings + F100 1, all fixed + tests; sprint 18 review: F93 3 findings + F95 2, all fixed + tests; sprint 17 review: F82 2 findings + F83 4, all fixed + tests, ~/.claude 2026-10-20 01:10; sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
+Reviewed through: framework baa7e0c (sprint 21 review: F101 1 real bug + close() + 5 FORMAT.md errors, all fixed + tests; proof: 4 findings fixed + tests; sprint 20 review: F94 5 hardening fixes + F98 3 security fixes, all + tests; sprint 19 review: F96 4 security findings + F100 1, all fixed + tests; sprint 18 review: F93 3 findings + F95 2, all fixed + tests; sprint 17 review: F82 2 findings + F83 4, all fixed + tests, ~/.claude 2026-10-20 01:10; sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 21 — saves that can move to any platform later (F101)
-Doing: Sprint 21 — F101 task 1 (measure)   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
+Doing: Sprint 21 — F101 built, waiting for OK   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts

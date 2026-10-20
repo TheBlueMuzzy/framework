@@ -273,7 +273,8 @@ export function installSaves(gameDir, { dryRun = false, cloud = false, board = f
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
   const stale = staleWorkers(game)
   for (const s of stale) {
-    log(`  ⚠ ${s.file} was made from an older template (version ${s.from}; the kit's is ${s.to}) — bring these changes over from framework/saves/templates/${s.file} (it may not compile until you do):`)
+    const made = /Template version: \d+/.test(readText(join(game, s.file))) ? `version ${s.from}` : 'no version line — from before versions, so check every change below'
+    log(`  ⚠ ${s.file} was made from an older template (${made}; the kit's is ${s.to}) — bring these changes over from framework/saves/templates/${s.file} (it may not compile until you do):`)
     s.changes.forEach((c) => log(`      ${c}`))
   }
   if (dryRun) return { changed, removed, starter, stale }
