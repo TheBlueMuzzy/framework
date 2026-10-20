@@ -25,7 +25,7 @@ import { countDevices, mergeRecords, type FieldRules } from './progress'
 import { browserStorage, readKey, removeKey, writeKey, type StorageLike } from './storage'
 
 /** What is saved: settings (volume, reduce motion) · progress (XP, unlocks, lifetime stats — the precious one) ·
- *  run (a game in progress — clear() it when the run ends) · slots (several self-contained saves, see slot()). */
+ *  run (a game in progress — made with createRun, run.ts, which wipes it whole when the run ends) · slots (several self-contained saves, see slot()). */
 export type SaveKind = 'settings' | 'progress' | 'run' | 'slots'
 
 /** One copy as it sits in storage. */

@@ -109,7 +109,9 @@ export function missingVersions(key, version, fileNames) {
 }
 
 export async function check(t) {
-  const code = t.gameCode()
+  // (this module's own copy is left out: an older Dev Kit's gameCode() still hands it over, and its createSave /
+  //  createRun calls — run.ts, nudge.ts, the examples in comments of this file — aren't the game's saves)
+  const code = t.gameCode().filter((f) => !f.path.startsWith(`${t.rel}/`))
   const saves = findSaves(code)
   {
     const name = 'every save has a golden copy for each version'

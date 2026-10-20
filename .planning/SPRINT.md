@@ -4,12 +4,12 @@ Researched first (code map 2026-10-20 + `.planning/research/saves.md` layers 2 a
 
 ## F93 🧱 Saves: run resume
 Done when: a game can autosave its run at break points (and when the tab hides / closes), ask "is there a run, from when?" without loading it, show the kit's Continue button only when there is one (with a short summary), and clear it when the run ends so it never comes back — a newer-build or damaged run says "can't be continued" instead of crashing.
-- [ ] 🤖 1. Peek without loading: `has()` / `savedAt()` (or `peek()`) on a save, tests — saves/kit/saves.ts
-- [ ] 🤖 2. `createRun()`: autosave(data) at break points + flush on visibilitychange / pagehide, `end()` clears every copy, `pending()` → `{ savedAt, summary } | null` — saves/kit/run.ts
-- [ ] 🤖 3. A run from a newer build or a damaged one → "This game can't be continued" + cleared, never a crash — saves/kit/run.ts
-- [ ] 🤖 4. Continue on the main menu: MainMenu's existing `onContinue` shown only with a pending run, a summary line under it ("Turn 7 · 5 min ago"), words in the kit's word lists — saves/kit/ui/, ui-kit/kit/blocks/frontend.tsx
-- [ ] 🤖 5. Golden saves for runs + "a run cleared at the end never comes back" in the framework check; proven end to end on a scratch Glyphtender vs the AI — saves/kit/oldSaves.ts, saves/kit/conformance.mjs
-- [ ] 🤖 6. README + design layer 2 + kit version — saves/README.md, .planning/design/saves.md
+- [x] 🤖 1. Peek without loading: `has()` / `savedAt()` (or `peek()`) on a save, tests — saves/kit/saves.ts
+- [x] 🤖 2. `createRun()`: autosave(data) at break points + flush on visibilitychange / pagehide, `end()` clears every copy, `pending()` → `{ savedAt, summary } | null` — saves/kit/run.ts
+- [x] 🤖 3. A run from a newer build or a damaged one → "This game can't be continued" + cleared, never a crash — saves/kit/run.ts
+- [x] 🤖 4. Continue on the main menu: MainMenu's existing `onContinue` shown only with a pending run, a summary line under it ("Turn 7 · 5 min ago"), words in the kit's word lists — saves/kit/ui/, ui-kit/kit/blocks/frontend.tsx
+- [x] 🤖 5. Golden saves for runs + "a run cleared at the end never comes back" in the framework check; proven end to end on a scratch Glyphtender vs the AI — saves/kit/oldSaves.ts, saves/kit/conformance.mjs
+- [x] 🤖 6. README + design layer 2 + kit version — saves/README.md, .planning/design/saves.md
 Check: a scratch Glyphtender game vs the AI, closed mid-game → reopened shows Continue with the turn + time, Continue lands on the same turn; finishing the game → Continue is gone after a reload; a run saved by a "newer build" → can't-continue message, no crash; screenshots of the menu with and without Continue at phone + desktop sizes.
 Ask Muzzy: —
 
@@ -28,3 +28,5 @@ Notes:
 - Plan-lint: only the old F61 / F59 / F60 line (Goops' session). No open P0/P1 bugs.
 - Muzzy 2026-10-20: a match should wait for a player "until the match ends" → that needs the room kept on the server (Durable Object storage), so it's its own feature, F100 (queued with sprint 19); this sprint makes the wait a setting, 5 min.
 - Continue + Rejoin go on the main menu (the kit's MainMenu already has a Continue slot), not a pop-up — the common pattern; Muzzy can ask for a pop-up.
+- F93 surprises: (1) a newer build's run must be WIPED, not kept like progress — the core never writes over a newer copy, so a kept one would block every run this build saves (`clear({ evenNewer })`, only runs use it). (2) The same data saved twice in one millisecond is the same text, so the core makes no backup of it — checkRunEnds puts the backups in place itself. (3) Older Dev Kits hand the saves module's own copy to the check as game code (it already flagged `nudge.ts`; `run.ts` would have added more) — the Saves check now skips `src/saves/` itself. (4) A hook can't read the clock while drawing (React purity lint) — useContinue works the line out when the menu opens.
+- F93 judgement calls: the summary line sits INSIDE the Continue button (UI kit 0.23.0 `continueDetail` / `items[].detail`) so nothing jumps; a can't-continue run still shows Continue (with only its time) and says why when pressed, rather than vanishing silently; leaving a game from the menu counts as abandoning it (`end()`), closing the tab doesn't. Scratch Glyphtender: Continue is the primary button when shown (Play becomes secondary); all local games are runs (vs AI and pass-and-play), not online or the tutorial.

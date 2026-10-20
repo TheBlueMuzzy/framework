@@ -97,6 +97,13 @@ describe('Saves checks — a run (createRun)', () => {
   const goldens = ['tests/saves/glyphtender_run-v1.json']
   const listed = "import { checkRunEnds } from '../../src/saves/oldSaves'\nconst RUNS = [{ run: matchRun }]\nit('x', () => checkRunEnds(run))\n"
 
+  it('the module\'s own copy (src/saves/) is never read as the game\'s saves — an older Dev Kit hands it over', async () => {
+    const own = { path: 'src/saves/run.ts', text: 'export function createRun(options) { return createSave({ key: options.key, version: options.version }) }\n' }
+    const { t, results } = tester({ code: [own, runFile, endsIt], goldens, saveTestText: listed })
+    await check(t)
+    expect(results.map((r) => r.ok)).toEqual([true, true, true, true])
+  })
+
   it('a run is found like a save (key, version, its name) — so it needs golden saves too', () => {
     expect(findSaves([runFile])).toEqual([{ where: 'src/game/run.ts:1', key: 'glyphtender:run', version: 1, run: true, name: 'matchRun' }])
   })
