@@ -15,13 +15,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Every module = every folder with a kit/VERSION — found, not typed in, so a new module can't be left unchecked
+  # (the Saves module went 9 commits unchecked here because the list was typed by hand, 2026-10-19)
+  modules:
+    runs-on: ubuntu-latest
+    outputs:
+      list: ${{ steps.find.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: echo "list=$(ls -d */kit/VERSION | cut -d/ -f1 | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
+
   module:
+    needs: modules
     name: ${{ matrix.module }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # one red module doesn't hide the others' results
       matrix:
-        module: [devkit, ui-kit, audio, table, ai, rooms]
+        module: ${{ fromJSON(needs.modules.outputs.list) }}
     steps:
       - uses: actions/checkout@v4
 

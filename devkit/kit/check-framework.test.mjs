@@ -48,6 +48,7 @@ describe('reading the game', () => {
   it('gameCode skips the framework folders and tests; linesMatching names file:line, not comments', () => {
     write('src/devkit/gameClock.ts', 'setTimeout(f, 1)')
     write('src/ui/kit/x.ts', 'setTimeout(f, 1)')
+    write('src/saves/storage.ts', 'setTimeout(f, 1)') // the saves module (0.20.4)
     write('src/engine/tick.ts', '// setTimeout(f, 1) in a comment\nconst a = 1\nsetTimeout(() => drop(), 500)\n')
     write('src/engine/tick.test.ts', 'setTimeout(f, 1)')
     const code = gameCode(game)

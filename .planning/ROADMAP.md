@@ -192,13 +192,20 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - 🟢 F83 🔧 Stage-release checks (alpha / beta / 1.0): release.mjs refuses a stage release without `.planning/archive/release-checks/<stage>.md` naming the devices tried, a first-time player who played without help, store-page screenshots newer than the last stage, TDD §7 compliance for the platform (privacy, age rating), no stand-in art left (beta+), and at 1.0 the name/trademark check + press kit — should · needs: F80 · gap ranks 7, 13, 16
 - 🟢 F84 🔧 Patch notes players can read: release.mjs writes the bullets to CHANGELOG.md + `.planning/archive/releases/vX.Y.Z.md` (ready to paste into itch) and refuses without them — should · needs: F80 · gap rank 9
 - 🟢 F85 🔧 Dependency + licence audit: /checkup runs `npm audit`, `npm outdated` and a licence summary per game (monthly), names high-risk packages and GPL code in a shipping game in plain words — should · gap rank 8
-- 🟢 F86 🧱 Saves module (Muzzy 2026-10-19: "saves would be the module, versioning is a feature of that module"): a framework module games copy in for saving/loading; every save carries a version stamp and each release adds a small upgrade step for older saves; ships a check:fast test that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress. Its own sprint. (No game versions its saves today: Goops, Glyphtender, Roll Better use localStorage unversioned) — should · gap rank 10
+- ✅ F86 🧱 Saves module (Muzzy 2026-10-19: "saves would be the module, versioning is a feature of that module"): a framework module games copy in for saving/loading; every save carries a version stamp and each release adds a small upgrade step for older saves; ships a check:fast test that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress. Researched first (`.planning/research/saves.md`): this is layers 0 + 1 (core + save code / storage health); layers 2–8 are F93–F99. (Only Goops' progress save carries a version today; Glyphtender has a one-off marker, Roll Better saves ids only) — should · gap rank 10 · sprint 15
 - ✅ F87 🔧 QA routine: plan-lint requires a `Check:` line under every sprint feature and a `Checked:` note before `Fnn: done`; an open P1 older than the sprint start that isn't a sprint task is flagged; /play's watch mode writes a playtest log (`.planning/research/playtests/<date>.md`) a stage release asks for — should · QA lead rows · sprint 13
 - ✅ F88 🔧 Quality bars in check:framework: text contrast, a reduce-motion setting, a volume setting when the audio module is in, nothing touching a card's edge, cards that don't grow mid-sequence (CLAUDE.md's "breathing room" rule, now checked) — should · gap rank 12 + art/audio rows · sprint 14
 - 💤 F89 🧱 Crash reports from players: a framework piece (window.onerror → a small Cloudflare worker that counts errors; opt-in play counts later, tied to the privacy policy); session start says "3 new errors from players since last time" — could · gap rank 6 (large)
 - 💤 F90 🔧 Coding standards as lint rules: no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · gap rank 14
 - 💤 F91 🔧 Localization readiness: player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
 - 💤 F92 🔧 Tech lead's routine: a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
+- 🟢 F93 🧱 Saves: run resume — autosave at natural break points (end of turn / wave), "Continue?" on launch, the run deleted when it ends (research layer 2) — should · needs: F86
+- ⏳ F94 🧱 Saves: seed + move log — a run saved as its seed + moves and rebuilt by replaying them; gives replays and daily challenges; needs rules with no hidden randomness (research layer 3) — could · needs: F86
+- 🟢 F95 🧱 Saves: online rejoin — room id + seat token kept so a player who closed the tab gets back into the match, with the rooms kit (research layer 4) — should · needs: F86
+- 🟢 F96 🧱 Saves: cloud via link code — a short code copies the save to another device, on our own Cloudflare (KV/D1), no accounts; progress merged by each field's rule (F86), offline first; privacy note + delete my data (research layer 5) — should · needs: F86
+- 🟢 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F86
+- ⏳ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96
+- 🟢 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F86
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]
@@ -213,6 +220,14 @@ flowchart LR
   F90[F90 Lint standards]
   F91[F91 Localization]
   F92[F92 Tech lead routine]
+  F86 --> F93[F93 Run resume]
+  F86 --> F94[F94 Seed + move log]
+  F86 --> F95[F95 Online rejoin]
+  F86 --> F96[F96 Link-code cloud]
+  F86 --> F97[F97 App stores + Steam]
+  F94 --> F98[F98 Checked leaderboards]
+  F96 --> F98
+  F86 --> F99[F99 Unity port]
 ```
 
 ## Later
@@ -227,6 +242,9 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-19 — **Saves switch-over, per game (F86 proof, scratch copies):** Goops → install `saves`, goops-progress becomes a createSave (progress, v1, `oldSave` for the old {v:1} record, both fields highest), golden saves v1 + v1-module, `setSavesConfig` in main.tsx, later the Settings rows + `askToKeepSaves()`. Glyphtender → install, glyphtender:new-game v2 with the 2-letter upgrade step, golden saves v1/v2/v2-module, room code under `storageAllowed` until F95, Settings rows + Save code screen; still to move: onlineOptions.ts (same 2-letter marker), tutorial/progress.ts, wordOutbox.ts; fullscreen.ts under `storageAllowed`. Steps in `saves/README.md`.
+- 2026-10-19 — **Saves: after a part-way code import, reload the game** (review): the panel says which saves came back but the running game still shows the old values until a reload.
+- 2026-10-19 — **Saves: test on real Safari, Firefox, a real itch.io page and a real incognito window** — Playwright Chromium only so far; the private-window guess may never fire in Chrome (same quota as a normal profile).
 - 2026-10-19 — **check-framework `t.run` builds one shell string** (security review, low): `devkit/kit/check-framework.mjs` runs with `shell: true` and quotes only spaces and `"`, so a game test file named with `$( )` or `;` would run a command. Not an escalation (the checks already run the game's own code) — pass an argument list instead.
 - 2026-10-19 — **UI kit gallery still has 56 older problems** (found by F88's shoot run, older checks): 34 cut-off texts (Results names, the Room share line) + 22 overlaps (Feedback toast, lobby, hud screens) — the kit's own demos should pass its own checks.
 - 2026-10-19 — **Hand to Goops' session (found by F88, read-only on a scratch copy):** the new quality bars pass; 5 older gaps — 27 art files not in credits, 2 🔴 fonts (gb_boot, Press Start DX), no code reads content/credits.json, Settings "Version" row has no text, no `conformance.startPlay` in the adapter (only the first screen gets checked).
