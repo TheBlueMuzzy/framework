@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.10.1",
-  "build": 3,
+  "version": "0.10.2",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -67,6 +67,11 @@
       "version": "0.10.1",
       "date": "2026-10-19",
       "summary": "Framework checks for every game: overlap, cut-off and faint text, breathing room, fixed-size cards, comfort settings"
+    },
+    {
+      "version": "0.10.2",
+      "date": "2026-10-20",
+      "summary": "Saves module: saved games survive updates, broken writes and browsers that wipe data"
     }
   ]
 }
