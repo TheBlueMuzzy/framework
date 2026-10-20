@@ -13,6 +13,7 @@ export const menu: MenuGroup[] = [
   ] },
   { title: 'Front end', entries: [
     { id: 'menu', name: 'Main menu', about: 'The game’s name and its big buttons, in the game’s own order' },
+    { id: 'continuemenu', name: 'Main menu: Continue', about: 'A game in progress: Continue first, with where you were and when (the saves module’s run)' },
     { id: 'artmenu', name: 'Main menu: game art', about: 'The game’s own pictures: logo, backdrop, art buttons (hold one: its pushed-in picture shows)' },
     { id: 'artstage', name: 'Art stage', about: 'A scene from the game’s own pictures: pull the lever (drag or tap), the screen slides, the level meter fills; an off panel' },
     { id: 'snap', name: 'Repair panel: sliders + dial', about: 'SnapControl: drag OR tap a slider to a stop, turn a dial to its corners; a lamp blinks, a wrong end shakes' },

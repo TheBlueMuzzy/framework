@@ -479,6 +479,9 @@ const samples: Record<string, ComponentType> = {
   // art skins (0.11.0): logo + backdrop + art buttons; the words still come from the game
   artstage: ArtStageSample,
   snap: SnapSample,
+  continuemenu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" continueDetail="Turn 7 · 5 min ago"
+    onContinue={() => toast('Back where you were')} onPlay={() => screens.push('modes')} onSettings={() => screens.push('settings')}
+    onHowToPlay={() => screens.push('howto')} onCredits={() => screens.push('credits')} />,
   artmenu: () => <MainMenu title="Roll Better" titleArt={art('logo.svg')} backdrop={art('backdrop.svg')} subtitle="A dice game for friends" items={[
     { label: 'Play', onClick: () => screens.push('artend'), art: redButton }, { label: 'Settings', onClick: () => screens.push('settings'), art: tealButton },
   ]} />,

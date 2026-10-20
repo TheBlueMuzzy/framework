@@ -32,6 +32,21 @@ describe('MainMenu', () => {
     ]} />)
     expect(primaryNames()).toEqual(['New game'])
   })
+
+  it('continueDetail: a second line inside Continue only (0.23.0) — and none without it', () => {
+    render(<MainMenu title="Game" onContinue={() => {}} onPlay={() => {}} continueDetail="Turn 7 · 5 min ago" />)
+    const [resume, play] = screen.getAllByRole('button')
+    expect(resume.querySelector('.kit-button-detail')?.textContent).toBe('Turn 7 · 5 min ago')
+    expect(play.querySelector('.kit-button-detail')).toBeNull()
+    cleanup()
+    render(<MainMenu title="Game" onPlay={() => {}} continueDetail="Turn 7" />) // no onContinue → no Continue, no line
+    expect(buttonNames()).toEqual(['Play'])
+  })
+
+  it('items: detail works on any item', () => {
+    render(<MainMenu title="Game" items={[{ label: 'Resume', onClick: () => {}, detail: 'Wave 3' }, { label: 'New run', onClick: () => {} }]} />)
+    expect(screen.getByText('Wave 3').className).toBe('kit-button-detail')
+  })
 })
 
 // Credits links the licence texts release.mjs writes (public/third-party-notices.txt, F85) — only when the file is there

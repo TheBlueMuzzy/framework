@@ -229,7 +229,10 @@
   }
   /* Main menu: extra buttons (children) sit in the button column like the others */
   .kit-main-menu-extra { display: contents; }
-  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right.
+  /* A button's second line (Continue's "Turn 7 · 5 min ago", 0.23.0): under the label, inside the button — so the menu
+     doesn't jump when it appears — a little smaller and lighter; the button's own padding keeps it off the edges */
+  .kit-main-menu-buttons > .kit-button:has(> .kit-button-detail) { flex-direction: column; gap: 0; }
+  .kit-button-detail { display: block; font-size: 0.85em; font-weight: 400; text-transform: none; }  /* Main menu on a short, wide screen (a phone on its side): the title on the left, the buttons on the right.
      With six or more buttons they go in two columns (main one(s) and extra buttons across both), so they still fit. */
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; }
