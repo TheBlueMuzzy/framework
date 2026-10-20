@@ -132,7 +132,7 @@ export async function check(t) {
     if (!t.has('devkit') || !adapter || !t.exists(adapter)) t.skip(name, 'no Dev Kit adapter in this game')
     else {
       const text = withoutComments(t.read(adapter))
-      const value = text.match(/\bversion\s*:\s*([^,\n}]+)/)?.[1]?.trim()
+      const value = text.match(/\bversion\s*:\s*(.+?)\s*,?\s*$/m)?.[1]?.trim() // the whole value, to the end of its line
       if (value && /^versionLabel\b/.test(value)) t.pass(name, `${adapter}: version: versionLabel`)
       else t.fail(name, [value ? `${adapter}: version: ${value} — not versionLabel, so snapshots and bug files can say something else than the menu.` : `${adapter} has no version.`],
         `${adapter}: import { versionLabel } from '../version'   then   version: versionLabel,`)

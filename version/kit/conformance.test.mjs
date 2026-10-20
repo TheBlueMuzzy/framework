@@ -67,6 +67,7 @@ describe('Version checks', () => {
     expect(r[CHECKS.shown].problems.join('\n')).toMatch(/src\/ui\/menus\.tsx:3 {2}<Settings version=`v\$\{version\.version\}`> — not versionLabel/)
     expect(r[CHECKS.oneSource].problems.slice(1).map((l) => l.trim().split('  ')[0])).toEqual(['src/ui/menus.tsx:1', 'src/devkit-game/gAdapter.ts:1'])
     expect(r[CHECKS.devkit].ok).toBe(false)
+    expect(r[CHECKS.devkit].problems[0]).toContain('version: `${versionFile.version}.${versionFile.build}` }')
     expect(r[CHECKS.devkit].fix).toContain('version: versionLabel')
     expect(r[CHECKS.e2e].ok).toBe(false) // a comment naming it doesn't count
   })

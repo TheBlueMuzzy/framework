@@ -25,6 +25,8 @@ describe('versionPlugin', () => {
     const server = await createServer({ root, configFile: false, logLevel: 'silent', plugins: [versionPlugin()], server: { middlewareMode: true, hmr: false } })
     try {
       expect(server.config.define[DEFINE_KEY]).toBe('"0.11.0.4"')
+      // the game's own Vitest tests get it through test.env (Vitest skips define's import.meta.env.* keys)
+      expect(server.config.test.env.APP_VERSION).toBe('0.11.0.4')
       const html = await server.transformIndexHtml('/', '<!doctype html><html><head><title>t</title></head><body></body></html>')
       expect(html).toMatch(/<meta name="app-version" content="v0\.11\.0\.4">/)
       expect(html.indexOf('app-version')).toBeLessThan(html.indexOf('</head>'))

@@ -236,7 +236,7 @@
      With six or more buttons they go in two columns (main one(s) and extra buttons across both), so they still fit. */
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; }
-    .kit-main-menu-buttons:has(> .kit-button:nth-child(6)) { display: grid; grid-template-columns: 1fr 1fr; }
+    .kit-main-menu-buttons[data-many] { display: grid; grid-template-columns: 1fr 1fr; } /* 6+ buttons, extras counted (0.24.0) */
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   .kit-end-title { display: inline-block; }

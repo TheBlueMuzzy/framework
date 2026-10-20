@@ -9,6 +9,16 @@ const buttonNames = () => screen.getAllByRole('button').map((b) => b.textContent
 const primaryNames = () => screen.getAllByRole('button').filter((b) => b.dataset.variant === 'primary').map((b) => b.textContent)
 
 describe('MainMenu', () => {
+  it('six buttons or more — extra buttons (children) counted — take two columns on a phone on its side (0.24.0)', () => {
+    const items = ['Play', 'Daily', 'Board', 'Online', 'Settings'].map((label) => ({ label, onClick: () => {} }))
+    const { container, rerender } = render(<MainMenu title="Game" items={items} version="v0.1.0.12" />)
+    const many = () => container.querySelector('.kit-main-menu-buttons')?.hasAttribute('data-many')
+    expect(many()).toBe(false)
+    rerender(<MainMenu title="Game" items={items} version="v0.1.0.12">{false}{<button>Full screen</button>}</MainMenu>)
+    expect(many()).toBe(true) // the false child doesn't count; Full screen does
+    expect(screen.getByText('v0.1.0.12')).toBeTruthy()
+  })
+
   it('named buttons: fixed order, only the ones passed, first is primary (kit 0.1 games)', () => {
     render(<MainMenu title="Game" onQuit={() => {}} onPlay={() => {}} onSettings={() => {}} words={{ play: 'Go' }} />)
     expect(buttonNames()).toEqual(['Go', 'Settings', 'Quit'])

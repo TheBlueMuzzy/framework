@@ -1,7 +1,7 @@
 // FRONT END — MainMenu, ModeSelect, HowToPlay, Credits.
 // Each one is a screen: open it with screens.push('…'), and Back / Esc close it.
 // A button only appears when you pass its function (no onQuit → no Quit button).
-import { useEffect, useState, type ReactNode } from 'react'
+import { Children, useEffect, useState, type ReactNode } from 'react'
 import { Grid, Panel, Row, Screen, Stack } from '../layout'
 import { Button, Card, Badge, ScrollArea, Text, type ButtonArt } from '../controls'
 import { screens } from '../screens'
@@ -42,6 +42,9 @@ export function MainMenu({ title, subtitle, version, children, items, words, tit
   const buttons = items ?? named
   const anyMarked = buttons.some((item) => item.primary)
   const isPrimary = (item: MainMenuItem, i: number) => (anyMarked ? item.primary : i === 0)
+  // On a phone on its side the buttons go in two columns from six on — the extra buttons (children) count too
+  // (0.24.0: Glyphtender's 5 items + Full screen stayed one column and ran off the top once the version footer took a row)
+  const buttonCount = buttons.length + Children.toArray(children).length
   return (
     <Screen label={title} bottom={version && <Text kind="caption">{version}</Text>} backdrop={backdrop}>
       <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
@@ -49,7 +52,7 @@ export function MainMenu({ title, subtitle, version, children, items, words, tit
           {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} /> : <Text kind="display">{title}</Text>}
           {subtitle && <Text kind="caption">{subtitle}</Text>}
         </Stack>
-        <Stack gap="s" className="kit-main-menu-buttons">
+        <Stack gap="s" className="kit-main-menu-buttons" data-many={buttonCount >= 6 || undefined}>
           {buttons.map((item, i) => (
             <Button key={`${i}-${item.label}`} variant={isPrimary(item, i) ? 'primary' : 'secondary'} onClick={item.onClick} art={item.art}
               sound={item.locked ? false : undefined} aria-disabled={item.locked || undefined} data-locked={item.locked || undefined}>

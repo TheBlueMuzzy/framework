@@ -24,7 +24,9 @@ export function versionPlugin(options = {}) {
       const root = resolve(options.root ?? config.root ?? process.cwd())
       file = join(root, VERSION_FILE)
       version = readAppVersion(root)
-      return { define: { [DEFINE_KEY]: JSON.stringify(version) } }
+      // define: the dev server + builds. test.env: Vitest gives tests its own import.meta.env and skips define's
+      // import.meta.env.* keys (found in the F102 proof: the game's tests saw "dev") — so the tests get it from there.
+      return { define: { [DEFINE_KEY]: JSON.stringify(version) }, test: { env: { APP_VERSION: version } } }
     },
     transformIndexHtml() {
       return [{ tag: 'meta', attrs: { name: META_NAME, content: labelOf(version) }, injectTo: 'head' }]
