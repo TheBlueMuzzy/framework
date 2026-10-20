@@ -46,7 +46,7 @@ export function MainMenu({ title, subtitle, version, children, items, words, tit
   // (0.24.0: Glyphtender's 5 items + Full screen stayed one column and ran off the top once the version footer took a row)
   const buttonCount = buttons.length + Children.toArray(children).length
   return (
-    <Screen label={title} bottom={version && <Text kind="caption">{version}</Text>} backdrop={backdrop}>
+    <Screen label={title} bottom={version && <span className="kit-menu-version"><Text kind="caption">{version}</Text></span>} backdrop={backdrop}>
       <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
           {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} /> : <Text kind="display">{title}</Text>}
