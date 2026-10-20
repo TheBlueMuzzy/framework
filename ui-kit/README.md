@@ -111,6 +111,9 @@ gallery's `npm run shoot` uses the same one.
      `e2e/start.mjs` `expectedVersion` / `checkVersion` → `src/version/e2e.mjs`; `GOOPS_BUILD` → `VERSION_BUILD`
      (e2e/sw-update.mjs); deploy.js → `builtVersion()`; `<Settings version={versionLabel}>` (and drop About → Version's
      `info`). The console footer is Goops' own (no MainMenu) — the version check's "menu" line may need a known gap.
+  7. Left for Goops to decide (not kit bugs): at 360×780 "CONTROLS" ends ~1–2 px from the dock's angled art frame
+     (the panel box has room; the visible frame doesn't) — the same as today — so a shorter label, a smaller bar-name
+     size on narrow phones, or a frame inset. Its credits.json lacks the art + fonts and two fonts have no licence 🔴.
   Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
   public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
