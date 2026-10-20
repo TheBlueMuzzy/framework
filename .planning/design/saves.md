@@ -1,4 +1,4 @@
-# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2, F96 = layer 5)
+# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2, F94 = layer 3, F96 = layer 5)
 
 Research first: `../research/saves.md` (2026-10-19). Muzzy 2026-10-19, on the first plan that only covered what our three games already did:
 > "sounds like you need to research before you design then" → research → "ok. makes sense" (layers 0 + 1 now, layers 2–8 → F93–F99).
@@ -40,6 +40,23 @@ He also asked about lifetime stats and meta progression → they're the `progres
 - **check:framework:** a `createRun` counts as a save (golden saves per version); "a run cleared at the end never comes back" = the run is named, something calls `<name>.end()`, and the game's save test runs `checkRunEnds` (autosave, backups in place, `end()`, reload → nothing left, no Continue, nothing loads).
 - Proven on a scratch Glyphtender vs the AI (README → Proof F93).
 
+## Layer 3 — seed + move log (F94, kit 0.4.0)
+A game kept as **how it started + every move**, rebuilt by playing the moves again through the game's own rules. Tiny, and the same record serves Continue, replays, a daily game everyone shares, and (F98) a leaderboard that computes the score itself.
+
+| Decision | What | Why |
+|---|---|---|
+| **The record** | `{ rulesVersion, setup, moves: [{ seat, action, by? }] }` — the table module's `MoveRecord` + `rulesVersion` (`recordRun`, `addRunMove`) | Plain JSON: it fits a run save, a save code, a leaderboard upload. `by` (person / AI) is kept but never changes the game |
+| **No import of the table module** | `replayRun` takes the game's rules through a tiny structural type (`setup` · `check` · `apply`); the table's `Rules` fits as it is (its test proves it, against the table's own `replay()`) | Modules are copied into games one by one (`src/saves`, `src/table`); a game may have saves without the table (Goops) |
+| **Another rules version** | Refused before a single move — `REPLAY_WORDS.otherVersion`, never a throw | An old record replayed under new rules isn't an error, it's quietly a DIFFERENT game (a wrong Continue, a wrong score). The game bumps `RULES_VERSION` when its golden games stop matching |
+| **Checked, not trusted** | `matches: { live, view }` — the live game's fingerprint saved beside the record; a replay that lands elsewhere → `different` | "The replay matches the live game exactly (checked)": a rule that read the clock or `Math.random` shows up as a polite refusal, not a changed board |
+| **The AI's randomness** | Not recorded | Its moves are logged, not its thinking — a replay needs no AI (and no AI version) |
+| **Daily seed** | `dailySeed(gameId, when)` = FNV-1a of `"<gameId>:<UTC day>"` + murmur's mix → 0…2³²−1 (a mulberry32 seed) | No server, no device, no clock but the date; the day turns at midnight UTC for everyone. The game fixes the rest of the table too (Glyphtender: 2 players vs the AI, the standard word rules, turn order from the same seed) |
+| **Privacy** | A record holds the game only (setup, seed, moves) — no name, no device; it stays in the run save | research → Privacy: nothing personal, nothing sent (F98's board will say what it sends) |
+
+- **Where it's checked:** check:framework — a game that calls `recordRun` must have a test that runs `replayRun` and `sameResult` (Glyphtender's: the live fingerprint after every move == the replay's).
+- **Glyphtender's Continue** saves `{ record, print, turn, options, seats, stats }` (run version 2; version 1 runs keep their game and are put back as before); it waits for the word list (scoring needs it) before replaying; a word list that won't load keeps the run and says so.
+- Proven on a scratch Glyphtender (README → Proof F94).
+
 ## Layer 5 — link-code cloud (F96, kit 0.3.0)
 The save code, but short enough to type: the player's save code goes to **the game's own Cloudflare** and comes back as **`K7QM-2XRP`** — typed on the other device, the save comes in and is **merged by each field's rule** (best kept, counts added), through the very same `readSaveCode` path as a pasted code (same checks, nothing written unless every save is good).
 
@@ -73,5 +90,5 @@ The save code, but short enough to type: the player's save code goes to **the ga
 Goops progress, Glyphtender New Game choices (the 2-letter marker → version 2 + upgrade step; its unchanged test passes), the save code round trip in Playwright's Chromium on Glyphtender's real Settings → Save code screen, inside a cross-site frame too. Details + each game's switch-over steps: `../../saves/README.md`.
 Playwright switches Chrome's storage partitioning off by default (`--disable-features=…ThirdPartyStoragePartitioning…`); the frame-vs-own-site check runs a browser with it back on.
 
-## Later (F94–F99)
-Seed + action log (3) · online rejoin with the rooms kit (4) · Capacitor / Electron / Steam backends behind the same API (6) · accounts + checked leaderboards (7) · the Unity port of the same format (8).
+## Later (F95–F99)
+Online rejoin with the rooms kit (4) · Capacitor / Electron / Steam backends behind the same API (6) · accounts + checked leaderboards (7) · the Unity port of the same format (8).
