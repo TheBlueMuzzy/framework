@@ -5,7 +5,7 @@ From the Goops session's notes (its STATE + archive/sprints/sprint-11.md Notes):
 ## F102 🧱 Version module
 Done when: a game installs `version/` and, from its version.json alone (the file /save bumps), shows `vX.Y.Z.B` in the same places — main-menu footer, the bottom of Settings, the Dev Kit's snapshots and bug files — and its page carries `<meta name="app-version">`; an e2e helper refuses to test a stale build or a cached service worker; check:framework checks the wiring; one format kit-wide.
 - [x] 🤖 1. The module: a Vite plugin (reads version.json, build override by env for update tests, defines the version, injects the meta tag) + `versionLabel()` "vX.Y.Z.B" — version/ (new module folder beside saves/)
-- [ ] 🤖 2. The e2e helper: `expectedVersion()` + `checkVersion(page)` (the page's meta = version.json, else a plain "stale build or cached service worker?") — version/ (new module folder beside saves/)
+- [x] 🤖 2. The e2e helper: `expectedVersion()` + `checkVersion(page)` (the page's meta = version.json, else a plain "stale build or cached service worker?") — version/ (new module folder beside saves/)
 - [ ] 🤖 3. UI kit Settings: a version line at the bottom of every tab (`version` prop), so a game needs no About tab — ui-kit/kit/blocks/Settings.tsx
 - [ ] 🤖 4. Dev Kit: the adapter's `version` documented and shown in the same "vX.Y.Z.B" form — devkit/README.md
 - [ ] 🤖 5. conformance.mjs for check:framework (plugin in vite.config, label on the menu + Settings, an e2e calls checkVersion) + installer + install-module's module list + MODULE-CONTRACTS line + README — version/ (new module folder beside saves/), ~/.claude/config/bmuz/scripts/install-module.mjs
