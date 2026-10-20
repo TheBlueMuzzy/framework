@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 17 done (approved): F82 the live-game check + F83 the stage-release checklist** on `dev/v0-10` (not released yet — /deliver when the milestone's ready). Session start says "DOWN" only when STATE's Live page or room server is; alpha / beta / 1.0 releases need `.planning/archive/release-checks/<stage>.md` filled + ticked, and no stand-in art from beta. Rooms kit 0.8.0 answers /health (Glyphtender / Roll Better get it at their next rooms update). Next: /sprint 18 — F93 run resume + F95 online rejoin. Queue after: 19 F96 + F94 · 20 F97 + F98 + F99 (Muzzy 2026-10-20: "I want you to do all of them").
+2026-10-20 — **Sprint 18 planned: players get back where they were** — F93 run resume (autosave, Continue on the main menu, gone when the run ends) + F95 online rejoin (the last room remembered, Rejoin match, "That match has ended"; an empty room waits 5 min, a setting). Next: /develop F93 task 1 (peek without loading, saves/kit/saves.ts). Sprint 17 (F82 live check + F83 release checklist) done + archived. Queue: 19 F96 + F94 + F100 (rooms wait until the match ends — Muzzy's pick) · 20 F97 + F98 + F99.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -11,8 +11,8 @@
 Reviewed through: framework f50a74e (sprint 17 review: F82 2 findings + F83 4, all fixed + tests, ~/.claude 2026-10-20 01:10; sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 17 — releases and live games get watched for you (F82, F83)
-Doing: Sprint 17 done — next /sprint 18   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 18 — players get back where they were (F93, F95)
+Doing: F93 — building   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
