@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 21 started: saves everywhere — F97 phone apps (Capacitor) + desktop (Electron) + Steam Cloud, then F99 the Unity port** on `dev/v0-10` (saves 0.5.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Researched first (`.planning/research/saves.md` "Layers 6 + 8"): load every key into memory at start, write through in the background; desktop = JSON files in userData/saves synced by Steam Auto-Cloud; Unity = persistentDataPath + Newtonsoft, same golden saves. **Next: /develop F97 task 1 — the spike (what runs on this PC + start-up / write costs).** Ask Muzzy: a Steamworks app id for a real Steam Cloud test?
+2026-10-20 — **Sprint 21 started: saves everywhere — F97 phone apps (Capacitor) + desktop (Electron) + Steam Cloud, then F99 the Unity port** on `dev/v0-10` (saves 0.5.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Researched first (`.planning/research/saves.md` "Layers 6 + 8"): load every key into memory at start, write through in the background; desktop = JSON files in userData/saves synced by Steam Auto-Cloud; Unity = persistentDataPath + Newtonsoft, same golden saves. **Next: /develop F97 task 1 — the spike (what runs on this PC + start-up / write costs).**
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.

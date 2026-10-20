@@ -244,6 +244,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- **Store release run-through** (Muzzy 2026-10-20: "when i'm ready to actually release games… a big runthrough with you to get app store, play store, steam and itch.io (and any other platforms) figured out") — accounts, fees, store pages, signing, a real Steam Cloud test of F97; until then games go out on GitHub Pages only — could
 - 2026-10-20 — **Replays for Goops and Roll Better** (found planning F94): Goops needs a fixed game step (its tick takes the frame's real time) and its repair minigames' Math.random checked; Roll Better needs seeded dice instead of physics results trusted from the browser. Then both can use the saves replay piece + leaderboards.
 - 2026-10-19 — **Hand to Roll Better's session (found by F85's checkup §8, read-only):** `@react-three/rapier@2.2.0` ships with no licence in its package — its next release is refused until the licence is checked (repo likely MIT, unverified) and --deps-risk-ok chosen, or upstream adds one. Also 9 outdated shipped packages.
 - 2026-10-19 — **Patch notes, later (F84 research):** Steam BBCode + store short forms with their limits (Play 500, App Store 4,000) · an in-game "What's new" (once after an update, highlights only, never on first install or mid-game).

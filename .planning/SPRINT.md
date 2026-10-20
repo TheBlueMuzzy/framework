@@ -12,7 +12,7 @@ Done when: a game built as a phone app (Capacitor) or a desktop app (Electron, S
 - [ ] 🤖 6. Installer `--app` / `--desktop` + README "Phone and desktop builds"; scratch Glyphtender as an Electron app (and the phone build or its stand-in): play, quit, relaunch → Continue; a browser save copied over on first launch; files land in the folder Steam would sync — saves/scripts/install-saves.mjs, saves/README.md
 - [ ] 🤖 7. Security review from the first brief: the bridge can't reach files outside `saves/` (key names → safe file names, no `..`), a damaged file → backup, two windows, a write cut off mid-way — saves/kit/platform.test.ts
 Check: scratch Glyphtender in Electron: a few turns, quit, relaunch → Continue at the same turn; `userData/saves/*.json` readable, ≤ ~6 files, a killed write leaves the last good file; first launch copies a browser save once; a key like `../x` can't write outside saves/; phone backend proven on a build or a stand-in (said which); start-up load ms + bytes + file count on record; saves tests + tsc + lint green.
-Ask Muzzy: do you have a Steamworks partner account with an app id (even unreleased)? Yes → a 🙋 real Steam Cloud test; no → the folder proof is enough for now.
+Ask Muzzy: —
 
 ## F99 🧱 Saves: Unity port
 Done when: a Unity game saves and loads the same files as the web kit (same envelope, same version stamp, same upgrade steps in C#), under `persistentDataPath`, written safely, and the C# side passes the same golden saves the TypeScript side does.
@@ -26,6 +26,7 @@ Ask Muzzy: —
 
 Notes:
 - Muzzy 2026-10-20: OK on the plan (sprint 21 shown in chat).
+- Muzzy 2026-10-20: no Steamworks account — "for now… it's just git pages" → the folder proof is enough; a real Steam Cloud test waits for the store run-through (ROADMAP Ideas).
 - Plan-lint: only the old F61 / F59 / F60 line (Goops' session). No open P0/P1 bugs.
 - Technical calls (Claude, from the research): sync API kept on top of async backends by loading everything at start (game code unchanged); one global storage switch instead of passing storage to every call; Steam = Auto-Cloud on `userData/saves`, not steamworks.js (indies' usual choice; no SDK in the game page; Steam's own docs: "use the API only if you need selective control"); Steam's per-user `{64BitSteamID}` folder skipped — Roaming is already per Windows user, and using it would need the SDK; a key + its backups share a file so Steam's file count stays small; `savedAt` + a counter that only goes up inside each file so a wrong pick in Steam's conflict dialog can be noticed.
 - Sprint 20 retro change → task 1 measures start-up load + write cost before the build.
