@@ -8,7 +8,7 @@ Done when: a game's content/ui/style.json can say `"orientation": "portrait"`; c
 - [x] 🤖 2. The screenshot script honours it — ui-kit/scripts/shoot.mjs
 - [x] 🤖 3. Dev Kit checks with their own phone sizes honour it (the pill check already upright-only; any other size loop) — devkit/kit/check-framework.mjs
 - [x] 🤖 4. Skills: the develop skill's size list and game-ui say "minus the sizes the game's orientation rules out", and breathing room is measured to the visible frame/art, not the CSS box (sprint 22 retro) — ~/.claude/skills/develop/SKILL.md
-- [ ] 🤖 5. Docs + versions: style.json template / catalog line, README, UI kit + Dev Kit VERSION bumps, Goops hand-over note gets `"orientation": "portrait"` — ui-kit/README.md
+- [x] 🤖 5. Docs + versions: style.json template / catalog line, README, UI kit + Dev Kit VERSION bumps, Goops hand-over note gets `"orientation": "portrait"` — ui-kit/README.md
 - [ ] 🤖 6. Proof: scratch Goops with "portrait" → check:framework's UI part runs 5 sizes and lists the 2 sideways as skipped; scratch Glyphtender (no orientation) → all 7 — ui-kit/kit/conformance.test.mjs
 Check: ui-kit + devkit tests + tsc + lint green; scratch Goops: check:framework names "portrait only" and runs no 844×390 / 768×343; scratch Glyphtender: 7 sizes as before; a bad value ("sideways") → a plain warning and all sizes.
 Ask Muzzy: —

@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.25.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.26.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -44,7 +44,8 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | nothing touches the edge of its box | (0.21.0) text, an icon, a picture, an avatar or a badge less than 2 px from the inside edge of the drawn box around it (a border, a shadow or its own background) — not inside a scroll area, not marked `data-ui-bleed`, not hanging outside the box |
 | nothing 🔴 ships (credits) | an entry in `content/credits.json` is 🔴 — or (0.22.0) its licence says non-commercial (a CC BY-NC code, "non-commercial use only", "for non-commercial", "personal use only" — not "commercial and non-commercial"), whatever light it was given: it forbids tips, ads and store sales, and Steam won't take it |
 | cards keep their size while they fill in | (0.21.0) a `Card` / `PlayerChip` (or a game's own `useFixedSize` box) grew by more than 1 px after it settled (fonts loaded + two frames). The screen or the style changing starts it over; shrinking is fine |
-The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080, on its
+The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080 (minus
+the phone sizes the game's `"orientation"` rules out — 0.26.0), on its
 first screen and in live play (through the Dev Kit adapter's `conformance.startPlay`), and say at which sizes each
 problem shows. They skip the Dev Kit, hidden / inert / `aria-hidden` things, text for screen readers only, and
 anything inside `data-ui-check="skip"` (an overlap that's on purpose). The in-page check is `kit/uiProblems.mjs` — the
@@ -91,6 +92,10 @@ gallery's `npm run shoot` uses the same one.
   And two HUD options for a narrow phone, so a game needs no app.css restyle (each one was a check:ui warning in Goops):
   `Bar width={0.3} atMost` — the bars in a row share its room evenly, each at most its share (never narrower than its
   label) · `Hud dockTight` — the dock panel's sides get `--gap-s` instead of `--gap-m`.
+  0.26.0 (F104): `content/ui/style.json` `"orientation"` — `"any"` (default; new games get it written in) · `"portrait"`
+  · `"landscape"`. check:framework's browser checks skip the phone sizes it rules out and say so (`portrait` drops
+  844×390 + 768×343; desktop sizes stay: a portrait game still runs in a desktop window); an unknown value warns and
+  checks every size. The Dev Kit's PAUSED pill check uses sideways phones for a landscape game.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
@@ -99,6 +104,8 @@ gallery's `npm run shoot` uses the same one.
      Machine bars: `<Bar … width={… bars.machineWidth} atMost …>`; the HUD: `<Hud … dockTight />`.
   3. `src/ui/app.css`: delete the `.hud-machines > .kit-bar { … }` rule and the `.kit-hud-dock > .kit-panel:has(.hud-panel) { … }`
      rule (+ their comments); keep `.hud-machines { flex-wrap: nowrap; }`. check:ui's 2 warnings go.
+  3b. `content/ui/style.json`: add `"orientation": "portrait"` (UI kit 0.26.0) — check:framework then never checks
+     Goops sideways.
   4. `content/devkit.json`: leave `pauseBadgeSpot` out (= "left", clear at 390 and 360) — or pick "left" / "right";
      check:framework names the clear spots if the HUD changes. ("top", where Dev Kit 0.18.0 drew it, covers CRACKS.)
   5. Goops' adapter has no `conformance.startPlay`, so check:framework's play checks have never run on it. Add one

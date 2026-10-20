@@ -478,4 +478,7 @@ to search sets `searchable: false` (no box).
 - 0.21.0 (framework F103, from Goops): `check:framework` warns when the closed-panel PAUSED pill sits on the game's HUD
   on an upright phone (Goops' "CRACKS 0/10" at 390), naming `content/devkit.json` `"pauseBadgeSpot"` and the spots that
   are clear. Checks can now `t.warn(name, problems, fix)` — shown like a failure, the run still passes.
+- 0.21.1 (framework F104): the PAUSED pill check uses the phones the game plays on — sideways (844×390, 768×343) when
+  `content/ui/style.json` says `"orientation": "landscape"`, upright otherwise. A known gap whose check only warns is no
+  longer told it "passes now"; a pill check whose page throws is a skip with the reason (F103 review).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
