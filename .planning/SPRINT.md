@@ -11,6 +11,7 @@ Done when: a game can autosave its run at break points (and when the tab hides /
 - [x] 🤖 5. Golden saves for runs + "a run cleared at the end never comes back" in the framework check; proven end to end on a scratch Glyphtender vs the AI — saves/kit/oldSaves.ts, saves/kit/conformance.mjs
 - [x] 🤖 6. README + design layer 2 + kit version — saves/README.md, .planning/design/saves.md
 Check: a scratch Glyphtender game vs the AI, closed mid-game → reopened shows Continue with the turn + time, Continue lands on the same turn; finishing the game → Continue is gone after a reload; a run saved by a "newer build" → can't-continue message, no crash; screenshots of the menu with and without Continue at phone + desktop sizes.
+Checked: scratch Glyphtender (.scratch/glyphtender-f93, helper; Claude looked at the shots): vs the AI through the draft + 3 turns → reload → "Continue · Turn 4 · just now" → same turn (board, hands, seats); 5 min back → "5 min ago"; finished game and New game → no Continue after a reload; a version-7 run → can't-continue toast, wiped, no page errors; menu shots 390×844 + 1440×900 — Continue green with its line inside, padding all round, nothing clipped · saves 124/124 after the review fixes (newer run never blocks a new one, `subscribe` keeps Continue fresh, a commented end() fails the check), UI kit 382/382 + check-ui 133 files, tsc + lint clean (Claude ran). The review fixes are proven by unit tests, not re-run in the scratch game.
 Ask Muzzy: —
 
 ## F95 🧱 Saves: online rejoin
@@ -22,6 +23,7 @@ Done when: a player who closed the tab mid-match sees "Rejoin match" on the main
 - [x] 🤖 11. Tests + conformance; Glyphtender's scratch copy moved from its sessionStorage room to the kit helper — rooms/kit/useRoom.test.tsx, rooms/kit/conformance.mjs
 - [x] 🤖 12. Privacy line: the room code + player id stay on this device and only go to the game's own server — saves/README.md, rooms/README.md
 Check: two browsers in a scratch Glyphtender online match, one closes its tab, reopens within 5 min → "Rejoin match" → same seat, the bot's turns named; reopening after the room is gone → "That match has ended", no new room made; leaving on purpose → no Rejoin button; screenshots of the menu with Rejoin + the back-in message.
+Checked: scratch Glyphtender (.scratch/glyphtender-f95, e2e/f95-rejoin.mjs, own wrangler 2999 + vite 5392, helper; Claude looked at the shots): reload → same seat; closed tab → "Rejoin match" green first → "Rejoining…" → same seat + "You're back — a bot played 4 turns for you" (server counted 4); left on purpose → no Rejoin; room cleared → "That match has ended", and a plain join to that code still no_room (the rejoin made no room); console clean · rooms 141/141 after the review fixes (no `back` without bot turns; kicked-while-away = match ended), tsc + lint clean (Claude ran). Live Cloudflare drops an empty room's memory after ~1–2 min — the 5-minute wait holds fully only with F100.
 Ask Muzzy: —
 
 Notes:
