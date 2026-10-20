@@ -86,6 +86,8 @@ export interface JoinRequest {
   persistentId: string
   /** true = the player is making a new room with this code. */
   create: boolean
+  /** true = "Rejoin match": only their own seat will do (none → no_room). Never creates. (0.9.0) */
+  rejoin?: boolean
 }
 
 export type JoinResult =
@@ -108,6 +110,8 @@ export function joinRoom(room: RoomData, request: JoinRequest, settings: RoomSet
     chooseHost(room)
     return { ok: true, seat: own, cameBack: true }
   }
+  // A rejoin with no seat of theirs here: the match they were in is gone (the code may even be someone else's now)
+  if (request.rejoin) return { ok: false, reason: 'no_room' }
 
   const name = cleanName(request.name)
   if (!name) return { ok: false, reason: 'name_needed' }

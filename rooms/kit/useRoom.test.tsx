@@ -232,3 +232,85 @@ describe('useRoom', () => {
     }
   })
 })
+
+// ─── Rejoin (0.9.0, F95) ────────────────────────────────────────────
+
+const playing: RoomState = { ...room, phase: 'playing' }
+const lastRoom = () => JSON.parse(localStorage.getItem('rooms:last-room') ?? 'null')
+
+describe('useRoom: rejoin', () => {
+  it('remembers the room once it arrives (with its phase), and forgets it when the game is over', () => {
+    renderHook(() => useRoom('BAKU', { name: 'Ann', create: true }))
+    const socket = sockets[0]
+    socket.open()
+    expect(lastRoom()).toBeNull() // not before the server says we're in
+    socket.receive({ type: 'room', room, you: 'seat-1' })
+    expect(lastRoom()).toMatchObject({ code: 'BAKU', phase: 'lobby' })
+    socket.receive({ type: 'room', room: playing, you: 'seat-1' })
+    expect(lastRoom()).toMatchObject({ code: 'BAKU', phase: 'playing' })
+    socket.receive({ type: 'room', room: { ...room, phase: 'over' }, you: 'seat-1' })
+    expect(lastRoom()).toBeNull()
+  })
+
+  it('leave() forgets it (no Rejoin after leaving on purpose); unmounting keeps it (closing the tab)', () => {
+    const first = renderHook(() => useRoom('BAKU', { name: 'Ann', create: true }))
+    sockets[0].open()
+    sockets[0].receive({ type: 'room', room: playing, you: 'seat-1' })
+    first.unmount()
+    expect(lastRoom()).toMatchObject({ code: 'BAKU' })
+    const second = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false }))
+    sockets[1].open()
+    sockets[1].receive({ type: 'room', room: playing, you: 'seat-1' })
+    act(() => second.result.current.leave())
+    expect(lastRoom()).toBeNull()
+  })
+
+  it('kicked / room closed / no room → forgotten; "another tab has your seat" → kept (that tab is still in)', () => {
+    for (const reason of ['kicked', 'room_closed', 'no_room', 'connected_elsewhere'] as const) {
+      localStorage.clear()
+      sockets.length = 0
+      const { unmount } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false }))
+      sockets[0].open()
+      sockets[0].receive({ type: 'room', room: playing, you: 'seat-1' })
+      sockets[0].receive({ type: 'closed', reason, message: '' })
+      if (reason === 'connected_elsewhere') expect(lastRoom()).toMatchObject({ code: 'BAKU' })
+      else expect(lastRoom()).toBeNull()
+      unmount()
+    }
+  })
+
+  it('a rejoin never creates (even with create: true) and asks for its own seat only', () => {
+    renderHook(() => useRoom('BAKU', { name: 'Ann', create: true, rejoin: true }))
+    const socket = sockets[0]
+    socket.open()
+    expect(socket.sent[0]).toMatchObject({ type: 'join', create: false, rejoin: true })
+    socket.receive({ type: 'room', room: playing, you: 'seat-1' })
+    socket.drop()
+    socket.open()
+    // once in, a reconnect is just a reconnect
+    expect(socket.sent.at(-1)).toEqual({ type: 'join', name: 'Ann', persistentId: expect.any(String), create: false })
+  })
+
+  it('the room is gone → matchEnded ("That match has ended"), not a join error; a plain join to a wrong code is not "ended"', () => {
+    const rejoin = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false, rejoin: true }))
+    sockets[0].open()
+    sockets[0].receive({ type: 'closed', reason: 'no_room', message: 'No room.' })
+    expect(rejoin.result.current.status).toBe('closed')
+    expect(rejoin.result.current.matchEnded).toBe(true)
+    const join = renderHook(() => useRoom('MOTE', { name: 'Ann', create: false }))
+    sockets[1].open()
+    sockets[1].receive({ type: 'closed', reason: 'no_room', message: 'No room.' })
+    expect(join.result.current.matchEnded).toBe(false)
+  })
+
+  it('back in → cameBack says how many turns the bot played, until cleared', () => {
+    const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false, rejoin: true }))
+    sockets[0].open()
+    sockets[0].receive({ type: 'room', room: playing, you: 'seat-1' })
+    expect(result.current.cameBack).toBeNull()
+    sockets[0].receive({ type: 'back', botTurns: 3 })
+    expect(result.current.cameBack).toEqual({ botTurns: 3 })
+    act(() => result.current.clearCameBack())
+    expect(result.current.cameBack).toBeNull()
+  })
+})
