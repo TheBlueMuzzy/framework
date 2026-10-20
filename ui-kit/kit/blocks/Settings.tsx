@@ -109,6 +109,9 @@ type SettingsProps = {
   onChange?: (values: SettingsValues, changedId: string) => void
   onAction?: (id: string) => void // button and destructive rows
   info?: Record<string, string> // text for info rows, e.g. { version: '1.2.0' }
+  // 0.24.0: the game's version ("vX.Y.Z.B" — the version module's versionLabel), one quiet line at the bottom of every
+  // tab, so a game needs no About tab. An info row with id "version" shows it too, unless info gives its own.
+  version?: string
   onBack?: () => void
   storageKey?: string // the browser save slot; each game gets its own by default (see settingsStorageKey)
   load?: () => SettingsValues | null; save?: (values: SettingsValues) => void // or the game's own saving
@@ -117,9 +120,10 @@ type SettingsProps = {
   hide?: string[] // row ids to leave out right now, e.g. in-game-only rows when opened from the main menu
 }
 
-export function Settings({ schema = defaultSchema, onChange, onAction, info = {}, onBack = () => screens.pop(),
+export function Settings({ schema = defaultSchema, onChange, onAction, info: infoText = {}, version, onBack = () => screens.pop(),
   storageKey = settingsStorageKey(), load = () => loadFromBrowser(storageKey), save = (values) => saveToBrowser(storageKey, values), words, labels = {}, hide = [] }: SettingsProps) {
   const w = { ...settingsWords, ...words }
+  const info: Record<string, string> = version ? { version, ...infoText } : infoText
   const [values, setValues] = useState(() => withSaved(schema, load()))
   const tabs = schema.tabs
     .map((tab) => ({ ...tab, rows: visibleRows(tab.rows, hide) }))
@@ -213,6 +217,8 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info = {}
             })}
           </div>
         )}
+        {/* The version (0.24.0): below the pages, so it's in the same spot on every tab and never scrolls away */}
+        {version && <Row justify="center" className="kit-settings-version"><Text kind="caption">{version}</Text></Row>}
       </Panel>
     </Screen>
   )

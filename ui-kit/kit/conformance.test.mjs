@@ -230,6 +230,10 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     expect(fileFeedsInfo('<Settings schema={s} info={{ version: `v${file.version}` }} />', 'version')).toBe(true)
     expect(fileFeedsInfo('const info = { build, version }', 'version')).toBe(true)
     expect(fileFeedsInfo('<Settings info={{ build: b }} />', 'version')).toBe(false)
+    // 0.24.0: the version prop fills the version row too — only on Settings, only for "version"
+    expect(fileFeedsInfo('<Settings schema={s} onChange={(v) => apply(v)} version={versionLabel} />', 'version')).toBe(true)
+    expect(fileFeedsInfo('<MainMenu version={versionLabel} />', 'version')).toBe(false)
+    expect(fileFeedsInfo('<Settings version={versionLabel} />', 'build')).toBe(false)
   })
   it('skips rows that are switched off ("on": false)', () => {
     const schema = tab([{ id: 'difficulty', type: 'selector', label: 'Difficulty', on: false }, { id: 'tips', type: 'toggle', label: 'Tips' }])

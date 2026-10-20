@@ -303,7 +303,10 @@ export function fileReadsRow(text, id) {
 /** Does this file give an info row its text? <Settings info={{ version: … }} /> (or an info: { … } object passed on).
  *  Stricter than fileReadsRow: ids like "version" show up all over a game's code for other reasons. */
 export function fileFeedsInfo(text, id) {
-  return new RegExp(`\\binfo\\s*[=:]\\s*\\{\\{?[^}]*?(?<![\\w$.])${escapeRe(id)}(?![\\w$])`).test(stripComments(text))
+  const code = stripComments(text)
+  // 0.24.0: <Settings version={versionLabel} …> fills the "version" row too (and the line at the bottom of every tab)
+  if (id === 'version' && /<Settings\b(?:=>|[^<>])*?\sversion\s*=\s*[{"']/.test(code)) return true
+  return new RegExp(`\\binfo\\s*[=:]\\s*\\{\\{?[^}]*?(?<![\\w$.])${escapeRe(id)}(?![\\w$])`).test(code)
 }
 
 /** Which rows nothing reads → { dead: [rows], placeholder: [rows], read, kit } (code = [{ path, text }]). */
@@ -334,7 +337,7 @@ export function settingsProblems(schema, code) {
 function wireHint(row) {
   if (VALUE_TYPES.includes(row.type)) return `read values.${row.id} in the Settings onChange (and loadSettings(…) at start-up)`
   if (row.type === 'button' || row.type === 'destructive') return `handle it in the Settings onAction: if (id === '${row.id}') …`
-  if (row.type === 'info') return `give its text: <Settings info={{ ${row.id}: … }} />`
+  if (row.type === 'info') return row.id === 'version' ? 'give it the version: <Settings version={versionLabel} /> (the version module)' : `give its text: <Settings info={{ ${row.id}: … }} />`
   return 'read its id where it should act'
 }
 

@@ -197,6 +197,25 @@ describe('Settings', () => {
     expect(onBack).toHaveBeenCalled()
   })
 
+  it('version (0.24.0): one line at the bottom, the same on every tab, outside the scrolling pages', () => {
+    const { container } = render(<Settings schema={schema()} version="v0.11.0.4" />)
+    const lines = () => [...container.querySelectorAll('.kit-settings-version')]
+    expect(lines().map((l) => l.textContent)).toEqual(['v0.11.0.4'])
+    expect(lines()[0].closest('.kit-settings-pages')).toBe(null)
+    fireEvent.click(screen.getByRole('tab', { name: 'About' }))
+    expect(lines().map((l) => l.textContent)).toEqual(['v0.11.0.4'])
+  })
+
+  it('no version → no line; info.version still fills an info row, and version fills it when info doesn\'t', () => {
+    const list = (): SettingsSchema => ({ tabs: [{ id: 'about', label: 'About', rows: [{ id: 'version', type: 'info', label: 'Version' }] }] })
+    const { container, unmount } = render(<Settings schema={list()} info={{ version: 'v1.2.3' }} />)
+    expect(container.querySelector('.kit-settings-version')).toBe(null)
+    expect(screen.getByText('v1.2.3')).toBeTruthy()
+    unmount()
+    render(<Settings schema={list()} version="v0.11.0.4" />)
+    expect(screen.getAllByText('v0.11.0.4')).toHaveLength(2) // the row + the bottom line
+  })
+
   it('text size and reduce motion drive the whole kit', () => {
     const list: SettingsSchema = { tabs: [{ id: 'a11y', label: 'Accessibility', rows: [
       { id: 'reduceMotion', type: 'toggle', label: 'Reduce motion', default: false },
