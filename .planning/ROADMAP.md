@@ -203,10 +203,11 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - ✅ F94 🧱 Saves: seed + move log — a run saved as its seed + moves and rebuilt by replaying them; gives replays and daily challenges; needs rules with no hidden randomness (research layer 3) — could · needs: F86 · sprint 20
 - ✅ F95 🧱 Saves: online rejoin — room id + seat token kept so a player who closed the tab gets back into the match, with the rooms kit (research layer 4) — should · needs: F86 · sprint 18
 - ✅ F96 🧱 Saves: cloud via link code — a short code copies the save to another device, on our own Cloudflare (KV/D1), no accounts; progress merged by each field's rule (F86), offline first; privacy note + delete my data (research layer 5) — should · needs: F86 · sprint 19
-- 🔨 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F86 · sprint 21
+- 💤 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
 - ✅ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96 · sprint 20
-- 🔨 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F86 · sprint 21
+- 💤 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
 - ✅ F100 🧱 Rooms: a match waits until it ends — the room's seats + game state kept in the Durable Object's storage, so a player can rejoin hours later and a server restart doesn't lose the match (Muzzy 2026-10-20: "until the match ends") — should · needs: F95 · sprint 19
+- 🔨 F101 🧱 Saves: ready for any platform — one storage switch for the whole kit, saves opened from a slow (async) storage at start-up then read instantly, writes in the background and forced out on hide/quit, the save format written down for any language (FORMAT.md); the seams F97 / F99 plug into later — should · needs: F86 · sprint 21
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]
@@ -225,10 +226,11 @@ flowchart LR
   F86 --> F94[F94 Seed + move log]
   F86 --> F95[F95 Online rejoin]
   F86 --> F96[F96 Link-code cloud]
-  F86 --> F97[F97 App stores + Steam]
+  F86 --> F101[F101 Ready for any platform]
+  F101 --> F97[F97 App stores + Steam]
   F94 --> F98[F98 Checked leaderboards]
   F96 --> F98
-  F86 --> F99[F99 Unity port]
+  F101 --> F99[F99 Unity port]
   F95 --> F100[F100 Rooms wait until the end]
 ```
 
