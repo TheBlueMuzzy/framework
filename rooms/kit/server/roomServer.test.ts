@@ -77,6 +77,13 @@ const countToTen: GameRules<State, { secretBase: number }, { add: number }, View
     seatChanges.push(`${seat.name}:${change}`)
     return state
   },
+  // Loaded back after a restart (0.10.0): the turn clock goes on for what was left
+  onRestore(state, room, timersEndAt) {
+    const seatId = state.order[state.turn]
+    room.onTheClock(state.total >= 10 ? [] : [seatId])
+    if (timersEndAt.turn !== undefined) room.timers.start('turn', Math.max(0, timersEndAt.turn - Date.now()), () => room.timedOut(seatId))
+    return state
+  },
 }
 
 // Whose turn it is goes on the room's idle clock; the game's own turn timer running out hands the seat to a bot.
@@ -568,5 +575,201 @@ describe('RoomServer: rejoin after closing the tab (0.9.0, F95)', () => {
     join('tab-cat', 'Cat', CAT, true) // someone new makes a room with the same code
     expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
     expect(seats().map((s) => s.name)).toEqual(['Cat'])
+  })
+})
+
+describe('RoomServer: a match waits until it ends — kept in storage (0.10.0, F100)', () => {
+  /** A host with storage, like party/worker.ts: keeps the last thing saved, the alarm time, and counts the writes. */
+  class StoredParty extends FakeParty {
+    stored: string | null = null
+    wake: number | null = null
+    writes = 0
+    saveRoom(savedRoom: string | null, wakeUpAt: number | null) {
+      this.stored = savedRoom
+      this.wake = wakeUpAt
+      this.writes += 1
+    }
+  }
+  const SETTINGS = { minSeats: 2, maxSeats: 3, botTakesOverAfterMs: 60_000, keepEmptyRoomMs: 60_000, idleWarnAfterMs: 30_000, idleTakeoverAfterMs: 60_000, keepMatchDays: 1 }
+  const DAY = 86_400_000
+  let stored: StoredParty
+  /** Saves happen a moment after a change (all of one go = one write): let them. */
+  const settle = () => Promise.resolve()
+  const rejoin = (tabId: string, name: string, persistentId: string) => {
+    const connection = connect(tabId)
+    send(connection, { type: 'join', name, persistentId, create: false, rejoin: true })
+    return connection
+  }
+  /** The server stops and starts again: a new copy of the room, loaded from what storage held. */
+  function restartServer() {
+    const kept = stored.stored
+    stored = new StoredParty('BAKU')
+    stored.stored = kept
+    party = stored
+    server = new RoomServer(party, countToTen, SETTINGS)
+    return server.restore(kept)
+  }
+
+  beforeEach(() => {
+    stored = new StoredParty('BAKU')
+    party = stored
+    server = new RoomServer(party, countToTen, SETTINGS)
+  })
+
+  it('saved after each change, once per go — never for a message that changes nothing; the lobby keeps nothing', async () => {
+    const ann = join('tab-ann', 'Ann', ANN, true)
+    const bob = join('tab-bob', 'Bob', BOB)
+    await settle()
+    expect(stored.writes).toBe(0) // (the lobby isn't kept)
+    send(bob, { type: 'ready', ready: true })
+    send(ann, { type: 'start', options: { secretBase: 100 } })
+    await settle()
+    expect(stored.writes).toBe(1)
+    expect(JSON.parse(stored.stored!)).toMatchObject({ data: { phase: 'playing' }, game: { total: 0 } })
+    send(ann, { type: 'active' }) // a tap
+    send(ann, { type: 'action', action: { look: true } }) // "show me again": the same state
+    await settle()
+    expect(stored.writes).toBe(1)
+    send(ann, { type: 'action', action: { add: 2 } })
+    await settle()
+    expect(stored.writes).toBe(2)
+    expect(JSON.parse(stored.stored!).game.total).toBe(2)
+  })
+
+  it('pack → unpack: a restart mid-match loses nothing — same seats, same turn, and the turn clock goes on from where it was', async () => {
+    const { ann } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn: his 90 s turn clock starts
+    const turnEnds = server.timers.endTimes().turn
+    vi.advanceTimersByTime(20_000)
+    await settle()
+    const before = server.packRoom()!
+
+    expect(restartServer()).toBe(true)
+    expect(server.game).toEqual(before.game)
+    expect(seats().map((s) => [s.id, s.name])).toEqual([['seat-1', 'Ann'], ['seat-2', 'Bob']])
+    expect(seats().every((s) => !s.connected)).toBe(true) // (their connections died with the old server)
+    expect(server.timers.endTimes().turn).toBe(turnEnds) // the same end time…
+    expect(server.timers.msLeft('turn')).toBe(70_000) // …so 70 s left, not a fresh 90
+
+    const bob = rejoin('tab-bob-2', 'Bob', BOB)
+    expect(bob.last('room')?.you).toBe('seat-2')
+    expect(bob.last('view')?.view).toEqual({ total: 1, whoseTurn: 'seat-2', mySecret: 101 })
+    expect(rejoin('tab-ann-2', 'Ann', ANN).last('room')?.you).toBe('seat-1')
+    expect(seatNamed('Bob').isHost).toBe(true) // (back first: the usual host rule)
+  })
+
+  it('bot-turn counts survive a restart ("a bot played 1 turn for you")', async () => {
+    const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // Bob's turn
+    drop(bob)
+    vi.advanceTimersByTime(60_000) // a bot takes his seat mid-turn: 1 turn
+    await settle()
+    restartServer()
+    expect(rejoin('tab-bob-2', 'Bob', BOB).last('back')).toEqual({ type: 'back', botTurns: 1 })
+  })
+
+  it('a player away when the server stopped still gets the bot at the right time (the away timer comes back by name)', async () => {
+    const { bob } = startGame()
+    drop(bob)
+    vi.advanceTimersByTime(40_000)
+    await settle()
+    restartServer()
+    vi.advanceTimersByTime(19_999)
+    expect(seatNamed('Bob').kind).toBe('human')
+    vi.advanceTimersByTime(1)
+    expect(seatNamed('Bob').kind).toBe('bot')
+  })
+
+  it('everyone gone: the saved match waits keepMatchDays (not keepEmptyRoomMs); no move for that long → it ends, storage wiped, a rejoin hears no_room', async () => {
+    const { ann, bob } = startGame()
+    drop(ann)
+    drop(bob)
+    vi.advanceTimersByTime(12 * 60 * 60_000) // half a day
+    await settle()
+    expect(server.game).not.toBeNull()
+    expect(stored.stored).not.toBeNull()
+    vi.advanceTimersByTime(12 * 60 * 60_000) // a whole day (this test's keepMatchDays: 1)
+    await settle()
+    expect(server.game).toBeNull()
+    expect(stored.stored).toBeNull()
+    expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
+  })
+
+  it('a move starts the keepMatchDays wait again; the storage alarm is set for the earliest timer', async () => {
+    const { ann } = startGame()
+    vi.advanceTimersByTime(DAY - 1000)
+    send(ann, { type: 'action', action: { add: 1 } })
+    vi.advanceTimersByTime(2000)
+    await settle()
+    expect(server.game).not.toBeNull() // (the move gave it another day)
+    expect(stored.wake).toBe(Math.min(...Object.values(JSON.parse(stored.stored!).timersEndAt as Record<string, number>)))
+  })
+
+  it('woken up after keepMatchDays (the alarm, nobody there) → the match has ended: not loaded back, the caller wipes it', async () => {
+    const { ann, bob } = startGame()
+    drop(ann)
+    drop(bob)
+    await settle()
+    vi.setSystemTime(Date.now() + 2 * DAY) // (the server was off all that time)
+    expect(restartServer()).toBe(false)
+    expect(server.game).toBeNull()
+    expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
+  })
+
+  it('woken up by the alarm while the match is still on: what is due runs (a player away too long gets the bot)', async () => {
+    const { bob } = startGame()
+    drop(bob)
+    await settle()
+    vi.setSystemTime(Date.now() + 61_000) // (asleep past Bob's away timer)
+    restartServer()
+    server.wakeUp()
+    expect(seatNamed('Bob').kind).toBe('bot')
+    expect(server.game).not.toBeNull()
+  })
+
+  it('wiped at game over — and kept again for the rematch; wiped back in the lobby', async () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 4; i++) {
+      send(ann, { type: 'action', action: { add: 1 } })
+      send(bob, { type: 'action', action: { add: 2 } })
+    }
+    await settle()
+    expect(server.data.phase).toBe('over')
+    expect(stored.stored).toBeNull()
+    send(ann, { type: 'start', options: { secretBase: 1 } }) // rematch
+    await settle()
+    expect(stored.stored).not.toBeNull()
+    vi.advanceTimersByTime(1000) // (a new second: the flood limit counts per second)
+    for (let i = 0; i < 4; i++) {
+      send(ann, { type: 'action', action: { add: 1 } })
+      send(bob, { type: 'action', action: { add: 2 } })
+    }
+    send(ann, { type: 'back_to_lobby' })
+    await settle()
+    expect(stored.stored).toBeNull()
+  })
+
+  it('nothing usable stored (junk, an older shape, another room code) → the room starts empty', () => {
+    expect(server.restore(undefined)).toBe(false)
+    expect(server.restore('{{{')).toBe(false)
+    const { ann } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } })
+    const elsewhere = new RoomServer(new StoredParty('MOTE'), countToTen, SETTINGS)
+    expect(elsewhere.restore(JSON.stringify(server.packRoom()))).toBe(false)
+    expect(elsewhere.data.seats).toEqual([])
+  })
+
+  it("a state that can't be saved as JSON (a Map): said in the log, kept in memory only, with the old empty-room wait", async () => {
+    const log = vi.spyOn(console, 'log')
+    const withMap = { ...countToTen, onStart: (...args: Parameters<typeof countToTen.onStart>) => ({ ...countToTen.onStart(...args), seen: new Map() }) }
+    server = new RoomServer(party, withMap, SETTINGS)
+    const { ann, bob } = startGame()
+    await settle()
+    expect(stored.stored).toBeNull()
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("this match can't be saved — it lives in memory only: state.seen is a Map"))
+    drop(ann)
+    drop(bob)
+    vi.advanceTimersByTime(60_000) // (this test's keepEmptyRoomMs)
+    expect(server.game).toBeNull()
   })
 })

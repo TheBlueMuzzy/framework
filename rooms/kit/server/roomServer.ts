@@ -11,7 +11,10 @@
 //
 // party/worker.ts (PartyServer on Cloudflare) calls onConnect / onMessage / onClose / onError. This class runs
 // the room (seats.ts has the rules for seats and host) and calls the game's rules (gameRules.ts) for everything
-// about the game itself. One room = one room code. Everything is in memory: if the room is cleared, it's gone.
+// about the game itself. One room = one room code.
+// A match being played is also saved (0.10.0, F100): after each change the room is packed (savedRoom.ts) and handed
+// to party/worker.ts (PartyRoom.saveRoom), which keeps it in the room's Durable Object storage — so a server restart
+// loses nothing and players can come back days later (keepMatchDays). The lobby and a finished game are not kept.
 import { parseClientMessage } from '../protocol'
 import type { ClientMessage, CloseReason, ErrorCode, ServerMessage } from '../protocol'
 import type { GameRules, RoomTools, SeatChange } from './gameRules'
@@ -20,6 +23,8 @@ import {
   newRoom, playedBy, publicRoom, publicSeat, removeSeat, startPlaying, takeBack, whyNotStart,
 } from './seats'
 import type { RoomData, SeatRecord } from './seats'
+import { jsonProblem, readSavedRoom, SAVED_ROOM_VERSION, wakeUpAt } from './savedRoom'
+import type { SavedRoom } from './savedRoom'
 import { readSettings } from './settings'
 import type { RoomSettings } from './settings'
 import { Timers } from './timers'
@@ -35,12 +40,23 @@ export interface PartyConnection {
 export interface PartyRoom {
   id: string
   getConnection(id: string): PartyConnection | undefined
+  /**
+   * Optional (0.10.0): keep the match in storage. `savedRoom` = the packed match (JSON text), or null = wipe it
+   * (game over, back to the lobby, room cleared, the match expired). `wakeUpAt` = when the earliest saved timer ends
+   * (ms since 1970) — set the storage alarm for it — or null for none. Called at most once per change, never for
+   * a message that changed nothing. Without it the room lives in memory only (as before 0.10.0).
+   */
+  saveRoom?(savedRoom: string | null, wakeUpAt: number | null): void
 }
 
 // The room's own timers start with "room:" — the game's timers are everything else.
 const ROOM_TIMER = 'room:'
-const botTakeoverTimer = (seatId: string) => `${ROOM_TIMER}bot-takes-over:${seatId}`
+const BOT_TAKEOVER = `${ROOM_TIMER}bot-takes-over:`
+const botTakeoverTimer = (seatId: string) => `${BOT_TAKEOVER}${seatId}`
 const EMPTY_ROOM_TIMER = `${ROOM_TIMER}empty`
+// A match with no move for keepMatchDays ends (0.10.0)
+const MATCH_EXPIRES_TIMER = `${ROOM_TIMER}match-expires`
+const DAY_MS = 24 * 60 * 60 * 1000
 // A seat on the clock that does nothing: first a warning on their screen, then a bot takes over
 const idleWarnTimer = (seatId: string) => `${ROOM_TIMER}idle-warn:${seatId}`
 const idleTakeoverTimer = (seatId: string) => `${ROOM_TIMER}idle-takeover:${seatId}`
@@ -67,6 +83,12 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   private botTurns = new Map<string, number>()
   /** true while a game callback runs (so update() can't clash with it). */
   private insideGameCode = false
+  /** A save is already on its way for this change (several changes in one go = one write). */
+  private saveComing = false
+  /** What storage holds now (the packed match), null = nothing — so an unchanged room is never written twice. */
+  private lastSaved: string | null = null
+  /** Why this game's state can't be saved (a Map, a Date… — see jsonProblem), or null. Then it lives in memory only. */
+  private cantSave: string | null = null
   private tools: RoomTools<State, Event>
 
   constructor(party: PartyRoom, rules: GameRules<State, Options, Action, View, Event>, settings: Partial<RoomSettings> = {}) {
@@ -149,20 +171,28 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.log(`${seat?.name ?? seatId} dropped out`)
     if (dropOut(this.data, seatId) === 'waiting') {
       // Mid-game: the seat waits. If they stay away too long, a bot takes it (they can still come back).
-      if (this.settings.botTakesOverAfterMs > 0) {
-        this.timers.start(botTakeoverTimer(seatId), this.settings.botTakesOverAfterMs, () => {
-          const stillAway = findSeat(this.data, seatId)
-          if (!stillAway || stillAway.kind !== 'human' || stillAway.connected) return
-          handToBot(this.data, seatId)
-          if (this.onClock.has(seatId)) this.countBotTurn(seatId) // (taken over mid-turn: the bot plays this one)
-          this.log(`a bot took ${stillAway.name}'s seat (away too long)`)
-          this.seatChanged(seatId, 'bot')
-          this.afterSeatsChanged()
-        })
-      }
+      if (this.settings.botTakesOverAfterMs > 0) this.startAwayTimer(seatId, this.settings.botTakesOverAfterMs)
       this.seatChanged(seatId, 'dropped')
     }
     this.afterSeatsChanged()
+  }
+
+  /** A player who's away mid-game: after `ms` a bot takes their seat (they can still come back and take it). */
+  private startAwayTimer(seatId: string, ms: number): void {
+    this.timers.start(botTakeoverTimer(seatId), ms, () => {
+      const stillAway = findSeat(this.data, seatId)
+      if (!stillAway || stillAway.kind !== 'human' || stillAway.connected) return
+      handToBot(this.data, seatId)
+      if (this.onClock.has(seatId)) this.countBotTurn(seatId) // (taken over mid-turn: the bot plays this one)
+      this.log(`a bot took ${stillAway.name}'s seat (away too long)`)
+      this.seatChanged(seatId, 'bot')
+      this.afterSeatsChanged()
+    })
+  }
+
+  /** The storage alarm woke the room: run every timer that's due now. (party/worker.ts onAlarm) */
+  wakeUp(): void {
+    this.timers.runDue()
   }
 
   /** A connection that broke with an error counts as dropped, like a close. */
@@ -262,6 +292,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.botTurns.clear() // (a rematch: last game's count is old news)
     startPlaying(this.data)
     this.game = state
+    this.aMoveWasMade()
     this.afterGameChanged()
     this.sendRoomToEveryone()
   }
@@ -305,6 +336,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.botTurns.clear()
     this.clearIdleClocks()
     this.timers.stopAll() // nothing to wait for in the lobby
+    this.changed() // (the lobby isn't kept: the saved match is wiped)
     this.sendToEveryone({ type: 'view', view: null })
     this.sendRoomToEveryone()
   }
@@ -340,6 +372,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.game = state
     // A move of their own: they're not idle (if the game still waits for them — e.g. the second half of a turn — their clock starts again)
     this.restartIdleClock(seat.id)
+    this.aMoveWasMade()
     this.afterGameChanged()
   }
 
@@ -376,6 +409,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     } finally {
       this.insideGameCode = false
     }
+    this.aMoveWasMade() // (a bot's move or the game's timer counts too)
     this.afterGameChanged()
   }
 
@@ -483,9 +517,13 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.data.phase = 'over'
       this.stopGameTimers()
       this.clearIdleClocks()
+      this.timers.stop(MATCH_EXPIRES_TIMER)
       this.log('game over')
+      // (a finished game isn't kept: if nobody's here — the bots played it out — the room clears after the usual wait)
+      if (this.sockets.size === 0) this.startEmptyRoomTimer()
       this.sendRoomToEveryone()
     }
+    this.changed()
     for (const seatId of this.sockets.keys()) {
       const seat = findSeat(this.data, seatId)
       if (seat) this.sendView(seat)
@@ -516,12 +554,27 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.clearRoom('everyone left the lobby')
       return
     }
-    if (nobodyHere && !this.timers.isRunning(EMPTY_ROOM_TIMER)) {
-      // Mid-game and everyone's gone: wait a little for someone to come back
-      this.timers.start(EMPTY_ROOM_TIMER, this.settings.keepEmptyRoomMs, () => this.clearRoom('nobody came back'))
-    }
-    if (!nobodyHere) this.timers.stop(EMPTY_ROOM_TIMER)
+    // A match being played that's saved waits for its players keepMatchDays (its own timer) — not just a few minutes
+    const matchWaits = this.data.phase === 'playing' && this.party.saveRoom !== undefined && this.cantSave === null
+    if (nobodyHere && !matchWaits && !this.timers.isRunning(EMPTY_ROOM_TIMER)) this.startEmptyRoomTimer()
+    if (!nobodyHere || matchWaits) this.timers.stop(EMPTY_ROOM_TIMER)
+    this.changed()
     this.sendRoomToEveryone()
+  }
+
+  /** Everyone's gone and the room isn't kept: wait a little for someone to come back (keepEmptyRoomMs), then clear it. */
+  private startEmptyRoomTimer(): void {
+    this.timers.start(EMPTY_ROOM_TIMER, this.settings.keepEmptyRoomMs, () => this.clearRoom('nobody came back'))
+  }
+
+  /** A move (a player's, a bot's, the game's timer — not a seat changing hands): the match is kept keepMatchDays from now. */
+  private aMoveWasMade(): void {
+    this.startMatchExpiry(this.settings.keepMatchDays * DAY_MS)
+  }
+
+  /** The match ends if nobody moves for this long (keepMatchDays). */
+  private startMatchExpiry(ms: number): void {
+    this.timers.start(MATCH_EXPIRES_TIMER, ms, () => this.clearRoom(`no move for ${this.settings.keepMatchDays} days (keepMatchDays)`))
   }
 
   /** Start over: no seats, no game, no timers. The code is free again. */
@@ -534,6 +587,118 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.game = null
     this.botTurns.clear()
     this.data = newRoom(this.party.id)
+    this.changed() // (nothing to keep: the saved match is wiped)
+  }
+
+  // ─── Kept in storage (0.10.0, F100) ───────────────────────────────
+  // After each change the match is packed and handed to the host (PartyRoom.saveRoom) — once per change, however
+  // many things changed in it, and only if it really changed: the Workers free plan allows 100,000 rows written a
+  // day (each save = 1 row, and moving the storage alarm = 1 more), so a message that changes nothing writes nothing.
+
+  /** Something changed: save once everything in this go is done (a moment later — a microtask). */
+  private changed(): void {
+    if (!this.party.saveRoom || this.saveComing) return
+    this.saveComing = true
+    queueMicrotask(() => {
+      this.saveComing = false
+      this.saveNow()
+    })
+  }
+
+  private saveNow(): void {
+    const saved = this.packRoom()
+    if (saved) {
+      const problem = jsonProblem(saved.game)
+      if (problem !== this.cantSave) {
+        this.cantSave = problem
+        if (problem) this.log(`this match can't be saved — it lives in memory only: ${problem}`)
+      }
+    }
+    if (!saved || this.cantSave) {
+      // Nothing to keep (the lobby, a finished game, a cleared room — or a state that can't be saved): wipe what's stored
+      if (this.lastSaved === null) return
+      this.lastSaved = null
+      this.party.saveRoom?.(null, null)
+      return
+    }
+    const text = JSON.stringify(saved)
+    if (text === this.lastSaved) return // (nothing that's kept changed)
+    this.lastSaved = text
+    this.party.saveRoom?.(text, wakeUpAt(saved))
+  }
+
+  /** The match as plain JSON — or null when there's nothing to keep (no game being played). Never the live connections. */
+  packRoom(): SavedRoom<State> | null {
+    if (this.data.phase !== 'playing' || this.game === null) return null
+    const timersEndAt: Record<string, number> = {}
+    for (const [name, endsAt] of Object.entries(this.timers.endTimes())) {
+      // The idle clocks and the empty-room wait only run while someone's connected or the room isn't kept: never saved
+      const kept = !name.startsWith(ROOM_TIMER) || name.startsWith(BOT_TAKEOVER) || name === MATCH_EXPIRES_TIMER
+      if (kept) timersEndAt[name] = endsAt
+    }
+    return {
+      version: SAVED_ROOM_VERSION,
+      data: this.data,
+      game: this.game,
+      botTurns: Object.fromEntries(this.botTurns),
+      onClock: [...this.onClock],
+      timersEndAt,
+    }
+  }
+
+  /**
+   * Load a saved match back (what storage held — party/worker.ts onStart). false = nothing usable (missing, broken, an
+   * older shape, another code): the room starts empty and the caller wipes storage. The players' connections died
+   * with the old server: each player still marked "here" is now away (a bot takes over after botTakesOverAfterMs, as
+   * with any drop), and they come back by rejoining. Timers start again by name for what was left — the room's own
+   * here, the game's through rules.onRestore.
+   */
+  restore(raw: unknown): boolean {
+    const saved = readSavedRoom(raw)
+    if (!saved || saved.data.code !== this.party.id) return false
+    // Nobody moved for keepMatchDays while the room slept: that match has ended — it never comes back, not even for a moment
+    const expires = saved.timersEndAt[MATCH_EXPIRES_TIMER]
+    if (expires !== undefined && expires <= Date.now()) {
+      this.log('the saved match ended while the room was asleep (keepMatchDays)')
+      return false
+    }
+    this.data = saved.data
+    this.game = saved.game as State
+    this.botTurns = new Map(Object.entries(saved.botTurns))
+    this.onClock = new Set(saved.onClock)
+    this.lastSaved = JSON.stringify(saved) // (storage holds it — a wipe must reach it)
+
+    const now = Date.now()
+    const gameTimers: Record<string, number> = {}
+    for (const [name, endsAt] of Object.entries(saved.timersEndAt)) {
+      const msLeft = Math.max(0, endsAt - now)
+      if (name.startsWith(BOT_TAKEOVER)) this.startAwayTimer(name.slice(BOT_TAKEOVER.length), msLeft)
+      else if (name === MATCH_EXPIRES_TIMER) this.startMatchExpiry(msLeft)
+      else if (!name.startsWith(ROOM_TIMER)) gameTimers[name] = endsAt
+    }
+    if (!this.timers.isRunning(MATCH_EXPIRES_TIMER)) this.aMoveWasMade()
+    // Anyone still marked "here" lost their connection with the old server: away from now
+    for (const seat of this.data.seats) {
+      if (seat.kind !== 'human' || !seat.connected) continue
+      dropOut(this.data, seat.id)
+      if (this.settings.botTakesOverAfterMs > 0) this.startAwayTimer(seat.id, this.settings.botTakesOverAfterMs)
+    }
+    // The game's own timers (a turn clock, a bot's next move)
+    if (this.rules.onRestore) {
+      try {
+        this.insideGameCode = true
+        this.game = this.rules.onRestore(this.game, this.tools, gameTimers)
+      } catch (error) {
+        this.log(`onRestore failed: ${reasonOf(error)}`)
+      } finally {
+        this.insideGameCode = false
+      }
+    } else if (Object.keys(gameTimers).length > 0) {
+      this.log(`the game had timers running (${Object.keys(gameTimers).join(', ')}) but its rules have no onRestore — they're gone`)
+    }
+    this.log(`match loaded from storage (${this.data.seats.length} seats)`)
+    this.changed()
+    return true
   }
 
   // ─── Which seat is this connection? ───────────────────────────────

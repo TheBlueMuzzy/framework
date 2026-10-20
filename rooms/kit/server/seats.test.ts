@@ -282,6 +282,15 @@ describe('settings', () => {
     expect(readSettings({ keepEmptyRoomMs: 10_000 }).keepEmptyRoomMs).toBe(10_000)
   })
 
+  it('keepMatchDays: 7 unless the game says otherwise — any positive number; 0, below 0 or junk → 7 (0.10.0)', () => {
+    expect(readSettings({}).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: 30 }).keepMatchDays).toBe(30)
+    expect(readSettings({ keepMatchDays: 0.5 }).keepMatchDays).toBe(0.5)
+    expect(readSettings({ keepMatchDays: 0 }).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: -1 }).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: '30' } as never).keepMatchDays).toBe(7)
+  })
+
   it('game over: a player a bot played for (they idled, still connected) keeps their seat — back to the lobby and in a rematch', () => {
     const room = lobby()
     startPlaying(room)
