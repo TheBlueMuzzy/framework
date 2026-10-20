@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { makeTester } from '../../devkit/kit/check-framework.mjs'
-import { CHECKS, check, openingTags, propValue, versionProps } from './conformance.mjs'
+import { adapterVersion, CHECKS, check, openingTags, propValue, READS_VERSION_FILE, versionProps } from './conformance.mjs'
 
 const dirs = []
 afterEach(() => { while (dirs.length) rmSync(dirs.pop(), { recursive: true, force: true }) })
@@ -95,5 +95,27 @@ describe('reading tags', () => {
     expect(propValue('<MainMenu version="v1" />', 'version')).toBe('"v1"')
     expect(propValue('<MainMenu version={`v${file.version}`} />', 'version')).toBe('`v${file.version}`')
     expect(versionProps([{ path: 'a.tsx', text: '// <MainMenu version={x} />\n<MainMenu />' }], 'MainMenu')).toEqual([{ where: 'a.tsx:2', value: null }])
+  })
+})
+
+describe('review findings (F102)', () => {
+  it('a TypeScript type named like the tag is not a tag: useState<Settings>(), Partial<Settings>', () => {
+    const code = 'const [s, setS] = useState<Settings>(load())\nfunction f(x: Partial<Settings>) {}\nconst a: Array<Settings> = []\nreturn <Settings version={versionLabel} />'
+    expect(versionProps([{ path: 'a.tsx', text: code }], 'Settings')).toEqual([{ where: 'a.tsx:4', value: 'versionLabel' }])
+    expect(openingTags('cond ? <Settings /> : null', 'Settings')).toHaveLength(1)
+    expect(openingTags('{open && <Settings/>}', 'Settings')).toHaveLength(1)
+  })
+
+  it('the adapter passes when ANY version: is versionLabel (an earlier nested one does not hide it)', () => {
+    expect(adapterVersion('meta: { version: 2 },\n  version: versionLabel,\n').ok).toBe(true)
+    expect(adapterVersion('version: `${v.version}.${v.build}`,').ok).toBe(false)
+    expect(adapterVersion('// version: versionLabel\nversion: "0.1",').ok).toBe(false)
+  })
+
+  it('reading version.json is caught on one line, split over lines, and as a bare import', () => {
+    for (const code of ["import v from '../../version.json'", "import {\n  version,\n} from '../version.json'", "import '../version.json'"]) {
+      expect(READS_VERSION_FILE.test(code), code).toBe(true)
+    }
+    expect(READS_VERSION_FILE.test("import { versionLabel } from '../version'")).toBe(false)
   })
 })

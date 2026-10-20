@@ -68,8 +68,10 @@ describe('wiringSteps', () => {
       ...kits,
       'vite.config.ts': "import { versionPlugin } from './src/version/vitePlugin.mjs'\nexport default { plugins: [versionPlugin()] }",
       'src/ui/menus.tsx': "import { versionLabel } from '../version'\nconst a = <MainMenu title=\"G\" version={versionLabel} />\nconst b = <Settings version={versionLabel} />",
-      'src/devkit-game/gAdapter.ts': "import { versionLabel } from '../version'\nexport const g = { version: versionLabel }",
-      'e2e/start.mjs': "import { checkVersion } from '../src/version/e2e.mjs'\nawait checkVersion(page)",
+      'src/devkit-game/tabs.ts': "import { g } from './gAdapter'\nregisterDevKitGame(g)",
+      'src/devkit-game/gAdapter.ts': "import { versionLabel } from '../version'\nexport const g = { meta: { version: 2 }, version: versionLabel }",
+      'src/devkit-game/saveSchema.ts': 'export const schema = { version: 1 }', // not the adapter: never counted (review finding)
+      'tests/start.mjs': "import { checkVersion } from '../src/version/e2e.mjs'\nawait checkVersion(page)", // tests/, like check:framework
     }
     expect(wiringSteps(game(wired)).filter((w) => !w.done)).toEqual([])
     const own = wiringSteps(game({ ...wired, 'src/ui/About.tsx': "import file from '../../version.json'\nexport const v = file.version" })).filter((w) => !w.done)

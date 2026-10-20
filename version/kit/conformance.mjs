@@ -22,7 +22,13 @@ export const CHECKS = {
 }
 
 const VITE_CONFIGS = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs']
-const IMPORT_FILE = /^\s*import\b[^;]*?from\s*['"][^'"]*version\.json['"]/
+/** A line that reads version.json: `… from '../version.json'` (also the last line of an import split over lines) or a
+ *  bare `import '../version.json'`. The installer uses the same pattern. */
+export const READS_VERSION_FILE = /\bfrom\s*['"][^'"]*version\.json['"]|^\s*import\s*['"][^'"]*version\.json['"]/m
+const IMPORT_FILE = READS_VERSION_FILE
+/** Where e2e scripts live and what they're written in — check:framework and the installer look in the same places. */
+export const E2E_DIRS = ['e2e', 'tests', 'scripts']
+export const E2E_EXTS = /\.(m?[jt]sx?)$/
 const FROM_MODULE = /from\s*['"][^'"]*\/version(\/index(\.ts)?)?['"]/
 
 /** Comments out, so a how-to comment never counts as wiring (strings stay). */
@@ -36,6 +42,8 @@ export function openingTags(text, tag) {
   const start = new RegExp(`<${tag}(?![\\w$.])`, 'g')
   let m
   while ((m = start.exec(text))) {
+    // A JSX tag never follows a name, ) or ] — that's a TypeScript type: useState<Settings>(…), Partial<Settings>
+    if (m.index > 0 && /[\w$)\]]/.test(text[m.index - 1])) continue
     let depth = 0
     let i = m.index + m[0].length
     for (; i < text.length; i++) {
@@ -61,6 +69,14 @@ export function propValue(tagText, prop) {
     else if (tagText[i] === '}' && --depth === 0) return tagText.slice(from + 1, i).trim()
   }
   return null
+}
+
+/** The adapter's `version:` values (every one — an earlier nested `meta: { version: 2 }` mustn't hide the real one):
+ *  ok when one of them is versionLabel. */
+export function adapterVersion(text) {
+  // each value up to its , } or line end — so `meta: { version: 2 }, version: versionLabel` on one line is two values
+  const values = [...withoutComments(text).matchAll(/\bversion\s*:\s*([^,}\n]+)/g)].map((m) => m[1].trim())
+  return { ok: values.some((v) => /^versionLabel\b/.test(v)), values }
 }
 
 /** Where a tag is used, and whether each use passes versionLabel as `version`: [{ where, value }]. */
@@ -131,9 +147,9 @@ export async function check(t) {
     const adapter = t.adapterFile()
     if (!t.has('devkit') || !adapter || !t.exists(adapter)) t.skip(name, 'no Dev Kit adapter in this game')
     else {
-      const text = withoutComments(t.read(adapter))
-      const value = text.match(/\bversion\s*:\s*(.+?)\s*,?\s*$/m)?.[1]?.trim() // the whole value, to the end of its line
-      if (value && /^versionLabel\b/.test(value)) t.pass(name, `${adapter}: version: versionLabel`)
+      const { ok } = adapterVersion(t.read(adapter))
+      const value = withoutComments(t.read(adapter)).match(/\bversion\s*:\s*(.+?)\s*,?\s*$/m)?.[1]?.trim() // shown whole, to the end of its line
+      if (ok) t.pass(name, `${adapter}: version: versionLabel`)
       else t.fail(name, [value ? `${adapter}: version: ${value} — not versionLabel, so snapshots and bug files can say something else than the menu.` : `${adapter} has no version.`],
         `${adapter}: import { versionLabel } from '../version'   then   version: versionLabel,`)
     }
@@ -142,7 +158,7 @@ export async function check(t) {
   // 5. an e2e script calls checkVersion
   {
     const name = CHECKS.e2e
-    const scripts = t.files({ dirs: ['e2e', 'tests', 'scripts'], exts: /\.(m?[jt]sx?)$/ })
+    const scripts = t.files({ dirs: E2E_DIRS, exts: E2E_EXTS })
     const callers = scripts.filter((f) => /\bcheckVersion\s*\(/.test(withoutComments(f.text)))
     if (callers.length) t.pass(name, callers.map((f) => f.path).join(', '))
     else t.fail(name, ['No e2e script calls checkVersion(page), so a test can run against a stale build or a cached service worker without saying so.'],

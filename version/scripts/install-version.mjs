@@ -12,7 +12,8 @@ import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { versionProps, withoutComments } from '../kit/conformance.mjs'
+import { adapterFile } from '../../devkit/kit/check-framework.mjs'
+import { adapterVersion, E2E_DIRS, E2E_EXTS, READS_VERSION_FILE, versionProps, withoutComments } from '../kit/conformance.mjs'
 
 const moduleDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const KIT_TARGET = 'src/version'
@@ -63,10 +64,10 @@ export function wiringSteps(gameDir) {
     const uses = versionProps(gameCode, tag)
     return uses.length > 0 && uses.every((u) => /\bversionLabel\b/.test(u.value ?? ''))
   }
-  const adapters = src.filter((f) => f.path.startsWith('src/devkit-game/') && /\bversion\s*:/.test(withoutComments(f.text)))
-  const e2e = listFiles(join(game, 'e2e')).filter((f) => /\.(m?[jt]s)$/.test(f))
+  const adapter = hasDevKit ? adapterFile(game) : null // the one registerDevKitGame names — not every file with a version: key
+  const e2e = E2E_DIRS.flatMap((dir) => listFiles(join(game, dir)).filter((f) => E2E_EXTS.test(f)).map((f) => `${dir}/${f}`))
   const ownReads = [...gameCode, ...src.filter((f) => f.path.startsWith('src/devkit-game/'))]
-    .filter((f) => /^\s*import\b[^;]*?from\s*['"][^'"]*version\.json['"]/m.test(withoutComments(f.text))).map((f) => f.path)
+    .filter((f) => READS_VERSION_FILE.test(withoutComments(f.text))).map((f) => f.path)
   const steps = [
     {
       done: /\bversionPlugin\s*\(/.test(withoutComments(text(config))),
@@ -78,7 +79,7 @@ export function wiringSteps(gameDir) {
       : { done: gameCode.some((f) => /\bversionLabel\b/.test(f.text)), step: 'Show versionLabel (import { versionLabel } from \'../version\') on the main menu and in Settings' },
     ...(hasUiKit ? [{ done: passesLabel('Settings'), step: 'The bottom of every Settings tab: <Settings version={versionLabel} …> (UI kit 0.24.0+; an About → Version row fills itself from it too)' }] : []),
     ...(hasDevKit ? [{
-      done: adapters.length > 0 && adapters.every((f) => /\bversion\s*:\s*versionLabel\b/.test(withoutComments(f.text))),
+      done: !!adapter && adapterVersion(text(adapter)).ok,
       step: 'The Dev Kit adapter (src/devkit-game/<game>Adapter.ts): import { versionLabel } from \'../version\'   then   version: versionLabel,   (snapshots + bug files)',
     }] : []),
     {
@@ -86,7 +87,7 @@ export function wiringSteps(gameDir) {
       step: `Stop reading version.json yourself — use versionLabel instead (one format everywhere): ${ownReads.join(', ')}`,
     },
     {
-      done: e2e.some((f) => /\bcheckVersion\s*\(/.test(withoutComments(text(`e2e/${f}`)))),
+      done: e2e.some((f) => /\bcheckVersion\s*\(/.test(withoutComments(text(f)))),
       step: 'An e2e script: import { checkVersion } from \'../src/version/e2e.mjs\'   then, after page.goto(…):   await checkVersion(page)   (refuses a stale build or a cached service worker)',
     },
   ]
