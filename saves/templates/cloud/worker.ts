@@ -35,7 +35,15 @@ export class SaveCloud {
     this.query('CREATE TABLE IF NOT EXISTS saves (link TEXT PRIMARY KEY, code TEXT NOT NULL, expires_at INTEGER NOT NULL)')
     this.query('CREATE INDEX IF NOT EXISTS saves_by_expiry ON saves (expires_at)')
     this.query('CREATE TABLE IF NOT EXISTS tries (who TEXT NOT NULL, what TEXT NOT NULL, hour INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (who, what, hour))')
+    // The secret that scrambles addresses: made once at random, kept here, never sent anywhere (review F96)
+    this.query('CREATE TABLE IF NOT EXISTS secret (v TEXT NOT NULL)')
+    if (!this.query('SELECT v FROM secret').length) {
+      const random = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, '0')).join('')
+      this.query('INSERT INTO secret (v) VALUES (?)', random)
+    }
+    this.secret = String(this.query('SELECT v FROM secret')[0].v)
   }
+  private secret: string
 
   /** Runs one SQL statement on this object's own SQLite (the ?s are filled from values) → its rows. */
   private query(sql: string, ...values: (string | number)[]): Record<string, unknown>[] {
@@ -48,6 +56,7 @@ export class SaveCloud {
       rows: this.rows(),
       settings,
       address: request.headers.get('CF-Connecting-IP') ?? 'unknown', // Cloudflare always sets it on the live server
+      secret: this.secret,
       keepMs: testSeconds > 0 ? testSeconds * 1000 : undefined,
     })
     await this.wakeForNextTidy()

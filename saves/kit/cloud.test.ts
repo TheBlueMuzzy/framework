@@ -84,6 +84,19 @@ describe('link codes (the game side)', () => {
     expect(linkCodeHere(a.saves, a.cloud)).toBeNull()
   })
 
+  it('A made its own code, then fetches B\'s: A still remembers ITS code, so "Delete my data" reaches it (review F96)', async () => {
+    const server = fakeServer()
+    const a = played(device(server))
+    const b = played(device(server))
+    const mine = await makeLinkCode(a.saves, a.cloud)
+    const theirs = await makeLinkCode(b.saves, b.cloud)
+    if (!mine.ok || !theirs.ok) throw new Error('no codes')
+    await loadLinkCode(theirs.link, a.saves, a.cloud)
+    expect(linkCodeHere(a.saves, a.cloud)?.link).toBe(mine.link)
+    await deleteLinkCode(a.saves, a.cloud)
+    expect(server.rows.saves.size).toBe(1) // A's own is gone; B's stays for B
+  })
+
   it('an expired code fails plainly (and this device stops showing it)', async () => {
     const server = fakeServer()
     const a = played(device(server))

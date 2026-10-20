@@ -139,8 +139,11 @@ export async function loadLinkCode(typed: string, saves: AnySave[], options: Clo
   const answer = await ask('/saves/get', { link }, options)
   if (!answer.ok) return { ok: false, message: message(answer.code) }
   const result = await readSaveCode(String(answer.body.code), saves)
-  // remembered here too, so "Delete my data" works from this device as well
-  if (result.ok) linkMemory(saves, options.storage).save({ link, expiresAt: Number(answer.body.expiresAt) })
+  // remembered here too, so "Delete my data" works from this device as well — but never over this device's OWN live
+  // code: that one would be forgotten and "Delete my data" could no longer reach it (review F96)
+  const memory = linkMemory(saves, options.storage)
+  const own = memory.load()
+  if (result.ok && !(own.link && own.expiresAt > Date.now())) memory.save({ link, expiresAt: Number(answer.body.expiresAt) })
   return result
 }
 

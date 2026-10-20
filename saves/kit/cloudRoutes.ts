@@ -95,6 +95,8 @@ export interface CloudContext {
   settings: CloudConfig
   /** The caller's address (Cloudflare's CF-Connecting-IP header). Only ever kept scrambled, for an hour. */
   address: string
+  /** The worker's own random secret for scrambling addresses (made once, kept in its storage, never sent). */
+  secret?: string
   now?: number
   /** How long a new link code lasts, in ms — normally settings.keepDays. (A test server sets seconds.) */
   keepMs?: number
@@ -128,11 +130,29 @@ async function readJson(request: Request, maxChars: number): Promise<Record<stri
   }
 }
 
-/** An address → a scrambled number (SHA-256, the first 16 hex digits): enough to count tries, never the address. */
-export async function scramble(address: string): Promise<string> {
-  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`saves-cloud:${address}`))
+/** An address → a scrambled number (HMAC-SHA-256 with the worker's own secret, the first 16 hex digits): enough to
+ *  count tries, never the address. With a secret nobody else has, the 4 billion IPv4 addresses can't simply be tried
+ *  one by one to undo it (review F96). */
+export async function scramble(address: string, secret = ''): Promise<string> {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(`saves-cloud:${secret}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const hash = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(addressKey(address)))
   return Array.from(new Uint8Array(hash).slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('')
 }
+
+/** Who to count: an IPv4 address as it is; an IPv6 address by its first half (/64) — one home gets 2^64 of them, so
+ *  counting the full address would let a guesser take a fresh one per guess (review F96). */
+export function addressKey(address: string): string {
+  if (!address.includes(':')) return address
+  const [head, tail = ''] = address.toLowerCase().split('::')
+  const front = head ? head.split(':') : []
+  const back = address.includes('::') ? (tail ? tail.split(':') : []) : []
+  const groups = [...front, ...Array(Math.max(0, 8 - front.length - back.length)).fill('0'), ...back]
+  return `${groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, '')).join(':')}::/64`
+}
+
+/** Wrong link codes the whole server takes in an hour, from everyone — a last stop for a guesser with many addresses. */
+export const SERVER_WRONG_PER_HOUR = 2_000
+const EVERYONE = '*'
 
 /** The same shape as a save code (saveCode.ts) — the cloud only carries save codes, nothing else. */
 const SAVE_CODE_SHAPE = /^[A-Za-z0-9]+-\d+[zj]-[A-Za-z0-9_-]+$/
@@ -147,11 +167,14 @@ export async function handleCloud(request: Request, context: CloudContext): Prom
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: OPEN_CORS })
   if (path === '/health' && request.method === 'GET') return json({ ok: true })
   if (request.method !== 'POST' || !['/saves/link', '/saves/get', '/saves/delete'].includes(path)) return refuse('not-found', 404)
-  const who = await scramble(address)
+  // Everything that waits (the body, the scramble) happens FIRST. From the limit check to the count going up there's no
+  // waiting at all, so a Durable Object can't let 500 requests sent at once all pass the check before any is counted
+  // (review F96).
+  const body = await readJson(request, path === '/saves/link' ? MAX_BODY_CHARS : 1_000)
+  const who = await scramble(address, context.secret)
 
   if (path === '/saves/link') {
     if (rows.count(who, 'upload', hour) >= settings.uploadsPerHour) return refuse('too-many-codes', 429)
-    const body = await readJson(request, MAX_BODY_CHARS)
     if (!body) return refuse('too-big', 413) // (or not JSON at all — the game never sends that)
     const code = body.code
     if (typeof code !== 'string' || !SAVE_CODE_SHAPE.test(code)) return refuse('not-a-save', 400)
@@ -170,12 +193,13 @@ export async function handleCloud(request: Request, context: CloudContext): Prom
 
   // /saves/get and /saves/delete: both need the right link code, so both count wrong tries
   if (rows.count(who, 'wrong', hour) >= settings.wrongTriesPerHour) return refuse('too-many-tries', 429)
-  const body = await readJson(request, 1_000)
+  if (rows.count(EVERYONE, 'wrong', hour) >= SERVER_WRONG_PER_HOUR) return refuse('too-many-tries', 429)
   const link = typeof body?.link === 'string' ? readLinkCode(body.link) : null
   if (!link) return refuse('not-a-link', 400) // can't match anything, so it isn't counted as a guess
   const saved = rows.get(link)
   if (!saved || saved.expiresAt <= now) {
     rows.bump(who, 'wrong', hour)
+    rows.bump(EVERYONE, 'wrong', hour)
     return refuse('not-found', 404)
   }
   if (path === '/saves/delete') {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { handleCloud, LINK_ALPHABET, memoryCloudRows, newLinkCode, readLinkCode, scramble, showLinkCode, type CloudContext } from './cloudRoutes'
+import { addressKey, handleCloud, LINK_ALPHABET, memoryCloudRows, newLinkCode, readLinkCode, scramble, SERVER_WRONG_PER_HOUR, showLinkCode, type CloudContext } from './cloudRoutes'
 import { DEFAULT_SAVES_CONFIG } from './config'
 import { MAX_CODE_CHARS } from './saveCode'
 
@@ -44,6 +44,46 @@ describe('link codes', () => {
     expect(await scramble('203.0.113.7')).toBe(who)
     expect(await scramble('203.0.113.8')).not.toBe(who)
   })
+
+  it('…with the worker\'s own secret, so the hashes can\'t be undone by trying every address (review F96)', async () => {
+    expect(await scramble('203.0.113.7', 'secret-a')).not.toBe(await scramble('203.0.113.7', 'secret-b'))
+    expect(await scramble('203.0.113.7', 'secret-a')).toBe(await scramble('203.0.113.7', 'secret-a'))
+  })
+
+  it('an IPv6 address counts by its first half (/64), however it\'s written (review F96)', () => {
+    expect(addressKey('203.0.113.7')).toBe('203.0.113.7')
+    expect(addressKey('2001:db8:aa:bb:1:2:3:4')).toBe('2001:db8:aa:bb::/64')
+    expect(addressKey('2001:DB8:AA:BB::99')).toBe('2001:db8:aa:bb::/64')
+    expect(addressKey('2001:0db8:00aa:00bb:ffff::')).toBe('2001:db8:aa:bb::/64')
+    expect(addressKey('2001:db8::1')).toBe('2001:db8:0:0::/64')
+  })
+})
+
+describe('the guess limits hold under pressure (review F96)', () => {
+  it('30 wrong guesses sent all at once → no more than wrongTriesPerHour get through', async () => {
+    const { call } = setup()
+    const answers = await Promise.all(Array.from({ length: 30 }, () => call('/saves/get', { link: 'ZZZZ2222' })))
+    expect(answers.filter((a) => a.status === 404)).toHaveLength(DEFAULT_SAVES_CONFIG.cloud.wrongTriesPerHour)
+  })
+
+  it('30 uploads sent all at once → no more than uploadsPerHour codes made', async () => {
+    const { rows, call } = setup({ newLink: newLinkCode })
+    await Promise.all(Array.from({ length: 30 }, () => call('/saves/link', { code: CODE })))
+    expect(rows.saves.size).toBe(DEFAULT_SAVES_CONFIG.cloud.uploadsPerHour)
+  })
+
+  it('a fresh IPv6 address per guess from one home (/64) still hits the limit', async () => {
+    const { call } = setup()
+    const answers: number[] = []
+    for (let i = 0; i < 15; i++) answers.push((await call('/saves/get', { link: 'ZZZZ2222' }, { address: `2001:db8:aa:bb::${i + 1}` })).status)
+    expect(answers.filter((s) => s === 429).length).toBe(15 - DEFAULT_SAVES_CONFIG.cloud.wrongTriesPerHour)
+  })
+
+  it('many different addresses: the whole server stops taking wrong guesses after SERVER_WRONG_PER_HOUR', async () => {
+    const { call } = setup()
+    for (let i = 0; i < SERVER_WRONG_PER_HOUR; i++) await call('/saves/get', { link: 'ZZZZ2222' }, { address: `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}` })
+    expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '198.51.100.250' })).status).toBe(429)
+  }, 30_000)
 })
 
 describe('the cloud routes', () => {
