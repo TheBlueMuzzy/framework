@@ -1,4 +1,4 @@
-# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2)
+# The Saves module — design (framework v0.10, F86 = layers 0 + 1, F93 = layer 2, F96 = layer 5)
 
 Research first: `../research/saves.md` (2026-10-19). Muzzy 2026-10-19, on the first plan that only covered what our three games already did:
 > "sounds like you need to research before you design then" → research → "ok. makes sense" (layers 0 + 1 now, layers 2–8 → F93–F99).
@@ -40,6 +40,24 @@ He also asked about lifetime stats and meta progression → they're the `progres
 - **check:framework:** a `createRun` counts as a save (golden saves per version); "a run cleared at the end never comes back" = the run is named, something calls `<name>.end()`, and the game's save test runs `checkRunEnds` (autosave, backups in place, `end()`, reload → nothing left, no Continue, nothing loads).
 - Proven on a scratch Glyphtender vs the AI (README → Proof F93).
 
+## Layer 5 — link-code cloud (F96, kit 0.3.0)
+The save code, but short enough to type: the player's save code goes to **the game's own Cloudflare** and comes back as **`K7QM-2XRP`** — typed on the other device, the save comes in and is **merged by each field's rule** (best kept, counts added), through the very same `readSaveCode` path as a pasted code (same checks, nothing written unless every save is good).
+
+| Decision | What | Why |
+|---|---|---|
+| **Storage** | ONE named **SQLite Durable Object** (`SaveCloud`, name `"saves"`) in a small worker of the game's own (`cloud/worker.ts`, its own `cloud/wrangler.json` → `<game>-saves.joebrogno.workers.dev`) | KV's free plan allows only ~1,000 writes a day; a SQLite Durable Object allows 100,000 rows written a day (below). One object = one table, no cross-object lookups. A separate worker so a game without rooms needs nothing else, and a rooms deploy never touches saves (and back) |
+| **Code format** | 8 characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (no O/0, no I/1), shown `XXXX-XXXX`; typing is forgiving (spaces, dashes, lower case) | 32⁸ ≈ 1.1 trillion codes — with the guess limit, guessing someone's code is hopeless; no two characters that look alike |
+| **How long** | **7 days** (Muzzy 2026-10-20), then the object's alarm deletes it — `content/saves.json` `cloud.keepDays` (1–30) | Long enough to walk to the other device, short enough that nothing piles up. A fetch never serves an expired code even if the alarm is late |
+| **Fetching doesn't delete it** | The code works until it expires or "Delete my data" | The player may bring it to a THIRD device (phone, tablet, laptop), or retry when the other device's storage was full. What a stranger who saw the code gets is game progress, nothing personal; "Delete my data" ends it at once from either device |
+| **Size cap** | The save code's own limit: 300,000 characters (`MAX_CODE_CHARS`); the object refuses new uploads past 900 MB stored (the free plan's object holds 1 GB) | A real save is a few KB; one row may be 2 MB at most |
+| **Guess limit** | Per address: `cloud.wrongTriesPerHour` (default 10) wrong codes in an hour → every fetch / delete from that address is refused for the rest of the hour ("Too many tries…"); `cloud.uploadsPerHour` (default 20) new codes an hour | Stops guessing and stops one address filling the store. Counted by the HOUR it falls in |
+| **The address** | Kept only as a scrambled number (SHA-256), only for the hour it counts in, then deleted | A player's IP is personal data (GDPR) — this is the least that still counts tries |
+| **Privacy line** | On the Save code screen: "A link code puts a copy of your save (nothing else — no name, no account) on this game's own server (Cloudflare) for 7 days, then it deletes itself. Delete my data removes it now." | research → Privacy: what's stored, where, how long, how to delete |
+| **Offline first** | No network / the server down / timed out (10 s) → one plain sentence, nothing changed on this device | The save on the device is the real one; the cloud is only a carrier |
+| **Where the game finds it** | `cloudAddress(import.meta.env.VITE_SAVES_CLOUD)` — set at build for the live game; unset on localhost / the Wi-Fi = the PC's own `:1998`; unset anywhere else = no cloud, so the Link code part isn't shown | Like the rooms kit's VITE_PARTY_HOST |
+| **The routes** | `kit/cloudRoutes.ts` — plain web Requests in, Responses out, the store passed in (Glyphtender's `wordsRoutes.ts` pattern): tested without Cloudflare. The worker only stores rows and sets alarms | |
+| **Going live** | Muzzy's call (a public server): `npx wrangler deploy -c cloud/wrangler.json` | |
+
 ## Decisions
 - **The record:** `{ save: <key>, version, savedAt, data, counts? }` — `save` marks it as ours and which save it is (a record pasted under the wrong key is refused). Kept as JSON text in localStorage (5 MiB is plenty for layer 0; IndexedDB later only if a game needs more).
 - **Backups beside the save, not inside it** (`<key>~1`, `<key>~2`): each copy is a whole record on its own, so any one can be broken without the others.
@@ -56,4 +74,4 @@ Goops progress, Glyphtender New Game choices (the 2-letter marker → version 2 
 Playwright switches Chrome's storage partitioning off by default (`--disable-features=…ThirdPartyStoragePartitioning…`); the frame-vs-own-site check runs a browser with it back on.
 
 ## Later (F94–F99)
-Seed + action log (3) · online rejoin with the rooms kit (4) · link-code cloud on our own Cloudflare with the field merge (5) · Capacitor / Electron / Steam backends behind the same API (6) · accounts + checked leaderboards (7) · the Unity port of the same format (8).
+Seed + action log (3) · online rejoin with the rooms kit (4) · Capacitor / Electron / Steam backends behind the same API (6) · accounts + checked leaderboards (7) · the Unity port of the same format (8).
