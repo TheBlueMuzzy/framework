@@ -115,6 +115,13 @@ describe('Saves checks — a run (createRun)', () => {
     expect(results[2].detail).toBe('glyphtender:run: matchRun.end()')
   })
 
+  it('an end() only in a comment ("// TODO matchRun.end()") doesn\'t count (review F93)', async () => {
+    const todo = { path: 'src/game/flow.ts', text: 'function gameOver() {\n  // TODO matchRun.end()\n  /* matchRun.end() */\n}\n' }
+    const { t, results } = tester({ code: [runFile, todo], goldens, saveTestText: listed })
+    await check(t)
+    expect(results[2].ok).toBe(false)
+  })
+
   it('a run nothing ends fails: it would come back as Continue after the game was over', async () => {
     const { t, results } = tester({ code: [runFile], goldens, saveTestText: listed })
     await check(t)

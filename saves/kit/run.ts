@@ -77,6 +77,8 @@ export interface Run<T> {
   end(): void
   /** The save underneath (the test kit and save codes use it). */
   readonly save: Save<T>
+  /** Be told whenever the run is saved, wiped or ended (the menu's Continue line). Returns "stop telling me". */
+  subscribe(tell: () => void): () => void
   /** The same run, kept somewhere else and deaf to the page (tests: memoryStorage()). */
   withStorage(storage: StorageLike | null): Run<T>
 }
@@ -95,9 +97,21 @@ export function createRun<T>(options: RunOptions<T>): Run<T> {
   // The last break-point save that the browser refused (full storage…): tried again when the tab hides.
   let unsaved: T | null = null
 
+  // Who wants to know the run changed (the menu's Continue line) — so a menu that stays mounted is never stale.
+  const listeners = new Set<() => void>()
+  const changed = () => { for (const tell of listeners) tell() }
+
   function write(data: T): SaveResult {
-    const result = save.save(data)
+    let result = save.save(data)
+    if (!result.ok && result.reason === 'newer') {
+      // A newer build's old run is still there (the player started a new game instead of pressing Continue): the core
+      // never writes over a newer save, so this run would never be saved. A newer run isn't worth keeping — wipe it,
+      // write again (review F93).
+      save.clear({ evenNewer: true })
+      result = save.save(data)
+    }
     unsaved = result.ok ? null : data
+    if (result.ok) changed()
     return result
   }
 
@@ -146,6 +160,7 @@ export function createRun<T>(options: RunOptions<T>): Run<T> {
       // Unlike progress, a run isn't worth keeping for later — and while a newer copy sits there, this build refuses
       // to write the key at all (saves.ts never writes over a newer save), so no new run could ever be saved.
       save.clear({ evenNewer: true })
+      changed()
       return { ok: false, reason: found.state, message: RUN_WORDS.cantContinue }
     }
     const data = save.load()
@@ -158,10 +173,15 @@ export function createRun<T>(options: RunOptions<T>): Run<T> {
     unsaved = null
     listen(false)
     save.clear({ evenNewer: true }) // backups too: a finished run must never come back (see the top)
+    changed()
   }
 
   return {
     key: options.key, save, pending, resume, end,
+    subscribe(tell) {
+      listeners.add(tell)
+      return () => { listeners.delete(tell) }
+    },
     withStorage: (other) => createRun({ ...options, storage: other, page: null }),
     autosave(data) {
       start()

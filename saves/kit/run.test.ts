@@ -132,12 +132,23 @@ describe('createRun — a run that can\'t be continued', () => {
     expect(run.pending()).toBeNull()
   })
 
-  it('...and once wiped, this build can save new runs again (a newer copy would block every write)', () => {
+  it('a New game while a newer build\'s run waits (Continue never pressed): the new run still saves — the old one goes (review F93)', () => {
     const storage = memoryStorage({ 'test:run': newerRun })
     const run = matchRun(storage)
-    expect(run.autosave({ turn: 1, scores: [0, 0] })).toMatchObject({ ok: false, reason: 'newer' })
-    run.resume()
     expect(run.autosave({ turn: 1, scores: [0, 0] })).toEqual({ ok: true })
+    expect(matchRun(storage).resume()).toEqual({ ok: true, data: { turn: 1, scores: [0, 0] } })
+  })
+
+  it('subscribe: told on every save, wipe and end — so a menu that stays mounted is never stale (review F93)', () => {
+    const run = matchRun()
+    let told = 0
+    const stop = run.subscribe(() => { told++ })
+    run.autosave({ turn: 1, scores: [0, 0] })
+    run.end()
+    expect(told).toBe(2)
+    stop()
+    run.autosave({ turn: 2, scores: [0, 0] })
+    expect(told).toBe(2)
   })
 
   it('end() wipes a newer build\'s run too (New game while one is waiting)', () => {

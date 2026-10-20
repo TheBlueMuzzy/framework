@@ -24,8 +24,8 @@ export const goldenPrefix = (key) => key.replace(/[^A-Za-z0-9._-]/g, '_') + '-v'
 export function findSaves(files) {
   const found = []
   for (const { path, text: original } of files) {
-    // comments out (kept as blank space, so line numbers stay right): a createSave named in a comment isn't a save
-    const text = original.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' ')).replace(/^(\s*)\/\/.*$/gm, '$1')
+    // a createSave named in a comment isn't a save
+    const text = withoutComments(original)
     const call = /\bcreate(Save|Run)\s*(<[^>]*>)?\s*\(/g
     let match
     while ((match = call.exec(text))) {
@@ -49,6 +49,11 @@ export function findSaves(files) {
 }
 
 /** The runs whose end() nothing in the game's code calls → the problems (a run never ended comes back as Continue). */
+/** Code with its comments blanked out (kept as spaces, so line numbers stay right). */
+function withoutComments(text) {
+  return text.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' ')).replace(/^(\s*)\/\/.*$/gm, '$1')
+}
+
 export function runsNeverEnded(runs, files) {
   const problems = []
   for (const run of runs) {
@@ -57,7 +62,8 @@ export function runsNeverEnded(runs, files) {
       continue
     }
     const ends = new RegExp(`\\b${run.name.replace(/\$/g, '\\$')}\\s*\\??\\.\\s*end\\s*\\(`)
-    if (!files.some((f) => ends.test(f.text))) problems.push(`"${run.key}" (${run.where}): nothing calls ${run.name}.end() — a game that's won, lost or abandoned would come back as Continue`)
+    // (a "// TODO matchRun.end()" isn't a call — review F93)
+    if (!files.some((f) => ends.test(withoutComments(f.text)))) problems.push(`"${run.key}" (${run.where}): nothing calls ${run.name}.end() — a game that's won, lost or abandoned would come back as Continue`)
   }
   return problems
 }
