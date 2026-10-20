@@ -16,4 +16,20 @@ export const SAVE_PANEL_WORDS = {
   askMessage: 'Progress is combined with what\'s on this device (nothing is lost); other saved choices are replaced. The save on this device is kept as a backup.',
   loaded: 'Save loaded.',
   close: 'Close',
+  // Link code (F96) — only shown when the game has a cloud (the panel's `cloud` prop). The server's own sentences
+  // (offline, wrong code, too many tries, the privacy line…) are CLOUD_WORDS in ../cloud.ts.
+  linkTitle: 'Link code',
+  linkIntro: 'No copy and paste between your devices? Make a short link code here and type it on the other one.',
+  yourLink: 'Your link code',
+  noLinkYet: 'No link code yet',
+  linkLasts: (days: number) => `A link code works for ${days} days.`,
+  makeLink: 'Make a link code',
+  copyLink: 'Copy link code',
+  linkCopied: 'Link code copied.',
+  typeLink: 'Type a link code',
+  getLink: 'Get my save',
+  deleteData: 'Delete my data',
+  deleteTitle: 'Delete your data?',
+  deleteMessage: 'This deletes your link code and the copy of your save on the game\'s server, now. The save on this device stays.',
+  delete: 'Delete',
 }
