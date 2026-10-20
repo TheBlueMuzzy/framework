@@ -215,6 +215,35 @@ function kitVersion() {
   return { version, commit }
 }
 
+// --- worker files that fell behind the kit -------------------------------------------------------------------------
+// cloud/ and board/worker.ts are copied ONCE (the game fills them in), but they call the kit, which keeps changing —
+// a copy from an older template can stop compiling or miss a fix (F101 proof: a board/worker.ts from before the F98
+// review lacked `attempts`). Each template says its version; a game's copy with an older one (or none) is named here
+// with what changed since. Bump the template's "Template version" line AND add a line here whenever a template changes.
+export const TEMPLATE_CHANGES = {
+  [CLOUD_WORKER]: {
+    2: 'limits hold for requests sent at once, IPv6 counted by /64, a server-wide cap, a keyed address hash (F96 review)',
+  },
+  [BOARD_WORKER]: {
+    2: 'a sent game is checked a few moves per alarm (the alarm has the same 10 ms CPU limit as a request) — progress + state columns',
+    3: 'a day\'s work budget, a stuck game dropped after 3 saved tries (the attempts column + attemptWaiting), replay from the server\'s own daily setup (F98 review)',
+  },
+}
+
+const templateVersion = (text) => Number(/Template version: (\d+)/.exec(text)?.[1] ?? 1)
+
+/** The game's worker copies made from an older template → [{ file, from, to, changes: [lines] }]. */
+export function staleWorkers(gameDir) {
+  return Object.entries(TEMPLATE_CHANGES).flatMap(([file, notes]) => {
+    const mine = readText(join(gameDir, file))
+    if (!mine) return []
+    const from = templateVersion(mine)
+    const to = templateVersion(readText(join(savesDir, 'templates', file)))
+    if (from >= to) return []
+    return [{ file, from, to, changes: Object.entries(notes).filter(([v]) => Number(v) > from).map(([v, note]) => `${v}: ${note}`) }]
+  })
+}
+
 export function installSaves(gameDir, { dryRun = false, cloud = false, board = false, log = console.log } = {}) {
   const game = resolve(gameDir)
   const target = join(game, KIT_TARGET)
@@ -242,7 +271,12 @@ export function installSaves(gameDir, { dryRun = false, cloud = false, board = f
   if (!changed.length && !removed.length) log('  already up to date')
   if (!hasUiKit) log(`  skipped ${UI_FOLDER} (the Save code screen — the game has no UI kit; use saveCode.ts directly)`)
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
-  if (dryRun) return { changed, removed, starter }
+  const stale = staleWorkers(game)
+  for (const s of stale) {
+    log(`  ⚠ ${s.file} was made from an older template (version ${s.from}; the kit's is ${s.to}) — bring these changes over from framework/saves/templates/${s.file} (it may not compile until you do):`)
+    s.changes.forEach((c) => log(`      ${c}`))
+  }
+  if (dryRun) return { changed, removed, starter, stale }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
     copyFileSync(join(savesDir, 'kit', f), join(target, f))
@@ -267,12 +301,15 @@ export function installSaves(gameDir, { dryRun = false, cloud = false, board = f
     boardWiringSteps(game, { justMade: starter }).filter((w) => !w.done).forEach((w, i) => log(`  ${i + 1}. ${w.step}`))
   }
   { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
-  return { changed, removed, starter }
+  return { changed, removed, starter, stale }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const gameDir = process.argv[2]
-  if (!gameDir) {
+  const known = ['--dry-run', '--cloud', '--board']
+  const unknown = process.argv.slice(3).filter((a) => !known.includes(a))
+  if (!gameDir || gameDir.startsWith('-') || unknown.length) {
+    if (unknown.length) console.log(`Unknown: ${unknown.join(' ')}`)
     console.log('Usage: node scripts/install-saves.mjs <game-folder> [--dry-run] [--cloud] [--board]')
     process.exit(1)
   }

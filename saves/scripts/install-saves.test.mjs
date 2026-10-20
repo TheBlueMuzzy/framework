@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { boardWiringSteps, boardWranglerConfig, cloudWiringSteps, cloudWranglerConfig, installSaves } from './install-saves.mjs'
+import { boardWiringSteps, boardWranglerConfig, cloudWiringSteps, cloudWranglerConfig, installSaves, staleWorkers, TEMPLATE_CHANGES } from './install-saves.mjs'
 
 const quiet = () => {}
 const newGame = ({ uiKit = false } = {}) => {
@@ -148,5 +148,37 @@ describe('install-saves', () => {
     expect(starter).toEqual(['content/saves.json', 'tests/saves/saves.test.ts'])
     expect(existsSync(join(game, 'src/saves'))).toBe(false)
     expect(existsSync(join(game, 'content'))).toBe(false)
+  })
+})
+
+describe('install-saves — worker files that fell behind the kit (F101 proof)', () => {
+  const template = (file) => readFileSync(new URL(`../templates/${file}`, import.meta.url), 'utf8')
+
+  it('names a board/worker.ts made from an older template, with every change since', () => {
+    const game = newGame()
+    mkdirSync(join(game, 'board'), { recursive: true })
+    writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts').replace(/Template version: \d+/, 'Template version: 1'))
+    const lines = []
+    const { stale } = installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
+    expect(stale).toEqual([{ file: 'board/worker.ts', from: 1, to: 3, changes: [expect.stringMatching(/^2: /), expect.stringMatching(/^3: .*attempts/)] }])
+    expect(lines.join('\n')).toMatch(/board\/worker\.ts was made from an older template \(version 1; the kit's is 3\)/)
+    rmSync(game, { recursive: true, force: true })
+  })
+
+  it('a copy with no version line counts as version 1; an up-to-date copy is not named', () => {
+    const game = newGame()
+    mkdirSync(join(game, 'cloud'), { recursive: true })
+    mkdirSync(join(game, 'board'), { recursive: true })
+    writeFileSync(join(game, 'cloud/worker.ts'), '// an old cloud worker\n')
+    writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts'))
+    expect(staleWorkers(game).map((s) => [s.file, s.from, s.to])).toEqual([['cloud/worker.ts', 1, 2]])
+    rmSync(game, { recursive: true, force: true })
+  })
+
+  it("every template's version has its change written down (bump both together)", () => {
+    for (const [file, notes] of Object.entries(TEMPLATE_CHANGES)) {
+      const version = Number(/Template version: (\d+)/.exec(template(file))?.[1])
+      expect(Math.max(1, ...Object.keys(notes).map(Number)), file).toBe(version)
+    }
   })
 })

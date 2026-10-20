@@ -3,6 +3,7 @@
 // then deletes them. Everything it answers is decided in src/saves/cloudRoutes.ts (no Cloudflare there, so it's
 // tested on its own); this file only stores rows and sets the alarm that tidies up.
 //   Local:  npm run cloud:dev   (port 1998)   ·   Live: npm run cloud:deploy (Muzzy's call — it's public)
+// Template version: 2 (keep this line: the installer compares it with the kit's to say what changed since your copy)
 //
 // ONE copy of the SaveCloud class (named "saves") holds every link code in its own SQLite: a SQLite Durable Object,
 // the free plan's kind (100,000 rows written a day — KV's free plan allows only 1,000 writes).

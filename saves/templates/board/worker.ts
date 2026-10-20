@@ -4,6 +4,7 @@
 // by a player is never read. Everything it answers is decided in src/saves/boardRoutes.ts (no Cloudflare there, so
 // it's tested on its own); this file only stores rows, runs the alarm, and plugs the game in.
 //   Local:  npm run board:dev   (port 1996)   ·   Live: npm run board:deploy (Muzzy's call — it's public)
+// Template version: 3 (keep this line: the installer compares it with the kit's to say what changed since your copy)
 //
 // ONE copy of the DailyBoard class (named "board") holds every day's board in its own SQLite: a SQLite Durable Object,
 // the free plan's kind. No packages: a plain class with fetch() and alarm() is a Durable Object to Cloudflare.
