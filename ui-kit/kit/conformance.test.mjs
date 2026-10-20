@@ -77,9 +77,25 @@ describe('credits', () => {
       { paths: ['public/x.mp3'], source: 'Some site', light: '🔴' },
     ]
     const found = creditProblems(assets, entries)
+    expect(creditProblems([], [
+      { paths: ['public/boom.ogg'], source: 'Freesound', light: '🟡', licence: 'CC-BY-NC-4.0', credit: 'Boom by X' },
+      { paths: ['public/hum.ogg'], source: 'Some pack', light: '🟢', licence: 'free for non-commercial use' },
+      { paths: ['public/ok.ogg'], source: 'Kenney', light: '🟢', licence: 'CC0-1.0' },
+    ]).red).toEqual([ // 0.22.0: a non-commercial licence is 🔴 whatever light it was given
+      'Freesound (public/boom.ogg) — "CC-BY-NC-4.0" is non-commercial: no tips, ads or store sales with it',
+      'Some pack (public/hum.ogg) — "free for non-commercial use" is non-commercial: no tips, ads or store sales with it',
+    ])
     expect(found.unlisted).toEqual(['public/favicon.svg'])
     expect(found.red).toEqual(['Some site (public/x.mp3)'])
     expect(found.noCredit).toEqual(['Google Fonts (src/ui/kit/fonts/nunito.woff2)'])
+  })
+  it('non-commercial (0.22.1 review): CC BY-NC codes and "… only" wordings are 🔴; commercial-allowed wordings and a credit line saying "NC" are not', async () => {
+    const { isNonCommercialLicence } = await import('./conformance.mjs')
+    for (const red of ['CC-BY-NC-4.0', 'CC BY-NC-SA 4.0', 'CC BY-NC-ND 3.0', 'cc-by-nc', 'Non-commercial use only', 'Free for non-commercial projects', 'Personal use only'])
+      expect([red, isNonCommercialLicence(red)]).toEqual([red, true])
+    for (const fine of ['Free for commercial and non-commercial use', 'CC0-1.0', 'CC-BY-4.0', 'CC BY-SA 4.0', 'SIL OFL 1.1', 'Commercial use allowed, non-commercial too', ''])
+      expect([fine, isNonCommercialLicence(fine)]).toEqual([fine, false])
+    expect(creditProblems([], [{ paths: ['public/a.ogg'], source: 'Field sounds', light: '🟡', licence: 'CC-BY-4.0', credit: 'Recorded in Asheville, NC by Sam' }]).red).toEqual([])
   })
   it('all listed, credited and shown → three passes', async () => {
     const results = []

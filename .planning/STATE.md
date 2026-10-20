@@ -1,19 +1,19 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Released v0.10.2 (framework update): the Saves module 0.1.0** — saves that upgrade safely across game updates, keep backups, combine lifetime stats across devices, a save code players can copy, browser-risk warnings, and golden-save tests in check:framework (Dev Kit 0.20.4). GitHub's checks now find every module themselves. Games switch over in their own sessions (steps: ROADMAP Ideas + saves/README.md). Next: /sprint (or /roadmap) — ready in v0.10: F82–F85, save layers F93 run resume, F95 online rejoin, F96 cloud via link code, F97 app stores, F99 Unity. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
+2026-10-19 — **F84 + F85 approved (sprint 16 done): patch notes + dependency/licence check.** Next: retro → archive → /deliver v0.10.3 (merge dev/v0-10, `release.mjs update --draft-notes`, show Muzzy the notes, release). Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: /sprint for sprint 16. Research first for any new module or system (/sprint step 7).
+- Found by checkup §8: Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas, for its session).
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
 
-Reviewed through: framework e98126d (d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
+Reviewed through: framework 20196de (sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (15 archived)
-Doing: released v0.10.2 — next /sprint   Branch: main   Version: 0.10.2 (UI kit 0.21.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 16 — every release says what changed and ships nothing risky
+Doing: F84 + F85 done — /deliver   Branch: dev/v0-10   Version: 0.10.2 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.2
 
 ## Key facts
@@ -27,7 +27,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
-- Security reviewed: e98126d (2026-10-19, v0.10.1 → dev/v0-10, last 3 commits by Claude — workflow lists modules from repo folders only, no secrets, no event text: no high/medium; 2 low in save codes — size limits, built-in device names — fixed + tests that failed first)
+- Security reviewed: 20196de (2026-10-19, v0.10.2 → dev/v0-10 by Claude: the Credits link opens a same-site text file named by the game, noopener; .npmrc settings only — no issues)
 - Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.

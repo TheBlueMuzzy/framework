@@ -83,13 +83,27 @@ export function listAssets(root, readdir, dirs = ['public', 'src', 'content']) {
   return out
 }
 
+// A non-commercial licence (CC-BY-NC, "non-commercial use only") counts as 🔴 whatever light it was given (0.22.0, F85):
+// it forbids any money — tips, ads, a store page — and Steam won't take it. Only the `licence` field is read (a credit
+// line can say "Asheville, NC"), and a licence that allows commercial use too ("free for commercial and non-commercial
+// use") is fine (review, 0.22.1).
+const NC_CODE = /\bCC[\s-]*BY(?:[\s-]*(?:SA|ND))*[\s-]*NC\b/i // CC-BY-NC, CC BY-NC-SA 4.0, CC-BY-ND-NC…
+const NC_WORDS = /\bnon-?commercial(?:\s+use)?\s+only\b|\bfor\s+non-?commercial\b|\bpersonal\s+use\s+only\b|\bnot\s+for\s+commercial\b/i
+const COMMERCIAL_OK = /\bcommercial\s+(?:and|&|or)\s+non-?commercial\b|\bcommercial\s+use\s+(?:is\s+)?(?:allowed|ok|permitted)\b|\bfree\s+for\s+commercial\b/i
+export function isNonCommercialLicence(licence = '') {
+  const text = String(licence)
+  if (COMMERCIAL_OK.test(text)) return false
+  return NC_CODE.test(text) || NC_WORDS.test(text)
+}
+const isNonCommercial = (e) => isNonCommercialLicence(e.licence ?? '')
+
 /** What's wrong with the credits: { unlisted: [paths], red: [lines], noCredit: [lines] } (empty lists = fine). */
 export function creditProblems(assets, entries) {
   const listed = (path) => entries.some((e) => (e.paths ?? []).some((p) => p === path || (p.endsWith('/') && path.startsWith(p))))
   const name = (e) => `${e.source ?? '?'} (${(e.paths ?? []).join(', ')})`
   return {
     unlisted: assets.filter((a) => !listed(a)),
-    red: entries.filter((e) => e.light === '🔴').map(name),
+    red: entries.filter((e) => e.light === '🔴' || isNonCommercial(e)).map((e) => (e.light !== '🔴' ? `${name(e)} — "${e.licence}" is non-commercial: no tips, ads or store sales with it` : name(e))),
     noCredit: entries.filter((e) => e.light === '🟡' && !String(e.credit ?? '').trim()).map(name),
   }
 }
