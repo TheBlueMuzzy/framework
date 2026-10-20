@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { check, findSaves, missingVersions } from './conformance.mjs'
 
-function tester({ code = [], goldens = [], savesJson = { storageAllowed: [] }, saveTest = true, vitest = true, runResult = { code: 0, out: '' } }) {
+function tester({ code = [], goldens = [], savesJson = { storageAllowed: [] }, saveTest = true, saveTestText = '', vitest = true, runResult = { code: 0, out: '' } }) {
   const results = []
   const ran = []
   const linesMatching = (files, re) => files.flatMap((f) => f.text.split('\n').map((l, i) => (re.test(l.replace(/\/\/.*$/, '')) ? `${f.path}:${i + 1}  ${l.trim()}` : null)).filter(Boolean))
@@ -10,6 +10,7 @@ function tester({ code = [], goldens = [], savesJson = { storageAllowed: [] }, s
     rel: 'src/saves', version: '0.1.0',
     gameCode: () => code, linesMatching,
     files: () => goldens.map((path) => ({ path, text: '{}' })),
+    read: (p) => (p === 'tests/saves/saves.test.ts' ? saveTestText : ''),
     json: (p) => (p === 'content/saves.json' ? savesJson : null),
     exists: (p) => (p === 'tests/saves/saves.test.ts' ? saveTest : p === 'node_modules/vitest' ? vitest : false),
     run: (cmd, args) => { ran.push([cmd, ...args].join(' ')); return runResult },
@@ -50,7 +51,7 @@ describe('Saves checks', () => {
   it('a game with golden saves for every version, passing tests and no direct storage passes', async () => {
     const { t, results, ran } = tester({ code: [goopsSave], goldens: ['tests/saves/goops-progress-v1.json', 'tests/saves/goops-progress-v2.json'] })
     await check(t)
-    expect(results.map((r) => r.ok)).toEqual([true, true, true])
+    expect(results.map((r) => r.ok ?? 'skipped')).toEqual([true, true, 'skipped', true]) // no run in Goops
     expect(ran).toEqual(['npx vitest run tests/saves/saves.test.ts'])
   })
 
@@ -78,14 +79,52 @@ describe('Saves checks', () => {
     const { t, results } = tester({ code, savesJson: { storageAllowed: [{ file: 'src/ui/online/session.ts', why: 'room code until F95' }] } })
     await check(t)
     expect(results[0].skipped).toBe(true) // no createSave yet
-    expect(results[2].ok).toBe(false)
-    expect(results[2].problems.slice(1)).toEqual(["  src/ui/fullscreen.ts:1  localStorage.setItem('glyphtender:fullscreen', '1')"])
+    expect(results[3].ok).toBe(false)
+    expect(results[3].problems.slice(1)).toEqual(["  src/ui/fullscreen.ts:1  localStorage.setItem('glyphtender:fullscreen', '1')"])
   })
 
   it('a missing content/saves.json or save test is named', async () => {
     const { t, results } = tester({ code: [goopsSave], goldens: ['tests/saves/goops-progress-v1.json', 'tests/saves/goops-progress-v2.json'], savesJson: null, saveTest: false })
     await check(t)
     expect(results[1].problems[0]).toContain('tests/saves/saves.test.ts is missing')
-    expect(results[2].problems[0]).toContain('content/saves.json is missing')
+    expect(results[3].problems[0]).toContain('content/saves.json is missing')
+  })
+})
+
+describe('Saves checks — a run (createRun)', () => {
+  const runFile = { path: 'src/game/run.ts', text: "export const matchRun = createRun<Match>({\n  key: 'glyphtender:run',\n  version: 1,\n  fresh: emptyMatch(),\n})\n" }
+  const endsIt = { path: 'src/game/flow.ts', text: 'function gameOver() {\n  matchRun.end()\n}\n' }
+  const goldens = ['tests/saves/glyphtender_run-v1.json']
+  const listed = "import { checkRunEnds } from '../../src/saves/oldSaves'\nconst RUNS = [{ run: matchRun }]\nit('x', () => checkRunEnds(run))\n"
+
+  it('a run is found like a save (key, version, its name) — so it needs golden saves too', () => {
+    expect(findSaves([runFile])).toEqual([{ where: 'src/game/run.ts:1', key: 'glyphtender:run', version: 1, run: true, name: 'matchRun' }])
+  })
+
+  it('ended in the game\'s code and tested with checkRunEnds → passes', async () => {
+    const { t, results } = tester({ code: [runFile, endsIt], goldens, saveTestText: listed })
+    await check(t)
+    expect(results.map((r) => r.ok)).toEqual([true, true, true, true])
+    expect(results[2].detail).toBe('glyphtender:run: matchRun.end()')
+  })
+
+  it('a run nothing ends fails: it would come back as Continue after the game was over', async () => {
+    const { t, results } = tester({ code: [runFile], goldens, saveTestText: listed })
+    await check(t)
+    expect(results[2].ok).toBe(false)
+    expect(results[2].problems[0]).toContain('nothing calls matchRun.end()')
+  })
+
+  it('a save test without checkRunEnds (an older starter) or without the run in RUNS fails, saying what to add', async () => {
+    const { t, results } = tester({ code: [runFile, endsIt], goldens, saveTestText: 'const SAVES = []\n' })
+    await check(t)
+    expect(results[2].problems.join('\n')).toContain('doesn\'t run checkRunEnds')
+    expect(results[2].problems.join('\n')).toContain('matchRun isn\'t listed')
+  })
+
+  it('a run with no name can\'t be checked — says how to fix it', async () => {
+    const { t, results } = tester({ code: [{ path: 'a.ts', text: "register(createRun({ key: 'x:run', version: 1, fresh }))" }], goldens: ['tests/saves/x_run-v1.json'], saveTestText: listed })
+    await check(t)
+    expect(results[2].problems[0]).toContain('give it a name')
   })
 })

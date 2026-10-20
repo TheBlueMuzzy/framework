@@ -77,6 +77,8 @@ export interface Run<T> {
   end(): void
   /** The save underneath (the test kit and save codes use it). */
   readonly save: Save<T>
+  /** The same run, kept somewhere else and deaf to the page (tests: memoryStorage()). */
+  withStorage(storage: StorageLike | null): Run<T>
 }
 
 export function createRun<T>(options: RunOptions<T>): Run<T> {
@@ -160,6 +162,7 @@ export function createRun<T>(options: RunOptions<T>): Run<T> {
 
   return {
     key: options.key, save, pending, resume, end,
+    withStorage: (other) => createRun({ ...options, storage: other, page: null }),
     autosave(data) {
       start()
       return write(data)

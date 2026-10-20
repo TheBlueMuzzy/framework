@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, goldenFileName, goldenSavesFor, goldenVersionOf, makeGoldenSave, missingGoldenVersions,
+  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenFileName, goldenSavesFor, goldenVersionOf, makeGoldenSave, missingGoldenVersions,
 } from './oldSaves'
+import { createRun, type Run } from './run'
 import { createSave, type Save } from './saves'
+import { removeKey, type StorageLike } from './storage'
 
 const quiet = () => {}
 const choices = createSave({
@@ -70,5 +72,35 @@ describe('the checks the game\'s ready-made test runs', () => {
     const slots = createSave({ key: 'x:slots', kind: 'slots', version: 1, storage: null, onProblem: quiet, fresh: { level: 1 } })
     expect(checkRoundTrip(slots, { level: 4 })).toEqual([])
     expect(checkDamagedSaves(slots, { level: 4 })).toEqual([])
+  })
+})
+
+describe('runs (createRun)', () => {
+  const matchRun = () => createRun({ key: 'glyphtender:run', version: 2, onProblem: quiet, storage: null, page: null,
+    fresh: { turn: 0, scores: [0, 0] }, upgrades: { 2: (v1: { turn: number }) => ({ ...v1, scores: [0, 0] }) } })
+
+  it('a run\'s golden saves, round trip, damaged saves and full storage go through its save', () => {
+    const run = matchRun()
+    const v1 = { stored: { save: 'glyphtender:run', version: 1, savedAt: '2026-10-20T09:00:00.000Z', data: { turn: 6 } }, expect: { turn: 6, scores: [0, 0] } }
+    expect(checkGoldenSave(run.save, v1)).toEqual([])
+    expect(checkGoldenSave(run.save, JSON.parse(makeGoldenSave(run.save, { turn: 7, scores: [3, 4] }, 'v2')))).toEqual([])
+    expect(checkRoundTrip(run.save, { turn: 7, scores: [3, 4] })).toEqual([])
+    expect(checkDamagedSaves(run.save, { turn: 7, scores: [3, 4] })).toEqual([])
+    expect(checkFullStorage(run.save, { turn: 7, scores: [3, 4] })).toEqual([])
+  })
+
+  it('a run cleared at the end never comes back', () => {
+    expect(checkRunEnds(matchRun(), { turn: 7, scores: [3, 4] })).toEqual([])
+  })
+
+  it('…and a run whose end() only wipes the newest copy is caught (its backup would come back)', () => {
+    const real = matchRun()
+    const leaky = {
+      ...real,
+      withStorage: (storage: StorageLike | null): Run<unknown> => ({ ...real.withStorage(storage), end: () => removeKey(storage, real.key) }),
+    } as Run<unknown>
+    const problems = checkRunEnds(leaky, { turn: 7, scores: [3, 4] })
+    expect(problems.join(' | ')).toContain('left copies behind: glyphtender:run~1')
+    expect(problems.join(' | ')).toContain('the finished run loads again')
   })
 })
