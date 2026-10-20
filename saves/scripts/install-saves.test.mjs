@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { installSaves } from './install-saves.mjs'
+import { cloudWiringSteps, cloudWranglerConfig, installSaves } from './install-saves.mjs'
 
 const quiet = () => {}
 const newGame = ({ uiKit = false } = {}) => {
@@ -65,6 +65,39 @@ describe('install-saves', () => {
     expect(existsSync(join(game, 'src/saves/saves.ts'))).toBe(false)
     expect(existsSync(join(game, 'content'))).toBe(false)
     expect(lines.join('\n')).toContain('src/saves/ already holds')
+  })
+
+  it('--cloud gives cloud/worker.ts + cloud/wrangler.json once, then prints only the missing wiring (going live = Muzzy\'s call)', () => {
+    const game = newGame()
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'goops', devDependencies: {} }))
+    installSaves(game, { log: quiet })
+    expect(existsSync(join(game, 'cloud'))).toBe(false) // not without --cloud
+    const lines = []
+    const { starter } = installSaves(game, { cloud: true, log: (l) => lines.push(l) })
+    expect(starter).toEqual(['cloud/worker.ts', 'cloud/wrangler.json'])
+    expect(readFileSync(join(game, 'cloud/worker.ts'), 'utf8')).toContain('export class SaveCloud')
+    expect(JSON.parse(readFileSync(join(game, 'cloud/wrangler.json'), 'utf8'))).toEqual(cloudWranglerConfig(game))
+    expect(cloudWranglerConfig(game)).toMatchObject({
+      name: 'goops-saves', main: 'worker.ts', migrations: [{ tag: 'v1', new_sqlite_classes: ['SaveCloud'] }], dev: { port: 1998 },
+    })
+    const said = lines.join('\n')
+    expect(said).toContain('npm install -D wrangler')
+    expect(said).toContain('"cloud:dev": "wrangler dev -c cloud/wrangler.json"')
+    expect(said).toContain('cloudAddress(import.meta.env.VITE_SAVES_CLOUD)')
+    expect(said).toContain('Going live (Muzzy\'s call')
+    expect(said).toContain('goops-saves.joebrogno.workers.dev')
+
+    // wired up → those steps go; the game's own edits to cloud/ are never overwritten; no --cloud needed any more
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'goops', devDependencies: { wrangler: '^4' },
+      scripts: { 'cloud:dev': 'wrangler dev -c cloud/wrangler.json', 'cloud:deploy': 'wrangler deploy -c cloud/wrangler.json' } }))
+    writeFileSync(join(game, '.gitignore'), 'node_modules\n.wrangler/\n')
+    mkdirSync(join(game, 'src'), { recursive: true })
+    writeFileSync(join(game, 'src/menus.tsx'), 'const cloud = { url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }')
+    expect(cloudWiringSteps(game).filter((w) => !w.done).map((w) => w.step.slice(0, 7))).toEqual(['Try it:', 'Going l'])
+    writeFileSync(join(game, 'cloud/worker.ts'), '// mine')
+    const again = installSaves(game, { log: quiet })
+    expect(again.starter).toEqual([])
+    expect(readFileSync(join(game, 'cloud/worker.ts'), 'utf8')).toBe('// mine')
   })
 
   it('a dry run changes nothing', () => {
