@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 22 started: every game shows its version (F102 version module, Muzzy's ask from the Goops session) + Goops' kit fixes (F103)** on `dev/v0-10` (saves 0.6.0 · rooms 0.10.0 · UI kit 0.23.0 — unreleased; going live stays Muzzy's call). Built from Goops' own version copy (its sprint-11 Notes). **Next: /develop F102 task 1 — the version module's Vite plugin + label.** F62 stays with the Goops session (heading to /deliver alpha). F97 / F99 wait (💤).
+2026-10-20 — **Sprint 22: F102 version module approved; F103 Goops' kit fixes next** on `dev/v0-10` (version 0.1.0 · UI kit 0.24.0 · Dev Kit 0.20.5 · saves 0.6.0 · rooms 0.10.0 — unreleased; going live stays Muzzy's call). Every game can show one `vX.Y.Z.B` from version.json (menu footer, every Settings tab, Dev Kit bug files) and its tests refuse a stale build. **Next: /develop F103 task 7 — confirm boxes work without `...kitScreens`.** Real games get version/ when their own sessions install it (Goops swaps its own copy — hand-over note is F103 task 11).
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework 6187670 (sprint 22 review: F102 2 real + 2 minor che
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 22 — every game shows its version + Goops' kit fixes (F102, F103)
-Doing: F102 — building   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
+Doing: F103 — building   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.23.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.5.0 · rooms 0.10.0 — unreleased on dev/v0-10)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-20 — F102 approved: every game can show the same version number on its menu, in Settings and in bug reports, and its tests refuse an outdated build.
 - 2026-10-20 — Sprint 21 planned: saves ready to move to phone, desktop, Steam or Unity later (the store and Unity parts wait until a game needs them).
 - 2026-10-20 — F94 + F98 approved: games can be replayed from their seed + moves (a Daily game for everyone), and a Daily board checks every score by replaying it.
 - 2026-10-20 — Sprint 20 built (waiting for OK): a game can be kept as its seed + moves (replays, a Daily game for everyone), and a Daily board where the server replays every game to check its score.
