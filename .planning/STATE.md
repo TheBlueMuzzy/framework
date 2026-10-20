@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 18 built, waiting for Muzzy's OK: F93 run resume + F95 online rejoin** on `dev/v0-10`. F93 (saves 0.2.0, UI kit 0.23.0): `createRun` autosaves at break points and when the tab hides, Continue on the main menu with "Turn 7 · 5 min ago" inside the button, end() wipes every copy, a newer/damaged run → "can't be continued". F95 (rooms 0.9.0): the last room remembered (≤ 3 h, only mid-match), "Rejoin match" on the menu, same seat back + "a bot played N turns", "That match has ended" when gone, a rejoin never makes a room; empty room waits 5 min (setting) — live Cloudflare forgets after ~1–2 min until F100. Both proven on scratch Glyphtenders, reviewed (3 + 2 fixes). Next: Muzzy "approved" → done, retro, archive, /sprint 19 (F96 link-code cloud + F94 seed/move log + F100 rooms wait until the end). Queue after: 20 F97 + F98 + F99.
+2026-10-20 — **Sprint 18 done (approved): F93 run resume + F95 online rejoin** on `dev/v0-10` (saves 0.2.0 · rooms 0.9.0 · UI kit 0.23.0 — not released yet). Games can offer Continue (autosave, "Turn 7 · 5 min ago", gone when the run ends) and Rejoin match (same seat, "a bot played N turns", "That match has ended"). Live Cloudflare forgets an empty room after ~1–2 min until F100. Next: /sprint 19 — F96 link-code cloud + F94 seed/move log + F100 rooms wait until the match ends. Queue after: 20 F97 + F98 + F99 (Muzzy 2026-10-20: "I want you to do all of them").
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework 7445a36 (sprint 18 review: F93 3 findings + F95 2, a
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 18 — players get back where they were (F93, F95)
-Doing: Sprint 18 built (F93, F95) — waiting for Muzzy's OK   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Doing: Sprint 18 done — next /sprint 19   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
@@ -32,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-20 — F93 + F95 approved: games can offer Continue for an unfinished game and Rejoin match for an online match left mid-game.
 - 2026-10-20 — Sprint 18 built (waiting for OK): games can offer Continue for an unfinished game and Rejoin match for an online match left mid-game.
 - 2026-10-20 — F82 + F83 approved: session start warns when a live game or its online server is down, and alpha / beta / 1.0 releases need a filled-in release checklist.
 - 2026-10-20 — Sprint 17 built (waiting for OK): session start now says when a live game or its room server is down, and alpha / beta / 1.0 releases need a filled-in release checklist (no stand-in art from beta).

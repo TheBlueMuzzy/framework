@@ -38,3 +38,9 @@ Notes:
 - F95 proven on a scratch Glyphtender (.scratch/glyphtender-f95, e2e/f95-rejoin.mjs, own wrangler 2999 + vite 5392, short timings in its rooms.json): reload → same seat; closed tab → Rejoin match → Rejoining… → same seat, "You're back — a bot played 4 turns for you" (server botTurns 4); Leave → no Rejoin after reload; room cleared → "That match has ended", and a plain join to the code afterwards → no_room (nothing made). Its 817 tests + rooms promise check pass. Shots: .scratch/glyphtender-f95/shots/f95-*.png.
 - F95 review (helper, no high-confidence bugs; Claude fixed 2 + tests, rooms 141/141): ① every reload or 2-second Wi-Fi drop would toast "You're back" (back with 0 turns) → `back` only when a bot really played · ② kicked while away → a join error on Rejoin → counts as "That match has ended". Left as known limits in rooms/README: several bot moves in one turn count once; Rejoin also shows in a second live tab (moves the seat there); a pre-0.9 server ignores `rejoin` (deploy server with client).
 - **Live caveat (helper):** on Cloudflare an empty room's memory goes after ~1–2 min whatever keepEmptyRoomMs says — the 5-minute wait fully holds only with F100 (the room kept in the Durable Object's storage).
+- Muzzy 2026-10-20: F93 + F95 approved.
+
+Retro:
+- went well: two helpers built side by side, each proven on a scratch Glyphtender; the reviews caught 5 small bugs
+- went wrong: Cloudflare forgets an empty room after ~1–2 min, so the 5-minute wait isn't real live yet (F100)
+- change: check the live host's limits before promising a timing
