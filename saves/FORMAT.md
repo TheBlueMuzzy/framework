@@ -36,14 +36,16 @@ A storage is a list of **keys → text**. Every value is JSON text.
 | `data` | the game's save — plain JSON only (objects, lists, text, numbers, true/false, null). |
 | `counts` | optional, progress saves only: each device's part of every add-up field, `{ "<field>": { "<device id>": 12, "earlier": 3 } }`. |
 
-Unknown extra fields are kept as they are, never an error.
+Only these five fields are read and written: any other field at this level is dropped by the next save (never an
+error). Unknown fields INSIDE `data` are kept (§3 step 6).
 
 ## 3. Loading — the newest GOOD copy wins
 Try `<key>`, then `<key>~1`, `<key>~2`… For each copy, in this order:
 1. **Empty** (missing, or only spaces) → try the next.
 2. **Not JSON** (a write cut off) → damaged, try the next.
-3. **Not a record** (no `save` / `version` / `data`) → the game's `oldSave` rule may recognise a save from before
-   the kit (`{ version, data }`); otherwise damaged.
+3. **A record** = an object whose `save` is text and which has a `data` field (even `null`). Then: `save` not this
+   save's key → damaged; `version` not a whole number from 1 up (missing too) → damaged. **Not a record** → the game's
+   `oldSave` rule may recognise a save from before the kit (`{ version, data }`); otherwise damaged.
 4. **`version` greater than today's** → a **newer build's** save: stop. The game runs on fresh values and **never
    writes over it** (a player who went back to an older version keeps their newer progress).
 5. **Upgrade one step at a time**: version N-1 → N with the game's step `upgrades[N]`, for every N up to today's.
@@ -61,17 +63,27 @@ The first copy that passes all of that is loaded. A damaged NEWEST copy is set a
 at all → the game's `fresh` save.
 
 ## 4. Saving
-1. The copy being replaced moves down: `<key>~N-1` → `<key>~N` … `<key>` → `<key>~1` (only if it was there).
-2. Backups past the configured count are removed.
-3. Write the new record to `<key>`, then read it back: if it doesn't match, put the old copy back (report "not kept").
-4. **Full storage** → remove the oldest backups (never the newest good copy) and try again; still full → report "full".
-5. A newer build's save at `<key>` → don't write at all (report "newer").
+1. **Any** copy (`<key>` or a backup) is a newer build's → don't write at all (report "newer"). Checked on every
+   write, not remembered (another window may have written one).
+2. The copy being replaced moves down — only if it is **good** (§3) and **different** from the new record:
+   `<key>~N-1` → `<key>~N` … `<key>` → `<key>~1`. (A broken newest copy never pushes a good backup out.)
+3. Backups past the configured count are removed.
+4. Write the new record to `<key>`, then read it back: if it doesn't match, put the old copy back (report "not kept").
+5. **Full storage** → remove backups older than the newest GOOD backup, oldest first (that one itself never goes),
+   trying the write again after each; still full → report "full".
 
 ## 5. Progress fields — how two copies combine (`progress.ts`)
-Settings, runs and slots: the copy with the later `savedAt` wins whole. Progress: top-level fields of a progress save, by the game's `fields` rules: `highest` (the bigger number), `add-up` (each
-device's part adds up — using `counts`, so the same copy met twice never counts twice; `earlier` = the part from
-before counting per device), `collect` (both lists, nothing twice, compared as JSON), `newest` (the copy with the
-later `savedAt` — the default).
+Which copy is "newer": the one with the later `savedAt` (compared as text); on a tie, or both `""`, the SECOND copy
+passed in. Settings, runs and slots: the newer copy wins whole. Progress: start from both copies' data with the newer
+copy's fields on top (a field only one copy has keeps that copy's value), then each top-level field by the game's
+`fields` rules:
+- `highest` — the bigger number, only when both copies hold a number (otherwise the newer copy's value)
+- `add-up` — each device's part = the LARGER of the two copies' parts for that device (a device's own part only
+  grows), then the field = the sum of the parts. Parts come from `counts`; a copy without `counts` for the field counts
+  its whole value as the part `earlier`. So the same copy met twice never counts twice.
+- `collect` — the older copy's list, then the newer copy's items not already in it (compared as JSON), only when both
+  are lists (otherwise the newer copy's value)
+- `newest` — the newer copy's value (the default for fields not listed)
 
 ## 6. Runs kept as seed + moves (`replay.ts`)
 A run can be kept as `{ "rulesVersion": 3, "setup": { … the seed and table … }, "moves": [ … ] }` inside its data and
