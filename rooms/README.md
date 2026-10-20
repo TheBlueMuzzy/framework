@@ -1,13 +1,14 @@
 # Rooms
 
-Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare — Workers free plan): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.8.0** — 0.8.0 (2026-10-20): the server answers `/health` (`server/health.ts`) so `live-check.mjs` can tell it's up after a deploy; the installer tells an older `party/worker.ts` how to add it. 0.7.0: its promise check (the Dev Kit adapter is off online). 0.6.0 (2026-10-12): the server runs on PartyServer + wrangler (Glyphtender's proven setup) — the installer makes `party/worker.ts` + `wrangler.json`, `server/liveConnections.ts` is in the kit, no more `partykit.json` (PartyKit's hosted platform shut down on 23 Oct 2026). (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
+Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare — Workers free plan): make a room, share a short code, friends join, the host starts, people drop out and come back — and the game's own rules run on the server, so nobody can cheat or peek. Harvested from Roll Better (proven with real players since v0.2), made game-agnostic. Kit **0.9.0** — 0.9.0 (2026-10-20, F95): **Rejoin match** — the room is remembered on this device (`lastRoom.ts`) so a player who closed the tab gets back into the same seat (from a bot, if one took over) and hears how many turns the bot played; a room that's gone says "That match has ended", never a join error or a new room; an empty mid-game room now waits `keepEmptyRoomMs` = 5 minutes (was 60 s); a new promise check. 0.8.0 (2026-10-20): the server answers `/health` (`server/health.ts`) so `live-check.mjs` can tell it's up after a deploy; the installer tells an older `party/worker.ts` how to add it. 0.7.0: its promise check (the Dev Kit adapter is off online). 0.6.0 (2026-10-12): the server runs on PartyServer + wrangler (Glyphtender's proven setup) — the installer makes `party/worker.ts` + `wrangler.json`, `server/liveConnections.ts` is in the kit, no more `partykit.json` (PartyKit's hosted platform shut down on 23 Oct 2026). (0.1.1: flood limit, one seat per connection, "nothing changed" answers only the sender, bot seats stay mid-game — from Glyphtender's security review). 0.5.0: `room.playedBy(seatId)` → `'seat'` (the person) · `'bot-for-seat'` (a bot holding a person's seat: idle, out of time, left, kicked, away) · `'bot'` (a bot the host added) — the table kit's `PlayedBy` words, so each recorded move can say who played it.
 
 ## What a game gets
 | Part | Does |
 |---|---|
 | Room codes (`roomCodes.ts`) | 4 letters, consonant–vowel (BAKU, MOTE, ZIRA): easy to say out loud, no C/Q/W/X/Y, a short rude-word list is never handed out. Typing is forgiving (`ba-ku`, `M0T1` work). 6,400 codes; a clash is caught (`code_taken`) |
 | Identity (`identity.ts`) | `persistentId` (localStorage) = the player, owns their seat · `tabId` (sessionStorage) = this tab's connection · the player's name, remembered. Works in private windows too |
-| `useRoom(roomCode, { name, create })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`, `idleWarning` (`{ endsAt }` while your screen should show the idle bar, else null), `botPlaysForMe` (a bot holds your seat because you went idle), `active()` ("I'm here" — call it on any tap/key while it matters; throttled to one ping per 5 s, at once while warned or bot-held; 0.4.0). Reconnects by itself; StrictMode-safe |
+| Last room (`lastRoom.ts`, 0.9.0) | `{ code, savedAt, phase }` in localStorage (`rooms:last-room`) — kept up to date by `useRoom`, forgotten on leave / kick / game over / a closed or missing room. `matchToRejoin()` → the match to offer as "Rejoin match" (only one being played, at most 3 hours since this device last heard from it), else null |
+| `useRoom(roomCode, { name, create, rejoin? })` | The React hook: `status` (idle · connecting · open · reconnecting · closed), `room` (seats, phase, host), `mySeat`, `isHost`, `view` (your view of the game), `error`, `closedReason`, `send(action)`, `setReady`, `start(options)`, `kick`, `addBot(profile?)` (which bot, in the game's words — the game's optional `botProfile(profile) → { profile, name }` checks it and names the seat; repeats are numbered "Ada 2"; 0.3.0), `backToLobby`, **`leave()`**, `clearError`, `idleWarning` (`{ endsAt }` while your screen should show the idle bar, else null), `botPlaysForMe` (a bot holds your seat because you went idle), `active()` ("I'm here" — call it on any tap/key while it matters; throttled to one ping per 5 s, at once while warned or bot-held; 0.4.0), `matchEnded` (the match you were rejoining is gone, or the room closed — "That match has ended"; 0.9.0), `cameBack` (`{ botTurns }` once you're back in a game after being away) + `clearCameBack()`. Reconnects by itself; StrictMode-safe |
 | Protocol (`protocol.ts`) | Every message, typed, shared by game and server. The server checks every field of every message (junk and huge messages are refused) |
 | Live connections (`server/liveConnections.ts`) | The server's own list of live sockets, one per connection id — a phone's late old-socket close never drops its new one (PartyServer's own list does). `party/worker.ts` uses it |
 | Health check (`server/health.ts`) | `GET /health` → `{ ok: true }` (never cached, no room opened). `party/worker.ts` answers it first; `live-check.mjs` pings it after a deploy |
@@ -27,7 +28,9 @@ Online rooms for a web game (React + Vite, PartyServer on Muzzy's own Cloudflare
 - **Host:** stays host while connected; otherwise the first connected human in seat order. No flip-flopping when the old host returns.
 - **Same player, second tab:** the new tab gets the seat, the old one is told (`connected_elsewhere`).
 - **Kick:** host only; lobby = seat gone, mid-game = a bot takes it. A kicked player can't come back to that room.
-- **Everyone gone mid-game:** the room waits `keepEmptyRoomMs`, then clears.
+- **Everyone gone mid-game:** the room waits `keepEmptyRoomMs` (5 minutes), then clears.
+- **Back after being away (0.9.0):** a player who comes back into a game (reload, lost Wi-Fi, a closed tab and Rejoin match) gets `back` with `botTurns` — how many times the game waited on their seat while a bot held it for them. Turns they watched (idled, then tapped) aren't counted.
+- **Rejoin (0.9.0):** a join marked `rejoin` only takes back the player's own seat. No seat of theirs in that room (it was cleared, or the code is a stranger's room now) → `no_room`. It never creates a room.
 - **Start:** host only, at least `minSeats`, everyone (but the host) Ready. After a game (phase `over`) the host can **start** again (rematch, same seats) or go **back to lobby** (gone players lose their seats). Anyone a bot was playing for because they idled — still connected — gets their seat back at that point, for either (0.4.1).
 
 ## Use it in a game
@@ -90,8 +93,25 @@ const online = useRoom<View, Action, Options, Event>(code, { name: playerName, c
 - `send` only sends while `status` is `'open'` (returns false otherwise) — grey out moves while reconnecting.
 - The seat list never contains anyone's `persistentId`.
 
+### Rejoin — back into a match after closing the tab (0.9.0)
+Don't keep the room code yourself (sessionStorage forgets it when the tab closes; the check below fails on it) — `useRoom` remembers it in `lastRoom.ts` and forgets it at the right moments. The words are the UI kit's `rejoinWords` / `welcomeBackLine` (online.tsx); MainMenu takes the item through its `items` list.
+```tsx
+import { matchToRejoin } from '../rooms/lastRoom'
+
+// Main menu: the item only while there's a match to go back to
+const rejoin = matchToRejoin()
+const items = [...(rejoin ? [{ label: rejoinWords.rejoin, onClick: () => { setRejoining(true); setCreating(false); setCode(rejoin.code) }, primary: true }] : []), …]
+
+const online = useRoom(code, { name, create: creating, rejoin: rejoining })
+// Joining:  online.status === 'connecting' && rejoining → <Reconnecting words={{ title: rejoinWords.joiningTitle }} message={rejoinWords.joining} onQuit={…} />
+// Back in:  online.cameBack → toast(welcomeBackLine(online.cameBack.botTurns)); online.clearCameBack()   (the match ended meanwhile: the view shows the results)
+// Gone:     online.matchEnded → toast(rejoinWords.ended); setCode(null)   — never the join error, and nothing new was made
+// Leave:    online.leave() as always — it forgets the room, so no Rejoin offer afterwards
+```
+**Privacy:** the room code (and the player id that owns the seat) stay on this device, in the browser's own storage, and are only ever sent to the game's own room server — never to anyone else, and never shown to other players.
+
 ## Knobs — `content/rooms.json`
-`minSeats` (2) · `maxSeats` (4) · `idleWarnAfterMs` (30000; 0 = no warning) · `idleTakeoverAfterMs` (60000; 0 = never) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (60000) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
+`minSeats` (2) · `maxSeats` (4) · `idleWarnAfterMs` (30000; 0 = no warning) · `idleTakeoverAfterMs` (60000; 0 = never) · `botTakesOverAfterMs` (60000; 0 = never) · `keepEmptyRoomMs` (300000 = 5 min; was 60000 before 0.9.0) · `allowBots` (false) · `maxMessagesPerSecond` (10; 0 = no limit). `_help` explains each. The turn clock and other game timings belong in the game's own `content/` files.
 
 ## What a game must provide
 From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`): online, **the server owns the truth** — so the Dev Kit's tools
@@ -99,7 +119,9 @@ that change play are offline-only: the game's Dev Kit adapter answers `canRestor
 `false` while the game is online (`canRestore: () => !isOnline()`).
 
 **How it's checked — `npm run check:framework`** (0.7.0, `kit/conformance.mjs`): fails when the adapter has no
-`canRestore`, or one that's always `true`.
+`canRestore`, or one that's always `true`. 0.9.0: a game that uses `useRoom` fails when its online code (files that
+import the rooms kit) keeps something in `sessionStorage` (its own room code), or nothing calls `matchToRejoin()`
+(no "Rejoin match" offer).
 
 ## Install or update
 From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run` first to see what would change).
@@ -137,7 +159,7 @@ From this folder: `node scripts/install-rooms.mjs <game-folder>` (add `--dry-run
 - Rooms live in memory: if Cloudflare restarts the room, it's gone (same as Roll Better). Fine for a party game.
 - A *duplicated* browser tab copies sessionStorage, so both tabs share a tab id; the server keeps whichever joined last.
 - No spectators and no joining a game in progress (Roll Better's seat picker for mid-game joiners stays in Roll Better until a second game needs it).
-- The Cloudflare Workers free plan has daily limits (100k requests; Durable Object time and messages are counted too) — fine for turn-based games. An empty in-memory room is evicted after ~1–2 min, so `keepEmptyRoomMs` is an upper bound, not a promise.
+- The Cloudflare Workers free plan has daily limits (100k requests; Durable Object time and messages are counted too) — fine for turn-based games. An empty in-memory room is evicted after ~1–2 min, so `keepEmptyRoomMs` is an upper bound, not a promise — live, the 5-minute wait (0.9.0) can end sooner, and Rejoin then says "That match has ended". Keeping the room in Durable Object storage (F100) fixes it ("until the match ends").
 
 ## Develop
 `npm install`, then `npm test` (room codes, identity, protocol checks, seats/host/rejoin rules, the idle clock (warn, takeover, tap back, turn timer), timers, checks, RoomServer with a fake host and a tiny game, live connections (late close) incl. private views, server-import guard, useRoom with a fake socket incl. StrictMode, installer incl. "a fresh install type-checks") and `npm run typecheck`.
