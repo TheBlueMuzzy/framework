@@ -1,9 +1,9 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-19 — **Released v0.10.2 (framework update): the Saves module 0.1.0** — saves that upgrade safely across game updates, keep backups, combine lifetime stats across devices, a save code players can copy, browser-risk warnings, and golden-save tests in check:framework (Dev Kit 0.20.4). GitHub's checks now find every module themselves. Games switch over in their own sessions (steps: ROADMAP Ideas + saves/README.md). Next: /sprint (or /roadmap) — ready in v0.10: F82–F85, save layers F93 run resume, F95 online rejoin, F96 cloud via link code, F97 app stores, F99 Unity. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
+2026-10-19 — **Sprint 16 started: F84 patch notes + F85 dependency/licence check** — researched first (`.planning/research/patch-notes-and-dependencies.md`): one notes file per release (drafted from commits, Muzzy edits, neutral voice), CHANGELOG.md + itch text; a security + licence gate at release, THIRD-PARTY-NOTICES, CC-BY-NC = 🔴, a 7-day wait on new package versions, /checkup §8. Work in ~/.claude + UI kit on `dev/v0-10`. Released v0.10.2 (Saves module) just before. Every BMUZ step is ① automatic, ② checked or ③ judgement; audit: ~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md.
 - What changed for Muzzy: /save runs the checks, refuses stale RESUME HERE notes, rebuilds the planner, syncs the setup (never over the laptop's newer changes); saying "going to bed" with unpushed work can't end the turn; release.mjs checks every /deliver gate first and lists all that's missing; new merge.mjs, live-check.mjs, rollback.mjs; Stop checks hold until fixed (3 tries); rule-kind flags any new rule line without ①/②/③.
-- Next: /sprint for sprint 16. Research first for any new module or system (/sprint step 7).
+- Next: build F84 tasks 1–4, then F85 tasks 5–8, review, hand to Muzzy.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters.
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
 - dev/conformance merged into main 2026-10-19 (v0.10.1); the helper workspace is gone. Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -12,8 +12,8 @@
 Reviewed through: framework e98126d (d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: deliver   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: none open (15 archived)
-Doing: released v0.10.2 — next /sprint   Branch: main   Version: 0.10.2 (UI kit 0.21.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 16 — every release says what changed and ships nothing risky
+Doing: F84 — building   Branch: dev/v0-10   Version: 0.10.2 (UI kit 0.21.0 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.2
 
 ## Key facts
