@@ -24,7 +24,7 @@ async function badgeCheck(t) {
     const page = await t.page({ width, height, mobile: true })
     try {
       const reason = await t.startPlay(page)
-      if (reason) return t.skip(BADGE_CHECK, 'live play didn\'t start at a phone size')
+      if (reason) return t.skip(BADGE_CHECK, `live play didn't start at ${width}×${height} (${reason.replace(/^threw:/, 'startPlay threw: ')})`)
       await page.evaluate(() => window.__devkit.pause('full'))
       await page.waitForTimeout(300)
       const seen = await page.evaluate(badgeOverHud, { spots: BADGE_SPOTS })

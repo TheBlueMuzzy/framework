@@ -24,8 +24,9 @@ export function badgeOverHud({ spots }) {
   const name = (el) => (el.getAttribute('aria-label') || el.textContent || el.tagName.toLowerCase()).trim().replace(/\s+/g, ' ').slice(0, 40)
   const textNodes = (el) => [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim())
 
-  // The game's words (an element with text of its own: the boxes of its text, not its whole box) and controls (their box)
-  const controls = [...document.querySelectorAll('button, a[href], input, select, textarea, [role="button"], [role="slider"], [role="switch"], [role="tab"]')]
+  // The game's words (an element with text of its own: the boxes of its text, not its whole box), controls and meters
+  // (a health bar the pill hides is a reading lost) — their box
+  const controls = [...document.querySelectorAll('button, a[href], input, select, textarea, [role="button"], [role="slider"], [role="switch"], [role="tab"], [role="progressbar"], [role="meter"]')]
     .filter((el) => !ours(el) && shown(el))
   const texts = [...document.body.querySelectorAll('*')]
     .filter((el) => !['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE'].includes(el.tagName) && !ours(el) && textNodes(el).length && shown(el))

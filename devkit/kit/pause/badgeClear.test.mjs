@@ -56,6 +56,11 @@ describe('badgeOverHud', () => {
     expect(seen.over).toEqual({ top: [], bottom: [] })
   })
 
+  it('a meter (a health bar) counts, by its name', async () => {
+    const seen = await overOn(`<div role="progressbar" aria-label="Integrity" style="position:fixed;bottom:6px;left:20px;right:20px;height:24px;background:#3a3"></div>${pill('bottom')}`, ['bottom', 'top'])
+    expect(seen.over).toEqual({ bottom: ['Integrity'], top: [] })
+  })
+
   it('the Dev Kit\'s own parts never count', async () => {
     const seen = await overOn(`<div class="devkit-corner" style="position:fixed;top:6px;left:0;right:0;text-align:center">Dev Kit</div>${pill('top')}`, ['top'])
     expect(seen.over.top).toEqual([])
