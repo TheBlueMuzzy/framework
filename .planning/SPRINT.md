@@ -18,7 +18,7 @@ Done when: release.mjs refuses an alpha / beta / 1.0 release without `.planning/
 - [x] 🤖 6. release.mjs: a stage release refuses while the checklist is missing, unfilled, or has an unticked line, naming each; `release-check.mjs <stage>` writes the list for that stage (--dry-run stays change-nothing) — ~/.claude/config/bmuz/scripts/release.mjs, ~/.claude/config/bmuz/scripts/release-check.mjs
 - [x] 🤖 7. Beta and later: any credits.json entry marked stand-in (and stand-in files the check can find) refused, naming each — ~/.claude/config/bmuz/scripts/release.mjs
 - [x] 🤖 8. Tests + /deliver step + PROJECT-FILES format line — ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/skills/deliver/SKILL.md, ~/.claude/config/bmuz/PROJECT-FILES.md
-- [ ] 🙋 9. Read the checklist template — anything a real alpha / beta check needs that's missing? — ~/.claude/config/bmuz/templates/release-check.md
+- [x] 🙋 9. Read the checklist template — anything a real alpha / beta check needs that's missing? — ~/.claude/config/bmuz/templates/release-check.md
 Check: a scratch game's beta release with no checklist, a half-ticked one, or a stand-in sprite in credits.json is refused naming each line; a full one passes; an update release never asks for it.
 Checked: release-stage-checks suite 14/14 in scratch games (alpha with no list → refused naming the file + release-check.mjs; untouched list → 8 lines named once; half done → only Devices unticked + Store page unfilled; a deleted line named; full → passes; stand-in fine at alpha; beta list adds No stand-in art + Bugs; beta with a credits "stand-in", `standIn: true`, a placeholder-card.png and an open (stand-in) task → refused naming all 4, not the OFL font or the ticked task; --no-release-check-ok on record in the commit; 1.0 list adds Name check + Press kit; update release never asks) · real games read-only: a beta today would flag only Glyphtender's own art (credits: "stand-in until redrawn"), nothing in Roll Better / Goops / Windchime / EPS · test-scripts 258/258 (D4 + F87 stage tests now fill a checklist), test-hooks 518/518 (Claude ran).
 Ask Muzzy: —
@@ -33,3 +33,9 @@ Notes:
 - F83: the checklist is written by its own script (`release-check.mjs <stage>`), not `release.mjs --dry-run` — a dry run promises to change nothing. Extra lines beyond the plan (Phone sizes, What they got stuck on, Sound and settings, Credits, beta+ Bugs) come from what indie release checklists ask; Muzzy reads them in task 9. Override `--no-release-check-ok` like the other stage gates (on record in the release commit).
 - F82 review (helper, Claude fixed + tests): ① `**Live: <url>**` read the `**` as part of the address → false DOWN; addresses now drop trailing `*.,;:'"]` (live-check reads STATE through the same helper) · ② a stuck name lookup could outlive the 3 s limit → session-start runs live-ping under `timeout 5`.
 - F83 review (helper, Claude fixed + tests, test-scripts 262/262): ① `beta2` / `rc1` / `open-beta` counted as alpha → stage names match without a word break · ② a real answer with `<https://…>` or "under <10 min" read as unfilled → only the template's own long <prompt> counts · ③ `PlaceholderIcon.png` / `standInHero.webp` missed → camelCase split first · ④ a null entry or `"paths": "one string"` in credits.json crashed the release → odd shapes skipped, `{ entries: [...] }` read.
+- Muzzy 2026-10-20: F82 + F83 approved, the release checklist as written (task 9 — no changes asked).
+
+Retro:
+- went well: built and reviewed in one night, real games checked read-only
+- went wrong: the reviews found 6 bugs; Windows (exit crash) and Cloudflare (404 for a missing worker) surprises cost time
+- change: run the review helper earlier — mid-feature, not at the end

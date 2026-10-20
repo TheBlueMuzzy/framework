@@ -1,8 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 17 built, waiting for Muzzy's OK: F82 (is the live game up?) + F83 (stage-release checklist)** on `dev/v0-10`. F82: session start asks STATE's Live page + the room server in ≤ 3 s and says "DOWN" only when one is (hooks/live-ping.mjs); live-check pings the room server's /health; rooms kit 0.8.0 answers /health. F83: an alpha / beta / 1.0 release is refused until `.planning/archive/release-checks/<stage>.md` is filled + ticked (scripts/release-check.mjs writes it); from beta no stand-in art. Both reviewed by a helper (2 + 4 findings, all fixed + tests). Next: Muzzy says "approved" → F82/F83 done, retro, archive, /sprint 18 (F93 run resume + F95 online rejoin). Queue after: 19 F96 + F94 · 20 F97 + F98 + F99.
-- Muzzy: task 9 — read ~/.claude/config/bmuz/templates/release-check.md (anything a real alpha/beta check needs that's missing?), then approve F82 + F83.
+2026-10-20 — **Sprint 17 done (approved): F82 the live-game check + F83 the stage-release checklist** on `dev/v0-10` (not released yet — /deliver when the milestone's ready). Session start says "DOWN" only when STATE's Live page or room server is; alpha / beta / 1.0 releases need `.planning/archive/release-checks/<stage>.md` filled + ticked, and no stand-in art from beta. Rooms kit 0.8.0 answers /health (Glyphtender / Roll Better get it at their next rooms update). Next: /sprint 18 — F93 run resume + F95 online rejoin. Queue after: 19 F96 + F94 · 20 F97 + F98 + F99 (Muzzy 2026-10-20: "I want you to do all of them").
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -13,7 +12,7 @@ Reviewed through: framework f50a74e (sprint 17 review: F82 2 findings + F83 4, a
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 17 — releases and live games get watched for you (F82, F83)
-Doing: Sprint 17 built (F82, F83) — waiting for Muzzy's OK   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
+Doing: Sprint 17 done — next /sprint 18   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.22.1 · Dev Kit 0.20.4 · audio 0.3.2 · saves 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
@@ -33,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-20 — F82 + F83 approved: session start warns when a live game or its online server is down, and alpha / beta / 1.0 releases need a filled-in release checklist.
 - 2026-10-20 — Sprint 17 built (waiting for OK): session start now says when a live game or its room server is down, and alpha / beta / 1.0 releases need a filled-in release checklist (no stand-in art from beta).
 - 2026-10-20 — Released v0.10.3: every release now carries patch notes players can read, and refuses risky code packages; games can show their open-source licences in Credits.
 - 2026-10-19 — Released v0.10.2: games can install the Saves module — saved games survive updates, broken writes and (with a save code) browsers that wipe data.
