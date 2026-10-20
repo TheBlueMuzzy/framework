@@ -180,7 +180,8 @@ export async function check(t) {
     // Layer 3 (0.4.0): a record is only worth keeping if replaying it gives back the SAME game — a rule that reads the
     // clock or Math.random would make Continue land on a different board. Only a test that replays and compares proves it.
     const name = 'a game kept as seed + moves has a replay test'
-    const keeps = code.filter((f) => /\brecordRun\s*\(/.test(withoutComments(f.text)))
+    // (recordRun<GameSetup, Action>({ … }) counts too — Glyphtender's record.ts writes it with its types)
+    const keeps = code.filter((f) => /\brecordRun\s*(<[^>]*>)?\s*\(/.test(withoutComments(f.text)))
     if (!keeps.length) {
       t.skip(name, 'no recordRun in the game\'s code')
     } else {

@@ -5,9 +5,10 @@
 //   const RULES_VERSION = 3                                          // +1 when a rule change would replay old games differently
 //   let record = recordRun({ rulesVersion: RULES_VERSION, setup })   // a new game
 //   record = addRunMove(record, seat, action, 'bot')                 // every move, people's AND the AI's
-//   matchRun.autosave({ record })                                    // the run IS the record (layer 2 keeps it)
-//   const back = replayRun(rules, record, { rulesVersion: RULES_VERSION })   // { ok, state } | { ok: false, reason, message }
-//   sameResult(liveGame, back.state, fingerprint)                    // did the replay land on exactly the live game?
+//   matchRun.autosave({ record, print: fingerprint(game) })          // the run IS the record (layer 2 keeps it)
+//   const back = replayRun(rules, record, { rulesVersion: RULES_VERSION, matches: { live: print, view: fingerprint } })
+//                                                                    // { ok, state } | { ok: false, reason, message }
+//   sameResult(liveGame, replayed, fingerprint)                      // did a replay land on exactly the live game? (tests)
 //   startGame({ seed: dailySeed('glyphtender') })                    // today's game — the same on every device
 //
 // What the game must keep: randomness lives IN the state (a seeded position, like Glyphtender's mulberry32), so the
@@ -45,13 +46,14 @@ export interface RunRecord<Setup, Action> {
 
 export type ReplayResult<State> =
   | { ok: true; state: State }
-  | { ok: false; reason: 'other-version' | 'move-refused' | 'damaged'; message: string; move?: number }
+  | { ok: false; reason: 'other-version' | 'move-refused' | 'damaged' | 'different'; message: string; move?: number }
 
 /** The replay's player-facing words — replace any of them (another language, the game's own voice). */
 export const REPLAY_WORDS = {
   otherVersion: 'This game was played under a different version of the rules, so it can\'t be rebuilt. Start a new game.',
   moveRefused: 'This game can\'t be rebuilt — one of its moves isn\'t allowed by today\'s rules. Start a new game.',
   damaged: 'This game\'s record is damaged, so it can\'t be rebuilt. Start a new game.',
+  different: 'This game came back different from how it was left, so it can\'t be continued. Start a new game.',
 }
 
 /** A new record — or a copy of one with its moves so far. Plain data, nothing shared with what was passed in. */
@@ -81,12 +83,19 @@ export function addRunMove<Setup, Action>(
  *    DIFFERENT game — a wrong Continue, a wrong score — so it's never tried);
  *  - a move today's rules refuse → refused, naming the move;
  *  - not a record at all (cut off, edited by hand) → damaged.
+ *  - `matches` given (the live game, or its fingerprint saved beside the record) and the replay lands somewhere else →
+ *    'different' (a rule that read the clock or Math.random): refused, never shown as if it were the player's game.
  * `everyMove(state, i)` sees the game after each move (tests compare it to the live game's fingerprint).
  */
 export function replayRun<State, Action, Setup>(
   rules: ReplayRules<State, Action, Setup>,
   record: RunRecord<Setup, Action>,
-  options: { rulesVersion: number | string; everyMove?: (state: State, move: number) => void; words?: Partial<typeof REPLAY_WORDS> },
+  options: {
+    rulesVersion: number | string
+    matches?: { live: State | string; view?: (state: State) => unknown }
+    everyMove?: (state: State, move: number) => void
+    words?: Partial<typeof REPLAY_WORDS>
+  },
 ): ReplayResult<State> {
   const w = { ...REPLAY_WORDS, ...options.words }
   if (!looksLikeRecord(record)) return { ok: false, reason: 'damaged', message: w.damaged }
@@ -107,6 +116,7 @@ export function replayRun<State, Action, Setup>(
     }
     options.everyMove?.(state, i + 1)
   }
+  if (options.matches && !sameResult(options.matches.live, state, options.matches.view)) return { ok: false, reason: 'different', message: w.different }
   return { ok: true, state }
 }
 

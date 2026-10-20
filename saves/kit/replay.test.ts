@@ -141,6 +141,18 @@ describe('refusals — plain words, never a wrong game, never a throw', () => {
     expect(replayRun(race, { ...live.record, rulesVersion: '1.4' }, { rulesVersion: '1.5' }).ok).toBe(false)
   })
 
+  it('a replay that lands on a different game than the one left is refused (matches: the saved fingerprint)', () => {
+    const live = playLive(12)
+    const print = (s: Race) => s.rolls.join('-')
+    const same = replayRun(race, live.record, { rulesVersion: 3, matches: { live: print(live.state), view: print } })
+    expect(same.ok).toBe(true)
+    // a setup that changed under the record (as if it read the clock): the same moves play, but it's another game
+    const leaky = { ...race, setup: (input: RaceSetup) => ({ ...race.setup(input), rolls: [Date.now() % 6] }) }
+    expect(replayRun(leaky, live.record, { rulesVersion: 3, matches: { live: print(live.state), view: print } }))
+      .toEqual({ ok: false, reason: 'different', message: REPLAY_WORDS.different })
+    expect(replayRun(race, live.record, { rulesVersion: 3, matches: { live: { ...live.state, rolls: [] } } }).ok).toBe(false) // whole state
+  })
+
   it('a move the rules refuse says which move', () => {
     const live = playLive(9)
     const forged = recordRun({ ...live.record, moves: [live.record.moves[0], { seat: 0, action: { type: 'roll' } }] }) // seat 0 twice

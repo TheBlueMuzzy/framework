@@ -159,6 +159,14 @@ describe('seed + move log (layer 3, 0.4.0)', () => {
     expect(results.at(-1)).toMatchObject({ ok: true, detail: 'tests/record.test.ts' })
   })
 
+  it('a recordRun written with its types (recordRun<GameSetup, Action>(…)) is found too (F94 proof)', async () => {
+    const typed = { path: 'src/game/record.ts', text: 'export const newRecord = (setup) => recordRun<GameSetup, Action>({ rulesVersion: RULES_VERSION, setup })\n' }
+    const { t, results } = tester({ code: [typed] })
+    await check(t)
+    expect(results.at(-1).ok).toBe(false)
+    expect(results.at(-1).problems[0]).toContain('src/game/record.ts keeps a record')
+  })
+
   it('a record kept but no replay test (or one that never compares) → fails with the fix', async () => {
     const onlyReplays = { path: 'src/store/x.test.ts', text: 'replayRun(rules, record, { rulesVersion: 1 })\n' }
     const { t, results } = tester({ code: [keeper], testFiles: [onlyReplays, { path: 'tests/record.ts', text: replayTest.text }] })
