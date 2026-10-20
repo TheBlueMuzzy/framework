@@ -1,7 +1,7 @@
 // Runs in the framework (not copied into games): the snapshot list kept in this browser.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  addSnapshot, cleanName, deleteSnapshot, isSnapshot, loadSnapshots, snapshotFilePath, snapshotForClaude, snapshotMatches, type Snapshot,
+  addSnapshot, cleanName, deleteSnapshot, isSnapshot, loadSnapshots, snapshotFilePath, snapshotForClaude, snapshotMatches, versionTag, type Snapshot,
 } from './snapshotStore'
 
 const snap = (name: string, state: unknown = { turn: 1 }): Snapshot => ({
@@ -84,5 +84,12 @@ describe('snapshotMatches — the Snapshots tab search', () => {
     expect(snapshotMatches(s, '0.1.0.12')).toBe(true)
     expect(snapshotMatches(s, 'red')).toBe(false)
     expect(snapshotMatches(s, '')).toBe(true)
+    // 0.20.5: the version module's "v0.1.0.12" (one format kit-wide) is found the same way
+    expect(snapshotMatches({ ...s, version: 'v0.1.0.12' }, 'v0.1.0.12')).toBe(true)
+  })
+
+  it('versionTag shows one format, vX.Y.Z.B, whichever way the adapter gives it', () => {
+    expect(versionTag('0.1.0.12')).toBe('v0.1.0.12')
+    expect(versionTag('v0.1.0.12')).toBe('v0.1.0.12')
   })
 })

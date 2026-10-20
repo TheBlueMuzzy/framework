@@ -115,7 +115,8 @@ from `src/devkit-game/tabs.ts` (which only loads with the Dev Kit — so the ada
 import type { DevKitGame } from '../devkit/devkitGame'
 export const myGameAdapter: DevKitGame = {
   name: 'My Game',
-  version: '0.1.0.12',                        // stamped on snapshots and captures
+  version: versionLabel,                      // 'v0.1.0.12' — the version module's label (import from '../version'): the
+                                              // same words as the main menu + Settings, stamped as given on snapshots and bug files
   getState: () => ({ board, turn }),          // this exact moment, as plain JSON (no Maps, Sets, classes, functions)
   setState: (state) => { /* put the game back to a getState() moment; throw with a plain reason if it's junk */ },
   canRestore: () => !isOnline,                // MUST be false in online games (tools that affect play are offline-only)
@@ -469,4 +470,7 @@ to search sets `searchable: false` (no box).
 `npm install`, then `npm test` (panel, Sound tab (list, knobs, A/B, files + upload + credits, mixer, log, wildcard notes, waveform maths, the knobs matching audio/kit/config.ts; Music section: tracks, layers, intensity, rests, the music knobs matching config.ts), save-audio + credit endpoints (path safety; conversion when ffmpeg is installed), AI tab (editor, save, copy, watch, check, search), Review list tab (Open/Yes/No cycle, order + no re-sort until Save, Save sends only changes, failed save/load, search), Text tab (flatten / unflatten keep order + lists, {placeholder} check holds Save, search, fresh-read save, no-change save byte-identical on Glyphtender's en.json), dot carousel, screen previews (list, overlay, Esc / Back, sandbox blocks), colour logic against the real UI kit, tuning logic + tab + live hook, live files (liveFile) + the Vite live-JSON step + the live guard, the two clocks (gameClock) + Pause (generic freeze, adapter calls, buttons, badges, P), game adapter registry, snapshot store + tab, capture log / recorder / report + tab, the Vite plugin in a real dev server, installer, release-check helpers) and `npm run typecheck`.
 - `npm run lint` — the framework's one ESLint setup (`../eslint.config.js`, the games' rules; `npm install` once in the framework root). Before 0.20.3 the framework had no ESLint and games ignore their kit copies, so Dev Kit 0.8.0 went out with 3 hooks errors that only showed up inside Glyphtender. 0.20.3: the Sound/AI tab tests lost their `any`s and an unused parameter (tests only, no behaviour change).
 - 0.20.4: `check:framework` knows the Saves module (framework F86): `src/saves/` is framework code (skipped when checking the game's own code) and its update hint is `node <framework>/saves/scripts/install-saves.mjs .`.
+- 0.20.5 (framework F102): one version format kit-wide, "vX.Y.Z.B" — the adapter's `version` is the version module's
+  `versionLabel` and is stamped as given on snapshots and bug files; the Snapshots tab shows an older adapter's
+  "0.1.0.12" as v0.1.0.12 (`versionTag`, never "vv…"). `check:framework` knows the version module (`src/version/`).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
