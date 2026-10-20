@@ -26,3 +26,8 @@ Notes:
 - Lesson → install-saves + its test: a file copied into a game ONCE (worker templates) falls behind the kit silently — every such template has a version and the installer lists what changed. (Other modules' once-copied starters could do the same — rooms' party/ server: for its own next change.)
 - Left as they are: the first-launch copy also takes the game's own keys that game code reads from localStorage directly (glyphtender:tutorial — harmless; those stay readable in the WebView); a live board deployed from template 1–2 would need its `attempts` column added (no board is deployed anywhere — F98 is unreleased).
 - Muzzy 2026-10-20: "approved" (F101).
+
+Retro: (Claude's draft from Notes — Muzzy ran /sprint twice without changing it, 2026-10-20; his words win if he edits it)
+- went well: measuring first proved the design before it was built (one loadAll ≈ 6 ms, 5 files); the scratch-game proof caught bugs unit tests missed (the hide-save wait, a stale board worker)
+- went wrong: the sprint was planned twice (store + Unity backends we can't test yet, until the Steam answer), and the first platform layer had a data-loss bug (backups dropped after a full storage) the review caught
+- change: ask about missing accounts / platforms / tools before planning a sprint that needs them, not after
