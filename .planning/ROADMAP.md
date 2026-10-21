@@ -185,7 +185,7 @@ flowchart LR
   F78 --> F80
 ```
 
-## v0.10 — A whole studio around one designer  ← current  · planned 2026-10-19 (from F80's studio gap list)
+## v0.10 — A whole studio around one designer  ✅ released 2026-10-21 (v0.11.0)  · planned 2026-10-19 (from F80's studio gap list)
 Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should too… simulate having a full team of checks and SOPs… as automated as possible because the people who use BMUZ (me) won't KNOW what to do." Each feature is one studio role's routine (producer, QA, release engineer, tech lead…), done by a trigger, never by memory. Source: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md` §4 (ranked by what would hurt a solo designer most). Already landing in F80: release checklist inside release.mjs, live check after a deploy, rollback, the look-back trigger. Order is Muzzy's call at /sprint.
 - ✅ F81 🔧 Producer's eye at every session start: sprint age ("Sprint 07 is 9 days old, the last 3 took ~4"), days to the milestone's `target:` date + musts done, features stuck in 🔨/🎛️ with no commits for 7+ days, open 🙋 tasks + `Ask Muzzy:` count, fixes waiting for Muzzy's check; plan-lint flags ⏳ features that became ready; archive-sprint refuses without a 3-line mini retro (went well · went wrong · change) — should · gap ranks 4, 5, 11 · sprint 13
 - ✅ F82 🔧 Is the live game up? Session start does a 3-second check of STATE's Live URL and says "the live site is DOWN" only when it is; live-check.mjs also pings the room server's health URL — should · needs: F80 · gap rank 1 · sprint 17
