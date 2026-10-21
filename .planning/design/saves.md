@@ -105,7 +105,7 @@ A finished Daily game (layer 3) goes to **the game's own board worker** as its r
 - **Use a solver.** A bot that finds the best legal moves produces a legal record — any leaderboard without a watched game has this.
 - **Many player ids.** A cleared browser is a new player: more tries and more names on the board, up to `sendsPerDay` per address (30) and more with many addresses (until the 3,000 a day server cap).
 - **Fill the day** with legal low scores from many addresses up to the server cap ("busy" for everyone until midnight UTC) — a nuisance, not a wrong score.
-- **Guessing** a player id (128 bits) or a removal is hopeless and limited; names and days hide nothing (the board is public).
+- **Guessing** a player id (128 bits) or a removal is hopeless and limited; names and days hide nothing (the board is public). "Remove my score" has only the per-address limit, no server-wide cap, so a flood of wrong removals can't block anyone's (security review, v0.11.0).
 
 ## Decisions
 - **The record:** `{ save: <key>, version, savedAt, data, counts? }` — `save` marks it as ours and which save it is (a record pasted under the wrong key is refused). Kept as JSON text in localStorage (5 MiB is plenty for layer 0; IndexedDB later only if a game needs more).

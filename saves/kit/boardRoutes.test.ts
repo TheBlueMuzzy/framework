@@ -257,6 +257,15 @@ describe('under pressure (security review from the first brief)', () => {
     expect(rows.scores).toHaveLength(1)
   })
 
+  it('a flood of wrong removals from many addresses never blocks a real "Remove my score"', async () => {
+    const { call, send, rows } = setup()
+    await send()
+    for (let i = 0; i < 5_000; i++) rows.bump('*', 'wrong', TODAY) // old server-wide counter, well past its old cap
+    for (let i = 0; i < 20; i++) await call('/board/remove', { day: TODAY, player: `guess-number-${String(i).padStart(6, '0')}` }, { address: `2001:db8:${i}::1` })
+    expect((await call('/board/remove', { day: TODAY, player: PLAYER })).body).toEqual({ ok: true })
+    expect(rows.scores).toHaveLength(0)
+  })
+
   it('addresses and player ids are only kept as keyed hashes; nothing sent back names another player', async () => {
     const { rows, call, send } = setup()
     await send()

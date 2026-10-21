@@ -224,9 +224,9 @@ export const MOVES_PER_STEP = 10
 /** A waiting game whose step has started this many times without finishing (it ran out of time, or broke) is
  *  refused and dropped — so one bad game can't hold up every game behind it (review F98). */
 export const MAX_STEP_ATTEMPTS = 3
-/** Wrong "remove my score" tries one address may make in a day, and the whole server. */
+/** Wrong "remove my score" tries one address may make in a day. No server-wide cap: the proof is a 128-bit player
+ *  id nobody can guess, so a cap would protect nothing and only let a flood block everyone's removal (v0.11.0 review). */
 export const WRONG_REMOVES_PER_DAY = 10
-export const SERVER_WRONG_PER_DAY = 2_000
 /** A whole game's record is a few KB (Glyphtender: ~8,000 characters); 100,000 is far past any real one. */
 export const MAX_RECORD_CHARS = 100_000
 const EVERYONE = '*'
@@ -317,12 +317,10 @@ export async function handleBoard<State, Action, Setup>(request: Request, contex
 
   // /board/remove — the player id is the proof it's yours (random, only on the player's device)
   if (rows.count(who, 'wrong', today) >= WRONG_REMOVES_PER_DAY) return refuse('too-many', 429)
-  if (rows.count(EVERYONE, 'wrong', today) >= SERVER_WRONG_PER_DAY) return refuse('server-busy', 429)
   const day = body?.day
   if (!player || !isDay(day)) return refuse('bad-request', 400)
   if (!rows.remove(day, player)) {
     rows.bump(who, 'wrong', today)
-    rows.bump(EVERYONE, 'wrong', today)
     return refuse('not-found', 404)
   }
   return json({ ok: true })
