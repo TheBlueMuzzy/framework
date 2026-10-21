@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-20 — **Sprint 23 built (F104 waiting for OK): a game says "portrait only" once** — content/ui/style.json `"orientation"` ("any" · "portrait" · "landscape"), honoured by check:framework (sideways sizes skipped and said so), the PAUSED pill check and the helper briefs (develop + game-ui skills) on `dev/v0-10` (UI kit 0.26.0 · Dev Kit 0.21.1 · version 0.1.0 · saves 0.6.0 — unreleased). **Next: Muzzy's OK on F104 → `F104: done`, sprint 23 retro.** Goops' hand-over note (ui-kit/README.md) now includes `"orientation": "portrait"`.
+2026-10-21 — **F104 ✅ done (Muzzy approved): a game says "portrait only" once** — content/ui/style.json `"orientation"` ("any" · "portrait" · "landscape"), honoured by check:framework, the PAUSED pill check and the helper briefs, on `dev/v0-10` (UI kit 0.26.0 · Dev Kit 0.21.1 — unreleased). **Next: sprint 23 retro (3 lines from Muzzy) → archive sprint 23 → `/sprint` for sprint 24.** Goops' hand-over note (ui-kit/README.md) includes `"orientation": "portrait"`.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework 22270d1 (sprint 23 F104: small diff read whole by Cl
 
 ## Where we are
 Stage: develop   Milestone: v0.10 — A whole studio around one designer (v0.9 left: F62 Goops, F64/F65)   Sprint: 23 — a game says "portrait only" once (F104)
-Doing: F104 — building   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.25.0 · Dev Kit 0.21.0 · audio 0.3.2 · saves 0.6.0 · version 0.1.0 · rooms 0.10.0 — unreleased on dev/v0-10)
+Doing: sprint 23 retro   Branch: dev/v0-10   Version: 0.10.3 (UI kit 0.26.0 · Dev Kit 0.21.1 · audio 0.3.2 · saves 0.6.0 · version 0.1.0 · rooms 0.10.0 — unreleased on dev/v0-10)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.10.3
 
 ## Key facts
