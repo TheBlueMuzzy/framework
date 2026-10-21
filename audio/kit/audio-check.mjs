@@ -18,7 +18,7 @@
 //
 // Exit code: 0 = the report ran (even with flagged files — it's a report), 1 = it couldn't run (no ffmpeg, a broken
 // file it couldn't read or write).
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from 'node:fs'
+import { constants, copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -116,7 +116,9 @@ export async function fixSounds(gameDir, rows, { ffmpeg, settings }) {
         kept = join(originalsDir, row.rel)
         if (!isInside(originalsDir, kept)) throw new Error(`Not allowed: ${row.rel} would be kept outside ${ORIGINALS_DIR}/`)
         mkdirSync(dirname(kept), { recursive: true })
-        copyFileSync(target, kept)
+        // checked again now its folder exists: a linked folder inside audio-originals/ can't lead the copy elsewhere
+        if (!isInside(originalsDir, dirname(kept))) throw new Error(`Not allowed: audio-originals/${dirname(row.rel)} points outside ${ORIGINALS_DIR}/`)
+        copyFileSync(target, kept, constants.COPYFILE_EXCL) // never over an existing file
       }
       const keptAt = relative(gameDir, kept).replaceAll('\\', '/')
       // never make it worse: a result no closer to the target (a file whose loudness IS its spikes — already limited)

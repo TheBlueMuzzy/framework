@@ -2,7 +2,7 @@
 // The report's parts are tested on made-up folders; the full run (measure → --fix → measure) needs ffmpeg and is
 // skipped without it.
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -113,6 +113,22 @@ describe('the command', () => {
     await main(['--fix', game], { log })
     expect(readFileSync(join(game, 'audio-originals/sfx/sfx_test_quiet_01.mp3')).equals(quietBefore)).toBe(true)
   }, 60000)
+
+  it.skipIf(!ffmpeg)('a linked folder in audio-originals/ never leads a copy outside it', async () => {
+    const outside = mkdtempSync(join(tmpdir(), 'audio-check-outside-'))
+    try {
+      mkdirSync(join(game, 'public/audio/sfx'), { recursive: true })
+      execFileSync(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'aevalsrc=0.01*sin(2*PI*800*t):s=44100:d=0.3', '-ac', '1', join(game, 'public/audio/sfx/sfx_test_quiet_01.mp3')])
+      const before = readFileSync(join(game, 'public/audio/sfx/sfx_test_quiet_01.mp3'))
+      mkdirSync(join(game, 'audio-originals'))
+      symlinkSync(outside, join(game, 'audio-originals/sfx'), 'junction')
+      const said = []
+      expect(await main(['--fix', game], { log: (l) => said.push(l) })).toBe(1)
+      expect(said.join('\n')).toMatch(/Not allowed: audio-originals\/sfx points outside/)
+      expect(readdirSync(outside)).toEqual([])
+      expect(readFileSync(join(game, 'public/audio/sfx/sfx_test_quiet_01.mp3')).equals(before)).toBe(true) // untouched
+    } finally { rmSync(outside, { recursive: true, force: true }) }
+  }, 30000)
 
   it.skipIf(!ffmpeg)('reads the targets from content/audio.json', async () => {
     mkdirSync(join(game, 'public/audio/ui'), { recursive: true })

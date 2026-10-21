@@ -24,7 +24,7 @@
 // ffmpeg: the system's `ffmpeg` (or the FFMPEG_PATH environment variable). Missing → a clear message:
 //   "install ffmpeg: winget install Gyan.FFmpeg" (Mac: brew install ffmpeg).
 import { execFile, spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -229,7 +229,9 @@ function keepOriginal(root: string, target: AudioTarget, name: string, bytes: Bu
   const original = resolve(originalsDir, `${name.replace(/\.mp3$/, '')}.${target.ext}`)
   if (!original.startsWith(originalsDir + sep) || existsSync(original)) return
   mkdirSync(originalsDir, { recursive: true })
-  writeFileSync(original, bytes)
+  // a linked folder in audio-originals/ can't lead the copy elsewhere
+  if (realpathSync(originalsDir) !== join(realpathSync(root), 'audio-originals', target.folder)) return
+  writeFileSync(original, bytes, { flag: 'wx' }) // never over an existing file
 }
 
 // ---------- credits ----------

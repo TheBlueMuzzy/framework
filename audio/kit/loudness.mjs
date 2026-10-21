@@ -283,11 +283,16 @@ export function limitPeaks(channels, sampleRate, limitDb) {
   if (need.every((n) => n === 1)) return channels.map((ch) => ch.slice()) // nothing over the limit: nothing to do
   // 2. look ahead: the lowest need in the next 2 ms (a min-hold), then a 1 ms average to smooth the dip —
   //    the average of a 2-wide hold over 1 ms is never above what the spike itself needs
+  //    (the lowest in a sliding window, kept in a queue so a 3-minute song takes a moment, not minutes)
   const held = new Float32Array(length)
-  for (let i = 0; i < length; i++) {
-    let low = 1
-    for (let j = i; j < Math.min(length, i + 2 * ahead); j++) low = Math.min(low, need[j])
-    held[i] = low
+  const window = 2 * ahead
+  const queue = new Int32Array(length) // sample numbers whose need is rising from front to back
+  let front = 0, back = 0
+  for (let j = length - 1; j >= 0; j--) { // walk backwards: the window is [j, j + window)
+    while (back > front && need[queue[back - 1]] >= need[j]) back--
+    queue[back++] = j
+    while (queue[front] >= j + window) front++
+    held[j] = need[queue[front]]
   }
   const gain = new Float32Array(length)
   let sum = ahead // the 1 ms before the start counts as "no dip"
