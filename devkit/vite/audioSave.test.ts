@@ -6,15 +6,19 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { encodeArgs, FFMPEG_MISSING, findFfmpeg, findOnsetSec, nextFileName, readAudioTarget, readCreditEntry, saveAudioFile } from './audioSave'
+import { encodeArgs, FFMPEG_MISSING, findFfmpeg, findOnsetSec, LOUDNESS_MISSING, nextFileName, readAudioTarget, readCreditEntry, saveAudioFile } from './audioSave'
 import { devkit } from './devkitVite'
+// The audio module's loudness matcher — in a game it sits at src/audio/loudness.mjs (the tests copy it there)
+// @ts-expect-error: a plain JS file with no type declarations (fine for a test)
+import * as loudness from '../../audio/kit/loudness.mjs'
+const AUDIO_LOUDNESS_FILE = new URL('../../audio/kit/loudness.mjs', import.meta.url)
 
 const ffmpeg = findFfmpeg()
 /** ffmpeg's description of a file's sound stream, e.g. "Audio: mp3 (mp3float), 44100 Hz, mono, fltp, 96 kb/s" */
 const describe_ = (file: string) => spawnSync(ffmpeg!, ['-hide_banner', '-i', file], { encoding: 'utf8' }).stderr.match(/Audio: .*/)?.[0] ?? ''
 
-/** A 16-bit mono WAV: `silenceMs` of nothing, then a 440 Hz tone for `toneMs`. */
-function makeWav(silenceMs: number, toneMs: number, rate = 44100): Buffer {
+/** A 16-bit mono WAV: `silenceMs` of nothing, then a 440 Hz tone for `toneMs` (`level`: its peak, out of 32767). */
+function makeWav(silenceMs: number, toneMs: number, rate = 44100, level = 20000): Buffer {
   const silent = Math.round((silenceMs / 1000) * rate)
   const tone = Math.round((toneMs / 1000) * rate)
   const samples = silent + tone
@@ -31,7 +35,7 @@ function makeWav(silenceMs: number, toneMs: number, rate = 44100): Buffer {
   wav.writeUInt16LE(16, 34)
   wav.write('data', 36)
   wav.writeUInt32LE(samples * 2, 40)
-  for (let i = 0; i < tone; i++) wav.writeInt16LE(Math.round(Math.sin((2 * Math.PI * 440 * i) / rate) * 20000), 44 + (silent + i) * 2)
+  for (let i = 0; i < tone; i++) wav.writeInt16LE(Math.round(Math.sin((2 * Math.PI * 440 * i) / rate) * level), 44 + (silent + i) * 2)
   return wav
 }
 
@@ -176,6 +180,8 @@ describe('the sound endpoints in a real Vite dev server', () => {
     expect(body).toMatchObject({ ok: true, path: 'sfx/sfx_test_pop_01.mp3', file: 'public/audio/sfx/sfx_test_pop_01.mp3' })
     expect(body.trimmedMs).toBeGreaterThanOrEqual(72)
     expect(body.trimmedMs).toBeLessThanOrEqual(80)
+    expect(body.loudness).toBe(LOUDNESS_MISSING) // this made-up game has no audio module: converted, not levelled
+    expect(existsSync(join(game, 'audio-originals'))).toBe(false)
     const saved = join(game, 'public/audio/sfx/sfx_test_pop_01.mp3')
     // Mono 96k, and the sound now starts (nearly) at once: decode it back and find its onset
     expect(describe_(saved)).toMatch(/mp3.*mono.*96 kb\/s/)
@@ -186,6 +192,30 @@ describe('the sound endpoints in a real Vite dev server', () => {
     const again = await upload('folder=sfx&stem=sfx_test_pop&bus=sfx&ext=wav', makeWav(0, 100))
     expect((await again.json()).path).toBe('sfx/sfx_test_pop_02.mp3')
     expect(readdirSync(join(game, 'public/audio/sfx')).sort()).toEqual(['sfx_test_pop_01.mp3', 'sfx_test_pop_02.mp3'])
+  }, 30000)
+  it.skipIf(!ffmpeg)('with the audio module (0.4.0+): a quiet effect lands at its target, and the dropped file is kept', async () => {
+    mkdirSync(join(game, 'src/audio'), { recursive: true })
+    writeFileSync(join(game, 'src/audio/loudness.mjs'), readFileSync(AUDIO_LOUDNESS_FILE))
+    const quiet = makeWav(50, 400, 44100, 600) // peak -34.7 dBFS: active ≈ -37.7, far under -18
+    const res = await upload('folder=sfx&stem=sfx_test_quiet&bus=sfx&ext=wav', quiet)
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(body.loudness).toMatch(/^levelled to -1[78]\.\d dB \(was -37\.\d; target -18\)$/)
+    const saved = join(game, 'public/audio/sfx/sfx_test_quiet_01.mp3')
+    const after = await loudness.measureFile(ffmpeg!, saved, 'sfx')
+    expect(Math.abs(after.loudnessDb + 18)).toBeLessThan(1)
+    expect(loudness.judge(after, 'sfx', loudness.DEFAULT_LOUDNESS)).toMatchObject({ ok: true }) // on target, on time, under the ceiling
+    // the dropped file, untouched, outside public/ (never shipped to players)
+    expect(readFileSync(join(game, 'audio-originals/sfx/sfx_test_quiet_01.wav')).equals(quiet)).toBe(true)
+  }, 30000)
+  it.skipIf(!ffmpeg)('the targets come from content/audio.json', async () => {
+    mkdirSync(join(game, 'src/audio'), { recursive: true })
+    writeFileSync(join(game, 'src/audio/loudness.mjs'), readFileSync(AUDIO_LOUDNESS_FILE))
+    writeFileSync(join(game, 'content/audio.json'), JSON.stringify({ loudness: { targets: { ui: -24 } } }))
+    const body = await (await upload('folder=ui&stem=ui_test_tap&bus=ui&ext=wav', makeWav(0, 300))).json()
+    expect(body.loudness).toMatch(/target -24\)$/)
+    const after = await loudness.measureFile(ffmpeg!, join(game, 'public/audio/ui/ui_test_tap_01.mp3'), 'ui')
+    expect(Math.abs(after.loudnessDb + 24)).toBeLessThan(1)
   }, 30000)
   it.skipIf(!ffmpeg)('keeps music stereo and its quiet start untouched', async () => {
     const res = await upload('folder=mus&stem=mus_test_theme&bus=music&ext=wav', makeWav(80, 200))
