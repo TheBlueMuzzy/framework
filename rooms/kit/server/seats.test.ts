@@ -291,6 +291,16 @@ describe('settings', () => {
     expect(readSettings({ keepMatchDays: '30' } as never).keepMatchDays).toBe(7)
   })
 
+  it('keepUnplayedMatchHours: 24 unless the game says otherwise; 0 = never; never under 1 hour; below 0 or junk → 24 (0.11.0)', () => {
+    expect(readSettings({}).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: 72 }).keepUnplayedMatchHours).toBe(72)
+    expect(readSettings({ keepUnplayedMatchHours: 0 }).keepUnplayedMatchHours).toBe(0)
+    expect(readSettings({ keepUnplayedMatchHours: 0.01 }).keepUnplayedMatchHours).toBe(1)
+    expect(readSettings({ keepUnplayedMatchHours: -5 }).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: Number.NaN }).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: '1' } as never).keepUnplayedMatchHours).toBe(24)
+  })
+
   it('game over: a player a bot played for (they idled, still connected) keeps their seat — back to the lobby and in a rematch', () => {
     const room = lobby()
     startPlaying(room)

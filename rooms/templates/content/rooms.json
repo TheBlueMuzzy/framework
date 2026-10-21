@@ -7,6 +7,7 @@
     "botTakesOverAfterMs": "A player who drops out mid-game gets a bot after this long, in ms (0 = never). They can still come back.",
     "keepEmptyRoomMs": "Everyone gone and the room isn't kept (a finished game, or a server without storage): how long (ms) it waits for someone to come back before it's cleared. 300000 = 5 minutes. A match being played waits keepMatchDays instead.",
     "keepMatchDays": "How long an unfinished match is kept after its last move — live games ~7, async (Scrabble-with-friends) ~30, any number (0.5 = 12 hours). Players can come back to it (\"Rejoin match\") until then; after that it's \"That match has ended\".",
+    "keepUnplayedMatchHours": "A match that has started but where no person has made a move yet, with nobody connected, ends after this many hours and frees its room code (so a script cannot hold every code). A match someone has played waits keepMatchDays instead. 0 = never; otherwise at least 1.",
     "allowBots": "May the host add bot seats in the lobby? (The game's rules must then play for bots.)",
     "maxMessagesPerSecond": "Messages one player's connection may send per second; more are dropped unread (flooding). 0 = no limit."
   },
@@ -17,6 +18,7 @@
   "botTakesOverAfterMs": 60000,
   "keepEmptyRoomMs": 300000,
   "keepMatchDays": 7,
+  "keepUnplayedMatchHours": 24,
   "allowBots": false,
   "maxMessagesPerSecond": 10
 }

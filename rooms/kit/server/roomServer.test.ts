@@ -682,6 +682,7 @@ describe('RoomServer: a match waits until it ends — kept in storage (0.10.0, F
 
   it('everyone gone: the saved match waits keepMatchDays (not keepEmptyRoomMs); no move for that long → it ends, storage wiped, a rejoin hears no_room', async () => {
     const { ann, bob } = startGame()
+    send(ann, { type: 'action', action: { add: 1 } }) // (a played match: keepUnplayedMatchHours doesn't apply)
     drop(ann)
     drop(bob)
     vi.advanceTimersByTime(12 * 60 * 60_000) // half a day
@@ -779,6 +780,110 @@ describe('RoomServer: a match waits until it ends — kept in storage (0.10.0, F
     const elsewhere = new RoomServer(new StoredParty('MOTE'), countToTen, SETTINGS)
     expect(elsewhere.restore(JSON.stringify(server.packRoom()))).toBe(false)
     expect(elsewhere.data.seats).toEqual([])
+  })
+
+  describe('a match nobody played frees its code after keepUnplayedMatchHours (security review, v0.11.0 — room-code squatting)', () => {
+    const HOUR = 3_600_000
+    const WEEK = { ...SETTINGS, keepMatchDays: 7, keepUnplayedMatchHours: 24 }
+    beforeEach(() => {
+      server = new RoomServer(party, countToTen, WEEK)
+    })
+    const restartWeek = () => {
+      const kept = stored.stored
+      stored = new StoredParty('BAKU')
+      stored.stored = kept
+      party = stored
+      server = new RoomServer(party, countToTen, WEEK)
+      return server.restore(kept)
+    }
+
+    it('started, nobody moved, everyone gone → ends after 24 hours (not 7 days): storage wiped, the code free again', async () => {
+      const { ann, bob } = startGame()
+      drop(ann)
+      drop(bob)
+      vi.advanceTimersByTime(24 * HOUR - 1)
+      await settle()
+      expect(server.game).not.toBeNull()
+      expect(JSON.parse(stored.stored!).timersEndAt['room:unplayed']).toBeDefined() // (kept, so a restart can't reset it)
+      vi.advanceTimersByTime(1)
+      await settle()
+      expect(server.game).toBeNull()
+      expect(stored.stored).toBeNull()
+      expect(rejoin('tab-bob-2', 'Bob', BOB).last('closed')?.reason).toBe('no_room')
+      expect(join('tab-cat', 'Cat', CAT, true).last('room')?.you).toBeDefined() // someone else can make a room with it
+    })
+
+    it('a person made a move → the match waits keepMatchDays as before (an async game between turns is never cut short)', async () => {
+      const { ann, bob } = startGame()
+      send(ann, { type: 'action', action: { add: 1 } })
+      drop(ann)
+      drop(bob)
+      vi.advanceTimersByTime(3 * 24 * HOUR) // three days with nobody there
+      await settle()
+      expect(server.game).not.toBeNull()
+      expect(JSON.parse(stored.stored!).timersEndAt['room:unplayed']).toBeUndefined()
+      expect(rejoin('tab-bob-2', 'Bob', BOB).last('room')?.you).toBe('seat-2')
+    })
+
+    it('someone coming back stops the wait; leaving again without a move starts it from the beginning', async () => {
+      const { ann, bob } = startGame()
+      drop(ann)
+      drop(bob)
+      vi.advanceTimersByTime(20 * HOUR)
+      const bobAgain = rejoin('tab-bob-2', 'Bob', BOB)
+      expect(server.timers.isRunning('room:unplayed')).toBe(false)
+      drop(bobAgain)
+      vi.advanceTimersByTime(20 * HOUR) // 40 hours since the start, 20 since Bob left
+      expect(server.game).not.toBeNull()
+      vi.advanceTimersByTime(4 * HOUR)
+      expect(server.game).toBeNull()
+    })
+
+    it('a restart mid-wait keeps the end time; one asleep past it → the match has ended; "moved" survives a restart', async () => {
+      const { ann, bob } = startGame()
+      drop(ann)
+      drop(bob)
+      vi.advanceTimersByTime(10 * HOUR)
+      await settle()
+      expect(restartWeek()).toBe(true)
+      vi.advanceTimersByTime(14 * HOUR - 1)
+      expect(server.game).not.toBeNull()
+      vi.advanceTimersByTime(1)
+      expect(server.game).toBeNull()
+
+      // asleep past the end → not loaded back
+      stored = new StoredParty('BAKU')
+      party = stored
+      server = new RoomServer(party, countToTen, WEEK)
+      const second = startGame()
+      drop(second.ann)
+      drop(second.bob)
+      await settle()
+      vi.setSystemTime(Date.now() + 25 * HOUR)
+      expect(restartWeek()).toBe(false)
+
+      // a match a person moved in, restarted with nobody there: no 24-hour wait comes back
+      stored = new StoredParty('BAKU')
+      party = stored
+      server = new RoomServer(party, countToTen, WEEK)
+      const third = startGame()
+      send(third.ann, { type: 'action', action: { add: 1 } })
+      drop(third.ann)
+      drop(third.bob)
+      await settle()
+      expect(restartWeek()).toBe(true)
+      vi.advanceTimersByTime(48 * HOUR)
+      expect(server.game).not.toBeNull()
+    })
+
+    it('0 = never: a match nobody played waits keepMatchDays', async () => {
+      server = new RoomServer(party, countToTen, { ...WEEK, keepUnplayedMatchHours: 0 })
+      const { ann, bob } = startGame()
+      drop(ann)
+      drop(bob)
+      vi.advanceTimersByTime(3 * 24 * HOUR)
+      expect(server.game).not.toBeNull()
+    })
   })
 
   it("a state that can't be saved as JSON (a Map): said in the log, kept in memory only, with the old empty-room wait", async () => {

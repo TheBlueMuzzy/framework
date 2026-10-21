@@ -57,6 +57,9 @@ const EMPTY_ROOM_TIMER = `${ROOM_TIMER}empty`
 // A match with no move for keepMatchDays ends (0.10.0)
 const MATCH_EXPIRES_TIMER = `${ROOM_TIMER}match-expires`
 const DAY_MS = 24 * 60 * 60 * 1000
+// A match nobody has moved in, with nobody here, ends after keepUnplayedMatchHours and frees its code (0.11.0)
+const UNPLAYED_TIMER = `${ROOM_TIMER}unplayed`
+const HOUR_MS = 60 * 60 * 1000
 // A seat on the clock that does nothing: first a warning on their screen, then a bot takes over
 const idleWarnTimer = (seatId: string) => `${ROOM_TIMER}idle-warn:${seatId}`
 const idleTakeoverTimer = (seatId: string) => `${ROOM_TIMER}idle-takeover:${seatId}`
@@ -298,6 +301,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.log(`game started with ${this.data.seats.length} seats`)
     this.botTurns.clear() // (a rematch: last game's count is old news)
     startPlaying(this.data)
+    this.data.personMoved = false
     this.game = state
     this.aMoveWasMade()
     this.afterGameChanged()
@@ -377,6 +381,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     // Nothing changed (the game gave back the SAME state, e.g. "send me my view again"): only the sender is answered
     if (state === this.game) return this.sendView(seat)
     this.game = state
+    this.data.personMoved = true // (a person played: this match waits keepMatchDays, never keepUnplayedMatchHours)
     // A move of their own: they're not idle (if the game still waits for them — e.g. the second half of a turn — their clock starts again)
     this.restartIdleClock(seat.id)
     this.aMoveWasMade()
@@ -565,6 +570,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     const matchWaits = this.data.phase === 'playing' && this.party.saveRoom !== undefined && this.cantSave === null
     if (nobodyHere && !matchWaits && !this.timers.isRunning(EMPTY_ROOM_TIMER)) this.startEmptyRoomTimer()
     if (!nobodyHere || matchWaits) this.timers.stop(EMPTY_ROOM_TIMER)
+    this.watchUnplayedMatch(nobodyHere && matchWaits)
     this.changed()
     this.sendRoomToEveryone()
   }
@@ -582,6 +588,20 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   /** The match ends if nobody moves for this long (keepMatchDays). */
   private startMatchExpiry(ms: number): void {
     this.timers.start(MATCH_EXPIRES_TIMER, ms, () => this.clearRoom(`no move for ${this.settings.keepMatchDays} days (keepMatchDays)`))
+  }
+
+  /** A saved match nobody has made a move in yet, with nobody here: it ends after keepUnplayedMatchHours and its code
+   *  is free again — so a script can't start a match in every room code and hold them all for keepMatchDays (security
+   *  review, v0.11.0). Anyone coming back stops the wait; leaving again without a move starts it from the beginning. */
+  private watchUnplayedMatch(nobodyHereAndKept: boolean): void {
+    const hours = this.settings.keepUnplayedMatchHours
+    const waits = nobodyHereAndKept && this.data.phase === 'playing' && this.data.personMoved === false && hours > 0
+    if (!waits) this.timers.stop(UNPLAYED_TIMER)
+    else if (!this.timers.isRunning(UNPLAYED_TIMER)) this.startUnplayedWait(hours * HOUR_MS)
+  }
+
+  private startUnplayedWait(ms: number): void {
+    this.timers.start(UNPLAYED_TIMER, ms, () => this.clearRoom(`nobody made a move or came back for ${this.settings.keepUnplayedMatchHours} hours (keepUnplayedMatchHours)`))
   }
 
   /** Start over: no seats, no game, no timers. The code is free again. */
@@ -642,7 +662,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     const timersEndAt: Record<string, number> = {}
     for (const [name, endsAt] of Object.entries(this.timers.endTimes())) {
       // The idle clocks and the empty-room wait only run while someone's connected or the room isn't kept: never saved
-      const kept = !name.startsWith(ROOM_TIMER) || name.startsWith(BOT_TAKEOVER) || name === MATCH_EXPIRES_TIMER
+      const kept = !name.startsWith(ROOM_TIMER) || name.startsWith(BOT_TAKEOVER) || name === MATCH_EXPIRES_TIMER || name === UNPLAYED_TIMER
       if (kept) timersEndAt[name] = endsAt
     }
     return {
@@ -671,6 +691,12 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.log('the saved match ended while the room was asleep (keepMatchDays)')
       return false
     }
+    // …and the same for a match nobody played (keepUnplayedMatchHours)
+    const unplayedEnds = saved.timersEndAt[UNPLAYED_TIMER]
+    if (unplayedEnds !== undefined && unplayedEnds <= Date.now()) {
+      this.log('the saved match nobody played ended while the room was asleep (keepUnplayedMatchHours)')
+      return false
+    }
     this.data = saved.data
     this.game = saved.game as State
     this.botTurns = new Map(Object.entries(saved.botTurns))
@@ -683,6 +709,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       const msLeft = Math.max(0, endsAt - now)
       if (name.startsWith(BOT_TAKEOVER)) this.startAwayTimer(name.slice(BOT_TAKEOVER.length), msLeft)
       else if (name === MATCH_EXPIRES_TIMER) this.startMatchExpiry(msLeft)
+      else if (name === UNPLAYED_TIMER) this.startUnplayedWait(msLeft)
       else if (!name.startsWith(ROOM_TIMER)) gameTimers[name] = endsAt
     }
     if (!this.timers.isRunning(MATCH_EXPIRES_TIMER)) this.aMoveWasMade()
@@ -692,6 +719,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       dropOut(this.data, seat.id)
       if (this.settings.botTakesOverAfterMs > 0) this.startAwayTimer(seat.id, this.settings.botTakesOverAfterMs)
     }
+    this.watchUnplayedMatch(true) // (nobody is here after a restart; a match nobody played starts its wait if it hadn't)
     // The game's own timers (a turn clock, a bot's next move)
     if (this.rules.onRestore) {
       try {

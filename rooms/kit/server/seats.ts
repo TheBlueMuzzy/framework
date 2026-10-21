@@ -28,6 +28,9 @@ export interface RoomData {
   kicked: string[]
   /** How many seats were ever made (for unique seat ids). */
   seatsMade: number
+  /** false from the start of a match until a person (not a bot, not a timer) makes a move in it — a match nobody
+   *  played ends after keepUnplayedMatchHours (0.11.0). Missing (a match saved before 0.11.0) = played. */
+  personMoved?: boolean
 }
 
 export function newRoom(code: string): RoomData {
