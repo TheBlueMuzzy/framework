@@ -41,7 +41,8 @@ Left out: 3D sound, blend containers, voice-over.
 | `log.ts` | Ring buffer of every play / drop with its reason. `window.__audioLog` in dev and tests. Feeds the Sound Board log. | unit |
 | `react.ts` | `useAudioSettings()` (Settings tab → buses), `<AudioUnlock/>` (first tap), `playSound` helper. | unit |
 | `devkit/` | Sound Board tab (below), installed with the Dev Kit's game tabs (like the AI tab). | e2e |
-| `scripts/` | `audio-check.mjs`: loudness report + convert/normalize (ffmpeg-static). `install-audio.mjs` (same shape as the other installers). | script tests |
+| `loudness.mjs` · `audio-check.mjs` | (F31, in `kit/` so they ship) The loudness matcher, and `npm run audio:check [-- --fix]`: the loudness report + evening out (the system's ffmpeg — see Loudness). | script tests |
+| `scripts/` | `install-audio.mjs` (same shape as the other installers). | script tests |
 
 No library. The browser's Web Audio has everything we need:
 - Howler is stale (last release 2023) and has no buses or filters.
@@ -86,7 +87,7 @@ No library. The browser's Web Audio has everything we need:
 
 ## Volume groups and the mix (standards — `research/audio-standards.md` §1)
 - Master → **Music · Ambience · Effects (sfx) · UI**. UI sits 6–10 dB under Effects; it's heard hundreds of times.
-- **Loudness target:** −16 to −18 LUFS overall, nothing above −1 dB. A limiter on the master as a safety net.
+- **Loudness target:** −16 to −18 LUFS overall, nothing above −1 dB. A limiter on the master as a safety net. Every file levelled to −18 — see Loudness (F31).
 - **Ducking:** a big moment lowers Music by 6–8 dB (10 ms down, 600 ms back). Snapshots (Paused, Reveal) are named mixes that ramp in and out.
 - **Menu sounds never vary** (Muzzy 2026-10-10): kit controls (tap, back, tabs, toggle on/off) = one file, no random pitch/volume — the same action always sounds the same. Toggle on rises, off falls (`toggle.on` / `toggle.off`, ui-kit 0.4.3). Variation below is for gameplay sounds.
 - **Not getting annoying:**
@@ -99,6 +100,33 @@ No library. The browser's Web Audio has everything we need:
   - climbs `steps` steps, then holds the top note
   - resets after `resetMs` of quiet
   - one root key per game, so pops always sit in the music's key
+
+## Loudness (F31, researched 2026-10-21)
+**What the industry uses** (whole-game loudness, measured over a long play session):
+| Where it plays | Target | Ceiling | Source |
+|---|---|---|---|
+| Console / PC (living room, headphones) | −24 LUFS ±2 (Sony's older figure −23, = EBU R128 broadcast) | −1 dBTP | Sony ASWG via Audiokinetic "Mastering a game with Wwise" (2024); IESD Mix Ref Levels (Sony, Microsoft, Nintendo) |
+| Phone / handheld / portable | −18 LUFS ±2 (Sony) · −16 LUFS (IESD) | −1 dBTP | same; designingsound.org "Different loudness ranges for console and mobile games" |
+| VR (Quest) | −16 LUFS | −1 dBTP | Meta developer docs, "Audio loudness meter" |
+| Web games (anecdotal) | ~−16 for effects + menus | −1 | Defold forum, "Optimization of sounds in web games" |
+
+- **LUFS** = loudness the way the ear hears it (weights the highs up and the deep lows down), averaged in 400 ms blocks with the quiet blocks left out. **dBTP** = the true peak, between samples.
+- **±2 LU** is the tolerance the standards give for a whole game. One loudness unit (LU) = 1 dB; ~1 dB is the smallest change people notice, 3 dB is clearly heard.
+- **How categories sit against each other:** no standard number per category. Studios level every *file* to one reference, then mix in the engine: dialogue is the anchor (none here), effects next, music under effects, ambience under music, menus 6–10 dB under effects (they're heard hundreds of times — our bus defaults already do this: sfx 0, ui −8, music −8, ambience −10).
+
+**Our rule: every file is levelled to the same −18, the mix lives in the volume groups.** So a new file never needs its `volumeDb` re-tuned, and "how loud is the menu next to the effects" stays one knob (the bus) instead of 30. −18 is the phone figure: our games are phone-first, and the master limiter (−1 dB) plus the player's sliders sit on top.
+| Folder | Default target | Measured as | Onset checked |
+|---|---|---|---|
+| `sfx` effects · `ui` menus · `stg` stingers | −18 | active loudness (below) | yes — later than 20 ms is flagged |
+| `mus` music · `amb` ambience | −18 | LUFS (BS.1770) | no (soft starts are on purpose) |
+- **Ceiling −1 dB** (the standard): the fix's limiter sits 0.5 dB under it (−1.5), because an MP3 can come out a little hotter than what went in. A sample peak is measured, not the true peak; the 0.5 dB margin covers the difference for our short MP3s.
+- **Tolerance 3 dB:** more than that off = flagged. Wider than the standards' ±2 LU on purpose — those are for a whole game's average; a single 100 ms click measured on its own wobbles more, and we don't want a report full of near-misses.
+- **Short sounds aren't measured in LUFS.** Integrated LUFS needs 400 ms blocks; a 100 ms click is mostly silence inside one block and reads 5–10 dB quieter than it sounds. We measure **active loudness** instead (Goops F29, `goops/scripts/sounds/build.mjs`): the average power of the 20 ms slices within 20 dB of the loudest slice — only the part you hear counts, the silence and the faint tail don't. For a steady sound it equals plain RMS (a 1 kHz sine at full scale: −3 dB, the same as its LUFS), so −18 means the same thing for effects and music.
+- **Spikes:** recorded hits are spiky (Goops F29: peak-normalised, they land 6–11 dB quieter than they sound). Raising them to −18 pushes the spike into a fast limiter (0.5 ms attack, 40 ms release) — but never by more than 3.5 dB; a spikier file ends a little under target instead of squashed. A file that's been evened out once gets no more limiting (else every `--fix` would shave it again); if it's still quiet, the report says "as loud as its spikes allow" and doesn't flag it.
+- Mono effects play on both speakers, so as heard they're ~3 dB louder than their mono number; music is measured in stereo. That's a fixed offset the bus defaults already absorb — not worth a correction.
+- Targets live in `content/audio.json` → `"loudness": { "targets": { "sfx": -18, … }, "toleranceDb": 3, "ceilingDb": -1, "lateMs": 20 }` (editable in the Dev Kit / Obsidian; missing = these defaults).
+
+Sources: [Audiokinetic — Mastering a game with Wwise, part 1](https://audiokinetic.com/en/mastering-a-game-with-wwise-part1) · [IESD Mix Ref Levels v03.02](https://www.audiogang.org/wp-content/uploads/2015/04/IESD-Mix-Ref-Levels-v03.02.pdf) · [designingsound.org — Different loudness ranges for console and mobile games](https://designingsound.org/2013/02/20/different-loudness-ranges-for-console-and-mobile-games) · [designingsound.org — Loudness in game audio](https://designingsound.org/2013/02/loudness-in-game-audio/) · [designingsound.org — interview with Sony's Garry Taylor](https://designingsound.org/2012/07/30/video-games-and-loudness-standards-interview-with-sonys-garry-taylor/) · [Meta — Audio loudness meter](https://developers.meta.com/vr/documentation/unreal/audio-loudness-meter-overview/) · [Defold forum — sounds in web games](https://forum.defold.com/t/optimization-of-sounds-in-web-games/81860) · [Wikipedia — Audio normalization](https://en.wikipedia.org/wiki/Audio_normalization) · ITU-R BS.1770 (the LUFS maths; filter values as in libebur128).
 
 ## Settings (UI kit standard Audio tab)
 **Rows:** Master · Music · Ambience · Effects · UI (sliders) · Sound (on/off) · Mute when in the background · Mono.
