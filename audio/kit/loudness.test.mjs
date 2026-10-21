@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
-  activeDbOf, DEFAULT_LOUDNESS, decode, findFfmpeg, fixArgs, FFMPEG_MISSING, judge, lufsOf, measure, measureFile,
-  onsetMsOf, peakOf, planFix, readLoudness, runFfmpeg, toDb,
+  activeDbOf, DEFAULT_LOUDNESS, decode, encodeArgs, findFfmpeg, FFMPEG_MISSING, judge, levelFile, levelSamples, limitPeaks,
+  lufsOf, measure, measureFile, onsetMsOf, peakOf, planFix, readLoudness, runFfmpeg, toDb, trimStart,
 } from './loudness.mjs'
 
 const RATE = 44100
@@ -46,7 +46,7 @@ describe('readLoudness — content/audio.json "loudness", defaults for the rest'
     const template = JSON.parse(readFileSync(new URL('../templates/content/audio.json', import.meta.url), 'utf8'))
     expect(template.loudness).toEqual(DEFAULT_LOUDNESS)
     expect(readLoudness(template).warnings).toEqual([])
-    for (const key of [...Object.keys(DEFAULT_LOUDNESS.targets).map((f) => `targets.${f}`), 'toleranceDb', 'ceilingDb', 'lateMs']) {
+    for (const key of [...Object.keys(DEFAULT_LOUDNESS.targets).map((f) => `targets.${f}`), 'toleranceDb', 'ceilingDb', 'lateMs', 'maxLimitingDb']) {
       expect(template._help[`loudness.${key}`], key).toBeTruthy()
       expect(template._labels[`loudness.${key}`], key).toBeTruthy()
     }
@@ -123,13 +123,68 @@ describe('the verdict and the fix', () => {
     expect(again.ok).toBe(true)
     expect(again.note).toMatch(/as loud as its spikes allow/)
   })
-  it('ffmpeg settings: trim + gain + limiter, MP3 like the Dev Kit drop', () => {
-    const args = fixArgs('in.mp3', 'out.mp3', 'sfx', { gainDb: 3.25, trimMs: 26 }, S).join(' ')
-    expect(args).toContain('atrim=start=0.0260,asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.003,volume=3.25dB,alimiter=limit=0.8414')
-    expect(args).toContain('-ac 1 -ar 44100 -c:a libmp3lame -b:a 96k out.mp3')
-    const music = fixArgs('in.mp3', 'out.mp3', 'mus', { gainDb: -2, trimMs: 0 }, S).join(' ')
-    expect(music).not.toContain('atrim')
-    expect(music).toContain('-ac 2 -ar 44100 -c:a libmp3lame -b:a 128k')
+  it('ffmpeg settings for writing: MP3 like the Dev Kit drop', () => {
+    expect(encodeArgs('out.mp3', 1, 'sfx').join(' ')).toContain('-f f32le -ar 44100 -ac 1 -i - -c:a libmp3lame -b:a 96k out.mp3')
+    expect(encodeArgs('out.mp3', 2, 'mus').join(' ')).toContain('-ac 2 -i - -c:a libmp3lame -b:a 128k out.mp3')
+    expect(encodeArgs('out.wav', 1, 'sfx').join(' ')).not.toContain('libmp3lame')
+  })
+})
+
+describe('evening out samples', () => {
+  const S = DEFAULT_LOUDNESS
+  it('trimStart cuts the silence and fades in over 3 ms', () => {
+    const [out] = trimStart([tone({ silenceMs: 50, amp: 0.5 })], RATE, 46)
+    expect(out.length).toBe(Math.round(0.55 * RATE) - Math.round(0.046 * RATE))
+    expect(out[0]).toBe(0)
+    expect(onsetMsOf(out, RATE)).toBeLessThan(6)
+  })
+  it('limitPeaks: nothing over the limit, and a short click keeps its level around one spike', () => {
+    const click = tone({ toneMs: 60, amp: 0.3 })
+    click[100] = 1 // one spike, 10 dB over the rest
+    const [out] = limitPeaks([click], RATE, -1.5)
+    expect(toDb(peakOf(out))).toBeLessThanOrEqual(-1.5 + 1e-6)
+    expect(activeDbOf(out, RATE)).toBeCloseTo(activeDbOf(click, RATE), 0) // the rest of the click is untouched
+    // under the limit: unchanged
+    const quiet = tone({ amp: 0.1 })
+    expect(limitPeaks([quiet], RATE, -1.5)[0]).toEqual(quiet)
+  })
+  it('limitPeaks dips both sides of a stereo sound together', () => {
+    const left = tone({ amp: 0.2 }), right = tone({ amp: 0.2 })
+    left[2000] = 1
+    const [l, r] = limitPeaks([left, right], RATE, -6)
+    expect(r[2000] / right[2000]).toBeCloseTo(l[2000] / left[2000], 5)
+  })
+  it('levelSamples: a quiet late click lands on target, trimmed', () => {
+    const quiet = tone({ silenceMs: 60, toneMs: 200, amp: 0.02 }) // active -37
+    const result = levelSamples([quiet], RATE, 'sfx', S)
+    expect(result.before.loudnessDb).toBeCloseTo(-37, 0)
+    expect(result.after.loudnessDb).toBeCloseTo(-18, 0)
+    expect(result.after.onsetMs).toBeLessThan(6)
+    expect(result.trimMs).toBeGreaterThan(55)
+    expect(result.peakLimited).toBe(false)
+  })
+  it('levelSamples: a spiky click is raised to target with the limiter shaving its spike (Goops tank spin)', () => {
+    const spiky = tone({ toneMs: 50, amp: 0.1 }) // active -23
+    for (const at of [200, 900, 1600]) spiky[at] = 0.6 // three spikes at -4.4 dB: +5 dB pushes them 0.6 dB into the -1.5 limiter
+    const result = levelSamples([spiky], RATE, 'sfx', S)
+    expect(result.gainDb).toBeGreaterThan(4.5)
+    expect(Math.abs(result.after.loudnessDb + 18)).toBeLessThan(0.2)
+    expect(result.peakLimited).toBe(false)
+    expect(result.after.peakDb).toBeLessThanOrEqual(-1.5 + 1e-6)
+  })
+  it('levelSamples: never more than 3.5 dB into the limiter — a very spiky one ends under target', () => {
+    const verySpiky = tone({ toneMs: 300, amp: 0.005 }) // active -49
+    verySpiky[500] = 1
+    const result = levelSamples([verySpiky], RATE, 'sfx', S)
+    expect(result.gainDb).toBeCloseTo(3.5 - 1.5, 1) // the spike at 0 dB may go to +2 before the -1.5 limiter
+    expect(result.peakLimited).toBe(true)
+    expect(levelSamples([verySpiky], RATE, 'sfx', S, { fixedBefore: true }).gainDb).toBeCloseTo(-1.5, 1)
+  })
+  it('levelSamples: too loud comes down, music is not trimmed', () => {
+    const loud = tone({ silenceMs: 100, toneMs: 2000, amp: 0.9 })
+    const result = levelSamples([loud, loud], RATE, 'mus', S)
+    expect(result.trimMs).toBe(0)
+    expect(result.after.loudnessDb).toBeCloseTo(-18, 1)
   })
 })
 
@@ -149,8 +204,9 @@ describe('files (ffmpeg)', () => {
       expect(before.onsetMs).toBeGreaterThan(55)
       expect(judge(before, 'sfx', DEFAULT_LOUDNESS).problems).toEqual([expect.stringMatching(/^1[45]\.\d dB too quiet$/), 'starts 60 ms late'])
       const fixed = join(dir, 'fixed.mp3')
-      await runFfmpeg(ffmpeg, fixArgs(quiet, fixed, 'sfx', planFix(before, 'sfx', DEFAULT_LOUDNESS), DEFAULT_LOUDNESS))
+      const levelled = await levelFile(ffmpeg, quiet, fixed, 'sfx', DEFAULT_LOUDNESS)
       const after = await measureFile(ffmpeg, fixed, 'sfx')
+      expect(levelled.after.loudnessDb).toBeCloseTo(after.loudnessDb, 5) // what it says is what was written
       expect(judge(after, 'sfx', DEFAULT_LOUDNESS)).toMatchObject({ ok: true })
       expect(Math.abs(after.loudnessDb + 18)).toBeLessThan(1)
       expect((await decode(ffmpeg, fixed, 2)).length).toBe(2)

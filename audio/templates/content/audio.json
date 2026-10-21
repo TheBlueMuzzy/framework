@@ -68,7 +68,8 @@
     "loudness.targets.mus": "How loud every music file is made (LUFS — loudness over the whole file). The Music volume group sets how loud it plays.",
     "loudness.toleranceDb": "A file further than this (dB) from its target is flagged by npm run audio:check and check:framework. 3 dB is clearly heard; 1 dB is the smallest change people notice.",
     "loudness.ceilingDb": "No sample louder than this (dB) after evening out — the spikes are limited. -1 is the standard.",
-    "loudness.lateMs": "An effect or menu sound that starts later than this (ms) after its file begins is flagged (and trimmed by --fix). Over ~40 ms feels delayed."
+    "loudness.lateMs": "An effect or menu sound that starts later than this (ms) after its file begins is flagged (and trimmed by --fix). Over ~40 ms feels delayed.",
+    "loudness.maxLimitingDb": "Evening out a spiky sound (a hit, a click) shaves its loudest spikes so the rest can come up. This is the most it may shave (dB). More = spiky sounds reach the target but lose some punch; less = they keep their snap and stay a little quieter. 3.5 is gentle."
   },
   "_labels": {
     "buses.music": "Music (dB)",
@@ -139,7 +140,8 @@
     "loudness.targets.mus": "Music files (LUFS)",
     "loudness.toleranceDb": "Flag files off by more than (dB)",
     "loudness.ceilingDb": "Loudest sample in a file (dB)",
-    "loudness.lateMs": "Flag sounds starting later than (ms)"
+    "loudness.lateMs": "Flag sounds starting later than (ms)",
+    "loudness.maxLimitingDb": "Most a spike may be shaved (dB)"
   },
   "_sections": {
     "Mix": ["buses", "master"],
@@ -206,7 +208,8 @@
     "loudness.targets.mus": [-40, 0, 0.5],
     "loudness.toleranceDb": [0.5, 12, 0.5],
     "loudness.ceilingDb": [-12, 0, 0.5],
-    "loudness.lateMs": [0, 500, 5]
+    "loudness.lateMs": [0, 500, 5],
+    "loudness.maxLimitingDb": [0, 12, 0.5]
   },
   "buses": { "music": -8, "ambience": -10, "sfx": 0, "ui": -8 },
   "master": { "limiterDb": -1, "muteDelayMs": 250 },
@@ -222,7 +225,8 @@
     "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 },
     "toleranceDb": 3,
     "ceilingDb": -1,
-    "lateMs": 20
+    "lateMs": 20,
+    "maxLimitingDb": 3.5
   },
   "sounds": {
     "example.pop": {

@@ -39,20 +39,23 @@ npm run audio:check                 a table of every file in public/audio/, the 
 npm run audio:check -- --fix        …and evens out the flagged ones
 ```
 ```
-File                         Folder  Loudness  Peak     Onset  Length  Verdict
-sfx/sfx_goop_land_01.mp3     sfx     -18.5 dB  -1.8 dB  2 ms   0.30 s  ✓
-sfx/sfx_goop_merge_01.mp3    sfx     -25.1 dB  -2.1 dB  2 ms   0.17 s  7.1 dB too quiet
-ui/ui_button_tap_01.mp3      ui      -22.5 dB  -2.8 dB  61 ms  0.10 s  4.5 dB too quiet, starts 61 ms late
+File                           Folder  Loudness  Peak      Onset  Length  Verdict
+sfx/sfx_goop_land_01.mp3       sfx     -18.5 dB  -1.8 dB   2 ms   0.30 s  ✓
+sfx/sfx_goop_land_04.mp3       sfx     -29.8 dB  -12.2 dB  72 ms  0.37 s  11.8 dB too quiet, starts 72 ms late
+sfx/sfx_goop_merge_01.mp3      sfx     -25.1 dB  -2.1 dB   2 ms   0.17 s  7.1 dB too quiet
+ui/ui_button_tap_01.mp3        ui      -22.5 dB  -2.8 dB   1 ms   0.10 s  4.5 dB too quiet
 
-34 sounds · target -18 dB ±3 · ceiling -1 dB · 2 to even out (2 too quiet, 1 start late)
+35 sounds · target -18 dB ±3 · ceiling -1 dB · 5 to even out (5 too quiet, 1 starts late)
 ```
+(a scratch copy of Goops, F31 — land_04 is a deliberately quiet, late copy)
 - **Loudness** — effects, menus and stingers: the *active loudness* (only the part you hear — the silence and the faint
   tail don't count; a short click can't be measured in LUFS). Music and ambience: LUFS, the standard for long sounds.
   Both read the same for a steady sound, so −18 means the same everywhere. **Peak**: the loudest sample.
   **Onset**: how long until the sound really starts (effects + menus only — music may start softly).
 - **`--fix`** rewrites only the flagged files, keeping their names (content/audio.json needs no change): brought to the
-  target, the spikes held under the ceiling by a fast limiter (never squashed more than 3.5 dB — a very spiky file ends a
-  little under target instead), effects + menus trimmed to their onset. Each file is first copied to
+  target, the spikes held under the ceiling by a fast limiter (never shaved more than `maxLimitingDb`, 3.5 dB — a very
+  spiky file ends a little under target instead), effects + menus trimmed to their onset. A file that can't come any
+  closer (already limited — its loudness *is* its spikes) is left as it was. Each file is first copied to
   **`audio-originals/<same path>`** (outside public/, so players never download it). An original is never overwritten,
   nothing is ever deleted; to undo, copy the original back. A file with a kept original isn't limited again on the next
   `--fix` — if it's still quiet, the report says "as loud as its spikes allow" instead of flagging it.
@@ -67,14 +70,16 @@ ui/ui_button_tap_01.mp3      ui      -22.5 dB  -2.8 dB  61 ms  0.10 s  4.5 dB to
   "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 },
   "toleranceDb": 3,
   "ceilingDb": -1,
-  "lateMs": 20
+  "lateMs": 20,
+  "maxLimitingDb": 3.5
 }
 ```
 - **Every folder is −18 on purpose:** the *files* are made even, and the *mix* — menus under effects, music under both
   — is the volume groups (`buses`). So a new sound never needs its `volumeDb` re-tuned. To make all menu sounds quieter,
   lower `buses.ui`, not `loudness.targets.ui`. −18 is the phone standard (consoles use −23/−24 over a whole game).
 - `toleranceDb`: further off than this is flagged (3 dB is clearly heard). `ceilingDb`: the loudest sample allowed (−1
-  is the standard). `lateMs`: an effect or menu sound starting later than this is flagged. Why these numbers, with
+  is the standard). `lateMs`: an effect or menu sound starting later than this is flagged. `maxLimitingDb`: the most a spike may be
+  shaved to let a spiky sound come up (more = spiky sounds reach the target but lose some snap). Why these numbers, with
   sources: `../.planning/design/audio.md` → Loudness.
 
 ## What a game must provide
@@ -173,7 +178,7 @@ readAudioConfig(json, warn?) · planPlay(input) · seededRandom(seed) · dbToGai
   "snapshots": { "paused": { "music": -10, "lowpassHz": 900, "fadeMs": 250 }, "reveal": { "music": -6, "ambience": -8 } },
   "duck":   { "amountDb": -7, "downMs": 10, "backMs": 600 },
   "limits": { "maxVoices": 14, "staleMs": 400 },
-  "loudness": { "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 }, "toleranceDb": 3, "ceilingDb": -1, "lateMs": 20 },  // npm run audio:check (above); the engine doesn't use it
+  "loudness": { "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 }, "toleranceDb": 3, "ceilingDb": -1, "lateMs": 20, "maxLimitingDb": 3.5 },  // npm run audio:check (above); the engine doesn't use it
   "sounds": {
     "seed.land": {
       "files": ["sfx/seed_land_01.mp3", "sfx/seed_land_02.mp3"],

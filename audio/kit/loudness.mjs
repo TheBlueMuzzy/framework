@@ -12,12 +12,12 @@
 //   peakDb      the loudest single sample (dBFS, 0 = the most a file can hold)
 //   onsetMs     where the sound really starts: the first sample at 10 % of the peak (Glyphtender B026)
 //   lengthMs    how long the file is
-// Then: the gain that brings it to its folder's target, and the ffmpeg settings that apply it (gain + a fast limiter
-// so the spikes stay under the ceiling, + the onset trim for effects and menus).
+// Then: evening it out — the onset trim for effects and menus, the gain that brings it to its folder's target, and a
+// fast limiter so the spikes stay under the ceiling — done on the samples here, then written back with ffmpeg.
 //
 // The pure parts (measuring samples, the verdict, the gain) are tested with made-up samples. Reading and writing files
 // uses the computer's own ffmpeg (or FFMPEG_PATH) — never a bundled copy.
-import { execFile, spawnSync } from 'node:child_process'
+import { execFile, spawn, spawnSync } from 'node:child_process'
 
 // ---------- the settings (content/audio.json "loudness") ----------
 
@@ -35,10 +35,9 @@ export const DEFAULT_LOUDNESS = {
   toleranceDb: 3, // further off than this = flagged
   ceilingDb: -1, // no sample louder than this (the games / broadcast standard is -1)
   lateMs: 20, // an effect or menu sound that starts later than this = flagged
+  maxLimitingDb: 3.5, // how much of a spike the limiter may shave (Goops F29); a spikier file ends a little under target
 }
 
-/** How much of a spike the limiter may shave. A spikier file ends up a little quieter instead of squashed. */
-export const MAX_LIMITING_DB = 3.5
 /** The limiter sits this far under the ceiling: an MP3 can come out a little hotter than what went in */
 export const LIMITER_MARGIN_DB = 0.5
 /** The onset trim keeps this much before the onset, then fades in over ONSET_FADE_MS (the same rule as the Dev Kit drop) */
@@ -78,6 +77,7 @@ export function readLoudness(audioJson) {
   settings.toleranceDb = number(raw.toleranceDb, 'loudness.toleranceDb', 0.5, 12, settings.toleranceDb)
   settings.ceilingDb = number(raw.ceilingDb, 'loudness.ceilingDb', -12, 0, settings.ceilingDb)
   settings.lateMs = number(raw.lateMs, 'loudness.lateMs', 0, 500, settings.lateMs)
+  settings.maxLimitingDb = number(raw.maxLimitingDb, 'loudness.maxLimitingDb', 0, 12, settings.maxLimitingDb)
   return { settings, warnings }
 }
 
@@ -205,7 +205,7 @@ export function measure(channels, sampleRate, folder) {
 
 /**
  * How to bring a measured sound to its target: { gainDb, trimMs, peakLimited }.
- *   gainDb: target - loudness, but never pushing a spike more than MAX_LIMITING_DB into the limiter
+ *   gainDb: target - loudness, but never pushing a spike more than settings.maxLimitingDb into the limiter
  *           (peakLimited = true when that cap made it less than the full way)
  *   trimMs: effects + menus only: cut the silence before the onset (keeping ONSET_LEAD_MS)
  * fixedBefore: the file was already evened out once (its original is kept in audio-originals/). Its spikes were
@@ -215,7 +215,7 @@ export function planFix(measured, folder, settings, { fixedBefore = false } = {}
   if (!isNumber(measured.loudnessDb)) return { gainDb: 0, trimMs: 0, peakLimited: false } // silence: nothing to do
   const wanted = settings.targets[folder] - measured.loudnessDb
   const limiterDb = settings.ceilingDb - LIMITER_MARGIN_DB
-  const mostAllowed = limiterDb + (fixedBefore ? 0 : MAX_LIMITING_DB) - measured.peakDb
+  const mostAllowed = limiterDb + (fixedBefore ? 0 : settings.maxLimitingDb) - measured.peakDb
   const gainDb = Math.min(wanted, mostAllowed)
   const trimMs = isLongFolder(folder) ? 0 : Math.max(0, measured.onsetMs - ONSET_LEAD_MS)
   return { gainDb, trimMs, peakLimited: gainDb < wanted - 0.05 }
@@ -233,7 +233,7 @@ export function judge(measured, folder, settings, options = {}) {
   let note = ''
   if (!isNumber(measured.loudnessDb)) return { ok: false, problems: ['silent'], note }
   const off = measured.loudnessDb - settings.targets[folder]
-  if (Math.abs(off) > settings.toleranceDb) {
+  if (Math.abs(off) >= settings.toleranceDb + 0.05) { // a file shown as "3.0 dB" off is within 3 dB
     const { gainDb, peakLimited } = planFix(measured, folder, settings, options)
     if (off < 0 && peakLimited && gainDb < 1) note = `${dB(off)} under target: as loud as its spikes allow`
     else problems.push(`${dB(off)} too ${off < 0 ? 'quiet' : 'loud'}`)
@@ -243,25 +243,110 @@ export function judge(measured, folder, settings, options = {}) {
   return { ok: problems.length === 0, problems, note }
 }
 
+// ---------- evening a sound out (pure: samples in, samples out) ----------
+// Done here on the samples, not with ffmpeg's own limiter: on a 50 ms click ffmpeg's alimiter (40 ms release) turned
+// the WHOLE sound down, so a "fixed" file came out quieter than before (found on Goops' tank spin, F31).
+
+/** Cuts `ms` off the start, then fades in over ONSET_FADE_MS so the cut doesn't click. New arrays. */
+export function trimStart(channels, sampleRate, ms) {
+  const cut = Math.min(Math.round((ms / 1000) * sampleRate), channels[0]?.length ?? 0)
+  const fade = Math.round((ONSET_FADE_MS / 1000) * sampleRate)
+  return channels.map((ch) => {
+    const out = ch.slice(cut)
+    for (let i = 0; i < fade && i < out.length; i++) out[i] *= i / fade
+    return out
+  })
+}
+
+/** Every sample × the gain (dB). New arrays. */
+export function applyGain(channels, gainDb) {
+  const g = fromDb(gainDb)
+  return channels.map((ch) => ch.map((s) => s * g))
+}
+
 /**
- * ffmpeg's settings to write `output` from `input` brought to target: the onset trim (effects + menus), the gain,
- * a fast limiter just under the ceiling. MP3s get the module's usual encoding: effects + menus mono 96 kbps,
- * music + ambience stereo 128 kbps. Other file types keep ffmpeg's own choice for that type.
+ * A fast "look-ahead" limiter: no sample comes out louder than `limitDb`. Around a spike the volume dips smoothly
+ * (down over 1 ms just before it, back up over ~10 ms after), so only the spike is shaved — the rest of a short click
+ * keeps its level. All channels dip together (stereo stays put). New arrays.
  */
-export function fixArgs(input, output, folder, fix, settings) {
-  const filters = []
-  if (fix.trimMs > 0) filters.push(`atrim=start=${(fix.trimMs / 1000).toFixed(4)}`, 'asetpts=PTS-STARTPTS', `afade=t=in:st=0:d=${ONSET_FADE_MS / 1000}`)
-  filters.push(`volume=${fix.gainDb.toFixed(2)}dB`)
-  const limit = fromDb(settings.ceilingDb - LIMITER_MARGIN_DB)
-  filters.push(`alimiter=limit=${limit.toFixed(4)}:attack=0.5:release=40:level=disabled`)
+export function limitPeaks(channels, sampleRate, limitDb) {
+  const limit = fromDb(limitDb)
+  const length = channels[0]?.length ?? 0
+  const ahead = Math.max(1, Math.round(0.001 * sampleRate)) // 1 ms
+  const release = 1 - Math.exp(-1 / (0.01 * sampleRate)) // ~10 ms back up
+  // 1. the gain each sample needs on its own
+  const need = new Float32Array(length).fill(1)
+  for (const ch of channels) for (let i = 0; i < length; i++) {
+    const a = Math.abs(ch[i])
+    if (a > limit) need[i] = Math.min(need[i], limit / a)
+  }
+  if (need.every((n) => n === 1)) return channels.map((ch) => ch.slice()) // nothing over the limit: nothing to do
+  // 2. look ahead: the lowest need in the next 2 ms (a min-hold), then a 1 ms average to smooth the dip —
+  //    the average of a 2-wide hold over 1 ms is never above what the spike itself needs
+  const held = new Float32Array(length)
+  for (let i = 0; i < length; i++) {
+    let low = 1
+    for (let j = i; j < Math.min(length, i + 2 * ahead); j++) low = Math.min(low, need[j])
+    held[i] = low
+  }
+  const gain = new Float32Array(length)
+  let sum = ahead // the 1 ms before the start counts as "no dip"
+  for (let i = 0; i < length; i++) {
+    sum += held[i] - (i >= ahead ? held[i - ahead] : 1)
+    gain[i] = sum / ahead
+  }
+  // 3. down at once, back up slowly
+  for (let i = 1; i < length; i++) gain[i] = Math.min(gain[i], gain[i - 1] + (1 - gain[i - 1]) * release)
+  // hard safety: never above the limit, whatever the rounding
+  return channels.map((ch) => ch.map((s, i) => Math.max(-limit, Math.min(limit, s * gain[i]))))
+}
+
+/**
+ * Brings samples to the folder's target: trim to the onset (effects + menus), then the gain, then the limiter.
+ * The gain is searched so the result really lands on target (limiting takes a little loudness away), but never pushes
+ * a spike more than settings.maxLimitingDb over the limiter (none at all when fixedBefore — see planFix).
+ * → { channels, before, after, gainDb, trimMs, peakLimited }
+ */
+export function levelSamples(channels, sampleRate, folder, settings, { fixedBefore = false, trimMs, limitDb } = {}) {
+  const before = measure(channels, sampleRate, folder)
+  const plan = planFix(before, folder, settings, { fixedBefore })
+  const trim = trimMs ?? plan.trimMs
+  const trimmed = trim > 0 ? trimStart(channels, sampleRate, trim) : channels
+  if (!isNumber(before.loudnessDb)) return { channels: trimmed, before, after: measure(trimmed, sampleRate, folder), gainDb: 0, trimMs: trim, peakLimited: false }
+  const limiterDb = limitDb ?? settings.ceilingDb - LIMITER_MARGIN_DB
+  const target = settings.targets[folder]
+  const at = (gainDb) => {
+    const out = limitPeaks(applyGain(trimmed, gainDb), sampleRate, limiterDb)
+    return { out, m: measure(out, sampleRate, folder), gainDb }
+  }
+  const wanted = target - before.loudnessDb
+  const most = limiterDb + (fixedBefore ? 0 : settings.maxLimitingDb) - before.peakDb
+  let best = at(Math.min(wanted, most))
+  // the limiter took some loudness: raise the gain (up to the cap) until it lands on target — halving the gap 10 times
+  if (best.m.loudnessDb < target - 0.1 && best.gainDb < most) {
+    let low = best.gainDb, high = most
+    const top = at(high)
+    if (top.m.loudnessDb <= target) best = top
+    else for (let step = 0; step < 10; step++) {
+      const middle = at((low + high) / 2)
+      if (middle.m.loudnessDb < target) low = middle.gainDb
+      else high = middle.gainDb
+      if (Math.abs(middle.m.loudnessDb - target) < Math.abs(best.m.loudnessDb - target)) best = middle
+    }
+  }
+  return { channels: best.out, before, after: best.m, gainDb: best.gainDb, trimMs: trim, peakLimited: best.m.loudnessDb < target - 0.5 }
+}
+
+/**
+ * ffmpeg's settings to write samples (44.1 kHz floats on its input) to `output`. MP3s get the module's usual
+ * encoding: effects + menus mono 96 kbps, music + ambience stereo 128 kbps. Other types: ffmpeg's own choice.
+ */
+export function encodeArgs(output, channelCount, folder) {
   const long = isLongFolder(folder)
-  const mp3 = /\.mp3$/i.test(output)
   return [
     '-y', '-hide_banner', '-loglevel', 'error',
-    '-i', input,
-    '-vn', '-map_metadata', '-1',
-    '-af', filters.join(','),
-    ...(mp3 ? ['-ac', long ? '2' : '1', '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', long ? '128k' : '96k'] : []),
+    '-f', 'f32le', '-ar', String(SAMPLE_RATE), '-ac', String(channelCount), '-i', '-',
+    ...(/\.mp3$/i.test(output) ? ['-c:a', 'libmp3lame', '-b:a', long ? '128k' : '96k'] : []),
     output,
   ]
 }
@@ -304,4 +389,42 @@ export async function decode(ffmpeg, file, channelCount) {
 /** Reads and measures a sound file (see measure). */
 export async function measureFile(ffmpeg, file, folder) {
   return measure(await decode(ffmpeg, file, isLongFolder(folder) ? 2 : 1), SAMPLE_RATE, folder)
+}
+
+/** Writes samples (one Float32Array per channel, 44.1 kHz) to a sound file with ffmpeg (see encodeArgs). */
+export function encode(ffmpeg, channels, output, folder) {
+  const frames = channels[0]?.length ?? 0
+  const interleaved = new Float32Array(frames * channels.length)
+  for (let i = 0; i < frames; i++) for (let c = 0; c < channels.length; c++) interleaved[i * channels.length + c] = channels[c][i]
+  return new Promise((done, fail) => {
+    const child = spawn(ffmpeg, encodeArgs(output, channels.length, folder), { windowsHide: true })
+    let errors = ''
+    child.stderr.on('data', (chunk) => (errors += chunk))
+    child.on('error', fail)
+    child.on('close', (code) => (code === 0 ? done() : fail(new Error(`ffmpeg couldn't write ${output}: ${errors.trim().split('\n').pop()}`))))
+    child.stdin.on('error', () => { /* ffmpeg stopped early: its own error comes through 'close' */ })
+    child.stdin.end(Buffer.from(interleaved.buffer))
+  })
+}
+
+/**
+ * Evens out one file: reads `input`, levels it (levelSamples), writes `output`, and measures what was written.
+ * An MP3 can come out a little hotter than its samples; if the written file peaks over the ceiling, it is made again
+ * once with the limiter lowered by that much. → { before, after, gainDb, trimMs, peakLimited }
+ * `options`: { fixedBefore, trimMs } (trimMs: how much to cut — default: to the onset, effects + menus only).
+ */
+export async function levelFile(ffmpeg, input, output, folder, settings, options = {}) {
+  const channels = await decode(ffmpeg, input, isLongFolder(folder) ? 2 : 1)
+  let limitDb = settings.ceilingDb - LIMITER_MARGIN_DB
+  let result
+  for (let attempt = 0; attempt < 2; attempt++) {
+    result = levelSamples(channels, SAMPLE_RATE, folder, settings, { ...options, limitDb })
+    await encode(ffmpeg, result.channels, output, folder)
+    const written = await measureFile(ffmpeg, output, folder)
+    result = { ...result, after: written }
+    if (written.peakDb <= settings.ceilingDb + 0.05) break
+    limitDb -= written.peakDb - settings.ceilingDb + 0.1
+  }
+  const { before, after, gainDb, trimMs, peakLimited } = result
+  return { before, after, gainDb, trimMs, peakLimited }
 }

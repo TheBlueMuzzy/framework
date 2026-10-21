@@ -56,7 +56,7 @@ describe('the report', () => {
     expect(table[3]).toContain('-17.0 dB LUFS')
   })
   it('a summary line: how many, and what kind', () => {
-    expect(summarize(rows, DEFAULT_LOUDNESS)).toBe('3 sounds · target -18 dB ±3 · ceiling -1 dB · 1 to even out (1 too quiet, 1 start late)')
+    expect(summarize(rows, DEFAULT_LOUDNESS)).toBe('3 sounds · target -18 dB ±3 · ceiling -1 dB · 1 to even out (1 too quiet, 1 starts late)')
     expect(summarize(rows.slice(0, 1), DEFAULT_LOUDNESS)).toMatch(/1 sound · .* all even ✓$/)
   })
 })

@@ -154,12 +154,11 @@ export type SavedAudio = { path: string; file: string; trimmedMs: number; loudne
 // Only the parts the drop uses. The full description is in the audio module's loudness.mjs.
 type LoudnessSettings = { targets: Record<string, number>; toleranceDb: number; ceilingDb: number; lateMs: number }
 type Measured = { loudnessDb: number; peakDb: number; onsetMs: number; lengthMs: number; method: string }
-type Fix = { gainDb: number; trimMs: number; peakLimited: boolean }
+type Levelled = { before: Measured; after: Measured; gainDb: number; trimMs: number; peakLimited: boolean }
 export type LoudnessTools = {
   readLoudness: (audioJson: unknown) => { settings: LoudnessSettings; warnings: string[] }
-  measureFile: (ffmpeg: string, file: string, folder: string) => Promise<Measured>
-  planFix: (measured: Measured, folder: string, settings: LoudnessSettings) => Fix
-  fixArgs: (input: string, output: string, folder: string, fix: Fix, settings: LoudnessSettings) => string[]
+  /** reads input, trims (trimMs) + levels it, writes output (MP3: mono 96k for effects + menus, stereo 128k for music + ambience) */
+  levelFile: (ffmpeg: string, input: string, output: string, folder: string, settings: LoudnessSettings, options: { trimMs: number }) => Promise<Levelled>
 }
 
 /** Where the audio module keeps its matcher in a game (audio 0.4.0+) */
@@ -207,12 +206,9 @@ export async function saveAudioFile(root: string, target: AudioTarget, bytes: Bu
     if (matcher) {
       // Level it: measure the dropped file, then trim + gain + limiter + MP3 in one go (the audio module's settings)
       const { settings } = matcher.readLoudness(readAudioJson(root))
-      const before = await matcher.measureFile(ffmpeg, input, target.folder)
-      const fix = { ...matcher.planFix(before, target.folder, settings), trimMs: startSec * 1000 }
-      await run(ffmpeg, matcher.fixArgs(input, temp, target.folder, fix, settings))
-      const after = await matcher.measureFile(ffmpeg, temp, target.folder)
+      const { before, after, peakLimited } = await matcher.levelFile(ffmpeg, input, temp, target.folder, settings, { trimMs: startSec * 1000 })
       loudness = `levelled to ${oneDecimal(after.loudnessDb)} dB (was ${oneDecimal(before.loudnessDb)}; target ${settings.targets[target.folder]})`
-      if (fix.peakLimited) loudness += ' — it is spiky, so it stays a little under target rather than being squashed'
+      if (peakLimited) loudness += ' — it is spiky, so it stays a little under target rather than being squashed'
     } else {
       await run(ffmpeg, encodeArgs(input, temp, target.bus, startSec))
     }

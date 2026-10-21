@@ -12,6 +12,8 @@
 // target, spikes limited, and effects + menus trimmed to their onset. Before a file is first changed, it is copied to
 // audio-originals/<same path> — outside public/, so it's never shipped to players. An original is never overwritten:
 // the first one kept stays (to undo: copy it back). A file with a kept original isn't limited again (see loudness.mjs).
+// A file that can't be brought closer (already limited: its loudness IS its spikes) is left as it was — its original is
+// still kept, as the mark that it was tried, so the next report doesn't flag it again.
 // It only ever writes inside public/audio/ and audio-originals/, and never deletes anything.
 //
 // Exit code: 0 = the report ran (even with flagged files — it's a report), 1 = it couldn't run (no ffmpeg, a broken
@@ -20,7 +22,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFile
 import { tmpdir } from 'node:os'
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { FFMPEG_MISSING, FOLDERS, findFfmpeg, fixArgs, judge, measureFile, planFix, readLoudness, runFfmpeg } from './loudness.mjs'
+import { FFMPEG_MISSING, FOLDERS, findFfmpeg, judge, levelFile, measureFile, readLoudness } from './loudness.mjs'
 
 export const AUDIO_DIR = 'public/audio'
 export const ORIGINALS_DIR = 'audio-originals'
@@ -106,9 +108,8 @@ export async function fixSounds(gameDir, rows, { ffmpeg, settings }) {
     for (const row of rows.filter(fixable)) {
       const target = join(audioDir, row.rel)
       if (!isInside(audioDir, target)) throw new Error(`Not allowed: ${row.rel} is outside ${AUDIO_DIR}/`)
-      const fix = planFix(row.measured, row.folder, settings, { fixedBefore: row.fixedBefore })
       const temp = join(work, `fixed${extname(row.rel)}`)
-      await runFfmpeg(ffmpeg, fixArgs(target, temp, row.folder, fix, settings))
+      const fix = await levelFile(ffmpeg, target, temp, row.folder, settings, { fixedBefore: row.fixedBefore })
       // keep the original first — only if this sound has none yet (never overwritten)
       let kept = originalOf(gameDir, row.rel)
       if (!kept) {
@@ -117,13 +118,23 @@ export async function fixSounds(gameDir, rows, { ffmpeg, settings }) {
         mkdirSync(dirname(kept), { recursive: true })
         copyFileSync(target, kept)
       }
+      const keptAt = relative(gameDir, kept).replaceAll('\\', '/')
+      // never make it worse: a result no closer to the target (a file whose loudness IS its spikes — already limited)
+      // is thrown away. Its original is still kept, which marks it as tried: the next report says "as loud as its
+      // spikes allow" instead of flagging it again.
+      const distance = (m) => Math.abs(m.loudnessDb - settings.targets[row.folder])
+      if (distance(fix.after) > distance(row.measured) - 0.3 && fix.trimMs < 1) {
+        const verdict = judge(row.measured, row.folder, settings, { fixedBefore: true })
+        changes.push({ rel: row.rel, before: row.measured, after: row.measured, verdict, line: `${row.rel}: left as it was — as loud as its spikes allow (original: ${keptAt})` })
+        continue
+      }
       copyFileSync(temp, target)
-      const after = await measureFile(ffmpeg, target, row.folder)
+      const after = fix.after
       const trimmed = fix.trimMs >= 1 ? `, trimmed ${Math.round(fix.trimMs)} ms` : ''
       const verdict = judge(after, row.folder, settings, { fixedBefore: true })
       changes.push({
         rel: row.rel, before: row.measured, after, verdict,
-        line: `${row.rel}: ${db(row.measured.loudnessDb)} → ${db(after.loudnessDb)} dB${trimmed} · original: ${relative(gameDir, kept).replaceAll('\\', '/')}${verdict.ok ? '' : ` · still: ${verdict.problems.join(', ')}`}`,
+        line: `${row.rel}: ${db(row.measured.loudnessDb)} → ${db(after.loudnessDb)} dB${trimmed} · original: ${keptAt}${verdict.ok ? '' : ` · still: ${verdict.problems.join(', ')}`}`,
       })
     }
   } finally {
@@ -153,7 +164,7 @@ export function formatTable(rows) {
 export function summarize(rows, settings) {
   const off = rows.filter((r) => !r.verdict.ok)
   const count = (word) => off.filter((r) => r.verdict.problems.some((p) => p.includes(word))).length
-  const kinds = [['too quiet', count('too quiet')], ['too loud', count('too loud')], ['peaks over the ceiling', count('peaks')], ['start late', count('late')], ['silent', count('silent')], ['in no sound folder', count('sound folder')]]
+  const kinds = [['too quiet', count('too quiet')], ['too loud', count('too loud')], ['peaks over the ceiling', count('peaks')], [count('late') === 1 ? 'starts late' : 'start late', count('late')], ['silent', count('silent')], ['in no sound folder', count('sound folder')]]
     .filter(([, n]) => n).map(([word, n]) => `${n} ${word}`)
   const targets = [...new Set(Object.values(settings.targets))].length === 1
     ? `target ${settings.targets.sfx} dB` : `targets ${FOLDERS.map((f) => `${f} ${settings.targets[f]}`).join(', ')} dB`

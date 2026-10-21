@@ -44,7 +44,10 @@ export async function check(t) {
         const fix = `npm run audio:check -- --fix   (brings them within ${settings.toleranceDb} dB of the target, trims late starts, keeps the originals in audio-originals/; the targets: content/audio.json "loudness")`
         const warn = t.warn ?? t.fail // t.warn: check:framework 0.21.0+; an older runner fails instead
         warn(name, problems, fix)
-      } else t.pass(name, `${rows.length} sound${rows.length === 1 ? '' : 's'} within ${settings.toleranceDb} dB of their targets`)
+      } else {
+        const spiky = rows.filter((r) => r.verdict.note).length
+        t.pass(name, `${rows.length} sound${rows.length === 1 ? '' : 's'} within ${settings.toleranceDb} dB of their targets${spiky ? ` (${spiky} as loud as their spikes allow — npm run audio:check lists them)` : ''}`)
+      }
     }
   }
 }
