@@ -163,24 +163,30 @@ export function refuseHugeBody(request: Request, maxBytes: number): Response | n
 /** An address → a scrambled number (HMAC-SHA-256 with the worker's own secret, the first 16 hex digits): enough to
  *  count tries, never the address. With a secret nobody else has, the 4 billion IPv4 addresses can't simply be tried
  *  one by one to undo it (review F96). */
-export async function scramble(address: string, secret = ''): Promise<string> {
+export async function scramble(address: string, secret = '', prefix: 64 | 48 = 64): Promise<string> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(`saves-cloud:${secret}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
-  const hash = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(addressKey(address)))
+  const hash = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(addressKey(address, prefix)))
   return Array.from(new Uint8Array(hash).slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 /** Who to count: an IPv4 address as it is; an IPv6 address by its first half (/64) — one home gets 2^64 of them, so
- *  counting the full address would let a guesser take a fresh one per guess (review F96). */
-export function addressKey(address: string): string {
+ *  counting the full address would let a guesser take a fresh one per guess (review F96). prefix 48 = the wider block
+ *  one customer is often given (65,536 /64s), for the wrong-try limit per block (security review, v0.11.0). */
+export function addressKey(address: string, prefix: 64 | 48 = 64): string {
   if (!address.includes(':')) return address
   const [head, tail = ''] = address.toLowerCase().split('::')
   const front = head ? head.split(':') : []
   const back = address.includes('::') ? (tail ? tail.split(':') : []) : []
   const groups = [...front, ...Array(Math.max(0, 8 - front.length - back.length)).fill('0'), ...back]
-  return `${groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, '')).join(':')}::/64`
+  return `${groups.slice(0, prefix / 16).map((g) => g.replace(/^0+(?=.)/, '')).join(':')}::/${prefix}`
 }
 
-/** Wrong link codes the whole server takes in an hour, from everyone — a last stop for a guesser with many addresses. */
+/** Wrong link codes one IPv6 /48 may make in an hour (its /64s together) — so a guesser with a block of /64s can't
+ *  spend the whole server's wrong tries alone (security review, v0.11.0). An IPv4 address is only counted on its own. */
+export const WRONG_PER_48_PER_HOUR = 30
+/** Wrong link codes the whole server takes in an hour, from everyone — a last stop for a guesser with many addresses.
+ *  It only stops /saves/get: "Delete my data" needs the exact code, so it rests on the per-address and per-/48 limits
+ *  and a flood from many addresses can't stop a player deleting their data (security review, v0.11.0). */
 export const SERVER_WRONG_PER_HOUR = 2_000
 const EVERYONE = '*'
 
@@ -202,6 +208,7 @@ export async function handleCloud(request: Request, context: CloudContext): Prom
   // (review F96).
   const body = await readJson(request, path === '/saves/link' ? MAX_BODY_CHARS : 1_000)
   const who = await scramble(address, context.secret)
+  const block = address.includes(':') ? await scramble(address, context.secret, 48) : null // IPv6 only
 
   if (path === '/saves/link') {
     if (rows.count(who, 'upload', hour) >= settings.uploadsPerHour) return refuse('too-many-codes', 429)
@@ -221,14 +228,17 @@ export async function handleCloud(request: Request, context: CloudContext): Prom
     return refuse('server-full', 507)
   }
 
-  // /saves/get and /saves/delete: both need the right link code, so both count wrong tries
+  // /saves/get and /saves/delete: both need the right link code, so both count wrong tries (per address, per IPv6 /48,
+  // and server-wide — that last one only stops a fetch, so a flood can't stop anyone deleting their data)
   if (rows.count(who, 'wrong', hour) >= settings.wrongTriesPerHour) return refuse('too-many-tries', 429)
-  if (rows.count(EVERYONE, 'wrong', hour) >= SERVER_WRONG_PER_HOUR) return refuse('too-many-tries', 429)
+  if (block && rows.count(block, 'wrong', hour) >= WRONG_PER_48_PER_HOUR) return refuse('too-many-tries', 429)
+  if (path === '/saves/get' && rows.count(EVERYONE, 'wrong', hour) >= SERVER_WRONG_PER_HOUR) return refuse('too-many-tries', 429)
   const link = typeof body?.link === 'string' ? readLinkCode(body.link) : null
   if (!link) return refuse('not-a-link', 400) // can't match anything, so it isn't counted as a guess
   const saved = rows.get(link)
   if (!saved || saved.expiresAt <= now) {
     rows.bump(who, 'wrong', hour)
+    if (block) rows.bump(block, 'wrong', hour)
     rows.bump(EVERYONE, 'wrong', hour)
     return refuse('not-found', 404)
   }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addressKey, handleCloud, LINK_ALPHABET, MAX_BODY_CHARS, memoryCloudRows, newLinkCode, readJson, readLinkCode, refuseHugeBody, scramble, SERVER_WRONG_PER_HOUR,
-  showLinkCode, type CloudContext,
+  showLinkCode, WRONG_PER_48_PER_HOUR, type CloudContext,
 } from './cloudRoutes'
 import { DEFAULT_SAVES_CONFIG } from './config'
 import { MAX_CODE_CHARS } from './saveCode'
@@ -87,6 +87,35 @@ describe('the guess limits hold under pressure (review F96)', () => {
     for (let i = 0; i < SERVER_WRONG_PER_HOUR; i++) await call('/saves/get', { link: 'ZZZZ2222' }, { address: `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}` })
     expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '198.51.100.250' })).status).toBe(429)
   }, 30_000)
+
+  it('an IPv6 /48 is counted too: its /64s together get WRONG_PER_48_PER_HOUR wrong tries (security review, v0.11.0)', async () => {
+    const { call } = setup()
+    expect(addressKey('2001:db8:aa:bb::1', 48)).toBe('2001:db8:aa::/48')
+    const answers: number[] = []
+    for (let i = 0; i < 6; i++) { // 6 different /64s in one /48, 10 wrong tries each
+      for (let n = 0; n < 10; n++) answers.push((await call('/saves/get', { link: 'ZZZZ2222' }, { address: `2001:db8:aa:${i + 1}::${n + 1}` })).status)
+    }
+    expect(answers.filter((s) => s === 404)).toHaveLength(WRONG_PER_48_PER_HOUR)
+    expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '2001:db8:aa:99::1' })).status).toBe(429)  // a fresh /64 in the same /48
+    expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '2001:db8:ab:1::1' })).status).toBe(404)   // another /48: its own count
+    expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '198.51.100.9' })).status).toBe(404)        // IPv4: per address only
+  })
+
+  it('…and it holds for wrong tries sent all at once from 60 /64s of one /48', async () => {
+    const { call } = setup()
+    const answers = await Promise.all(Array.from({ length: 60 }, (_, i) => call('/saves/get', { link: 'ZZZZ2222' }, { address: `2001:db8:aa:${i + 1}::1` })))
+    expect(answers.filter((a) => a.status === 404)).toHaveLength(WRONG_PER_48_PER_HOUR)
+  })
+
+  it('the server-wide cap stops /saves/get only — "Delete my data" still works with the exact code (security review, v0.11.0)', async () => {
+    const { rows, call } = setup()
+    await call('/saves/link', { code: CODE })
+    rows.tries.set(`*|wrong|${Math.floor(NOW / HOUR)}`, SERVER_WRONG_PER_HOUR) // a flood from many addresses spent it
+    expect((await call('/saves/get', { link: 'K7QM2XRP' }, { address: '198.51.100.4' })).body).toEqual({ ok: false, code: 'too-many-tries' })
+    expect((await call('/saves/delete', { link: 'ZZZZ2222' }, { address: '198.51.100.4' })).status).toBe(404) // a wrong code: still just not-found
+    expect((await call('/saves/delete', { link: 'K7QM2XRP' }, { address: '198.51.100.4' })).body).toEqual({ ok: true })
+    expect(rows.saves.size).toBe(0)
+  })
 })
 
 /** A body sent in pieces with no size (chunked): 64 KB at a time, up to `total` bytes. `pulled()` = how much was read. */
