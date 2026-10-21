@@ -1,7 +1,8 @@
 // WHERE SAVES ARE KEPT — the browser's localStorage, reached safely. Every read and write can fail
 // (a private window that refuses storage, a full disk, Safari blocking a site inside a frame), so nothing
 // here ever throws: a refused read is "nothing saved", a refused write is reported back.
-// Tests (and later the phone / desktop builds, F98) pass their own storage with the same three methods.
+// Tests pass their own storage with the same three methods; a phone or desktop build switches the whole kit to
+// its platform's storage once at start-up (setSavesStorage, usually through openSaves in platform.ts).
 
 /** What a save needs from a storage. localStorage has it all; so does memoryStorage below. A storage without
  *  removeItem (an older game's test helper) works too: a removed copy is written as "" instead (read as nothing). */
@@ -18,6 +19,43 @@ export function browserStorage(): StorageLike | null {
   } catch {
     return null // some browsers throw just for looking at localStorage when storage is blocked
   }
+}
+
+// --- the one switch: where every save, run, link code, board memory and health check keeps its data ---------------
+
+let chosen: { storage: StorageLike | null; native: boolean } | null = null
+
+/** Point the whole saves kit at another storage (a phone app's or desktop app's — see openSaves). Call it once at
+ *  start-up, before the first save is read. `native: true` = the platform's own storage, not the browser's, so the
+ *  health check drops the browser-only warnings (Safari's 7 days, private windows, itch.io's frame).
+ *  `setSavesStorage(undefined)` goes back to the browser's localStorage. A call that passes its own `storage` still wins. */
+export function setSavesStorage(storage: StorageLike | null | undefined, { native = false }: { native?: boolean } = {}): void {
+  chosen = storage === undefined ? null : { storage, native }
+}
+
+/** The storage the kit uses when a call doesn't pass its own: the one set with setSavesStorage, else localStorage. */
+export function savesStorage(): StorageLike | null {
+  return chosen ? chosen.storage : browserStorage()
+}
+
+/** A storage that asks savesStorage() on every read and write — what a save made without its own `storage` keeps.
+ *  So a save created when the game's files load (before openSaves has finished) still uses the switched storage. */
+export const switchedStorage: StorageLike = {
+  getItem: (key) => savesStorage()?.getItem(key) ?? null,
+  setItem: (key, value) => {
+    const storage = savesStorage()
+    if (!storage) throw new Error('storage is blocked') // what writeKey reports as "blocked", like a null storage
+    storage.setItem(key, value)
+  },
+  removeItem: (key) => {
+    const storage = savesStorage()
+    if (storage) removeKey(storage, key)
+  },
+}
+
+/** true when the kit was switched to a platform's own storage (setSavesStorage(…, { native: true })). */
+export function savesOnNativeStorage(): boolean {
+  return chosen?.native ?? false
 }
 
 /** Read a key; any failure = nothing there. */

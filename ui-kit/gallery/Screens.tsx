@@ -471,7 +471,7 @@ const samples: Record<string, ComponentType> = {
   feedback: Feedback,
   rewards: () => <RewardPopup rewards={[{ icon: '🪙', amount: 250, label: 'Coins' }, { icon: '💎', amount: 3, label: 'Gems' }, { icon: '🎲', label: 'Gold dice skin' }]} />,
   // items: the buttons in the game's own order (the first is the main one unless one says primary)
-  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0" items={[
+  menu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0.12" items={[
     { label: 'Play', onClick: () => screens.push('modes') }, { label: 'Play online', onClick: () => screens.push('lobby') },
     { label: 'Settings', onClick: () => screens.push('settings') }, { label: 'How to play', onClick: () => screens.push('howto') },
     { label: 'Credits', onClick: () => screens.push('credits') }, { label: 'Quit', onClick: () => screens.pop() },
@@ -479,6 +479,9 @@ const samples: Record<string, ComponentType> = {
   // art skins (0.11.0): logo + backdrop + art buttons; the words still come from the game
   artstage: ArtStageSample,
   snap: SnapSample,
+  continuemenu: () => <MainMenu title="Roll Better" subtitle="A dice game for friends" version="v0.1.0.12" continueDetail="Turn 7 · 5 min ago"
+    onContinue={() => toast('Back where you were')} onPlay={() => screens.push('modes')} onSettings={() => screens.push('settings')}
+    onHowToPlay={() => screens.push('howto')} onCredits={() => screens.push('credits')} />,
   artmenu: () => <MainMenu title="Roll Better" titleArt={art('logo.svg')} backdrop={art('backdrop.svg')} subtitle="A dice game for friends" items={[
     { label: 'Play', onClick: () => screens.push('artend'), art: redButton }, { label: 'Settings', onClick: () => screens.push('settings'), art: tealButton },
   ]} />,
@@ -486,7 +489,7 @@ const samples: Record<string, ComponentType> = {
   scrolling: ScrollingMenu,
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
-  settings: () => <Settings info={{ version: '0.1.0' }} onAction={(id) => toast(`Action: ${id}`)} />,
+  settings: () => <Settings version="v0.1.0.12" onAction={(id) => toast(`Action: ${id}`)} />,
   hud: HudSample,
   huddock: HudDockSample,
   chips: PlayerChips,

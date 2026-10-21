@@ -92,6 +92,9 @@
   /* An open screen with another one on top is hidden (ScreenStack sets data-covered): only the top screen shows.
      visibility (not display: none) keeps its scroll position; !important so no game rule can make it peek through */
   .kit-layer[data-covered], .kit-layer[data-covered] * { visibility: hidden !important; }
+  /* The main menu's version line hides while a screen is open over the menu (0.24.0): Settings shows its own, and the
+     dimmed menu's line peeked out just under the Settings card — the same number twice, one half-hidden */
+  .kit-layer[inert] .kit-menu-version { visibility: hidden; }
   /* <ScreenStack overlay>: open screens cover the whole window above a game that isn't built from Screens */
   .kit-overlay { position: fixed; inset: 0; z-index: var(--kit-overlay-z, 100); pointer-events: none; }
   .kit-overlay[data-open] { pointer-events: auto; }

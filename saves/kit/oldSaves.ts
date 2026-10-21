@@ -12,7 +12,8 @@
 // The game's ready-made test (tests/saves/saves.test.ts, copied once by the installer) runs these checks for every
 // save the game lists. Each check returns the problems it found in plain words — an empty list = all good.
 // check:framework (conformance.mjs) also fails a save that has no golden copy for a version.
-import type { Save, SaveRecord, SlotSaves } from './saves'
+import type { Run } from './run'
+import { backupKey, type Save, type SaveRecord, type SlotSaves } from './saves'
 import { memoryStorage, type MemoryStorage } from './storage'
 
 export interface GoldenSave {
@@ -24,6 +25,13 @@ export interface GoldenSave {
 /** One save the game's test checks, with a sample of real-looking data (not just fresh) for the round trip. */
 export interface SaveUnderTest {
   save: Save<any> | SlotSaves<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
+  sample?: unknown
+}
+
+/** A run the game's test checks (createRun): its save is tested like any other (golden saves, round trip…), and on
+ *  top, that a run ended with end() never comes back. */
+export interface RunUnderTest {
+  run: Run<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's runs
   sample?: unknown
 }
 
@@ -166,4 +174,30 @@ function fullStorageProblems(save: SaveUnderTest['save'], sample: unknown): stri
     problems.push(`blocked storage: threw ${(error as Error)?.message ?? error}`)
   }
   return problems
+}
+
+/** A run that ended (won, lost, abandoned) never comes back: not as Continue, not from a backup, not after a reload.
+ *  Backups are put in place first (as a few more turns would make them), so a plain clear-the-newest is caught. */
+export function checkRunEnds(run: Run<any>, sample: unknown): string[] { // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's runs
+  try {
+    const storage = memoryStorage()
+    const target = run.withStorage(storage)
+    const data = sample ?? target.save.load()
+    const result = target.autosave(data)
+    if (!result.ok) return [`autosave failed: ${result.message}`]
+    // (the same data saved again in the same millisecond is the same text, which the core doesn't copy into a backup)
+    storage.data[backupKey(target.key, 1)] = storage.data[target.key]
+    storage.data[backupKey(target.key, 2)] = storage.data[target.key]
+    if (!target.pending()) return ['after an autosave, pending() found no run — Continue would never show']
+    target.end()
+    const problems: string[] = []
+    const left = Object.keys(storage.data).filter((k) => storage.data[k] !== '')
+    if (left.length) problems.push(`end() left copies behind: ${left.join(', ')}`)
+    const again = run.withStorage(storage) // a fresh page after a reload
+    if (again.pending()) problems.push('after end() and a reload, Continue still shows')
+    if (again.resume().ok) problems.push('after end() and a reload, the finished run loads again')
+    return problems
+  } catch (error) {
+    return [`it threw ${(error as Error)?.message ?? error}`]
+  }
 }

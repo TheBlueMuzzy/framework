@@ -156,7 +156,8 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   for (const f of removed) removeInside(target, f, log)
   for (const f of sourceFiles) copyFile(join(kitDir, f), join(target, f))
   writeText(join(target, 'VERSION'), `${version}\ncommit ${commit}\n`)
-  if (makeStyle) writeText(stylePath, JSON.stringify({ preset, tweaks: {} }, null, 2) + '\n')
+  // orientation (0.26.0): "any" until the game says "portrait" / "landscape" — then check:framework skips the sizes it rules out
+  if (makeStyle) writeText(stylePath, JSON.stringify({ preset, orientation: 'any', tweaks: {} }, null, 2) + '\n')
   if (makeSettings) writeText(settingsPath, JSON.stringify(starterSettings(JSON.parse(readText(join(kitDir, 'blocks', 'settings.default.json')))), null, 2) + '\n')
   if (creditsReadable && (merged.added.length || merged.removed.length)) {
     writeText(creditsPath, JSON.stringify(merged.credits, null, 2) + '\n')
@@ -172,7 +173,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
        applyStyle(style)
        applyAccessibility(loadSettings(settings))
   2. Draw menus and dialogs through the screen stack, once, around the game:
-       <ScreenStack screens={{ ...kitScreens, settings: () => <Settings schema={settings} /> }}>
+       <ScreenStack screens={{ settings: () => <Settings schema={settings} /> }}>
          <Game />
        </ScreenStack>
        <ToastStack />

@@ -74,6 +74,18 @@ describe('the tester + report', () => {
     expect(text).toMatch(/FAIL — 1 promise not kept: b$/)
     expect(formatReport('mygame', [{ title: 'Dev Kit', version: '1', rel: 'src/devkit', results: [results[0], results[2]] }]).text).toMatch(/PASS — 1 check kept, 1 skipped$/)
   })
+  it('t.warn (0.21.0): shown with its problems + fix, but the run still passes; the health file lists it', () => {
+    const results = []
+    const t = makeTester({ root: game, module: { rel: 'src/devkit', version: '1' }, modules: [], shared: {}, staticOnly: false, results })
+    t.pass('a', 'fine')
+    t.warn('pill clear', ['390×844: at "top" it covers "CRACKS 0/10"'], 'content/devkit.json "pauseBadgeSpot": "left"')
+    const sections = [{ title: 'Dev Kit', version: '1', rel: 'src/devkit', results }]
+    const { text, failed } = formatReport('g', sections)
+    expect(failed).toBe(0)
+    expect(text).toContain('! pill clear — WARNING\n      390×844: at "top" it covers "CRACKS 0/10"\n      FIX: content/devkit.json "pauseBadgeSpot": "left"')
+    expect(text).toMatch(/PASS — 1 check kept, 1 warning \(pill clear\)$/)
+    expect(healthSummary(sections).modules[0]).toMatchObject({ passed: 1, warnings: ['pill clear'], failed: [] })
+  })
   it('needsPlay says exactly what to add to the adapter', () => {
     write('src/devkit-game/tabs.ts', "import { gAdapter } from './gAdapter'\nregisterDevKitGame(gAdapter)\n")
     write('src/devkit-game/gAdapter.ts', '')
@@ -123,8 +135,8 @@ describe('health file for the planner (F66)', () => {
   it('sums each module up: passed, the failed names, skipped', () => {
     const s = healthSummary(sections, { date: '2026-10-19T00:00:00.000Z', commit: 'abc1234' })
     expect(s.modules).toEqual([
-      { id: 'devkit', title: 'Dev Kit', version: '0.19.1', passed: 1, failed: ['b'], skipped: 1, knownGaps: [], gapsToRemove: [] },
-      { id: 'ui', title: 'UI kit', version: '0.19.0', passed: 1, failed: [], skipped: 0, knownGaps: [], gapsToRemove: [] },
+      { id: 'devkit', title: 'Dev Kit', version: '0.19.1', passed: 1, warnings: [], failed: ['b'], skipped: 1, knownGaps: [], gapsToRemove: [] },
+      { id: 'ui', title: 'UI kit', version: '0.19.0', passed: 1, warnings: [], failed: [], skipped: 0, knownGaps: [], gapsToRemove: [] },
     ])
     expect(s.commit).toBe('abc1234')
   })
@@ -169,6 +181,14 @@ describe('known gaps (0.20.1)', () => {
     expect(text).toContain('! it passes now — take it off "knownGaps" in content/devkit.json')
     expect(text).toMatch(/! 1 known gap passes now — take it off "knownGaps" in content\/devkit\.json: no inline styles$/)
     expect(healthSummary(sections).modules[1].gapsToRemove).toEqual(['no inline styles'])
+  })
+
+  it('a listed check that only WARNS still has its gap — no "passes now" reminder (F103 review)', () => {
+    const sections = run()
+    sections[1].results[0] = { name: 'no inline styles', ok: true, warning: true, problems: ['still covers CRACKS'] }
+    applyKnownGaps(sections, listed([{ check: 'no inline styles', why: 'x', roadmap: 'F1' }]))
+    expect(sections[1].results[0].gapNowPasses).toBeUndefined()
+    expect(formatReport('g', sections).text).not.toContain('it passes now')
   })
 
   it('a listed name no check has is a failure (typo / renamed check) — only judged when every check ran', () => {

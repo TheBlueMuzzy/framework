@@ -36,6 +36,18 @@ describe('seats: joining', () => {
     expect(joinRoom(lobby(), { ...cat, create: true }, settings)).toEqual({ ok: false, reason: 'code_taken' })
   })
 
+  it('a rejoin only takes back the player\'s own seat — never a new room, never a stranger\'s lobby (0.9.0)', () => {
+    const empty = newRoom('BAKU')
+    expect(joinRoom(empty, { ...ann, rejoin: true }, settings)).toEqual({ ok: false, reason: 'no_room' })
+    expect(empty.seats).toEqual([]) // nothing made, even though Ann's request said create: true
+    const strangers = lobby()
+    expect(joinRoom(strangers, { ...cat, rejoin: true }, settings)).toEqual({ ok: false, reason: 'no_room' })
+    const mine = lobby()
+    startPlaying(mine)
+    handToBot(mine, 'seat-2')
+    expect(joinRoom(mine, { ...bob, rejoin: true }, settings)).toMatchObject({ ok: true, cameBack: true, seat: { id: 'seat-2', kind: 'human' } })
+  })
+
   it('refuses junk codes, empty names, a full room and a game in progress', () => {
     expect(joinRoom(newRoom('ZZZZ'), ann, settings)).toEqual({ ok: false, reason: 'no_room' })
     expect(joinRoom(lobby(), { ...cat, name: '   ' }, settings)).toEqual({ ok: false, reason: 'name_needed' })
@@ -266,6 +278,27 @@ describe('settings', () => {
     expect(s.minSeats).toBe(2)
     expect(s.idleWarnAfterMs).toBe(30_000)
     expect(s.idleTakeoverAfterMs).toBe(60_000)
+    expect(s.keepEmptyRoomMs).toBe(300_000) // an empty mid-game room waits 5 minutes (Muzzy, 2026-10-20)
+    expect(readSettings({ keepEmptyRoomMs: 10_000 }).keepEmptyRoomMs).toBe(10_000)
+  })
+
+  it('keepMatchDays: 7 unless the game says otherwise — any positive number; 0, below 0 or junk → 7 (0.10.0)', () => {
+    expect(readSettings({}).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: 30 }).keepMatchDays).toBe(30)
+    expect(readSettings({ keepMatchDays: 0.5 }).keepMatchDays).toBe(0.5)
+    expect(readSettings({ keepMatchDays: 0 }).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: -1 }).keepMatchDays).toBe(7)
+    expect(readSettings({ keepMatchDays: '30' } as never).keepMatchDays).toBe(7)
+  })
+
+  it('keepUnplayedMatchHours: 24 unless the game says otherwise; 0 = never; never under 1 hour; below 0 or junk → 24 (0.11.0)', () => {
+    expect(readSettings({}).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: 72 }).keepUnplayedMatchHours).toBe(72)
+    expect(readSettings({ keepUnplayedMatchHours: 0 }).keepUnplayedMatchHours).toBe(0)
+    expect(readSettings({ keepUnplayedMatchHours: 0.01 }).keepUnplayedMatchHours).toBe(1)
+    expect(readSettings({ keepUnplayedMatchHours: -5 }).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: Number.NaN }).keepUnplayedMatchHours).toBe(24)
+    expect(readSettings({ keepUnplayedMatchHours: '1' } as never).keepUnplayedMatchHours).toBe(24)
   })
 
   it('game over: a player a bot played for (they idled, still connected) keeps their seat — back to the lobby and in a rematch', () => {

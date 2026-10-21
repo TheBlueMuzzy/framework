@@ -12,7 +12,7 @@
 //
 //   const health = await checkSaveHealth()      // once at start-up (no prompts)
 //   await askToKeepSaves()                      // after the first real progress (Firefox shows a question)
-import { browserStorage, readKey, removeKey, writeKey, type StorageLike } from './storage'
+import { readKey, removeKey, savesOnNativeStorage, savesStorage, writeKey, type StorageLike } from './storage'
 
 export type WarningId = 'blocked' | 'private' | 'itch' | 'frame' | 'safari' | 'not-kept'
 
@@ -58,6 +58,9 @@ export interface HealthEnv {
   standalone: boolean
   /** The JavaScript memory limit (Chrome only), for the private-window guess. */
   heapLimit?: number
+  /** The saves are in a phone or desktop app's own storage (setSavesStorage(…, { native: true })): the browser's
+   *  risks (Safari's 7 days, private windows, frames, "not kept") don't apply — only "can it save at all?". */
+  native?: boolean
 }
 
 export function browserEnv(): HealthEnv {
@@ -75,7 +78,8 @@ export function browserEnv(): HealthEnv {
     }
   } catch { /* leave the defaults */ }
   return {
-    storage: browserStorage(),
+    storage: savesStorage(),
+    native: savesOnNativeStorage(),
     userAgent: nav?.userAgent ?? '',
     storageManager: nav?.storage,
     crossSiteFrame, hostname, standalone,
@@ -117,6 +121,10 @@ async function looksPrivate(env: HealthEnv): Promise<boolean> {
 export async function checkSaveHealth(env: HealthEnv = browserEnv(), words = HEALTH_WORDS): Promise<SaveHealth> {
   const warnings: SaveWarning[] = []
   const canSave = storageWorks(env.storage)
+  if (env.native) {
+    if (!canSave) warnings.push({ id: 'blocked', level: 'risk', message: words.blocked })
+    return { canSave, kept: canSave ? true : null, inFrame: false, onItch: false, warnings }
+  }
   const onItch = isItch(env.hostname)
   const inFrame = env.crossSiteFrame || onItch
   let kept: boolean | null = null

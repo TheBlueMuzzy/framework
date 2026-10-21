@@ -4,11 +4,28 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import defaultSettings from './blocks/settings.default.json'
-import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, settingsProblems, stripComments, whereText } from './conformance.mjs'
+import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, readOrientation, settingsProblems, sizesFor, stripComments, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
     expect(SIZES.map((s) => `${s.width}×${s.height}`)).toEqual(['390×844', '360×780', '844×390', '768×343', '1100×800', '1440×900', '1920×1080'])
+  })
+  it('a portrait-only game is never checked on a phone on its side; desktops stay (F104)', () => {
+    const names = (o) => { const { sizes, skipped } = sizesFor(o); return [sizes.map((s) => `${s.width}×${s.height}`), skipped.map((s) => `${s.width}×${s.height}`)] }
+    expect(names('portrait')).toEqual([['390×844', '360×780', '1100×800', '1440×900', '1920×1080'], ['844×390', '768×343']])
+    expect(names('landscape')).toEqual([['844×390', '768×343', '1100×800', '1440×900', '1920×1080'], ['390×844', '360×780']])
+    expect(names('any')[1]).toEqual([])
+    expect(names(undefined)[0]).toHaveLength(7)
+  })
+  it('style.json "orientation": missing → any; a value the kit doesn\'t know → any + a plain problem (F104)', () => {
+    expect(readOrientation({ preset: 'neon' })).toEqual({ orientation: 'any', problem: null })
+    expect(readOrientation(null)).toEqual({ orientation: 'any', problem: null })
+    expect(readOrientation({ orientation: 'portrait' })).toEqual({ orientation: 'portrait', problem: null })
+    expect(readOrientation({ orientation: 'sideways' })).toEqual({ orientation: 'any', problem: expect.stringMatching(/"sideways" isn't one of "any", "portrait", "landscape" — checking every size/) })
+  })
+  it('"every size" means every size CHECKED (5 for a portrait game)', () => {
+    const where = ['phone 390×844 · in play', 'small phone 360×780 · in play', 'laptop 1100×800 · in play', 'desktop 1440×900 · in play', 'HD 1920×1080 · in play']
+    expect(whereText(where, 10, 5)).toBe('in play, every size')
   })
   it('groups problems by kind, each with every screen it showed on (wider counts as clipped)', () => {
     const grouped = groupProblems({
@@ -230,6 +247,10 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     expect(fileFeedsInfo('<Settings schema={s} info={{ version: `v${file.version}` }} />', 'version')).toBe(true)
     expect(fileFeedsInfo('const info = { build, version }', 'version')).toBe(true)
     expect(fileFeedsInfo('<Settings info={{ build: b }} />', 'version')).toBe(false)
+    // 0.24.0: the version prop fills the version row too — only on Settings, only for "version"
+    expect(fileFeedsInfo('<Settings schema={s} onChange={(v) => apply(v)} version={versionLabel} />', 'version')).toBe(true)
+    expect(fileFeedsInfo('<MainMenu version={versionLabel} />', 'version')).toBe(false)
+    expect(fileFeedsInfo('<Settings version={versionLabel} />', 'build')).toBe(false)
   })
   it('skips rows that are switched off ("on": false)', () => {
     const schema = tab([{ id: 'difficulty', type: 'selector', label: 'Difficulty', on: false }, { id: 'tips', type: 'toggle', label: 'Tips' }])

@@ -21,7 +21,7 @@ describe('install-kit', () => {
     expect(existsSync(join(kit, 'fonts/nunito.woff2'))).toBe(true)
     expect(existsSync(join(kit, 'screens.test.ts'))).toBe(false)
     expect(readFileSync(join(kit, 'VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+\ncommit /)
-    expect(readJson(join(game, 'content/ui/style.json'))).toEqual({ preset: 'cozy', tweaks: {} })
+    expect(readJson(join(game, 'content/ui/style.json'))).toEqual({ preset: 'cozy', orientation: 'any', tweaks: {} })
     const settings = readJson(join(game, 'content/ui/settings.json'))
     expect(settings.tabs.length).toBeGreaterThan(0)
     // only the rows the kit wires itself start on — a game switches a row on when it reads it (no fake settings)

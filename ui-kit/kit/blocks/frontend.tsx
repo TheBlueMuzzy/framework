@@ -1,7 +1,7 @@
 // FRONT END — MainMenu, ModeSelect, HowToPlay, Credits.
 // Each one is a screen: open it with screens.push('…'), and Back / Esc close it.
 // A button only appears when you pass its function (no onQuit → no Quit button).
-import { useEffect, useState, type ReactNode } from 'react'
+import { Children, useEffect, useState, type ReactNode } from 'react'
 import { Grid, Panel, Row, Screen, Stack } from '../layout'
 import { Button, Card, Badge, ScrollArea, Text, type ButtonArt } from '../controls'
 import { screens } from '../screens'
@@ -18,7 +18,9 @@ export const mainMenuWords = { continue: 'Continue', play: 'Play', settings: 'Se
 // locked: true = greyed like a disabled button, but a tap still calls onClick, so the game can say why
 // (e.g. a Callout: "Finish your first game to unlock this"). Screen readers hear it as unavailable.
 // art (0.11.0): the game's own button pictures for this item (Button art: { up, down?, label?, size? }).
-export type MainMenuItem = { label: string; onClick: () => void; primary?: boolean; locked?: boolean; art?: ButtonArt }
+// detail (0.23.0): a short second line inside the button, under its label — e.g. Continue's "Turn 7 · 5 min ago"
+// (the saves module's continueLine). Inside the button, so the menu never jumps when it appears.
+export type MainMenuItem = { label: string; onClick: () => void; primary?: boolean; locked?: boolean; art?: ButtonArt; detail?: string }
 // titleArt (0.11.0): the game's logo picture in place of the title words (the words are still its name for screen readers).
 // backdrop (0.11.0): a picture behind the whole menu (Screen backdrop; keeps its shape, crops what spills over).
 type MainMenuProps = {
@@ -27,28 +29,35 @@ type MainMenuProps = {
   items?: MainMenuItem[]
   onContinue?: () => void; onPlay?: () => void; onSettings?: () => void
   onHowToPlay?: () => void; onCredits?: () => void; onQuit?: () => void
+  continueDetail?: string // the second line inside Continue (0.23.0), e.g. "Turn 7 · 5 min ago"
   words?: Partial<typeof mainMenuWords>
 }
-export function MainMenu({ title, subtitle, version, children, items, words, titleArt, backdrop, ...on }: MainMenuProps) {
+export function MainMenu({ title, subtitle, version, children, items, words, titleArt, backdrop, continueDetail, ...on }: MainMenuProps) {
   const w = { ...mainMenuWords, ...words }
-  const named = [
-    [w.continue, on.onContinue], [w.play, on.onPlay], [w.settings, on.onSettings],
-    [w.howToPlay, on.onHowToPlay], [w.credits, on.onCredits], [w.quit, on.onQuit],
-  ].filter(([, onClick]) => onClick).map(([label, onClick]) => ({ label, onClick }) as MainMenuItem)
+  const named = ([
+    { label: w.continue, onClick: on.onContinue, detail: continueDetail }, { label: w.play, onClick: on.onPlay },
+    { label: w.settings, onClick: on.onSettings }, { label: w.howToPlay, onClick: on.onHowToPlay },
+    { label: w.credits, onClick: on.onCredits }, { label: w.quit, onClick: on.onQuit },
+  ] as Partial<MainMenuItem>[]).filter((item) => item.onClick) as MainMenuItem[]
   const buttons = items ?? named
   const anyMarked = buttons.some((item) => item.primary)
   const isPrimary = (item: MainMenuItem, i: number) => (anyMarked ? item.primary : i === 0)
+  // On a phone on its side the buttons go in two columns from six on — the extra buttons (children) count too
+  // (0.24.0: Glyphtender's 5 items + Full screen stayed one column and ran off the top once the version footer took a row)
+  const buttonCount = buttons.length + Children.toArray(children).length
   return (
-    <Screen label={title} bottom={version && <Text kind="caption">{version}</Text>} backdrop={backdrop}>
+    <Screen label={title} bottom={version && <span className="kit-menu-version"><Text kind="caption">{version}</Text></span>} backdrop={backdrop}>
       <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
           {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} /> : <Text kind="display">{title}</Text>}
           {subtitle && <Text kind="caption">{subtitle}</Text>}
         </Stack>
-        <Stack gap="s" className="kit-main-menu-buttons">
+        <Stack gap="s" className="kit-main-menu-buttons" data-many={buttonCount >= 6 || undefined}>
           {buttons.map((item, i) => (
             <Button key={`${i}-${item.label}`} variant={isPrimary(item, i) ? 'primary' : 'secondary'} onClick={item.onClick} art={item.art}
-              sound={item.locked ? false : undefined} aria-disabled={item.locked || undefined} data-locked={item.locked || undefined}>{item.label}</Button>
+              sound={item.locked ? false : undefined} aria-disabled={item.locked || undefined} data-locked={item.locked || undefined}>
+              {item.label}{item.detail && <span className="kit-button-detail">{item.detail}</span>}
+            </Button>
           ))}
           {children && <div className="kit-main-menu-extra">{children}</div>}
         </Stack>

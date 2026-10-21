@@ -1,0 +1,41 @@
+# Sprint 17 — releases and live games get watched for you
+Started 2026-10-20 · Milestone v0.10 · Features: F82, F83
+Release safety first, then the save layers (Muzzy 2026-10-20: "I want you to do all of them"). Queue: 17 F82 + F83 · 18 F93 + F95 (players get back where they were) · 19 F96 + F94 (saves travel: link code + seed/move log) · 20 F97 + F98 + F99 (saves everywhere: stores/Steam, checked leaderboards, Unity). Work in `~/.claude` (BMUZ scripts, hooks, skills) + the rooms kit on `dev/v0-10`; no game is changed.
+
+## F82 🔧 Is the live game up?
+Done when: session start checks STATE's Live URL in at most 3 seconds and says "the live site is DOWN" only when it is (silent when up, when there's no Live URL, or when offline); live-check.mjs also checks the room server's `/health`; the rooms kit answers `/health`.
+- [x] 🤖 1. Rooms kit server answers `GET /health` with `{ ok: true }` (no room opened; the game may pass its version), the worker template answers it first, the installer tells an older worker to add it; kit 0.8.0 — rooms/kit/server/health.ts, rooms/templates/party/worker.ts
+- [x] 🤖 2. live-check.mjs pings the room server's health URL (STATE Key facts `Rooms:` URL, when there is one) and names it in plain words when it's down — ~/.claude/config/bmuz/scripts/live-check.mjs
+- [x] 🤖 3. Session start: a 3-second check of STATE's Live URL and the room server; one "DOWN" line each only when it fails; nothing when up, missing, offline or slow — ~/.claude/config/bmuz/hooks/live-ping.mjs, ~/.claude/config/bmuz/session-start.sh
+- [x] 🤖 4. Tests: a site that's up, down (500), slow (> 3 s → never holds the session), no Live URL, offline — ~/.claude/config/bmuz/hooks/test-hooks.mjs, ~/.claude/config/bmuz/scripts/test-scripts.mjs
+Check: a fake down site prints the DOWN line at session start, an up one prints nothing, a 10-second one gives up after 3 s; live-check with a down room server names it; the rooms kit test hits /health.
+Checked: real session-start.sh in a stand-in game with a dead Pages URL + a deleted worker → both DOWN lines ("HTTP 404", "no such server (Cloudflare error 1042)"); Roll Better's real session start → no DOWN line (its site 200, its worker's own 404 = up) · Glyphtender / Goops / Windchime quiet, ~0.25 s each · live-ping suite 16/16 (500 → DOWN, 10-second site → quiet after ~3 s, offline → quiet, no Live / Release none → quiet, 1042 → DOWN) · live-check suite 22/22 (room server up / 500 / old 404 / Cloudflare 1042 / nothing listening) · rooms kit 118/118 incl. health.test.ts · test-scripts 244/244, test-hooks 516/516 (Claude ran).
+Ask Muzzy: —
+
+## F83 🔧 Stage-release checks (alpha / beta / 1.0)
+Done when: release.mjs refuses an alpha / beta / 1.0 release without `.planning/archive/release-checks/<stage>.md` filled in, listing every missing line at once; at beta and later, stand-in art left in credits.json is refused; at 1.0 the name/trademark check and press kit are asked for.
+- [x] 🤖 5. Checklist template: devices tried · a first-time player who played without help · store-page screenshots newer than the last stage · TDD §7 for the platform (privacy, age rating) · no stand-in art (beta+) · name/trademark check + press kit (1.0) — ~/.claude/config/bmuz/templates/release-check.md
+- [x] 🤖 6. release.mjs: a stage release refuses while the checklist is missing, unfilled, or has an unticked line, naming each; `release-check.mjs <stage>` writes the list for that stage (--dry-run stays change-nothing) — ~/.claude/config/bmuz/scripts/release.mjs, ~/.claude/config/bmuz/scripts/release-check.mjs
+- [x] 🤖 7. Beta and later: any credits.json entry marked stand-in (and stand-in files the check can find) refused, naming each — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 8. Tests + /deliver step + PROJECT-FILES format line — ~/.claude/config/bmuz/scripts/test-scripts.mjs, ~/.claude/skills/deliver/SKILL.md, ~/.claude/config/bmuz/PROJECT-FILES.md
+- [x] 🙋 9. Read the checklist template — anything a real alpha / beta check needs that's missing? — ~/.claude/config/bmuz/templates/release-check.md
+Check: a scratch game's beta release with no checklist, a half-ticked one, or a stand-in sprite in credits.json is refused naming each line; a full one passes; an update release never asks for it.
+Checked: release-stage-checks suite 14/14 in scratch games (alpha with no list → refused naming the file + release-check.mjs; untouched list → 8 lines named once; half done → only Devices unticked + Store page unfilled; a deleted line named; full → passes; stand-in fine at alpha; beta list adds No stand-in art + Bugs; beta with a credits "stand-in", `standIn: true`, a placeholder-card.png and an open (stand-in) task → refused naming all 4, not the OFL font or the ticked task; --no-release-check-ok on record in the commit; 1.0 list adds Name check + Press kit; update release never asks) · real games read-only: a beta today would flag only Glyphtender's own art (credits: "stand-in until redrawn"), nothing in Roll Better / Goops / Windchime / EPS · test-scripts 258/258 (D4 + F87 stage tests now fill a checklist), test-hooks 518/518 (Claude ran).
+Ask Muzzy: —
+
+Notes:
+- Plan-lint clean, no open P0/P1 bugs (2026-10-20).
+- F82: the rooms kit has no health route today (checked 2026-10-20) → framework-first task 1.
+- F82 task 1: the health answer lives in its own kit file (`server/health.ts`) used by the worker's fetch — the room server class never sees plain web requests. No kit version in the answer: the worker can't read the kit's VERSION file without a text-import setup; a game may pass its own version.
+- F82 task 2: the room server's address comes from STATE — a `Rooms: https://…` line, else the *.workers.dev host on the Release / Server line (finds Glyphtender's and Roll Better's as written today). A 404 at /health only warns: Glyphtender's and Roll Better's workers predate it until their next rooms update.
+- Surprise: Node 24 on Windows crashes (libuv "UV_HANDLE_CLOSING", exit 127 instead of 1) when a script calls process.exit right after 3+ fetches — reproduced alone; live-check waits 100 ms before that refusal.
+- F82 surprise 2: a deleted Cloudflare worker ALSO answers 404 — told apart by asking for JSON (`Error 1042: Cloudflare Error`); its HTML page doesn't name the code. And the Windows exit crash hit live-ping's plain `process.exit(0)` too → live-ping never exits early after fetching.
+- F83: the checklist is written by its own script (`release-check.mjs <stage>`), not `release.mjs --dry-run` — a dry run promises to change nothing. Extra lines beyond the plan (Phone sizes, What they got stuck on, Sound and settings, Credits, beta+ Bugs) come from what indie release checklists ask; Muzzy reads them in task 9. Override `--no-release-check-ok` like the other stage gates (on record in the release commit).
+- F82 review (helper, Claude fixed + tests): ① `**Live: <url>**` read the `**` as part of the address → false DOWN; addresses now drop trailing `*.,;:'"]` (live-check reads STATE through the same helper) · ② a stuck name lookup could outlive the 3 s limit → session-start runs live-ping under `timeout 5`.
+- F83 review (helper, Claude fixed + tests, test-scripts 262/262): ① `beta2` / `rc1` / `open-beta` counted as alpha → stage names match without a word break · ② a real answer with `<https://…>` or "under <10 min" read as unfilled → only the template's own long <prompt> counts · ③ `PlaceholderIcon.png` / `standInHero.webp` missed → camelCase split first · ④ a null entry or `"paths": "one string"` in credits.json crashed the release → odd shapes skipped, `{ entries: [...] }` read.
+- Muzzy 2026-10-20: F82 + F83 approved, the release checklist as written (task 9 — no changes asked).
+
+Retro:
+- went well: built and reviewed in one night, real games checked read-only
+- went wrong: the reviews found 6 bugs; Windows (exit crash) and Cloudflare (404 for a missing worker) surprises cost time
+- change: run the review helper earlier — mid-feature, not at the end

@@ -188,8 +188,8 @@ flowchart LR
 ## v0.10 — A whole studio around one designer  ← current  · planned 2026-10-19 (from F80's studio gap list)
 Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should too… simulate having a full team of checks and SOPs… as automated as possible because the people who use BMUZ (me) won't KNOW what to do." Each feature is one studio role's routine (producer, QA, release engineer, tech lead…), done by a trigger, never by memory. Source: `~/.claude/config/bmuz/reviews/2026-10-19-triggers/AUDIT.md` §4 (ranked by what would hurt a solo designer most). Already landing in F80: release checklist inside release.mjs, live check after a deploy, rollback, the look-back trigger. Order is Muzzy's call at /sprint.
 - ✅ F81 🔧 Producer's eye at every session start: sprint age ("Sprint 07 is 9 days old, the last 3 took ~4"), days to the milestone's `target:` date + musts done, features stuck in 🔨/🎛️ with no commits for 7+ days, open 🙋 tasks + `Ask Muzzy:` count, fixes waiting for Muzzy's check; plan-lint flags ⏳ features that became ready; archive-sprint refuses without a 3-line mini retro (went well · went wrong · change) — should · gap ranks 4, 5, 11 · sprint 13
-- 🔨 F82 🔧 Is the live game up? Session start does a 3-second check of STATE's Live URL and says "the live site is DOWN" only when it is; live-check.mjs also pings the room server's health URL — should · needs: F80 · gap rank 1
-- 🔨 F83 🔧 Stage-release checks (alpha / beta / 1.0): release.mjs refuses a stage release without `.planning/archive/release-checks/<stage>.md` naming the devices tried, a first-time player who played without help, store-page screenshots newer than the last stage, TDD §7 compliance for the platform (privacy, age rating), no stand-in art left (beta+), and at 1.0 the name/trademark check + press kit — should · needs: F80 · gap ranks 7, 13, 16
+- ✅ F82 🔧 Is the live game up? Session start does a 3-second check of STATE's Live URL and says "the live site is DOWN" only when it is; live-check.mjs also pings the room server's health URL — should · needs: F80 · gap rank 1 · sprint 17
+- ✅ F83 🔧 Stage-release checks (alpha / beta / 1.0): release.mjs refuses a stage release without `.planning/archive/release-checks/<stage>.md` naming the devices tried, a first-time player who played without help, store-page screenshots newer than the last stage, TDD §7 compliance for the platform (privacy, age rating), no stand-in art left (beta+), and at 1.0 the name/trademark check + press kit — should · needs: F80 · gap ranks 7, 13, 16 · sprint 17
 - ✅ F84 🔧 Patch notes players can read: release.mjs writes the bullets to CHANGELOG.md + `.planning/archive/releases/vX.Y.Z.md` (ready to paste into itch) and refuses without them — should · needs: F80 · gap rank 9 · sprint 16
 - ✅ F85 🔧 Dependency + licence audit: /checkup runs `npm audit`, `npm outdated` and a licence summary per game (monthly), names high-risk packages and GPL code in a shipping game in plain words — should · gap rank 8 · sprint 16
 - ✅ F86 🧱 Saves module (Muzzy 2026-10-19: "saves would be the module, versioning is a feature of that module"): a framework module games copy in for saving/loading; every save carries a version stamp and each release adds a small upgrade step for older saves; ships a check:fast test that loads a saved game from every past release (`tests/saves/*.json`), so an update can't wipe progress. Researched first (`.planning/research/saves.md`): this is layers 0 + 1 (core + save code / storage health); layers 2–8 are F93–F99. (Only Goops' progress save carries a version today; Glyphtender has a one-off marker, Roll Better saves ids only) — should · gap rank 10 · sprint 15
@@ -199,13 +199,18 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - 💤 F90 🔧 Coding standards as lint rules: no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · gap rank 14
 - 💤 F91 🔧 Localization readiness: player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
 - 💤 F92 🔧 Tech lead's routine: a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
-- 🟢 F93 🧱 Saves: run resume — autosave at natural break points (end of turn / wave), "Continue?" on launch, the run deleted when it ends (research layer 2) — should · needs: F86
-- ⏳ F94 🧱 Saves: seed + move log — a run saved as its seed + moves and rebuilt by replaying them; gives replays and daily challenges; needs rules with no hidden randomness (research layer 3) — could · needs: F86
-- 🟢 F95 🧱 Saves: online rejoin — room id + seat token kept so a player who closed the tab gets back into the match, with the rooms kit (research layer 4) — should · needs: F86
-- 🟢 F96 🧱 Saves: cloud via link code — a short code copies the save to another device, on our own Cloudflare (KV/D1), no accounts; progress merged by each field's rule (F86), offline first; privacy note + delete my data (research layer 5) — should · needs: F86
-- 🟢 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F86
-- ⏳ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96
-- 🟢 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F86
+- ✅ F93 🧱 Saves: run resume — autosave at natural break points (end of turn / wave), "Continue?" on launch, the run deleted when it ends (research layer 2) — should · needs: F86 · sprint 18
+- ✅ F94 🧱 Saves: seed + move log — a run saved as its seed + moves and rebuilt by replaying them; gives replays and daily challenges; needs rules with no hidden randomness (research layer 3) — could · needs: F86 · sprint 20
+- ✅ F95 🧱 Saves: online rejoin — room id + seat token kept so a player who closed the tab gets back into the match, with the rooms kit (research layer 4) — should · needs: F86 · sprint 18
+- ✅ F96 🧱 Saves: cloud via link code — a short code copies the save to another device, on our own Cloudflare (KV/D1), no accounts; progress merged by each field's rule (F86), offline first; privacy note + delete my data (research layer 5) — should · needs: F86 · sprint 19
+- 💤 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
+- ✅ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96 · sprint 20
+- 💤 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
+- ✅ F100 🧱 Rooms: a match waits until it ends — the room's seats + game state kept in the Durable Object's storage, so a player can rejoin hours later and a server restart doesn't lose the match (Muzzy 2026-10-20: "until the match ends") — should · needs: F95 · sprint 19
+- ✅ F101 🧱 Saves: ready for any platform — one storage switch for the whole kit, saves opened from a slow (async) storage at start-up then read instantly, writes in the background and forced out on hide/quit, the save format written down for any language (FORMAT.md); the seams F97 / F99 plug into later — should · needs: F86 · sprint 21
+- ✅ F102 🧱 Version module (Muzzy 2026-10-20: "version number visibility is important in all games… should be a built in process, possibly a 'version' framework module that gets added to every game"): one source (version.json, /save bumps it) → a Vite plugin (define + `<meta name="app-version">`), one "vX.Y.Z.B" label on the main menu, the bottom of Settings and the Dev Kit's bug files, an e2e helper that refuses a stale build / cached service worker, check:framework checks the wiring (from Goops' own copy) — should · sprint 22
+- ✅ F103 🔧 Kit fixes from Goops: confirm boxes work without `...kitScreens`, Bar row "at most its share" + dock tight padding as kit options, the Dev Kit check warns when the PAUSED pill sits on the game's HUD — should · sprint 22
+- ✅ F104 🔧 Portrait only, said once (sprint 22 retro + F103 proof: check:framework checked Goops sideways though Muzzy said "the game is not expected to function in horizontal/landscape mode. ever."): content/ui/style.json `orientation`, honoured by check:framework, the screenshot script, the Dev Kit's phone checks and the helper briefs — should · sprint 23
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]
@@ -224,10 +229,12 @@ flowchart LR
   F86 --> F94[F94 Seed + move log]
   F86 --> F95[F95 Online rejoin]
   F86 --> F96[F96 Link-code cloud]
-  F86 --> F97[F97 App stores + Steam]
+  F86 --> F101[F101 Ready for any platform]
+  F101 --> F97[F97 App stores + Steam]
   F94 --> F98[F98 Checked leaderboards]
   F96 --> F98
-  F86 --> F99[F99 Unity port]
+  F101 --> F99[F99 Unity port]
+  F95 --> F100[F100 Rooms wait until the end]
 ```
 
 ## Later
@@ -242,6 +249,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- **Store release run-through** (Muzzy 2026-10-20: "when i'm ready to actually release games… a big runthrough with you to get app store, play store, steam and itch.io (and any other platforms) figured out") — accounts, fees, store pages, signing, a real Steam Cloud test of F97; until then games go out on GitHub Pages only — could
+- 2026-10-20 — **Replays for Goops and Roll Better** (found planning F94): Goops needs a fixed game step (its tick takes the frame's real time) and its repair minigames' Math.random checked; Roll Better needs seeded dice instead of physics results trusted from the browser. Then both can use the saves replay piece + leaderboards.
 - 2026-10-19 — **Hand to Roll Better's session (found by F85's checkup §8, read-only):** `@react-three/rapier@2.2.0` ships with no licence in its package — its next release is refused until the licence is checked (repo likely MIT, unverified) and --deps-risk-ok chosen, or upstream adds one. Also 9 outdated shipped packages.
 - 2026-10-19 — **Patch notes, later (F84 research):** Steam BBCode + store short forms with their limits (Play 500, App Store 4,000) · an in-game "What's new" (once after an update, highlights only, never on first install or mid-game).
 - 2026-10-19 — **Packages, later (F85 research):** npm 12 blocks dependencies' install scripts — test esbuild / Playwright / sharp first · Dependabot with a cooldown + grouped monthly PRs once several games are live · turn on GitHub's free security alerts per repo.

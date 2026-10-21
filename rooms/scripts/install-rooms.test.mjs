@@ -119,6 +119,46 @@ describe('install-rooms', () => {
     expect(missing()).toMatch(/npm uninstall partykit/)
   })
 
+  it('an older worker without /health is told to add it; the template has it', () => {
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    expect(missing()).not.toMatch(/answer \/health/) // no worker yet → nothing to say
+    write(join(game, 'party/worker.ts'), 'export default { fetch() { return routePartykitRequest() } }')
+    expect(missing()).toMatch(/party\/worker\.ts: answer \/health/)
+    rmSync(join(game, 'party/worker.ts'))
+    installRooms(game, { log: quiet })
+    expect(missing()).not.toMatch(/answer \/health/)
+  })
+
+  it('an older worker that keeps nothing is told how to keep a match in storage; the template does it (0.10.0)', () => {
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    write(join(game, 'party/worker.ts'), 'onStart() { this.room = new GameServer({ id: this.name }) } healthResponse(request)')
+    expect(missing()).toMatch(/party\/worker\.ts: keep a match in the room's storage/)
+    rmSync(join(game, 'party/worker.ts'))
+    installRooms(game, { log: quiet })
+    expect(missing()).not.toMatch(/keep a match in the room's storage/)
+  })
+
+  it('a game with timers of its own is asked for onRestore (0.10.0)', () => {
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    write(join(game, 'party/turnClock.ts'), "room.timers.start('turn', 30_000, () => room.timedOut(seatId))")
+    expect(missing()).toMatch(/add onRestore\(state, room, timersEndAt\)/)
+    write(join(game, 'party/rules.ts'), 'onRestore(state, room, timersEndAt) { return state }')
+    expect(missing()).not.toMatch(/add onRestore/)
+  })
+
+  it('keepMatchDays: the designer is asked to choose it for the game — after a fresh install, and while rooms.json says nothing (0.10.0)', () => {
+    const logged = []
+    installRooms(game, { log: (line) => logged.push(line) })
+    expect(logged.join('\n')).toMatch(/Choose how long an unfinished match is kept for THIS game.*"keepMatchDays" \(now 7\).*live game ~7.*~30/s)
+    expect(readJson(join(game, 'content/rooms.json')).keepMatchDays).toBe(7) // the template's default…
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    expect(missing()).not.toMatch(/keepMatchDays/) // …once it's the game's own file, its number is the game's choice
+    write(join(game, 'content/rooms.json'), JSON.stringify({ maxSeats: 2 })) // an older rooms.json: no keepMatchDays
+    expect(missing()).toMatch(/Choose how long an unfinished match is kept/)
+    write(join(game, 'content/rooms.json'), JSON.stringify({ maxSeats: 2, keepMatchDays: 30 }))
+    expect(missing()).not.toMatch(/keepMatchDays/)
+  })
+
   it('wrangler.json name comes from package.json', () => {
     expect(wranglerConfig(game).name).toBe('my-game')
   })
@@ -135,6 +175,8 @@ describe('install-rooms', () => {
       include: ['src', 'party'],
     }))
     const tsc = join(roomsDir, 'node_modules', 'typescript', 'bin', 'tsc')
-    expect(() => execSync(`node "${tsc}" -p .`, { cwd: game, stdio: 'pipe' })).not.toThrow()
+    let errors = '' // (tsc's own words when it fails, so a failure says what's wrong)
+    try { execSync(`node "${tsc}" -p .`, { cwd: game, stdio: 'pipe' }) } catch (error) { errors = String(error.stdout) || String(error) }
+    expect(errors).toBe('')
   }, 30_000)
 })

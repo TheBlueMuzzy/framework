@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.22.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.26.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -44,7 +44,8 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | nothing touches the edge of its box | (0.21.0) text, an icon, a picture, an avatar or a badge less than 2 px from the inside edge of the drawn box around it (a border, a shadow or its own background) — not inside a scroll area, not marked `data-ui-bleed`, not hanging outside the box |
 | nothing 🔴 ships (credits) | an entry in `content/credits.json` is 🔴 — or (0.22.0) its licence says non-commercial (a CC BY-NC code, "non-commercial use only", "for non-commercial", "personal use only" — not "commercial and non-commercial"), whatever light it was given: it forbids tips, ads and store sales, and Steam won't take it |
 | cards keep their size while they fill in | (0.21.0) a `Card` / `PlayerChip` (or a game's own `useFixedSize` box) grew by more than 1 px after it settled (fonts loaded + two frames). The screen or the style changing starts it over; shrinking is fine |
-The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080, on its
+The browser checks open the REAL game at 390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080 (minus
+the phone sizes the game's `"orientation"` rules out — 0.26.0), on its
 first screen and in live play (through the Dev Kit adapter's `conformance.startPlay`), and say at which sizes each
 problem shows. They skip the Dev Kit, hidden / inert / `aria-hidden` things, text for screen readers only, and
 anything inside `data-ui-check="skip"` (an overlap that's on purpose). The in-page check is `kit/uiProblems.mjs` — the
@@ -75,6 +76,53 @@ gallery's `npm run shoot` uses the same one.
   leaves it out. And a non-commercial licence (CC-BY-NC) in `content/credits.json` now counts as 🔴.
   0.22.1 (review): the non-commercial check reads only the `licence` field (a credit line saying "Asheville, NC" is fine) and
   lets "free for commercial and non-commercial use" through.
+  0.23.0 (F93): `MainMenu` buttons can carry a second line inside them (`continueDetail` for Continue, `items[].detail`)
+  — Continue's "Turn 7 · 5 min ago" from the saves module's run resume. Inside the button, so the menu never jumps.
+  Also (F95): `rejoinWords` + `welcomeBackLine()` in the online blocks — "Rejoin match", "That match has ended", "You're
+  back — a bot played 4 turns for you" — for the rooms kit's rejoin (a MainMenu `items` entry).
+  0.24.0 (F102): `Settings` takes `version` ("vX.Y.Z.B" — the version module's `versionLabel`): one quiet caption line
+  under the pages, the same spot on every tab, so a game needs no About tab (short screens, 30rem tall or less: at the
+  right of the header instead, so a phone on its side keeps its rows). It fills an info row with id "version"
+  too (unless `info` gives its own); `info={{ version }}` still works, and the Settings-row check counts either.
+  And `MainMenu` on a phone on its side counts its extra buttons (children) toward the two-column switch at six:
+  Glyphtender's 5 items + Full screen stayed one column and ran off the top once its version footer took a row.
+  0.25.0 (F103, from Goops): `ScreenStack` always has the kit's own screens (Confirm) under the game's — a game's own
+  `confirm` still wins — so `...kitScreens` is no longer needed (Goops' Settings had none: Replay lessons' confirm drew
+  an empty layer on top and nothing happened). A pushed name with no screen warns in the console, naming it, and closes.
+  And two HUD options for a narrow phone, so a game needs no app.css restyle (each one was a check:ui warning in Goops):
+  `Bar width={0.3} atMost` — the bars in a row share its room evenly, each at most its share (never narrower than its
+  label) · `Hud dockTight` — the dock panel's sides get `--gap-s` instead of `--gap-m`.
+  0.26.0 (F104): `content/ui/style.json` `"orientation"` — `"any"` (default; new games get it written in) · `"portrait"`
+  · `"landscape"`. check:framework's browser checks skip the phone sizes it rules out and say so (`portrait` drops
+  844×390 + 768×343; desktop sizes stay: a portrait game still runs in a desktop window); an unknown value warns and
+  checks every size. The Dev Kit's PAUSED pill check uses sideways phones for a landscape game.
+- **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
+  copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
+  1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
+     `… install-module.mjs devkit .` (0.18.0 → 0.21.0); then `npm run check:ui`, tests, build.
+  2. `src/ui/App.tsx`: drop `...kitScreens` from the three screen lists (and from the import) — the stack has them now.
+     Machine bars: `<Bar … width={… bars.machineWidth} atMost …>`; the HUD: `<Hud … dockTight />`.
+  3. `src/ui/app.css`: delete the `.hud-machines > .kit-bar { … }` rule and the `.kit-hud-dock > .kit-panel:has(.hud-panel) { … }`
+     rule (+ their comments); keep `.hud-machines { flex-wrap: nowrap; }`. check:ui's 2 warnings go.
+  3b. `content/ui/style.json`: add `"orientation": "portrait"` (UI kit 0.26.0) — check:framework then never checks
+     Goops sideways.
+  4. `content/devkit.json`: leave `pauseBadgeSpot` out (= "left", clear at 390 and 360) — or pick "left" / "right";
+     check:framework names the clear spots if the HUD changes. ("top", where Dev Kit 0.18.0 drew it, covers CRACKS.)
+  5. Goops' adapter has no `conformance.startPlay`, so check:framework's play checks have never run on it. Add one
+     (the scratch's: `query: '?rank=6'`, mark the lessons seen via `window.__goopsSeen`, click Start shift, wait for
+     `status === 'playing'` and no `.kit-art-stage`, up to 25 s) — all 10 Dev Kit checks then pass. Its own
+     `check:framework` script (`check:ui && check:devkit`) is worth pointing at `node src/devkit/check-framework.mjs`.
+  6. The version module replaces Goops' own copy: `… install-module.mjs version .`, then `versionPlugin()` in
+     vite.config.ts instead of the `goops-version-meta` plugin + the `GOOPS_VERSION` define; `src/version.ts` → import
+     `versionLabel` from `./version` (keep `content/text/en.json console.version` only if its words differ from "vX.Y.Z.B");
+     `e2e/start.mjs` `expectedVersion` / `checkVersion` → `src/version/e2e.mjs`; `GOOPS_BUILD` → `VERSION_BUILD`
+     (e2e/sw-update.mjs); deploy.js → `builtVersion()`; `<Settings version={versionLabel}>` (and drop About → Version's
+     `info`). The console footer is Goops' own (no MainMenu) — the version check's "menu" line may need a known gap.
+  7. Left for Goops to decide (not kit bugs): at 360×780 "CONTROLS" ends ~1–2 px from the dock's angled art frame
+     (the panel box has room; the visible frame doesn't) — the same as today — so a shorter label, a smaller bar-name
+     size on narrow phones, or a frame inset. Its credits.json lacks the art + fonts and two fonts have no licence 🔴.
+  Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
+  public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
   (`SHOOT_PORT=5281` when 5180 is busy)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

@@ -46,7 +46,9 @@ export interface RoomState {
 
 export type ClientMessage =
   /** Sent every time the socket opens (first time AND every reconnect). A known persistentId gets its seat back. */
-  | { type: 'join'; name: string; persistentId: string; create: boolean }
+  | { type: 'join'; name: string; persistentId: string; create: boolean; rejoin?: boolean }
+  // rejoin (0.9.0): "Rejoin match" from the menu — only take back MY seat. No seat of mine in that room (it was cleared
+  // and the code reused, or I lost my lobby seat) → no_room, never a stranger's lobby and never a new room.
   /** On purpose: gives up the seat (a bot takes it mid-game). */
   | { type: 'leave' }
   | { type: 'ready'; ready: boolean }
@@ -100,6 +102,9 @@ export type ServerMessage =
   | { type: 'idle_warning'; msLeft: number }
   /** Only to that player: the warning is over (they did something, their turn moved on, or the bot took over). */
   | { type: 'idle_warning_off' }
+  /** Only to a player who came back into a game after being away (closed the tab, lost the connection, left the
+   *  screen idle): `botTurns` = how many of their turns a bot played meanwhile (0 = none). (Rooms 0.9.0.) */
+  | { type: 'back'; botTurns: number }
 
 // ─── Checking what arrives ──────────────────────────────────────────
 
@@ -138,6 +143,8 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
     case 'join':
       if (typeof data.name !== 'string' || typeof data.persistentId !== 'string' || typeof data.create !== 'boolean') return null
       if (data.persistentId.length < 8 || data.persistentId.length > 64) return null
+      if (data.rejoin !== undefined && typeof data.rejoin !== 'boolean') return null
+      if (data.rejoin === true) return { type: 'join', name: data.name, persistentId: data.persistentId, create: false, rejoin: true }
       return { type: 'join', name: data.name, persistentId: data.persistentId, create: data.create }
     case 'leave':
       return { type: 'leave' }

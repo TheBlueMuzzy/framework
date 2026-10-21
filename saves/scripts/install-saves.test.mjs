@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { installSaves } from './install-saves.mjs'
+import { boardWiringSteps, boardWranglerConfig, cloudWiringSteps, cloudWranglerConfig, installSaves, staleWorkers, TEMPLATE_CHANGES } from './install-saves.mjs'
 
 const quiet = () => {}
 const newGame = ({ uiKit = false } = {}) => {
@@ -67,6 +67,80 @@ describe('install-saves', () => {
     expect(lines.join('\n')).toContain('src/saves/ already holds')
   })
 
+  it('--cloud gives cloud/worker.ts + cloud/wrangler.json once, then prints only the missing wiring (going live = Muzzy\'s call)', () => {
+    const game = newGame()
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'goops', devDependencies: {} }))
+    installSaves(game, { log: quiet })
+    expect(existsSync(join(game, 'cloud'))).toBe(false) // not without --cloud
+    const lines = []
+    const { starter } = installSaves(game, { cloud: true, log: (l) => lines.push(l) })
+    expect(starter).toEqual(['cloud/worker.ts', 'cloud/wrangler.json'])
+    expect(readFileSync(join(game, 'cloud/worker.ts'), 'utf8')).toContain('export class SaveCloud')
+    expect(JSON.parse(readFileSync(join(game, 'cloud/wrangler.json'), 'utf8'))).toEqual(cloudWranglerConfig(game))
+    expect(cloudWranglerConfig(game)).toMatchObject({
+      name: 'goops-saves', main: 'worker.ts', migrations: [{ tag: 'v1', new_sqlite_classes: ['SaveCloud'] }], dev: { port: 1998 },
+    })
+    const said = lines.join('\n')
+    expect(said).toContain('npm install -D wrangler')
+    expect(said).toContain('"cloud:dev": "wrangler dev -c cloud/wrangler.json"')
+    expect(said).toContain('cloudAddress(import.meta.env.VITE_SAVES_CLOUD)')
+    expect(said).toContain('Going live (Muzzy\'s call')
+    expect(said).toContain('goops-saves.joebrogno.workers.dev')
+
+    // wired up → those steps go; the game's own edits to cloud/ are never overwritten; no --cloud needed any more
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'goops', devDependencies: { wrangler: '^4' },
+      scripts: { 'cloud:dev': 'wrangler dev -c cloud/wrangler.json', 'cloud:deploy': 'wrangler deploy -c cloud/wrangler.json' } }))
+    writeFileSync(join(game, '.gitignore'), 'node_modules\n.wrangler/\n')
+    mkdirSync(join(game, 'src'), { recursive: true })
+    writeFileSync(join(game, 'src/menus.tsx'), 'const cloud = { url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }')
+    expect(cloudWiringSteps(game).filter((w) => !w.done).map((w) => w.step.slice(0, 7))).toEqual(['Try it:', 'Going l'])
+    writeFileSync(join(game, 'cloud/worker.ts'), '// mine')
+    const again = installSaves(game, { log: quiet })
+    expect(again.starter).toEqual([])
+    expect(readFileSync(join(game, 'cloud/worker.ts'), 'utf8')).toBe('// mine')
+  })
+
+  it('--board gives board/worker.ts + board/wrangler.json once, ASKS for dailyTries, then prints only the missing wiring (F98)', () => {
+    const game = newGame()
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'glyphtender', devDependencies: {} }))
+    const lines = []
+    const { starter } = installSaves(game, { board: true, log: (l) => lines.push(l) })
+    expect(starter).toEqual(['content/saves.json', 'tests/saves/saves.test.ts', 'board/worker.ts', 'board/wrangler.json'])
+    expect(readFileSync(join(game, 'board/worker.ts'), 'utf8')).toContain('export class DailyBoard')
+    expect(boardWranglerConfig(game)).toMatchObject({
+      name: 'glyphtender-board', main: 'worker.ts', migrations: [{ tag: 'v1', new_sqlite_classes: ['DailyBoard'] }], dev: { port: 1996 },
+    })
+    expect(JSON.parse(readFileSync(join(game, 'board/wrangler.json'), 'utf8'))).toEqual(boardWranglerConfig(game))
+    const said = lines.join('\n')
+    expect(said).toMatch(/Choose how many Daily games count per player per day for THIS game.*"dailyTries": 1.*1 = only the first.*0 = unlimited/s)
+    expect(said).toContain('fill in THE GAME')
+    expect(said).toContain('"board:dev": "wrangler dev -c board/wrangler.json"')
+    expect(said).toContain('10 ms of CPU per request')
+    expect(said).toContain('Going live (Muzzy\'s call')
+    expect(said).toContain('glyphtender-board.joebrogno.workers.dev')
+
+    // the saves.json is the game's own now: its number is the game's choice (an older one without "board" still asks)
+    const missing = () => boardWiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+    expect(missing()).not.toMatch(/dailyTries/)
+    writeFileSync(join(game, 'content/saves.json'), JSON.stringify({ backups: 2 }))
+    expect(missing()).toMatch(/dailyTries/)
+    writeFileSync(join(game, 'content/saves.json'), JSON.stringify({ backups: 2, board: { dailyTries: 3 } }))
+    expect(missing()).not.toMatch(/dailyTries/)
+
+    // wired up → only Try it + Going live are left; the game's board/worker.ts is never overwritten; no --board needed any more
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'glyphtender', devDependencies: { wrangler: '^4' },
+      scripts: { 'board:dev': 'wrangler dev -c board/wrangler.json', 'board:deploy': 'wrangler deploy -c board/wrangler.json' } }))
+    writeFileSync(join(game, '.gitignore'), '.wrangler/\n')
+    mkdirSync(join(game, 'src/game'), { recursive: true })
+    writeFileSync(join(game, 'src/game/board.ts'), 'keepForBoard(record, day, board)')
+    writeFileSync(join(game, 'src/menus.tsx'), 'dailyBoard: () => <BoardPanel board={board} />')
+    writeFileSync(join(game, 'board/worker.ts'), '// mine: const game = { rulesVersion: RULES_VERSION }')
+    expect(boardWiringSteps(game).filter((w) => !w.done).map((w) => w.step.slice(0, 7))).toEqual(['Try it:', 'Going l'])
+    const again = installSaves(game, { log: quiet })
+    expect(again.starter).toEqual([])
+    expect(readFileSync(join(game, 'board/worker.ts'), 'utf8')).toContain('// mine')
+  })
+
   it('a dry run changes nothing', () => {
     const game = newGame()
     const { changed, starter } = installSaves(game, { dryRun: true, log: quiet })
@@ -74,5 +148,40 @@ describe('install-saves', () => {
     expect(starter).toEqual(['content/saves.json', 'tests/saves/saves.test.ts'])
     expect(existsSync(join(game, 'src/saves'))).toBe(false)
     expect(existsSync(join(game, 'content'))).toBe(false)
+  })
+})
+
+describe('install-saves — worker files that fell behind the kit (F101 proof)', () => {
+  const template = (file) => readFileSync(new URL(`../templates/${file}`, import.meta.url), 'utf8')
+
+  it('names a board/worker.ts made from an older template, with every change since', () => {
+    const game = newGame()
+    mkdirSync(join(game, 'board'), { recursive: true })
+    writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts').replace(/Template version: \d+/, 'Template version: 1'))
+    const lines = []
+    const { stale } = installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
+    expect(stale).toEqual([{ file: 'board/worker.ts', from: 1, to: 4, changes: [expect.stringMatching(/^2: /), expect.stringMatching(/^3: .*attempts/), expect.stringMatching(/^4: .*front door/)] }])
+    expect(lines.join('\n')).toMatch(/board\/worker\.ts was made from an older template \(version 1; the kit's is 4\)/)
+    rmSync(game, { recursive: true, force: true })
+  })
+
+  it('a copy with no version line counts as version 1; an up-to-date copy is not named', () => {
+    const game = newGame()
+    mkdirSync(join(game, 'cloud'), { recursive: true })
+    mkdirSync(join(game, 'board'), { recursive: true })
+    writeFileSync(join(game, 'cloud/worker.ts'), '// an old cloud worker\n')
+    writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts'))
+    expect(staleWorkers(game).map((s) => [s.file, s.from, s.to])).toEqual([['cloud/worker.ts', 1, 3]])
+    const lines = []
+    installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
+    expect(lines.join('\n')).toMatch(/cloud\/worker\.ts was made from an older template \(no version line/)
+    rmSync(game, { recursive: true, force: true })
+  })
+
+  it("every template's version has its change written down (bump both together)", () => {
+    for (const [file, notes] of Object.entries(TEMPLATE_CHANGES)) {
+      const version = Number(/Template version: (\d+)/.exec(template(file))?.[1])
+      expect(Math.max(1, ...Object.keys(notes).map(Number)), file).toBe(version)
+    }
   })
 })

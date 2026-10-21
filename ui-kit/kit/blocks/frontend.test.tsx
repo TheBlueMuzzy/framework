@@ -9,6 +9,16 @@ const buttonNames = () => screen.getAllByRole('button').map((b) => b.textContent
 const primaryNames = () => screen.getAllByRole('button').filter((b) => b.dataset.variant === 'primary').map((b) => b.textContent)
 
 describe('MainMenu', () => {
+  it('six buttons or more — extra buttons (children) counted — take two columns on a phone on its side (0.24.0)', () => {
+    const items = ['Play', 'Daily', 'Board', 'Online', 'Settings'].map((label) => ({ label, onClick: () => {} }))
+    const { container, rerender } = render(<MainMenu title="Game" items={items} version="v0.1.0.12" />)
+    const many = () => container.querySelector('.kit-main-menu-buttons')?.hasAttribute('data-many')
+    expect(many()).toBe(false)
+    rerender(<MainMenu title="Game" items={items} version="v0.1.0.12">{false}{<button>Full screen</button>}</MainMenu>)
+    expect(many()).toBe(true) // the false child doesn't count; Full screen does
+    expect(screen.getByText('v0.1.0.12')).toBeTruthy()
+  })
+
   it('named buttons: fixed order, only the ones passed, first is primary (kit 0.1 games)', () => {
     render(<MainMenu title="Game" onQuit={() => {}} onPlay={() => {}} onSettings={() => {}} words={{ play: 'Go' }} />)
     expect(buttonNames()).toEqual(['Go', 'Settings', 'Quit'])
@@ -31,6 +41,21 @@ describe('MainMenu', () => {
       { label: 'Continue', onClick: () => {} }, { label: 'New game', onClick: () => {}, primary: true },
     ]} />)
     expect(primaryNames()).toEqual(['New game'])
+  })
+
+  it('continueDetail: a second line inside Continue only (0.23.0) — and none without it', () => {
+    render(<MainMenu title="Game" onContinue={() => {}} onPlay={() => {}} continueDetail="Turn 7 · 5 min ago" />)
+    const [resume, play] = screen.getAllByRole('button')
+    expect(resume.querySelector('.kit-button-detail')?.textContent).toBe('Turn 7 · 5 min ago')
+    expect(play.querySelector('.kit-button-detail')).toBeNull()
+    cleanup()
+    render(<MainMenu title="Game" onPlay={() => {}} continueDetail="Turn 7" />) // no onContinue → no Continue, no line
+    expect(buttonNames()).toEqual(['Play'])
+  })
+
+  it('items: detail works on any item', () => {
+    render(<MainMenu title="Game" items={[{ label: 'Resume', onClick: () => {}, detail: 'Wave 3' }, { label: 'New run', onClick: () => {} }]} />)
+    expect(screen.getByText('Wave 3').className).toBe('kit-button-detail')
   })
 })
 

@@ -3,12 +3,12 @@
 //   node src/devkit/check-framework.mjs [--port 5197] [--static] [--only devkit,ui]
 //     --port:   where the checks serve the game (default 5197 — never the usual dev ports 5173 / 5199)
 //     --static: only the checks that read code (no browser)
-//     --only:   only these modules (their folder names: devkit, ui, audio, table, ai, rooms, saves)
+//     --only:   only these modules (their folder names: devkit, ui, audio, table, ai, rooms, saves, version)
 // Needs Playwright in the game for the browser checks: npm install -D playwright-core (Playwright's own Chromium —
 // never your installed Chrome).
 //
 // How it works: every framework module the game has installed sits in src/ with a VERSION file (src/devkit/VERSION,
-// src/ui/kit/VERSION, src/audio/VERSION, src/table/VERSION, src/ai/kit/VERSION, src/rooms/VERSION, src/saves/VERSION). Each module ships
+// src/ui/kit/VERSION, src/audio/VERSION, src/table/VERSION, src/ai/kit/VERSION, src/rooms/VERSION, src/saves/VERSION, src/version/VERSION). Each module ships
 // its OWN checks beside that file — conformance.mjs — written from what MODULE-CONTRACTS.md says a game must provide.
 // This file finds them, runs them, and prints one plain-English report: every failure says what to wire and where.
 // Browser checks share one Vite dev server (the game's own vite.config, so the Dev Kit's plugin is in) and one
@@ -64,6 +64,7 @@ export const UPDATE_HINT = {
   ai: 'node <framework>/ai/scripts/install-ai.mjs .',
   rooms: 'node <framework>/rooms/scripts/install-rooms.mjs .',
   saves: 'node <framework>/saves/scripts/install-saves.mjs .',
+  version: 'node <framework>/version/scripts/install-version.mjs .',
 }
 
 /** Text files under the game's folders (forward-slash paths relative to the game), for checks that read code. */
@@ -85,7 +86,7 @@ export function sourceFiles(root, { dirs = ['src'], skip = [], exts = /\.(m?[jt]
 }
 
 /** The framework's own folders inside a game (code the game didn't write) — skipped when checking the game's code. */
-export const KIT_FOLDERS = ['src/devkit', 'src/ui/kit', 'src/audio', 'src/table', 'src/ai/kit', 'src/rooms', 'src/saves']
+export const KIT_FOLDERS = ['src/devkit', 'src/ui/kit', 'src/audio', 'src/table', 'src/ai/kit', 'src/rooms', 'src/saves', 'src/version']
 const isTestFile = (path) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(path) || /(^|\/)(tests?|e2e|__tests__)\//.test(path)
 /** The game's own code: src/ minus the framework's folders, the Dev Kit's game folder and tests. */
 export const gameCode = (root) => sourceFiles(root, { skip: [...KIT_FOLDERS, 'src/devkit-game'] }).filter((f) => !isTestFile(f.path))
@@ -189,6 +190,8 @@ export function makeTester({ root, module, modules, shared, staticOnly, results 
     /** problems: lines saying exactly what's wrong and where ("src/a.ts:12 — …"); fix: what to do, in plain words. */
     fail: (name, problems, fix) => record({ name, ok: false, problems: [].concat(problems).filter(Boolean), fix }),
     skip: (name, why) => record({ name, skipped: true, detail: why }),
+    /** A warning (0.21.0): worth fixing, but the run still passes — shown with its problems and fix, like a failure. */
+    warn: (name, problems, fix) => record({ name, ok: true, warning: true, problems: [].concat(problems).filter(Boolean), fix }),
     /** Read a JSON file in the game (null if missing or broken). */
     json(path) { try { return JSON.parse(readFileSync(join(root, path), 'utf8')) } catch { return null } },
     exists: (path) => existsSync(join(root, path)),
@@ -307,7 +310,7 @@ export function applyKnownGaps(sections, { gaps, problems }, { complete = true }
     const matches = all.filter((r) => r.name === gap.check)
     if (!matches.length) unknown.push(gap.check)
     for (const r of matches) {
-      if (r.ok) r.gapNowPasses = true
+      if (r.ok && !r.warning) r.gapNowPasses = true // (a check that only warns still has its gap)
       else if (!r.skipped) r.knownGap = { why: gap.why, roadmap: gap.roadmap }
     }
   }
@@ -318,7 +321,7 @@ export function applyKnownGaps(sections, { gaps, problems }, { complete = true }
   else if (complete) home.results.push({ name: KNOWN_GAPS_CHECK, ok: true, detail: `${gaps.length} listed in ${KNOWN_GAPS_FILE}` })
 }
 
-const symbols = { ok: '✓', bad: '✗', skip: '–', gap: '○' }
+const symbols = { ok: '✓', bad: '✗', skip: '–', gap: '○', warn: '!' }
 const isFailure = (r) => !r.ok && !r.skipped && !r.knownGap
 const gapLabel = (g) => (g.roadmap ? ` (roadmap ${g.roadmap})` : '')
 
@@ -338,19 +341,21 @@ export function formatReport(gameName, sections) {
         for (const p of r.problems ?? []) lines.push(`      ${p.replace(/\n/g, '\n      ')}`)
         continue
       }
-      lines.push(`  ${r.skipped ? symbols.skip : r.ok ? symbols.ok : symbols.bad} ${r.name}${r.detail ? ` — ${r.detail}` : ''}`)
+      lines.push(`  ${r.skipped ? symbols.skip : r.warning ? symbols.warn : r.ok ? symbols.ok : symbols.bad} ${r.name}${r.warning ? ' — WARNING' : ''}${r.detail ? ` — ${r.detail}` : ''}`)
       if (r.gapNowPasses) lines.push(`      ! it passes now — take it off "knownGaps" in ${KNOWN_GAPS_FILE}`)
-      if (isFailure(r)) {
+      if (isFailure(r) || r.warning) {
         for (const p of r.problems ?? []) lines.push(`      ${p.replace(/\n/g, '\n      ')}`)
         if (r.fix) lines.push(`      FIX: ${r.fix.replace(/\n/g, '\n      ')}`)
       }
     }
   }
   const skipped = all.filter((r) => r.skipped).length
-  const kept = all.filter((r) => r.ok).length
+  const kept = all.filter((r) => r.ok && !r.warning).length
+  const warned = all.filter((r) => r.warning)
+  const warnings = warned.length ? `, ${warned.length} warning${warned.length === 1 ? '' : 's'} (${warned.map((r) => r.name).join(' · ')})` : ''
   lines.push('', failed.length
-    ? `FAIL — ${failed.length} promise${failed.length === 1 ? '' : 's'} not kept: ${failed.map((r) => r.name).join(' · ')}`
-    : `PASS — ${kept} check${kept === 1 ? '' : 's'} kept${known.length ? `, ${known.length} known gap${known.length === 1 ? '' : 's'} (${known.map((r) => r.name + gapLabel(r.knownGap)).join(' · ')})` : ''}${skipped ? `, ${skipped} skipped` : ''}`)
+    ? `FAIL — ${failed.length} promise${failed.length === 1 ? '' : 's'} not kept: ${failed.map((r) => r.name).join(' · ')}${warnings}`
+    : `PASS — ${kept} check${kept === 1 ? '' : 's'} kept${known.length ? `, ${known.length} known gap${known.length === 1 ? '' : 's'} (${known.map((r) => r.name + gapLabel(r.knownGap)).join(' · ')})` : ''}${warnings}${skipped ? `, ${skipped} skipped` : ''}`)
   if (nowPass.length) lines.push(`! ${nowPass.length} known gap${nowPass.length === 1 ? '' : 's'} pass${nowPass.length === 1 ? 'es' : ''} now — take ${nowPass.length === 1 ? 'it' : 'them'} off "knownGaps" in ${KNOWN_GAPS_FILE}: ${nowPass.map((r) => r.name).join(' · ')}`)
   return { text: lines.join('\n'), failed: failed.length }
 }
@@ -364,7 +369,8 @@ export function healthSummary(sections, { date = new Date().toISOString(), commi
     date, commit, only,
     modules: sections.map((s) => ({
       id: s.rel.split('/')[1] ?? s.title, title: s.title, version: s.version,
-      passed: s.results.filter((r) => r.ok).length,
+      passed: s.results.filter((r) => r.ok && !r.warning).length,
+      warnings: s.results.filter((r) => r.warning).map((r) => r.name),
       failed: s.results.filter(isFailure).map((r) => r.name),
       skipped: s.results.filter((r) => r.skipped).length,
       knownGaps: s.results.filter((r) => r.knownGap).map((r) => ({ name: r.name, ...r.knownGap })),

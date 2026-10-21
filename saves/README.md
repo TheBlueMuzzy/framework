@@ -2,26 +2,36 @@
 
 The player's saves — settings, progress, a run in progress, save slots — kept so that **no update, broken write, full storage or browser habit loses them**. The game says *what* it saves (`createSave({ key, kind, version, fresh, upgrades })`); the module keeps it versioned, upgraded step by step, backed up, and copyable as a **save code**.
 
-Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; layers 2–8 are F93–F99). Kit **0.1.0**. Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices) — see *Proof* below.
+Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.6.1** (0.6.1: the v0.11.0 security review — body size, wrong tries per IPv6 /48). Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
 
-No library: localStorage, the browser's own CompressionStream, and nothing else at run time.
+No library: localStorage, the browser's own CompressionStream, and nothing else at run time (the optional link-code cloud and Daily board are small workers of the game's own on Cloudflare — no packages but wrangler).
 
-## What a game gets (0.1.0)
+## What a game gets (0.6.0)
 | File | Does |
 |---|---|
 | `index.ts` | The public API (below) — import from `src/saves` |
 | `saves.ts` | **The core.** `createSave` — game-prefixed keys, version stamp, step-by-step upgrades, missing fields filled with today's defaults (never over the player's values), one whole-record write that's read back before it counts, 2 rolling backups (newest GOOD copy wins), a newer build's save kept untouched (in any copy — this build then never writes), full storage caught (backups older than the newest good copy make room; that copy itself never goes). A write that doesn't read back is undone. Never throws. `kind: 'slots'` → one save per slot + a list |
 | `progress.ts` | How two copies of progress combine (for the cloud later, F96): `highest` · `add-up` (counted per device, so two devices' "games played" SUM) · `collect` (every unlock once) · `newest` |
 | `fill.ts` | Fill in what's missing after loading (and why a changed default doesn't reach old saves on its own) |
-| `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked) |
+| `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked). **0.6.0:** `setSavesStorage(storage, { native? })` — one switch for the whole kit (every save, run, link code, board memory and the health check); a save made before the switch follows it too |
+| `platform.ts` | **Saves on any platform (0.6.0, F101).** `openSaves(backend, { game })` — a phone or desktop storage that answers later: every key loaded once at start-up, then instant reads and background writes (a few at once), written at once when the page hides or closes; a storage that can't be read is never written over; a failed write stays queued and the kit reports it; the first launch copies the game's browser saves over once. `browserBackend(game)` and `slowBackend()` (tests) |
 | `saveCode.ts` | The save code: `GAME-1z-…` (compressed) copy-paste text and the same as a `.txt` file. Every save in a code is checked before ANY is written — a bad code never wipes a save. Progress is merged, other saves replaced (the old copy stays as a backup). If the browser still refuses a write part-way (full storage), the result names exactly which saves were and weren't restored |
 | `health.ts` | Will this browser keep the saves? Warnings in plain words: storage blocked · looks like a private window · itch.io's frame · another site's frame · Safari's 7-day rule · persist refused. `askToKeepSaves()` = `navigator.storage.persist()` |
 | `nudge.ts` | "Back up your save" after real progress since the last code (never nagging — content/saves.json) |
 | `settingsRow.ts` | The Settings rows (`Your save` · `Saved: On this device` · `Save code ›`) for the UI kit's Settings |
-| `ui/SaveCodePanel.tsx` | The Save code screen (copy / download / paste / load a file), built from UI kit parts. **Only installed when the game has the UI kit** (the module's one link to another module, kept optional) |
-| `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage — used by the game's `tests/saves/saves.test.ts` |
-| `config.ts` | `content/saves.json`: backups, nudge |
+| `ui/SaveCodePanel.tsx` | The Save code screen (copy / download / paste / load a file; 0.3.0: + **Link code** — make / copy / type one, "Delete my data", the privacy line — when given `cloud`), built from UI kit parts. **Only installed when the game has the UI kit** (the module's one link to another module, kept optional) |
+| `run.ts` | **Run resume (0.2.0).** `createRun` — a game in progress saved at the game's break points (`autosave`) and when the tab hides or closes, `pending()` for the Continue button without loading it, `resume()`, and `end()` that wipes every copy (backups and a newer build's too) so a finished game never comes back. A newer build's or damaged run → "This game can't be continued", wiped, never a crash. `continueLine` → "Turn 7 · 5 min ago" |
+| `replay.ts` | **Seed + move log (0.4.0, F94).** `recordRun` — a game as its rules version + setup (the seed) + every move; `addRunMove`; `replayRun(rules, record, { rulesVersion, matches? })` rebuilds it through the game's own rules (the table module's `Rules` fits as it is) — another rules version, a refused move, a damaged record or a replay that lands on a different game → one plain sentence (`REPLAY_WORDS`), never a throw, never a wrong game; `sameResult(live, replayed, fingerprint?)`; `dailySeed(gameId, when?)` = the same seed on every device all day (UTC), `utcDay` |
+| `ui/useContinue.ts` | The main menu's Continue (0.2.0): `{ onContinue, continueDetail }` for the UI kit's MainMenu when a run is waiting, `{}` when not; a can't-continue run → a toast and Continue goes. UI kit only, like the panel |
+| `cloud.ts` | **Link codes (0.3.0, F96).** `makeLinkCode` sends the save code to the game's own server → "K7QM-2XRP" (8 characters, no O/0 or I/1); `loadLinkCode` brings it in through `readSaveCode` (same checks; progress merged by each field's rule); `deleteLinkCode` = "Delete my data"; `linkCodeHere`; `cloudAddress(import.meta.env.VITE_SAVES_CLOUD)`. Offline first: no network → one plain sentence (`CLOUD_WORDS`), nothing changed |
+| `cloudRoutes.ts` | The cloud's web addresses (`/saves/link` · `/saves/get` · `/saves/delete` · `/health`) as plain Requests → Responses with the store passed in — tested without Cloudflare. Size cap (the save code's 300,000 characters), wrong codes per address per hour, new codes per address per hour, addresses kept only scrambled for the hour |
+| `board.ts` | **The Daily board, the game's side (0.5.0, F98).** `keepForBoard(record, day, board)` keeps a finished Daily game on the device until it's sent; `sendScore('ADA', board)` sends the RECORD (never a score) under 3 letters; `loadBoard(board)` → the day's top scores + this device's own line, how many tries count, games still being checked; `removeMyScore(board)`; `boardAddress(import.meta.env.VITE_SAVES_BOARD)`. A random player id made once on the device is who "you" are (no account). `BOARD_WORDS` |
+| `boardRoutes.ts` | The board's web addresses (`/board/send` · `/board/day` · `/board/remove` · `/health`) as plain Requests → Responses, the store AND the game's own rules passed in (`BoardGame`: rulesVersion, rules(setup), dailySetup(day), score(state), maxMoves) — tested without Cloudflare. **The score is only what the server's replay computes.** Size, version, today's-setup, name, tries, per-address and server-wide limits; addresses and player ids only as keyed hashes; `checkWaiting` replays waiting games a few moves per alarm; `tidyBoard` deletes old days |
+| `ui/BoardPanel.tsx` | The Daily board screen (UI kit parts only): the day's top scores under 3-letter names with a "You" badge, "Your 3 letters" + Send when a finished Daily game waits, "Checking your game…", the try rule, "Remove my score", the privacy line. Fixed size from the start (always `board.show` rows). UI kit only, like the Save code screen |
+| `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage, and (0.2.0) `checkRunEnds` — used by the game's `tests/saves/saves.test.ts` |
+| `config.ts` | `content/saves.json`: backups, nudge, cloud (keepDays 7, wrongTriesPerHour 10, uploadsPerHour 20), board (dailyTries 1, keepDays 7, sendsPerDay 30, show 10) |
 | `conformance.mjs` | Its check:framework checks |
+| `../FORMAT.md` | The save format for any language (keys, records, loading, saving, golden saves) — what a C# or other version is built from; `kit/format.test.ts` keeps it true |
 
 ## What a game must provide
 From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`), "Saves":
@@ -32,8 +42,10 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`), "Saves":
 
 **How it's checked — `npm run check:framework`** (the Dev Kit's runner runs `kit/conformance.mjs`):
 - *every save has a golden copy for each version* — names each missing file (`tests/saves/goops-progress-v2.json`).
-- *the game's save tests pass* — runs `npx vitest run tests/saves/saves.test.ts`: every golden save loads with today's code (and its `expect` values), round trip, cut-off / wrong-type / empty saves fall back to the backup, full and blocked storage keep the game running.
+- *the game's save tests pass* — runs `npx vitest run tests/saves/saves.test.ts`: every golden save loads with today's code (and its `expect` values), round trip, cut-off / wrong-type / empty saves fall back to the backup, full and blocked storage keep the game running; each run in `RUNS` ended with `end()` leaves no copy behind (`checkRunEnds`).
+- *a run cleared at the end never comes back* (0.2.0) — every `createRun` is named (`const matchRun = createRun(…)`), something in the game's code calls `matchRun.end()`, and the save test runs `checkRunEnds` on it (a starter from 0.1.0 has no `RUNS`: copy that part from `templates/tests/saves/saves.test.ts`).
 - *the game saves through the module, not straight into the browser's storage* — lists every line of game code that touches `localStorage` / `sessionStorage` (minus `rooms:` ids and `storageAllowed` files).
+- *a game kept as seed + moves has a replay test* (0.4.0) — a game that calls `recordRun` needs a test (`*.test.ts` in `tests/` or `src/`) that calls `replayRun` and `sameResult`: replaying is only safe if it's proven to give back the same game.
 
 ## Install / update in a game
 ```
@@ -63,6 +75,93 @@ setSavesConfig(savesJson)
 **Ask the browser to keep the saves** after the first real progress (Firefox shows a question): `askToKeepSaves()`.
 **Nudge:** `const nudge = createBackupNudge('goops')` · `nudge.noteProgress()` per finished game · `if (nudge.due(health)) { toast(NUDGE_WORDS.message); nudge.shown() }` · pass `nudge` to `SaveCodePanel` (copying counts as a backup).
 
+### Run resume — Continue on the main menu (layer 2, 0.2.0)
+A game in progress that survives the tab closing. About ten lines in the game (Glyphtender's, from the F93 proof):
+```ts
+// src/game/run.ts
+export const matchRun = createRun<Match>({
+  key: 'glyphtender:run', version: 1, fresh: { game: null, options: null, seats: [], stats: [] },
+  summary: (m) => fill(text.mainMenu.continueTurn, { n: (m.game?.turnCount ?? 0) + 1 }),  // "Turn {n}" in content/text
+  snapshot: () => matchNow(),           // optional: the game right now (or null), saved when the tab hides or closes
+})
+matchRun.autosave(match)                // at each break point: a turn ended, a wave cleared — NOT every frame
+matchRun.end()                          // won, lost, left from the menu — and before a New game starts
+// the main menu (UI kit)
+const resume = useContinue(matchRun, (match) => putBackOnTable(match))   // src/saves/ui/useContinue
+<MainMenu {...resume} onPlay={…} />     // or with items: { label: 'Continue', onClick: resume.onContinue, detail: resume.continueDetail }
+```
+Then list it in `tests/saves/saves.test.ts` → `RUNS: [{ run: matchRun, sample }]` and add `tests/saves/glyphtender_run-v1.json` like any golden save.
+- **Break points, not every change:** a break point is a moment the game's state is whole (a turn ended). The tab hiding (an app switch, a closed tab) saves `snapshot()` too, so a phone player mid-turn loses nothing; return null from it when the game isn't in a state worth saving.
+- **Only after `end()` is a run gone** — leaving the game from the menu is an end (abandoned); closing the tab is not (that's what Continue is for).
+- **A newer build's run or a damaged one** shows Continue with just its time; pressing it says "This game can't be continued…" (`RUN_WORDS.cantContinue`) and wipes it. Unlike progress, a newer build's run is not kept: while it sits there this build can't write the key at all, so no new run could ever be saved.
+- Online games aren't runs: the server holds the match (rejoin is F95).
+
+### Seed + move log — Continue by replay, the Daily game (layer 3, 0.4.0)
+A game whose randomness lives in its state (a seeded position — the table module's promise) can be kept as **how it started + every move**: tiny, and the same record gives Continue, replays, a daily game and (F98) checked leaderboards. Glyphtender's, from the F94 proof:
+```ts
+// src/game/record.ts
+export const RULES_VERSION = 1   // +1 when a rule change would replay old games differently (golden games fail = bump it)
+export const newRecord = (setup: GameSetup) => recordRun<GameSetup, Action>({ rulesVersion: RULES_VERSION, setup })
+// the store: startGame → record = newRecord(setup) · each move through the rules' door, people's AND the AI's:
+record = addRunMove(record, seat, action, seats[seat].kind === 'bot' ? 'bot' : 'seat')   // set together with the new game
+// the run saves the record + the live game's fingerprint (not the game); Continue replays it:
+matchRun.autosave({ record, print: fingerprint(game), turn: game.turnCount, … })
+const back = replayRun(glyphtenderRules(words), m.record, { rulesVersion: RULES_VERSION, matches: { live: m.print, view: fingerprint } })
+if (!back.ok) { toast(back.message); matchRun.end() } else loadState(back.state, …)
+// the Daily game: the same setup for everyone today
+startGame({ players: 2, seed: dailySeed('glyphtender'), turnOrder: pickTurnOrder(2, seed), …fixed table rules, bots: [1] })
+```
+Then a test that plays a game the way the screen does and checks `replayRun` → `sameResult` after every move (check:framework asks for it).
+- **The AI's own randomness doesn't matter:** its moves are logged, not its thinking — a replay needs no AI.
+- **Another rules version → refused, never replayed** (an old record under new rules would quietly be a different game). A replay that doesn't land on the saved fingerprint → refused too. Both say one plain sentence (`REPLAY_WORDS`), and Continue goes.
+- **A replay that scores needs what scoring needs** (Glyphtender: its word list) — wait for it before replaying; if it can't load, say so and keep the run.
+- **Daily game:** `dailySeed(gameId)` hashes `"<gameId>:<UTC day>"` — no server, no device, no `Math.random`; everyone's day changes at midnight UTC. Fix the rest of the table too (players, board, word rules, who goes first from the same seed), or two players' "daily" games differ.
+- Why `replay.ts` doesn't import the table module: the modules are copied into a game one by one and a game may have saves without the table; the replay only needs `setup` / `check` / `apply`, which the table's `Rules` has.
+
+### Link codes — the save on another device without copy-paste (layer 5, 0.3.0)
+The save code is long; a **link code** is 8 characters (`K7QM-2XRP`, no O/0 or I/1). The game's own small server (a SQLite Durable Object on Muzzy's Cloudflare) keeps the save code under it for `cloud.keepDays` (7), then deletes it; on the other device the save comes in through `readSaveCode` — checked first, progress **merged** by each field's rule (best kept, counts added). Decisions + why: `../.planning/design/saves.md` → Layer 5.
+1. `node ~/.claude/config/bmuz/scripts/install-module.mjs saves . --cloud` → `cloud/worker.ts` + `cloud/wrangler.json` (`<game>-saves`, local port 1998), then the printed steps: `npm install -D wrangler`, `"cloud:dev": "wrangler dev -c cloud/wrangler.json"`, `"cloud:deploy": "wrangler deploy -c cloud/wrangler.json"`, `.wrangler/` in .gitignore.
+2. The Save code screen: `<SaveCodePanel saves={…} cloud={{ url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }} … />`. No `VITE_SAVES_CLOUD` and not on this PC / the Wi-Fi → no cloud → no Link code part (the rest of the screen as before).
+3. Try it: `npm run cloud:dev` + `npm run dev` → Settings → Save code → Make a link code, then type it in another browser.
+4. **Going live is Muzzy's call** (a public server that keeps players' saves): `npx wrangler login` once, `npm run cloud:deploy`, then build the game with `VITE_SAVES_CLOUD=<game>-saves.joebrogno.workers.dev`. Deploy the cloud again when `cloud/`, `src/saves/cloudRoutes.ts` or content/saves.json `cloud` change.
+- **A fetch doesn't delete the code** (a third device, or a retry after the other device's storage was full); "Delete my data" does, from either device. Wrong, expired and deleted codes get the same answer.
+- **Guess limit:** `cloud.wrongTriesPerHour` wrong codes from one address → every try from it is refused until the hour ends; `cloud.uploadsPerHour` new codes per address per hour. Wrong codes are also counted per IPv6 /48 (30 an hour, its /64s together) and server-wide (2,000 an hour — this one stops fetching only, never "Delete my data") (0.6.1). The address is kept only as a scrambled number, only for that hour.
+- **Body size:** the worker refuses a POST with no size (`Content-Length`) or past the cap (a save code + a little JSON; the board: `MAX_RECORD_CHARS`, 100,000) with 413 at the door, and the routes read a body only up to the cap — so a huge upload can't reset the one shared object for everyone (0.6.1).
+- **Free plan fit** (Cloudflare docs, 2026-10-20): Workers 100,000 requests/day · Durable Objects 100,000 requests/day (alarms count), 100,000 SQLite rows written/day (`setAlarm` = 1), 5 million rows read/day, 1 GB per object (5 GB per account), 2 MB per row, 10 ms CPU per request. A link code ≈ 1–2 rows written; the object stops making new codes at 900 MB.
+- **Test server:** `wrangler dev -c cloud/wrangler.json --var TEST_KEEP_SECONDS:5` = codes last 5 seconds (never set live).
+
+### Checked leaderboard — the Daily board (layer 7, 0.5.0)
+A finished **Daily game** (layer 3) goes to the game's own board worker as its **record**; the server replays every move with **the game's own rules** and puts the score **it** computed on the day's board under 3 letters (arcade style). A sent score is never read. Decisions, limits and what a cheater can still do: `../.planning/design/saves.md` → Layer 7.
+1. `node ~/.claude/config/bmuz/scripts/install-module.mjs saves . --board` → `board/worker.ts` + `board/wrangler.json` (`<game>-board`, local port 1996), then the printed steps — including **choose `dailyTries` for this game** in content/saves.json `"board"` (1 = only the first finished game counts, arcade-fair · N = the best of the first N · 0 = unlimited; Muzzy 2026-10-20: "based on the game, like the 7 or 30 days").
+2. **Fill in THE GAME in `board/worker.ts`** — imports from the game itself, never a copy, so the server and the phone can't disagree. Glyphtender's:
+   ```ts
+   import { glyphtenderRules } from '../src/engine/rules'
+   import { dailyScore, dailySetup, RULES_VERSION } from '../src/game/record'   // the same dailySetup startDailyGame uses
+   import wordsText from '../party/words.gen.txt'                               // board/wrangler.json "rules": Text + "build" (like party/)
+   const wordFile = parseWordFile(wordsText)                                     // once, at start-up — not inside a request
+   const game = { rulesVersion: RULES_VERSION, rules: (setup) => glyphtenderRules(wordListFor(wordFile, setup.extraWords)), dailySetup, score: dailyScore, maxMoves: 400 }
+   ```
+3. When a Daily game ends: `keepForBoard(record, day, board)` (`board = { url: boardAddress(import.meta.env.VITE_SAVES_BOARD), game: 'glyphtender' }`); register `dailyBoard: () => <BoardPanel board={board} />` and open it from the menu.
+4. Try it: `npm run board:dev` + `npm run dev` → finish a Daily game → Daily board → 3 letters → Send. The worker logs `replay: N moves in X ms` for each check.
+5. **Going live is Muzzy's call** (a public server that keeps 3-letter names, scores and games for `board.keepDays`): `npm run board:deploy`, then build with `VITE_SAVES_BOARD=<game>-board.joebrogno.workers.dev`. Deploy the board again whenever the game's rules change — and bump `RULES_VERSION` when they'd replay old games differently.
+- **CPU:** Workers Free gives **10 ms of CPU per request — and per alarm** (Cloudflare docs, Workers limits, updated 2026-10-12; Durable Objects limits: the per-invocation limit applies to each HTTP request, WebSocket message or alarm). A whole Glyphtender game replays in 9–18 ms in the local worker, so the template checks LATER (`CHECK_LATER = true`): a sent game shows "Checking your game…", and the object's alarm replays it `MOVES_PER_ALARM` (10) moves at a time, keeping the game in between as JSON (the state must be plain data, like a save). Steps measure 1–5 ms. The count is moves, not a clock: on Cloudflare the clock doesn't move while code runs.
+- **Who a player is:** a random 128-bit id made once on the device (`<game>:board`), sent only to the board, kept there only as a keyed hash; it's also the proof for "Remove my score". Clearing the browser = a new player.
+- **Measuring / e2e:** `wrangler dev -c board/wrangler.json --var CHECK_NOW:1` = each game replayed inside its request (to time a whole replay; never set live).
+
+### Phone, desktop and Unity — ready, built later (0.6.0, F101)
+A web game needs nothing here. A phone app (Capacitor) or desktop app (Electron, Steam) build opens its saves once
+before anything reads one, and the whole kit then uses them — game code stays the same:
+```ts
+// main.tsx, before rendering
+await openSaves(myPlatformBackend, { game: 'glyphtender' })   // a SavesBackend: name, native, loadAll(), write(changes)
+```
+What's ready: the switch, the start-up layer, the first-launch copy, the health check without browser warnings, the
+format (`FORMAT.md`). What the store run-through adds (ROADMAP F97, research in `.planning/research/saves.md`
+"Layers 6 + 8"): the Capacitor Preferences backend, the Electron files backend (a key and its backups in one JSON file
+in `userData/saves`, written safely by the main process through a narrow preload bridge, one window at a time) and the
+Steam Auto-Cloud settings for that folder. A Unity game (F99) reads and writes the same records under
+`persistentDataPath`, built from `FORMAT.md` and tested on the same golden saves.
+
 ## Golden saves
 A real save from each version, committed as `tests/saves/<key>-v<N>.json` — several per version are fine (`goops-progress-v1-before-the-module.json`):
 ```json
@@ -75,21 +174,50 @@ Get `stored` from DevTools → Application → Local Storage → the key, or `ma
 ## The public API
 ```ts
 createSave<T>({ key, kind: 'settings' | 'progress' | 'run' | 'slots', version, fresh, upgrades?, fields?, oldSave?, clean?, storage?, onProblem? })
-  → save.load() · save.save(data) · save.clear() · save.report() → { from: fresh|save|backup, backup?, upgradedFrom?, newer?, added, replaced, problems, note }
+  → save.load() · save.save(data) · save.clear({ evenNewer? }) · save.peek() → { state: good|newer|damaged, savedAt, data|version|problem } | null · save.report() → { from: fresh|save|backup, backup?, upgradedFrom?, newer?, added, replaced, problems, note }
     save.exportRecord() · save.checkRecord(raw) · save.restoreRecord(record) · save.merge(a, b) · save.withStorage(storage)
   kind 'slots' → slots.slot(id) (a Save) · slots.slots() → [{ id, savedAt }] newest first
+createRun<T>({ key, version, fresh, upgrades?, summary?, snapshot?, storage?, onProblem?, page? })
+  → run.autosave(data) · run.pending() → { savedAt, summary, canContinue } | null · run.resume() → { ok, data } | { ok: false, reason: none|newer|damaged, message }
+    run.end() · run.save (the Save underneath) · run.withStorage(storage)
+continueLine(pending, now?, words?) → "Turn 7 · 5 min ago" · timeAgo(savedAt, now?, words?) · RUN_WORDS
+recordRun({ rulesVersion, setup, moves? }) · addRunMove(record, seat, action, by?) · replayRun(rules, record, { rulesVersion, matches?: { live, view? }, everyMove?, words?, maxMoves? }) — maxMoves: a server replaying records strangers send refuses longer ones up front
+  → { ok, state } | { ok: false, reason: other-version|move-refused|damaged|different, message, move? } · sameResult(live, replayed, view?) · dailySeed(gameId, when?) · utcDay(when?) · REPLAY_WORDS
+ui/useContinue(run, onResume, words?) → { onContinue?, continueDetail? } for the UI kit's MainMenu
 makeSaveCode(saves) → Promise<string> · readSaveCode(code, saves) → Promise<{ ok, restored, skipped } | { ok: false, message }>
 saveFileName(saves) · downloadSaveFile(code, name) · readSaveFile(file) · copyText(text)
+makeLinkCode(saves, cloud) → { ok, link, expiresAt } | { ok: false, message } · loadLinkCode(typed, saves, cloud) → CodeResult · deleteLinkCode(saves, cloud) · linkCodeHere(saves) · cloudAddress(env?) · CLOUD_WORDS   (cloud = { url, storage?, fetch?, online?, timeoutMs? })
+handleCloud(request, { rows, settings, address, now?, keepMs? }) · memoryCloudRows() · readLinkCode · showLinkCode · newLinkCode   (cloudRoutes.ts — the worker's side)
+keepForBoard(record, day, board) · waitingForBoard(board) · sendScore(name, board) → { ok, checking } | { ok, score, best, rank } | { ok: false, message }
+  loadBoard(board, day?) → { ok, day, top: [{ rank, name, score, you? }], mine, checking, refused, tries: { used, allowed } } · removeMyScore(board, day?) · lastBoardName(board) · boardAddress(env?) · BOARD_WORDS   (board = { url, game, storage?, fetch?, online?, timeoutMs?, now? })
+handleBoard(request, { rows, game, settings, address, secret?, checkLater?, now?, timed? }) · checkWaiting(context, movesPerStep?) · tidyBoard(rows, settings, now?) · nextMidnight(now?) · memoryBoardRows() · readArcadeName · sameSetup · keyedHash · BLOCKED_NAMES   (boardRoutes.ts — the worker's side)
 checkSaveHealth(env?) → Promise<{ canSave, kept, inFrame, onItch, warnings: [{ id, level: risk|note, message }] }> · askToKeepSaves() · healthLine(health)
 createBackupNudge(game, { storage?, config?, now? }) → { noteProgress(n?), backedUp(), due(health?), shown() }
 SAVE_SETTINGS_ROWS · SAVE_CODE_ROW · SAVE_HEALTH_ROW · HEALTH_WORDS · CODE_WORDS · NUDGE_WORDS · NOTES
+openSaves(backend, { game, copyFrom?, delayMs?, page?, onProblem?, useForKit? }) → Promise<storage + flush() · waiting() · problem() · loadMs · close()> · browserBackend(game) · slowBackend(start?, { waitMs?, native? }) · COPIED_MARKER
+setSavesStorage(storage, { native? }) · savesStorage() · savesOnNativeStorage() · switchedStorage
 setSavesConfig(json) · readSavesConfig(json) · memoryStorage(start?) · mergeRecords(kind, fields, a, b) · fillMissing(saved, fresh)
-oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage
+oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds
 ```
-Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORDS`, the panel's `words`) can be replaced.
+Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORDS`, `RUN_WORDS`, `REPLAY_WORDS`, the panel's `words`) can be replaced.
+
+## Privacy
+Every save stays on this device (the browser's storage) unless the player copies a save code. Online rejoin (rooms kit 0.9.0, F95) keeps the room code and the player id on this device too; they only go to the game's own room server, to get the player back into their seat. With a link code (0.3.0, only when the player makes one): a copy of the save code — nothing else, no name, no account — goes to the game's own server on Cloudflare for `cloud.keepDays` (7) days, then deletes itself; "Delete my data" removes it at once; the player's address is used only to count wrong tries, kept scrambled for an hour. The Save code screen says this in one line (`CLOUD_WORDS.privacy`). A move record (0.4.0) holds only the game — its setup, seed and moves, no name, no device — and stays in the run save on this device; the daily seed is made from the date alone. The Daily board (0.5.0, only when the player presses Send): the finished Daily game's record, the 3 letters they typed and a random player id go to the game's own board server; it keeps the letters, the score and (while it's being checked) the game for `board.keepDays` (7) days, then deletes them; "Remove my score" deletes the player's at once; the address and the player id are kept only as keyed hashes (the address for a day or two, to count sends). The board screen says this in one line (`BOARD_WORDS.privacy`). Nothing is sent anywhere else.
 
 ## `content/saves.json`
-`backups` (0–5, default 2: older copies beside each save) · `nudge.afterProgress` (points before "back up your save", 0 = never; default 10) · `nudge.minDaysBetween` (default 7) · `nudge.onlyWhenAtRisk` (default false) · `storageAllowed` ([{ file, why }]). `_help` / `_ranges` follow the Dev Kit convention.
+`backups` (0–5, default 2: older copies beside each save) · `nudge.afterProgress` (points before "back up your save", 0 = never; default 10) · `nudge.minDaysBetween` (default 7) · `nudge.onlyWhenAtRisk` (default false) · `cloud.keepDays` (1–30, default 7 — Muzzy 2026-10-20) · `cloud.wrongTriesPerHour` (default 10) · `cloud.uploadsPerHour` (default 20) · `board.dailyTries` (0 = unlimited, 1 = the first game only, N = the best of N; default 1 — the installer asks) · `board.keepDays` (1–30, default 7) · `board.sendsPerDay` (games one address may send a day, default 30) · `board.show` (rows on the board, default 10) · `storageAllowed` ([{ file, why }]). `_help` / `_ranges` follow the Dev Kit convention.
+
+## Proof (F98, 2026-10-20) — a scratch Glyphtender in `~/Documents/dev/.scratch/glyphtender-f98/`
+A copy of the F94 scratch, saves 0.5.0 installed with `--board`. `src/game/record.ts` gained `dailySetup(day)` (now also what `startDailyGame` uses) and `dailyScore` (seat 0's Magic once over); `board/worker.ts` imports them + `glyphtenderRules` + the online server's bundled word list (read once at start-up); `src/game/dailyBoard.ts` keeps a finished Daily game for the board; Main menu → "Daily board" (`BoardPanel`); content/saves.json `board.dailyTries` 1. **CPU** (`wrangler dev --var CHECK_NOW:1`, 12 whole greedy-sim Daily games, 55–100 moves): **9–18 ms per whole replay** (Node: 9 ms for 72 moves) — over the free plan's 10 ms → checked later, 10 moves per alarm (20-move steps measured 1–10 ms, so 10). Playwright (`e2e/f98-board.mjs`, board on 5998 with `--persist-to`, vite 5396): a Daily game vs the AI to the end (78 moves) → Daily board → "ada" → Send → "Checking your game…" → "Your score: 8 · #1 today (checked by the board)" = the live game's Magic; the same record with `score: 999` → the board shows 8; an old rulesVersion → refused at once; another seed → `not-todays-game`; a move out of turn → refused by the replay (and through the screen in a second browser: "…it didn't add up, so it wasn't counted"); a second Daily game the same day (Magic 17, better) → "Only your first Daily game each day goes on the board", the board unchanged; Remove my score → gone; no page errors. Screens at 390×844 and 1440×900 (and scrolled to the end): every row, box and button ≥ 28 px from the card's edge, ties share a place, "You" badge, the privacy line at the end of the card's scroll. Its 831 tests + tsc + lint pass; check:framework as before (the known direct-storage gaps).
+
+## Proof (F96, 2026-10-20) — a scratch Goops in `~/Documents/dev/.scratch/goops-f96/`
+Saves 0.3.0 installed with `--cloud`; `src/progress/save.ts` moved onto `createSave` (totalXp / scrapsSpent `highest`, plus a scratch-only `shiftsPlayed` `add-up`), Settings → Gameplay → Save code with `cloud={{ url: cloudAddress(import.meta.env.VITE_SAVES_CLOUD) }}`. The cloud worker under `wrangler dev` (port 4999, `--persist-to` a scratch folder), the game under vite (5394), Playwright's Chromium with separate browser profiles (`e2e/f96-cloud.mjs`): A (5000 XP, 10 scraps, 4 shifts) makes `7QL8-XFJ3`; B (3000, 50, 2) types it in lower case with a space → **5000 XP, 50 scraps, 6 shifts**; after A's "Delete my data" the code says "That link code didn't work…" and changes nothing; with `TEST_KEEP_SECONDS:5` a 6-second-old code fails the same way (the object's alarm ran twice, ok); 20 wrong codes from one address → 9 "didn't work" then 11 "Too many wrong link codes…" (the 10th wrong try of the hour was the deleted code); the worker blocked (route aborted) → "Couldn't reach the game's server…" for both Make and Get, progress untouched; no page errors. The worker typechecks against the game's tsconfig (`erasableSyntaxOnly` on). Screens at 390×844 and 1440×900: nothing touches the card's sides, the privacy line at the end of the card's scroll.
+
+## Proof (F94, 2026-10-20) — a scratch Glyphtender in `~/Documents/dev/.scratch/glyphtender-f94/`
+A copy of the F93 scratch, saves 0.4.0 installed. `src/game/record.ts` (RULES_VERSION 1, `newRecord`, `rebuildGame`); the store keeps `record` (set by `startGame`, each move added in `send` — the one door — and set in the same update as the new game, so a refresh's shrink-and-grow never leaves them apart; `loadState` takes it, a dev jump has none); `src/game/run.ts` at version 2 = `{ record, print, turn, options, seats, stats, game: null }` (upgrade 2 keeps a v1 run's game, put back as it was); Continue waits for the word list, replays, checks the fingerprint; "Daily game" on the main menu (UI kit `items[].detail`, shown once the tutorial is done). Tests: `src/game/record.test.ts` — vs the AI to the end, replay fingerprint == live after every one of its moves, the record through JSON, Continue round trip (and play goes on into the same record), an older rulesVersion and a wrong fingerprint refused; golden `glyphtender_run-v2.json`; all 830 tests pass; check:framework Saves: golden v1–2 ✓, save tests ✓, run ends ✓, **replay test ✓** (the direct-storage line still lists the known gaps). Playwright (`e2e/f94-replay.mjs`, port 5395): New Game vs the AI, 4 turns (11 moves: 6 the person's, 5 the AI's) → the run save is the record with `game: null` → reload → "Continue · Turn 5 · just now" → the same fingerprint `96a6eb3db3667667`, turn 4, 11 moves, and play goes on to 14; two separate browsers (desktop + phone) → Daily game → seed 4283455274, the same turn order and the same opening fingerprint; a run planted with `rulesVersion: 0` → Continue → "This game was played under a different version of the rules…" toast, no game, the run wiped, no Continue, no page errors. Menu screenshots at 390×844 and 1440×900: "Daily game / Same seeds for everyone today" under Play, nothing touching an edge.
+
+## Proof (F93, 2026-10-20) — a scratch Glyphtender in `~/Documents/dev/.scratch/glyphtender-f93/`
+UI kit 0.23.0 + saves 0.2.0 installed with install-module; `src/game/run.ts` (a local game's table: state, options, seats, stats; autosave when a turn or the phase changes, `end()` on game over / leaving / a new game), Continue in `src/ui/menus.tsx` (`useContinue`, "Turn {n}" in content/text). In Playwright's Chromium: a game vs the AI → the draft + 3 turns → reload → **Continue · Turn 4 · just now** → Continue lands on the same turn (board, hands, seats identical); a 5-minute-old save reads "Turn 4 · 5 min ago"; finishing the game (`playRest`) → no copy left, no Continue after a reload; a new game left from the menu → the same; a version-7 run planted → Continue with "3 hours ago" → "This game can't be continued…" toast, wiped, no page errors. Menu screenshots with and without Continue at 390×844 and 1440×900. Its 824 tests pass; check:framework Saves: golden copy ✓, save tests ✓ (`checkRunEnds`), "a run cleared at the end never comes back" ✓ (the direct-storage check still lists the game's known gaps, see F86 below).
 
 ## Proof (F86, 2026-10-19) — scratch copies in `~/Documents/dev/.scratch/framework-f86/`
 - **Goops** (`goops-progress` v1, before the module `{ v: 1, totalXp, scrapsSpent }`): moved onto `createSave` with `oldSave` reading the old record, `fields` highest / highest. Its own 377 tests pass (its old save test unchanged except the pretend storage), `tsc -b` clean, check:framework Saves: 3 / 3. With its golden files removed, check:framework fails naming `tests/saves/goops-progress-v1.json`.
@@ -101,4 +229,4 @@ Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORD
 **Glyphtender** — install the same way → `src/ui/newGame.ts`: `choicesSave = createSave` (version 2, upgrade 2 drops `twoLetterWords`, `oldSave` reads `twoLetterSave`, `clean` = the old range / board / seat checks), `loadChoices` / `saveChoices` thin wrappers (tests unchanged) → `tests/saves/saves.test.ts` + golden v1, v2, v2-module → `content/saves.json` `storageAllowed`: `src/ui/online/session.ts` (room code, F95) → Settings rows + `SaveCodeScreen` in `menus.tsx` / `menuScreens.ts`. **Still to move** (check:framework lists them; a known gap until done): `src/ui/online/onlineOptions.ts` (has the same 2-letter marker → version 2 + the same upgrade), `src/tutorial/progress.ts` (progress kind), `src/ui/online/wordOutbox.ts` (a queue — settings kind, or `storageAllowed`), `src/ui/fullscreen.ts` (writes the UI kit's Settings slot — `storageAllowed`, the UI kit keeps its own saving).
 
 ## Tests
-`npm test` (vitest), `npm run typecheck` and `npm run lint` here in `saves/`. Everything runs in Node with `memoryStorage()` (full / blocked on demand) and fake browser environments for the health check; the save code uses Node's own CompressionStream. `ui/SaveCodePanel.tsx` is typechecked against the framework's UI kit (`saves/ui/kit/index.ts` passes `'../../ui/kit'` on to `../ui-kit/kit`; `tsconfig.json` points `react` at the UI kit's copy so there's one React) and proven in the browser in Glyphtender. The installer: `scripts/install-saves.test.mjs`.
+`npm test` (vitest), `npm run typecheck` and `npm run lint` here in `saves/`. Everything runs in Node with `memoryStorage()` (full / blocked on demand) and fake browser environments for the health check; the save code uses Node's own CompressionStream. `ui/SaveCodePanel.tsx` is typechecked against the framework's UI kit (`saves/ui/kit/index.ts` passes `'../../ui/kit'` on to `../ui-kit/kit`; `tsconfig.json` points `react` at the UI kit's copy so there's one React) and proven in the browser in Glyphtender. The installer: `scripts/install-saves.test.mjs`. The board: `kit/boardRoutes.test.ts` (the security tests: an illegal move, a changed score, another version, another day's or seed's game, 30 sent at once, a fresh IPv6 address per send, a fake removal, names, retention, checking later step by step) and `kit/board.test.ts` (the game's side against the routes in memory).

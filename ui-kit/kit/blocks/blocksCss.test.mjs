@@ -1,0 +1,29 @@
+// blocks.css rules a test can read as text (Vitest hands .css imports to tests empty, so this reads the file).
+// 0.25.0 (Goops): Bar atMost + Hud dockTight — their CSS uses style names only, no px.
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { describe, expect, it } from 'vitest'
+
+const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'blocks.css'), 'utf8')
+const rule = (selector) => css.split(/\r?\n/).find(line => line.includes(selector)) ?? ''
+
+describe('blocks.css 0.25.0', () => {
+  it('at-most: the row shared evenly, capped at the share, never narrower than its label — no px', () => {
+    const line = rule('[data-width="at-most"] {')
+    expect(line).toContain('flex: 1 1 0')
+    expect(line).toContain('min-inline-size: max-content')
+    expect(line).toContain('calc(var(--kit-bar-share) * 100%)')
+    expect(line).not.toMatch(/\dpx/)
+  })
+
+  it('at-most bars on a plate stretch their bar like a share does', () => {
+    expect(rule('.kit-hud-chip:is([data-width="share"], [data-width="at-most"]) > .kit-progress')).toContain('flex: 1 1 auto')
+  })
+
+  it('dockTight: the dock panel sides get the small gap style name', () => {
+    const line = rule('.kit-hud-dock[data-tight] > .kit-panel')
+    expect(line).toContain('padding-inline: var(--gap-s)')
+    expect(line).not.toMatch(/\dpx/)
+  })
+})
