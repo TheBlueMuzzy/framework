@@ -20,3 +20,8 @@ Notes:
 - Task 2: not needed — ui-kit/scripts/shoot.mjs shoots the UI kit's own gallery (its own Vite on 5180), never a game; no game has a copy. Task 3: the pill check was the only Dev Kit check with phone sizes — upright by default, sideways when style.json says "landscape" (read directly: a game can have the Dev Kit without the UI kit); the other browser checks (Dev Kit + version) use one 1280×800 desktop page.
 - Review (Claude, small diff read whole): whereText now takes the checked size count (else "every size" never matched for a portrait game); `(t.warn ?? t.fail)` keeps older Dev Kit testers working; t.json existed before 0.21; the pill check reads style.json itself so a Dev Kit without the UI kit still works. No findings.
 - Honest note: sprint 22's hand-off said the "portrait only" idea was "logged in the roadmap's Ideas" — it never was: the python edit looked for "## Ideas" + LF in a CRLF file, matched nothing, and said nothing. The first F104 insert then landed inside the mermaid block (same cause, a mixed-line-ending file). Lesson → my plan-file edits now assert their anchor was found and keep the file's own line endings.
+
+Retro: (Claude's draft — Muzzy 2026-10-21: "the retro is clear")
+- went well: small and quick — one setting in a file Muzzy already edits, and every check honours it
+- went wrong: sprint 22 said the "portrait only" idea was logged in the roadmap's Ideas but it never was (the edit missed its anchor in a CRLF file and said nothing)
+- change: when Claude says something got logged, check it's really there before saying so (plan-file edits now assert their anchor was found)
