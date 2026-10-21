@@ -1,6 +1,6 @@
 // @vitest-environment node
 // The measuring is tested with made-up samples (no ffmpeg). The file tests need ffmpeg and are skipped without it.
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -41,6 +41,15 @@ describe('readLoudness — content/audio.json "loudness", defaults for the rest'
     expect(warnings.join('\n')).toMatch(/targets\.voice is not a sound folder/)
     expect(warnings.join('\n')).toMatch(/ceilingDb/)
     expect(readLoudness({ loudness: [] }).warnings[0]).toMatch(/should be an object/)
+  })
+  it('the starter content/audio.json spells out exactly these defaults (and a note for each)', () => {
+    const template = JSON.parse(readFileSync(new URL('../templates/content/audio.json', import.meta.url), 'utf8'))
+    expect(template.loudness).toEqual(DEFAULT_LOUDNESS)
+    expect(readLoudness(template).warnings).toEqual([])
+    for (const key of [...Object.keys(DEFAULT_LOUDNESS.targets).map((f) => `targets.${f}`), 'toleranceDb', 'ceilingDb', 'lateMs']) {
+      expect(template._help[`loudness.${key}`], key).toBeTruthy()
+      expect(template._labels[`loudness.${key}`], key).toBeTruthy()
+    }
   })
   it('never changes the defaults themselves', () => {
     readLoudness({ loudness: { targets: { sfx: -30 } } })

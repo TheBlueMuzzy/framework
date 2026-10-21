@@ -60,7 +60,15 @@
     "music.tracks.*.playsBeforeRest": "How many plays before the music rests (just the ambience for a while). 0 = never rests.",
     "music.tracks.*.restSeconds": "How long a rest is, in seconds: a random time between the two numbers.",
     "music.tracks.*.fadeInMs": "Fade in (ms) when it starts and when it comes back after a rest.",
-    "music.tracks.*.fadeOutMs": "Fade out (ms) at the end of the last play before a rest, and when it's stopped."
+    "music.tracks.*.fadeOutMs": "Fade out (ms) at the end of the last play before a rest, and when it's stopped.",
+    "loudness.targets.sfx": "How loud every effect FILE is made (dB) — npm run audio:check and the Sound tab's drop bring each file to this, so they all sound equally loud. -18 is the phone standard. The mix (effects louder than menus…) is done with the volume groups above, not here.",
+    "loudness.targets.ui": "How loud every menu / button sound file is made (dB). Same -18 as effects: the Menus volume group puts them under the effects.",
+    "loudness.targets.stg": "How loud every stinger file (a short musical hit for a big moment) is made (dB).",
+    "loudness.targets.amb": "How loud every ambience file is made (LUFS — loudness over the whole file). The Ambience volume group sets how loud it plays.",
+    "loudness.targets.mus": "How loud every music file is made (LUFS — loudness over the whole file). The Music volume group sets how loud it plays.",
+    "loudness.toleranceDb": "A file further than this (dB) from its target is flagged by npm run audio:check and check:framework. 3 dB is clearly heard; 1 dB is the smallest change people notice.",
+    "loudness.ceilingDb": "No sample louder than this (dB) after evening out — the spikes are limited. -1 is the standard.",
+    "loudness.lateMs": "An effect or menu sound that starts later than this (ms) after its file begins is flagged (and trimmed by --fix). Over ~40 ms feels delayed."
   },
   "_labels": {
     "buses.music": "Music (dB)",
@@ -123,7 +131,15 @@
     "music.tracks.*.playsBeforeRest": "Plays before a rest",
     "music.tracks.*.restSeconds": "Rest (seconds, shortest-longest)",
     "music.tracks.*.fadeInMs": "Fade in (ms)",
-    "music.tracks.*.fadeOutMs": "Fade out (ms)"
+    "music.tracks.*.fadeOutMs": "Fade out (ms)",
+    "loudness.targets.sfx": "Effect files (dB)",
+    "loudness.targets.ui": "Menu sound files (dB)",
+    "loudness.targets.stg": "Stinger files (dB)",
+    "loudness.targets.amb": "Ambience files (LUFS)",
+    "loudness.targets.mus": "Music files (LUFS)",
+    "loudness.toleranceDb": "Flag files off by more than (dB)",
+    "loudness.ceilingDb": "Loudest sample in a file (dB)",
+    "loudness.lateMs": "Flag sounds starting later than (ms)"
   },
   "_sections": {
     "Mix": ["buses", "master"],
@@ -132,7 +148,8 @@
     "Named mixes": ["snapshots", "duck"],
     "Limits": ["limits"],
     "Sounds": ["sounds"],
-    "Music": ["music"]
+    "Music": ["music"],
+    "File loudness (audio:check)": ["loudness"]
   },
   "_ranges": {
     "buses.music": [-40, 6, 0.5],
@@ -181,7 +198,15 @@
     "music.tracks.*.playsBeforeRest": [0, 20, 1],
     "music.tracks.*.restSeconds": [0, 600, 1],
     "music.tracks.*.fadeInMs": [0, 20000, 50],
-    "music.tracks.*.fadeOutMs": [0, 20000, 50]
+    "music.tracks.*.fadeOutMs": [0, 20000, 50],
+    "loudness.targets.sfx": [-40, 0, 0.5],
+    "loudness.targets.ui": [-40, 0, 0.5],
+    "loudness.targets.stg": [-40, 0, 0.5],
+    "loudness.targets.amb": [-40, 0, 0.5],
+    "loudness.targets.mus": [-40, 0, 0.5],
+    "loudness.toleranceDb": [0.5, 12, 0.5],
+    "loudness.ceilingDb": [-12, 0, 0.5],
+    "loudness.lateMs": [0, 500, 5]
   },
   "buses": { "music": -8, "ambience": -10, "sfx": 0, "ui": -8 },
   "master": { "limiterDb": -1, "muteDelayMs": 250 },
@@ -193,6 +218,12 @@
   },
   "duck": { "amountDb": -7, "downMs": 10, "backMs": 600 },
   "limits": { "maxVoices": 14, "staleMs": 400 },
+  "loudness": {
+    "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 },
+    "toleranceDb": 3,
+    "ceilingDb": -1,
+    "lateMs": 20
+  },
   "sounds": {
     "example.pop": {
       "files": ["sfx/example_pop_01.mp3", "sfx/example_pop_02.mp3", "sfx/example_pop_03.mp3"],
