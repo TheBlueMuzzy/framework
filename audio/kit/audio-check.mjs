@@ -55,14 +55,18 @@ export function listSounds(gameDir) {
 }
 
 /**
- * The kept original of a sound, if there is one: audio-originals/<same folder>/<same name, any type>
- * (the Dev Kit drop keeps a dropped .wav as sfx_pop_01.wav beside the sfx_pop_01.mp3 it made). null = none.
+ * The kept original of a sound, if there is one: audio-originals/<same folder>/<same name> first, else the same name
+ * in another type (the Dev Kit drop keeps a dropped .wav as sfx_pop_01.wav beside the sfx_pop_01.mp3 it made) — but
+ * never a file that is the original of ANOTHER sound in public/audio (hit.mp3 + hit.ogg each keep their own). null = none.
  */
 export function originalOf(gameDir, rel) {
   const dir = join(gameDir, ORIGINALS_DIR, dirname(rel))
   if (!existsSync(dir)) return null
+  if (existsSync(join(dir, basename(rel)))) return join(dir, basename(rel))
   const stem = basename(rel, extname(rel))
-  const found = readdirSync(dir, { withFileTypes: true }).find((e) => e.isFile() && basename(e.name, extname(e.name)) === stem)
+  const soundDir = join(gameDir, AUDIO_DIR, dirname(rel))
+  const found = readdirSync(dir, { withFileTypes: true }).find((e) =>
+    e.isFile() && basename(e.name, extname(e.name)) === stem && !existsSync(join(soundDir, e.name)))
   return found ? join(dir, found.name) : null
 }
 
@@ -89,9 +93,10 @@ export async function checkSounds(gameDir, { ffmpeg, audioJson = readAudioJson(g
 /** Can --fix do something about this row? (not for silence or a file in an unknown folder) */
 const fixable = (row) => row.measured && !row.verdict.ok && !row.verdict.problems.includes('silent')
 
-/** Is `path` really inside `dir`? (both resolved, links followed for what exists) */
+/** Is `path` really inside `dir`? (both resolved, links followed for what exists — a path that doesn't exist yet is
+ *  resolved through its nearest existing folder, so both sides are compared the same way) */
 function isInside(dir, path) {
-  const real = (p) => (existsSync(p) ? realpathSync(p) : resolve(p))
+  const real = (p) => (existsSync(p) ? realpathSync(p) : dirname(p) === p ? resolve(p) : join(real(dirname(p)), basename(p)))
   return real(path).startsWith(real(dir) + sep)
 }
 
@@ -124,8 +129,11 @@ export async function fixSounds(gameDir, rows, { ffmpeg, settings }) {
       // never make it worse: a result no closer to the target (a file whose loudness IS its spikes — already limited)
       // is thrown away. Its original is still kept, which marks it as tried: the next report says "as loud as its
       // spikes allow" instead of flagging it again.
+      // (a file whose only problem was a peak over the ceiling counts as better once the peak is under it)
       const distance = (m) => Math.abs(m.loudnessDb - settings.targets[row.folder])
-      if (distance(fix.after) > distance(row.measured) - 0.3 && fix.trimMs < 1) {
+      const overCeiling = (m) => m.peakDb > settings.ceilingDb + 0.05
+      const peakFixed = overCeiling(row.measured) && !overCeiling(fix.after)
+      if (!peakFixed && distance(fix.after) > distance(row.measured) - 0.3 && fix.trimMs < 1) {
         const verdict = judge(row.measured, row.folder, settings, { fixedBefore: true })
         changes.push({ rel: row.rel, before: row.measured, after: row.measured, verdict, line: `${row.rel}: left as it was — as loud as its spikes allow (original: ${keptAt})` })
         continue

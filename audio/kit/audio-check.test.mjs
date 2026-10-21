@@ -39,6 +39,15 @@ describe('finding the sounds', () => {
     expect(originalOf(game, 'sfx/sfx_pop_02.mp3')).toBeNull()
     expect(originalOf(game, 'ui/ui_tap_01.mp3')).toBeNull()
   })
+  it('two sounds with one name in two types (hit.mp3 + hit.ogg) each have their own original', () => {
+    put('public/audio/sfx/hit.mp3')
+    put('public/audio/sfx/hit.ogg')
+    put('audio-originals/sfx/hit.mp3')
+    expect(originalOf(game, 'sfx/hit.mp3')).toMatch(/hit\.mp3$/)
+    expect(originalOf(game, 'sfx/hit.ogg')).toBeNull() // hit.mp3's original is not hit.ogg's
+    put('audio-originals/sfx/hit.ogg')
+    expect(originalOf(game, 'sfx/hit.ogg')).toMatch(/hit\.ogg$/)
+  })
 })
 
 describe('the report', () => {
@@ -124,10 +133,26 @@ describe('the command', () => {
       symlinkSync(outside, join(game, 'audio-originals/sfx'), 'junction')
       const said = []
       expect(await main(['--fix', game], { log: (l) => said.push(l) })).toBe(1)
-      expect(said.join('\n')).toMatch(/Not allowed: audio-originals\/sfx points outside/)
+      expect(said.join('\n')).toMatch(/Not allowed: .*outside audio-originals\//)
       expect(readdirSync(outside)).toEqual([])
       expect(readFileSync(join(game, 'public/audio/sfx/sfx_test_quiet_01.mp3')).equals(before)).toBe(true) // untouched
     } finally { rmSync(outside, { recursive: true, force: true }) }
+  }, 30000)
+
+  it.skipIf(!ffmpeg)('a sound on target whose only problem is one spike over the ceiling is fixed, not flagged forever', async () => {
+    mkdirSync(join(game, 'public/audio/sfx'), { recursive: true })
+    // RMS ≈ -18.4 (on target) with a 0.2 ms spike near 0 dBFS (over the -1 ceiling)
+    execFileSync(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'aevalsrc=0.17*sin(2*PI*800*t)+if(between(t\\,0.15\\,0.1502)\\,0.8\\,0):s=44100:d=0.4', '-ac', '1', '-c:a', 'pcm_s16le', join(game, 'public/audio/sfx/sfx_test_spike_01.wav')])
+    const said = []
+    const log = (l) => said.push(l)
+    await main([game], { log })
+    expect(said.join('\n')).toMatch(/sfx_test_spike_01\.wav .*peaks .*over/)
+    said.length = 0
+    await main(['--fix', game], { log })
+    expect(said.join('\n')).not.toContain('left as it was')
+    said.length = 0
+    await main([game], { log })
+    expect(said.join('\n')).toMatch(/sfx_test_spike_01\.wav .*✓/)
   }, 30000)
 
   it.skipIf(!ffmpeg)('reads the targets from content/audio.json', async () => {
