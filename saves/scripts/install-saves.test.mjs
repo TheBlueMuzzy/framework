@@ -160,8 +160,8 @@ describe('install-saves — worker files that fell behind the kit (F101 proof)',
     writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts').replace(/Template version: \d+/, 'Template version: 1'))
     const lines = []
     const { stale } = installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
-    expect(stale).toEqual([{ file: 'board/worker.ts', from: 1, to: 3, changes: [expect.stringMatching(/^2: /), expect.stringMatching(/^3: .*attempts/)] }])
-    expect(lines.join('\n')).toMatch(/board\/worker\.ts was made from an older template \(version 1; the kit's is 3\)/)
+    expect(stale).toEqual([{ file: 'board/worker.ts', from: 1, to: 4, changes: [expect.stringMatching(/^2: /), expect.stringMatching(/^3: .*attempts/), expect.stringMatching(/^4: .*front door/)] }])
+    expect(lines.join('\n')).toMatch(/board\/worker\.ts was made from an older template \(version 1; the kit's is 4\)/)
     rmSync(game, { recursive: true, force: true })
   })
 
@@ -171,7 +171,7 @@ describe('install-saves — worker files that fell behind the kit (F101 proof)',
     mkdirSync(join(game, 'board'), { recursive: true })
     writeFileSync(join(game, 'cloud/worker.ts'), '// an old cloud worker\n')
     writeFileSync(join(game, 'board/worker.ts'), template('board/worker.ts'))
-    expect(staleWorkers(game).map((s) => [s.file, s.from, s.to])).toEqual([['cloud/worker.ts', 1, 2]])
+    expect(staleWorkers(game).map((s) => [s.file, s.from, s.to])).toEqual([['cloud/worker.ts', 1, 3]])
     const lines = []
     installSaves(game, { dryRun: true, log: (l) => lines.push(l) })
     expect(lines.join('\n')).toMatch(/cloud\/worker\.ts was made from an older template \(no version line/)

@@ -117,17 +117,47 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...OPEN_CORS } })
 const refuse = (code: string, status: number) => json({ ok: false, code }, status)
 
-/** The body as JSON, or null when it's too big or not JSON. */
-async function readJson(request: Request, maxChars: number): Promise<Record<string, unknown> | null> {
-  if (Number(request.headers.get('Content-Length') ?? 0) > maxChars) return null
-  const text = await request.text()
-  if (text.length > maxChars) return null
+/** The body as JSON, or null when it's too big or not JSON. Read a piece at a time and given up the moment it passes
+ *  maxBytes — a body sent without a size (chunked) is never read whole first, so tens of MB can't fill the one shared
+ *  object's memory (security review, v0.11.0). The game only sends plain ASCII, so bytes = characters. */
+export async function readJson(request: Request, maxBytes: number): Promise<Record<string, unknown> | null> {
+  if (Number(request.headers.get('Content-Length') ?? 0) > maxBytes) return null
+  if (!request.body) return null
+  const reader = request.body.getReader()
+  const pieces: Uint8Array[] = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.byteLength
+    if (size > maxBytes) {
+      reader.cancel().catch(() => {}) // tell the sender to stop; nothing more is read
+      return null
+    }
+    pieces.push(value)
+  }
+  const bytes = new Uint8Array(size)
+  let at = 0
+  for (const piece of pieces) {
+    bytes.set(piece, at)
+    at += piece.byteLength
+  }
   try {
-    const body = JSON.parse(text)
+    const body = JSON.parse(new TextDecoder().decode(bytes))
     return body && typeof body === 'object' ? body : null
   } catch {
     return null
   }
+}
+
+/** The worker's front door (its fetch, before the ONE shared object): a POST must say how big it is (Content-Length)
+ *  and be no bigger than maxBytes — else 413 right there, and the object never sees it (security review, v0.11.0).
+ *  The game's fetch() always sends a Content-Length for its JSON body. null = let it through. */
+export function refuseHugeBody(request: Request, maxBytes: number): Response | null {
+  if (request.method !== 'POST') return null
+  const length = request.headers.get('Content-Length')?.trim() ?? ''
+  if (!/^\d+$/.test(length) || Number(length) > maxBytes) return refuse('too-big', 413)
+  return null
 }
 
 /** An address → a scrambled number (HMAC-SHA-256 with the worker's own secret, the first 16 hex digits): enough to
@@ -156,8 +186,8 @@ const EVERYONE = '*'
 
 /** The same shape as a save code (saveCode.ts) — the cloud only carries save codes, nothing else. */
 const SAVE_CODE_SHAPE = /^[A-Za-z0-9]+-\d+[zj]-[A-Za-z0-9_-]+$/
-/** A body is a save code + a little JSON around it. */
-const MAX_BODY_CHARS = MAX_CODE_CHARS + 1_000
+/** A body is a save code + a little JSON around it — the biggest the cloud takes (the worker's front door uses it too). */
+export const MAX_BODY_CHARS = MAX_CODE_CHARS + 1_000
 
 export async function handleCloud(request: Request, context: CloudContext): Promise<Response> {
   const { rows, settings, address } = context

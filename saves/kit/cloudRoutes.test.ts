@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { addressKey, handleCloud, LINK_ALPHABET, memoryCloudRows, newLinkCode, readLinkCode, scramble, SERVER_WRONG_PER_HOUR, showLinkCode, type CloudContext } from './cloudRoutes'
+import {
+  addressKey, handleCloud, LINK_ALPHABET, MAX_BODY_CHARS, memoryCloudRows, newLinkCode, readJson, readLinkCode, refuseHugeBody, scramble, SERVER_WRONG_PER_HOUR,
+  showLinkCode, type CloudContext,
+} from './cloudRoutes'
 import { DEFAULT_SAVES_CONFIG } from './config'
 import { MAX_CODE_CHARS } from './saveCode'
 
@@ -84,6 +87,56 @@ describe('the guess limits hold under pressure (review F96)', () => {
     for (let i = 0; i < SERVER_WRONG_PER_HOUR; i++) await call('/saves/get', { link: 'ZZZZ2222' }, { address: `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}` })
     expect((await call('/saves/get', { link: 'ZZZZ2222' }, { address: '198.51.100.250' })).status).toBe(429)
   }, 30_000)
+})
+
+/** A body sent in pieces with no size (chunked): 64 KB at a time, up to `total` bytes. `pulled()` = how much was read. */
+function endlessBody(total: number) {
+  let sent = 0
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent >= total) return controller.close()
+      const piece = new Uint8Array(65_536).fill(0x61)
+      sent += piece.byteLength
+      controller.enqueue(piece)
+    },
+  })
+  return { stream, pulled: () => sent }
+}
+
+describe('huge bodies never reach the shared store (security review, v0.11.0)', () => {
+  it('a chunked 50 MB body with no Content-Length is given up after the cap, not read whole', async () => {
+    const body = endlessBody(50_000_000)
+    const request = new Request('https://goops-saves.example/saves/link', { method: 'POST', body: body.stream, duplex: 'half' } as RequestInit)
+    expect(request.headers.get('Content-Length')).toBeNull()
+    expect(await readJson(request, MAX_BODY_CHARS)).toBeNull()
+    expect(body.pulled()).toBeLessThan(MAX_BODY_CHARS + 3 * 65_536) // a piece or two past the cap, never the 50 MB
+  })
+
+  it('…and through the route: refused as too-big', async () => {
+    const body = endlessBody(50_000_000)
+    const request = new Request('https://goops-saves.example/saves/link', { method: 'POST', body: body.stream, duplex: 'half' } as RequestInit)
+    const response = await handleCloud(request, { rows: memoryCloudRows(), settings: DEFAULT_SAVES_CONFIG.cloud, address: '203.0.113.7', now: NOW })
+    expect(response.status).toBe(413)
+    expect(body.pulled()).toBeLessThan(MAX_BODY_CHARS + 3 * 65_536)
+  })
+
+  it('a body in pieces under the cap is read whole, as before', async () => {
+    const text = JSON.stringify({ code: CODE })
+    const pieces = [text.slice(0, 10), text.slice(10)].map((t) => new TextEncoder().encode(t))
+    const stream = new ReadableStream<Uint8Array>({ start(c) { pieces.forEach((p) => c.enqueue(p)); c.close() } })
+    const request = new Request('https://x/saves/link', { method: 'POST', body: stream, duplex: 'half' } as RequestInit)
+    expect(await readJson(request, MAX_BODY_CHARS)).toEqual({ code: CODE })
+  })
+
+  it('the worker\'s front door: a POST with no Content-Length, a false one, or one over the cap → 413 before the store', () => {
+    const post = (headers: Record<string, string>) => new Request('https://x/saves/link', { method: 'POST', headers })
+    expect(refuseHugeBody(post({}), MAX_BODY_CHARS)?.status).toBe(413)                                    // chunked: no size
+    expect(refuseHugeBody(post({ 'Content-Length': String(MAX_BODY_CHARS + 1) }), MAX_BODY_CHARS)?.status).toBe(413)
+    expect(refuseHugeBody(post({ 'Content-Length': 'lots' }), MAX_BODY_CHARS)?.status).toBe(413)
+    expect(refuseHugeBody(post({ 'Content-Length': '120' }), MAX_BODY_CHARS)).toBeNull()                // what the game sends
+    expect(refuseHugeBody(new Request('https://x/health'), MAX_BODY_CHARS)).toBeNull()                     // a GET has no body
+    // (a browser's fetch with a JSON string body always puts its size on the wire, so the game is never refused here)
+  })
 })
 
 describe('the cloud routes', () => {

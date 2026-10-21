@@ -223,10 +223,12 @@ function kitVersion() {
 export const TEMPLATE_CHANGES = {
   [CLOUD_WORKER]: {
     2: 'limits hold for requests sent at once, IPv6 counted by /64, a server-wide cap, a keyed address hash (F96 review)',
+    3: 'the front door refuses a POST with no size or too big (413) before the shared store reads it (v0.11.0 security review)',
   },
   [BOARD_WORKER]: {
     2: 'a sent game is checked a few moves per alarm (the alarm has the same 10 ms CPU limit as a request) — progress + state columns',
     3: 'a day\'s work budget, a stuck game dropped after 3 saved tries (the attempts column + attemptWaiting), replay from the server\'s own daily setup (F98 review)',
+    4: 'the front door refuses a POST with no size or too big (413) before the shared board reads it (v0.11.0 security review)',
   },
 }
 

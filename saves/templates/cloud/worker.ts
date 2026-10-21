@@ -3,14 +3,14 @@
 // then deletes them. Everything it answers is decided in src/saves/cloudRoutes.ts (no Cloudflare there, so it's
 // tested on its own); this file only stores rows and sets the alarm that tidies up.
 //   Local:  npm run cloud:dev   (port 1998)   ·   Live: npm run cloud:deploy (Muzzy's call — it's public)
-// Template version: 2 (keep this line: the installer compares it with the kit's to say what changed since your copy)
+// Template version: 3 (keep this line: the installer compares it with the kit's to say what changed since your copy)
 //
 // ONE copy of the SaveCloud class (named "saves") holds every link code in its own SQLite: a SQLite Durable Object,
 // the free plan's kind (100,000 rows written a day — KV's free plan allows only 1,000 writes).
 // No packages: a plain class with fetch() and alarm() is a Durable Object to Cloudflare.
 import savesJson from '../content/saves.json'
 import { readSavesConfig } from '../src/saves/config'
-import { handleCloud, type CloudRows, type TryKind } from '../src/saves/cloudRoutes'
+import { handleCloud, MAX_BODY_CHARS, refuseHugeBody, type CloudRows, type TryKind } from '../src/saves/cloudRoutes'
 
 // The few Cloudflare shapes used here (written out, so the game needs no Cloudflare type package)
 type SqlStorage = { exec(sql: string, ...values: (string | number)[]): { toArray(): Record<string, unknown>[] }; readonly databaseSize: number }
@@ -121,6 +121,9 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname
     if (path === '/health' || path.startsWith('/saves/')) {
+      // a POST with no size, or too big, stops HERE — never read inside the one store everyone shares (security review)
+      const tooBig = refuseHugeBody(request, MAX_BODY_CHARS)
+      if (tooBig) return tooBig
       // always the ONE store, so a link code made on one device is found from any other
       return env.SaveCloud.get(env.SaveCloud.idFromName('saves')).fetch(request)
     }

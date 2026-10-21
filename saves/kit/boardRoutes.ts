@@ -19,7 +19,7 @@
 // only to this server, kept only as a keyed hash, and it's also the proof for "Remove my score" — nobody else has it.
 // What a cheater can still do is written down in the design (.planning/design/saves.md → Layer 7).
 import type { BoardConfig } from './config'
-import { addressKey, MAX_STORED_BYTES } from './cloudRoutes'
+import { addressKey, MAX_STORED_BYTES, readJson } from './cloudRoutes'
 import { replayRun, utcDay, type ReplayRules, type RunRecord } from './replay'
 
 /** What the board needs from the game — the game's board worker fills it in from its own rules (never a copy). */
@@ -240,19 +240,6 @@ const OPEN_CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...OPEN_CORS } })
 const refuse = (code: string, status: number) => json({ ok: false, code }, status)
-
-/** The body as JSON, or null when it's too big or not JSON. */
-async function readJson(request: Request, maxChars: number): Promise<Record<string, unknown> | null> {
-  if (Number(request.headers.get('Content-Length') ?? 0) > maxChars) return null
-  const text = await request.text()
-  if (text.length > maxChars) return null
-  try {
-    const body = JSON.parse(text)
-    return body && typeof body === 'object' ? body : null
-  } catch {
-    return null
-  }
-}
 
 /** Shaped like a record (a version, a setup, a list of moves)? The full check is the replay's own. */
 const looksLikeRecord = (r: unknown): r is RunRecord<unknown, unknown> =>

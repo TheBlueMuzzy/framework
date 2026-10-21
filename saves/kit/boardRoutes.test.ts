@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  BLOCKED_NAMES, checkWaiting, handleBoard, keyedHash, MAX_STEP_ATTEMPTS, memoryBoardRows, MOVES_PER_STEP, nextMidnight, readArcadeName, sameSetup, SERVER_SENDS_PER_DAY,
+  BLOCKED_NAMES, checkWaiting, handleBoard, keyedHash, MAX_RECORD_CHARS, MAX_STEP_ATTEMPTS, memoryBoardRows, MOVES_PER_STEP, nextMidnight, readArcadeName, sameSetup, SERVER_SENDS_PER_DAY,
   tidyBoard, WRONG_REMOVES_PER_DAY, type BoardContext, type BoardGame,
 } from './boardRoutes'
+import { refuseHugeBody } from './cloudRoutes'
 import { DEFAULT_SAVES_CONFIG, type BoardConfig } from './config'
 import { addRunMove, dailySeed, recordRun, utcDay, type RunRecord } from './replay'
 
@@ -156,6 +157,15 @@ describe('a Daily game on the board: the score is the server\'s own', () => {
     expect((await send({ ...finished, moves: Array(201).fill({ seat: 0, action: { type: 'pass' } }) })).body.code).toBe('too-big')
     expect((await send({ ...finished, padding: 'x'.repeat(100_001) })).body.code).toBe('too-big')
     expect((await send('just text')).body.code).toBe('damaged')
+    // a chunked body with no size: given up just past the cap, never read whole (security review, v0.11.0)
+    let sent = 0
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { if (sent >= 50_000_000) return c.close(); sent += 65_536; c.enqueue(new Uint8Array(65_536).fill(0x61)) },
+    })
+    const chunked = new Request('https://race-board.example/board/send', { method: 'POST', body: stream, duplex: 'half' } as RequestInit)
+    expect((await handleBoard(chunked, { rows: memoryBoardRows(), game: raceBoard, settings: DEFAULT_SAVES_CONFIG.board, address: '203.0.113.7', now: NOW })).status).toBe(413)
+    expect(sent).toBeLessThan(MAX_RECORD_CHARS + 3 * 65_536)
+    expect(refuseHugeBody(new Request('https://x/board/send', { method: 'POST' }), MAX_RECORD_CHARS)?.status).toBe(413) // the worker's front door
     expect((await send({ rulesVersion: VERSION, setup: finished.setup, moves: 'all of them' })).body.code).toBe('damaged')
   })
 })

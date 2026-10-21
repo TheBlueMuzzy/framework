@@ -4,13 +4,14 @@
 // by a player is never read. Everything it answers is decided in src/saves/boardRoutes.ts (no Cloudflare there, so
 // it's tested on its own); this file only stores rows, runs the alarm, and plugs the game in.
 //   Local:  npm run board:dev   (port 1996)   ·   Live: npm run board:deploy (Muzzy's call — it's public)
-// Template version: 3 (keep this line: the installer compares it with the kit's to say what changed since your copy)
+// Template version: 4 (keep this line: the installer compares it with the kit's to say what changed since your copy)
 //
 // ONE copy of the DailyBoard class (named "board") holds every day's board in its own SQLite: a SQLite Durable Object,
 // the free plan's kind. No packages: a plain class with fetch() and alarm() is a Durable Object to Cloudflare.
 import savesJson from '../content/saves.json'
 import { readSavesConfig } from '../src/saves/config'
-import { checkWaiting, handleBoard, nextMidnight, tidyBoard, type BoardCount, type BoardGame, type BoardRows, type BoardScore } from '../src/saves/boardRoutes'
+import { checkWaiting, handleBoard, MAX_RECORD_CHARS, nextMidnight, tidyBoard, type BoardCount, type BoardGame, type BoardRows, type BoardScore } from '../src/saves/boardRoutes'
+import { refuseHugeBody } from '../src/saves/cloudRoutes'
 
 // ── THE GAME — fill this in (the installer lists it until it's done) ──────────────────────────────────────────────
 // The board needs four things from the game, all from the game's own code (so the server and the phone can't disagree):
@@ -158,6 +159,9 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname
     if (path === '/health' || path.startsWith('/board/')) {
+      // a POST with no size, or too big, stops HERE — never read inside the one board everyone shares (security review)
+      const tooBig = refuseHugeBody(request, MAX_RECORD_CHARS)
+      if (tooBig) return tooBig
       // always the ONE board, so every player sees the same day
       return env.DailyBoard.get(env.DailyBoard.idFromName('board')).fetch(request)
     }
