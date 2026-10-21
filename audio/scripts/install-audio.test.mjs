@@ -31,6 +31,22 @@ describe('install-audio', () => {
     expect(readFileSync(join(game, 'content/audio.json'), 'utf8')).toBe('{ "sounds": {} }')
   })
 
+  it('adds "audio:check" to package.json once, and leaves a game\'s own alone', () => {
+    const game = mkdtempSync(join(tmpdir(), 'audio-game-'))
+    writeFileSync(join(game, 'package.json'), '{\r\n    "name": "g",\r\n    "scripts": { "dev": "vite" }\r\n}\r\n')
+    expect(installAudio(game, { log: quiet }).script).toHaveLength(1)
+    const text = readFileSync(join(game, 'package.json'), 'utf8')
+    expect(JSON.parse(text).scripts).toEqual({ dev: 'vite', 'audio:check': 'node src/audio/audio-check.mjs' })
+    expect(text).toContain('\r\n    "name"') // the file's own line endings + indent kept
+    expect(installAudio(game, { log: quiet }).script).toEqual([])
+    expect(existsSync(join(game, 'src/audio/audio-check.mjs'))).toBe(true)
+    expect(existsSync(join(game, 'src/audio/loudness.mjs'))).toBe(true)
+    const own = mkdtempSync(join(tmpdir(), 'audio-game-'))
+    writeFileSync(join(own, 'package.json'), '{ "scripts": { "audio:check": "my-own" } }')
+    installAudio(own, { log: quiet })
+    expect(JSON.parse(readFileSync(join(own, 'package.json'), 'utf8')).scripts['audio:check']).toBe('my-own')
+  })
+
   it('a dry run changes nothing', () => {
     const game = mkdtempSync(join(tmpdir(), 'audio-game-'))
     const { changed, starter } = installAudio(game, { dryRun: true, log: quiet })

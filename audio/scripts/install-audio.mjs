@@ -6,6 +6,8 @@
 //   - writes a VERSION file (module version + framework commit)
 //   - removes files the module no longer ships — only ever inside src/audio/
 //   - gives the game a starter content/audio.json ONCE (if it has none). After that the game owns it: never overwritten.
+//   - adds "audio:check" to package.json's scripts (0.4.0) — only when missing, so a re-run changes nothing
+//     (npm run audio:check = the loudness report, kit/audio-check.mjs)
 import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -18,6 +20,24 @@ export function checkFrameworkStep(gameDir) {
   try { scripts = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).scripts ?? {} } catch { /* no package.json */ }
   if (scripts['check:framework']) return null
   return 'package.json "scripts": "check:framework": "node src/devkit/check-framework.mjs"   (comes with the Dev Kit: runs every installed module\'s promise checks, this one\'s too, and says what to wire where)'
+}
+
+export const AUDIO_CHECK_SCRIPT = 'node src/audio/audio-check.mjs'
+
+// "audio:check" in the game's package.json — added when missing (a game's own different one is left alone).
+// Returns true when it was (or, in a dry run, would be) added.
+export function addAudioCheckScript(gameDir, { dryRun = false } = {}) {
+  const pkgPath = join(gameDir, 'package.json')
+  if (!existsSync(pkgPath)) return false
+  const text = readFileSync(pkgPath, 'utf8')
+  let pkg
+  try { pkg = JSON.parse(text) } catch { return false } // unreadable: the game fixes it first
+  if (pkg.scripts?.['audio:check'] !== undefined) return false
+  pkg.scripts = { ...pkg.scripts, 'audio:check': AUDIO_CHECK_SCRIPT }
+  const indent = text.match(/^[ \t]+(?=")/m)?.[0] ?? '  '
+  const eol = text.includes('\r\n') ? '\r\n' : '\n'
+  if (!dryRun) writeFileSync(pkgPath, JSON.stringify(pkg, null, indent).replaceAll('\n', eol) + eol)
+  return true
 }
 
 const audioDir = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -58,7 +78,9 @@ export function installAudio(gameDir, { dryRun = false, log = console.log } = {}
   removed.forEach((f) => log(`  removed ${f}`))
   if (!changed.length && !removed.length) log('  already up to date')
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
-  if (dryRun) return { changed, removed, starter }
+  const script = addAudioCheckScript(game, { dryRun }) ? ['package.json "audio:check" script'] : []
+  script.forEach((s) => log(`  ${dryRun ? 'would add' : 'add     '} ${s} (npm run audio:check: is every sound as loud as the others?)`))
+  if (dryRun) return { changed, removed, starter, script }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
     copyFileSync(join(audioDir, 'kit', f), join(target, f))
@@ -71,7 +93,7 @@ export function installAudio(gameDir, { dryRun = false, log = console.log } = {}
     copyFileSync(join(audioDir, 'templates', f), join(game, f))
   }
   { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
-  return { changed, removed, starter }
+  return { changed, removed, starter, script }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
