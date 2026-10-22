@@ -78,10 +78,16 @@ export function crashesMaps(options = {}) {
       mapsDir = join(root, MAPS_FOLDER, options.version ?? readGameVersion(root), 'maps')
       log = (message) => config.logger.info(message)
     },
-    closeBundle() {
-      // closeBundle: after everything is written (public/ copied too), so a .map from anywhere is caught
-      const moved = moveMaps(outDir, mapsDir)
-      if (moved.length) log(`crashes: ${moved.length} source map(s) moved out of the build → ${relative(process.cwd(), mapsDir) || mapsDir}`)
+    // closeBundle: after everything is written (public/ copied too), so a .map from anywhere is caught.
+    // order 'post' + sequential: after every other plugin's closeBundle has FINISHED — vite-plugin-pwa writes sw.js.map
+    // and workbox-*.js.map in its own closeBundle, after the build (the scratch-Goops proof caught two shipping).
+    closeBundle: {
+      order: 'post',
+      sequential: true,
+      handler() {
+        const moved = moveMaps(outDir, mapsDir)
+        if (moved.length) log(`crashes: ${moved.length} source map(s) moved out of the build → ${relative(process.cwd(), mapsDir) || mapsDir}`)
+      },
     },
   }
 }

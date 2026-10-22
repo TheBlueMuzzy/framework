@@ -40,6 +40,26 @@ describe('crashesMaps', () => {
     expect(JSON.parse(readFileSync(join(maps, scriptMap), 'utf8')).sources.join()).toContain('main.js')
   }, 60_000)
 
+  it('a map another plugin writes after the build (vite-plugin-pwa: sw.js.map, workbox-*.js.map) is moved too', async () => {
+    // (found by the scratch-Goops proof: the PWA plugin, enforce post, writes its service worker + maps in its own
+    // sequential closeBundle — after crashesMaps had already swept dist/, so two maps shipped)
+    const root = gameAt('0.1.0', 1)
+    const pwaLike = {
+      name: 'pwa-like', enforce: 'post', apply: 'build',
+      closeBundle: {
+        sequential: true,
+        async handler() {
+          await new Promise((done) => setTimeout(done, 50))
+          writeFileSync(join(root, 'dist', 'sw.js'), 'self.x=1\n//# sourceMappingURL=sw.js.map\n')
+          writeFileSync(join(root, 'dist', 'sw.js.map'), '{}')
+        },
+      },
+    }
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps(), pwaLike] })
+    expect(findMaps(join(root, 'dist'))).toEqual([])
+    expect(findMaps(join(root, 'releases', '0.1.0.1', 'maps'))).toContain('sw.js.map')
+  }, 60_000)
+
   it('the version is the same text the version module gives (and the game puts in reports), VERSION_BUILD included', () => {
     const root = gameAt('0.10.2', 7)
     expect(readGameVersion(root)).toBe(readAppVersion(root))
