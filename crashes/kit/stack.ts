@@ -16,12 +16,16 @@ export interface ReadStack {
   allExtension: boolean
 }
 
-/** The path inside the site for a file of the game's own, or null for anything else (another site, an extension). */
-export function sitePath(url: string, origin: string): string | null {
+/** The path inside the game for a file of the game's own, or null for anything else (another site, an extension,
+ *  "<anonymous>" — eval, a console or a test tool: a stack names real files by their full address, so nothing else is
+ *  read relative to the page). base = the game's folder on its site ("/GOOPS/alpha/"): the path is inside it, the
+ *  way the build's maps are filed (assets/index-Bx12.js), so the game moving folder keeps every fingerprint. */
+export function sitePath(url: string, origin: string, base = '/'): string | null {
   let parsed: URL
-  try { parsed = new URL(url, origin) } catch { return null }
+  try { parsed = new URL(url) } catch { return null }
   if (parsed.origin !== origin) return null
-  return safeFile(parsed.pathname.replace(/^\/+/, ''))
+  const path = parsed.pathname.startsWith(base) ? parsed.pathname.slice(base.length) : parsed.pathname
+  return safeFile(path.replace(/^\/+/, ''))
 }
 
 /** What the server accepts as a file: 1–200 characters, no spaces, no ? # or :, no ".." part. */
@@ -36,7 +40,7 @@ function cleanFn(name: string | undefined): string | undefined {
   return fn === '' || fn === '<anonymous>' ? undefined : fn
 }
 
-export function readStack(stack: string | undefined, origin: string): ReadStack {
+export function readStack(stack: string | undefined, origin: string, base = '/'): ReadStack {
   const frames: Frame[] = []
   let seen = 0
   let inExtension = 0
@@ -46,7 +50,7 @@ export function readStack(stack: string | undefined, origin: string): ReadStack 
     const [, fn, url, line, col] = match
     seen++
     if (EXTENSION.test(url)) { inExtension++; continue }
-    const file = sitePath(url, origin)
+    const file = sitePath(url, origin, base)
     if (!file || frames.length >= MAX_FRAMES) continue
     const frame: Frame = { file, line: Number(line), col: Number(col) }
     const name = cleanFn(fn)

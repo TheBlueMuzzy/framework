@@ -35,6 +35,9 @@ export interface CrashOptions {
   send?: SendReport
   /** Is this a dev build? Default import.meta.env.DEV. Dev builds send nothing unless config.client.sendInDev. */
   dev?: boolean
+  /** The game's folder on its site ("/GOOPS/alpha/", or "./"). Default Vite's base, import.meta.env.BASE_URL. Files are
+   *  named inside it (assets/index-Bx12.js) — how the maps are filed, and the same when the game moves folder. */
+  base?: string
 }
 
 const MAX_HELD = 10 // unsent reports kept in memory (offline), oldest dropped first
@@ -63,6 +66,14 @@ let running: Running | null = null
 
 const now = () => globalThis.performance?.now() ?? Date.now()
 const origin = () => globalThis.location?.origin ?? ''
+/** The game's folder as a path ("/GOOPS/alpha/"); "./" is read against the page, as the browser does. */
+function basePath(): string {
+  try {
+    return new URL(running?.options.base ?? import.meta.env.BASE_URL ?? '/', globalThis.location?.href).pathname
+  } catch {
+    return '/'
+  }
+}
 
 // --- the public functions ---------------------------------------------------------------------------------
 
@@ -163,7 +174,7 @@ function onWindowError(event: Event) {
   const title = e.error !== undefined && e.error !== null ? titleOf(e.error) : message.replace(/^Uncaught /, '')
   const stack = hasStack(e.error) ? e.error.stack : undefined
   // No stack (old browsers, a thrown string): the event's own file + line is the one frame we have
-  const fallback = e.filename ? sitePath(e.filename, origin()) : null
+  const fallback = e.filename ? sitePath(e.filename, origin(), basePath()) : null
   const oneFrame = fallback ? [{ file: fallback, line: e.lineno || 0, col: e.colno || 0 }] : undefined
   catchOne('error', title, stack, oneFrame)
 }
@@ -180,7 +191,11 @@ function assetFailed(el: Element & { src?: string; href?: unknown; currentSrc?: 
   if (src.startsWith('data:')) path = '(inline data)'
   else if (src.startsWith('blob:')) path = '(blob)'
   else if (src) {
-    try { path = new URL(src, globalThis.location?.href).pathname.replace(/^\/+/, '') || '/' } catch { /* keep "(unknown file)" */ }
+    try {
+      // the game's own file: its path inside the game (as frames are); another site's: its whole path
+      const url = new URL(src, globalThis.location?.href)
+      path = (url.origin === origin() && sitePath(url.href, origin(), basePath())) || url.pathname.replace(/^\/+/, '') || '/'
+    } catch { /* keep "(unknown file)" */ }
   }
   catchOne('asset', `${el.tagName.toLowerCase()} didn't load: ${path}`.slice(0, 200), undefined, [], true)
 }
@@ -196,7 +211,7 @@ function catchOne(kind: ReportKind, rawTitle: string, stack: string | undefined,
   try {
     if (!maySend(run)) return false
     if (!asset && /^ResizeObserver loop/.test(rawTitle.replace(/^\w*Error: /, ''))) return false // harmless browser noise
-    const read = readStack(stack, origin())
+    const read = readStack(stack, origin(), basePath())
     if (read.allExtension) return false // every frame in a browser extension: not the game's problem
     const frames = read.frames.length || !givenFrames ? read.frames : givenFrames
     const title = (asset ? rawTitle : cleanTitle(rawTitle)) || 'Error'

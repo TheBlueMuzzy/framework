@@ -22,12 +22,12 @@ const record: SendReport = (address, body, leaving) => {
   return Promise.resolve()
 }
 
-function start(client: Partial<ClientConfig> = {}, more: { dev?: boolean; version?: string; send?: SendReport } = {}) {
+function start(client: Partial<ClientConfig> = {}, more: { dev?: boolean; version?: string; send?: SendReport; base?: string } = {}) {
   sent = []
   fail = 'no'
   return startCrashes({
     config: { ...DEFAULT_CRASHES_CONFIG, client: { ...DEFAULT_CRASHES_CONFIG.client, url: URL_, ...client } },
-    version: more.version ?? '0.3.1.12', dev: more.dev ?? false, send: more.send ?? record,
+    version: more.version ?? '0.3.1.12', dev: more.dev ?? false, send: more.send ?? record, base: more.base,
   })
 }
 
@@ -268,6 +268,37 @@ describe('the awkward cases', () => {
     expect(sent[0].body).not.toContain('token')
     expect(sent[0].body).not.toContain('ads.example.com')
     expect(sent[0].body).not.toContain('extension')
+  })
+
+  it('a game in a folder (GitHub Pages /GOOPS/alpha/) → paths inside the game, so the maps are found and moving it keeps the fingerprint', async () => {
+    // (found by the scratch-Goops proof: frames said GOOPS/alpha/assets/…, the maps are filed as assets/…)
+    start({}, { base: '/GOOPS/alpha/' })
+    throwOnPage(gameError('Cannot read properties of undefined', 'GOOPS/alpha/assets/index-Bx12.js'))
+    const img = document.createElement('img')
+    img.src = `${SITE}/GOOPS/alpha/assets/hero-Bx12.png`
+    document.body.append(img)
+    img.dispatchEvent(new Event('error'))
+    await settle()
+    expect(sent[0].report.frames.map((f) => f.file)).toEqual(['assets/index-Bx12.js', 'assets/index-Bx12.js'])
+    expect(sent[1].report.title).toBe("img didn't load: assets/hero-Bx12.png")
+    const inFolder = sent[0].report.fp
+    img.remove()
+    stopCrashes()
+    start({}, { base: '/GOOPS/' }) // the same bug once the game moved to its real address
+    throwOnPage(gameError('Cannot read properties of undefined', 'GOOPS/assets/index-Cd34.js'))
+    await settle()
+    expect(sent[0].report.fp).toBe(inFolder)
+  })
+
+  it('eval-style frames ("<anonymous>:313:16", a console or test tool) are not the game\'s files', async () => {
+    // (found by the scratch-Goops proof: Playwright's evaluate frames came through as "%3Canonymous%3E")
+    start()
+    const e = new Error('from eval')
+    e.stack = `Error: from eval\n    at yk (${SITE}/assets/index-Bx12.js:2:10893)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at <anonymous>:1:44\n    at eval (eval at run (${SITE}/assets/index-Bx12.js:1:5), <anonymous>:1:1)`
+    throwOnPage(e)
+    await settle()
+    expect(sent[0].report.frames.map((f) => f.file)).toEqual(['assets/index-Bx12.js'])
+    expect(sent[0].body).not.toContain('anonymous')
   })
 
   it('Firefox / Safari stacks are read too', async () => {
