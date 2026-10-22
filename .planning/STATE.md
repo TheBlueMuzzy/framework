@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-21 — **Released v0.11.1 — every sound in a game can come out equally loud and on time** (audio 0.4.0 · Dev Kit 0.22.0): `npm run audio:check` (+ `--fix`, originals in <game>/audio-originals/), targets in content/audio.json `loudness`, the Sound Board drop levels, check:framework warns. **Next: /sprint (or /roadmap)** — open: v0.9's F62 Goops (its own session) → F64/F65 starters, v0.10's parked 💤 coulds. For Goops' session: update audio + Dev Kit, run `npm run audio:check -- --fix`; its scripts/sounds/build.mjs limits after measuring (sounds 1–7 dB under its aim).
+2026-10-22 — **Sprint 25: when a player's game breaks, you hear about it (F89 crash reports, layer 1)** on `dev/crash-reports`. A new `crashes/` module: the game side catches errors and sends each kind once per session, a worker of its own groups them (hard caps, no IP stored), hidden source maps + a local command, the session-start line, a Settings switch (on by default — Muzzy 2026-10-22) + privacy line. **Next: /develop task 1** (design doc). Going live in a real game is Muzzy's call; a Goops proof is a scratch copy only.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -11,8 +11,8 @@
 Reviewed through: framework adb661e (sprint 24 F31: helper review, 2 real bugs fixed + tests; v0.11.0 security fixes 93c9a98..d89b2c0 read whole by Claude, no findings; sprint 23 F104: small diff read whole by Claude, no findings; sprint 22 F103 review: no bugs, 2 minor fixed + test; sprint 22 review: F102 2 real + 2 minor check findings, all fixed + tests; sprint 21 review: F101 1 real bug + close() + 5 FORMAT.md errors, all fixed + tests; proof: 4 findings fixed + tests; sprint 20 review: F94 5 hardening fixes + F98 3 security fixes, all + tests; sprint 19 review: F96 4 security findings + F100 1, all fixed + tests; sprint 18 review: F93 3 findings + F95 2, all fixed + tests; sprint 17 review: F82 2 findings + F83 4, all fixed + tests, ~/.claude 2026-10-20 01:10; sprint 16 review: 3 findings + 1 rough edge, all fixed + tests; d581d49..e98126d: workflow module list + type packages, Claude, no issues; sprint 15 review: 7 findings + 2 minor, all fixed + tests; security fixes edf3810 with tests) · Glyphtender eb032a7 · ~/.claude as of 2026-10-19 15:40
 
 ## Where we are
-Stage: deliver   Milestone: — (v0.9 left: F62 Goops, F64/F65)   Sprint: — (24 archived)
-Doing: —   Branch: main   Version: 0.11.1 (UI kit 0.26.0 · Dev Kit 0.22.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
+Stage: develop   Milestone: v0.10 leftover (F89)   Sprint: 25
+Doing: F89 — building   Branch: dev/crash-reports   Version: 0.11.1 (UI kit 0.26.0 · Dev Kit 0.22.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.11.1
 
 ## Key facts
@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).
 - 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.
 - 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.
 - 2026-10-20 — F104 built (waiting for OK): a game can say "portrait only" once and no check tests it sideways.
