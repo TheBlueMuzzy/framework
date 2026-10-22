@@ -23,5 +23,5 @@
     }
   },
   "include": ["kit", "ui", "templates", "tests"],
-  "exclude": ["templates/worker/worker.ts"]
+  "exclude": ["templates/worker"]
 }
