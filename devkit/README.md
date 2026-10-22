@@ -487,4 +487,6 @@ to search sets `searchable: false` (no box).
   (content/audio.json `"loudness"`, default −18) with a fast limiter for spikes — measured by the game's own audio
   module (`src/audio/loudness.mjs`, audio 0.4.0+; older → converted but not levelled, and the tab says so). The
   dropped file is kept in `audio-originals/<folder>/` (outside public/). The tab's message says the level it landed at.
+- 0.22.1 (framework F89): check:framework knows the new crashes module — its update command, and its copy in
+  `src/crashes/` is never read as the game's own code.
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
