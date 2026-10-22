@@ -5,7 +5,7 @@ Research first (2026-10-21, web research by a helper; Cloudflare numbers from it
 ## The idea
 - **When a player's game breaks, Muzzy hears about it without asking anyone.** The game catches its own errors, sends each *kind* once per session to a small server of its own, the server groups them, and the next Claude session opens with "3 new errors from players, 1 came back since last time".
 - **Nothing about the player travels.** No name, no IP kept, no stored id, no free text. A report is: what broke, where in the code, which version, what kind of device, the last few game moments as names and numbers.
-- **Cheap and capped.** An error that fires every frame costs one request per session, not 60 a second; the server has a hard daily cap so a crash storm can never use up the Cloudflare account's shared allowance (online play lives there too).
+- **Cheap and capped.** An error that fires every frame costs one request per session, not 60 a second; the server has a hard daily cap so an honest crash storm can't use up the Cloudflare account's shared allowance (online play lives there too). A deliberate flood from many addresses still can (every request counts, even refused ones) — that needs layer 2's Workers rate-limit binding or a firewall rule (F105).
 
 ## What the game catches (kit/capture.ts)
 | What | How |
