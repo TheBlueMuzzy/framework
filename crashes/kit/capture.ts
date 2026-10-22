@@ -54,6 +54,7 @@ interface Running {
   moments: Remembered[]
   canvases: HTMLCanvasElement[]
   gpu: string
+  queue: Promise<void> // new reports waiting for their fingerprint, in order
   busy: boolean // true while the catcher itself is working or sending: an error now is ignored (no feedback loop)
   undo: (() => void)[] // removes every listener (stop)
 }
@@ -70,7 +71,7 @@ export function startCrashes(options: CrashOptions): { stop: () => void } {
   stopCrashes()
   const run: Running = {
     options, on: true, startedAt: now(), kinds: new Map(), sentCount: 0, held: [], moments: [], canvases: [], gpu: '',
-    busy: false, undo: [],
+    queue: Promise.resolve(), busy: false, undo: [],
   }
   running = run
   const listen = (target: EventTarget | undefined, type: string, fn: (event: Event) => void, capture = false) => {
@@ -211,12 +212,13 @@ function catchOne(kind: ReportKind, rawTitle: string, stack: string | undefined,
     const kindSeen: SeenKind = { sent: true, report: null, waiting: 0 }
     run.kinds.set(key, kindSeen)
     const report = buildReport(run, kind, title, frames)
-    fingerprint(key).then((fp) => {
+    // The fingerprint takes a moment; one after the other, so reports leave in the order things happened
+    run.queue = run.queue.then(() => fingerprint(key)).then((fp) => {
       if (!fp || running !== run) return // no crypto.subtle (plain http) or stopped meanwhile
       report.fp = fp
       kindSeen.report = report
       deliver(run, fitInSize(report), false)
-    }, () => {})
+    }).catch(() => {})
     return true
   } catch {
     return false // the catcher never breaks the game
@@ -324,10 +326,10 @@ function titleOf(value: unknown): string {
     return e.message ? `${name}: ${e.message}` : name
   }
   if (typeof value === 'string') return value || 'Empty error text'
-  if (value === undefined || value === null) return `Failed with ${String(value)}`
+  if (value === undefined || value === null) return `Failed with: ${String(value)}`
   if (typeof value === 'object') {
     const name = (value as object).constructor?.name
-    return `Failed with ${typeof name === 'string' && name ? `a ${name}` : 'an object'}` // its contents never travel
+    return `Failed with: ${typeof name === 'string' && name ? name : 'object'}` // its kind only — its contents never travel
   }
-  return `Failed with a ${typeof value}` // a number, a boolean
+  return `Failed with: ${typeof value}` // a number, a boolean (not its value)
 }
