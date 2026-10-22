@@ -15,6 +15,7 @@ import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { gameName } from './crash-report.mjs'
 
 const crashesDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/crashes'
@@ -35,14 +36,8 @@ export function checkFrameworkStep(gameDir) {
   return 'package.json "scripts": "check:framework": "node src/devkit/check-framework.mjs"   (comes with the Dev Kit: runs every installed module\'s promise checks, this one\'s too)'
 }
 
-// The game's name for Cloudflare (package.json "name", else the folder) — the server is "<name>-crashes"
-export function gameName(gameDir) {
-  try {
-    const name = JSON.parse(readText(join(gameDir, 'package.json'))).name
-    if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name)) return name
-  } catch { /* no package.json: use the folder name */ }
-  return resolve(gameDir).split(/[\\/]/).filter(Boolean).at(-1).toLowerCase().replace(/[^a-z0-9-]/g, '-')
-}
+// The game's name for Cloudflare and the token file — ONE rule, shared with npm run crashes (crash-report.mjs)
+export { gameName }
 
 /** The template's wrangler.json with the game's name in. Its own file inside crashes/, so a deploy never touches the
  *  rooms server, the saves cloud or the board (and back). Paths in it are relative to crashes/. */

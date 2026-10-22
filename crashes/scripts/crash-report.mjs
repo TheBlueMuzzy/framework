@@ -33,6 +33,17 @@ export function readCrashesUrl(gameDir) {
   return null
 }
 
+/** The game's name: package.json "name" (what the server is named after, "<name>-crashes"), else the folder's name.
+ *  The installer, this command and session start (crash-news.mjs) all use this one rule, so the token file the
+ *  installer names is the one they look for (F89 review: my-first-baby's package is "myfirstbaby"). */
+export function gameName(gameDir) {
+  try {
+    const name = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).name
+    if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name)) return name
+  } catch { /* no package.json: use the folder name */ }
+  return basename(resolve(gameDir)).toLowerCase().replace(/[^a-z0-9-]/g, '-')
+}
+
 /** The token: CRASHES_TOKEN, else ~/.config/bmuz/crashes/<game>.token. null = none. */
 export function readToken(game, env = process.env, home = homedir()) {
   if (env.CRASHES_TOKEN?.trim()) return env.CRASHES_TOKEN.trim()
@@ -142,7 +153,7 @@ function explainStatus(status, url) {
 export async function main(argv, { cwd = process.cwd(), env = process.env, home = homedir(), print = console.log, fetchWith = fetch, now = Date.now() } = {}) {
   const options = Object.fromEntries(argv.filter((a) => a.startsWith('--')).map((a) => { const [k, ...v] = a.slice(2).split('='); return [k, v.join('=')] }))
   const words = argv.filter((a) => !a.startsWith('--'))
-  const game = basename(resolve(cwd)).toLowerCase()
+  const game = gameName(cwd)
   const url = (options.url || readCrashesUrl(cwd) || '').replace(/\/+$/, '')
   if (!url) {
     print(`No crash server address. Add a line to .planning/STATE.md's Key facts:\n  Crashes: https://${game}-crashes.<account>.workers.dev\nor run with --url=https://…`)

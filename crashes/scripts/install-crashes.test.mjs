@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { gameName, installCrashes, wiringSteps } from './install-crashes.mjs'
+import { gameName as commandsGameName } from './crash-report.mjs'
 
 const dirs = []
 afterEach(() => { while (dirs.length) rmSync(dirs.pop(), { recursive: true, force: true }) })
@@ -108,6 +109,18 @@ describe('install-crashes', () => {
   it('a wiring line in a comment doesn\'t count', () => {
     const root = game({ 'src/main.tsx': '// startCrashes({ config, version }) later\n' })
     expect(wiringSteps(root).find((w) => /At start-up/.test(w.step)).done).toBe(false)
+  })
+
+  it('the installer names the token file the PC command looks for (package "myfirstbaby" in folder my-first-baby — F89 review)', () => {
+    const parent = mkdtempSync(join(tmpdir(), 'crashes-name-'))
+    dirs.push(parent)
+    const root = join(parent, 'my-first-baby')
+    mkdirSync(root)
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'myfirstbaby' }))
+    const goLive = wiringSteps(root).find((w) => /Going live/.test(w.step)).step
+    expect(goLive).toContain('crashes/myfirstbaby.token')
+    expect(goLive).toContain('myfirstbaby-crashes.')
+    expect(commandsGameName(root)).toBe('myfirstbaby')
   })
 
   it('the server name comes from package.json, else the folder', () => {
