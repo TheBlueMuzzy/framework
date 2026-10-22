@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.11.1 — 2026-10-21
+
+Every sound in a game can now come out at the same loudness and start on time: a new audio check measures each sound and evens out the off ones, and sounds dropped into the Sound Board are levelled as they land.
+
+### New
+- Audio 0.4.0 — `npm run audio:check` lists every sound in public/audio with its loudness, peak, how late it starts and its length, and flags the ones that are off; `--fix` evens out only those, keeping each original in `audio-originals/` (outside what players download).
+- Audio — loudness targets per sound folder in content/audio.json (every folder −18 dB by default, ±3 dB allowed, a −1 dB ceiling), editable in the Dev Kit or Obsidian; `maxLimitingDb` sets how much a spiky sound's peaks may be shaved.
+- Audio — the framework check warns about a sound far from its target or slow to start, and names the fix.
+- Dev Kit 0.22.0 — a sound dropped into the Sound Board is levelled to its folder's target as well as trimmed and converted, the dropped file is kept, and the Sound tab says how loud it came out.
+
+### Fixed
+- Short clicks now really come up to their target: the old spike limiter turned the whole of a very short sound down.
+
 ## v0.11.0 — 2026-10-21
 
 Saves grow up: a game can resume an unfinished run, rejoin an online match after closing the tab, copy progress to another device with a short link code, and keep leaderboards that check every score. Every game can now show one version number on its menu and Settings, and a game says "portrait only" once so no check tests it on a phone held sideways.
