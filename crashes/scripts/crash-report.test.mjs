@@ -10,7 +10,7 @@ import { testStore } from '../tests/testStore'
 import { main, parseSince, readCrashesUrl, readToken, translateFrames } from './crash-report.mjs'
 
 const NOW = Date.UTC(2026, 9, 22, 12, 0, 0)
-const TOKEN = 'pc-token-for-tests'
+const TOKEN = 'pc-token-for-tests-long-enough'
 const dirs = []
 afterEach(() => { while (dirs.length) rmSync(dirs.pop(), { recursive: true, force: true }) })
 
@@ -134,8 +134,10 @@ describe('npm run crashes (against the real routes)', () => {
     const { game, home } = gameFolder()
     const elsewhere = join(home, '..', 'empty-home')
     expect(await say({ cwd: game, home: elsewhere })).toMatchObject({ code: 1, text: expect.stringMatching(/No token for goops/) })
-    const wrong = serverAt('a-different-token')
+    const wrong = serverAt('a-different-token-also-long-enough')
     expect(await say({ cwd: game, home, fetchWith: wrong.fetchWith })).toMatchObject({ code: 1, text: expect.stringMatching(/the token is wrong/) })
+    const unset = serverAt('')
+    expect(await say({ cwd: game, home, fetchWith: unset.fetchWith })).toMatchObject({ code: 1, text: expect.stringMatching(/has no token yet.*wrangler secret put CRASHES_TOKEN/) })
     const down = async () => { throw new TypeError('fetch failed') }
     expect(await say({ cwd: game, home, fetchWith: down })).toMatchObject({ code: 1, text: expect.stringMatching(/Couldn't reach the crash server/) })
     expect(await say({ cwd: game, home }, ['--since=whenever'])).toMatchObject({ code: 1, text: expect.stringMatching(/isn't a time/) })

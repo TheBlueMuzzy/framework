@@ -14,7 +14,7 @@ const report = {
   version: '0.3.1.12', platform: 'web', browser: 'Chrome 141', os: 'Android 15', screen: '390x844@3', gpu: '', lang: 'en', secs: 3, moments: [], repeats: 0,
 }
 
-function fakeCloudflare(token = 'the-token') {
+function fakeCloudflare(token = 'the-token-long-enough-to-be-safe') {
   const db = new DatabaseSync(':memory:')
   let alarm: number | null = null
   const state = {
@@ -64,7 +64,7 @@ describe('the crashes worker', () => {
   it('reads the token from CRASHES_TOKEN; with none set, the summary stays closed', async () => {
     const cf = fakeCloudflare()
     const ask = (token: string) => worker.fetch(new Request('https://x/summary', { headers: { Authorization: `Bearer ${token}`, 'CF-Connecting-IP': '198.51.100.1' } }), cf.env)
-    expect((await ask('the-token')).status).toBe(200)
+    expect((await ask('the-token-long-enough-to-be-safe')).status).toBe(200)
     expect((await ask('nope')).status).toBe(404)
     const closed = fakeCloudflare('')
     expect((await worker.fetch(new Request('https://x/summary', { headers: { Authorization: 'Bearer ' } }), closed.env)).status).toBe(404)

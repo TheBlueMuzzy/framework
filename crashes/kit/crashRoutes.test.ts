@@ -226,6 +226,8 @@ describe('every field of a report wrong in turn → 400, never stored', () => {
     ['a 201-character title', { title: 'x'.repeat(201) }],
     ['an empty title', { title: '' }],
     ['a title with a terminal colour code', { title: 'oops \u001b[31mred' }],
+    ['a title with a right-to-left trick', { title: 'oops ‮evil' }],
+    ['a title over two lines', { title: 'line one\nline two' }],
     ['a moment named "Bob says hi"', { moments: [{ at: -1, name: 'Bob says hi' }] }],
     ['a moment with 5 numbers', { moments: [{ at: -1, name: 'tick', n: [1, 2, 3, 4, 5] }] }],
     ['a moment number NaN (as null in JSON)', { moments: [{ at: -1, name: 'tick', n: [null] }] }],
@@ -298,11 +300,15 @@ describe('the token routes', () => {
     expect(s.rows.kind(FP)!.status).toBe('open')
   })
 
-  it('a server with no token set is closed, not open (an empty token never matches)', async () => {
+  it('a server with no token set, or one too short to be safe, is closed, not open — and /health says why', async () => {
     const s = server({}, { token: '' })
     expect((await s.ask('/summary', { token: '' })).status).toBe(404)
+    expect((await s.ask('/health', { token: null })).json).toEqual({ ok: true, token: 'not-set' })
     const t = server({}, { token: undefined })
     expect((await t.ask('/summary', { token: 'anything' })).status).toBe(404)
+    const short = server({}, { token: 'password123' })
+    expect((await short.ask('/summary', { token: 'password123' })).status).toBe(404)
+    expect((await short.ask('/health', { token: null })).json).toEqual({ ok: true, token: 'too-short' })
   })
 
   it('100 wrong tries → that address is limited (even the right token gets 404 for the hour); others aren\'t', async () => {
@@ -346,7 +352,7 @@ describe('the token routes', () => {
 
   it('GET /health → ok, no token needed', async () => {
     const s = server()
-    expect((await s.ask('/health', { token: null })).json).toEqual({ ok: true })
+    expect((await s.ask('/health', { token: null })).json).toEqual({ ok: true, token: 'ok' })
   })
 })
 
@@ -436,6 +442,12 @@ describe('fixed, and coming back', () => {
     })
   }
 
+  it('fixed in 0.9.0, a report from 0.10.0 → came back (numbers, not letters: "0.10.0" sorts before "0.9.0" as text)', async () => {
+    const s = await fixedIn('0.9.0')
+    await s.send(report({ version: '0.10.0' }), { now: NOW + 1 })
+    expect(s.rows.kind(FP)!.status).toBe('open')
+  })
+
   it('versions compare as numbers: 0.10.0 > 0.9.0; a missing part is 0', () => {
     expect(compareVersions('0.10.0', '0.9.0')).toBeGreaterThan(0)
     expect(compareVersions('0.9.0', '0.10.0')).toBeLessThan(0)
@@ -476,6 +488,16 @@ describe('the daily tidy-up (the alarm)', () => {
     expect(s.all('days').map((d) => d.day).sort()).toEqual([utcDay(edge), utcDay(NOW - DAY)])
     expect(s.rows.anything()).toBe(true)
     tidyCrashes(s.rows, s.context.settings, NOW + 100 * DAY)
+    expect(s.rows.anything()).toBe(false)
+  })
+
+  it('a big clean-up is done a batch at a time (→ "more"), and finishes', async () => {
+    const s = server({ perAddressPerHour: 1000 })
+    for (let i = 0; i < 25; i++) await s.send(report({ fp: fpOf(i + 1) }), { now: NOW - 100 * DAY })
+    expect(tidyCrashes(s.rows, s.context.settings, NOW, 10)).toBe(true)
+    expect(s.all('samples')).toHaveLength(15)
+    expect(tidyCrashes(s.rows, s.context.settings, NOW, 10)).toBe(true)
+    expect(tidyCrashes(s.rows, s.context.settings, NOW, 10)).toBe(false)
     expect(s.rows.anything()).toBe(false)
   })
 })

@@ -59,10 +59,12 @@ export class CrashStore {
   }
 
   /** Cloudflare calls this at midnight (UTC): reports past keepDays (content/crashes.json) are deleted, and kinds not
-   *  seen for that long. It comes back tomorrow while anything is stored. */
+   *  seen for that long — a few thousand per alarm; a bigger clean-up comes back a minute later for the rest. Then it
+   *  comes back tomorrow while anything is stored. */
   async alarm(): Promise<void> {
-    tidyCrashes(this.rows, settings, Date.now())
-    if (this.rows.anything()) await this.state.storage.setAlarm(nextMidnight(Date.now()))
+    const more = tidyCrashes(this.rows, settings, Date.now())
+    if (more) await this.state.storage.setAlarm(Date.now() + 60_000)
+    else if (this.rows.anything()) await this.state.storage.setAlarm(nextMidnight(Date.now()))
     else this.alarmSet = false
   }
 }

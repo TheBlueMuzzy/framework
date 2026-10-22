@@ -54,8 +54,9 @@ export interface CrashRows {
   kindsSince(since: number, n: number): KindRow[]
   /** Kinds first seen / came back since `since`; reports + dropped from the day `sinceDay` on. */
   totalsSince(since: number, sinceDay: string): Totals
-  /** Delete samples from before `before` (ms), kinds not seen since `before` (with their samples), days before `beforeDay`. */
-  tidy(before: number, beforeDay: string): void
+  /** Delete samples from before `before` (ms), kinds not seen since `before` (with their samples), days before
+   *  `beforeDay` — at most `batch` samples and `batch` kinds. → true when more are left to delete. */
+  tidy(before: number, beforeDay: string, batch: number): boolean
   /** Is anything stored at all (so the alarm knows whether to come back tomorrow)? */
   anything(): boolean
   /** About how much is stored (bytes). */
@@ -131,14 +132,20 @@ export function sqlCrashRows(run: RunSql, size: () => number = () => 0): CrashRo
       const days = run('SELECT COALESCE(SUM(reports), 0) AS reports, COALESCE(SUM(dropped), 0) AS dropped FROM days WHERE day >= ?', sinceDay)[0]
       return { newKinds: Number(kinds?.new_kinds ?? 0), cameBack: Number(kinds?.came_back ?? 0), reports: Number(days?.reports ?? 0), dropped: Number(days?.dropped ?? 0) }
     },
-    tidy: (before, beforeDay) => {
-      // the kinds that lose samples get their `kept` counted again afterwards (only those rows are written)
-      const touched = run('SELECT DISTINCT fp FROM samples WHERE at < ?', before).map((r) => String(r.fp))
-      run('DELETE FROM samples WHERE at < ?', before)
-      run('DELETE FROM samples WHERE fp IN (SELECT fp FROM kinds WHERE last_seen < ?)', before)
-      run('DELETE FROM kinds WHERE last_seen < ?', before)
-      for (const fp of touched) run('UPDATE kinds SET kept = (SELECT COUNT(*) FROM samples WHERE fp = ?) WHERE fp = ?', fp, fp)
+    tidy: (before, beforeDay, batch) => {
+      // At most `batch` samples and `batch` kinds per call, so one alarm never runs long; → true = more left.
+      // A kind not seen since `before` has only samples from before it too, so deleting old samples covers its samples.
+      const old = run('SELECT id, fp FROM samples WHERE at < ? LIMIT ?', before, batch + 1)
+      const doomed = old.slice(0, batch)
+      for (const sample of doomed) run('DELETE FROM samples WHERE id = ?', Number(sample.id))
+      // the kinds that lost samples get their `kept` counted again (only those rows are written)
+      for (const fp of new Set(doomed.map((s) => String(s.fp)))) {
+        run('UPDATE kinds SET kept = (SELECT COUNT(*) FROM samples WHERE fp = ?) WHERE fp = ?', fp, fp)
+      }
+      const gone = run('SELECT fp FROM kinds WHERE last_seen < ? LIMIT ?', before, batch + 1)
+      for (const kind of gone.slice(0, batch)) run('DELETE FROM kinds WHERE fp = ?', String(kind.fp))
       run('DELETE FROM days WHERE day < ?', beforeDay)
+      return old.length > batch || gone.length > batch
     },
     anything: () => Number(run('SELECT (SELECT COUNT(*) FROM kinds) + (SELECT COUNT(*) FROM days) AS n')[0]?.n ?? 0) > 0,
     storedBytes: size,

@@ -66,8 +66,9 @@ const isNumber = (value: unknown, min: number, max: number): value is number =>
 const isText = (value: unknown, max: number, shape: RegExp): value is string =>
   typeof value === 'string' && value.length <= max && shape.test(value)
 
-/** Any printable text, no control characters (no new lines, no terminal colour codes when Muzzy prints it). */
-const PRINTABLE = /^[^\p{Cc}]*$/u
+/** Any printable text: no control characters (no new lines, no terminal colour codes when Muzzy prints it) and no
+ *  invisible format characters (no right-to-left trick that makes a line print as something else). */
+const PRINTABLE = /^[^\p{Cc}\p{Cf}]*$/u
 /** A path inside the site: no spaces, no "?query" or "#part", no ":" (so never "https://…"), no ".." step. */
 const SITE_PATH = /^(?!.*(^|\/)\.\.(\/|$))[^\s?#:\\]{1,200}$/
 /** "Chrome 141", "Android 15", "Safari 18" — a name and a number, nothing more. */
@@ -248,12 +249,21 @@ export function refuseHugeBody(request: Request, maxBytes: number): Response | n
 
 // --- the token ----------------------------------------------------------------------------------------------------
 
+/** A token shorter than this is treated as not set (the routes stay closed): the token is the only lock on the
+ *  reports, and the per-address limit only slows a guesser down — it has to be too long to guess (32 random letters
+ *  and digits: `node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`). */
+export const MIN_TOKEN_CHARS = 24
+
+/** What's wrong with the server's token, or null when it's fine (GET /health says it, so a closed server is explained). */
+export const tokenProblem = (secret: string | undefined): 'not-set' | 'too-short' | null =>
+  !secret ? 'not-set' : secret.length < MIN_TOKEN_CHARS ? 'too-short' : null
+
 /** Is the request's "Authorization: Bearer <token>" the secret? Both are hashed first and the hashes compared byte by
  *  byte without stopping early, so how long the answer takes says nothing about how close a guess was. An empty or
  *  missing secret never matches anything (a server whose token isn't set is closed, not open). */
 export async function rightToken(request: Request, secret: string | undefined): Promise<boolean> {
   const sent = /^Bearer (\S{1,200})$/.exec(request.headers.get('Authorization') ?? '')?.[1] ?? ''
-  if (!secret || !sent) return false
+  if (tokenProblem(secret) || !sent) return false
   const [a, b] = await Promise.all([sent, secret].map((text) => crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))))
   const left = new Uint8Array(a)
   const right = new Uint8Array(b)
@@ -330,7 +340,8 @@ export async function handleCrashes(request: Request, context: CrashContext): Pr
     return accepted()
   }
 
-  if (path === '/health' && request.method === 'GET') return answer({ ok: true })
+  // token: 'ok' · 'not-set' · 'too-short' — says only whether the summary can open at all, never anything about the token
+  if (path === '/health' && request.method === 'GET') return answer({ ok: true, token: tokenProblem(context.token) ?? 'ok' })
 
   // Everything else needs the token. Unknown address, wrong token, too many wrong tries: all the same 404.
   const tokenRoute = /^\/(summary|kinds\/[0-9a-f]{16}(\/fixed)?)$/.exec(path)
@@ -441,8 +452,12 @@ function storeReport(context: CrashContext, report: CrashReport, now: number) {
   rows.bumpDay(today, { reports: 1, newKinds: old ? 0 : 1 })
 }
 
-/** The alarm's tidy-up: samples older than keepDays, kinds not seen for keepDays (and their samples), and old days. */
-export function tidyCrashes(rows: CrashRows, settings: ServerConfig, now: number) {
+/** Rows one alarm deletes at most per table — a big clean-up is done over a few alarms, so no single one runs long. */
+export const TIDY_BATCH = 2_000
+
+/** The alarm's tidy-up: samples older than keepDays, kinds not seen for keepDays (and their samples), and old days.
+ *  → true when there's more to delete (the worker comes back in a minute instead of tomorrow). */
+export function tidyCrashes(rows: CrashRows, settings: ServerConfig, now: number, batch = TIDY_BATCH): boolean {
   const before = now - settings.keepDays * DAY
-  rows.tidy(before, utcDay(before))
+  return rows.tidy(before, utcDay(before), batch)
 }

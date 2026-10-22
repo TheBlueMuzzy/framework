@@ -160,6 +160,16 @@ export async function main(argv, { cwd = process.cwd(), env = process.env, home 
       return null
     }
   }
+  // a 404 is usually the token: the server's /health says when its own token isn't set (or is too short to be safe)
+  const explain = async (status) => {
+    if (status === 404) {
+      const health = await call('/health')
+      const token = health?.ok ? (await health.json().catch(() => null))?.token : null
+      if (token === 'not-set') return print(`The crash server has no token yet, so it opens to nobody. Set it once: npx wrangler secret put CRASHES_TOKEN -c crashes/wrangler.json (the same text as your token file).`)
+      if (token === 'too-short') return print(`The crash server's token is too short to be safe (under 24 characters), so it opens to nobody. Make a long one: node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))" — put it in the token file and in: npx wrangler secret put CRASHES_TOKEN -c crashes/wrangler.json`)
+    }
+    print(explainStatus(status, url))
+  }
   const unreachable = () => print(`Couldn't reach the crash server at ${url}. Is it deployed (npm run crashes:deploy) or running locally (npm run crashes:dev)? Are you online?`)
 
   if (words[0] === 'fixed') {
@@ -175,7 +185,7 @@ export async function main(argv, { cwd = process.cwd(), env = process.env, home 
       print(`The server has no kind ${fp} (a typo, or it was deleted after not being seen for a long time).`)
       return 1
     }
-    if (!response.ok) return print(explainStatus(response.status, url)), 1
+    if (!response.ok) return await explain(response.status), 1
     print(`Marked ${fp} fixed in ${version}. If a player on ${version} or newer hits it again, it comes back as open.`)
     return 0
   }
@@ -191,7 +201,7 @@ export async function main(argv, { cwd = process.cwd(), env = process.env, home 
   }
   const response = await call(`/summary${since === undefined ? '' : `?since=${Math.floor(since)}`}`)
   if (!response) return unreachable(), 1
-  if (!response.ok) return print(explainStatus(response.status, url)), 1
+  if (!response.ok) return await explain(response.status), 1
   const summary = await response.json()
   const from = since === undefined ? 'everything kept' : `since ${when(since)}`
   print(`Crash reports for ${game} (${from}): ${summary.kinds.length} kind${summary.kinds.length === 1 ? '' : 's'} · ${summary.newKinds} new · ${summary.cameBack} came back · ${summary.reports} reports${summary.dropped ? ` · ${summary.dropped} dropped (daily cap)` : ''}`)
