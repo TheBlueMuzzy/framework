@@ -84,7 +84,7 @@ describe('install-crashes', () => {
       devDependencies: { wrangler: '^4', 'source-map': '^0.7.6' },
       scripts: { crashes: 'node src/crashes/crash-report.mjs', 'crashes:dev': 'wrangler dev -c crashes/wrangler.json', 'crashes:deploy': 'wrangler deploy -c crashes/wrangler.json' },
     }))
-    writeFileSync(join(root, '.gitignore'), 'node_modules/\n.wrangler/\n')
+    writeFileSync(join(root, '.gitignore'), 'node_modules/\n.wrangler/\n.dev.vars\n')
     writeFileSync(join(root, 'vite.config.ts'), "import { crashesMaps } from './src/crashes/vitePlugin.mjs'\nexport default { plugins: [crashesMaps()] }\n")
     writeFileSync(join(root, 'src/main.tsx'), 'startCrashes({ config, version })\napplyCrashSetting(values)\nconst rows = CRASH_SETTINGS_ROWS\ncreateRoot(el, crashRootOptions())\n')
     const left = wiringSteps(root).filter((w) => !w.done).map((w) => w.step)
@@ -92,6 +92,17 @@ describe('install-crashes', () => {
     expect(left[0]).toMatch(/^Try it/)
     expect(left[1]).toMatch(/Going live \(Muzzy's call/)
     expect(left[1]).toContain('goops-crashes.joebrogno.workers.dev')
+  })
+
+  it('.gitignore needs .dev.vars too (the test token), not only .wrangler/', () => {
+    const gitignoreDone = (text) => {
+      const root = game({ '.gitignore': text })
+      return wiringSteps(root).find((w) => /^\.gitignore/.test(w.step)).done
+    }
+    expect(gitignoreDone('node_modules/\n.wrangler/\n')).toBe(false)
+    expect(gitignoreDone('.wrangler/\n.dev.vars\n')).toBe(true)
+    expect(gitignoreDone('.wrangler/\ncrashes/.dev.vars\n')).toBe(true)
+    expect(gitignoreDone('.wrangler/\n.dev.vars*\n')).toBe(true)
   })
 
   it('a wiring line in a comment doesn\'t count', () => {

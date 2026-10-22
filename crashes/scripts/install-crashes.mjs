@@ -82,8 +82,9 @@ export function wiringSteps(gameDir) {
       step: 'package.json "scripts": "crashes": "node src/crashes/crash-report.mjs", "crashes:dev": "wrangler dev -c crashes/wrangler.json", "crashes:deploy": "wrangler deploy -c crashes/wrangler.json"',
     },
     {
-      done: /(^|\n)\s*\/?\.wrangler\/?\s*(\n|$)/.test(text('.gitignore')),
-      step: '.gitignore: add the line   .wrangler/   (wrangler\'s local dev state)',
+      // (.dev.vars holds the test token — without the line, git status shows it and /save would commit it)
+      done: /(^|\n)\s*\/?\.wrangler\/?\s*(\n|$)/.test(text('.gitignore')) && /(^|\n)\s*(\*\*\/|\/?crashes\/)?\.dev\.vars\*?\s*(\n|$)/.test(text('.gitignore')),
+      step: '.gitignore: add the lines   .wrangler/   and   .dev.vars   (wrangler\'s local dev state, and the test token — never committed)',
     },
     {
       done: Boolean(viteConfig) && /\bcrashesMaps\s*\(/.test(withoutComments(text(viteConfig))),

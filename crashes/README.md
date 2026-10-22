@@ -32,7 +32,7 @@ node ~/.claude/config/bmuz/scripts/install-module.mjs crashes <game-folder>
 It prints only the wiring still missing:
 - packages (`wrangler`, `source-map`);
 - the `crashes`, `crashes:dev` and `crashes:deploy` scripts;
-- `.wrangler/` in .gitignore;
+- `.wrangler/` and `.dev.vars` (the local test token) in .gitignore;
 - `crashesMaps()`;
 - `startCrashes`;
 - the Settings switch and `applyCrashSetting`;
