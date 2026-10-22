@@ -73,6 +73,7 @@ describe('Crashes checks', () => {
     expect(r[CHECKS.maps].ok).toBe(false)
     expect(r[CHECKS.maps].problems[0]).toMatch(/dist\/assets\/index-Bx12\.js\.map/)
     expect(r[CHECKS.maps].problems[0]).toMatch(/public\/old\.js\.map/)
+    expect(r[CHECKS.maps].fix).toMatch(/^Delete the \.map files/) // crashesMaps() is already there: don't tell them to add it
   })
 
   it('a switch that\'s turned off in settings.json, or never applied, fails', async () => {

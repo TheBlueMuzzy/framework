@@ -34,7 +34,7 @@ Freezes, audio stuck in "suspended" and Analytics-style counts are layer 2 / 3.
   "repeats": 0 }
 ```
 - **fp (fingerprint)** = the first 16 hex of SHA-256 of `kind + cleaned title + top 3 in-game frames as file:function` (no column, no line — those change every build; file names lose their build hash `index-Bx12.js` → `index.js`). The same bug in every session and every build has the same fp. Cleaned title: numbers, hex ids and quoted text become `#`, `<id>`, `"…"`, cut to 200 characters.
-- **frames**: at most 10, only files from the game's own address (in-game frames). File = the path inside the site (`assets/index-Bx12.js`), never the full URL or its `?query`.
+- **frames**: at most 10, only files from the game's own address (in-game frames). File = the path inside the game's own folder (`assets/index-Bx12.js`, also for a game at `/GOOPS/alpha/` — the folder never travels, so a move to the real address keeps every fingerprint and the maps still match), never the full URL or its `?query`; `<anonymous>` frames (eval, a console) are left out.
 - **browser / os** are read from the user-agent text on the device, as a name + major version; the full user-agent text never travels. **gpu** is the WebGL renderer name, only when the game uses WebGL.
 - **moments**: the last 20, each `{ at: seconds before the error, name, n?: up to 4 numbers }`. A name must look like a code name (`^[A-Za-z][A-Za-z0-9_.:-]{0,31}$`) or it's dropped — so a player's name or chat can never get in, even by mistake. Fed by `moment('roundStart', 3)`, or from the Dev Kit adapter's `onEvent` (only its first word, if that is a code name).
 - **repeats**: how many more times this fp happened since it was last sent (sent with the next report or when the page hides).
@@ -56,7 +56,7 @@ Its own Worker (`<game>-crashes`) + one SQLite Durable Object, like the saves cl
 | `GET /summary?since=<ms>` | Muzzy (token) | `{ newKinds, cameBack, reports, kinds: [...] }` — kinds seen since then, newest first |
 | `GET /kinds/<fp>` | Muzzy (token) | one kind + its kept samples |
 | `POST /kinds/<fp>/fixed` `{ version }` | Muzzy (token) | marks it fixed in that version |
-| `GET /health` | anyone | `ok` (live-check) |
+| `GET /health` | anyone | `{ ok: true, token: 'ok' \| 'not-set' \| 'too-short' }` (live-check; the command tells "no token set" from "wrong token" — it says only whether one is set, never anything about it) |
 
 **Stored** (SQLite): `kinds` (fp, kind, title, first_seen, last_seen, count, versions — the last 10 with counts, status open/fixed, fixed_in, came_back_at) · `samples` (fp, at, the report as sent) · `days` (UTC day, reports, dropped).
 

@@ -74,7 +74,10 @@ export async function check(t) {
     if (shipped.length) problems.push(`Source maps where players can download them (anyone could read the game's original code): ${shipped.slice(0, 8).join(', ')}${shipped.length > 8 ? ` and ${shipped.length - 8} more` : ''}`)
     if (!config) problems.push('No vite.config — the build can\'t keep its maps out of dist/.')
     else if (!calls('crashesMaps', t.read(config))) problems.push(`${config} doesn't use crashesMaps() — without it a crash's file lines can't be read back (no maps), or the maps ship with the game.`)
-    if (problems.length) t.fail(name, problems, `${config ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ] — it builds hidden maps and moves them to releases/<version>/maps/. Delete any .map in public/ or dist/, then build again.`)
+    const wired = Boolean(config) && calls('crashesMaps', t.read(config))
+    if (problems.length) t.fail(name, problems, wired
+      ? 'Delete the .map files named (a map in public/ is copied into every build), then build again — crashesMaps() moves the build\'s own maps out after every other plugin; one still left means a plugin wrote it later still (name it in the sprint notes).'
+      : `${config ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ] — it builds hidden maps and moves them to releases/<version>/maps/. Delete any .map in public/ or dist/, then build again.`)
     else t.pass(name, `${config}: crashesMaps() — maps go to releases/<version>/maps/`)
   }
 
