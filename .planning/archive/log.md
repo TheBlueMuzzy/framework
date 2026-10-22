@@ -1,4 +1,11 @@
 # Log archive (newest first)
+- 2026-10-20 — Sprint 21 planned: saves ready to move to phone, desktop, Steam or Unity later (the store and Unity parts wait until a game needs them).
+- 2026-10-20 — F94 + F98 approved: games can be replayed from their seed + moves (a Daily game for everyone), and a Daily board checks every score by replaying it.
+- 2026-10-20 — Sprint 20 built (waiting for OK): a game can be kept as its seed + moves (replays, a Daily game for everyone), and a Daily board where the server replays every game to check its score.
+- 2026-10-20 — F100 + F96 approved: online matches survive a server restart until they end, and a link code moves a save to another device.
+- 2026-10-20 — Sprint 19 built (waiting for OK): online matches survive a server restart until they end (each game picks how long), and a short link code moves a save to another device for 7 days.
+- 2026-10-20 — F93 + F95 approved: games can offer Continue for an unfinished game and Rejoin match for an online match left mid-game.
+- 2026-10-20 — Sprint 18 built (waiting for OK): games can offer Continue for an unfinished game and Rejoin match for an online match left mid-game.
 - 2026-10-20 — F82 + F83 approved: session start warns when a live game or its online server is down, and alpha / beta / 1.0 releases need a filled-in release checklist.
 - 2026-10-20 — Sprint 17 built (waiting for OK): session start now says when a live game or its room server is down, and alpha / beta / 1.0 releases need a filled-in release checklist (no stand-in art from beta).
 - 2026-10-20 — Released v0.10.3: every release now carries patch notes players can read, and refuses risky code packages; games can show their open-source licences in Credits.
