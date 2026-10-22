@@ -2,7 +2,7 @@
 
 Sound for a game. **Code never names a file**: the game says *what happened* (`playSound('seed.land')`), and `content/audio.json` says *what that sounds like* — which files, how loud, how high, how much it varies, which volume group, how often it may repeat. Swapping a placeholder for a final sound means dropping in a file and editing the JSON (or, soon, the Dev Kit Sound Board).
 
-Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.3.0** (0.3.0: the Dev Kit's full pause silences it; its promise checks). Proven in Glyphtender (its v0.9).
+Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.4.0** (0.4.0: every sound equally loud and on time — `npm run audio:check`; 0.3.0: the Dev Kit's full pause silences it; its promise checks). Proven in Glyphtender (its v0.9).
 
 No library: the browser's own Web Audio does it all. No runtime dependencies.
 
@@ -20,6 +20,8 @@ No library: the browser's own Web Audio does it all. No runtime dependencies.
 | `settings.ts` | The player's Settings → Audio values → the engine (same ids as the UI kit's standard Audio tab) |
 | `react.ts` | `useAudioSettings`, `useAudioSnapshot`, `useLoop`, `useMusic` |
 | `shared.ts` | One shared engine so any file can `playSound(...)` |
+| `loudness.mjs` | (0.4.0, Node — not in the game's build) How loud a sound file is: measuring, the gain to a target, the ffmpeg settings. Shared by `audio-check.mjs`, check:framework and the Dev Kit's Sound tab drop |
+| `audio-check.mjs` | (0.4.0, Node) `npm run audio:check` — the loudness report, `--fix` evens out (below) |
 
 Kit 0.1.2 adds `audio.level(bus)` for the Dev Kit **Sound tab** (F30 — it lives in the Dev Kit: `devkit/kit/sound/`, see the Dev Kit README).
 
@@ -27,7 +29,58 @@ Kit 0.2.0 (F28) adds music tracks (layers + intensity + rests), streaming for mu
 
 Kit 0.2.1: the Settings row is **Sound** (`sound`, on = plays; was `muteAll` — an old save is read as its opposite), and switching it off lets the click that just started finish (`master.muteDelayMs`, 250) before the silence.
 
-Coming next: loudness check script (F31).
+Kit 0.4.0 (F31) adds the loudness check: **every sound file equally loud, effects and menus starting on time** — see "Is every sound as loud as the others?" below.
+
+## Is every sound as loud as the others? — `npm run audio:check`
+Sounds from different places come in at very different levels (a recorded hit can be 10 dB quieter than it looks), and
+free-pack files often start with 40–90 ms of silence, which feels "really delayed" on a tap. From the game folder:
+```
+npm run audio:check                 a table of every file in public/audio/, the off ones flagged
+npm run audio:check -- --fix        …and evens out the flagged ones
+```
+```
+File                           Folder  Loudness  Peak      Onset  Length  Verdict
+sfx/sfx_goop_land_01.mp3       sfx     -18.5 dB  -1.8 dB   2 ms   0.30 s  ✓
+sfx/sfx_goop_land_04.mp3       sfx     -29.8 dB  -12.2 dB  72 ms  0.37 s  11.8 dB too quiet, starts 72 ms late
+sfx/sfx_goop_merge_01.mp3      sfx     -25.1 dB  -2.1 dB   2 ms   0.17 s  7.1 dB too quiet
+ui/ui_button_tap_01.mp3        ui      -22.5 dB  -2.8 dB   1 ms   0.10 s  4.5 dB too quiet
+
+35 sounds · target -18 dB ±3 · ceiling -1 dB · 5 to even out (5 too quiet, 1 starts late)
+```
+(a scratch copy of Goops, F31 — land_04 is a deliberately quiet, late copy)
+- **Loudness** — effects, menus and stingers: the *active loudness* (only the part you hear — the silence and the faint
+  tail don't count; a short click can't be measured in LUFS). Music and ambience: LUFS, the standard for long sounds.
+  Both read the same for a steady sound, so −18 means the same everywhere. **Peak**: the loudest sample.
+  **Onset**: how long until the sound really starts (effects + menus only — music may start softly).
+- **`--fix`** rewrites only the flagged files, keeping their names (content/audio.json needs no change): brought to the
+  target, the spikes held under the ceiling by a fast limiter (never shaved more than `maxLimitingDb`, 3.5 dB — a very
+  spiky file ends a little under target instead), effects + menus trimmed to their onset. A file that can't come any
+  closer (already limited — its loudness *is* its spikes) is left as it was. Each file is first copied to
+  **`audio-originals/<same path>`** (outside public/, so players never download it). An original is never overwritten,
+  nothing is ever deleted; to undo, copy the original back. A file with a kept original isn't limited again on the next
+  `--fix` — if it's still quiet, the report says "as loud as its spikes allow" instead of flagging it.
+- It's a report: exit code 0 even with flagged files; 1 only when it can't run (no ffmpeg, a file it can't read).
+- Needs **ffmpeg** on the computer (Windows: `winget install Gyan.FFmpeg` · Mac: `brew install ffmpeg`; or the
+  `FFMPEG_PATH` environment variable) — the system one, never a copy in the game.
+- A sound dropped into the Dev Kit's **Sound tab** is levelled the same way on the way in (Dev Kit 0.22.0+).
+
+**The targets** — `content/audio.json` → `"loudness"` (edit in the Dev Kit or Obsidian; missing = these defaults):
+```json
+"loudness": {
+  "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 },
+  "toleranceDb": 3,
+  "ceilingDb": -1,
+  "lateMs": 20,
+  "maxLimitingDb": 3.5
+}
+```
+- **Every folder is −18 on purpose:** the *files* are made even, and the *mix* — menus under effects, music under both
+  — is the volume groups (`buses`). So a new sound never needs its `volumeDb` re-tuned. To make all menu sounds quieter,
+  lower `buses.ui`, not `loudness.targets.ui`. −18 is the phone standard (consoles use −23/−24 over a whole game).
+- `toleranceDb`: further off than this is flagged (3 dB is clearly heard). `ceilingDb`: the loudest sample allowed (−1
+  is the standard). `lateMs`: an effect or menu sound starting later than this is flagged. `maxLimitingDb`: the most a spike may be
+  shaved to let a spiky sound come up (more = spiky sounds reach the target but lose some snap). Why these numbers, with
+  sources: `../.planning/design/audio.md` → Loudness.
 
 ## What a game must provide
 From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
@@ -42,13 +95,16 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
 - *sounds are named in code, described in content/audio.json* — fails on a missing `content/audio.json`, and names
   each line of game code with a sound file name or its own `new Audio(` / `new AudioContext(`.
 - *the Dev Kit's full pause silences the sound* — fails when this copy of the module is older than 0.3.0.
+- *every sound is as loud as the others and starts on time* (0.4.0) — a **warning**, not a failure: names each file
+  further than `toleranceDb` from its target, peaking over the ceiling, or (effects + menus) starting late, and says
+  `npm run audio:check -- --fix`. No ffmpeg on the computer → skipped, with the install line.
 
 ## Install / update in a game
 ```
 node ../../framework/audio/scripts/install-audio.mjs .            (from the game folder)
 node ../../framework/audio/scripts/install-audio.mjs . --dry-run  (just show what would change)
 ```
-Copies `kit/` → `<game>/src/audio/` with a VERSION stamp (tests stay here), removes files the module no longer ships (only inside `src/audio/`), and gives the game a starter `content/audio.json` **once** — after that the file is the game's and is never overwritten. Sound files go in `public/audio/{sfx,ui,amb,mus,stg}/`, named `category_object_action_01.mp3`. The game needs React (for `react.ts`).
+Copies `kit/` → `<game>/src/audio/` with a VERSION stamp (tests stay here), removes files the module no longer ships (only inside `src/audio/`), and gives the game a starter `content/audio.json` **once** — after that the file is the game's and is never overwritten. It also adds `"audio:check": "node src/audio/audio-check.mjs"` to package.json's scripts when missing (0.4.0). A game from before 0.4.0 can add the `"loudness"` block to its own content/audio.json to change the targets (without it, the defaults are used). Sound files go in `public/audio/{sfx,ui,amb,mus,stg}/`, named `category_object_action_01.mp3`. The game needs React (for `react.ts`).
 
 ## Hooking it up (once, at start-up)
 ```ts
@@ -122,6 +178,7 @@ readAudioConfig(json, warn?) · planPlay(input) · seededRandom(seed) · dbToGai
   "snapshots": { "paused": { "music": -10, "lowpassHz": 900, "fadeMs": 250 }, "reveal": { "music": -6, "ambience": -8 } },
   "duck":   { "amountDb": -7, "downMs": 10, "backMs": 600 },
   "limits": { "maxVoices": 14, "staleMs": 400 },
+  "loudness": { "targets": { "sfx": -18, "ui": -18, "stg": -18, "amb": -18, "mus": -18 }, "toleranceDb": 3, "ceilingDb": -1, "lateMs": 20, "maxLimitingDb": 3.5 },  // npm run audio:check (above); the engine doesn't use it
   "sounds": {
     "seed.land": {
       "files": ["sfx/seed_land_01.mp3", "sfx/seed_land_02.mp3"],
