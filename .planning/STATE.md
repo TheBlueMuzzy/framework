@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-21 — **Sprint 24 built (F31 waiting for OK): every sound in a game comes out equally loud and starts on time** on `dev/audio-check` (audio 0.4.0 · Dev Kit 0.22.0 — unreleased) — `npm run audio:check` (+ `--fix`, originals kept in <game>/audio-originals/), the Sound Board drop levels to −18, check:framework warns on off sounds; proof on .scratch/goops-f31 (5 of 35 flagged → 0). **Next: Muzzy listens (task 8, page .scratch/goops-f31-listen) + the maxLimitingDb question → `F31: done`, sprint 24 retro.** Goops' own scripts/sounds/build.mjs uses ffmpeg's limiter after measuring, so its sounds came out 1–7 dB under its aim — for Goops' session.
+2026-10-21 — **F31 ✅ done (Muzzy approved): every sound in a game comes out equally loud and starts on time** on `dev/audio-check` (audio 0.4.0 · Dev Kit 0.22.0 — unreleased) — `npm run audio:check` (+ `--fix`, originals in <game>/audio-originals/), the Sound Board drop levels to −18, check:framework warns on off sounds; maxLimitingDb stays 3.5. **Next: sprint 24 retro → archive → `/deliver` (an update release of audio 0.4.0 + Dev Kit 0.22.0) or `/sprint`.** For Goops' session: update the audio module + run `npm run audio:check -- --fix`; its scripts/sounds/build.mjs limits after measuring (sounds 1–7 dB under its aim).
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework adb661e (sprint 24 F31: helper review, 2 real bugs f
 
 ## Where we are
 Stage: develop   Milestone: v0.6 leftover F31 (v0.9 left: F62 Goops, F64/F65)   Sprint: 24 — every sound equally loud and on time (F31)
-Doing: F31 — building   Branch: dev/audio-check   Version: 0.11.0 (UI kit 0.26.0 · Dev Kit 0.21.1 · audio 0.3.2 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
+Doing: sprint 24 retro   Branch: dev/audio-check   Version: 0.11.0 (UI kit 0.26.0 · Dev Kit 0.21.1 · audio 0.3.2 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.11.0
 
 ## Key facts
