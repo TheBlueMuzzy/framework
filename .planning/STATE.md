@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-22 — **F89 crash reports built (waiting for Muzzy's OK)** on `dev/crash-reports`: new `crashes/` module 0.1.0 (game side, its own Cloudflare server, hidden source maps + `npm run crashes`, the Settings switch + "Something broke" screen, installer + check:framework part) · UI kit 0.26.1 · Dev Kit 0.22.1 · session start's crash-news line (~/.claude). Proven end to end on a scratch Goops (.scratch/goops-f89) with a local server; reviewed (3 real bugs fixed + tests). **Next: Muzzy says "approved" → F89 ✅, /save, then the retro + archive (sprint 25 has only F89) → /deliver.** Going live in a real game stays Muzzy's call.
+2026-10-22 — **F89 crash reports approved** (Muzzy) on `dev/crash-reports`: crashes module 0.1.0 · UI kit 0.26.1 · Dev Kit 0.22.1 · session start's crash-news line. **Next: the sprint 25 retro (3 lines) → archive → /deliver.** Installing it in a real game and going live with its server stay Muzzy's call (Goops is the likely first — its own session).
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - The framework's own next release (release.mjs) needs `Release: none (library)` and `Security reviewed: <commit>` in Key facts — it lists them when run.
@@ -12,7 +12,7 @@ Reviewed through: framework 48fcd3e (sprint 25 F89: helper review, 3 real bugs f
 
 ## Where we are
 Stage: develop   Milestone: v0.10 leftover (F89)   Sprint: 25
-Doing: F89 — building   Branch: dev/crash-reports   Version: 0.11.1 (UI kit 0.26.0 · Dev Kit 0.22.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
+Doing: — (F89 approved; retro next)   Branch: dev/crash-reports   Version: 0.11.1 (UI kit 0.26.0 · Dev Kit 0.22.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.11.1
 
 ## Key facts
@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-22 — F89 approved: games can report their crashes to a server of their own, read on the PC with real file lines.
 - 2026-10-22 — F89 built (waiting for OK): when a player's game breaks, the game reports it to its own small server; `npm run crashes` shows real file lines and session start says "N new errors from players".
 - 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).
 - 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.
