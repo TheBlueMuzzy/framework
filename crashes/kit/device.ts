@@ -1,5 +1,6 @@
 // THE DEVICE, IN A FEW WORDS — "Chrome 141", "Android 15", "390x844@3", "en". Read on the device from the browser's
 // user-agent text; only a name + a major version leaves it — the full user-agent text never travels.
+import { withoutHidden } from './report'
 
 /** "Chrome 141", "Safari 18", "Firefox 132", "Edge 141", "Samsung Internet 27", "Opera 115" — or "" when unknown. */
 export function browserName(ua: string): string {
@@ -50,7 +51,7 @@ export function gpuName(canvas: HTMLCanvasElement): string {
     if (!gl) return ''
     const debug = gl.getExtension('WEBGL_debug_renderer_info')
     const name = debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
-    return typeof name === 'string' ? name.slice(0, 120) : ''
+    return typeof name === 'string' ? withoutHidden(name).slice(0, 120) : ''
   } catch {
     return ''
   }

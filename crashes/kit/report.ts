@@ -17,6 +17,14 @@ export const MOMENT_NAME = /^[A-Za-z][A-Za-z0-9_.:-]{0,31}$/
 /** A fingerprint: 16 lowercase hex characters (the start of a SHA-256). */
 export const FINGERPRINT = /^[0-9a-f]{16}$/
 
+/** A moment's numbers stay within ±1e12, and a moment at most a day before the error (the server refuses others). */
+export const MAX_MOMENT_NUMBER = 1e12
+export const MAX_MOMENT_AGE_S = 86_400
+
+/** Text with its control and invisible format characters taken out (an emoji's joiner, a zero-width space, a
+ *  right-to-left mark): the server refuses them, so a title with one would lose the whole report. */
+export const withoutHidden = (text: string) => text.replace(/[\p{Cc}\p{Cf}]/gu, '')
+
 export interface Frame {
   /** The path inside the site, e.g. "assets/index-Bx12.js" — never the full URL or its ?query. */
   file: string

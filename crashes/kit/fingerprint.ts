@@ -2,11 +2,11 @@
 // fp = the first 16 hex of SHA-256 of: kind + cleaned title + the top 3 in-game frames as file:function.
 // No line, no column, and file names without their build hash — so the same bug has the same fp in every session and
 // every build. Cleaning the title also keeps a player's name out: quoted text, numbers and ids never travel.
-import { MAX_TITLE_CHARS, type Frame, type ReportKind } from './report'
+import { MAX_TITLE_CHARS, withoutHidden, type Frame, type ReportKind } from './report'
 
 /** "Cannot find player 'Bob' at 12" → 'Cannot find player "…" at #'. Quoted text, hex ids and numbers go, cut to 200. */
 export function cleanTitle(text: string): string {
-  return text
+  return withoutHidden(text)
     .replace(/"[^"]*"|'[^']*'|`[^`]*`|“[^”]*”/g, '"…"') // quoted text (a name, a key someone typed)
     .replace(/\b0x[0-9a-f]+\b/gi, '<id>') // 0x1f3a
     .replace(/\b[0-9a-f]{4,}(?:-[0-9a-f]{4,})*\b/gi, (word) => (looksLikeId(word) ? '<id>' : word)) // a1b2c3d4, uuids

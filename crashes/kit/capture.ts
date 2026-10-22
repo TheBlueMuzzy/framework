@@ -16,7 +16,7 @@
 import type { CrashesConfig } from './config'
 import { browserName, gpuName, languageOnly, osName, screenText } from './device'
 import { cleanTitle, fingerprint, fingerprintText, withoutBuildHash } from './fingerprint'
-import { MAX_MOMENTS, MAX_REPORT_BYTES, MOMENT_NAME, REPORT_FORMAT, type CrashReport, type Frame, type Moment, type ReportKind } from './report'
+import { MAX_MOMENT_AGE_S, MAX_MOMENT_NUMBER, MAX_MOMENTS, MAX_REPORT_BYTES, MOMENT_NAME, REPORT_FORMAT, type CrashReport, type Frame, type Moment, type ReportKind } from './report'
 import { readStack, safeFile, sitePath } from './stack'
 
 /** How a report leaves the device. address = the server + "/report", body = the report as JSON text,
@@ -128,7 +128,8 @@ export function reportError(error: unknown, { kind = 'game' }: { kind?: ReportKi
 export function moment(name: string, ...numbers: number[]) {
   if (!running || typeof name !== 'string' || !MOMENT_NAME.test(name)) return
   const keep = Math.min(running.options.config.client.moments, MAX_MOMENTS)
-  const n = numbers.filter((x) => typeof x === 'number' && Number.isFinite(x)).slice(0, 4)
+  // (a number past ±1e12 — moment('seed', Date.now()) — would make the server refuse the whole report)
+  const n = numbers.filter((x) => typeof x === 'number' && Number.isFinite(x) && Math.abs(x) <= MAX_MOMENT_NUMBER).slice(0, 4)
   running.moments.push(n.length ? { at: now(), name, n } : { at: now(), name })
   while (running.moments.length > keep) running.moments.shift()
 }
@@ -253,9 +254,10 @@ function buildReport(run: Running, kind: ReportKind, title: string, frames: Fram
   const nav = globalThis.navigator
   const ua = nav?.userAgent ?? ''
   if (!run.gpu) run.gpu = run.canvases.map(gpuName).find((name) => name) ?? ''
-  const moments: Moment[] = run.moments.map((m) => {
-    const at = Math.round((m.at - t) / 100) / 10 || 0 // seconds before the error, 1 decimal (and never -0)
-    return m.n ? { at, name: m.name, n: m.n } : { at, name: m.name }
+  const moments: Moment[] = run.moments.flatMap((m) => {
+    const at = Math.min(0, Math.round((m.at - t) / 100) / 10) || 0 // seconds before the error, 1 decimal (and never -0)
+    if (at < -MAX_MOMENT_AGE_S) return [] // a tab left open for days: older moments would make the server refuse it all
+    return [m.n ? { at, name: m.name, n: m.n } : { at, name: m.name }]
   })
   return {
     v: REPORT_FORMAT, kind, fp: '', title, frames: frames.filter((f) => safeFile(f.file)),

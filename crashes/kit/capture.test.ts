@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { moment, momentsFromGame, reportError, setOn, startCrashes, stopCrashes, watchCanvas, fitInSize, type SendReport } from './capture'
 import { DEFAULT_CRASHES_CONFIG, type ClientConfig } from './config'
 import { applyCrashSetting, CRASH_SETTINGS_ROWS } from './settingsRow'
+import { readReport } from './crashRoutes'
 import { FINGERPRINT, MAX_FRAMES, MAX_REPORT_BYTES, MOMENT_NAME, REPORT_KINDS, type CrashReport } from './report'
 
 const SITE = location.origin // jsdom's page address
@@ -503,5 +504,45 @@ describe('one report', () => {
     expect(address).toBe(`${URL_}/report`)
     expect(init).toMatchObject({ method: 'POST', keepalive: true, referrerPolicy: 'no-referrer', headers: { 'content-type': 'text/plain' } })
     vi.unstubAllGlobals()
+  })
+})
+
+// F89 review: the game must never build a report the server refuses — a 400 loses it silently (the kind is spent)
+describe('what the game sends, the server takes', () => {
+  afterEach(() => { stopCrashes(); vi.restoreAllMocks() })
+
+  it('a huge moment number (a Date.now() seed) is dropped, not sent', async () => {
+    start()
+    moment('seed', Date.now(), 7)
+    reportError(gameError('boom'))
+    await settle()
+    expect(sent[0].report.moments).toEqual([{ at: 0, name: 'seed', n: [7] }])
+    expect(readReport(sent[0].report)).not.toBeNull()
+  })
+
+  it('moments more than a day old (a tab left open) are left out', async () => {
+    let clock = 1_000
+    vi.spyOn(performance, 'now').mockImplementation(() => clock)
+    start()
+    moment('shiftStart', 1)
+    clock += 2 * 86_400_000 // two days later
+    moment('shiftEnd', 2)
+    reportError(gameError('late'))
+    await settle()
+    expect(sent[0].report.moments.map((m) => m.name)).toEqual(['shiftEnd'])
+    expect(readReport(sent[0].report)).not.toBeNull()
+  })
+
+  it('invisible characters (an emoji joiner, a zero-width space, a right-to-left mark) are taken out of the title and function name', async () => {
+    start()
+    const [ZWJ, ZWSP, RLO] = [0x200d, 0x200b, 0x202e].map((c) => String.fromCharCode(c))
+    const e = new TypeError(`family 👨${ZWJ}👩${ZWJ}👧 broke${ZWSP} here ${RLO}`)
+    e.stack = `TypeError: x\n    at ti${ZWSP}ck (${SITE}/assets/index-Bx12.js:1:2)`
+    reportError(e)
+    await settle()
+    const report = sent[0].report
+    for (const hidden of [ZWJ, ZWSP, RLO]) expect(report.title).not.toContain(hidden)
+    expect(report.frames[0].fn).toBe('tick')
+    expect(readReport(report)).not.toBeNull()
   })
 })

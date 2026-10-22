@@ -3,7 +3,7 @@
 // Firefox / Safari write "tick@https://game.site/assets/index-Bx12.js:1:48211".
 // Only frames from the game's own address are kept (in-game frames), and only the path inside the site travels:
 // never the full URL, its ?query or #part.
-import { MAX_FRAMES, type Frame } from './report'
+import { MAX_FRAMES, withoutHidden, type Frame } from './report'
 
 const CHROME_LINE = /^\s*at (?:(.+?) \()?(.+?):(\d+):(\d+)\)?\s*$/
 const FIREFOX_LINE = /^\s*(.*?)@(.+?):(\d+):(\d+)\s*$/
@@ -36,7 +36,7 @@ export function safeFile(path: string): string | null {
 
 /** A function name as the server takes it: at most 100 characters, nothing invisible. "async tick" → "tick". */
 function cleanFn(name: string | undefined): string | undefined {
-  const fn = (name ?? '').replace(/^async\s+/, '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 100) // eslint-disable-line no-control-regex -- removing control characters is the point
+  const fn = withoutHidden((name ?? '').replace(/^async\s+/, '')).trim().slice(0, 100)
   return fn === '' || fn === '<anonymous>' ? undefined : fn
 }
 
