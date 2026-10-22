@@ -99,7 +99,7 @@ describe('the crashes worker', () => {
         noEmit: true, skipLibCheck: true, verbatimModuleSyntax: true, allowImportingTsExtensions: true, noUnusedLocals: true, types: ['node'] },
       include: ['crashes'],
     }))
-    const result = spawnSync('npx', ['tsc', '-p', game], { encoding: 'utf8', shell: process.platform === 'win32' })
+    const result = spawnSync(`npx tsc -p "${game}"`, { encoding: 'utf8', shell: true }) // (one command line: npx is a .cmd on Windows)
     expect(`${result.stdout}${result.stderr}`.trim()).toBe('')
     expect(result.status).toBe(0)
     rmSync(game, { recursive: true, force: true })
