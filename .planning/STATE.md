@@ -27,7 +27,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: private GitHub TheBlueMuzzy/framework.
-- Security reviewed: d89b2c0 (2026-10-21, v0.10.3 → v0.11.0, helper + Claude: earlier F96/F98/F100 fixes hold; 3 real findings fixed + tests — huge bodies refused at the worker door + read with a byte cap, wrong link-code tries also per IPv6 /48 + the server cap never blocks Delete my data or Remove my score, an unplayed match frees its room code after keepUnplayedMatchHours; per-address room-creation limit skipped — needs a new binding in every game, rooms README "Known limits")
+- Security reviewed: b697259 (2026-10-21, v0.11.0 → v0.11.1 by Claude: F31 adds no public address — the dev server's save-audio drop still checks type + folder against fixed lists, names the file itself, keeps the original inside audio-originals/ (path + realpath checked, never over a file); the matcher it imports is the game's own fixed src/audio/loudness.mjs; audio:check is a CLI writing only inside public/audio + audio-originals (link + path checks, review-tested) — no issues)
 - Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
