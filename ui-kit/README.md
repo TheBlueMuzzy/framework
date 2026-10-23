@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.26.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.28.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -98,6 +98,31 @@ gallery's `npm run shoot` uses the same one.
   checks every size. The Dev Kit's PAUSED pill check uses sideways phones for a landscape game.
   0.26.1 (F89): the Settings check counts the crashes module's "Send crash reports" switch (`crashReports`) as read
   once the game passes its values on (`applyCrashSetting` / `setOn`), like the Audio rows.
+  0.27.0 (F108, from Goops' Upgrades screen): pieces for shop / upgrade / loadout screens, in all 5 styles —
+  a `success` colour + `on-success` (green in every style, contrast-tested; Neon's `#39ff7a` well apart from its cyan) ·
+  `<Card tone="success">` (edge in success — the selected ring, so the card never grows — and the style's
+  `depth-success` shadow: Neon glows green) · `<Card locked>` (greyed but readable: muted text, dashed edge, flat
+  shadow, pictures in grey; the open card's exact size; never a button; `aria-disabled` + read out "Locked" —
+  `lockedLabel` for the game's word) · `<Modal headerAction={…}>` (a control on the right of its header; `actions`
+  stays the bottom buttons) · Neon's `danger` button glows red like `primary` glows cyan (`glow-danger`), so − / +
+  look like a pair · a MenuHeader title beside an action drops a step (heading size) before it wraps and never
+  splits a word ("UPGRAD / ES" at 360 wide); a ‹ too → body size; still too wide → the action moves under it.
+  New style values: `success`, `on-success`, `glow-danger`, `depth-success` (a game's tweaks may set them; Dev Kit 0.23.1
+  lists them). Look tests in a real browser: `kit/controls/cardLook.test.tsx`, `buttonLook.test.tsx`,
+  `kit/blocks/menuHeaderFit.test.tsx` (page: `kit/stylePage.test-util.mjs`).
+  0.28.0 (F107, the emotes module's parts — `kit/blocks/emotes.tsx`, gallery `?screen=emotes`): `SpeechBubble` (a
+  Callout with no button that fades by itself: the same placement maths, edge, pointer and entrance in every style;
+  fixed size from the start — sized to the longest of `sizeTo`; hidden from screen readers; pops at `motion-fast`, fades
+  at `motion-fast`; reduce motion = no pop) · `EmotePicker` (opened from the player's own seat: 44px+ phrase buttons,
+  two columns on a phone, one row on a wide screen; Escape / a tap outside closes; `readyIn` dims them with a filling
+  ring) · `MuteMenu` (an opponent's seat: Mute / Unmute emotes) · `MutedMark` (a crossed bubble, read out "Emotes
+  muted") · `LiveAnnouncer` (one polite line, at most one a second). The Callout's frame loop is now shared:
+  `useCalloutPlace` (+ `avoid` — a CSS selector it stays clear of, e.g. the HUD and the other seats; bubbles also stay
+  off each other: with no clear side, a second one stacks a step further out — found in the Glyphtender proof) and
+  `useShownPopover`. The Settings check counts `hideEmotes` as read once the game calls `applyEmoteSetting` /
+  `setHideAll` (like the crashes switch). Look tests: `kit/blocks/emoteLook.test.tsx`.
+  0.28.1 (F22, ai 0.5.0): the Settings check counts the AI module's "Bot chatter" selector (`botChatter`: Off · Some ·
+  Lots) as read once the game passes it on (`applyBanterSetting` / `setChatter`), like the emotes switch.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

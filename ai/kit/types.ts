@@ -134,7 +134,7 @@ export interface Special<Action> {
   why: string
 }
 
-export interface GamePlug<View, Action, World = View> {
+export interface GamePlug<View, Action, World = View, Event = unknown> {
   goals: Goal<View, Action, World>[]
   /** What it feels right now, each 0–10 ("myDanger", "handQuality", "behind"…). */
   readings(view: View, seat: number): Record<string, number>
@@ -148,6 +148,10 @@ export interface GamePlug<View, Action, World = View> {
   describe(action: Action, world: World): string
   /** Decisions outside the goal roll; null = no, use the goals. Runs after readings and the trait roll. */
   special?(ctx: Context<View, World>, rng: number): { special: Special<Action> | null; rng: number }
+  /** Banter (F22): the game's moment map — what one of its events means to this seat ("hitRival" for the one who did
+   *  it, "gotHit" for the one it happened to): one moment, a few (most important first) or nothing. The names are the
+   *  keys of content/ai/banter.json "chance"; the lines are content/text/en.json banter.<personality>.<moment>. */
+  moments?(event: Event, seat: number): string | readonly string[] | null | undefined
 }
 
 /** Why it did what it did — for the Dev Kit and bug reports, never shown to players. */

@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-20 — F103 built (waiting for OK): confirm boxes can't silently fail any more, bars fit small phones without workarounds, and the Dev Kit warns when its PAUSED pill covers the game's HUD.
 - 2026-10-20 — F102 approved: every game can show the same version number on its menu, in Settings and in bug reports, and its tests refuse an outdated build.
 - 2026-10-20 — Sprint 21 planned: saves ready to move to phone, desktop, Steam or Unity later (the store and Unity parts wait until a game needs them).
 - 2026-10-20 — F94 + F98 approved: games can be replayed from their seed + moves (a Daily game for everyone), and a Daily board checks every score by replaying it.
@@ -25,3 +26,6 @@
 - 2026-09-28 — Sprint 02 done: F04 built screens (~36, blocks 959 lines), F05 gallery menu + 116 screenshots; Pixel body font → VT323; focus rings keyboard-only. Muzzy approved.
 - 2026-09-28 — Sprint 01 done: F01 parts + style engine, F02 5 styles, F03 screen stack (Back/Esc, inert, style transitions); 74 tests. Muzzy approved all three.
 - 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.
+- 2026-10-20 — F103 approved: confirm boxes can't silently fail, bars fit small phones without workarounds, the Dev Kit warns when its PAUSED pill covers a game's HUD.
+- 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
+- 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.

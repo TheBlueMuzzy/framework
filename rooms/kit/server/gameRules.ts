@@ -65,6 +65,10 @@ export interface RoomTools<State, Event> {
   playedBy(seatId: string): PlayedBy | null
   /** A line in the server log (npm run party:dev shows it), marked with the room code. */
   log(message: string): void
+  /** A seat says a preset phrase or a bot's banter line (banter.<who>.<moment>) to every seat — through the same
+   *  gate as a player's emote (the server's count; dropped when over it). → true if it went out. Needs the game's
+   *  content/emotes.json passed to RoomServer. (Rooms 0.12.0, for F22 Banter.) */
+  emote(seatId: string, id: string): boolean
 }
 
 /**

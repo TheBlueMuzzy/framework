@@ -64,15 +64,16 @@ flowchart LR
   F15 --> F18
 ```
 
-## v0.5 — The AI  (proven by Glyphtender beta, its v0.7)
+## v0.5 — The AI  (proven by Glyphtender beta, its v0.7)  ✅ released 2026-10-23 (v0.12.0)
 Goal: any turn-based game can put a fair, human-feeling AI in any seat — local or online — with personalities Muzzy tunes in the Dev Kit and proves by watching behaviour across hundreds of games. Design: `design/ai.md`. Built here first and switched on in Glyphtender the same sprint (its F38–F47).
 - ✅ F19 🧱 Brain: personality + skill data, see (view only) → imagine hidden → readings → mood shifts → goal roll → candidates → score (main goal + nudge) → choose like a person → explain note; seeded; game plug shape — must:beta · needs: F12, F18 · Glyphtender sprint 14 · built 2026-10-04 (ai kit 0.1.0)
 - ✅ F20 🧱 Fuzzy beliefs: estimates with confidence that decays / rises from the seat's own events; drift; rebuilt from events (rejoin-safe) — must:beta · needs: F19, F13 · built 2026-10-04 (stateless beliefs.ts)
 - ✅ F21 🧱 Pace + background thinking: Web Worker runner, time budget, think-time + speed presets (Slow · Normal · Fast · Instant), server runner inside the room — must:beta · needs: F19
-- 🔨 F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
+- ✅ F107 🧱 Emotes (Muzzy 2026-10-05: "players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency"): a framework module — a short preset phrase set in content/, a picker, a speech bubble by the seat (UI kit part), mute per opponent, a spam limit, online through the rooms server — the base AI banter speaks through (Muzzy 2026-10-23: "Emotes first") — must:beta · needs: F13 · sprint 26
+- ✅ F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats), spoken through the emote module (its bubble, its mute) — must:beta · needs: F19, F13, F107
 - ✅ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20 · built 2026-10-04 (Dev Kit 0.6.0, devkit/kit/ai: game plugs in with aiTab(DevKitAi): files as data + validate / watch / runCheck callbacks; Run check opens the F24 report; first game: Glyphtender F41). Not yet: banter lines, pace.json, pause/step in Watch
   why: Muzzy tunes personalities by eye in the game, not by description
-- 🔨 F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21
+- ✅ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21 · sprint 26 (ai 0.3.0 arena + npm run ai:arena, Dev Kit 0.23.0 Run check in a worker)
   why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
 - ⏳ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
 - ⏳ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
@@ -83,6 +84,7 @@ flowchart LR
   F19 --> F20[F20 Fuzzy beliefs]
   F19 --> F21[F21 Pace + background]
   F19 --> F22[F22 Banter]
+  F107[F107 Emotes] --> F22
   F19 --> F23[F23 Dev Kit AI tab]
   F20 -.working.-> F23
   F19 --> F24[F24 Arena + Personality Check]
@@ -213,6 +215,7 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - ✅ F102 🧱 Version module (Muzzy 2026-10-20: "version number visibility is important in all games… should be a built in process, possibly a 'version' framework module that gets added to every game"): one source (version.json, /save bumps it) → a Vite plugin (define + `<meta name="app-version">`), one "vX.Y.Z.B" label on the main menu, the bottom of Settings and the Dev Kit's bug files, an e2e helper that refuses a stale build / cached service worker, check:framework checks the wiring (from Goops' own copy) — should · sprint 22
 - ✅ F103 🔧 Kit fixes from Goops: confirm boxes work without `...kitScreens`, Bar row "at most its share" + dock tight padding as kit options, the Dev Kit check warns when the PAUSED pill sits on the game's HUD — should · sprint 22
 - ✅ F104 🔧 Portrait only, said once (sprint 22 retro + F103 proof: check:framework checked Goops sideways though Muzzy said "the game is not expected to function in horizontal/landscape mode. ever."): content/ui/style.json `orientation`, honoured by check:framework, the screenshot script, the Dev Kit's phone checks and the helper briefs — should · sprint 23
+- ✅ F108 🔧 Kit pieces for shop / upgrade screens (Goops' session 2026-10-23, its F34 Upgrades screen): a `success` colour in all 5 styles, Card `tone="success"` (same size), Modal `headerAction` prop, Card `locked`, Neon `danger` glow matching `primary`, MenuHeader title that shrinks before wrapping and never splits a word — should · sprint 26
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]
@@ -243,7 +246,6 @@ flowchart LR
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
-- **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
 - **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
@@ -252,6 +254,9 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-23 — **BMUZ rule: game ↔ framework sessions message each other** (Goops' session, its Sprint 12 retro): a game session needing a framework change messages the framework session directly (what + why + evidence, "don't install until done"), the framework session replies "done" + the install-module command, the game confirms; the request is also written in the game's STATE/SPRINT Notes; neither asks the other to do what its own rules block. F108 went ask → installed in ~1 h this way. Muzzy OK'd 2026-10-23 → landed in config/bmuz/PROJECT-FILES.md "Game ↔ framework sessions talk directly".
+- 2026-10-23 — **Dev Kit Fonts tab: every font on the designer's machine** (Goops' session): Chrome's Local Font Access (`queryLocalFonts()`, asks permission) lists installed fonts to try live, so a game keeps only the fonts it uses.
+- 2026-10-22 — **Hand to Glyphtender's session (found by the F24 proof, read-only):** its own `scripts/ai-arena.mjs` seats every 2-player table as Scholar vs Survivor, so the Strategist never plays 2-player (0% wins there vs 20% with a fair shuffle), and its Dev Kit check seats tables another way — switching to the framework arena (ai 0.3.0: `npm run ai:arena`, `src/ai/arenaGame.ts`) fixes both; the installer names its old `ai:arena` line.
 - 2026-10-21 — **Audio: more spike shaving for very short clicks?** (F31 listen: Muzzy liked 6 dB of shaving on the 60 ms tank spin, 3.5 on the others) — if more short sounds want it, a per-file or "short sounds" maxLimitingDb in content/audio.json.
 - **Store release run-through** (Muzzy 2026-10-20: "when i'm ready to actually release games… a big runthrough with you to get app store, play store, steam and itch.io (and any other platforms) figured out") — accounts, fees, store pages, signing, a real Steam Cloud test of F97; until then games go out on GitHub Pages only — could
 - 2026-10-20 — **Replays for Goops and Roll Better** (found planning F94): Goops needs a fixed game step (its tick takes the frame's real time) and its repair minigames' Math.random checked; Roll Better needs seeded dice instead of physics results trusted from the browser. Then both can use the saves replay piece + leaderboards.

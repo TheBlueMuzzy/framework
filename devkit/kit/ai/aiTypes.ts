@@ -87,6 +87,22 @@ export interface AiWatchSeat {
   skill: AiSkill
 }
 
+/** The bots' lines: personality id → moment ("won", or "won_2", "won_3"… for more lines) → the words. */
+export type AiBanterLines = Record<string, Record<string, string>>
+
+export interface AiBanter {
+  /** Where the lines live, e.g. "content/text/en.json". (It may be the bios' file too — one Save writes both.) */
+  path: string
+  /** That file's data, AS THE GAME IMPORTED IT (the same object — edits go into it live). */
+  data: Record<string, unknown>
+  /** Where in the file the lines sit. Default ["banter"]. */
+  at?: string[]
+  /** The game's moments, in order — the keys of content/ai/banter.json "chance". */
+  moments: string[]
+  /** Optional: a moment's plain words for its row ("the game ended and it won" — the AI kit's COMMON_MOMENTS). */
+  describe?: Record<string, string>
+}
+
 /** What a game plugs into the AI tab. Only the two files are required; each callback adds a part of the tab. */
 export interface DevKitAi {
   personalities: AiFile
@@ -101,6 +117,11 @@ export interface DevKitAi {
     /** Optional: the name a new personality gets there (e.g. "the Brute"). Default: its id. */
     nameFor?: (id: string) => string
   }
+  /** Optional (0.24.0, framework F22): the bots' banter lines — content/text/en.json "banter" — edited per personality
+   *  per moment. LIVE: every edit is written straight into `data` (the same object the game imported and reads its
+   *  lines from: botBanter's `lines: () => text.banter`), so the next moment uses it without a reload; Save writes the
+   *  file without reloading the game. */
+  banter?: AiBanter
   /** Optional: the game's own AI settings files (goal settings, pace…), edited like Tuning rows. */
   settings?: AiSettingsFile[]
   /** Optional: the game's readings (mood-shift "reading" choices), e.g. ["myDanger", "behind"]. */
@@ -109,6 +130,7 @@ export interface DevKitAi {
   validate?: (p: AiPersonality) => string[]
   /** Optional: start a local all-AI game on the real board; call onEvent for every decision. Returns "stop". */
   watch?: (seats: AiWatchSeat[], onEvent: (e: AiWatchEvent) => void) => () => void
-  /** Optional: play `games` AI-vs-AI games with these personalities + skills and return the report page (HTML). */
+  /** Optional: play `games` AI-vs-AI games with these personalities + skills and return the report page (HTML).
+   *  Play them in a Web Worker so the page never freezes: runCheckInWorker + serveCheck (checkWorker.ts). */
   runCheck?: (options: { games: number; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (done: number, total: number) => void }) => Promise<string>
 }

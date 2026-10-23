@@ -41,6 +41,9 @@ export interface RoomIdentity {
 export interface UseRoomOptions<Event> {
   /** Called for every `event` the server sends, in order (views can arrive in one batch; events never get lost). */
   onEvent?: (event: Event) => void
+  /** Called for every emote the room relays — `{ seat, id }` (Rooms 0.12.0). Hand it to the emotes module:
+   *  onEmote: (message) => emotes.receive(message) — it drops the senders this player muted. */
+  onEmote?: (emote: { seat: string; id: string }) => void
   /** Leave out — it comes from partyHost() in roomClient.ts. */
   host?: string
 }
@@ -64,6 +67,9 @@ export interface OnlineRoom<View, Action, Options> {
   clearCameBack: () => void
   /** Send a game move. false = not sent (not connected right now). */
   send: (action: Action) => boolean
+  /** Say a preset phrase to the table (its id only — the server checks it, counts it and relays it to every seat,
+   *  yours too). false = not sent. Use it as the emotes module's `send`: (seat, id) => online.sendEmote(id). */
+  sendEmote: (id: string) => boolean
   setReady: (ready: boolean) => void
   /** Host: start a game (from the lobby, or a rematch after a game). */
   start: (options: Options) => void
@@ -118,10 +124,12 @@ export function useRoom<View = unknown, Action = unknown, Options = unknown, Eve
   const socketRef = useRef<PartySocket | null>(null)
   const identityRef = useRef(identity)
   const onEventRef = useRef(options.onEvent)
+  const onEmoteRef = useRef(options.onEmote)
   const roomCodeRef = useRef(roomCode)
   useEffect(() => {
     identityRef.current = identity
     onEventRef.current = options.onEvent
+    onEmoteRef.current = options.onEmote
     roomCodeRef.current = roomCode
   })
 
@@ -174,6 +182,10 @@ export function useRoom<View = unknown, Action = unknown, Options = unknown, Eve
           break
         case 'event':
           onEventRef.current?.(message.event as Event)
+          break
+        case 'emote':
+          // (ids only; the emotes module checks the id again and drops muted senders)
+          if (typeof message.seat === 'string' && typeof message.id === 'string') onEmoteRef.current?.({ seat: message.seat, id: message.id })
           break
         case 'error':
           update({ error: { code: message.code, message: message.message } })
@@ -261,6 +273,7 @@ export function useRoom<View = unknown, Action = unknown, Options = unknown, Eve
     cameBack: current.cameBack,
     clearCameBack: useCallback(() => setSaved((before) => ({ ...before, cameBack: null })), []),
     send: useCallback((action: Action) => sendMessage({ type: 'action', action }), [sendMessage]),
+    sendEmote: useCallback((id: string) => sendMessage({ type: 'emote', id }), [sendMessage]),
     setReady: useCallback((ready: boolean) => void sendMessage({ type: 'ready', ready }), [sendMessage]),
     start: useCallback((startOptions: Options) => void sendMessage({ type: 'start', options: startOptions }), [sendMessage]),
     kick: useCallback((seatId: string) => void sendMessage({ type: 'kick', seatId }), [sendMessage]),

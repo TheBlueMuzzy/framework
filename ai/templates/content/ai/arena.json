@@ -1,0 +1,27 @@
+{
+  "_help": {
+    "_file": "How the arena plays its AI-vs-AI games for the Personality Check — `npm run ai:arena` on the PC and the Dev Kit's Run check. The flags (--games, --seats, --ladder, --seed, --skill) change one run without changing this file.",
+    "games": "Mixed tables per run (npm run ai:arena). Personalities shuffled into tables of minSeats…maxSeats players, one size after the other.",
+    "minSeats": "The smallest table.",
+    "maxSeats": "The biggest table. Bigger than the number of personalities = one plays twice.",
+    "ladderGames": "Skill-ladder games per personality: its highest skill against its lowest, two players. 0 = no ladder.",
+    "seed": "The first mixed game's seed (game 2 plays seed + 1…). The same seed = the same games = the same report.",
+    "ladderSeedOffset": "Ladder games play seed + this + 0, 1, 2…",
+    "notesInReport": "How many of the first game's decision notes the report shows.",
+    "mainSkill": "The skill the mixed tables play at (empty = the middle skill in the game's skills file).",
+    "reportPath": "Where npm run ai:arena writes the report page, from the game folder.",
+    "devKitLadderFrom": "The Dev Kit's Run check adds a small skill ladder from this many games asked for.",
+    "devKitLadderGames": "…of this many games per personality."
+  },
+  "games": 60,
+  "minSeats": 2,
+  "maxSeats": 4,
+  "ladderGames": 6,
+  "seed": 1000,
+  "ladderSeedOffset": 4000,
+  "notesInReport": 24,
+  "mainSkill": "",
+  "reportPath": "e2e-shots/ai-check.html",
+  "devKitLadderFrom": 20,
+  "devKitLadderGames": 2
+}

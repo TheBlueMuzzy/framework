@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setSectionsOpen } from '../search/sectionState'
 import { AiTab } from './AiTab'
 import { aiTab } from './aiTabEntry'
-import type { AiWatchEvent, DevKitAi } from './aiTypes'
+import { getAt } from './aiLogic'
+import type { AiPersonality, AiWatchEvent, DevKitAi } from './aiTypes'
 import { sampleAi } from './sampleAi.test'
 
 const ALL_SECTIONS = ['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: big moments', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'].map((t) => `ai:${t}`)
@@ -172,6 +173,84 @@ describe('the AI tab', () => {
     expect(screen.getByRole('status').textContent).toBe('3 settings found') // the section title matches: all 3
     rerender(<AiTab ai={sampleAi()} query="zzz" />)
     expect(screen.getByRole('status').textContent).toMatch(/Nothing in AI matches “zzz”/)
+  })
+
+  describe('banter lines (0.24.0)', () => {
+    // The game's text file as it imported it — the bios and the lines share it (as in most games)
+    const withBanter = () => {
+      const ai = sampleAi()
+      const text = ai.bios!.data as Record<string, unknown>
+      text.banter = { Bully: { won: 'Too easy.', won_2: 'Next!' }, Scholar: { lost: 'Fascinating.' } }
+      return { ai: { ...ai, banter: { path: 'content/text/en.json', data: text, moments: ['won', 'gotHit', 'lost'], describe: { won: 'the game ended and it won' } } }, text }
+    }
+    beforeEach(() => setSectionsOpen(['ai:AI: banter lines'], true))
+
+    it('shows the picked personality\'s lines per moment; an edit is live in the game\'s own object at once', () => {
+      const { ai, text } = withBanter()
+      const held = text.banter as Record<string, Record<string, string>>
+      render(<AiTab ai={ai} />)
+      expect((screen.getByLabelText('Bully won line') as HTMLInputElement).value).toBe('Too easy.')
+      expect((screen.getByLabelText('Bully won_2 line') as HTMLInputElement).value).toBe('Next!')
+      expect(screen.getByText('the game ended and it won')).toBeTruthy()
+      fireEvent.change(screen.getByLabelText('Bully won line'), { target: { value: 'Is that all?' } })
+      expect(held.Bully.won).toBe('Is that all?') // live: the bots' next "won" says it, no reload, no Save yet
+      fireEvent.click(screen.getByLabelText('Add a gotHit line'))
+      fireEvent.change(screen.getByLabelText('Bully gotHit line'), { target: { value: 'Ow.' } })
+      expect(held.Bully).toEqual({ won: 'Is that all?', won_2: 'Next!', gotHit: 'Ow.' })
+      fireEvent.click(screen.getByLabelText('Remove Bully won_2'))
+      expect(held.Bully).not.toHaveProperty('won_2')
+      fireEvent.click(screen.getByRole('button', { name: 'Undo unsaved' }))
+      expect(held.Bully).toEqual({ won: 'Too easy.', won_2: 'Next!' }) // (undo is live too)
+    })
+
+    it('Save writes the text file once — the bios and the lines together, nothing reloaded', async () => {
+      const written = saves()
+      const { ai } = withBanter()
+      render(<AiTab ai={ai} />)
+      fireEvent.change(screen.getByLabelText('Bully bio'), { target: { value: 'Hunts.' } })
+      fireEvent.change(screen.getByLabelText('Bully won line'), { target: { value: 'Is that all?' } })
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+      const files = written()
+      expect(files.map((f) => f.path)).toEqual(['content/text/en.json'])
+      expect(files[0]).not.toHaveProperty('reload')
+      expect(getAt(files[0].data, ['ai', 'personality', 'Bully', 'bio'])).toBe('Hunts.')
+      expect(files[0].data.banter).toEqual({ Bully: { won: 'Is that all?', won_2: 'Next!' }, Scholar: { lost: 'Fascinating.' } })
+      // a later bios-only save still carries the saved lines (never the copy the tab took at the start)
+      fireEvent.change(screen.getByLabelText('Bully bio'), { target: { value: 'Hunts hard.' } })
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+      expect((written()[1].data.banter as Record<string, Record<string, string>>).Bully.won).toBe('Is that all?')
+    })
+
+    it('Save keeps a "_help" note beside the lines (review fix: it was dropped from en.json)', async () => {
+      const written = saves()
+      const { ai, text } = withBanter()
+      ;(text.banter as Record<string, unknown>)._help = 'Bots\' lines.'
+      render(<AiTab ai={ai} />)
+      fireEvent.change(screen.getByLabelText('Bully won line'), { target: { value: 'Is that all?' } })
+      expect((text.banter as Record<string, unknown>)._help).toBe('Bots\' lines.') // (live edit leaves it too)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+      expect((written()[0].data.banter as Record<string, unknown>)._help).toBe('Bots\' lines.')
+    })
+
+    it('a quiet personality is told it never talks; lines for a moment the game doesn\'t name are listed as never said', () => {
+      const { ai } = withBanter()
+      ai.personalities.data.personalities = [{ ...(ai.personalities.data.personalities as AiPersonality[])[0], chattiness: 0 }]
+      ;(ai.banter.data.banter as Record<string, Record<string, string>>).Bully.sneezed = 'Achoo.'
+      render(<AiTab ai={ai} />)
+      expect(screen.getByText(/Its chattiness is 0/)).toBeTruthy()
+      expect(screen.getByText(/never said/)).toBeTruthy()
+      expect((screen.getByLabelText('Bully sneezed line') as HTMLInputElement).value).toBe('Achoo.')
+    })
+
+    it('Copy for Claude lists the line changes', async () => {
+      const copied: string[] = []
+      vi.stubGlobal('navigator', { clipboard: { writeText: async (t: string) => { copied.push(t) } } })
+      const { ai } = withBanter()
+      render(<AiTab ai={ai} />)
+      fireEvent.change(screen.getByLabelText('Bully won line'), { target: { value: 'Next time.' } })
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy for Claude' })) })
+      expect(copied[0]).toContain('content/text/en.json → banter.Bully.won: "Too easy." → "Next time."')
+    })
   })
 
   it('aiTab hands the search box text on to the tab', () => {

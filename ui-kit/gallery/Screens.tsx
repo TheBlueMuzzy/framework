@@ -5,6 +5,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
+import { EmotesSample } from './Emotes'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   ArtLayer, ArtStage, LevelMeter, PullHandle, SnapControl, TitleArt, type LevelStep,
@@ -525,6 +526,7 @@ const samples: Record<string, ComponentType> = {
   idle: () => <IdleSample />,
   idlebot: () => <IdleSample startBot />,
   teach: TeachSample,
+  emotes: EmotesSample,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 
@@ -538,7 +540,7 @@ const openers: Record<string, () => void> = {
   endgamedim: () => { screens.push('hud'); screens.push('endgamedim') },
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
-const darkScreens = ['hud', 'huddock', 'chips', 'pinned']
+const darkScreens = ['hud', 'huddock', 'chips', 'pinned', 'emotes']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──

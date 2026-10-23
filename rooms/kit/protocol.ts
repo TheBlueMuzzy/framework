@@ -65,6 +65,9 @@ export type ClientMessage =
   /** "I'm here" — the player tapped or pressed a key. Resets their idle clock; if a bot holds their seat because they
    *  went idle, it's theirs again at once. (useRoom's active() sends it at most every few seconds.) */
   | { type: 'active' }
+  /** A preset phrase for every seat (Rooms 0.12.0, the emotes module). Only its id travels — never words, never a
+   *  seat: the server knows whose connection it is, checks the id against content/emotes.json and keeps its own count. */
+  | { type: 'emote'; id: string }
 
 // ─── Server → player ────────────────────────────────────────────────
 
@@ -105,12 +108,17 @@ export type ServerMessage =
   /** Only to a player who came back into a game after being away (closed the tab, lost the connection, left the
    *  screen idle): `botTurns` = how many of their turns a bot played meanwhile (0 = none). (Rooms 0.9.0.) */
   | { type: 'back'; botTurns: number }
+  /** A seat said a preset phrase (or a server bot its banter line) — to every seat, the sender's too. Each device drops
+   *  the senders its player muted (the emotes module's receive). (Rooms 0.12.0.) */
+  | { type: 'emote'; seat: string; id: string }
 
 // ─── Checking what arrives ──────────────────────────────────────────
 
 export const MAX_NAME_LENGTH = 16
 /** A bot's profile is a short tag (the game checks what it means). */
 export const MAX_PROFILE_LENGTH = 40
+/** An emote id is a short code name (a phrase id, or banter.<who>.<moment> from a server bot). */
+export const EMOTE_ID = /^[A-Za-z][A-Za-z0-9_.-]{0,79}$/
 /** Bigger messages than this are refused unread (a real one is far smaller). */
 export const MAX_MESSAGE_LENGTH = 16_000
 
@@ -164,6 +172,8 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return { type: 'action', action: data.action }
     case 'active':
       return { type: 'active' }
+    case 'emote':
+      return typeof data.id === 'string' && EMOTE_ID.test(data.id) ? { type: 'emote', id: data.id } : null
     default:
       return null
   }

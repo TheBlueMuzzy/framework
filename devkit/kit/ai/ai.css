@@ -169,3 +169,12 @@
 .ai-note { padding: 2px 0; overflow-wrap: anywhere; }
 .ai-link { color: #8fb4ff; }
 @media (prefers-reduced-motion: reduce) { .ai-bar-fill { transition: none; } }
+
+/* banter lines (0.24.0): per moment, a box per line with ✕, then "+ Line" */
+.ai-banter { display: flex; flex-direction: column; gap: 4px; }
+.ai-moment { gap: 6px; }
+.ai-line { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; }
+.ai-line .tt-dot { grid-column: 1; }
+.ai-line-text { grid-column: 2; width: 100%; min-width: 0; }
+.ai-line .tt-reset { grid-column: 3; }
+.ai-add-line { align-self: flex-start; }
