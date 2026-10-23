@@ -64,6 +64,25 @@ Report = a page with green/red, the grids, and example games to watch.
 - **Auto-tuner (could)** — given a personality's feel targets, searches slider values that hit them while staying fun to lose to; **suggests**, Muzzy approves in the editor.
 - **Won't:** learning between games / per player; a neural network in the game.
 
+## "What wins?" — mining the arena's games (F25, researched 2026-10-23)
+**What others do**
+- **Card-game win-rate sites** (17lands for MTG Arena drafts, HSReplay for Hearthstone): split games by a situation and show the win rate of each side. 17lands' *games-in-hand win rate* (GIH WR) = win rate of games where the card was seen; *opening-hand* WR = only games where it was in the first hand; *improvement when drawn* = drawn WR − not-drawn WR. HSReplay shows the same by turn played and in the mulligan. Both hide a number until it has enough games and print the game count next to it.
+- **Chess engines** turn "who's better here" into a *win probability* (an evaluation in pawns → an expected score, e.g. Lichess' win% curve). The useful idea: judge a position at a set *moment*, not only at the end.
+- **Board-game AI / balance studies** (self-play with MCTS/AlphaZero-style agents — e.g. a Mahjong study measuring the first seat's edge at ~26% vs 22.5% by seat, 7 Wonders Duel's ZeusAI rating "going first" as worth more than an extra pick): play many AI games, count wins by seat or by situation, change one rule, play again.
+**Which measures, at which moments**
+- A situation is a number the game names per seat: score lead, letters in hand, glyphlings trapped, pockets owned… (the game knows what's worth asking).
+- Sampled *after the seat's own turn N* (default turns 3 and 5) and at the *end* — early turns say what to aim for, the end says what the winners ended with. Moments live in `content/ai/arena.json` (`whatWinsMoments`).
+- Per situation per moment: **win rate by low / mid / high** (terciles — thirds of the seats by value; ties never split, so a yes/no number gets two groups, not three) and **how strongly it predicts the win**: *the edge* = in how many winner-vs-loser pairs **of the same game** the winner had the higher number (ties count half). 50% = says nothing, 100% = the winner always had more, 0% = always less (fewer is better). Same-game pairs on purpose: a 2-player table's 50% base rate and a 4-player table's 25% never get mixed up (the tercile win rates do mix them, so the base rate is printed beside them).
+**How many games are enough**
+- A win rate from n games is ± about 1/√n at 95% (100 games → ±10 points, 400 → ±5). The default floor is 30 seats per group and 30 winner-loser pairs (`whatWinsMinGames`); a situation below it is **left out and listed as "too few games"**, never hidden. The Dev Kit's 6-game run will mostly say "too few" — that's honest; `npm run ai:arena` (60+ games) is where it reads.
+**Plain words**: "Players with score lead 10 or more after turn 5 win 78% (of 240 games) — vs 12% with −3 or less." Top 5 by edge (furthest from 50%).
+**Pitfalls (said on the report)**
+- *Already winning:* a number that is the score (score lead at the end) predicts the win because it IS the win — useful as a sanity check, not as advice. The things that win *early* are the ones to value.
+- *Correlation, not cause:* "players with more trapped glyphlings win" may mean strong players trap more, not that trapping wins. Test a hunch by changing a goal and running again.
+- *Survivors:* turn 5 is only counted in games that reached turn 5; long games are over-represented late.
+- *The AI's own style:* bots value what their goals tell them to; a situation a goal never chases looks weak only because nobody tried it.
+**This sprint takes**: situations + moments, terciles, the same-game edge, the floor + "too few", top 5 sentences on the report and the Dev Kit. **Later (not now)**: logistic regression on several situations at once (what wins *with the others held still*), a chess-style win-probability curve over the game, situation × personality splits.
+
 ## Built how (engineering calls — Claude's, logged in Glyphtender TDD)
 - `ai/` module, pure TypeScript, no React, no network — like `table/`. Copied into games with a version stamp.
 - Bot shape unchanged: `(view, seat, rng) → { action, rng }` — a brain is made from (game plug, personality, skill, memory). Beliefs/memory live per bot seat, rebuilt from that seat's events, so a server restart or a rejoin rebuilds them.
