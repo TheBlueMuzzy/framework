@@ -84,7 +84,10 @@ export function wordsToAdd(current) {
   let file
   try { file = JSON.parse(current) } catch { return { text: null, added: [], broken: true } }
   if (!file || typeof file !== 'object' || Array.isArray(file)) return { text: null, added: [], broken: true }
-  const mine = file.emotes && typeof file.emotes === 'object' ? file.emotes : null
+  // An "emotes" that's there but isn't an object of words (a string, null, a list…) is the game's: never replaced
+  const has = Object.prototype.hasOwnProperty.call(file, 'emotes')
+  if (has && !(file.emotes && typeof file.emotes === 'object' && !Array.isArray(file.emotes))) return { text: null, added: [], notObject: true }
+  const mine = has ? file.emotes : null
   const added = Object.keys(starter).filter((id) => typeof mine?.[id] !== 'string')
   if (!added.length) return { text: null, added }
   const indent = current.match(/\n([ \t]+)"/)?.[1] ?? '  '
@@ -220,6 +223,7 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
   if (!hasUiKit) log(`  skipped ${UI_FOLDER} (the bubbles and the picker — the game has no UI kit; draw them yourself from onEmote)`)
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
   if (words.broken) log(`  ⚠ ${TEXT} isn't valid JSON — add the phrases' words yourself ("emotes": { "hello": "Hello!", … })`)
+  else if (words.notObject) log(`  ⚠ ${TEXT} "emotes" isn't a list of words (it should be { "hello": "Hello!", … }) — left as it is; fix it, then run the installer again`)
   else if (words.cantPlace) log(`  ⚠ couldn't add the words to ${TEXT} without changing anything else — add them yourself under "emotes": ${words.added.join(', ')} (templates/content/words.json has them)`)
   else if (words.added.length) log(`  words   ${TEXT} "emotes": ${words.added.join(', ')} (only ids that had none)`)
   if (dryRun) return { changed, removed, starter, words: words.text ? words.added : [] }

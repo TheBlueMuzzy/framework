@@ -100,6 +100,19 @@ describe('install-emotes', () => {
     expect(wordsToAdd('{}').text).toMatch(/^\{\n {2}"emotes"/)
   })
 
+  it('wordsToAdd: a top-level "emotes" that isn\'t an object is never replaced by a second "emotes" (review F107)', () => {
+    for (const odd of ['"Emotes"', 'null', '[1]', '7']) {
+      const result = wordsToAdd(`{\n  "title": "Goops",\n  "emotes": ${odd}\n}\n`)
+      expect(result.text).toBeNull()
+      expect(result.notObject).toBe(true)
+    }
+    const root = game({ 'content/text/en.json': '{ "emotes": "Emotes" }' })
+    const logs = []
+    installEmotes(root, { log: (l) => logs.push(l) })
+    expect(readFileSync(join(root, 'content/text/en.json'), 'utf8')).toBe('{ "emotes": "Emotes" }')
+    expect(logs.join('\n')).toMatch(/"emotes" isn't a list of words/)
+  })
+
   it('wordsToAdd: nothing to add → no new file', () => {
     expect(wordsToAdd(JSON.stringify({ emotes: { hello: 'a', wellPlayed: 'b', thanks: 'c', wow: 'd', oops: 'e', thinking: 'f', goodGame: 'g' } })).text).toBeNull()
   })
