@@ -75,8 +75,8 @@ Goal: any turn-based game can put a fair, human-feeling AI in any seat — local
   why: Muzzy tunes personalities by eye in the game, not by description
 - ✅ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21 · sprint 26 (ai 0.3.0 arena + npm run ai:arena, Dev Kit 0.23.0 Run check in a worker)
   why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
-- 🟢 F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
-- 🟢 F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
+- ✅ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
+- ✅ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
 ```mermaid
 flowchart LR
   F12[✅ F12 Game core] --> F19[F19 Brain]
@@ -254,6 +254,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
+- 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
 - 2026-10-23 — **A tappable seat row in the UI kit** (v0.5 look-back): emotes need one tappable portrait per seat; the scratch Glyphtender had to hand-build `SeatEmotes.tsx` — a kit part (seats in a row, each with `emoteSeatProps` + the muted mark) so every game with opponents gets it.
 - 2026-10-23 — **plan-lint trims the STATE Log itself** (v0.5 look-back): "Log has 11 entries" stopped 4 edits this sprint, each fixed by hand-moving the oldest line to archive/log.md — the hook (or save.mjs) can move it.

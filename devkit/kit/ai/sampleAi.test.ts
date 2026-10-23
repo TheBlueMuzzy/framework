@@ -2,7 +2,23 @@
 // it has one small test of its own at the bottom, so vitest is happy when it runs it).
 // A small game with two personalities and two skills, shaped like Glyphtender's content/ai/ files.
 import { expect, it } from 'vitest'
-import type { AiPersonality, DevKitAi } from './aiTypes'
+import type { AiPersonality, AiTuneResult, DevKitAi } from './aiTypes'
+
+/** A tuner result for the Bully (the AI kit's shape, 0.26.0): aggression 80–95 → 60–75, steady.SCORE 0.6 → 0.3. */
+export function bullySuggestion(over: Partial<AiTuneResult> = {}): AiTuneResult {
+  const suggested = { ...bully(), traits: { ...bully().traits, aggression: { min: 60, max: 75 } }, steady: { SCORE: 0.3 }, nudge: 0.9 }
+  return {
+    personality: 'Bully', verdict: 'better', message: 'Suggested: 1 → 2 of 2 targets green on 24 fresh games.', suggested,
+    sliders: [
+      { path: 'traits.aggression', from: '80–95', to: '60–75', changed: true },
+      { path: 'traits.greed', from: '30–50', to: '30–50', changed: false },
+      { path: 'nudge', from: '0.2', to: '0.9', changed: false }, // (not changed: never applied, whatever suggested says)
+      { path: 'steady.SCORE', from: '0.6', to: '0.3', changed: true },
+    ],
+    targets: [{ label: 'hems rivals in', meter: 'tangles', wants: '≥ 0.6', before: { measured: 0.4, pass: false }, after: { measured: 0.7, pass: true } }],
+    cantReach: [], others: [], tries: 9, games: 156, seconds: 3.2, settings: { tuneFreshGames: 24 }, ...over,
+  }
+}
 
 export const bully = (): AiPersonality => ({
   id: 'Bully',

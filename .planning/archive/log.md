@@ -29,3 +29,6 @@
 - 2026-10-20 — F103 approved: confirm boxes can't silently fail, bars fit small phones without workarounds, the Dev Kit warns when its PAUSED pill covers a game's HUD.
 - 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
 - 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.
+- 2026-10-20 — F104 built (waiting for OK): a game can say "portrait only" once and no check tests it sideways.
+- 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.
+- 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).

@@ -22,9 +22,9 @@ import { WatchPanel } from './WatchPanel'
 import {
   BANTER_SECTION, BIO_SECTION, CHECK_SECTION, WATCH_SECTION, aiSections, applyBanterLive, banterChanges, banterOf,
   copyPersonality, freeId, getAt, helpOf, labelOf, lineKeys, listChanges, listOf, moveGoal, newShift, nextLineKey,
-  searchAi, setAt, settingsName, steadyLabel, strayKeys, withBanter, withLine, withList, withRange, withSteady, type AiSection,
+  searchAi, setAt, settingsName, steadyLabel, strayKeys, withBanter, withLine, withList, withRange, withSteady, withSuggestion, type AiSection,
 } from './aiLogic'
-import type { AiBanter, AiBanterLines, AiFile, AiPersonality, AiShift, AiSkill, DevKitAi } from './aiTypes'
+import type { AiBanter, AiBanterLines, AiFile, AiPersonality, AiShift, AiSkill, AiTuneResult, DevKitAi } from './aiTypes'
 import '../tuning/tuning.css'
 import './ai.css'
 
@@ -95,6 +95,14 @@ export function AiTab({ ai, query = '' }: { ai: DevKitAi; query?: string }) {
     setPickedId(id)
     setNewName(null)
     setStatus({ kind: 'info', text: `${id} is a copy of ${picked.id} — not saved yet.` })
+  }
+
+  /** "Suggest sliders" → Apply (0.26.0): the suggested sliders go in as UNSAVED edits of that personality (picked, so
+   *  its sliders show the new values); Save writes them, Undo unsaved takes them back. */
+  function applySuggestion(result: AiTuneResult) {
+    setPeople((list) => list.map((p) => (p.id === result.personality ? withSuggestion(p, result) : p)))
+    setPickedId(result.personality)
+    setStatus({ kind: 'info', text: `Suggested sliders put in for ${result.personality} — not saved yet.` })
   }
 
   function undo() {
@@ -276,7 +284,7 @@ export function AiTab({ ai, query = '' }: { ai: DevKitAi; query?: string }) {
         onChange={(key, words) => editLines(withLine(lines, picked.id, key, words))} />
     }
     if (section.title === WATCH_SECTION && ai.watch) return <WatchPanel watch={ai.watch} picked={picked} everyone={people} skill={skill} />
-    if (section.title === CHECK_SECTION && ai.runCheck) return <CheckPanel runCheck={ai.runCheck} personalities={people} skills={skills} />
+    if (section.title === CHECK_SECTION && ai.runCheck) return <CheckPanel runCheck={ai.runCheck} personalities={people} skills={skills} suggest={ai.suggest} picked={picked.id} onApply={applySuggestion} />
     return null
   }
 

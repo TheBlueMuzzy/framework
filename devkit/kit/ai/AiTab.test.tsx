@@ -5,8 +5,8 @@ import { setSectionsOpen } from '../search/sectionState'
 import { AiTab } from './AiTab'
 import { aiTab } from './aiTabEntry'
 import { getAt } from './aiLogic'
-import type { AiPersonality, AiWatchEvent, DevKitAi } from './aiTypes'
-import { sampleAi } from './sampleAi.test'
+import type { AiPersonality, AiTuneProgress, AiTuneResult, AiWatchEvent, DevKitAi } from './aiTypes'
+import { bullySuggestion, sampleAi } from './sampleAi.test'
 
 const ALL_SECTIONS = ['AI: who it is', 'AI: traits', 'AI: banter, nerve & words', 'AI: personality — more', 'AI: bio', 'AI: big moments', 'AI: skill', 'AI: watch a game', 'AI: Personality Check'].map((t) => `ai:${t}`)
 
@@ -163,6 +163,100 @@ describe('the AI tab', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
     expect(runCheck.mock.calls[0][0]).toMatchObject({ games: 6 })
     expect(screen.getByRole('link', { name: 'open the report' }).getAttribute('href')).toBe('blob:report')
+    expect(screen.queryByText('What wins?')).toBeNull() // an older report has no "What wins?": nothing shown
+  })
+
+  it('Run check shows the report\'s "What wins?" sentences (0.25.0), and says when there are too few games', async () => {
+    vi.stubGlobal('open', vi.fn())
+    URL.createObjectURL = vi.fn(() => 'blob:report')
+    URL.revokeObjectURL = vi.fn()
+    const page = '<h2>What wins?</h2><section><ol data-what-wins><li>Players with score lead 10 or more after turn 5 win 78% (of 240 games, ±6%) — vs 12% with -3 or less</li><li>Players with &lt;tiles&gt; 2 at the end win 40%</li></ol></section><p data-what-wins-left="3">Left out</p>'
+    const runCheck = vi.fn(async () => page)
+    const { unmount } = render(<AiTab ai={sampleAi({ runCheck })} />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
+    expect(screen.getByText('What wins?')).toBeTruthy()
+    expect([...screen.getByText('What wins?').parentElement!.querySelectorAll('li')].map((li) => li.textContent)).toEqual(['Players with score lead 10 or more after turn 5 win 78% (of 240 games, ±6%) — vs 12% with -3 or less', 'Players with <tiles> 2 at the end win 40%'])
+    expect(screen.getByText('3 left out for too few games (listed on the report).')).toBeTruthy()
+    unmount()
+    render(<AiTab ai={sampleAi({ runCheck: vi.fn(async () => '<p data-what-wins-none>No situation…</p>') })} />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
+    expect(screen.getByText(/No situation has enough games yet/)).toBeTruthy()
+  })
+
+  describe('Suggest sliders (0.26.0)', () => {
+    const runCheck = async () => '<p>report</p>'
+
+    it('runs the tuner for the picked personality with progress, shows old → new and targets now → suggested', async () => {
+      let finish: (r: AiTuneResult) => void = () => {}
+      let progress: (p: AiTuneProgress) => void = () => {}
+      const suggest = vi.fn((o: { personality: string; onProgress: (p: AiTuneProgress) => void }) => { progress = o.onProgress; return new Promise<AiTuneResult>((r) => { finish = r }) })
+      render(<AiTab ai={sampleAi({ runCheck, suggest })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(suggest.mock.calls[0][0]).toMatchObject({ personality: 'Bully', personalities: [expect.objectContaining({ id: 'Bully' }), expect.objectContaining({ id: 'Scholar' })] })
+      act(() => progress({ phase: 'search', tryNo: 4, tries: 20, game: 3, games: 12 }))
+      expect(screen.getByRole('button', { name: 'Try 4 / 20 · game 3/12' })).toBeTruthy()
+      expect(screen.getByRole('progressbar', { name: 'Suggest sliders' }).getAttribute('aria-valuenow')).toBe('16') // (3 + 3/12) / 20
+      await act(async () => finish(bullySuggestion()))
+      expect(screen.getByText('Suggested: 1 → 2 of 2 targets green on 24 fresh games.')).toBeTruthy()
+      const rows = screen.getAllByRole('row').map((r) => r.textContent)
+      expect(rows).toContain('traits.aggression80–9560–75')
+      expect(rows).toContain('steady.SCORE0.60.3')
+      expect(rows.some((r) => r?.includes('traits.greed'))).toBe(false) // unchanged sliders aren't listed
+      expect(rows).toContainEqual(expect.stringMatching(/^hems rivals in — tangles, wants ≥ 0\.6✗ 0\.4✓ 0\.7$/))
+    })
+
+    it('a run still going when the panel closes is stopped (its signal aborts, so the worker closes) — review', async () => {
+      let signal: AbortSignal | undefined
+      const suggest = vi.fn((o: { signal?: AbortSignal }) => { signal = o.signal; return new Promise<AiTuneResult>(() => {}) })
+      const { unmount } = render(<AiTab ai={sampleAi({ runCheck, suggest })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(signal?.aborted).toBe(false)
+      unmount()
+      expect(signal?.aborted).toBe(true)
+    })
+
+    it('Apply puts the values in as unsaved edits: Save writes them, Undo unsaved takes them back', async () => {
+      const written = saves()
+      const suggest = vi.fn(async () => bullySuggestion())
+      render(<AiTab ai={sampleAi({ runCheck, suggest })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(written()).toEqual([]) // nothing is written by suggesting
+      expect((screen.getByLabelText('aggression low end') as HTMLInputElement).value).toBe('80') // not applied yet
+      fireEvent.click(screen.getByRole('button', { name: 'Apply to Bully' }))
+      expect((screen.getByLabelText('aggression low end') as HTMLInputElement).value).toBe('60')
+      expect((screen.getByLabelText('aggression high end slider') as HTMLInputElement).value).toBe('75')
+      expect(screen.getByText(/Applied to Bully as unsaved edits/)).toBeTruthy()
+      expect(written()).toEqual([]) // still nothing written
+      fireEvent.click(screen.getByRole('button', { name: 'Undo unsaved' }))
+      expect((screen.getByLabelText('aggression low end') as HTMLInputElement).value).toBe('80')
+      // apply again → Save writes the personalities file with the new values
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      fireEvent.click(screen.getByRole('button', { name: 'Apply to Bully' }))
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+      const [file] = written()
+      const saved = (file.data.personalities as AiPersonality[]).find((p) => p.id === 'Bully')!
+      expect(saved.traits.aggression).toEqual({ min: 60, max: 75 })
+      expect(saved.steady).toEqual({ SCORE: 0.3 })
+      expect(saved.nudge).toBe(0.2)
+    })
+
+    it('says when nothing held up (no Apply), and when the tuner stopped', async () => {
+      const none = vi.fn(async () => bullySuggestion({ verdict: 'noGain', suggested: null, message: 'No slider move hit more targets in 20 tries — keep what you have.', sliders: [], cantReach: [{ label: 'hems rivals in', why: "measured 0.4, wants ≥ 0.6 — couldn't reach it within these ranges" }] }))
+      const { unmount } = render(<AiTab ai={sampleAi({ runCheck, suggest: none })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(screen.getByText(/keep what you have/)).toBeTruthy()
+      expect(screen.getByText(/Couldn't reach “hems rivals in”: measured 0.4, wants ≥ 0.6 — couldn't reach it within these ranges/)).toBeTruthy()
+      expect(screen.queryByRole('button', { name: /Apply to/ })).toBeNull()
+      unmount()
+      render(<AiTab ai={sampleAi({ runCheck, suggest: vi.fn(async () => { throw new Error("this game's check worker can't suggest sliders yet") }) })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(screen.getByText(/Suggest sliders stopped: this game's check worker can't suggest sliders yet/)).toBeTruthy()
+    })
+
+    it('a game without a tuner shows no button', () => {
+      render(<AiTab ai={sampleAi({ runCheck })} />)
+      expect(screen.queryByRole('button', { name: /Suggest sliders/ })).toBeNull()
+    })
   })
 
   it('the Dev Kit search (its query, while the tab is open): only matching sections show, with a count', () => {

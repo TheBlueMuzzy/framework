@@ -52,6 +52,64 @@ describe('the arena loop', () => {
   })
 })
 
+describe('situations ("What wins?", F25)', () => {
+  const seats = [{ personality: greedy, skill: steady }, { personality: greedy, skill: steady }]
+
+  it('reads each seat\'s situations after its own turns N and at the end', () => {
+    const game = playArenaGame(arenaPlug, seats, 1000, 'mixed', [1, 2, 'end'])
+    for (const [i, s] of game.situations.entries()) {
+      expect(s.end).toEqual(arenaPlug.situations!(game.state, i))
+      const own = game.moves.filter((m) => m.seat === i).length
+      // Draw to 10: every move is one turn, so turn 1 = the hand after the seat's first card
+      if (own >= 1 && game.moves.find((m) => m.seat === i)!.action.type === 'draw') expect(s['turn 1'].total).toBeGreaterThan(0)
+      if (own < 2) expect(s['turn 2']).toBeUndefined() // a moment the game never reached isn't there
+    }
+    expect(toResults(arenaPlug, [game])[0].seats[0].situations).toEqual(game.situations[0])
+  })
+
+  it('a turn is all of a seat\'s moves until someone else acts', () => {
+    // A game where seat 0 acts twice in a row: its turn 1 is read after the second move only
+    let count = 0
+    const rules = { setup: () => ({ n: 0 }), isOver: (s: { n: number }) => s.n >= 3, toAct: (s: { n: number }) => [s.n < 2 ? 0 : 1], viewFor: () => ({}), apply: (s: { n: number }) => ({ state: { n: s.n + 1 } }) }
+    const plug = { name: 'Two in a row', rules, setup: () => ({}), bot: () => (_v: unknown, _s: number, rng: number) => ({ action: {}, rng }), meters: () => [{}, {}], winners: () => [1], situations: (s: { n: number }) => (count++, { moves: s.n }) }
+    const game = playArenaGame(plug, seats, 1, 'mixed', [1])
+    expect(game.situations).toEqual([{ 'turn 1': { moves: 2 } }, { 'turn 1': { moves: 3 } }])
+    expect(count).toBe(2) // read only at its moments, not after every move
+    // the game's own turn count (plug.turns): seat 0's first move was a draft, not a turn — its turn 1 is its 2nd move
+    const draft = playArenaGame({ ...plug, turns: (s: { n: number }, seat: number) => (seat === 0 ? Math.max(0, s.n - 1) : s.n >= 3 ? 1 : 0) }, seats, 1, 'mixed', [1])
+    expect(draft.situations).toEqual([{ 'turn 1': { moves: 2 } }, { 'turn 1': { moves: 3 } }])
+    const late = playArenaGame({ ...plug, turns: () => 0 }, seats, 1, 'mixed', [1])
+    expect(late.situations).toEqual([{}, {}]) // never reached turn 1 the game's way
+  })
+
+  it('true/false count as 1/0; anything else that isn\'t a number stops the run in plain English', () => {
+    const yesNo = { ...arenaPlug, situations: () => ({ ahead: true }) as unknown as Record<string, number> }
+    expect(playArenaGame(yesNo, seats, 1000, 'mixed', ['end']).situations[0].end).toEqual({ ahead: 1 })
+    const bad = { ...arenaPlug, situations: () => ({ lead: NaN }) }
+    expect(() => playArenaGame(bad, seats, 1000, 'mixed', ['end'])).toThrow(`Draw to 10's situation "lead" (seat 0, end) isn't a number`)
+    const word = { ...arenaPlug, situations: () => ({ lead: 'lots' }) as unknown as Record<string, number> }
+    expect(() => playArenaGame(word, seats, 1000, 'mixed', ['end'])).toThrow(/it gave "lots"/)
+  })
+
+  it('the moments from content/ai/arena.json: turn numbers and "end"; anything else refused in plain English', () => {
+    expect(arenaPlan(request({ settings: { games: 1, ladderGames: 0, whatWinsMoments: [2, 'end'] } })).settings.whatWinsMoments).toEqual([2, 'end'])
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: ['turn 3'] } }))).toThrow(`"whatWinsMoments": "turn 3" isn't a turn number (1, 2, 3…) or "end"`)
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: [0] } }))).toThrow(/0 isn't a turn number/)
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: 'end' as never } }))).toThrow(/should be a list like/)
+    // a game's imported JSON (strings typed as string) fits the settings as it is
+    const fromJson: { whatWinsMoments: (string | number)[] } = JSON.parse('{"whatWinsMoments":[3,"end"]}')
+    expect(runArena(arenaPlug, request({ settings: { games: 2, ladderGames: 0, ...fromJson } })).games[0].situations[0]).toHaveProperty('end')
+  })
+
+  it('an old plug without situations keeps working: no situations in its results', () => {
+    const { situations: _none, ...old } = arenaPlug
+    void _none
+    const game = playArenaGame(old, seats, 1000)
+    expect(game.situations).toEqual([{}, {}])
+    expect(toResults(old, [game])[0].seats[0]).not.toHaveProperty('situations')
+  })
+})
+
 describe('seating plans', () => {
   it('mixed tables go round 2, 3, 4 seats, shuffled the same way every run, with repeats past the cast', () => {
     const plan = mixedTables([careful, greedy], steady, 6, { minSeats: 2, maxSeats: 4, seed: 9 })
@@ -133,6 +191,32 @@ describe('the whole Personality Check on Draw to 10', () => {
     expect(withLadder.mixedResults).toHaveLength(12)
     expect(withLadder.results).toHaveLength(32) // + 10 ladder games for each of the 2 personalities
     expect(Object.keys(withLadder.report.ladder).length).toBeGreaterThan(0)
+  })
+
+  it('"What wins?" (F25): sentences from the mixed tables at the main skill, on the report page', () => {
+    const w = report.whatWins!
+    expect(w.top.length).toBeGreaterThan(0)
+    expect(w.top.length).toBeLessThanOrEqual(5)
+    // Draw to 10: at the end, not having bust is what wins — "busted" (fewer is better) or the lead tops the list
+    expect(w.all[0].strength).toBeGreaterThan(0.5)
+    expect(w.top.every((t) => /^Players with .+ win \d+% \(of \d+ games, ±\d+%\) — vs \d+% with /.test(t))).toBe(true)
+    const html = reportHtml(report)
+    expect(html).toContain('<h2>What wins?')
+    expect(html).toContain(`<ol data-what-wins><li>${w.top[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</li>`)
+    // the settings: fewer sentences, a higher floor
+    const strict = runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 0, whatWinsTop: 1, whatWinsMinGames: 1000 } })).report.whatWins!
+    expect(strict.top).toEqual([])
+    expect(strict.leftOut.length).toBe(strict.all.length)
+    expect(reportHtml({ ...report, whatWins: strict })).toContain('data-what-wins-none')
+    expect(runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 0, whatWinsTop: 1 } })).report.whatWins!.top).toHaveLength(1)
+  })
+
+  it('an old plug without situations: no "What wins?" on the report', () => {
+    const { situations: _none, ...old } = arenaPlug
+    void _none
+    const r = runArena(old, request({ settings: { games: 6, ladderGames: 0 } })).report
+    expect(r.whatWins).toBeUndefined()
+    expect(reportHtml(r)).not.toContain('What wins?')
   })
 
   it('the same seed gives the same report; another seed another', () => {
