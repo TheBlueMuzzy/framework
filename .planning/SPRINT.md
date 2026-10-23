@@ -17,7 +17,7 @@ Checked: 2026-10-23 (Claude) — root check:fast 20/20 (my own run at c513c90); 
 ## F26 🔧 Auto-tuner
 Done when: a personality that misses feel targets gets a suggested set of slider values (within its ranges) that hits more of them — on new games, not only the ones it was tuned on — shown as old → new per slider and red → green per target; from `npm run ai:tune` and a Dev Kit button; nothing is written until the designer applies it.
 why: Muzzy tunes by feel; the computer can do the slow searching
-- [ ] 🤖 1. The tuner: tries slider values within each slider's range, keeps what hits more targets (fixed seeds, a time / games budget in content/ai/arena.json) — ai/kit/check.ts
+- [x] 🤖 1. The tuner: tries slider values within each slider's range, keeps what hits more targets (fixed seeds, a time / games budget in content/ai/arena.json) — ai/kit/tune.ts (new: check.ts is the four checks)
 - [ ] 🤖 2. `npm run ai:tune -- --personality <id>` writes a suggestion page (old → new per slider, targets red → green, checked on fresh seeds) — ai/scripts/ai-arena.mjs
 - [ ] 🤖 3. Dev Kit AI tab: "Suggest sliders" runs it in the background worker with progress, shows old → new, "Apply" puts the values in unsaved (Save as usual) — devkit/kit/ai/CheckPanel.tsx
 - [ ] 🤖 4. Proof on the scratch Glyphtender: a personality with a red target → tune → apply → a fresh-seed check shows it green (or says honestly it can't be reached with those ranges); screenshots looked at — devkit/kit/ai/aiLogic.ts
