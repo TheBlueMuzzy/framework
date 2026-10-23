@@ -4,7 +4,7 @@
 // it's tested on its own) and every SQL statement is in src/crashes/crashRows.ts (tested on a real SQLite); this file
 // only plugs them into Cloudflare: one Durable Object, its SQLite, the daily tidy-up alarm, the token.
 //   Local:  npm run crashes:dev   (port 1995)   ·   Live: npm run crashes:deploy (Muzzy's call — it's public)
-//   Token:  npx wrangler secret put CRASHES_TOKEN -c crashes/wrangler.json   (the same text as ~/.config/bmuz/crashes/<game>.token)
+//   Token:  npx wrangler secret put CRASHES_TOKEN -c crashes/wrangler.json   (the same text as ~/.config/bmuz/crashes/<this server's host>.token)
 // Template version: 1 (keep this line: the installer compares it with the kit's to say what changed since your copy)
 //
 // ONE copy of the CrashStore class (named "crashes") holds everything in its own SQLite: a SQLite Durable Object, the

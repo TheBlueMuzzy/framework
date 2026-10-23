@@ -15,7 +15,7 @@ import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { gameName } from './crash-report.mjs'
+import { gameName, tokenFile } from './crash-report.mjs'
 
 const crashesDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/crashes'
@@ -117,7 +117,9 @@ export function wiringSteps(gameDir) {
       done: false,
       step: `Going live (Muzzy's call — a public server that keeps anonymous error reports for content/crashes.json server.keepDays):
        1. a token, once:   node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"
-          → save it in ~/.config/bmuz/crashes/${name}.token on each machine (never in the repo), and
+          → save it on each machine (never in the repo) in a file named after the server's address in step 2:
+            ~/.config/bmuz/crashes/${tokenFile(`https://${name}-crashes.joebrogno.workers.dev`)}
+            (the token only ever goes to the server its file is named after), and
           npx wrangler secret put CRASHES_TOKEN -c crashes/wrangler.json   (paste the same text)
        2. npx wrangler login (once per machine), then npm run crashes:deploy → https://${name}-crashes.joebrogno.workers.dev
        3. content/crashes.json client.url = that address; STATE Key facts: "Crashes: <that address>" (session start reads it)

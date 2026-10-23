@@ -385,15 +385,24 @@ describe('the awkward cases', () => {
     img.remove()
   })
 
-  it('a failed sound from another site → still only its path', async () => {
+  // security review v0.11.2: another site's path can name a player (an avatar's /u/1234567) — only site + file type
+  it('a failed file from another site → only the site and its file type, never its path', async () => {
     start()
     const audio = document.createElement('audio')
     audio.src = 'https://cdn.example.com/sfx/level-2.mp3?sig=xyz'
     document.body.append(audio)
     audio.dispatchEvent(new Event('error'))
+    const img = document.createElement('img')
+    img.src = 'https://avatars.example.com/u/1234567'
+    document.body.append(img)
+    img.dispatchEvent(new Event('error'))
     await settle()
-    expect(sent[0].report.title).toBe("audio didn't load: sfx/level-2.mp3")
+    expect(sent[0].report.title).toBe("audio didn't load: cdn.example.com/….mp3")
+    expect(sent[1].report.title).toBe("img didn't load: avatars.example.com/…")
+    expect(sent[1].body).not.toContain('1234567')
+    expect(sent.every((s) => readReport(JSON.parse(s.body)) !== null)).toBe(true) // and the server takes them
     audio.remove()
+    img.remove()
   })
 
   it('a rejection with a non-Error reason (a string, undefined, an object) → a sensible title, no crash', async () => {

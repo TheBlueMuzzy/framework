@@ -193,9 +193,11 @@ function assetFailed(el: Element & { src?: string; href?: unknown; currentSrc?: 
   else if (src.startsWith('blob:')) path = '(blob)'
   else if (src) {
     try {
-      // the game's own file: its path inside the game (as frames are); another site's: its whole path
+      // the game's own file: its path inside the game (as frames are); another site's: only the site and the file's
+      // type — its path can hold a player's id (an avatar's /u/1234567), and nothing that could name a player is kept
       const url = new URL(src, globalThis.location?.href)
-      path = (url.origin === origin() && sitePath(url.href, origin(), basePath())) || url.pathname.replace(/^\/+/, '') || '/'
+      const type = /\.[A-Za-z0-9]{1,8}$/.exec(url.pathname)?.[0] ?? ''
+      path = url.origin === origin() ? sitePath(url.href, origin(), basePath()) || url.pathname.replace(/^\/+/, '') || '/' : `${url.hostname}/…${type}`
     } catch { /* keep "(unknown file)" */ }
   }
   catchOne('asset', `${el.tagName.toLowerCase()} didn't load: ${path}`.slice(0, 200), undefined, [], true)

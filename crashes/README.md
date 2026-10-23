@@ -40,7 +40,7 @@ It prints only the wiring still missing:
 
 Then come the steps to try it locally and to go live.
 
-**Going live is Muzzy's call**: a token (also saved in `~/.config/bmuz/crashes/<game>.token` on each machine, never in the repo), `npm run crashes:deploy`, `client.url` in content/crashes.json, `Crashes: <address>` in STATE Key facts (session start reads it), and the privacy paragraph on the game's privacy page.
+**Going live is Muzzy's call**: a token (also saved in `~/.config/bmuz/crashes/<server host>.token` on each machine, never in the repo), `npm run crashes:deploy`, `client.url` in content/crashes.json, `Crashes: <address>` in STATE Key facts (session start reads it), and the privacy paragraph on the game's privacy page.
 
 ## What a game must provide (MODULE-CONTRACTS.md "Crashes") — check:framework checks each
 - the game catches its errors (`startCrashes` in the game's code + content/crashes.json);
