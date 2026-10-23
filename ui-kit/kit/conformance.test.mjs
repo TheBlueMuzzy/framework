@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import defaultSettings from './blocks/settings.default.json'
-import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, readOrientation, readRowManifest, settingsProblems, sizesFor, stripComments, whereText } from './conformance.mjs'
+import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, OLD_MODULE_ROWS, readOrientation, readRowManifest, settingsProblems, sizesFor, stripComments, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -396,7 +396,9 @@ describe('module Settings rows register themselves: settings-rows.json (0.30.0, 
       expect(runIn(old, rows, ['setOn(true); emotes.setHideAll(false); banter.setChatter("Lots")'])).toMatchObject({ ok: true, detail: '3 rows on: 0 read by the game, 3 handled by the kit / audio module' })
       // still red when an old copy's row isn't passed on — and the line names the module
       const r = runIn(old, rows, ['setOn(true); banter.setChatter("Lots")'])
-      expect(r.problems).toEqual(['Game → Hide everyone\'s emotes ("hideEmotes", a toggle): nothing in the game reads it — it\'s the emotes module\'s row: read values.hideEmotes in the Settings onChange (and loadSettings(…) at start-up)'])
+      expect(r.problems).toEqual([`Game → Hide everyone's emotes ("hideEmotes", a toggle): nothing in the game reads it — it's the emotes module's row: ${JSON.parse(real('emotes')).rows[0].hint}`])
+      // the fallback's hints are the manifests' own, word for word
+      for (const module of ['crashes', 'emotes', 'ai']) expect(OLD_MODULE_ROWS[module].map((row) => row.hint)).toEqual(JSON.parse(real(module)).rows.map((row) => row.hint))
     } finally { cleanUp() }
   })
   it('the fallback is only for an installed copy: no module folder → its row is just a row the game must read', () => {
@@ -421,6 +423,24 @@ describe('module Settings rows register themselves: settings-rows.json (0.30.0, 
       const odd = readRowManifest(JSON.stringify({ rows: [null, { id: 'x' }, { id: 'y', readBy: [42, 'a'.repeat(301)] }] }), { module: 'dice' })
       expect(odd.problems).toHaveLength(4)
       expect(odd.rows.map((row) => row.id)).toEqual(['x', 'y'])
+    } finally { cleanUp() }
+  })
+  it('a pattern that could run for minutes on a game\'s code (a repeated group with a repeat inside, like (a+)+) is refused, not run', () => {
+    const slow = ['(a+)+$', '(\\w+\\s?)*x', '((ab)*)+', '(?:x|y+){2,}', '(a+){3}']
+    for (const source of slow) {
+      const m = readRowManifest(JSON.stringify({ rows: [{ id: 'diceSkin', readBy: [source] }] }), { module: 'dice' })
+      expect(m.rows[0].readBy, source).toEqual([])
+      expect(m.problems, source).toEqual([expect.stringMatching(/"diceSkin": the pattern .* could take minutes to check \(a repeated group with a repeat inside\), so it isn't run — reinstall the module/)])
+    }
+    // the real shapes stay fine: one group of names, a repeat after a plain group, escaped brackets, a class with + inside
+    for (const source of ['\\b(applyCrashSetting|setOn)\\s*\\(', '(ab)+', '\\(a+\\)+', '[a+]+', '(a+)?b', '(?:x+)y']) {
+      expect(readRowManifest(JSON.stringify({ rows: [{ id: 'd', readBy: [source] }] }), { module: 'dice' }).problems, source).toEqual([])
+    }
+  })
+  it('an older module copy\'s failure line names that module\'s own call, not a generic "read values.…"', () => {
+    try {
+      const r = runIn({ 'src/emotes/VERSION': '0.3.0\n' }, tab([{ id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes' }]), [])
+      expect(r.problems[0]).toMatch(/it's the emotes module's row: pass it to the emotes module: applyEmoteSetting\(emotes, /)
     } finally { cleanUp() }
   })
   it('only module copies count: a manifest without a VERSION beside it, or under node_modules, is never read', () => {

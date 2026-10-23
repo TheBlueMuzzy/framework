@@ -194,6 +194,33 @@ const VALUE_TYPES = ['slider', 'toggle', 'selector', 'stepper']
 export const ROW_MANIFEST = 'settings-rows.json'
 const MAX_PATTERN = 300 // a pattern longer than this isn't a wiring call's name
 
+/** Could this regex source run for minutes on a long file? A repeated group with a repeat inside — (a+)+, (\w+\s?)*,
+ *  ((ab)*)+, (x|y+){2,} — is the classic case (JavaScript can't time a regex out, so the check would just hang).
+ *  Escapes and [classes] are skipped; a wiring pattern (a group of names, then \s*\() never has one. */
+export function slowPattern(source) {
+  const groups = [] // one per open ( : does it hold a repeat?
+  const quantifierAt = (j) => source[j] === '+' || source[j] === '*' || (source[j] === '{' && /\d/.test(source[j + 1] ?? ''))
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i]
+    if (c === '\\') { i++; continue }
+    if (c === '[') { // to the class's closing ]
+      for (i++; i < source.length && source[i] !== ']'; i++) if (source[i] === '\\') i++
+      continue
+    }
+    if (c === '(') { groups.push(false); continue }
+    if (c === ')') {
+      const inner = groups.pop() ?? false
+      const repeated = quantifierAt(i + 1)
+      if (inner && repeated) return true
+      if (groups.length) groups[groups.length - 1] ||= inner || repeated || source[i + 1] === '?'
+      continue
+    }
+    const isRepeat = quantifierAt(i) || (c === '?' && source[i - 1] !== '(' && !'+*?}'.includes(source[i - 1] ?? '('))
+    if (isRepeat && groups.length) groups[groups.length - 1] = true
+  }
+  return false
+}
+
 /** One module's settings-rows.json text → { module, file, rows: [{ id, readBy: [RegExp], hint }], problems: [plain words] }. */
 export function readRowManifest(text, { module, file = `src/${module}/${ROW_MANIFEST}` }) {
   const fix = `reinstall the module (node ~/.claude/config/bmuz/scripts/install-module.mjs ${module} .) — the game's copy isn't meant to be edited`
@@ -216,6 +243,10 @@ export function readRowManifest(text, { module, file = `src/${module}/${ROW_MANI
         problems.push(`${file} "${row.id}": a "readBy" entry isn't a short pattern (text, 1–${MAX_PATTERN} characters) — ${fix}`)
         continue
       }
+      if (slowPattern(source)) {
+        problems.push(`${file} "${row.id}": the pattern ${JSON.stringify(source)} could take minutes to check (a repeated group with a repeat inside), so it isn't run — ${fix}`)
+        continue
+      }
       try { readBy.push(new RegExp(source)) } catch (e) {
         problems.push(`${file} "${row.id}": the pattern ${JSON.stringify(source)} isn't one the check can use (${String(e?.message ?? e).split('\n')[0]}) — ${fix}`)
       }
@@ -230,9 +261,10 @@ export function readRowManifest(text, { module, file = `src/${module}/${ROW_MANI
 // did. Used ONLY for one of these folders installed (a VERSION) WITHOUT the file — updating the module makes it unused.
 // Don't add to it: a new module ships its own settings-rows.json instead.
 export const OLD_MODULE_ROWS = {
-  crashes: [{ id: 'crashReports', readBy: [/\b(applyCrashSetting|setOn)\s*\(/], hint: '' }], // F89
-  emotes: [{ id: 'hideEmotes', readBy: [/\b(applyEmoteSetting|setHideAll)\s*\(/], hint: '' }], // F107
-  ai: [{ id: 'botChatter', readBy: [/\b(applyBanterSetting|setChatter)\s*\(/], hint: '' }], // F22
+  // (the hints are the ones each module's settings-rows.json gives, so an old copy's failure line names the right call)
+  crashes: [{ id: 'crashReports', readBy: [/\b(applyCrashSetting|setOn)\s*\(/], hint: 'pass it to the crashes module: applyCrashSetting(loadSettings(settingsJson)) at start-up and applyCrashSetting(values) in the Settings onChange (src/crashes/settingsRow.ts)' }], // F89
+  emotes: [{ id: 'hideEmotes', readBy: [/\b(applyEmoteSetting|setHideAll)\s*\(/], hint: 'pass it to the emotes module: applyEmoteSetting(emotes, loadSettings(settingsJson)) at start-up and applyEmoteSetting(emotes, values) in the Settings onChange (src/emotes/settingsRow.ts)' }], // F107
+  ai: [{ id: 'botChatter', readBy: [/\b(applyBanterSetting|setChatter)\s*\(/], hint: 'pass it to the bots\' voice: applyBanterSetting(banter, loadSettings(settingsJson)) when the banter is made and applyBanterSetting(banter, values) in the Settings onChange (src/ai/kit/settingsRow.ts)' }], // F22
 }
 const oldSource = (module) => ({ module, file: null, old: true, rows: OLD_MODULE_ROWS[module], problems: [] })
 
