@@ -32,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-23 — F25 + F26 approved: the AI report says which situations predict winning, and the Dev Kit can suggest personality sliders (checked on fresh games; you apply).
 - 2026-10-23 — Sprint 27 planned: finish the AI — see which situations win, and let the computer suggest personality settings (F25, F26).
 - 2026-10-23 — Released v0.12.0 (v0.5 The AI milestone): players send preset phrases in speech bubbles, computer players talk at big moments and answer good moves (Bot chatter setting), a personality check proves each AI plays like itself, shop-screen kit pieces.
 - 2026-10-23 — F22 approved: computer players talk at the game's moments through the emote bubble, always answer a player's good move, and a Bot chatter setting (Off · Some · Lots) turns them down.
@@ -41,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-22 — F89 approved: games can report their crashes to a server of their own, read on the PC with real file lines.
 - 2026-10-22 — F89 built (waiting for OK): when a player's game breaks, the game reports it to its own small server; `npm run crashes` shows real file lines and session start says "N new errors from players".
 - 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).
-- 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.

@@ -30,3 +30,4 @@
 - 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
 - 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.
 - 2026-10-20 — F104 built (waiting for OK): a game can say "portrait only" once and no check tests it sideways.
+- 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.
