@@ -1,5 +1,35 @@
 # Changelog
 
+## v0.12.0 — 2026-10-23
+
+Players can now talk across the table without typing: tap your own seat, pick a preset phrase ("Well played!"), and it shows in a speech bubble by your seat on every screen, locally and online. Computer players speak through the same bubbles at the game's big moments, always answer a player's good move, and a "Bot chatter" setting (Off · Some · Lots) turns them down. A new personality check plays many bot-vs-bot games and shows whether each personality really plays like itself.
+
+### New
+- Emotes 0.2.0 (new module) — 7 starter phrases, a picker with a cooldown ring, mute any opponent (they aren't told), a "Hide everyone's emotes" switch in Settings, and a spam limit of 3 in a row then one every 4 s; phrases, limits and bubble timings live in content/emotes.json.
+- Rooms 0.12.0 — emotes travel through the room server, which always uses the sender's own seat, accepts only the game's own phrases, keeps its own spam count per player and never stores an emote.
+- AI 0.5.0 — banter: the game names its moments, each personality has lines per moment in content/text/en.json, bots speak a short beat later on the game's clock (both pauses hold them), never two at once, never the same line twice in a row; a player's good move always gets one bot's answer.
+- AI 0.5.0 — the "Bot chatter" Settings row (Off · Some · Lots), kept between sessions with the saves module.
+- AI 0.3.0 — the arena: `npm run ai:arena` plays many bot-vs-bot games and writes a report page — each personality's behaviour against its feel targets, whether personalities can be told apart, win shares and a skill ladder.
+- UI kit 0.28.1 — speech bubble, emote picker, mute menu and muted mark, in all 5 styles and every screen size.
+- UI kit 0.27.0 — a "success" colour in all 5 styles, cards that highlight (`tone="success"`) or show locked (greyed, readable, can't be tapped), a button in a dialog's header, Neon's red buttons glow like its others, and a menu title that shrinks before it would split a word.
+- Dev Kit 0.24.0 — the AI tab edits each personality's lines per moment while the game runs and saves them; "Run check" plays the personality check in the background with a progress bar.
+- The installers add emotes and banter to a game and list only the wiring still missing; the framework check confirms each promise.
+
+### Fixed
+- Adding emotes to a game no longer rewrites the game's whole text file — only the missing lines are added.
+- Two seats' speech bubbles no longer land on top of each other.
+- An emote sent the instant its cooldown ended is no longer dropped by the room server because of network delay.
+- Lobby players coming and going can no longer grow the room server's memory.
+- Saving banter lines in the Dev Kit keeps every other entry in the text file.
+- A waiting bot line is dropped when a person takes that seat back, instead of being said as them.
+- A dialog title that shrank for a header button goes back to full size when the button goes away.
+- Skill-ladder games no longer count in the personality check's main numbers.
+
+### Known issues
+- Online, bots run on the room server and don't see each player's "Bot chatter" level; "Hide everyone's emotes" still hides them — planned (banter, layer 2).
+- When two bubbles must share a spot (a player's emote and a bot's line at once), the second can point past its seat — planned.
+- No game uses emotes or banter yet; each game's own session installs them.
+
 ## v0.11.2 — 2026-10-22
 
 When a game breaks for a player, the designer now hears about it: a new crashes module catches the error, sends one short report to the game's own small crash server, and the next session starts with "3 new errors from players since last time". Reports carry no name, address or stored id, are deleted after 90 days, and players can switch them off in Settings.
