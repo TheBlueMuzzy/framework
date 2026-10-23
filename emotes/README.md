@@ -19,7 +19,7 @@ not told), a spam limit holds on the device AND on the room's server, and a Sett
 | `config.ts` | `content/emotes.json`. A bad value → one warning + the default. |
 | `save.ts` | `EMOTE_SAVE` — the saves-module options for the switch + this match's mutes: `createSave({ ...EMOTE_SAVE, key: '<game>:emotes', version: 1 })`. |
 | `settingsRow.ts` | `EMOTE_SETTINGS_ROWS`: "Hide everyone's emotes" (off), for the UI kit's Settings; `applyEmoteSetting(emotes, values)` passes it on; `emoteSettingsRows(config)` starts it at `mutedByDefault`. |
-| `ui/EmoteLayer.tsx` | `<EmoteBubbles>` (one bubble per seat, pointing at it, replaced in place, said once to screen readers) · `<EmoteMenu>` (your seat → the phrase picker with its cooldown ring; an opponent's → Mute / Unmute) · `useEmoteState` (muted seats, for `<MutedMark />` on a chip) · `emoteSeatProps(seat, mine)`. **Only installed when the game has the UI kit.** |
+| `ui/EmoteLayer.tsx` | **`<EmoteSeats>`** (0.3.0: the tappable seat row — all of the below in one line) · `<EmoteBubbles>` (one bubble per seat, pointing at it, replaced in place, said once to screen readers) · `<EmoteMenu>` (your seat → the phrase picker with its cooldown ring; an opponent's → Mute / Unmute) · `useEmoteState` (muted seats, for `<MutedMark />` on a chip) · `emoteSeatProps(seat, mine)`. **Only installed when the game has the UI kit.** |
 | `conformance.mjs` | Its check:framework part (below). |
 
 Given once (then the game's own): `content/emotes.json`. Added if missing: the starter words in `content/text/en.json`
@@ -51,12 +51,25 @@ A typical wiring (React, online-capable):
 const emotes = useMemo(() => createEmotes({ settings: emotesJson, words: text.emotes, save: emoteSave, mine: [me],
   match: roomCode ?? '', send: online ? (seat, id) => room.sendEmote(id) : undefined }), [me, roomCode])
 useRoom(code, who, { onEmote: (m) => emotes.receive(m) })
+// THE EASY WAY (0.3.0, F109) — the seat row, its menus, the muted marks and the bubbles, in one line:
+<EmoteSeats emotes={emotes} seats={players.map((p) => ({ id: p.seatId, name: p.name, avatar: p.art }))} mine={me} activeId={turn} />
+```
+`<EmoteSeats>` = the UI kit's `PlayerSeats` (0.29.0+) with every seat a real button (Tab reaches it, the focus ring
+shows; read out "Ada — send an emote" / "Bo — mute or unmute"): yours opens the picker, a rival's Mute; a muted rival's
+portrait wears the `MutedMark` on its corner (the chip never changes size); the bubbles point at the seats. Options:
+`mine` (one id or a hot seat's several) · `activeId` (whose turn) · `showNames={false}` (portraits only) · `placement`
+(`'bottom'` for a row along the top) · `avoid` (the HUD's selector; the seats are always added) · `nameFor` ·
+`bubbles={false}` (the game draws its own `<EmoteBubbles>`) · `words` (`emoteSeatWords`: the button names + "Emotes
+muted", from the game's text to translate). Escape, a tap outside or the seat again closes the menu.
+
+By hand instead (a game whose seats aren't a row — chips placed round a board):
+```tsx
 <EmoteBubbles emotes={emotes} targetFor={(s) => `[data-emote-seat="${s}"]`} nameFor={nameOf} avoid=".hud, [data-emote-seat]" />
 <button {...emoteSeatProps(seat, seat === me)} onClick={() => setTapped(seat)}><PlayerChip … badge={isMuted(seat) ? <MutedMark /> : undefined} /></button>
 {tapped && <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={`[data-emote-seat="${tapped}"]`} name={nameOf(tapped)} onClose={() => setTapped(null)} />}
 ```
 Clocks: the bubble's timer is on the looks clock (it fades even while paused); Pause closes the picker (the game's
-job); bots speak on the rules clock (F22).
+job — with `<EmoteSeats>`, tapping Pause is a tap outside, so it closes); bots speak on the rules clock (F22).
 
 ## What a game must provide (MODULE-CONTRACTS.md "Emotes") — check:framework checks each
 - every phrase has words (each id in `content/emotes.json` has `emotes.<id>` in `content/text/en.json`);
