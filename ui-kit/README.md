@@ -117,7 +117,8 @@ gallery's `npm run shoot` uses the same one.
   two columns on a phone, one row on a wide screen; Escape / a tap outside closes; `readyIn` dims them with a filling
   ring) · `MuteMenu` (an opponent's seat: Mute / Unmute emotes) · `MutedMark` (a crossed bubble, read out "Emotes
   muted") · `LiveAnnouncer` (one polite line, at most one a second). The Callout's frame loop is now shared:
-  `useCalloutPlace` (+ `avoid` — a CSS selector it stays clear of, e.g. the HUD and the other seats) and
+  `useCalloutPlace` (+ `avoid` — a CSS selector it stays clear of, e.g. the HUD and the other seats; bubbles also stay
+  off each other: with no clear side, a second one stacks a step further out — found in the Glyphtender proof) and
   `useShownPopover`. The Settings check counts `hideEmotes` as read once the game calls `applyEmoteSetting` /
   `setHideAll` (like the crashes switch). Look tests: `kit/blocks/emoteLook.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch

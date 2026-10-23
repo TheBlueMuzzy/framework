@@ -83,10 +83,15 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       const distance = reach + tipSize * 0.25
       let spot = placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
       // Clear of the HUD: the first side (in the usual order) where it fits without covering anything to avoid
-      const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target) : []
+      const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target, box) : []
       const covers = (s: typeof spot) => avoid.some((a) => overlaps({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height }, a))
       if (avoid.length && covers(spot)) {
-        const clear = sidesFor(now.current.placement).map((side) => placeCallout(hole, size, frameBox, distance, side, tipInset)).find((s) => !covers(s))
+        const sides = sidesFor(now.current.placement)
+        // No clear side next to the target (two seats side by side, both talking): one step further out on a side,
+        // then two — a second bubble stacks past the first instead of on top of it (the pointer still aims at its seat)
+        const tries = [0, 1, 2].flatMap((step) => sides.map((side) => ({ side, extra: step * ((side === 'top' || side === 'bottom' ? size.height : size.width) + space) })))
+        const clear = tries.map(({ side, extra }) => placeCallout(hole, size, frameBox, distance + extra, side, tipInset))
+          .find((s, i) => s.side === tries[i].side && !covers(s))
         if (clear) spot = clear
       }
       // The pointer sits inside the bubble's border box; its centre goes on the middle of the border line
@@ -111,10 +116,12 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
 }
 
 // The boxes of what a bubble must stay off (visible ones only), minus any that hold the target (its own seat's HUD)
-function avoidBoxes(selector: string, target: CalloutTarget): Box[] {
+// and the bubble itself (a selector like .kit-speech names it too)
+function avoidBoxes(selector: string, target: CalloutTarget, self: Element): Box[] {
   const targetEl = typeof target === 'string' ? document.querySelector(target) : target instanceof Element ? target : null
   return [...document.querySelectorAll(selector)]
-    .filter((el) => !(targetEl && el.contains(targetEl)))
+    .filter((el) => el !== self && !(targetEl && el.contains(targetEl)))
+    .filter((el) => getComputedStyle(el).visibility !== 'hidden')
     .map((el) => el.getBoundingClientRect())
     .filter((r) => r.width > 0 && r.height > 0)
     .map((r) => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom }))

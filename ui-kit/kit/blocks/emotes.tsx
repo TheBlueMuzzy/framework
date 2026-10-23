@@ -4,7 +4,8 @@
 // <SpeechBubble target="#seat-2" text="Well played!" sizeTo={allPhrases} showMs={2500} onDone={hide} />
 //   A Callout with no button that fades by itself — same intention (words pointing at a thing) → the same shape, the
 //   same placement maths and the same look in every style. It points at the seat, flips to stay inside the window (or
-//   the game picture) and, with `avoid` (a CSS selector: the HUD), clear of it. FIXED SIZE from the start: wide and
+//   the game picture) and, with `avoid` (a CSS selector: the HUD), clear of it — and always clear of the other bubbles
+//   showing. FIXED SIZE from the start: wide and
 //   tall enough for the longest of `sizeTo` (all the phrases in the current language), so "Wow!" and a long line never
 //   resize it. It never catches taps and is hidden from screen readers (LiveAnnouncer says it once instead).
 //   Give a new emote from the same seat a new React key: it replaces the old one in place (no stacking, no queue).
@@ -54,9 +55,11 @@ export type SpeechBubbleProps = {
 export function SpeechBubble({ target, text, sizeTo = [], showMs, placement = 'top', avoid, onDone }: SpeechBubbleProps) {
   const layer = useRef<HTMLDivElement>(null)
   const bubble = useRef<HTMLDivElement>(null)
-  const now = useRef<CalloutPlaceInput>({ target, placement, avoid })
+  // Bubbles also stay off each other (two seats side by side would otherwise stack their words)
+  const clearOf = avoid ? `${avoid}, .kit-speech` : '.kit-speech'
+  const now = useRef<CalloutPlaceInput>({ target, placement, avoid: clearOf })
   const done = useRef(onDone)
-  useLayoutEffect(() => { now.current = { target, placement, avoid }; done.current = onDone })
+  useLayoutEffect(() => { now.current = { target, placement, avoid: clearOf }; done.current = onDone })
   useShownPopover(layer)
   useCalloutPlace(layer, bubble, now)
 
