@@ -6,7 +6,7 @@ Nothing about the player travels: no name, no IP kept, no stored id, no typed te
 
 - Design: `../.planning/design/crashes.md` (research, budget, privacy wording, decisions).
 - Framework sprint 25: F89 = layer 1. Layer 2 (F105): kept across sessions while offline, freezes, a private web page, the rate-limit binding. Layer 3 (F106): charts, a player "report a bug", native crashes.
-- Kit **0.1.0**.
+- Kit **0.2.0** (0.2.0, F110: ships `settings-rows.json` — tells the UI kit's (0.30.0+) Settings check that `crashReports` is passed on by `applyCrashSetting` / `setOn`; installed with the kit, not to be edited in the game).
 - No packages at run time. The server is a small worker of the game's own (wrangler). `source-map` is used on the PC only.
 
 ## What a game gets

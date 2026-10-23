@@ -1,10 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import defaultSettings from './blocks/settings.default.json'
-import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, readOrientation, settingsProblems, sizesFor, stripComments, whereText } from './conformance.mjs'
+import { COMFORT_CHECK, SETTINGS_CHECK, SIZES, check, checkComfortForTest, checkSettingsForTest, checkUiArgs, missingComfortRows, creditProblems, fileFeedsInfo, fileReadsRow, groupProblems, listAssets, liveRows, readOrientation, readRowManifest, settingsProblems, sizesFor, stripComments, whereText } from './conformance.mjs'
 
 describe('UI kit checks', () => {
   it('checks the seven sizes the sprint asked for', () => {
@@ -306,5 +306,127 @@ describe('comfort rows (0.21.0): reduce motion always, master volume with the au
   })
   it('the kit\'s own default Settings has both', () => {
     expect(missingComfortRows(defaultSettings, { audio: true })).toEqual([])
+  })
+})
+
+describe('module Settings rows register themselves: settings-rows.json (0.30.0, F110)', () => {
+  const made = []
+  const tab = (rows) => ({ tabs: [{ id: 'game', label: 'Game', rows }] })
+  /** A game folder with these files (src/…/VERSION, settings-rows.json…) → the Settings check's one result. */
+  const runIn = (files, schema, code) => {
+    const root = mkdtempSync(join(tmpdir(), 'kit-rows-'))
+    made.push(root)
+    for (const [path, text] of Object.entries(files)) {
+      mkdirSync(join(root, path, '..'), { recursive: true })
+      writeFileSync(join(root, path), text)
+    }
+    const results = []
+    checkSettingsForTest({
+      root, json: () => schema, gameCode: () => code.map((text, i) => ({ path: `src/game/f${i}.ts`, text })),
+      pass: (name, detail) => results.push({ name, ok: true, detail }),
+      fail: (name, problems, fix) => results.push({ name, ok: false, problems, fix }),
+    })
+    return results[0]
+  }
+  const cleanUp = () => { while (made.length) rmSync(made.pop(), { recursive: true, force: true }) }
+  const dice = JSON.stringify({ rows: [{ id: 'diceSkin', readBy: ['\\bapplyDiceSetting\\s*\\('], hint: 'pass it on: applyDiceSetting(values) in the Settings onChange' }] })
+  const diceRow = tab([{ id: 'diceSkin', type: 'selector', label: 'Dice skin', options: ['Wood', 'Glass'] }])
+  const real = (module) => readFileSync(new URL(`../../${module}/kit/settings-rows.json`, import.meta.url), 'utf8')
+
+  it('a made-up module with a row passes with its manifest — no UI kit change', () => {
+    try {
+      const r = runIn({ 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': dice }, diceRow, ['applyDiceSetting(loadSettings(settingsJson))'])
+      expect(r).toEqual({ name: SETTINGS_CHECK, ok: true, detail: '1 rows on: 0 read by the game, 1 handled by the kit / audio module' })
+      // a module whose copy sits in src/<name>/kit/ (like the AI's) is found too
+      expect(runIn({ 'src/dice/kit/VERSION': '0.1.0\n', 'src/dice/kit/settings-rows.json': dice }, diceRow, ['applyDiceSetting(values)']).ok).toBe(true)
+    } finally { cleanUp() }
+  })
+  it('the module\'s own code (where applyDiceSetting is defined) never counts — the Dev Kit doesn\'t know a new module\'s folder', () => {
+    try {
+      const files = { 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': dice }
+      const root = mkdtempSync(join(tmpdir(), 'kit-rows-'))
+      made.push(root)
+      for (const [path, text] of Object.entries(files)) { mkdirSync(join(root, path, '..'), { recursive: true }); writeFileSync(join(root, path), text) }
+      const results = []
+      checkSettingsForTest({
+        root, json: () => diceRow,
+        gameCode: () => [{ path: 'src/dice/settingsRow.ts', text: 'export function applyDiceSetting(values) { setSkin(values.diceSkin) }' }],
+        pass: (name, detail) => results.push({ name, ok: true, detail }),
+        fail: (name, problems, fix) => results.push({ name, ok: false, problems, fix }),
+      })
+      expect(results[0].ok).toBe(false)
+      expect(results[0].problems[0]).toMatch(/it's the dice module's row/)
+    } finally { cleanUp() }
+  })
+  it('a module\'s row shown but never passed on still fails — naming the module and its own hint', () => {
+    try {
+      const r = runIn({ 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': dice }, diceRow, ['// applyDiceSetting(values) later', 'const skin = "Wood"'])
+      expect(r.ok).toBe(false)
+      expect(r.problems).toEqual(['Game → Dice skin ("diceSkin", a selector): nothing in the game reads it — it\'s the dice module\'s row: pass it on: applyDiceSetting(values) in the Settings onChange'])
+    } finally { cleanUp() }
+  })
+  it('the real crashes, emotes and ai manifests, where their installers put them, count their wiring', () => {
+    try {
+      const files = {
+        'src/crashes/VERSION': '0.2.0\n', 'src/crashes/settings-rows.json': real('crashes'),
+        'src/emotes/VERSION': '0.4.0\n', 'src/emotes/settings-rows.json': real('emotes'),
+        'src/ai/kit/VERSION': '0.8.0\n', 'src/ai/kit/settings-rows.json': real('ai'),
+      }
+      const rows = tab([
+        { id: 'crashReports', type: 'toggle', label: 'Send crash reports' },
+        { id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes' },
+        { id: 'botChatter', type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'] },
+      ])
+      const wired = ['applyCrashSetting(values)\napplyEmoteSetting(emotes, values)\napplyBanterSetting(banter, values)']
+      expect(runIn(files, rows, wired)).toMatchObject({ ok: true, detail: '3 rows on: 0 read by the game, 3 handled by the kit / audio module' })
+      const r = runIn(files, rows, ['applyCrashSetting(values)'])
+      expect(r.problems).toHaveLength(2)
+      expect(r.problems[0]).toMatch(/"hideEmotes".*it's the emotes module's row: pass it to the emotes module: applyEmoteSetting/)
+      expect(r.problems[1]).toMatch(/"botChatter".*it's the ai module's row: pass it to the bots' voice: applyBanterSetting/)
+    } finally { cleanUp() }
+  })
+  it('an older module copy without a manifest passes through the one-release fallback (as before 0.30.0)', () => {
+    try {
+      const old = { 'src/emotes/VERSION': '0.3.0 (framework 8c204d6)\n', 'src/crashes/VERSION': '0.1.0\n', 'src/ai/kit/VERSION': '0.7.0\n' }
+      const rows = tab([
+        { id: 'crashReports', type: 'toggle', label: 'Send crash reports' },
+        { id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes' },
+        { id: 'botChatter', type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'] },
+      ])
+      expect(runIn(old, rows, ['setOn(true); emotes.setHideAll(false); banter.setChatter("Lots")'])).toMatchObject({ ok: true, detail: '3 rows on: 0 read by the game, 3 handled by the kit / audio module' })
+      // still red when an old copy's row isn't passed on — and the line names the module
+      const r = runIn(old, rows, ['setOn(true); banter.setChatter("Lots")'])
+      expect(r.problems).toEqual(['Game → Hide everyone\'s emotes ("hideEmotes", a toggle): nothing in the game reads it — it\'s the emotes module\'s row: read values.hideEmotes in the Settings onChange (and loadSettings(…) at start-up)'])
+    } finally { cleanUp() }
+  })
+  it('the fallback is only for an installed copy: no module folder → its row is just a row the game must read', () => {
+    try {
+      const r = runIn({}, tab([{ id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes' }]), ['applyEmoteSetting(emotes, values)'])
+      expect(r.ok).toBe(false)
+      expect(r.problems[0]).toMatch(/nothing in the game reads it — read values\.hideEmotes/)
+    } finally { cleanUp() }
+  })
+  it('a broken manifest fails in plain English naming the module — bad JSON, a bad pattern, no rows — and never crashes', () => {
+    try {
+      const broken = runIn({ 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': '{ "rows": [ { "id": "diceSkin", ' }, diceRow, ['applyDiceSetting(values)'])
+      expect(broken.ok).toBe(false)
+      expect(broken.problems.at(-1)).toMatch(/^src\/dice\/settings-rows\.json isn't valid JSON \(.+\), so the dice module's Settings rows can't be checked — reinstall the module \(node ~\/\.claude\/config\/bmuz\/scripts\/install-module\.mjs dice \.\)/)
+      expect(broken.fix).toMatch(/settings-rows\.json .* is broken — reinstall that module/)
+      const badRe = JSON.stringify({ rows: [{ id: 'diceSkin', readBy: ['applyDiceSetting(', '\\bsetSkin\\s*\\('] }] })
+      const r = runIn({ 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': badRe }, diceRow, ['dice.setSkin(values.x)'])
+      expect(r.problems).toEqual([expect.stringMatching(/^src\/dice\/settings-rows\.json "diceSkin": the pattern "applyDiceSetting\(" isn't one the check can use \(.+\) — reinstall the module/)])
+      // (the good pattern beside it still counted the row as read, so only the broken pattern is listed)
+      expect(runIn({ 'src/dice/VERSION': '0.1.0\n', 'src/dice/settings-rows.json': '[]' }, diceRow, []).problems)
+        .toContain('src/dice/settings-rows.json has no "rows" list, so the dice module\'s Settings rows can\'t be checked — reinstall the module (node ~/.claude/config/bmuz/scripts/install-module.mjs dice .) — the game\'s copy isn\'t meant to be edited')
+      const odd = readRowManifest(JSON.stringify({ rows: [null, { id: 'x' }, { id: 'y', readBy: [42, 'a'.repeat(301)] }] }), { module: 'dice' })
+      expect(odd.problems).toHaveLength(4)
+      expect(odd.rows.map((row) => row.id)).toEqual(['x', 'y'])
+    } finally { cleanUp() }
+  })
+  it('only module copies count: a manifest without a VERSION beside it, or under node_modules, is never read', () => {
+    try {
+      const files = { 'src/dice/settings-rows.json': dice, 'src/node_modules/dice/VERSION': '1\n', 'src/node_modules/dice/settings-rows.json': dice }
+      expect(runIn(files, diceRow, ['applyDiceSetting(values)']).ok).toBe(false)
+    } finally { cleanUp() }
   })
 })

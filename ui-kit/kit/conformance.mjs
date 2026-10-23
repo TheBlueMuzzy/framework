@@ -249,12 +249,12 @@ export function findRowSources(root) {
       const dir = join(src, entry.name, sub)
       if (!existsSync(join(dir, 'VERSION'))) continue
       const path = join(dir, ROW_MANIFEST)
-      const file = ['src', entry.name, sub, ROW_MANIFEST].filter(Boolean).join('/')
+      const folder = ['src', entry.name, sub].filter(Boolean).join('/')
       if (existsSync(path)) {
         let text = ''
         try { text = readFileSync(path, 'utf8') } catch { /* unreadable → "isn't valid JSON" below */ }
-        sources.push(readRowManifest(text, { module: entry.name, file }))
-      } else if (Object.hasOwn(OLD_MODULE_ROWS, entry.name)) sources.push(oldSource(entry.name))
+        sources.push({ ...readRowManifest(text, { module: entry.name, file: `${folder}/${ROW_MANIFEST}` }), folder })
+      } else if (Object.hasOwn(OLD_MODULE_ROWS, entry.name)) sources.push({ ...oldSource(entry.name), folder })
       break // src/x/VERSION wins over src/x/kit/VERSION (there's only ever one)
     }
   }
@@ -462,7 +462,11 @@ function checkSettings(t) {
   const schema = t.json(SETTINGS_FILE)
   if (!schema) return t.pass(SETTINGS_CHECK, `no ${SETTINGS_FILE}`)
   const sources = t.root ? findRowSources(t.root) : undefined // (a test's made-up tester may have no game folder)
-  const { dead, placeholder, read, kit } = settingsProblems(schema, t.gameCode(), sources)
+  // A module's own code never counts as the game passing its row on (its settingsRow.ts DEFINES applyXSetting(…)) —
+  // the Dev Kit's gameCode() leaves out only the modules it knows by name, so a new module's folder is left out here.
+  const inModule = (path) => (sources ?? []).some((s) => s.folder && path.startsWith(`${s.folder}/`))
+  const code = t.gameCode().filter((f) => !inModule(f.path))
+  const { dead, placeholder, read, kit } = settingsProblems(schema, code, sources)
   const where = (row) => `${row.tab} → ${row.label ?? row.id} ("${row.id}", a ${row.type})`
   const problems = [
     ...dead.map((row) => `${where(row)}: nothing in the game reads it — ${wireHint(row)}`),

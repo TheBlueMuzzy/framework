@@ -16,7 +16,7 @@ Checked: 2026-10-23 (Claude) — emotes 52 tests, ui-kit 474 (review run); root 
 Done when: each module that adds a Settings row (crashes, emotes, ai) ships one small manifest naming its row ids and what in a game's code counts as "read"; the UI kit's Settings check reads every installed manifest instead of its own hard-coded lists (CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS gone); older games with older module copies still pass; a new module with a row needs no UI kit change.
 - [x] 🤖 1. The manifest shape + each module's own (crashes, emotes, ai), installed with the module — ui-kit/kit/conformance.mjs
 - [x] 🤖 2. The Settings check reads the installed manifests (src/*/kit/…) and drops its hard-coded lists; older module copies without a manifest still pass (the old lists kept as a fallback for one release, said so) — ui-kit/kit/conformance.mjs
-- [ ] 🤖 3. Tests: a made-up module with a row passes with its manifest and no UI kit change; a row shown but never read still fails; an old copy without a manifest passes; README + MODULE-CONTRACTS line — ui-kit/kit/conformance.test.mjs
+- [x] 🤖 3. Tests: a made-up module with a row passes with its manifest and no UI kit change; a row shown but never read still fails; an old copy without a manifest passes; README + MODULE-CONTRACTS line — ui-kit/kit/conformance.test.mjs
 - [ ] 🤖 4. Proof: check:framework on the scratch Glyphtender (crashes off, emotes + ai on) and on Goops' last checkout read-only (a fresh clone in .scratch) — the same results as before the change — ui-kit/kit/VERSION
 Check: ui-kit + crashes + emotes + ai tests, typecheck, lint green (root check:fast); check:framework results identical before / after on two real games (scratch clones), read by me.
 
