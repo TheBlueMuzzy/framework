@@ -39,7 +39,7 @@ Ask Muzzy: spam limit — default 3 in a row, then one every 4 s (content/emotes
 - [x] 🤖 2. The module: phrase set + limits in content/emotes.json, `sendEmote(seat, id)` / `onEmote`, the spam limit, mute per seat (kept with the saves module), a bot-facing `say(seat, id)` — emotes/kit/
 - [x] 🤖 3. SpeechBubble part in the UI kit + an EmotePicker: points at its seat, clear of the HUD, fixed size for the longest phrase, all 5 styles, reduce-motion = no pop, timings in content — ui-kit/kit/blocks/
 - [x] 🤖 4. Online: an `emote` room message through the rooms kit (rate-limited on the server, never trusted from the browser), shown to every seat that hasn't muted the sender — rooms/kit/
-- [ ] 🤖 5. Installer, check:framework part (phrases in content, no phrase hard-coded, the picker reachable), README, MODULE-CONTRACTS section — emotes/scripts/
+- [x] 🤖 5. Installer, check:framework part (phrases in content, no phrase hard-coded, the picker reachable), README, MODULE-CONTRACTS section — emotes/scripts/
 - [ ] 🤖 6. Proof on a scratch Glyphtender copy: send emotes in a local game and a two-tab online game, mute one, spam is held back; screenshots of bubble + picker at every size — emotes/kit/
 Check: emotes + ui-kit + rooms tests, typecheck, lint green (root check:fast, check-ui); on .scratch/glyphtender-f107 a local game and a two-tab online game: an emote shows in the sender's bubble on both tabs, a muted sender's never shows, a burst past the limit is held back, a bot's emote uses the same bubble; bubble + picker screenshots in all 5 styles at 390x844, 360x780, 844x390, 768x343, 1100, 1440x900, 1920x1080, looked at by me (edges measured to the visible bubble).
 

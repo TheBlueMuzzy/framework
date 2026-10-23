@@ -7,12 +7,19 @@
 //   <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={…} name={names[tapped]} onClose={close} />
 //     the player's own seat → the picker (cooldown ring while the spam limit holds) · an opponent's → Mute / Unmute
 //   const { isMuted } = useEmoteState(emotes)   →   <PlayerChip badge={isMuted(seat) ? <MutedMark /> : undefined} … />
-// The game makes the seats tappable (a button round its chip / portrait) and closes the menu when Pause opens.
+// The game makes the seats tappable (a button round its chip / portrait, with emoteSeatProps(seat, mine)) and closes
+// the menu when Pause opens. Pass avoid="<the HUD's selector>, [data-emote-seat]" so bubbles stay off both.
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { EmotePicker, LiveAnnouncer, MuteMenu, SpeechBubble, type CalloutPlacement, type CalloutTarget } from '../../ui/kit'
 import type { EmoteMessage, Emotes } from '../emotes'
 
 type Shown = EmoteMessage & { key: number }
+
+/** Put on each tappable seat (the button round its chip / portrait): marks whose it is, so check:framework can find
+ *  the player's own seat (the picker) and the bubbles can stay off the other seats (avoid '[data-emote-seat]'). */
+export function emoteSeatProps(seat: string, mine: boolean) {
+  return { 'data-emote-seat': seat, 'data-emote-mine': mine ? '' : undefined }
+}
 
 /** The bubble showing at each seat right now (seat → its emote), and the newest one for the announcer. */
 export function useEmoteBubbles(emotes: Emotes) {
