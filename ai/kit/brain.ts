@@ -14,7 +14,7 @@
 //   7. Choose — keep the moves within skill.spread of the best, at most skill.topN, pick one weighted by score.
 //   8. Explain— a Decision with a plain-English note (Dev Kit, bug reports — never players).
 // It only ever sees the view it's given. All its randomness comes from the rng it's given (same game → same moves).
-import { linesFor, maybeSay, momentsFor, quietMemory, settingsAtLevel, type BanterLines, type BanterMemory, type BanterSettings, type ChatterLevel, type MomentMap } from './banter'
+import { freshLine, linesFor, maybeSay, momentsFor, momentsWithCause, quietMemory, settingsAtLevel, type BanterLines, type BanterMemory, type BanterSettings, type ChatterLevel, type MomentMap } from './banter'
 import { BANTER_SAVE, type BanterSaveLike } from './save'
 import { botWait, paceNow, type PaceClock } from './pace'
 import { nextRandom, randomBetween, shuffle, weightedPick } from './random'
@@ -307,6 +307,11 @@ export interface BotBanterOptions<Event> {
   /** Where "Bot chatter" is kept: a saves-module save made with BANTER_SAVE (save.ts). With one, it starts at the
    *  saved level and setChatter keeps the new one. */
   save?: BanterSaveLike
+  /** Is this bot seat muted on this device (local: (seat) => emotes.isMuted(seatIdOf(seat)))? A muted bot's lines are
+   *  never said (and never hold up the table gap), and a person's good move is answered by an UNMUTED bot. Without
+   *  it, a muted bot's line goes out and the emote module drops it — and the answer may go to a muted bot. Online
+   *  (the server) leave it out: each device mutes for itself. */
+  muted?: (seat: number) => boolean
 }
 
 export interface BotBanter {
@@ -330,28 +335,43 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
   const settingsNow = () => settingsAtLevel(typeof options.settings === 'function' ? options.settings() : options.settings, level)
   const memories = new Map<number, BanterMemory>()
   const rngs = new Map<number, number>()
-  const waiting = new Map<number, { id: string; cancel: () => void }>()
+  // (answer = a reply to a person's good move: it always waits out the table gap, and a bot's ordinary line never
+  // replaces it)
+  const waiting = new Map<number, { id: string; cancel: () => void; answer: boolean }>()
   let turn = 0
   let lastSpokeAt: number | null = null
   const rngOf = (seat: number) => rngs.get(seat) ?? botSeed(options.seed ^ 0xba7, seat)
+  let tieRng = botSeed(options.seed ^ 0xa45, 0) // (which of two equally chatty bots answers a person)
+  const isMuted = (seat: number) => options.muted?.(seat) === true
 
   // Someone spoke less than tableGap ago: wait for the gap once (a second bot answers a beat later, like people do) —
-  // unless that would make the line later than delay.max + tableGap after its moment (then it's stale: let it go)
-  const speak = (seat: number, id: string, memory: BanterMemory, heardAt: number) => {
+  // unless that would make the line later than delay.max + tableGap after its moment (then it's stale: let it go).
+  // An answer to a person always waits: it must come.
+  const speak = (seat: number, id: string, memory: BanterMemory, heardAt: number, answer: boolean) => {
     waiting.delete(seat)
     if (!options.bots().some((bot) => bot.seat === seat)) return // (a person took the seat back while the line waited)
     const settings = settingsNow()
     if (!settings) return // (chatter went Off while it waited)
+    if (isMuted(seat)) return // (muted while it waited: nothing said, the table gap untouched)
     const gapMs = (settings.tableGap ?? 0) * 1000
     const left = lastSpokeAt === null ? 0 : gapMs - (clock.now() - lastSpokeAt)
     if (gapMs > 0 && left > 0) {
       const staleAfter = (settings.delay?.max ?? 0) * 1000 + gapMs
-      if (clock.now() + left - heardAt <= staleAfter) waiting.set(seat, { id, cancel: clock.after(left, () => speak(seat, id, memory, heardAt)) })
+      if (answer || clock.now() + left - heardAt <= staleAfter) waiting.set(seat, { id, answer, cancel: clock.after(left, () => speak(seat, id, memory, heardAt, answer)) })
       return
     }
-    if (!options.say(seat, id)) return // (muted bots still "go out" — the emote module drops them; false = refused)
+    if (!options.say(seat, id)) return // (false = refused; without a muted check a muted bot's line "goes out" and the emote module drops it)
     memories.set(seat, memory)
     lastSpokeAt = clock.now()
+  }
+
+  const schedule = (seat: number, id: string, memory: BanterMemory, settings: BanterSettings, answer: boolean) => {
+    const delay = settings.delay ?? { min: 0, max: 0 }
+    const wait = randomBetween(rngOf(seat), Math.round(delay.min * 1000), Math.round(delay.max * 1000))
+    rngs.set(seat, wait.rng)
+    waiting.get(seat)?.cancel()
+    const heardAt = clock.now()
+    waiting.set(seat, { id, answer, cancel: clock.after(wait.value, () => speak(seat, id, memory, heardAt, answer)) })
   }
 
   const dropWaiting = () => {
@@ -372,21 +392,45 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
       const settings = settingsNow()
       if (!settings) return // Off: the bots say nothing at all
       const lines = options.lines()
-      for (const bot of options.bots()) {
+      const bots = options.bots()
+      const botSeats = new Set(bots.map((bot) => bot.seat))
+      const linesOf = (bot: BanterSeat, moment: string) => {
+        const own = linesFor(lines, bot.personality.id, moment)
+        return own.length ? own : settings.presets?.[moment] ?? []
+      }
+
+      // 1. A PERSON's good move always gets an answer (answerPeople — Muzzy 2026-10-23, "like Sparky in MTG Arena"):
+      // exactly one bot, the chattiest unmuted one with a line for it (ties: the seed) — no chance roll, no cooldown.
+      // The other bots let this change go (one reply, not a chorus — the table gap would queue them anyway).
+      const answerable = settings.answerPeople ?? []
+      const askers = bots.flatMap((bot) => {
+        if (bot.personality.chattiness <= 0 || isMuted(bot.seat)) return []
+        const hit = momentsWithCause(options.moments, events as Event[], bot.seat)
+          .find((m) => answerable.includes(m.moment) && m.by !== undefined && !botSeats.has(m.by) && linesOf(bot, m.moment).length)
+        return hit ? [{ bot, moment: hit.moment }] : []
+      })
+      if (askers.length) {
+        const most = Math.max(...askers.map((a) => a.bot.personality.chattiness))
+        const tied = askers.filter((a) => a.bot.personality.chattiness === most)
+        const roll = nextRandom(tieRng)
+        tieRng = roll.rng
+        const { bot, moment } = tied[Math.floor(roll.value * tied.length)]
+        const r = freshLine(linesOf(bot, moment), turn, memories.get(bot.seat) ?? quietMemory(), rngOf(bot.seat))
+        rngs.set(bot.seat, r.rng)
+        if (r.line) schedule(bot.seat, r.line, r.memory, settings, true)
+        return
+      }
+
+      // 2. Everyone else's moments: chance × chattiness, the cooldown, no repeats.
+      for (const bot of bots) {
+        if (waiting.get(bot.seat)?.answer) continue // (its answer to a person comes first)
+        if (isMuted(bot.seat)) continue
         const said = memories.get(bot.seat) ?? quietMemory()
         for (const moment of momentsFor(options.moments, events as Event[], bot.seat)) {
-          const own = linesFor(lines, bot.personality.id, moment)
-          const candidates = own.length ? own : settings.presets?.[moment] ?? []
-          const r = maybeSay(moment, turn, bot.personality.chattiness, candidates, said, settings, rngOf(bot.seat))
+          const r = maybeSay(moment, turn, bot.personality.chattiness, linesOf(bot, moment), said, settings, rngOf(bot.seat))
           rngs.set(bot.seat, r.rng)
           if (!r.line) continue
-          const delay = settings.delay ?? { min: 0, max: 0 }
-          const wait = randomBetween(rngOf(bot.seat), Math.round(delay.min * 1000), Math.round(delay.max * 1000))
-          rngs.set(bot.seat, wait.rng)
-          waiting.get(bot.seat)?.cancel()
-          const id = r.line
-          const heardAt = clock.now()
-          waiting.set(bot.seat, { id, cancel: clock.after(wait.value, () => speak(bot.seat, id, r.memory, heardAt)) })
+          schedule(bot.seat, r.line, r.memory, settings, false)
           break // (one line per seat per change)
         }
       }

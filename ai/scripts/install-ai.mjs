@@ -104,8 +104,8 @@ export function wiringSteps(gameDir) {
       // Banter (F22): only asked for once a personality talks (chattiness > 0)
       done: !chattyPersonalities(gameDir).length || codeCalls(gameDir, /\bbotBanter\s*(<[^>()]*>)?\s*\(/),
       step: `the bots talk (${chattyPersonalities(gameDir).join(', ')} ${chattyPersonalities(gameDir).length === 1 ? 'has' : 'have'} chattiness > 0): their lines in content/text/en.json "banter": { "<personality>": { "<moment>": "…" } } (the Dev Kit's AI tab edits them),
-       the moments in the plug (moments(event, seat) → the names in content/ai/banter.json "chance"), then
-       const banter = botBanter({ moments: plug.moments, bots, settings: readBanterSettings(banterJson), lines: () => text.banter, say: (seat, id) => emotes.say(seatIdOf(seat), id).ok, seed })
+       the moments in the plug (moments(event, seat) → the names in content/ai/banter.json "chance"; a rival's good move as { moment: 'rivalBigMove', by: seat } so a person's always gets an answer), then
+       const banter = botBanter({ moments: plug.moments, bots, settings: readBanterSettings(banterJson), lines: () => text.banter, say: (seat, id) => emotes.say(seatIdOf(seat), id).ok, muted: (seat) => emotes.isMuted(seatIdOf(seat)), seed })
        and banter.hear(events) after every change — online in party/server.ts with say: room.emote (the AI README's "Banter"; needs the emotes module)`,
       banter: true,
     },
