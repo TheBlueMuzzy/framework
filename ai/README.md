@@ -1,6 +1,6 @@
 # AI
 
-A fair, human-feeling computer player for any turn-based game built on the Table (framework v0.5 — design: `../.planning/design/ai.md`). Proven in Glyphtender beta. Kit **0.6.0** — the Brain + the Arena + Banter + What wins? (0.6.0: **"What wins?"** — the arena plug may name its situations (`situations(state, seat)` → numbers: score lead, letters in hand…), read after each seat's own turns 3, 5 and at the end (`content/ai/arena.json` `whatWinsMoments` / `whatWinsMinGames` / `whatWinsTop`); the report, `npm run ai:arena` and the Dev Kit's Run check say which predict the win in plain sentences, too-few-games ones listed, not hidden — `wins.ts`, F25 · 0.5.0: "Bot chatter" Off · Some · Lots in the player's Settings, kept by the saves module, and a person's good move always gets one bot's answer — F22 tasks 6–7 · 0.4.0: bots talk at the game's moments through the emote module — botBanter, content/ai/banter.json, lines in content/text/en.json, F22 · 0.2.0: bots wait on the rules clock — setPaceClock / botWait; its promise checks · 0.3.0: the arena + the whole Personality Check — `npm run ai:arena` and the Dev Kit's Run check, F24).
+A fair, human-feeling computer player for any turn-based game built on the Table (framework v0.5 — design: `../.planning/design/ai.md`). Proven in Glyphtender beta. Kit **0.6.0** — the Brain + the Arena + Banter + What wins? (0.6.0: **"What wins?"** — the arena plug may name its situations (`situations(state, seat)` → numbers: score lead, letters in hand…), read after each seat's own turns 3, 5 and at the end (`content/ai/arena.json` `whatWinsMoments` / `whatWinsMinGames` / `whatWinsTop` / `whatWinsIsTheWin`; the plug may count its own turns with `turns(state, seat)`); the report, `npm run ai:arena` and the Dev Kit's Run check say which predict the win in plain sentences, too-few-games ones listed, not hidden — `wins.ts`, F25 · 0.5.0: "Bot chatter" Off · Some · Lots in the player's Settings, kept by the saves module, and a person's good move always gets one bot's answer — F22 tasks 6–7 · 0.4.0: bots talk at the game's moments through the emote module — botBanter, content/ai/banter.json, lines in content/text/en.json, F22 · 0.2.0: bots wait on the rules clock — setPaceClock / botWait; its promise checks · 0.3.0: the arena + the whole Personality Check — `npm run ai:arena` and the Dev Kit's Run check, F24).
 
 ## The idea
 Every game's AI is the same kind of player with different instincts. This module is the player; the game's **plug** teaches it what to care about. A bot seat = **one personality** (what it wants) + **one skill** (how well it sees and searches). It only ever sees its own seat's view.
@@ -100,7 +100,9 @@ export default async function arenaGame(files: { read(path: string): Promise<str
   anything under `whatWinsMinGames` (and lists it), and writes the strongest as sentences — one per situation, at its
   strongest moment: "Players with score lead 10 or more after turn 5 win 78% (of 240 games, ±6%) — vs 12% with -3 or
   less". On the report (`<ol data-what-wins>`, which the Dev Kit 0.25.0 Check panel shows), and printed by `ai:arena`.
-  The score itself at the end predicts the win because it IS the win — the early moments are the advice.
+  The score itself at the end predicts the win because it IS the win: a situation that at the end picks the winner in
+  ≥ 95% of games (`whatWinsIsTheWin`) is named apart ("Magic lead at the end decides who wins by itself"), and its
+  early moments make the sentence instead.
 - `content/ai/feel-targets.json` `"all"`: `{ "check": "tellApart" | "skillLadder" | "winRate" | "meter" (+ "meter") | <the plug's own>, "min", "max", "label" }`.
 
 ## What a game must provide

@@ -77,7 +77,8 @@ Report = a page with green/red, the grids, and example games to watch.
 - A win rate from n games is ± about 1/√n at 95% (100 games → ±10 points, 400 → ±5). The default floor is 30 seats per group and 30 winner-loser pairs (`whatWinsMinGames`); a situation below it is **left out and listed as "too few games"**, never hidden. The Dev Kit's 6-game run will mostly say "too few" — that's honest; `npm run ai:arena` (60+ games) is where it reads.
 **Plain words**: "Players with score lead 10 or more after turn 5 win 78% (of 240 games) — vs 12% with −3 or less." Top 5 by edge (furthest from 50%).
 **Pitfalls (said on the report)**
-- *Already winning:* a number that is the score (score lead at the end) predicts the win because it IS the win — useful as a sanity check, not as advice. The things that win *early* are the ones to value.
+- *Already winning:* a number that is the score (score lead at the end) predicts the win because it IS the win — useful as a sanity check, not as advice. The things that win *early* are the ones to value. Built in after the Glyphtender proof (its "Magic lead at the end" took the #1 slot at 100%): a situation that at the end picks the winner ≥ 95% of the time (`whatWinsIsTheWin`) is named apart, and its early moments speak instead ("Magic lead 4 or more after turn 3 win 59%").
+- *Whose turn is it:* a game's own turns may not be "moves until someone else acts" (Glyphtender's draft) — the plug may count them (`turns(state, seat)`).
 - *Correlation, not cause:* "players with more trapped glyphlings win" may mean strong players trap more, not that trapping wins. Test a hunch by changing a goal and running again.
 - *Survivors:* turn 5 is only counted in games that reached turn 5; long games are over-represented late.
 - *The AI's own style:* bots value what their goals tell them to; a situation a goal never chases looks weak only because nobody tried it.
