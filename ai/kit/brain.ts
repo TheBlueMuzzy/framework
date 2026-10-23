@@ -404,7 +404,8 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
       // The other bots let this change go (one reply, not a chorus — the table gap would queue them anyway).
       const answerable = settings.answerPeople ?? []
       const askers = bots.flatMap((bot) => {
-        if (bot.personality.chattiness <= 0 || isMuted(bot.seat)) return []
+        // (a missing chattiness counts as 0 — silent — like check:framework; never NaN in the "chattiest" pick below)
+        if (!(Number.isFinite(bot.personality.chattiness) && bot.personality.chattiness > 0) || isMuted(bot.seat)) return []
         const hit = momentsWithCause(options.moments, events as Event[], bot.seat)
           .find((m) => answerable.includes(m.moment) && m.by !== undefined && !botSeats.has(m.by) && linesOf(bot, m.moment).length)
         return hit ? [{ bot, moment: hit.moment }] : []

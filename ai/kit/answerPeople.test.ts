@@ -158,6 +158,28 @@ describe('a person\'s good move always gets an answer', () => {
     expect(said).toEqual([]) // chance 0, no cause → no always-answer
   })
 
+  it('review fix: a bot\'s big word and a person\'s in the same change → the person\'s still gets its answer', () => {
+    const two: BanterSeat[] = [{ seat: 1, personality: { id: 'Chatty', chattiness: 80 } }, { seat: 2, personality: { id: 'Calm', chattiness: 30 } }]
+    const { time, seen, banter, emotes } = table({ bots: two })
+    emotes.mute('seat-3', true) // Calm (seat 2) muted: only Chatty can answer
+    banter.hear([{ type: 'word', seat: 2, points: 30 }, { type: 'word', seat: 0, points: 30 }])
+    time.run(5000)
+    expect(seen.map((e) => e.seat)).toEqual(['seat-2']) // Chatty answers the person (seat 2's word named first must not hide it)
+    expect(momentsWithCause(moments, [{ type: 'word', seat: 2, points: 30 }, { type: 'word', seat: 0, points: 30 }], 1))
+      .toEqual([{ moment: 'rivalBigMove', by: 2 }, { moment: 'rivalBigMove', by: 0 }])
+    expect(momentsFor(moments, [{ type: 'word', seat: 2, points: 30 }, { type: 'word', seat: 0, points: 30 }], 1)).toEqual(['rivalBigMove'])
+  })
+
+  it('review fix: a personality with no chattiness (an older file) is silent — never picked, never crashes the change', () => {
+    const mixed = [{ seat: 1, personality: { id: 'Calm' } }, { seat: 2, personality: { id: 'Chatty', chattiness: 80 } }] as unknown as BanterSeat[]
+    const { time, seen, banter } = table({ bots: mixed, settings: { ...file, chance: { ...file.chance, bigMove: 1 } } })
+    expect(() => banter.hear(bigWord(0))).not.toThrow()
+    time.run(5000)
+    expect(seen.map((e) => e.seat)).toEqual(['seat-3']) // Chatty answers
+    for (let i = 0; i < 5; i++) { banter.hear(bigWord(1)); time.run(5000) } // Calm's own big word at chance 1
+    expect(seen.some((e) => e.seat === 'seat-2')).toBe(false) // no chattiness = says nothing (as check:framework counts it)
+  })
+
   it('content/ai/banter.json "answerPeople": default ["rivalBigMove"]; [] turns it off', () => {
     expect(readBanterSettings({}).answerPeople).toEqual(['rivalBigMove'])
     const { time, seen, banter } = table({ settings: { ...file, answerPeople: [] } })

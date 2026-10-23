@@ -194,10 +194,11 @@ function sees(event: unknown, seat: number): boolean {
 /** What one change means to one seat: every moment the plug names for its events, in order, no repeats. Events the
  *  seat may not see (a Table event's `seen`) are skipped — a bot never comments on a secret. */
 export function momentsFor<Event>(map: MomentMap<Event>, events: readonly Event[], seat: number): Moment[] {
-  return momentsWithCause(map, events, seat).map((m) => m.moment)
+  return [...new Set(momentsWithCause(map, events, seat).map((m) => m.moment))]
 }
 
-/** momentsFor, with who caused each (`by`, when the moment map said). The first cause named for a moment wins. */
+/** momentsFor, with who caused each (`by`, when the moment map said). A moment caused by two seats in one change is
+ *  listed once per cause (so a bot's big move named first never hides a person's in the same change). */
 export function momentsWithCause<Event>(map: MomentMap<Event>, events: readonly Event[], seat: number): MomentBy[] {
   const out: MomentBy[] = []
   for (const event of events) {
@@ -206,8 +207,9 @@ export function momentsWithCause<Event>(map: MomentMap<Event>, events: readonly 
     const list: readonly (Moment | MomentBy)[] = named === null || named === undefined ? [] : Array.isArray(named) ? named : [named as Moment | MomentBy]
     for (const item of list) {
       const moment = typeof item === 'string' ? item : item && typeof item === 'object' ? item.moment : undefined
-      if (typeof moment !== 'string' || !MOMENT_NAME.test(moment) || out.some((m) => m.moment === moment)) continue
+      if (typeof moment !== 'string' || !MOMENT_NAME.test(moment)) continue
       const by = typeof item === 'object' && Number.isInteger(item.by) ? item.by : undefined
+      if (out.some((m) => m.moment === moment && m.by === by)) continue
       out.push(by === undefined ? { moment } : { moment, by })
     }
   }
@@ -258,7 +260,9 @@ export function maybeSay(
   const roll = nextRandom(rng)
   // (own keys only: a moment named "constructor" or "toString" would otherwise read a built-in → NaN → always speak)
   const chance = own(settings.chance, moment) && typeof settings.chance[moment] === 'number' ? settings.chance[moment] : 0
-  if (roll.value >= chance * (chattiness / 100)) return { ...quiet, rng: roll.rng }
+  // (a missing or broken chattiness = 0, silent — as check:framework counts it; NaN would otherwise always speak)
+  const talk = Number.isFinite(chattiness) && chattiness > 0 ? chattiness : 0
+  if (roll.value >= chance * (talk / 100)) return { ...quiet, rng: roll.rng }
   return freshLine(lines, turn, memory, roll.rng)
 }
 
