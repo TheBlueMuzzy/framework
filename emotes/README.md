@@ -65,10 +65,11 @@ muted", from the game's text to translate). Escape, a tap outside or the seat ag
 
 By hand instead (a game whose seats aren't a row — chips placed round a board):
 ```tsx
-<EmoteBubbles emotes={emotes} targetFor={(s) => `[data-emote-seat="${s}"]`} nameFor={nameOf} avoid=".hud, [data-emote-seat]" />
+<EmoteBubbles emotes={emotes} targetFor={seatSelector} nameFor={nameOf} avoid=".hud, [data-emote-seat]" />
 <button {...emoteSeatProps(seat, seat === me)} onClick={() => setTapped(seat)}><PlayerChip … badge={isMuted(seat) ? <MutedMark /> : undefined} /></button>
-{tapped && <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={`[data-emote-seat="${tapped}"]`} name={nameOf(tapped)} onClose={() => setTapped(null)} />}
+{tapped && <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={seatSelector(tapped)} name={nameOf(tapped)} onClose={() => setTapped(null)} />}
 ```
+`seatSelector(seat)` (from `ui/EmoteLayer`) builds `[data-emote-seat="…"]` with the id escaped — a room can relay any seat id, and a raw one with a quote or line break breaks the lookup.
 Clocks: the bubble's timer is on the looks clock (it fades even while paused); Pause closes the picker (the game's
 job — with `<EmoteSeats>`, tapping Pause is a tap outside, so it closes); bots speak on the rules clock (F22).
 

@@ -151,13 +151,14 @@ export function wiringSteps(gameDir) {
     {
       done: seatRow || inCode(/<EmoteBubbles\b/),
       step: `The bubbles, once, over the table (or skip this: <EmoteSeats>, the next step's easy way, draws them too):
-       <EmoteBubbles emotes={emotes} targetFor={(seat) => \`[data-emote-seat="\${seat}"]\`} nameFor={(seat) => name(seat)} avoid="<your HUD's selector>, [data-emote-seat]" />`,
+       <EmoteBubbles emotes={emotes} targetFor={seatSelector} nameFor={(seat) => name(seat)} avoid="<your HUD's selector>, [data-emote-seat]" />
+       (seatSelector from src/emotes/ui/EmoteLayer — it escapes the seat id; a raw one with a quote or line break breaks the lookup)`,
     },
     {
       done: seatRow || (inCode(/<EmoteMenu\b/) && inCode(/\bemoteSeatProps\s*\(/)),
       step: `Tappable seats — ${easyWay}
        wrap each seat's chip / portrait in a button with {...emoteSeatProps(seat, seat === me)} that opens
-       <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={\`[data-emote-seat="\${tapped}"]\`} name={…} onClose={…} />
+       <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={seatSelector(tapped)} name={…} onClose={…} />
        (your seat → the phrase picker; an opponent's → Mute emotes). Close it when Pause opens. A muted seat's chip: badge={<MutedMark />}.`,
     },
   )
