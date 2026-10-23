@@ -62,7 +62,16 @@ export interface ArenaPlug<State, Action, Setup, View> {
   /** Where a seat's randomness starts. Default: the AI kit's botSeed rule (a game moving its own arena up can keep
    *  its old rule, so its old numbers stay the same). */
   seatRng?: (seed: number, seat: number) => number
+  /** "What wins?" (F25, optional): the numbers the game names for one seat right now — "score lead", "letters in
+   *  hand", "glyphlings trapped"… Read after each seat's own turns 3, 5… and at the end (content/ai/arena.json
+   *  `whatWinsMoments`); the report says which of them predict the win. Numbers only (true/false → 1/0). */
+  situations?: (state: State, seat: number) => Record<string, number>
 }
+
+/** When situations are read: after the seat's own turn N (a number), or 'end' (the game as it ended). */
+export type Moment = number | 'end'
+/** A moment's name in the results ("turn 3", "end"). */
+export const momentName = (m: Moment) => (m === 'end' ? 'end' : `turn ${m}`)
 
 /** One finished game. */
 export interface ArenaGame<State, Action> {
@@ -77,6 +86,22 @@ export interface ArenaGame<State, Action> {
   notes: string[]
   /** How long each decision took, in ms (this machine — never part of the report, so the report stays the same). */
   decisionMs: number[]
+  /** Each seat's situations (seat order): moment name ("turn 3", "end") → situation → number. A moment the game
+   *  never reached (it ended before that seat's turn 5) isn't there. Empty when the plug names none. */
+  situations: Record<string, Record<string, number>>[]
+}
+
+/** The plug's situations for one seat, checked: every value a real number (true/false count as 1/0). */
+function readSituations<State>(plug: { name: string; situations?: (state: State, seat: number) => Record<string, number> }, state: State, seat: number, moment: string): Record<string, number> {
+  const raw = plug.situations?.(state, seat) ?? {}
+  const out: Record<string, number> = {}
+  for (const [name, value] of Object.entries(raw)) {
+    const v: unknown = value
+    const n = typeof v === 'boolean' ? Number(v) : v
+    if (typeof n !== 'number' || !Number.isFinite(n)) throw new Error(`${plug.name}'s situation "${name}" (seat ${seat}, ${moment}) isn't a number — it gave ${JSON.stringify(v) ?? String(v)}. Situations are numbers only (true/false → 1/0).`)
+    out[name] = n
+  }
+  return out
 }
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now())
@@ -87,6 +112,8 @@ export function playArenaGame<State, Action, Setup, View>(
   seats: ArenaSeat[],
   seed: number,
   kind: TableKind = 'mixed',
+  /** When to read the plug's situations (if it has any). */
+  moments: Moment[] = defaultArenaSettings.whatWinsMoments,
 ): ArenaGame<State, Action> {
   const { rules } = plug
   let state = rules.setup(plug.setup(seats, seed, kind))
@@ -96,6 +123,9 @@ export function playArenaGame<State, Action, Setup, View>(
   const bots = seats.map((s, i) => plug.bot(s, (d) => notes.push(`${i} ${d.note}`)))
   const rngs = seats.map((_, i) => (plug.seatRng ?? botSeed)(seed, i))
   const maxMoves = plug.maxMoves ?? 5000
+  const situations: Record<string, Record<string, number>>[] = seats.map(() => ({}))
+  const turnsAt = new Set(moments.filter((m): m is number => typeof m === 'number'))
+  const turns = seats.map(() => 0)
   while (!rules.isOver(state)) {
     if (moves.length >= maxMoves) throw new Error(`An arena game did not end within ${maxMoves} moves (seed ${seed})`)
     const acting = rules.toAct(state)
@@ -107,8 +137,14 @@ export function playArenaGame<State, Action, Setup, View>(
     rngs[seat] = picked.rng
     state = rules.apply(state, seat, picked.action, plug.fast ? { fast: true } : undefined).state
     moves.push({ seat, action: picked.action })
+    // A seat's turn ends when someone else acts next (or the game ends) — then its own turn count goes up
+    if (plug.situations && (rules.isOver(state) || rules.toAct(state)[0] !== seat)) {
+      turns[seat]++
+      if (turnsAt.has(turns[seat])) situations[seat][momentName(turns[seat])] = readSituations(plug, state, seat, momentName(turns[seat]))
+    }
   }
-  return { seats, seed, kind, state, moves, notes, decisionMs }
+  if (plug.situations && moments.includes('end')) seats.forEach((_, i) => (situations[i].end = readSituations(plug, state, i, 'end')))
+  return { seats, seed, kind, state, moves, notes, decisionMs, situations }
 }
 
 /** Each finished game as rows for the Personality Check (check.ts): who sat where, their meters, their share of the
@@ -123,6 +159,7 @@ export function toResults<State, Action, Setup, View>(plug: ArenaPlug<State, Act
         skill: s.skill.id,
         meters: { ...meters[i] },
         won: winners.includes(i) ? 1 / winners.length : 0,
+        ...(game.situations?.[i] && Object.keys(game.situations[i]).length ? { situations: game.situations[i] } : {}),
       })),
     }
   })
@@ -145,10 +182,16 @@ export interface ArenaSettings {
   ladderSeedOffset: number
   /** How many decision notes of the first game go in the report. */
   notesInReport: number
+  /** "What wins?" (F25): when the plug's situations are read — after each seat's own turn N, and 'end'. */
+  whatWinsMoments: Moment[]
+  /** A low / mid / high group, or a situation's winner-vs-loser pairs, below this many → "too few games", left out. */
+  whatWinsMinGames: number
+  /** How many sentences the report shows. */
+  whatWinsTop: number
 }
 
 /** Used for anything content/ai/arena.json leaves out (the numbers Glyphtender's own arena used). */
-export const defaultArenaSettings: ArenaSettings = { games: 60, minSeats: 2, maxSeats: 4, ladderGames: 6, seed: 1000, ladderSeedOffset: 4000, notesInReport: 24 }
+export const defaultArenaSettings: ArenaSettings = { games: 60, minSeats: 2, maxSeats: 4, ladderGames: 6, seed: 1000, ladderSeedOffset: 4000, notesInReport: 24, whatWinsMoments: [3, 5, 'end'], whatWinsMinGames: 30, whatWinsTop: 5 }
 
 /** One game to play: who sits where, its seed, what kind of table. */
 export interface ArenaTable {
@@ -305,7 +348,7 @@ export function runArena<State, Action, Setup, View>(
   const { tables, main, settings } = arenaPlan(request)
   const games: ArenaGame<State, Action>[] = []
   for (const t of tables) {
-    games.push(playArenaGame(plug, t.seats, t.seed, t.kind))
+    games.push(playArenaGame(plug, t.seats, t.seed, t.kind, settings.whatWinsMoments))
     onProgress?.(games.length, tables.length)
   }
   const results = toResults(plug, games)

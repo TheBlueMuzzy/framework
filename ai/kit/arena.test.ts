@@ -52,6 +52,49 @@ describe('the arena loop', () => {
   })
 })
 
+describe('situations ("What wins?", F25)', () => {
+  const seats = [{ personality: greedy, skill: steady }, { personality: greedy, skill: steady }]
+
+  it('reads each seat\'s situations after its own turns N and at the end', () => {
+    const game = playArenaGame(arenaPlug, seats, 1000, 'mixed', [1, 2, 'end'])
+    for (const [i, s] of game.situations.entries()) {
+      expect(s.end).toEqual(arenaPlug.situations!(game.state, i))
+      const own = game.moves.filter((m) => m.seat === i).length
+      // Draw to 10: every move is one turn, so turn 1 = the hand after the seat's first card
+      if (own >= 1 && game.moves.find((m) => m.seat === i)!.action.type === 'draw') expect(s['turn 1'].total).toBeGreaterThan(0)
+      if (own < 2) expect(s['turn 2']).toBeUndefined() // a moment the game never reached isn't there
+    }
+    expect(toResults(arenaPlug, [game])[0].seats[0].situations).toEqual(game.situations[0])
+  })
+
+  it('a turn is all of a seat\'s moves until someone else acts', () => {
+    // A game where seat 0 acts twice in a row: its turn 1 is read after the second move only
+    let count = 0
+    const rules = { setup: () => ({ n: 0 }), isOver: (s: { n: number }) => s.n >= 3, toAct: (s: { n: number }) => [s.n < 2 ? 0 : 1], viewFor: () => ({}), apply: (s: { n: number }) => ({ state: { n: s.n + 1 } }) }
+    const plug = { name: 'Two in a row', rules, setup: () => ({}), bot: () => (_v: unknown, _s: number, rng: number) => ({ action: {}, rng }), meters: () => [{}, {}], winners: () => [1], situations: (s: { n: number }) => (count++, { moves: s.n }) }
+    const game = playArenaGame(plug, seats, 1, 'mixed', [1])
+    expect(game.situations).toEqual([{ 'turn 1': { moves: 2 } }, { 'turn 1': { moves: 3 } }])
+    expect(count).toBe(2) // read only at its moments, not after every move
+  })
+
+  it('true/false count as 1/0; anything else that isn\'t a number stops the run in plain English', () => {
+    const yesNo = { ...arenaPlug, situations: () => ({ ahead: true }) as unknown as Record<string, number> }
+    expect(playArenaGame(yesNo, seats, 1000, 'mixed', ['end']).situations[0].end).toEqual({ ahead: 1 })
+    const bad = { ...arenaPlug, situations: () => ({ lead: NaN }) }
+    expect(() => playArenaGame(bad, seats, 1000, 'mixed', ['end'])).toThrow(`Draw to 10's situation "lead" (seat 0, end) isn't a number`)
+    const word = { ...arenaPlug, situations: () => ({ lead: 'lots' }) as unknown as Record<string, number> }
+    expect(() => playArenaGame(word, seats, 1000, 'mixed', ['end'])).toThrow(/it gave "lots"/)
+  })
+
+  it('an old plug without situations keeps working: no situations in its results', () => {
+    const { situations: _none, ...old } = arenaPlug
+    void _none
+    const game = playArenaGame(old, seats, 1000)
+    expect(game.situations).toEqual([{}, {}])
+    expect(toResults(old, [game])[0].seats[0]).not.toHaveProperty('situations')
+  })
+})
+
 describe('seating plans', () => {
   it('mixed tables go round 2, 3, 4 seats, shuffled the same way every run, with repeats past the cast', () => {
     const plan = mixedTables([careful, greedy], steady, 6, { minSeats: 2, maxSeats: 4, seed: 9 })

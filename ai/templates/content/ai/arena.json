@@ -11,7 +11,10 @@
     "mainSkill": "The skill the mixed tables play at (empty = the middle skill in the game's skills file).",
     "reportPath": "Where npm run ai:arena writes the report page, from the game folder.",
     "devKitLadderFrom": "The Dev Kit's Run check adds a small skill ladder from this many games asked for.",
-    "devKitLadderGames": "…of this many games per personality."
+    "devKitLadderGames": "…of this many games per personality.",
+    "whatWinsMoments": "\"What wins?\": when the game's situations (score lead, letters in hand…) are read — after each player's own turn N (numbers), and \"end\". Early turns say what to aim for; \"end\" says what winners ended with.",
+    "whatWinsMinGames": "A low / mid / high group (or a situation's winner-vs-loser pairs) with fewer than this many games is left out of \"What wins?\" and listed as too few games. 30 ≈ ±18% — more games, surer numbers.",
+    "whatWinsTop": "How many \"What wins?\" sentences the report and the Dev Kit show."
   },
   "games": 60,
   "minSeats": 2,
@@ -23,5 +26,12 @@
   "mainSkill": "",
   "reportPath": "e2e-shots/ai-check.html",
   "devKitLadderFrom": 20,
-  "devKitLadderGames": 2
+  "devKitLadderGames": 2,
+  "whatWinsMoments": [
+    3,
+    5,
+    "end"
+  ],
+  "whatWinsMinGames": 30,
+  "whatWinsTop": 5
 }

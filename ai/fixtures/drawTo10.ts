@@ -125,6 +125,12 @@ export const arenaPlug: ArenaPlug<State, Action, Setup, View> = {
       stopped: game.state.stopped[i] ? 1 : 0,
     })),
   winners: (s) => winners(s),
+  // "What wins?": the hand's total, and how far it is from the best other hand (both read after turns 3, 5 and at the end)
+  situations: (s, seat) => {
+    const mine = total(s.hands[seat])
+    const best = Math.max(0, ...s.hands.map((h, i) => (i === seat || total(h) >= 10 ? 0 : total(h))))
+    return { total: mine, lead: mine - best, busted: mine >= 10 ? 1 : 0 }
+  },
   checks: {
     stops: (results, skill) => {
       const out = new Map<string, number[]>()
