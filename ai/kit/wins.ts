@@ -105,9 +105,9 @@ export const margin = (n: number) => (n > 0 ? 1 / Math.sqrt(n) : 1)
 const when = (moment: string) => (moment === 'end' ? 'at the end' : `after ${moment}`)
 
 /** How a group reads in a sentence: the top one "10 or more", the bottom one "-3 or less", a middle one "2–6",
- *  one number "of 1". */
+ *  one number just "1". */
 function range(g: WinsGroup, place: 'top' | 'bottom' | 'middle'): string {
-  if (g.low === g.high) return `of ${num(g.low)}`
+  if (g.low === g.high) return num(g.low)
   if (place === 'top') return `${num(g.low)} or more`
   if (place === 'bottom') return `${num(g.high)} or less`
   return `${num(g.low)}–${num(g.high)}`

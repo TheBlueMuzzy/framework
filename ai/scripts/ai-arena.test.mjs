@@ -37,6 +37,10 @@ describe('npm run ai:arena', () => {
     const html = readFileSync(path, 'utf8')
     expect(html).toContain('Personality Check — Draw to 10')
     expect(html).toContain('12 mixed games at Steady (2–4 players) + 4 skill-ladder games · seed 1000')
+    // "What wins?" (0.6.0): 12 games are too few to say — said, on the PC and on the page
+    expect(out).toMatch(/What wins\? \(players win \d+% on average\)/)
+    expect(out).toMatch(/no situation has enough games yet|left out for too few games/)
+    expect(html).toContain('<h2>What wins?')
   }, 30000)
 
   it('flags change one run: --games --ladder --seats --skill --seed --notes --out; the same seed = the same report', () => {

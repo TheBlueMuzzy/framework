@@ -99,5 +99,12 @@ mkdirSync(dirname(out), { recursive: true })
 writeFileSync(out, reportHtml({ ...report, subtitle: `${report.subtitle} · ${new Date().toISOString().slice(0, 16).replace('T', ' ')}` }))
 const feel = Object.values(report.feel).flat()
 console.log(`\nfeel targets: ${feel.filter((x) => x.pass).length}/${feel.length} green · tell-apart ${Math.round(report.tell.overall * 100)}% · for-all checks ${report.all.filter((a) => a.pass).length}/${report.all.length}`)
+if (report.whatWins) {
+  const w = report.whatWins
+  console.log(`\nWhat wins? (players win ${Math.round(w.baseRate * 100)}% on average)`)
+  if (w.top.length) w.top.forEach((line, i) => console.log(`  ${i + 1}. ${line}`))
+  else console.log('  no situation has enough games yet — play more (--games 200)')
+  if (w.leftOut.length) console.log(`  left out for too few games: ${w.leftOut.length} (listed on the report)`)
+}
 console.log(`report: ${out}`)
 if (args.includes('--notes')) console.log('\n' + games[0].notes.join('\n'))

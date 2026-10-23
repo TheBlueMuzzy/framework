@@ -116,6 +116,13 @@ export function wiringSteps(gameDir) {
       step: `${ARENA_FILE}: the game's half of the arena — export default async function arenaGame(files) returning { plug, personalities, skills, targets }
        (plug = its rules, setup(seats, seed, kind) with its board choice, bot, meters, winners — src/ai/kit/arena.ts ArenaGameFile; the AI README's "Arena")`,
     },
+    {
+      // "What wins?" (0.6.0, F25): once the arena file is there, until its plug names situations
+      done: !existsSync(join(gameDir, ARENA_FILE)) || /\bsituations\s*[:(]/.test(readFileSync(join(gameDir, ARENA_FILE), 'utf8')),
+      optional: true,
+      step: `"What wins?": name the game's situations in the arena plug, situations: (state, seat) => ({ 'score lead': …, 'letters in hand': … }) (numbers only)
+       — the report, npm run ai:arena and the Dev Kit's Run check then say which predict the win (read after turns 3, 5 and at the end: content/ai/arena.json "whatWinsMoments"; the AI README's "What wins?")`,
+    },
   ]
 }
 
@@ -169,11 +176,12 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
     if (STARTERS[f]) copyFileSync(join(aiDir, STARTERS[f]), join(game, f))
     else writeFileSync(join(game, f), goldenText(game))
   }
-  const missing = wiringSteps(game).filter((w) => !w.done)
+  const missing = wiringSteps(game).filter((w) => !w.done && !w.optional)
   if (missing.length) {
     log(`  Still to wire${missing.every((w) => !w.banter) ? ' (only for the arena — npm run ai:arena)' : ''}:`)
     missing.forEach((w, i) => log(`  ${i + 1}. ${w.step}`))
   }
+  wiringSteps(game).filter((w) => !w.done && w.optional).forEach((w) => log(`  Optional: ${w.step}`))
   { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }
   return { changed, removed, starter }
 }

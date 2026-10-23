@@ -1,6 +1,7 @@
 // THE AI MODULE — THE PERSONALITY CHECK REPORT. One self-contained HTML page (no scripts, no files) a game's arena
 // writes after a run: feel targets green/red, the tell-apart grid, win shares, the skill ladder, example notes.
 import type { TargetResult } from './check'
+import type { SituationWins, WhatWins } from './wins'
 
 export interface CheckReport {
   title: string
@@ -14,11 +15,32 @@ export interface CheckReport {
   ladder: Record<string, number>
   /** A few decision notes from one game, to read how it thinks. */
   notes?: string[]
+  /** "What wins?" (F25) — only when the game names situations. */
+  whatWins?: WhatWins
 }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const pct = (v: number) => `${Math.round(v * 100)}%`
+const num = (v: number) => String(Math.round(v * 100) / 100)
 const mark = (pass: boolean) => `<span class="${pass ? 'ok' : 'no'}">${pass ? '✓' : '✗'}</span>`
+
+/** "What wins?": the top sentences in a card (the Dev Kit's Check panel reads them from `data-what-wins`), the
+ *  pitfall, every situation in a table, and what was left out for too few games. */
+function whatWinsHtml(w: WhatWins): string {
+  const cell = (s: SituationWins, i: number) => {
+    const g = s.groups.length === 3 ? s.groups[i] : s.groups.length === 2 ? [s.groups[0], undefined, s.groups[1]][i] : i === 1 ? s.groups[0] : undefined
+    return g ? `<td>${pct(g.winRate)} <span class="dim">${g.low === g.high ? num(g.low) : `${num(g.low)}–${num(g.high)}`} · ${g.games}</span></td>` : '<td class="dim">—</td>'
+  }
+  const rows = w.all.map((s) => `<tr${s.leftOut ? ' class="dim"' : ''}><th>${esc(s.situation)}</th><td>${esc(s.moment)}</td><td>${s.leftOut ? 'too few' : `${pct(s.edge)}`}</td>${[0, 1, 2].map((i) => cell(s, i)).join('')}</tr>`).join('')
+  const top = w.top.length
+    ? `<ol data-what-wins>${w.top.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>`
+    : `<p data-what-wins-none>No situation has enough games yet — play more (npm run ai:arena -- --games 200).</p>`
+  return `<h2>What wins? <span class="dim">(players win ${pct(w.baseRate)} of their games on average)</span></h2>
+<section class="card">${top}</section>
+<p class="dim">A number that is the score itself (score lead at the end) predicts the win because it is the win — the early ones say what to aim for. And it's what goes with winning, not proof it causes it: change a goal and run again to check.</p>
+${w.leftOut.length ? `<p class="dim" data-what-wins-left="${w.leftOut.length}">Left out: ${w.leftOut.map(esc).join(' · ')}</p>` : ''}
+<div class="scroll"><table><tr><th>situation</th><th>when</th><th>winner had more</th><th>low</th><th>mid</th><th>high</th></tr>${rows}</table></div>`
+}
 
 export function reportHtml(r: CheckReport): string {
   const names = Object.keys(r.tell.grid)
@@ -54,6 +76,7 @@ pre{background:var(--card);border:1px solid var(--line);border-radius:8px;paddin
 <h2>Does each one feel like itself?</h2><div class="cards">${feelRows}</div>
 <h2>Can you tell them apart? <span class="dim">(${pct(r.tell.overall)} guessed right from behaviour alone)</span></h2><div class="scroll">${grid}</div>
 <h2>Does everyone win sometimes?</h2><div class="scroll">${winTable}</div>
+${r.whatWins ? whatWinsHtml(r.whatWins) : ''}
 ${r.notes?.length ? `<h2>How they think (one game)</h2><pre>${r.notes.map(esc).join('\n')}</pre>` : ''}
 </main></body></html>`
 }

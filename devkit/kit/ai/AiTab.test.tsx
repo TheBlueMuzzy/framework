@@ -163,6 +163,24 @@ describe('the AI tab', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
     expect(runCheck.mock.calls[0][0]).toMatchObject({ games: 6 })
     expect(screen.getByRole('link', { name: 'open the report' }).getAttribute('href')).toBe('blob:report')
+    expect(screen.queryByText('What wins?')).toBeNull() // an older report has no "What wins?": nothing shown
+  })
+
+  it('Run check shows the report\'s "What wins?" sentences (0.25.0), and says when there are too few games', async () => {
+    vi.stubGlobal('open', vi.fn())
+    URL.createObjectURL = vi.fn(() => 'blob:report')
+    URL.revokeObjectURL = vi.fn()
+    const page = '<h2>What wins?</h2><section><ol data-what-wins><li>Players with score lead 10 or more after turn 5 win 78% (of 240 games, ±6%) — vs 12% with -3 or less</li><li>Players with &lt;tiles&gt; 2 at the end win 40%</li></ol></section><p data-what-wins-left="3">Left out</p>'
+    const runCheck = vi.fn(async () => page)
+    const { unmount } = render(<AiTab ai={sampleAi({ runCheck })} />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
+    expect(screen.getByText('What wins?')).toBeTruthy()
+    expect([...screen.getByText('What wins?').parentElement!.querySelectorAll('li')].map((li) => li.textContent)).toEqual(['Players with score lead 10 or more after turn 5 win 78% (of 240 games, ±6%) — vs 12% with -3 or less', 'Players with <tiles> 2 at the end win 40%'])
+    expect(screen.getByText('3 left out for too few games (listed on the report).')).toBeTruthy()
+    unmount()
+    render(<AiTab ai={sampleAi({ runCheck: vi.fn(async () => '<p data-what-wins-none>No situation…</p>') })} />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Run check' })) })
+    expect(screen.getByText(/No situation has enough games yet/)).toBeTruthy()
   })
 
   it('the Dev Kit search (its query, while the tab is open): only matching sections show, with a count', () => {

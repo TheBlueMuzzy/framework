@@ -12,6 +12,7 @@ import { botSeed } from './brain'
 import { averages, checkFeelTargets, skillLadder, tellApart, winRates, type FeelTarget, type GameResult } from './check'
 import { shuffle } from './random'
 import type { CheckReport } from './report'
+import { whatWins, type WhatWinsOptions } from './wins'
 import type { Decision, Personality, Skill } from './types'
 
 /** A number per personality, worked out from the results (a game's own "for all of them" check). */
@@ -269,6 +270,8 @@ export interface ReportOptions {
   checks?: Record<string, PersonalityNumbers>
   /** How many notes of the first game to show. Default 24. */
   notes?: number
+  /** "What wins?" (F25): the minimum games and how many sentences (only when the games have situations). */
+  whatWins?: Omit<WhatWinsOptions, 'skill'>
 }
 
 /** The whole Personality Check for a batch of results, ready for reportHtml. Pure: the same results = the same report. */
@@ -299,7 +302,8 @@ export function checkReport(name: string, results: GameResult[], firstNotes: str
     const detail = !measured.length ? 'not measured in these games' : failing.length ? `off: ${failing.map(([n, v]) => `${n} ${pct(v)}`).join(', ')}` : `all ${measured.length} in range${notMeasured ? ` (${notMeasured} not measured)` : ''}`
     return { label: t.label, pass, detail }
   })
-  return { title: `Personality Check — ${name}`, subtitle: options.subtitle, feel, all, tell, wins, ladder, notes: firstNotes.slice(0, options.notes ?? 24) }
+  const named = results.some((g) => g.seats.some((s) => s.situations))
+  return { title: `Personality Check — ${name}`, subtitle: options.subtitle, feel, all, tell, wins, ladder, notes: firstNotes.slice(0, options.notes ?? 24), ...(named ? { whatWins: whatWins(results, { ...options.whatWins, skill: mainSkill }) } : {}) }
 }
 
 /** What to play: the cast, their skills, the targets, and anything to change from the settings for this run. */
@@ -368,6 +372,7 @@ export function runArena<State, Action, Setup, View>(
     tellMeters: plug.tellMeters,
     checks: plug.checks,
     notes: settings.notesInReport,
+    whatWins: { minGames: settings.whatWinsMinGames, top: settings.whatWinsTop },
   })
   return { games, results, mixedResults, report }
 }

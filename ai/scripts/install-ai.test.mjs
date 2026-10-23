@@ -44,6 +44,12 @@ describe('install-ai', () => {
     expect(readFileSync(join(game, 'content/ai/arena.json'), 'utf8')).toBe('{ "games": 12 }')
     expect(second).toMatchObject({ changed: [], removed: [], starter: [] })
     expect(again.join('\n')).not.toContain('Still to wire')
+    // 0.6.0: "What wins?" is offered (optional) until the arena plug names its situations
+    expect(again.join('\n')).toContain('Optional: "What wins?": name the game\'s situations')
+    writeFileSync(join(game, 'src/ai/arenaGame.ts'), 'export const plug = { situations: (state, seat) => ({ lead: 1 }) }')
+    const named = []
+    installAi(game, { log: (l) => named.push(l) })
+    expect(named.join('\n')).not.toContain('What wins?')
     // A personality that talks asks for the banter wiring until botBanter is in the game's code
     writeFileSync(join(game, 'content/ai/personalities.json'), JSON.stringify({ personalities: [{ id: 'Bully', chattiness: 60 }, { id: 'Mute', chattiness: 0 }] }))
     const chat = []

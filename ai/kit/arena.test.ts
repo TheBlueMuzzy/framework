@@ -178,6 +178,32 @@ describe('the whole Personality Check on Draw to 10', () => {
     expect(Object.keys(withLadder.report.ladder).length).toBeGreaterThan(0)
   })
 
+  it('"What wins?" (F25): sentences from the mixed tables at the main skill, on the report page', () => {
+    const w = report.whatWins!
+    expect(w.top.length).toBeGreaterThan(0)
+    expect(w.top.length).toBeLessThanOrEqual(5)
+    // Draw to 10: at the end, not having bust is what wins — "busted" (fewer is better) or the lead tops the list
+    expect(w.all[0].strength).toBeGreaterThan(0.5)
+    expect(w.top.every((t) => /^Players with .+ win \d+% \(of \d+ games, ±\d+%\) — vs \d+% with /.test(t))).toBe(true)
+    const html = reportHtml(report)
+    expect(html).toContain('<h2>What wins?')
+    expect(html).toContain(`<ol data-what-wins><li>${w.top[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</li>`)
+    // the settings: fewer sentences, a higher floor
+    const strict = runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 0, whatWinsTop: 1, whatWinsMinGames: 1000 } })).report.whatWins!
+    expect(strict.top).toEqual([])
+    expect(strict.leftOut.length).toBe(strict.all.length)
+    expect(reportHtml({ ...report, whatWins: strict })).toContain('data-what-wins-none')
+    expect(runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 0, whatWinsTop: 1 } })).report.whatWins!.top).toHaveLength(1)
+  })
+
+  it('an old plug without situations: no "What wins?" on the report', () => {
+    const { situations: _none, ...old } = arenaPlug
+    void _none
+    const r = runArena(old, request({ settings: { games: 6, ladderGames: 0 } })).report
+    expect(r.whatWins).toBeUndefined()
+    expect(reportHtml(r)).not.toContain('What wins?')
+  })
+
   it('the same seed gives the same report; another seed another', () => {
     expect(runArena(arenaPlug, request()).report).toEqual(report)
     expect(runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 20, seed: 4242 } })).report).not.toEqual(report)
