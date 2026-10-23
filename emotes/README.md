@@ -9,12 +9,12 @@ not told), a spam limit holds on the device AND on the room's server, and a Sett
 - Design: `../.planning/design/emotes.md` (research: Hearthstone, MTG Arena, Clash Royale, Marvel Snap, LoR, BGA, Rocket League).
 - Framework sprint 26: F107 = layer 1. Layer 2: a sound per phrase, desktop keys 1–7, the server not sending a muted
   sender's emotes, reply phrases. Layer 3: animated / unlockable emotes. Never: free text chat.
-- Kit **0.1.0**. No packages. Pure TypeScript core; the UI parts come from the UI kit (0.28.0+); online from Rooms (0.12.0+).
+- Kit **0.2.0** (0.2.0, F22: a bot's `say()` while online is refused — `server` — bots there speak from the room's server, `room.emote`; the banter lines are read live from the object passed as `banter`). No packages. Pure TypeScript core; the UI parts come from the UI kit (0.28.0+); online from Rooms (0.12.0+).
 
 ## What a game gets
 | File (in `src/emotes/`) | Does |
 |---|---|
-| `emotes.ts` | **The module.** `createEmotes({ settings, words, banter, mine, save, match, send })` → `sendEmote(seat, id)` (`{ ok }` or `cooling` / `unknown` / `offline`) · `say(seat, id)` (a bot: the same path and bucket) · `onEmote(fn)` (only emotes this player should see) · `receive(message)` (online: what the room relayed) · `mute(seat, on)` / `isMuted` / `muted()` · `setHideAll(on)` / `hideAll()` · `readyIn(seat)` (ms until the next send) · `text(id)` / `allTexts()` / `bubbleMs(id)` · `setMatch(id)` (a new match: mutes start clean) · `setMine(seats)` · `onChange(fn)`. A muted seat's emotes are dropped before `onEmote` — the bubble never starts. Hide-all drops everyone's but this device's own. Ids travel, never words. |
+| `emotes.ts` | **The module.** `createEmotes({ settings, words, banter, mine, save, match, send })` → `sendEmote(seat, id)` (`{ ok }` or `cooling` / `unknown` / `offline`) · `say(seat, id)` (a bot: the same path and bucket — local games only; online it returns `server`: bots speak from the room's server) · `onEmote(fn)` (only emotes this player should see) · `receive(message)` (online: what the room relayed) · `mute(seat, on)` / `isMuted` / `muted()` · `setHideAll(on)` / `hideAll()` · `readyIn(seat)` (ms until the next send) · `text(id)` / `allTexts()` / `bubbleMs(id)` · `setMatch(id)` (a new match: mutes start clean) · `setMine(seats)` · `onChange(fn)`. A muted seat's emotes are dropped before `onEmote` — the bubble never starts. Hide-all drops everyone's but this device's own. Ids travel, never words. |
 | `bucket.ts` | The spam limit: up to `burst` in a row, one back every `refillSeconds`, never two closer than `minGapMs` — one per seat. Over it a send is refused (nothing queued). |
 | `config.ts` | `content/emotes.json`. A bad value → one warning + the default. |
 | `save.ts` | `EMOTE_SAVE` — the saves-module options for the switch + this match's mutes: `createSave({ ...EMOTE_SAVE, key: '<game>:emotes', version: 1 })`. |

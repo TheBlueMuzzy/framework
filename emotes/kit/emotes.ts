@@ -28,8 +28,9 @@ export interface EmoteMessage {
 }
 
 /** cooling = past the spam limit (readyIn says for how long) · unknown = not a phrase or banter id · offline = online, but
- *  the room isn't connected right now */
-export type SendResult = { ok: true } | { ok: false; reason: 'cooling' | 'unknown' | 'offline' }
+ *  the room isn't connected right now · server = a bot's say() while online: bots speak from the room's server
+ *  (room.emote(seatId, id)) — from here it would go out as this player's own seat */
+export type SendResult = { ok: true } | { ok: false; reason: 'cooling' | 'unknown' | 'offline' | 'server' }
 
 export interface EmotesOptions {
   /** content/emotes.json as it is (read with readEmotesConfig: a bad value warns once and uses the default). */
@@ -59,7 +60,9 @@ export interface Emotes {
   /** The phrase ids, in picker order. */
   readonly phrases: readonly string[]
   sendEmote(seat: string, id: string): SendResult
-  /** A bot seat "presses" an emote: exactly sendEmote (the same check, the same bucket, the same bubble, the same mute). */
+  /** A bot seat "presses" an emote: exactly sendEmote (the same check, the same bucket, the same bubble, the same mute).
+   *  Local games only: online (a `send` is set) it's refused with 'server' — bots there speak from the room's server
+   *  (room.emote(seatId, id)), or the room would send the line as this player's own seat. */
   say(seat: string, id: string): SendResult
   /** Called for every emote this player should see. Returns the way to stop listening. */
   onEmote(listener: (emote: EmoteMessage) => void): () => void
@@ -152,11 +155,21 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
     return { ok: true }
   }
 
+  let toldServer = false
+  const say = (seat: string, id: string): SendResult => {
+    if (send) {
+      if (!toldServer) warn('a bot\'s say() while online is refused: online, bots speak from the room\'s server (room.emote(seatId, id)) — from this device the room would send it as your own seat.')
+      toldServer = true
+      return { ok: false, reason: 'server' }
+    }
+    return sendEmote(seat, id)
+  }
+
   return {
     config,
     phrases: config.phrases,
     sendEmote,
-    say: sendEmote,
+    say,
     onEmote(listener) {
       listeners.add(listener)
       return () => { listeners.delete(listener) }

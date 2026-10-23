@@ -15,6 +15,10 @@ describe('banter moments + settings (F22)', () => {
     expect(momentsFor(map, events, 0)).toEqual(['hitRival', 'won'])
     expect(momentsFor(map, events, 1)).toEqual(['gotHit', 'lost'])
     expect(momentsFor(map, events, 3)).toEqual(['lost'])
+    // a secret event (a Table event's seen) only counts for the seats that may see it
+    const secret = [{ type: 'hit', by: 2, on: 1, seen: { seats: [1, 2] } }] as unknown as Ev[]
+    expect(momentsFor(map, secret, 1)).toEqual(['gotHit'])
+    expect(momentsFor((e: Ev) => (e.type === 'hit' ? 'rivalBigMove' : null), secret, 0)).toEqual([])
     // a name that couldn't be an emote id is ignored
     expect(momentsFor(() => ['bad name', '9x', 'ok'], [{ type: 'drew', seat: 0 }], 0)).toEqual(['ok'])
   })

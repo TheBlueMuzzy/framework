@@ -114,10 +114,20 @@ export function readBanterSettings(json: unknown, warn: (message: string) => voi
   return out
 }
 
-/** What one change means to one seat: every moment the plug names for its events, in order, no repeats. */
+/** May this seat see this event? A Table event says (seen: 'all' | { seats }); anything else counts as seen by all. */
+function sees(event: unknown, seat: number): boolean {
+  const seen = event && typeof event === 'object' ? (event as { seen?: unknown }).seen : undefined
+  if (!seen || typeof seen !== 'object') return true
+  const seats = (seen as { seats?: unknown }).seats
+  return !Array.isArray(seats) || seats.includes(seat)
+}
+
+/** What one change means to one seat: every moment the plug names for its events, in order, no repeats. Events the
+ *  seat may not see (a Table event's `seen`) are skipped — a bot never comments on a secret. */
 export function momentsFor<Event>(map: MomentMap<Event>, events: readonly Event[], seat: number): Moment[] {
   const out: Moment[] = []
   for (const event of events) {
+    if (!sees(event, seat)) continue
     const named = map(event, seat)
     const list = named === null || named === undefined ? [] : typeof named === 'string' ? [named] : named
     for (const moment of list) if (typeof moment === 'string' && MOMENT_NAME.test(moment) && !out.includes(moment)) out.push(moment)

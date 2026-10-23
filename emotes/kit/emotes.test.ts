@@ -178,6 +178,18 @@ describe('online: send and receive', () => {
     emotes.receive({ type: 'emote', seat: 'seat-1', id: 'hello' })
     expect(seen.map((e) => e.id)).toEqual(['hello'])
   })
+  it('online, a bot\'s say() on this device is refused (bots speak from the server: room.emote) — told once, nothing sent', () => {
+    const sent: string[] = []
+    const warnings: string[] = []
+    const { emotes, seen } = setup({ send: (seat, id) => { sent.push(`${seat}:${id}`); return true }, warn: (m) => warnings.push(m) })
+    expect(emotes.say('seat-3', 'banter.bully.won')).toEqual({ ok: false, reason: 'server' })
+    expect(emotes.say('seat-3', 'wow')).toEqual({ ok: false, reason: 'server' })
+    expect([sent, seen, warnings.length]).toEqual([[], [], 1])
+    expect(warnings[0]).toContain('room.emote')
+    expect(emotes.readyIn('seat-3')).toBe(0) // (its bucket untouched)
+    emotes.setSend(undefined)
+    expect(emotes.say('seat-3', 'banter.bully.won')).toEqual({ ok: true }) // a local game again: it speaks
+  })
   it('setSend switches a page between online and local (a game with both modes)', () => {
     const sent: string[] = []
     const { emotes, seen, time } = setup()

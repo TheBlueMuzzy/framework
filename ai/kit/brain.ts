@@ -14,6 +14,8 @@
 //   7. Choose — keep the moves within skill.spread of the best, at most skill.topN, pick one weighted by score.
 //   8. Explain— a Decision with a plain-English note (Dev Kit, bug reports — never players).
 // It only ever sees the view it's given. All its randomness comes from the rng it's given (same game → same moves).
+import { linesFor, maybeSay, momentsFor, quietMemory, type BanterLines, type BanterMemory, type BanterSettings, type MomentMap } from './banter'
+import { botWait, paceNow, type PaceClock } from './pace'
 import { nextRandom, randomBetween, shuffle, weightedPick } from './random'
 import type { Context, Decision, GamePlug, Mode, Personality, Range, Skill } from './types'
 
@@ -262,6 +264,103 @@ export function asBot<View, Action>(brain: Brain<View, Action>, onDecision?: (d:
     const { action, rng: next, decision } = brain.decide(view, seat, rng)
     onDecision?.(decision, seat)
     return { action, rng: next }
+  }
+}
+
+// ─── Banter: bots talk through the emote module (F22) ───
+// The game hands it its moment map (plug.moments), who the bots are, the banter settings, its lines (read live) and a
+// say(seat, id). After every change it calls hear(events): each bot seat turns the events into its moments, rolls
+// chance × chattiness (banter.ts maybeSay: cooldown, no repeats), and — a short moment later on the RULES clock, so the
+// Dev Kit's full and half pause (and the game's own pause) stop it — says one line through say(), i.e. the emote
+// module's emotes.say(seatId, id): the same bucket, the same bubble, the same mute. A line is an emote id
+// (banter.<personality>.<moment>…), never words: each device looks its words up in its own text file.
+//   Local:   say: (seat, id) => emotes.say(seatIdOf(seat), id).ok
+//   Online:  bots speak from the SERVER — say: (seat, id) => room.emote(seatIdOf(seat), id). Never a client-side
+//            say() online (it would go out as the player's own seat; the emotes module refuses it).
+// At most one line waits per seat (a newer one replaces it); `tableGap` keeps a second bot from talking over the first.
+
+/** One bot seat: its seat number and its personality (only id + chattiness are read — the lines are keyed by id). */
+export interface BanterSeat {
+  seat: number
+  personality: Pick<Personality, 'id' | 'chattiness'>
+}
+
+export interface BotBanterOptions<Event> {
+  /** The game's moment map: plug.moments. */
+  moments: MomentMap<Event>
+  /** The bot seats right now (a function: a bot can take over a seat mid-game, and the Dev Kit edits chattiness live). */
+  bots: () => readonly BanterSeat[]
+  /** content/ai/banter.json, read with readBanterSettings (a function → read each time, for live edits). */
+  settings: BanterSettings | (() => BanterSettings)
+  /** content/text/en.json "banter" — a function, read at every moment (never copied), so a line edited in the Dev Kit
+   *  is used at the next moment without a reload. */
+  lines: () => BanterLines | undefined
+  /** Say it: the emote module's say (local) or the room's emote (online server). → true if it went out. */
+  say: (seat: number, id: string) => boolean
+  /** The game's seed (each seat gets its own randomness from it — botSeed). */
+  seed: number
+  /** The clock it waits on. Default: the bots' pace clock — the game's rules clock once it called setPaceClock. */
+  clock?: PaceClock
+}
+
+export interface BotBanter {
+  /** One change happened at the table: these are its events (all of them — each seat only hears what it may see). */
+  hear(events: readonly unknown[]): void
+  /** Stop: every waiting line is dropped (the game ended and was left, the screen closed). */
+  stop(): void
+  /** Lines waiting to be said right now (seat → emote id) — for tests and the Dev Kit. */
+  waiting(): Record<number, string>
+}
+
+const paceClockNow = (): PaceClock => ({ now: paceNow, after: botWait })
+
+export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
+  const clock = options.clock ?? paceClockNow()
+  const settingsNow = () => (typeof options.settings === 'function' ? options.settings() : options.settings)
+  const memories = new Map<number, BanterMemory>()
+  const rngs = new Map<number, number>()
+  const waiting = new Map<number, { id: string; cancel: () => void }>()
+  let turn = 0
+  let lastSpokeAt: number | null = null
+  const rngOf = (seat: number) => rngs.get(seat) ?? botSeed(options.seed ^ 0xba7, seat)
+
+  const speak = (seat: number, id: string, memory: BanterMemory) => {
+    waiting.delete(seat)
+    const gapMs = (settingsNow().tableGap ?? 0) * 1000
+    if (gapMs > 0 && lastSpokeAt !== null && clock.now() - lastSpokeAt < gapMs) return // (someone just spoke: let it go)
+    if (!options.say(seat, id)) return // (muted bots still "go out" — the emote module drops them; false = refused)
+    memories.set(seat, memory)
+    lastSpokeAt = clock.now()
+  }
+
+  return {
+    hear(events) {
+      turn += 1
+      const settings = settingsNow()
+      const lines = options.lines()
+      for (const bot of options.bots()) {
+        const said = memories.get(bot.seat) ?? quietMemory()
+        for (const moment of momentsFor(options.moments, events as Event[], bot.seat)) {
+          const own = linesFor(lines, bot.personality.id, moment)
+          const candidates = own.length ? own : settings.presets?.[moment] ?? []
+          const r = maybeSay(moment, turn, bot.personality.chattiness, candidates, said, settings, rngOf(bot.seat))
+          rngs.set(bot.seat, r.rng)
+          if (!r.line) continue
+          const delay = settings.delay ?? { min: 0, max: 0 }
+          const wait = randomBetween(rngOf(bot.seat), Math.round(delay.min * 1000), Math.round(delay.max * 1000))
+          rngs.set(bot.seat, wait.rng)
+          waiting.get(bot.seat)?.cancel()
+          const id = r.line
+          waiting.set(bot.seat, { id, cancel: clock.after(wait.value, () => speak(bot.seat, id, r.memory)) })
+          break // (one line per seat per change)
+        }
+      }
+    },
+    stop() {
+      for (const w of waiting.values()) w.cancel()
+      waiting.clear()
+    },
+    waiting: () => Object.fromEntries([...waiting].map(([seat, w]) => [seat, w.id])),
   }
 }
 
