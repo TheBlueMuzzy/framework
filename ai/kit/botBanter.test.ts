@@ -186,6 +186,23 @@ describe('bots talk through the emote module', () => {
     expect(online.say('seat-2', 'banter.Bully.won')).toEqual({ ok: false, reason: 'server' })
   })
 
+  it('a seat that stops being a bot while its line waits (a player took it back) says nothing (review fix)', () => {
+    const { time, seen, banter, bots } = table()
+    banter.hear([{ type: 'hit', by: 1, on: 2 }]) // both bots have a line waiting
+    bots.splice(0, 1) // seat 1 is a person again before its line comes
+    time.run(5000)
+    expect(seen.map((e) => e.seat)).toEqual(['seat-3'])
+  })
+
+  it('a moment named like a built-in ("constructor", "toString") with no chance listed is never spoken at (review fix)', () => {
+    const odd: MomentMap<Ev> = (e, seat) => (e.type === 'hit' && e.by === seat ? ['constructor', 'toString'] : null)
+    const time = rulesClock()
+    const said: string[] = []
+    const banter = botBanter({ moments: odd, bots: () => [{ seat: 1, personality: { id: 'Bully', chattiness: 100 } }], settings: always, lines: () => ({ Bully: { constructor: 'Built.', toString: 'Strung.' } }), say: (_s, id) => { said.push(id); return true }, seed: 1, clock: time.clock })
+    for (let i = 0; i < 20; i++) { banter.hear([{ type: 'hit', by: 1, on: 2 }]); time.run(5000) }
+    expect(said).toEqual([])
+  })
+
   it('stop() drops every waiting line', () => {
     const { time, seen, banter } = table()
     banter.hear([{ type: 'hit', by: 1, on: 2 }])

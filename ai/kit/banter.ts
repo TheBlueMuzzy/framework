@@ -179,7 +179,9 @@ export function maybeSay(
   const cooling = memory.lastSpokeTurn !== null && turn - memory.lastSpokeTurn <= settings.cooldownTurns
   if (cooling && !settings.alwaysAllowed?.includes(moment)) return quiet
   const roll = nextRandom(rng)
-  if (roll.value >= (settings.chance[moment] ?? 0) * (chattiness / 100)) return { ...quiet, rng: roll.rng }
+  // (own keys only: a moment named "constructor" or "toString" would otherwise read a built-in → NaN → always speak)
+  const chance = own(settings.chance, moment) && typeof settings.chance[moment] === 'number' ? settings.chance[moment] : 0
+  if (roll.value >= chance * (chattiness / 100)) return { ...quiet, rng: roll.rng }
   // A line it hasn't said lately: the ones never said, else the one said longest ago.
   const fresh = lines.filter((l) => !memory.said.includes(l))
   const pickFrom = fresh.length ? fresh : [memory.said.find((l) => lines.includes(l))!]
