@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-22 — **Sprint 26 started** on `dev/ai-talk-and-check`: AI players that talk (F22 Banter) and proof each personality plays like itself (F24 Arena + Personality Check) — the last two v0.5 musts. **F24 approved** (Muzzy 2026-10-23; ai 0.3.0 arena + `npm run ai:arena`, Dev Kit 0.23.0 Run check in a worker). **On hold (Muzzy 2026-10-23: "hold for a second")** — he's weighing whether F108 (Goops' 5 kit pieces for its Upgrades screen) belongs in the framework. Planned order once he says go (auto mode): **F108** → **F107 Emotes** (research first) → **F22 Banter** plugs into it (Muzzy: "Emotes first"). Goops' session hasn't had a reply yet. Glyphtender itself is only touched as scratch copies (.scratch/glyphtender-f24 / -f22). Before: released v0.11.2 (crash reports; security fixes in). Installing crashes in a real game and going live with its server stay Muzzy's call (Goops is the likely first — its own session). A game's crash token is now `~/.config/bmuz/crashes/<server host>.token`.
+2026-10-22 — **Sprint 26 started** on `dev/ai-talk-and-check`: AI players that talk (F22 Banter) and proof each personality plays like itself (F24 Arena + Personality Check) — the last two v0.5 musts. **F24 approved** (Muzzy 2026-10-23; ai 0.3.0 arena + `npm run ai:arena`, Dev Kit 0.23.0 Run check in a worker). **Auto mode (Muzzy 2026-10-23).** Building **F108** (kit pieces for shop screens, asked for by Goops' session: `success` colour role, Card `tone="success"` + `locked`, Modal `headerAction`, Neon danger glow, MenuHeader no word-split) → then **F107 Emotes** (research first) → **F22 Banter** plugs into it. Muzzy's ask: talk to Goops' session like a helper — it was told what's coming; when F108 is done, send it "done" + exact install/usage steps. Glyphtender itself is only touched as scratch copies (.scratch/glyphtender-f24 / -f22). Before: released v0.11.2 (crash reports; security fixes in). Installing crashes in a real game and going live with its server stay Muzzy's call (Goops is the likely first — its own session). A game's crash token is now `~/.config/bmuz/crashes/<server host>.token`.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 09184da (sprint 26 F24 4121ea5..d55c032: helper revi
 
 ## Where we are
 Stage: develop   Milestone: v0.5 The AI (F22, F24)   Sprint: 26
-Doing: — (on hold)   Branch: dev/ai-talk-and-check   Version: 0.11.2 (crashes 0.1.0 · UI kit 0.26.1 · Dev Kit 0.22.1 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
+Doing: F108 — building   Branch: dev/ai-talk-and-check   Version: 0.11.2 (crashes 0.1.0 · UI kit 0.26.1 · Dev Kit 0.22.1 · audio 0.4.0 · saves 0.6.1 · version 0.1.0 · rooms 0.11.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (private), tag v0.11.2
 
 ## Key facts
