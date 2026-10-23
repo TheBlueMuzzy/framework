@@ -1,6 +1,6 @@
 // Runs in the framework (not copied into games): the AI tab's thinking.
 import { describe, expect, it } from 'vitest'
-import { BANTER_SECTION, aiSections, applyBanterLive, banterChanges, banterOf, copyPersonality, freeId, getAt, labelOf, lineKeys, listChanges, moveGoal, nextLineKey, searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withList, withRange, withSteady } from './aiLogic'
+import { BANTER_SECTION, aiSections, applyBanterLive, banterChanges, banterOf, copyPersonality, freeId, getAt, labelOf, lineKeys, listChanges, moveGoal, nextLineKey, searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withBanter, withList, withRange, withSteady } from './aiLogic'
 import { sampleAi, bully } from './sampleAi.test'
 
 describe('AI tab logic', () => {
@@ -111,6 +111,17 @@ describe('AI tab logic — banter lines (0.24.0)', () => {
     const empty: Record<string, unknown> = {}
     applyBanterLive(empty, ['ai', 'banter'], { Bully: { won: 'Hi' } })
     expect(empty).toEqual({ ai: { banter: { Bully: { won: 'Hi' } } } })
+  })
+  it('applyBanterLive and withBanter only ever touch the lines: a "_help" note or a non-text entry in the file stays (review fix)', () => {
+    const file = () => ({ title: 'Game', banter: { _help: 'Bots\' lines.', Bully: { won: 'Too easy.', _note: { keep: true }, moods: ['a'] }, Gone: { won: 'x' } } })
+    const game: Record<string, unknown> = file()
+    applyBanterLive(game, ['banter'], { Bully: { won: 'Next!' } })
+    expect(game.banter).toEqual({ _help: 'Bots\' lines.', Bully: { won: 'Next!', _note: { keep: true }, moods: ['a'] } })
+    const original = file()
+    const saved = withBanter(original, ['banter'], { Bully: { lost: 'Rigged.' } })
+    expect(saved).toEqual({ title: 'Game', banter: { _help: 'Bots\' lines.', Bully: { lost: 'Rigged.', _note: { keep: true }, moods: ['a'] } } })
+    expect(original).toEqual(file()) // (the original is untouched)
+    expect(withBanter({}, ['ai', 'banter'], { Bully: { won: 'Hi' } })).toEqual({ ai: { banter: { Bully: { won: 'Hi' } } } })
   })
   it('lists changes for Copy for Claude, and the banter section is searchable by moment', () => {
     expect(banterChanges({ Bully: { won: 'A', lost: 'B' } }, { Bully: { won: 'C', gotHit: 'D' } })).toEqual([

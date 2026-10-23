@@ -22,7 +22,7 @@ import { WatchPanel } from './WatchPanel'
 import {
   BANTER_SECTION, BIO_SECTION, CHECK_SECTION, WATCH_SECTION, aiSections, applyBanterLive, banterChanges, banterOf,
   copyPersonality, freeId, getAt, helpOf, labelOf, lineKeys, listChanges, listOf, moveGoal, newShift, nextLineKey,
-  searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withList, withRange, withSteady, type AiSection,
+  searchAi, setAt, settingsName, steadyLabel, strayKeys, withBanter, withLine, withList, withRange, withSteady, type AiSection,
 } from './aiLogic'
 import type { AiBanter, AiBanterLines, AiFile, AiPersonality, AiShift, AiSkill, DevKitAi } from './aiTypes'
 import '../tuning/tuning.css'
@@ -128,7 +128,7 @@ export function AiTab({ ai, query = '' }: { ai: DevKitAi; query?: string }) {
       if (biosChanged && ai.bios) texts.set(ai.bios.path, bios)
       if (ai.banter && (linesChanged || texts.has(ai.banter.path))) {
         const base = texts.get(ai.banter.path) ?? (ai.bios?.path === ai.banter.path ? bios : ai.banter.data)
-        texts.set(ai.banter.path, setAt(base, banterAt, lines))
+        texts.set(ai.banter.path, withBanter(base, banterAt, lines))
       }
       for (const [path, data] of texts) {
         await saveContentFile(path, data)

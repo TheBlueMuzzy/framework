@@ -221,6 +221,17 @@ describe('the AI tab', () => {
       expect((written()[1].data.banter as Record<string, Record<string, string>>).Bully.won).toBe('Is that all?')
     })
 
+    it('Save keeps a "_help" note beside the lines (review fix: it was dropped from en.json)', async () => {
+      const written = saves()
+      const { ai, text } = withBanter()
+      ;(text.banter as Record<string, unknown>)._help = 'Bots\' lines.'
+      render(<AiTab ai={ai} />)
+      fireEvent.change(screen.getByLabelText('Bully won line'), { target: { value: 'Is that all?' } })
+      expect((text.banter as Record<string, unknown>)._help).toBe('Bots\' lines.') // (live edit leaves it too)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+      expect((written()[0].data.banter as Record<string, unknown>)._help).toBe('Bots\' lines.')
+    })
+
     it('a quiet personality is told it never talks; lines for a moment the game doesn\'t name are listed as never said', () => {
       const { ai } = withBanter()
       ai.personalities.data.personalities = [{ ...(ai.personalities.data.personalities as AiPersonality[])[0], chattiness: 0 }]

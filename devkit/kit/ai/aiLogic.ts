@@ -183,6 +183,21 @@ export function withLine(lines: AiBanterLines, who: string, key: string, words: 
 export const strayKeys = (lines: AiBanterLines, who: string, moments: string[]) =>
   Object.keys(lines[who] ?? {}).filter((k) => !moments.some((m) => isLineFor(k, m)))
 
+const has = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key)
+
+/** Make the lines in `box` (the "banter" object) exactly `lines`, in place. Only lines are touched — the tab only ever
+ *  holds a personality's TEXT entries (banterOf), so anything else ("_help": "…" beside the personalities, a non-text
+ *  value inside one) is the game's and stays. */
+function fitLines(box: Record<string, unknown>, lines: AiBanterLines): void {
+  for (const who of Object.keys(box)) if (isRecord(box[who]) && !has(lines, who)) delete box[who]
+  for (const [who, mine] of Object.entries(lines)) {
+    if (!isRecord(box[who])) box[who] = {}
+    const target = box[who] as Record<string, unknown>
+    for (const key of Object.keys(target)) if (typeof target[key] === 'string' && !has(mine, key)) delete target[key]
+    for (const [key, words] of Object.entries(mine)) target[key] = words
+  }
+}
+
 /** LIVE: make the lines at `at` inside the game's own object exactly `lines` — in place (the game holds this object),
  *  making the containers it needs. Other keys in the file are never touched. */
 export function applyBanterLive(data: Record<string, unknown>, at: string[], lines: AiBanterLines): void {
@@ -191,13 +206,16 @@ export function applyBanterLive(data: Record<string, unknown>, at: string[], lin
     if (!isRecord(box[key])) box[key] = {}
     box = box[key] as Record<string, unknown>
   }
-  for (const who of Object.keys(box)) if (!(who in lines)) delete box[who]
-  for (const [who, mine] of Object.entries(lines)) {
-    if (!isRecord(box[who])) box[who] = {}
-    const target = box[who] as Record<string, unknown>
-    for (const key of Object.keys(target)) if (!(key in mine)) delete target[key]
-    for (const [key, words] of Object.entries(mine)) target[key] = words
-  }
+  fitLines(box, lines)
+}
+
+/** For Save: a copy of the file with the lines at `at` made exactly `lines` (same rule as applyBanterLive — only lines
+ *  change). The original is untouched. */
+export function withBanter(data: Record<string, unknown>, at: string[], lines: AiBanterLines): Record<string, unknown> {
+  const found = getAt(data, at)
+  const box = isRecord(found) ? (JSON.parse(JSON.stringify(found)) as Record<string, unknown>) : {}
+  fitLines(box, lines)
+  return setAt(data, at, box)
 }
 
 /** Plain-English lines for what changed ("banter.Bully.won: "Too easy." → "Next!""), for Copy for Claude. */
