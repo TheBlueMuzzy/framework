@@ -32,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-23 — F107 + F108 approved: players send preset phrases in a speech bubble (mute, spam limit, online), and shop screens get a success colour, locked cards and a header action.
 - 2026-10-22 — Sprint 26 planned: AI players that talk, and proof each personality plays like itself (F22 Banter, F24 Arena + Personality Check).
 - 2026-10-22 — Released v0.11.2: crash reports from players (crashes 0.1.0, UI kit 0.26.1, Dev Kit 0.22.1); the security review's 3 fixes — the token goes only to its own server, player text framed as data, other sites' file paths dropped.
 - 2026-10-22 — F89 approved: games can report their crashes to a server of their own, read on the PC with real file lines.
@@ -41,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.
 - 2026-10-20 — F104 built (waiting for OK): a game can say "portrait only" once and no check tests it sideways.
 - 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
-- 2026-10-20 — F103 approved: confirm boxes can't silently fail, bars fit small phones without workarounds, the Dev Kit warns when its PAUSED pill covers a game's HUD.
