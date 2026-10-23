@@ -243,6 +243,17 @@ flowchart LR
   F95 --> F100[F100 Rooms wait until the end]
 ```
 
+## v0.11 — Games take the AI  ← current · planned 2026-10-23
+Goal (Muzzy 2026-10-23, "a go"): the pieces a game still hand-builds before it can take emotes, banter and the AI check — so Glyphtender's session can install them in one go.
+- 🔨 F109 🔧 Tappable seat row: the UI kit's PlayerSeats can make each seat a button (tap → the emote picker on yours, Mute on a rival's), with the muted mark on the chip and the emote seat tags — the emotes module's `<EmoteSeats>` wires it; Glyphtender's hand-built SeatEmotes.tsx no longer needed (v0.5 look-back) — should · needs: F107 · sprint 28
+- 🔨 F110 🔧 Module Settings rows register themselves: each module ships its rows + what counts as "read" in one manifest the UI kit's Settings check reads, so a new module (crashes, emotes, ai…) needs no UI kit change (v0.5 look-back) — should · needs: F107, F22 · sprint 28
+```mermaid
+flowchart LR
+  F107[F107 Emotes] --> F109[F109 Tappable seat row]
+  F107 --> F110[F110 Module Settings rows]
+  F22[F22 Banter] --> F110
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
