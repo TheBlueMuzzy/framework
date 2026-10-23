@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { StrictMode } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { ScreenStack, screens } from '..'
+import { Button, ScreenStack, screens } from '..'
 import { askConfirm, kitScreens, MAX_TOASTS, Modal, toast, toasts, ToastStack } from './dialogs'
 
 afterEach(() => {
@@ -20,6 +20,19 @@ describe('Modal', () => {
     rerender(<Modal title="Pick a word" onBack={onBack} />)
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(onBack).toHaveBeenCalledOnce()
+  })
+
+  it('headerAction goes on the right of its header row; actions stay the bottom buttons (0.27.0)', () => {
+    const respec = vi.fn()
+    const { container } = render(<Modal title="Upgrades" headerAction={<Button compact onClick={respec}>Respec</Button>}
+      actions={<Button>Done</Button>} />)
+    const header = container.querySelector('.kit-menu-header')!
+    const slot = header.querySelector('.kit-menu-header-action')!
+    expect(header.lastElementChild).toBe(slot)
+    expect(slot.textContent).toBe('Respec')
+    fireEvent.click(screen.getByRole('button', { name: 'Respec' }))
+    expect(respec).toHaveBeenCalledOnce()
+    expect(header.contains(screen.getByRole('button', { name: 'Done' }))).toBe(false)
   })
 })
 
