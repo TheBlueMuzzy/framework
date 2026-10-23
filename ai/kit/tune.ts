@@ -315,7 +315,8 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
   const startScore = scoreOf(freshStart, start.id)
   // Suggested only when MORE of its targets are green on the fresh games (closer but still red isn't enough)
   const heldUp = changedAny && scoreOf(freshBest, start.id).own > startScore.own
-  const after = heldUp ? freshBest : freshStart
+  // "after" = what the best try really got on the fresh games (suggested or not — so the page shows why not)
+  const after = freshBest
   const targetsOut: TuneTargetChange[] = targets.map((t, k) => {
     const a = freshStart[start.id][k]
     const b = after[start.id][k]
@@ -343,8 +344,9 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
           ? `All ${targets.length} targets were green on the ${settings.tuneGames} tuning games, so nothing was tried — but ${greenBefore} on ${settings.tuneFreshGames} fresh games: it sits on the edge. More games a try (tuneGames) give the search a truer picture.`
           : `No slider move hit more targets in ${tryNo} tries — keep what you have (${greenBefore} of ${targets.length} green on fresh games).`
   const suggested = heldUp ? best : null
+  // sliders = the best try's values (when not suggested: for the record — the page and the Dev Kit say "best found")
   return {
-    ...base, verdict, message, suggested, sliders: unchanged(suggested ?? start), targets: targetsOut, cantReach: verdict === 'alreadyGreen' ? [] : cantReach,
+    ...base, verdict, message, suggested, sliders: unchanged(best), targets: targetsOut, cantReach: verdict === 'alreadyGreen' ? [] : cantReach,
     others: heldUp ? others : [], log, tries: tryNo, games: gamesPlayed, seconds: Math.round((now() - started) / 100) / 10, stoppedBy,
   }
 }

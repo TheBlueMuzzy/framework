@@ -100,8 +100,8 @@ describe('tunePersonality', () => {
       const green = (k: 'before' | 'after') => r.targets.filter((x) => x[k].pass).length
       if (r.verdict === 'better') expect(green('after')).toBeGreaterThan(green('before'))
       else {
-        expect(r.suggested).toBeNull()
-        expect(green('after')).toBe(green('before'))
+        expect(r.suggested).toBeNull() // the best try's own fresh numbers are shown, never suggested
+        expect(green('after')).toBeLessThanOrEqual(green('before'))
       }
     }
   })
@@ -145,7 +145,8 @@ describe('tunePersonality', () => {
     expect(r.stoppedBy).toBe('settled')
     expect(r.verdict).toBe('noGain')
     expect(r.suggested).toBeNull()
-    expect(r.cantReach).toEqual([{ label: 'impossible', why: expect.stringMatching(/measured 80, wants ≥ 999 — couldn't reach it within these ranges/) }])
+    expect(r.cantReach).toEqual([{ label: 'impossible', why: expect.stringMatching(/measured 85, wants ≥ 999 — couldn't reach it within these ranges/) }]) // the best found: the top of its range
+    expect(r.sliders.find((s) => s.path === 'traits.caution')).toMatchObject({ from: '80–95', to: '85–100', changed: true }) // for the record, not suggested
     expect(r.message).toMatch(/keep what you have/)
   })
 

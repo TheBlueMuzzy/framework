@@ -100,7 +100,7 @@ async function tune() {
   console.log(`\n${r.personality}: ${r.message}`)
   const changed = r.sliders.filter((s) => s.changed)
   if (changed.length) {
-    console.log('\nsliders (old → new):')
+    console.log(`\nsliders (old → ${r.suggested ? 'new' : 'best found, not suggested'}):`)
     changed.forEach((s) => console.log(`  ${s.path}  ${s.from} → ${s.to}`))
   }
   if (r.targets.length) {

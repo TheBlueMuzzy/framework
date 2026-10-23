@@ -156,7 +156,7 @@ function SuggestPart({ suggest, picked, personalities, skills, onApply }: Requir
           <p className={`devkit-status ${result.suggested ? 'is-ok' : ''}`}>{result.message}</p>
           {changed.length > 0 && (
             <table className="ai-tune-table">
-              <thead><tr><th>Slider</th><th>Now</th><th>Suggested</th></tr></thead>
+              <thead><tr><th>Slider</th><th>Now</th><th>{result.suggested ? 'Suggested' : 'Best found'}</th></tr></thead>
               <tbody>{changed.map((s) => <tr key={s.path}><th>{s.path}</th><td>{s.from}</td><td className="ai-tune-new">{s.to}</td></tr>)}</tbody>
             </table>
           )}

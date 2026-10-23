@@ -104,7 +104,7 @@ ${r.targets.length ? `<h2>Its feel targets <span class="dim">(on ${r.settings.tu
 ${r.cantReach.length ? `<h2>Couldn't reach</h2><ul>${r.cantReach.map((c) => `<li>${mark(false)} ${esc(c.label)} <span class="dim">— ${esc(c.why)}</span></li>`).join('')}</ul>` : ''}
 ${r.others.length ? `<h2>Other personalities' targets that changed</h2><ul>${r.others.map((o) => `<li>${mark(o.after)} ${esc(o.personality)}: ${esc(o.label)} <span class="dim">— was ${o.before ? 'green' : 'red'}</span></li>`).join('')}</ul>` : ''}
 <h2>Sliders <span class="dim">(old → new; each stays inside its range)</span></h2>
-<div class="scroll"><table><tr><th class="l">slider</th><th>now</th><th>suggested</th></tr>${sliders}</table></div>
+<div class="scroll"><table><tr><th class="l">slider</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found (not suggested)'}</th></tr>${sliders}</table></div>
 ${r.log.length ? `<h2>How it searched <span class="dim">(on the tuning games)</span></h2><ol>${r.log.map((l) => `<li>${esc(l.change)} → ${l.own}/${r.targets.length} green${l.tryNo > 1 ? (l.kept ? ' <span class="ok">kept</span>' : ' <span class="dim">not kept</span>') : ''}</li>`).join('')}</ol>` : ''}`
   return page(`Suggested sliders — ${r.personality}`, body)
 }
