@@ -36,9 +36,11 @@ export interface TuneSettings {
   tuneFreshSeed: number
   /** The first step, as a share of each slider's range (0.25 = a quarter); halved after a pass where nothing helped. */
   tuneStep: number
+  /** Fewer fresh games than this = too few to trust: the best try is shown, never suggested (like whatWinsMinGames). */
+  tuneMinFreshGames: number
 }
 
-export const defaultTuneSettings: TuneSettings = { tuneGames: 12, tuneTries: 20, tuneSeconds: 900, tuneFreshGames: 24, tuneSeed: 7000, tuneFreshSeed: 9000, tuneStep: 0.25 }
+export const defaultTuneSettings: TuneSettings = { tuneGames: 12, tuneTries: 20, tuneSeconds: 900, tuneFreshGames: 30, tuneSeed: 7000, tuneFreshSeed: 9000, tuneStep: 0.25, tuneMinFreshGames: 30 }
 
 /** One slider the tuner may move: where it is in the personality, and its allowed range. */
 export interface TuneSlider {
@@ -206,8 +208,9 @@ export interface TuneTargetChange {
 export interface TuneResult {
   personality: string
   /** better = a suggestion that held up on fresh seeds · noGain = nothing held up (keep what you have) ·
-   *  alreadyGreen = every target green at the start · noTargets = it has no feel targets to aim at. */
-  verdict: 'better' | 'noGain' | 'alreadyGreen' | 'noTargets'
+   *  alreadyGreen = every target green at the start · noTargets = it has no feel targets to aim at ·
+   *  tooFewGames = it held up, but on fewer fresh games than tuneMinFreshGames — shown, not suggested. */
+  verdict: 'better' | 'noGain' | 'alreadyGreen' | 'noTargets' | 'tooFewGames'
   /** The verdict in one plain sentence. */
   message: string
   /** The suggested personality (only sliders changed), or null when there is nothing to suggest. */
@@ -219,8 +222,9 @@ export interface TuneResult {
   cantReach: { label: string; why: string }[]
   /** Other personalities' targets that changed colour on the fresh seeds (the tuner tries not to, but says so). */
   others: { personality: string; label: string; before: boolean; after: boolean }[]
-  /** Each try: what changed and how many of its targets went green. */
-  log: { tryNo: number; change: string; own: number; kept: boolean }[]
+  /** Each try: what changed and how many of its targets went green; a kept try says why (more of its own targets
+   *  green, the same but more of the others', or the same counts but closer to its red lines). */
+  log: { tryNo: number; change: string; own: number; kept: boolean; why?: 'more' | 'others' | 'closer' }[]
   tries: number
   games: number
   seconds: number
@@ -308,7 +312,8 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
       tryNo++
       const score = scoreOf(play(candidate, settings.tuneSeed, settings.tuneGames, 'search', tryNo), start.id)
       const kept = isBetter(score, bestScore)
-      log.push({ tryNo, change: `${s.path} ${sliderText(best, s.path)} → ${sliderText(candidate, s.path)}`, own: score.own, kept })
+      const why = !kept ? undefined : score.own > bestScore.own ? 'more' as const : score.others > bestScore.others ? 'others' as const : 'closer' as const
+      log.push({ tryNo, change: `${s.path} ${sliderText(best, s.path)} → ${sliderText(candidate, s.path)}`, own: score.own, kept, ...(why ? { why } : {}) })
       if (kept) {
         ;[best, bestScore, directions[i], helped] = [candidate, score, dir, true]
         break
@@ -334,6 +339,9 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
   const startScore = scoreOf(freshStart, start.id)
   // Suggested only when MORE of its targets are green on the fresh games (closer but still red isn't enough)
   const heldUp = changedAny && scoreOf(freshBest, start.id).own > startScore.own
+  // …and only on enough fresh games to trust (the Dev Kit proof suggested "2 → 3 of 4" on 4 fresh games: noise)
+  const freshGames = Math.max(1, Math.floor(settings.tuneFreshGames))
+  const tooFew = heldUp && freshGames < settings.tuneMinFreshGames
   // "after" = what the best try really got on the fresh games (suggested or not — so the page shows why not)
   const after = freshBest
   const targetsOut: TuneTargetChange[] = targets.map((t, k) => {
@@ -353,9 +361,11 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
   const cantReach = targetsOut.filter((t) => !t.after.pass).map((t) => ({ label: t.label, why: `measured ${Number.isFinite(t.after.measured) ? t.after.measured : 'nothing'}, wants ${t.wants} — couldn't reach it ${why}` }))
   const greenBefore = targetsOut.filter((t) => t.before.pass).length
   const greenAfter = targetsOut.filter((t) => t.after.pass).length
-  const verdict: TuneResult['verdict'] = heldUp ? 'better' : allGreenAtStart ? 'alreadyGreen' : 'noGain'
+  const verdict: TuneResult['verdict'] = tooFew ? 'tooFewGames' : heldUp ? 'better' : allGreenAtStart ? 'alreadyGreen' : 'noGain'
   const message = verdict === 'better'
     ? `Suggested: ${greenBefore} → ${greenAfter} of ${targets.length} targets green on ${settings.tuneFreshGames} fresh games.${newlyBorderline ? ` ${newlyBorderline === 1 ? 'One of them is' : `${newlyBorderline} of them are`} only just over the line — confirm with npm run ai:arena (more games) before saving.` : ''}`
+    : verdict === 'tooFewGames'
+      ? `The best try had ${greenBefore} → ${greenAfter} of ${targets.length} targets green, but on only ${freshGames} fresh games — too few to trust (it wants ${settings.tuneMinFreshGames}), so it isn't suggested. Raise tuneFreshGames in content/ai/arena.json, or try its values and confirm with npm run ai:arena.`
     : verdict === 'alreadyGreen'
       ? `All ${targets.length} of ${start.id}'s targets are green already — nothing to change.`
       : bestScore.own > log[0].own
@@ -363,10 +373,10 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
         : log[0].own === targets.length
           ? `All ${targets.length} targets were green on the ${settings.tuneGames} tuning games, so nothing was tried — but ${greenBefore} on ${settings.tuneFreshGames} fresh games: it sits on the edge. More games a try (tuneGames) give the search a truer picture.`
           : `No slider move hit more targets in ${tryNo} tries — keep what you have (${greenBefore} of ${targets.length} green on fresh games).`
-  const suggested = heldUp ? best : null
+  const suggested = heldUp && !tooFew ? best : null
   // sliders = the best try's values (when not suggested: for the record — the page and the Dev Kit say "best found")
   return {
     ...base, verdict, message, suggested, sliders: unchanged(best), targets: targetsOut, cantReach: verdict === 'alreadyGreen' ? [] : cantReach,
-    others: heldUp ? others : [], log, tries: tryNo, games: gamesPlayed, seconds: Math.round((now() - started) / 100) / 10, stoppedBy,
+    others: suggested ? others : [], log, tries: tryNo, games: gamesPlayed, seconds: Math.round((now() - started) / 100) / 10, stoppedBy,
   }
 }

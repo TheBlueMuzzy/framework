@@ -12,7 +12,7 @@ import { arenaPlug, careful, greedy, skills, targets, type Action, type Setup, t
 const cautionPlug: ArenaPlug<State, Action, Setup, View> = { ...arenaPlug, meters: (game) => game.seats.map((s) => ({ caution: s.personality.traits.caution.min, greed: s.personality.traits.greed.min })) }
 const withTargets = (careful_: FeelTarget[], greedy_: FeelTarget[] = []): CheckTargets => ({ personalities: { Careful: careful_, Greedy: greedy_ }, all: [] })
 const req = (t: CheckTargets, over: Partial<ArenaRequest> = {}): ArenaRequest => ({ personalities: [careful, greedy], skills, targets: t, ...over })
-const quick = { tuneGames: 4, tuneFreshGames: 6, tuneTries: 200, tuneSeconds: 0 }
+const quick = { tuneGames: 4, tuneFreshGames: 6, tuneTries: 200, tuneSeconds: 0, tuneMinFreshGames: 0 }
 const withoutClock = (r: TuneResult) => ({ ...r, seconds: 0 })
 
 describe('the sliders', () => {
@@ -96,6 +96,26 @@ describe('tunePersonality', () => {
     expect(r.targets[0].after).toEqual({ measured: 38, pass: true, borderline: true })
     expect(r.message).toMatch(/One of them is only just over the line — confirm with npm run ai:arena \(more games\) before saving\./)
     expect(tuneHtml(r, 'g')).toContain('just over')
+  })
+
+  it('a gain on too few fresh games (under tuneMinFreshGames) is shown but never suggested (review: the Dev Kit proof said "Suggested" on 4)', () => {
+    const t = withTargets([{ meter: 'caution', op: '<=', value: 30, label: 'easy-going' }])
+    const r = tunePersonality(cautionPlug, req(t), 'Careful', { settings: { ...quick, tuneFreshGames: 4, tuneMinFreshGames: 30 } })
+    expect(r.verdict).toBe('tooFewGames')
+    expect(r.suggested).toBeNull()
+    expect(r.targets[0].after.pass).toBe(true) // the best try's fresh numbers are still shown
+    expect(r.message).toMatch(/only 4 fresh games — too few to trust \(it wants 30\).*Raise tuneFreshGames/)
+    expect(r.message).not.toMatch(/^Suggested/)
+    expect(tuneHtml(r, 'g')).toContain('best found (not suggested)')
+    expect(tunePersonality(cautionPlug, req(t), 'Careful', { settings: { ...quick, tuneFreshGames: 30, tuneMinFreshGames: 30 } }).verdict).toBe('better') // enough: suggested
+  })
+
+  it('a try kept without more of its own targets green says why — "closer" — on the page (review: "59–74 → 2/4 green kept")', () => {
+    const r = tunePersonality(cautionPlug, req(withTargets([{ meter: 'caution', op: '<=', value: 30, label: 'easy-going' }])), 'Careful', { settings: quick })
+    expect(r.log.find((l) => l.change.startsWith('traits.caution 80–95 → 59'))).toMatchObject({ own: 0, kept: true, why: 'closer' }) // still red, nearer the line
+    expect(r.log.find((l) => l.own === 1)).toMatchObject({ kept: true, why: 'more' })
+    expect(r.log.filter((l) => !l.kept).every((l) => l.why === undefined)).toBe(true)
+    expect(tuneHtml(r, 'g')).toContain('kept</span> <span class="dim">(same count — closer to its red lines)</span>')
   })
 
   it('stays inside every slider\'s range (real games, many tries)', () => {
@@ -215,7 +235,7 @@ describe('tunePersonality', () => {
   })
 
   it('has defaults for every budget number — the same as the installer\'s starter arena.json, each with a help line', () => {
-    expect(Object.keys(defaultTuneSettings).sort()).toEqual(['tuneFreshGames', 'tuneFreshSeed', 'tuneGames', 'tuneSeconds', 'tuneSeed', 'tuneStep', 'tuneTries'])
+    expect(Object.keys(defaultTuneSettings).sort()).toEqual(['tuneFreshGames', 'tuneFreshSeed', 'tuneGames', 'tuneMinFreshGames', 'tuneSeconds','tuneSeed', 'tuneStep', 'tuneTries'])
     const starter = JSON.parse(readFileSync(new URL('../templates/content/ai/arena.json', import.meta.url), 'utf8'))
     for (const [k, v] of Object.entries(defaultTuneSettings)) {
       expect(starter[k]).toBe(v)

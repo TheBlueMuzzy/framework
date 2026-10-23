@@ -71,7 +71,7 @@ describe('npm run ai:arena', () => {
     expect(path).toBe(join(dir, 'out', 'ai-tune-Careful.html'))
     const html = readFileSync(path, 'utf8')
     expect(html).toContain('Suggested sliders — Careful')
-    expect(html).toMatch(/data-tune-verdict="(better|noGain|alreadyGreen)"/)
+    expect(html).toMatch(/data-tune-verdict="(better|noGain|alreadyGreen|tooFewGames)"/)
     expect(readFileSync(join(dir, 'content/ai/arena.json'), 'utf8') + readFileSync(join(dir, 'content/ai/cast.json'), 'utf8')).toBe(before)
     expect(arenaRun(dir, '--tune')).toMatchObject({ code: 1, out: expect.stringContaining('ai:tune: which personality? npm run ai:tune -- --personality <id>   (there are Careful, Greedy)') })
     expect(arenaRun(dir, '--tune', '--personality', 'Nobody')).toMatchObject({ code: 1, out: expect.stringContaining('No personality "Nobody"') })

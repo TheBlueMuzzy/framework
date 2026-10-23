@@ -115,8 +115,9 @@ export interface AiTuneProgress {
 /** The AI kit's tuner result (framework ai/ kit/tune.ts TuneResult) — the parts the tab shows. */
 export interface AiTuneResult {
   personality: string
-  /** better = a suggestion that held up on fresh games · noGain = nothing did · alreadyGreen · noTargets */
-  verdict: 'better' | 'noGain' | 'alreadyGreen' | 'noTargets'
+  /** better = a suggestion that held up on fresh games · noGain = nothing did · alreadyGreen · noTargets ·
+   *  tooFewGames = it held up on too few fresh games to trust (shown as "best found", nothing to apply) */
+  verdict: 'better' | 'noGain' | 'alreadyGreen' | 'noTargets' | 'tooFewGames'
   message: string
   /** The personality with the suggested slider values (null = nothing to suggest). */
   suggested: AiPersonality | null

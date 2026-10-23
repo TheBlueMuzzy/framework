@@ -105,9 +105,12 @@ ${r.cantReach.length ? `<h2>Couldn't reach</h2><ul>${r.cantReach.map((c) => `<li
 ${r.others.length ? `<h2>Other personalities' targets that changed</h2><ul>${r.others.map((o) => `<li>${mark(o.after)} ${esc(o.personality)}: ${esc(o.label)} <span class="dim">— was ${o.before ? 'green' : 'red'}</span></li>`).join('')}</ul>` : ''}
 <h2>Sliders <span class="dim">(old → new; each stays inside its range)</span></h2>
 <div class="scroll"><table class="tune"><tr><th class="l">slider</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found (not suggested)'}</th></tr>${sliders}</table></div>
-${r.log.length ? `<h2>How it searched <span class="dim">(on the tuning games)</span></h2><ol>${r.log.map((l) => `<li>${esc(l.change)} → ${l.own}/${r.targets.length} green${l.tryNo > 1 ? (l.kept ? ' <span class="ok">kept</span>' : ' <span class="dim">not kept</span>') : ''}</li>`).join('')}</ol>` : ''}`
+${r.log.length ? `<h2>How it searched <span class="dim">(on the tuning games)</span></h2><ol>${r.log.map((l) => `<li>${esc(l.change)} → ${l.own}/${r.targets.length} green${l.tryNo > 1 ? (l.kept ? ` <span class="ok">kept</span>${l.why && l.why !== 'more' ? ` <span class="dim">(${keptWords[l.why]})</span>` : ''}` : ' <span class="dim">not kept</span>') : ''}</li>`).join('')}</ol>` : ''}`
   return page(`Suggested sliders — ${r.personality}`, body)
 }
+
+/** Why a try was kept when no more of its own targets went green (the tie-breaks, in order). */
+const keptWords = { others: "same count — more of the others' targets green", closer: 'same count — closer to its red lines' }
 
 const stopWords: Record<TuneResult['stoppedBy'], string> = {
   allGreen: 'every target green on the tuning games',
