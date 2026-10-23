@@ -106,11 +106,41 @@ describe('EmoteSeats (0.3.0, F109: the seat row in one line)', () => {
     fireEvent.click(rival()) // the seat's own toggle
     expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
   })
+  it('Escape on a rival\'s Mute menu puts the focus back on that seat (keyboard players keep their place)', () => {
+    const emotes = make()
+    render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    const rival = screen.getByRole('button', { name: 'Bo — mute or unmute' })
+    rival.focus()
+    fireEvent.click(rival)
+    expect(document.activeElement?.textContent).toBe('Mute emotes')
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    expect(document.activeElement).toBe(rival)
+  })
+  it('a seat that leaves closes its menu for good: back at the table, its menu stays shut until tapped again', () => {
+    const emotes = make()
+    const { rerender } = render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Bo — mute or unmute' }))
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
+    rerender(<EmoteSeats emotes={emotes} seats={[seats[0]]} mine="me" />)
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    rerender(<EmoteSeats emotes={emotes} seats={[seats[1], seats[0]]} mine="me" />) // back, and the order changed
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+  })
   it('a seat id with a quote still finds its seat', () => {
     const emotes = createEmotes({ settings: template, words: words.emotes, mine: ['a"b'], warn: () => {} })
     render(<EmoteSeats emotes={emotes} seats={[{ id: 'a"b', name: 'Ada' }]} mine={'a"b'} />)
     act(() => { emotes.sendEmote('a"b', 'hello') })
     expect(bubbles()).toEqual(['Hello!'])
     expect(document.querySelector('[data-emote-seat="a\\"b"]')).toBeTruthy()
+  })
+  it('a relayed seat id with a line break (any string up to 64 from the room) neither crashes the row nor breaks the selector', () => {
+    const odd = 'a\nb\\c'
+    const emotes = createEmotes({ settings: template, words: words.emotes, mine: ['me'], warn: () => {} })
+    render(<EmoteSeats emotes={emotes} seats={[{ id: 'me', name: 'Ada' }, { id: odd, name: 'Bo' }]} mine="me" />)
+    act(() => { emotes.receive({ seat: odd, id: 'wow' }) })
+    expect(bubbles()).toEqual(['Wow!'])
+    fireEvent.click(screen.getByRole('button', { name: 'Bo — mute or unmute' }))
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
   })
 })

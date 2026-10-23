@@ -147,8 +147,17 @@ export type EmoteSeatsProps = {
   words?: Partial<typeof emoteSeatWords>
 }
 
-// "[data-emote-seat="<id>"]" — the id escaped, so an odd room id can't break the selector
-const seatSelector = (seat: string) => `[data-emote-seat="${seat.replace(/["\\]/g, (c) => `\\${c}`)}"]`
+// "[data-emote-seat="<id>"]" — the id escaped, so an odd room id can't break the selector: a quote or backslash gets a
+// backslash; a line break or other control character becomes its code ("\a ") — left raw, it made querySelector throw
+// and took the whole row down (F109 review: a relayed seat id is any string up to 64)
+const seatSelector = (seat: string) => {
+  const escaped = [...seat].map((c) => {
+    const code = c.charCodeAt(0)
+    if (code < 0x20 || code === 0x7f) return `\\${code.toString(16)} `
+    return c === '"' || c === '\\' ? `\\${c}` : c
+  }).join('')
+  return `[data-emote-seat="${escaped}"]`
+}
 
 /** One line in a game: the tappable seat row, its menu (picker / Mute), the muted marks and the bubbles. */
 export function EmoteSeats({ emotes, seats, mine, nameFor, activeId, showNames, placement = 'top', avoid, bubbles = true, words }: EmoteSeatsProps) {
@@ -160,6 +169,8 @@ export function EmoteSeats({ emotes, seats, mine, nameFor, activeId, showNames, 
   const name = (seat: string) => nameFor?.(seat) ?? seats.find((s) => s.id === seat)?.name ?? seat
   const clearOf = avoid ? `${avoid}, [data-emote-seat]` : '[data-emote-seat]'
   const open = tapped !== null && seats.some((s) => s.id === tapped) ? tapped : null // (a seat that left closes its menu)
+  // … for good: forget the tap too, or the menu popped open again when that seat came back (F109 review)
+  if (tapped !== null && open === null) setTapped(null)
   const row: Seat[] = seats.map((s) => ({
     ...s,
     tapLabel: fill(isMine(s.id) ? w.mine : w.rival, { name: name(s.id) }),
