@@ -14,7 +14,7 @@ export const BANTER_SETTING = 'botChatter'
 export const BANTER_SETTINGS_ROWS = [
   {
     id: BANTER_SETTING, type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'], default: 'Some',
-    detail: 'How often the computer players talk. Off = never.',
+    detail: 'How often the computer players talk.',
   },
 ] as const
 
