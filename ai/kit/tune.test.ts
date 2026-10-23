@@ -164,6 +164,14 @@ describe('tunePersonality', () => {
   it('stops in plain English for a personality that isn\'t there or a bad budget', () => {
     expect(() => tunePersonality(arenaPlug, req(targets), 'Nobody')).toThrow(/No personality "Nobody" \(there are Careful, Greedy\)/)
     expect(() => tunePersonality(arenaPlug, req(targets), 'Careful', { settings: { tuneGames: -1 } })).toThrow(/"tuneGames" should be a number of 0 or more/)
+    expect(() => tunePersonality(arenaPlug, req(targets), 'Careful', { settings: { tuneTries: '5' as unknown as number } })).toThrow(/"tuneTries" should be a number/)
+  })
+
+  it('takes a game\'s whole arena.json as its settings: only the tune* numbers are read, the rest left alone', () => {
+    const arenaJson = { _help: { games: 'help' }, games: 60, whatWinsMoments: [3, 'end'], tuneGames: 2, tuneFreshGames: 3, tuneTries: 2, tuneSeconds: 0 }
+    const r = tunePersonality(cautionPlug, req(withTargets([{ meter: 'caution', op: '<=', value: 10, label: 'x' }])), 'Careful', { settings: arenaJson })
+    expect(r.settings).toEqual({ ...defaultTuneSettings, tuneGames: 2, tuneFreshGames: 3, tuneTries: 2, tuneSeconds: 0 })
+    expect(r.tries).toBe(2)
   })
 
   it('reports progress per game: "Try n / tries", then the fresh check', () => {

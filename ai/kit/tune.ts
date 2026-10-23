@@ -212,8 +212,8 @@ export interface TuneResult {
 }
 
 export interface TuneOptions {
-  /** The budget (content/ai/arena.json's tune* numbers); anything left out = defaultTuneSettings. */
-  settings?: Partial<TuneSettings>
+  /** The budget: content/ai/arena.json as it is (only its tune* numbers are read); anything left out = defaultTuneSettings. */
+  settings?: Partial<TuneSettings> & { [other: string]: unknown }
   onProgress?: (p: TuneProgress) => void
   /** The clock in ms (tests pass their own). Default performance.now / Date.now. */
   now?: () => number
@@ -228,7 +228,8 @@ const clockNow = () => (typeof performance !== 'undefined' ? performance.now() :
 /** Suggest slider values for personality `id` (see the top of this file). The same request + settings = the same
  *  suggestion (unless the time budget cuts it short). Throws in plain English for a personality that isn't there. */
 export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<State, Action, Setup, View>, request: ArenaRequest, id: string, options: TuneOptions = {}): TuneResult {
-  const settings: TuneSettings = { ...defaultTuneSettings, ...options.settings }
+  const given = options.settings ?? {}
+  const settings = Object.fromEntries(Object.entries(defaultTuneSettings).map(([k, v]) => [k, given[k] ?? v])) as unknown as TuneSettings
   for (const [k, v] of Object.entries(settings)) if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) throw new Error(`content/ai/arena.json "${k}" should be a number of 0 or more (got ${JSON.stringify(v)})`)
   const now = options.now ?? clockNow
   const started = now()
