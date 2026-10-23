@@ -28,3 +28,4 @@
 - 2026-09-28 — Project created; UI kit researched (skill review + kit inventory + platforms) and designed; Muzzy approved 5 presets, the repo, and the Built list.
 - 2026-10-20 — F103 approved: confirm boxes can't silently fail, bars fit small phones without workarounds, the Dev Kit warns when its PAUSED pill covers a game's HUD.
 - 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
+- 2026-10-21 — Released v0.11.0 (v0.10 milestone): games can resume runs, rejoin online matches, copy saves by link code and keep checked leaderboards; one version label everywhere; portrait-only games aren't checked sideways; four security fixes against one person jamming a shared server.
