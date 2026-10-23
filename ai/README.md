@@ -115,7 +115,9 @@ export default async function arenaGame(files: { read(path: string): Promise<str
   halves the step after a pass where nothing helped. Every try plays the same seeds, so only the slider changed. Then
   **the start and the best both play fresh seeds** and only a best with more targets green there is suggested — else
   "luck, not a real gain, keep what you have". A target still red says why: "within these ranges" (every slider tried
-  both ways to the smallest step) or "within this budget". Budget in `content/ai/arena.json`: `tuneGames` (a try),
+  both ways to the smallest step) or "within this budget"; a newly green one within 5% of its line is flagged "only just
+  over — confirm with npm run ai:arena" (`edgeOf`, `JUST_OVER`). In a noisy game give it more games a try (Glyphtender:
+  12 a try was luck twice; 30 a try ≈ 40 min). Budget in `content/ai/arena.json`: `tuneGames` (a try),
   `tuneTries`, `tuneSeconds`, `tuneFreshGames`, `tuneSeed`, `tuneFreshSeed`, `tuneStep` (defaults in the code for an
   older arena.json). **PC:** `npm run ai:tune -- --personality <id> [--budget tries=10,games=8,fresh=24,seconds=300]`
   (the installer adds `"ai:tune": "node src/ai/kit/ai-arena.mjs --tune"`) prints old → new and the targets before →
