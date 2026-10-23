@@ -28,6 +28,7 @@
   "depth-0": "0 4px 0 #0d0e17",
   "depth-1": "6px 6px 0 #0d0e17",
   "depth-2": "8px 8px 0 #0d0e17",
+  "depth-success": "var(--depth-1)",
   "border-width": "4px",
   "glow": "none",
   "panel-texture": "none",

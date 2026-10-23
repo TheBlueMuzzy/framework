@@ -333,6 +333,9 @@
       black calc(100% - min(var(--kit-scroll-fade, 2rem), var(--kit-more-end, 2rem))), var(--kit-fade-end)); }
 
   .kit-card { background: var(--surface) var(--panel-texture); color: var(--on-surface); }
+  /* success (0.27.0): the same inset ring as selected, in the success colour — an outline takes no room, so the card
+     stays exactly its size; the shadow is the style's depth-success (Neon glows green). Selected wins its ring. */
+  .kit-card[data-tone="success"] { border-color: var(--success); outline: 0.1875rem solid var(--success); outline-offset: -0.1875rem; box-shadow: var(--depth-success); }
   .kit-card[data-state="selected"] { border-color: var(--primary); outline: 0.1875rem solid var(--primary); outline-offset: -0.1875rem; }
 
   .kit-badge[data-variant="neutral"] { background: var(--surface); color: var(--on-surface); }

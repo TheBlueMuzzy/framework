@@ -28,6 +28,7 @@
   "depth-0": "0 0 10px rgb(31 229 255 / 0.25)",
   "depth-1": "0 0 18px rgb(31 229 255 / 0.18), inset 0 0 22px rgb(31 229 255 / 0.07)",
   "depth-2": "0 0 36px rgb(31 229 255 / 0.3), inset 0 0 28px rgb(31 229 255 / 0.1)",
+  "depth-success": "0 0 18px rgb(57 255 122 / 0.3), inset 0 0 22px rgb(57 255 122 / 0.1)",
   "border-width": "1px",
   "glow": "drop-shadow(0 0 6px rgb(31 229 255 / 0.7))",
   "panel-texture": "repeating-linear-gradient(0deg, rgb(31 229 255 / 0.035) 0 1px, transparent 1px 4px)",

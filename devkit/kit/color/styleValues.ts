@@ -22,6 +22,7 @@ export const UI_SHAPES: StyleValue[] = [
   { token: 'depth-0', name: 'Shadow: flat things (buttons)' },
   { token: 'depth-1', name: 'Shadow: raised things (panels)' },
   { token: 'depth-2', name: 'Shadow: floating things (popups)' },
+  { token: 'depth-success', name: 'Shadow: success cards (owned, done)', fallback: 'var(--depth-1)' },
   { token: 'glow', name: 'Glow on lit things', fallback: 'none' },
   { token: 'press-scale', name: 'Press: shrink to', slider: { '': [0.8, 1, 0.01] } },
   { token: 'press-shift', name: 'Press: sink by', slider: { px: [0, 6, 0.5], rem: [0, 0.4, 0.025] } },

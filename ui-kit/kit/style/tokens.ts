@@ -55,6 +55,7 @@ export const otherTokens = {
 export const optionalTokens = {
   'glow': 'none', // a CSS filter on lit things (primary buttons, on-switches, bars, focus), e.g. drop-shadow(…)
   'panel-texture': 'none',
+  'depth-success': 'var(--depth-1)', // a success card's shadow (Card tone="success", 0.27.0) — Neon: its glow in green
 } as const
 
 // The three text roles (0.16.0) — like a web page: a title font, a heading font and a body font (font-body, above).

@@ -504,5 +504,6 @@ to search sets `searchable: false` (no box).
   `runCheckInWorker` on the page, `serveCheck` in the game's worker file (the README's AI tab section) — with progress
   after every game, so the game never freezes while the Personality Check plays.
 - 0.23.1 (framework F108, needs UI kit 0.27.0): the Color tab lists the kit's two new colours, **Success** and **Text on
-  success** (`success` / `on-success`), so each game's green can be set live.
+  success** (`success` / `on-success`), so each game's green can be set live; UI shape & feel lists **Shadow: success
+  cards** (`depth-success`, Neon's green glow).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).

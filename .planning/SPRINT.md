@@ -19,7 +19,7 @@ Checked: 2026-10-22 — root check:fast 18/18 (my own run); ai 68 tests (Draw to
 From Goops' session 2026-10-23 (Muzzy-approved there; its F34 Upgrades screen, dev/m5-beta): check-ui rightly refuses a raw colour in game CSS, and every game with a shop, loadout or skill tree will want these. Goops then installs the kit and uses `<Card tone={level > 0 ? 'success' : undefined}>` and `<Modal action={respecButton}>`.
 Done when: the 5 items below are in the UI kit in all 5 styles, contrast-tested, with screenshots I looked at; Goops' session is told which branch to install from.
 - [x] 🤖 1. A `success` colour (+ `on-success`) in all 5 styles, contrast-tested; Neon's reads as a clear green next to its cyan — ui-kit/kit/styles/
-- [ ] 🤖 2. Card `tone="success"`: border + the style's glow in that colour, the card's size unchanged (no thicker border — cards are fixed size) — ui-kit/kit/controls/Card.tsx
+- [x] 🤖 2. Card `tone="success"`: border + the style's glow in that colour, the card's size unchanged (no thicker border — cards are fixed size) — ui-kit/kit/controls/Card.tsx
 - [ ] 🤖 3. Modal `headerAction` prop, passed to its MenuHeader's action slot (Goops builds Screen + Panel + MenuHeader by hand today to get it; named `headerAction`, not Goops' `action`, because Modal already has `actions` = its bottom buttons) — ui-kit/kit/blocks/dialogs.tsx
 - [ ] 🤖 4. Neon `danger` button with a red glow matching `primary`'s, so − and + look like a pair — ui-kit/kit/controls/Button.tsx
 - [ ] 🤖 5. MenuHeader title beside an action: shrinks a step before wrapping, never breaks inside a word ("UPGRADES" + a compact "RESPEC" at 360/390 portrait rendered "UPGRAD / ES") — ui-kit/kit/blocks/MenuHeader.tsx
