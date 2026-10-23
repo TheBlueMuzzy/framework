@@ -75,21 +75,22 @@ const pct = (v: number) => `${Math.round(v * 100)}%`
 const num = (v: number) => String(round(v, 2))
 
 /** Split numbers into up to three groups by size — about a third each, but equal numbers always stay together
- *  (so 0/1 numbers make two groups, and one number repeated makes one). Returns each group's low…high. */
+ *  (so 0/1 numbers make two groups, and one number repeated makes one). Each cut goes at the change of number
+ *  nearest its third. Returns each group's low…high. */
 export function terciles(values: number[]): { low: number; high: number }[] {
   const sorted = [...values].sort((a, b) => a - b)
   const n = sorted.length
-  const groups: { low: number; high: number }[] = []
-  let start = 0
-  for (let i = 0; i < n; i++) {
-    const lastOfValue = i === n - 1 || sorted[i + 1] !== sorted[i]
-    // close a group at the end of a run of equal numbers once it has reached its third (the last group takes the rest)
-    if (lastOfValue && (i === n - 1 || (groups.length < 2 && i + 1 >= ((groups.length + 1) * n) / 3))) {
-      groups.push({ low: sorted[start], high: sorted[i] })
-      start = i + 1
-    }
-  }
-  return groups
+  if (!n) return []
+  // where a cut may go: between two different numbers (so equal numbers stay together)
+  const places: number[] = []
+  for (let i = 1; i < n; i++) if (sorted[i] !== sorted[i - 1]) places.push(i)
+  // each cut at the place nearest its third (a smaller run before a big one stays its own group, not swallowed)
+  const nearest = (target: number, after: number) =>
+    places.filter((p) => p > after).reduce<number | undefined>((best, p) => (best === undefined || Math.abs(p - target) < Math.abs(best - target) ? p : best), undefined)
+  const first = nearest(n / 3, 0)
+  const second = first === undefined ? undefined : nearest((2 * n) / 3, first)
+  const cuts = [0, ...[first, second].filter((c): c is number => c !== undefined), n]
+  return cuts.slice(1).map((end, i) => ({ low: sorted[cuts[i]], high: sorted[end - 1] }))
 }
 
 /** The edge: in winner-vs-loser pairs of the same game, how often the winner's number was higher (ties count half).

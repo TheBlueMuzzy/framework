@@ -106,3 +106,11 @@ describe('what wins', () => {
     expect(whatWins([{ seats: [{ personality: 'A', skill: 'Mid', meters: {}, won: 1 }] }])).toMatchObject({ top: [], all: [], seats: 0 })
   })
 })
+
+describe('review fixes', () => {
+  it('a smaller first run of equal numbers stays its own group (not swallowed by a big middle run)', () => {
+    // a count that's 0 for a fifth, 1 for most, 2 for a tenth: three groups, so 0 vs 1 can still be compared
+    const values = [...Array(20).fill(0), ...Array(70).fill(1), ...Array(10).fill(2)]
+    expect(terciles(values)).toEqual([{ low: 0, high: 0 }, { low: 1, high: 1 }, { low: 2, high: 2 }])
+  })
+})
