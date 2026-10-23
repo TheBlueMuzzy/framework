@@ -75,8 +75,8 @@ Goal: any turn-based game can put a fair, human-feeling AI in any seat — local
   why: Muzzy tunes personalities by eye in the game, not by description
 - ✅ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21 · sprint 26 (ai 0.3.0 arena + npm run ai:arena, Dev Kit 0.23.0 Run check in a worker)
   why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
-- ⏳ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
-- ⏳ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
+- 🟢 F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
+- 🟢 F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
 ```mermaid
 flowchart LR
   F12[✅ F12 Game core] --> F19[F19 Brain]
