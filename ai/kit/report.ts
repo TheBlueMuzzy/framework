@@ -82,7 +82,7 @@ h1{margin:0 0 4px}h2{margin:32px 0 8px}.dim{color:var(--dim)}.ok{color:var(--ok)
 .card h3{margin:0 0 6px}ul{margin:0;padding-left:18px}li{margin:2px 0}.scroll{overflow-x:auto}
 table{border-collapse:collapse;background:var(--card);border-radius:8px}th,td{border:1px solid var(--line);padding:6px 10px;text-align:center}td.diag{background:var(--diag)}td.off{background:var(--off)}table.wins td,table.wins th{white-space:nowrap}
 pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;font-size:13px}
-th.l,td.l{text-align:left}td.changed{font-weight:600}
+th.l,td.l{text-align:left}td.changed{font-weight:600}table.tune td{white-space:nowrap}
 </style></head><body><main>
 ${body}
 </main></body></html>`
@@ -98,13 +98,13 @@ export function tuneHtml(r: TuneResult, game: string): string {
   const green = (k: 'before' | 'after') => r.targets.filter((t) => t[k].pass).length
   const body = `<h1>Suggested sliders — ${esc(r.personality)}</h1><p class="dim">${esc(game)} · ${esc(r.subtitle)}</p>
 <section class="card" data-tune-verdict="${esc(r.verdict)}"><p><span class="${r.verdict === 'better' ? 'ok' : r.verdict === 'alreadyGreen' ? 'ok' : 'no'}">${esc(r.message)}</span></p>
-<p class="dim">${r.tries} tries · ${r.games} games · ${r.seconds} s · stopped: ${esc(stopWords[r.stoppedBy])}. Nothing was written — apply it in the Dev Kit's AI tab (Suggest sliders → Apply → Save), or copy the new values into content/ai/personalities.json.</p></section>
+<p class="dim">${r.tries} ${r.tries === 1 ? 'try' : 'tries'} ·${r.games} games · ${r.seconds} s · stopped: ${esc(stopWords[r.stoppedBy])}. Nothing was written — apply it in the Dev Kit's AI tab (Suggest sliders → Apply → Save), or copy the new values into content/ai/personalities.json.</p></section>
 ${r.targets.length ? `<h2>Its feel targets <span class="dim">(on ${r.settings.tuneFreshGames} fresh games: ${green('before')} → ${green('after')} of ${r.targets.length} green)</span></h2>
-<div class="scroll"><table><tr><th class="l">target</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found'}</th></tr>${targets}</table></div>` : ''}
+<div class="scroll"><table class="tune"><tr><th class="l">target</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found'}</th></tr>${targets}</table></div>` : ''}
 ${r.cantReach.length ? `<h2>Couldn't reach</h2><ul>${r.cantReach.map((c) => `<li>${mark(false)} ${esc(c.label)} <span class="dim">— ${esc(c.why)}</span></li>`).join('')}</ul>` : ''}
 ${r.others.length ? `<h2>Other personalities' targets that changed</h2><ul>${r.others.map((o) => `<li>${mark(o.after)} ${esc(o.personality)}: ${esc(o.label)} <span class="dim">— was ${o.before ? 'green' : 'red'}</span></li>`).join('')}</ul>` : ''}
 <h2>Sliders <span class="dim">(old → new; each stays inside its range)</span></h2>
-<div class="scroll"><table><tr><th class="l">slider</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found (not suggested)'}</th></tr>${sliders}</table></div>
+<div class="scroll"><table class="tune"><tr><th class="l">slider</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found (not suggested)'}</th></tr>${sliders}</table></div>
 ${r.log.length ? `<h2>How it searched <span class="dim">(on the tuning games)</span></h2><ol>${r.log.map((l) => `<li>${esc(l.change)} → ${l.own}/${r.targets.length} green${l.tryNo > 1 ? (l.kept ? ' <span class="ok">kept</span>' : ' <span class="dim">not kept</span>') : ''}</li>`).join('')}</ol>` : ''}`
   return page(`Suggested sliders — ${r.personality}`, body)
 }
