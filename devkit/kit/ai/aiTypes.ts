@@ -165,6 +165,7 @@ export interface DevKitAi {
   runCheck?: (options: { games: number; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (done: number, total: number) => void }) => Promise<string>
   /** Optional (0.26.0, framework F26): "Suggest sliders" — the AI kit's tuner for one personality, with the tab's
    *  personalities + skills as they are (unsaved too). It only suggests: the tab's Apply puts the values in as unsaved
-   *  edits. In the check's worker: serveCheck(self, runCheck, tune) + suggestInWorker (checkWorker.ts). */
-  suggest?: (options: { personality: string; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (p: AiTuneProgress) => void }) => Promise<AiTuneResult>
+   *  edits. In the check's worker: serveCheck(self, runCheck, tune) + suggestInWorker (checkWorker.ts). `signal` aborts
+   *  when the panel closes mid-run (pass the options on whole and suggestInWorker closes the worker). */
+  suggest?: (options: { personality: string; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (p: AiTuneProgress) => void; signal?: AbortSignal }) => Promise<AiTuneResult>
 }

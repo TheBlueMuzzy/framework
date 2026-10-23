@@ -2,7 +2,7 @@
 // now (unsaved changes too) and opens the report page in a new browser tab. The game does the playing (its runCheck
 // callback, played in a Web Worker so the screen stays alive — checkWorker.ts does both ends); this shows progress and
 // the link.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { AiPersonality, AiSkill, AiTuneProgress, AiTuneResult, DevKitAi } from './aiTypes'
 
 const GAME_CHOICES = [6, 20, 60] // a quick look · a fair read · a proper check (slow)
@@ -114,6 +114,10 @@ function SuggestPart({ suggest, picked, personalities, skills, onApply }: Requir
   const [result, setResult] = useState<AiTuneResult | null>(null)
   const [applied, setApplied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // A run still going when the panel closes (section folded, search hides it, Dev Kit closed) is stopped — its worker
+  // closed — so a long tune never keeps playing unseen, its result lost, beside the next one.
+  const running = useRef<AbortController | null>(null)
+  useEffect(() => () => running.current?.abort(), [])
 
   async function run() {
     setBusy(true)
@@ -121,11 +125,15 @@ function SuggestPart({ suggest, picked, personalities, skills, onApply }: Requir
     setResult(null)
     setApplied(false)
     setProgress(null)
+    const stop = new AbortController()
+    running.current = stop
     try {
-      setResult(await suggest({ personality: picked, personalities, skills, onProgress: setProgress }))
+      const got = await suggest({ personality: picked, personalities, skills, onProgress: setProgress, signal: stop.signal })
+      if (!stop.signal.aborted) setResult(got)
     } catch (e) {
-      setError((e as Error).message)
+      if (!stop.signal.aborted) setError((e as Error).message)
     } finally {
+      if (running.current === stop) running.current = null
       setBusy(false)
       setProgress(null)
     }

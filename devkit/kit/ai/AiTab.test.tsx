@@ -205,6 +205,16 @@ describe('the AI tab', () => {
       expect(rows).toContainEqual(expect.stringMatching(/^hems rivals in — tangles, wants ≥ 0\.6✗ 0\.4✓ 0\.7$/))
     })
 
+    it('a run still going when the panel closes is stopped (its signal aborts, so the worker closes) — review', async () => {
+      let signal: AbortSignal | undefined
+      const suggest = vi.fn((o: { signal?: AbortSignal }) => { signal = o.signal; return new Promise<AiTuneResult>(() => {}) })
+      const { unmount } = render(<AiTab ai={sampleAi({ runCheck, suggest })} />)
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Suggest sliders for Bully' })) })
+      expect(signal?.aborted).toBe(false)
+      unmount()
+      expect(signal?.aborted).toBe(true)
+    })
+
     it('Apply puts the values in as unsaved edits: Save writes them, Undo unsaved takes them back', async () => {
       const written = saves()
       const suggest = vi.fn(async () => bullySuggestion())

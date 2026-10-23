@@ -75,6 +75,25 @@ describe('Run check in a worker', () => {
     expect(pair.terminated()).toBe(1)
   })
 
+  it('a tune stopped by the page (the panel closed mid-run) closes its worker and rejects — no late result (review)', async () => {
+    const pair = fakeWorkerPair()
+    let keepPlaying: (p: { phase: 'search'; tryNo: number; tries: number; game: number; games: number }) => void = () => {}
+    serveCheck(pair.inside, () => '', (_job, onProgress) => new Promise(() => { keepPlaying = onProgress })) // a long tune
+    const stop = new AbortController()
+    const seen: number[] = []
+    const waiting = suggestInWorker(() => pair.page, { personality: 'Bully', personalities: [bully], skills, onProgress: (p) => seen.push(p.tryNo), signal: stop.signal })
+    await new Promise((r) => setTimeout(r, 0))
+    stop.abort()
+    await expect(waiting).rejects.toThrow('stopped')
+    expect(pair.terminated()).toBe(1)
+    keepPlaying({ phase: 'search', tryNo: 2, tries: 9, game: 1, games: 1 })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(seen).toEqual([]) // nothing heard after the stop
+    const already = new AbortController()
+    already.abort()
+    await expect(suggestInWorker(() => { throw new Error('should not start') }, { personality: 'Bully', personalities: [bully], skills, onProgress: () => {}, signal: already.signal })).rejects.toThrow('stopped')
+  })
+
   it('a worker with no tune function says so in plain English; a failing tune rejects with its reason', async () => {
     const old = fakeWorkerPair()
     serveCheck(old.inside, () => '<p>report</p>')

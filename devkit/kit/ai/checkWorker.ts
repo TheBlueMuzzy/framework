@@ -31,7 +31,7 @@ export type CheckJob = Omit<CheckOptions, 'onProgress'>
 /** What the AI tab's "Suggest sliders" hands the game (0.26.0). */
 export type SuggestOptions = Parameters<NonNullable<DevKitAi['suggest']>>[0]
 /** The same without the progress callback: which personality, and the cast as it is in the tab. */
-export type SuggestJob = Omit<SuggestOptions, 'onProgress'>
+export type SuggestJob = Omit<SuggestOptions, 'onProgress' | 'signal'>
 
 /** A Web Worker, or the worker's own `self` (anything that posts and hears messages the same way). */
 export interface CheckWorkerLike {
@@ -45,8 +45,9 @@ type FromWorker = { progress: [number, number] } | { html: string } | { tuneProg
 
 /** Start a worker, send it one job, and settle with what `read` makes of its messages ({ value } = done; nothing =
  *  keep listening). Anything it doesn't know, a crash or a worker that won't start rejects, in plain English. */
-function ask<T>(start: () => CheckWorkerLike, payload: unknown, read: (data: FromWorker) => { value: T } | 'more' | undefined): Promise<T> {
+function ask<T>(start: () => CheckWorkerLike, payload: unknown, read: (data: FromWorker) => { value: T } | 'more' | undefined, signal?: AbortSignal): Promise<T> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new Error('stopped'))
     let worker: CheckWorkerLike
     try {
       worker = start()
@@ -69,6 +70,8 @@ function ask<T>(start: () => CheckWorkerLike, payload: unknown, read: (data: Fro
       else finish(() => reject(new Error(('error' in data && data.error) || 'the check stopped')))
     })
     worker.addEventListener('error', (event) => finish(() => reject(new Error(event.message || "the check's worker stopped working"))))
+    // Stopped by the page (the panel closed mid-run): the worker is closed too, so its games stop using the computer
+    signal?.addEventListener('abort', () => finish(() => reject(new Error('stopped'))), { once: true })
     // Plain data only (a personality edited in the tab is plain JSON already)
     worker.postMessage(JSON.parse(JSON.stringify(payload)))
   })
@@ -89,14 +92,14 @@ export function runCheckInWorker(start: () => CheckWorkerLike, { onProgress, ...
 
 /** On the page (0.26.0): "Suggest sliders" — the same worker, a tune job; progress per game ("Try 4 / 20"), then the
  *  tuner's result. It only suggests: nothing is written anywhere. */
-export function suggestInWorker(start: () => CheckWorkerLike, { onProgress, ...job }: SuggestOptions, extra?: unknown): Promise<AiTuneResult> {
+export function suggestInWorker(start: () => CheckWorkerLike, { onProgress, signal, ...job }: SuggestOptions, extra?: unknown): Promise<AiTuneResult> {
   return ask<AiTuneResult>(start, { job, extra, kind: 'tune' }, (data) => {
     if ('tuneProgress' in data) {
       onProgress(data.tuneProgress)
       return 'more'
     }
     return 'tune' in data ? { value: data.tune } : undefined
-  })
+  }, signal)
 }
 
 /** Inside the worker: run each job with the game's own check function (it may be async — e.g. to fetch a word list
