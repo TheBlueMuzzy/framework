@@ -42,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-20 — Sprint 23 planned: a game says "portrait only" once and no check tests it sideways again.
 - 2026-10-20 — F103 approved: confirm boxes can't silently fail, bars fit small phones without workarounds, the Dev Kit warns when its PAUSED pill covers a game's HUD.
 - 2026-10-20 — F103 built (waiting for OK): confirm boxes can't silently fail any more, bars fit small phones without workarounds, and the Dev Kit warns when its PAUSED pill covers the game's HUD.
-- 2026-10-20 — F102 approved: every game can show the same version number on its menu, in Settings and in bug reports, and its tests refuse an outdated build.
