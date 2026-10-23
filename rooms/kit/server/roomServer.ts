@@ -30,6 +30,9 @@ import type { RoomSettings } from './settings'
 import { Timers } from './timers'
 import { EmoteGate, readEmoteRoomSettings } from './emotes'
 
+/** The most emote counts a room keeps before forgetting those of players who left (memory stays small). */
+const MAX_EMOTE_COUNTS = 64
+
 /** Optional extras a game's server passes (Rooms 0.12.0). */
 export interface RoomServerExtras {
   /** content/emotes.json (the emotes module): players' preset phrases are relayed to every seat, checked and counted
@@ -422,6 +425,11 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     // Counted per PLAYER (their persistentId — never sent anywhere), so leaving the lobby and joining again as a new
     // seat never refills it; a bot seat the host added is counted by its seat
     const counter = trusted ? `seat:${seatId}` : `player:${seat.persistentId}`
+    // Players coming and going in the lobby (a new id each time) would pile up counts: past MAX_EMOTE_COUNTS, only the
+    // seats still here keep theirs
+    if (this.emoteGate.size >= MAX_EMOTE_COUNTS) {
+      this.emoteGate.forgetAllBut(new Set(this.data.seats.flatMap((s) => [`seat:${s.id}`, `player:${s.persistentId}`])))
+    }
     const verdict = this.emoteGate.allow(counter, id, Date.now(), trusted)
     if (!verdict.ok) {
       if (this.emoteGate.firstDrop(counter)) this.log(`emotes from ${seatId} dropped (${verdict.why}) — said once`)

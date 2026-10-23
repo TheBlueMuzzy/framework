@@ -167,6 +167,17 @@ describe('RoomServer: emotes', () => {
     expect(server.emote('seat-9', 'wow')).toBe(false) // no such seat
     expect(server.emote('seat-1', 'Hello there')).toBe(false)
   })
+  it('players coming and going in the lobby (each a new id) never grow the server\'s counts without end', () => {
+    join('tab-ann', 'Ann', 'ann-persistent-1', true)
+    for (let i = 0; i < 300; i++) {
+      const visitor = join(`tab-v${i}`, 'Vis', `visitor-persistent-${i}`)
+      say(visitor, { type: 'emote', id: 'hello' })
+      say(visitor, { type: 'emote', id: 'nope' }) // (a drop, so it's in the "said once" list too)
+      say(visitor, { type: 'leave' })
+    }
+    const gate = (server as unknown as { emoteGate: EmoteGate }).emoteGate
+    expect(gate.size).toBeLessThanOrEqual(64)
+  })
   it('a server without content/emotes.json drops emotes (said once in the log)', () => {
     server = new RoomServer(party, nothing, { minSeats: 1 })
     const ann = join('tab-ann', 'Ann', 'ann-persistent-1', true)

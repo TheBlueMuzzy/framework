@@ -74,6 +74,19 @@ export class EmoteGate {
     return true
   }
 
+  /** How many counts are kept (one per player or bot seat that has spoken this match). */
+  get size(): number {
+    return this.counts.size
+  }
+
+  /** Forget the counts (and "said once" marks) of everyone not in `keep` — the room calls it when players coming and
+   *  going in the lobby (each with a new id) have piled up too many, so memory never grows without end. (Someone who
+   *  left and comes back after that starts a fresh count — no more than a new id would give them anyway.) */
+  forgetAllBut(keep: ReadonlySet<string>): void {
+    for (const key of [...this.counts.keys()]) if (!keep.has(key)) this.counts.delete(key)
+    for (const key of [...this.told]) if (!keep.has(key)) this.told.delete(key)
+  }
+
   /** A new match: every seat's count starts again (its per-match cap too). (A seat that leaves keeps its count until
    *  then, so leaving and joining again never refills it.) */
   newMatch(): void {
