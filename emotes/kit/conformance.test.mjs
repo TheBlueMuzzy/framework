@@ -86,4 +86,13 @@ describe('Emotes checks', () => {
     expect(r[CHECKS.settings].ok).toBe(false)
     expect(r[CHECKS.settings].problems).toHaveLength(2)
   })
+
+  it('a Settings switch that starts somewhere else than mutedByDefault fails (it would undo it at start-up) — review F107', async () => {
+    const r = await run({ ...WIRED, 'content/emotes.json': JSON.stringify({ ...template, mutedByDefault: true }) })
+    expect(r[CHECKS.settings].ok).toBe(false)
+    expect(r[CHECKS.settings].problems.join(' ')).toMatch(/"default": false[\s\S]*mutedByDefault is true/)
+    const same = { tabs: [{ id: 'game', label: 'Game', rows: [{ id: 'hideEmotes', type: 'toggle', label: 'Hide', default: true }] }] }
+    const ok = await run({ ...WIRED, 'content/emotes.json': JSON.stringify({ ...template, mutedByDefault: true }), 'content/ui/settings.json': JSON.stringify(same) })
+    expect(ok[CHECKS.settings].ok).toBe(true)
+  })
 })

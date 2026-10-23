@@ -135,6 +135,10 @@ export async function check(t) {
     const problems = []
     if ((!row || row.on === false) && !inCode) problems.push('Settings has no "Hide everyone\'s emotes" switch (no hideEmotes row in content/ui/settings.json, no EMOTE_SETTINGS_ROWS in the code).')
     if (!applied.length) problems.push('Nothing passes the switch to the module (applyEmoteSetting(emotes, values) or emotes.setHideAll(on)) — it would do nothing.')
+    // The row's default is what a new player's Settings says, and applyEmoteSetting at start-up passes it on — so it
+    // must be content/emotes.json mutedByDefault, or that value is undone the moment the game starts
+    const mutedByDefault = file?.mutedByDefault === true
+    if (row && row.on !== false && (row.default === true) !== mutedByDefault) problems.push(`content/ui/settings.json hideEmotes has "default": ${JSON.stringify(row.default ?? false)} but content/emotes.json mutedByDefault is ${mutedByDefault} — a new player's Settings would undo mutedByDefault at start-up. Make them the same.`)
     if (problems.length) t.fail(name, problems, "Paste the hideEmotes toggle (EMOTE_SETTINGS_ROWS in src/emotes/settingsRow.ts) into a tab's rows in content/ui/settings.json, then call applyEmoteSetting(emotes, loadSettings(settingsJson)) at start-up and applyEmoteSetting(emotes, values) in <Settings onChange>.")
     else t.pass(name, `${row ? 'content/ui/settings.json' : 'EMOTE_SETTINGS_ROWS'} · ${[...new Set(applied)].join(', ')}`)
   }
