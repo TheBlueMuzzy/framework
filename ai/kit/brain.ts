@@ -328,6 +328,7 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
   // unless that would make the line later than delay.max + tableGap after its moment (then it's stale: let it go)
   const speak = (seat: number, id: string, memory: BanterMemory, heardAt: number) => {
     waiting.delete(seat)
+    if (!options.bots().some((bot) => bot.seat === seat)) return // (a person took the seat back while the line waited)
     const settings = settingsNow()
     const gapMs = (settings.tableGap ?? 0) * 1000
     const left = lastSpokeAt === null ? 0 : gapMs - (clock.now() - lastSpokeAt)
