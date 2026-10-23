@@ -37,4 +37,14 @@ describe('MenuHeader', () => {
     expect(header.lastElementChild!.className).toBe('kit-menu-header-action')
     expect(screen.getByRole('button', { name: 'Start' })).toBeTruthy()
   })
+
+  // F108 review: an action that shows only sometimes (Respec while something is owned) left the title shrunk
+  it('the action going away puts the title back to full size', () => {
+    const respec = <Button compact>Respec</Button>
+    const { container, rerender } = render(<MenuHeader title="UPGRADES" action={respec} />)
+    const box = container.querySelector<HTMLElement>('.kit-menu-header-title')!
+    box.dataset.fit = 'tight' // what a narrow phone measures (jsdom can't measure)
+    rerender(<MenuHeader title="UPGRADES" />)
+    expect(box.hasAttribute('data-fit')).toBe(false)
+  })
 })

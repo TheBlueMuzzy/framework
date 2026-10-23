@@ -20,7 +20,8 @@ export function MenuHeader({ title, onBack, backLabel = 'Back', action }: MenuHe
   const fits = Boolean(action) && typeof title === 'string'
   useLayoutEffect(() => {
     const box = titleBox.current
-    if (!fits || !box) return
+    if (!box) return
+    if (!fits) { delete box.dataset.fit; return } // the action went away: back to the full title size (F108 review)
     fitMenuTitle(box)
     if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
     const refit = new ResizeObserver(() => fitMenuTitle(box)) // a turned phone, the text size setting, a restyle
