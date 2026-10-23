@@ -37,8 +37,9 @@ export interface EmotesOptions {
   settings?: unknown
   /** The phrases' words: content/text/en.json "emotes" ({ hello: 'Hello!' }). */
   words?: Record<string, string>
-  /** The bots' banter lines: content/text/en.json "banter" ({ bully: { won: 'Too easy.' } }) — F22. */
-  banter?: Record<string, Record<string, string>>
+  /** The bots' banter lines: content/text/en.json "banter" ({ bully: { won: 'Too easy.' } }) — F22. Read at every
+   *  lookup, never copied; a function (() => text.banter) also follows a file whose "banter" object gets replaced. */
+  banter?: Record<string, Record<string, string>> | (() => Record<string, Record<string, string>> | undefined)
   /** The seats played on THIS device (yourself; every person's seat in a hot-seat game). Their emotes always show,
    *  and they can't be muted. */
   mine?: string[]
@@ -103,7 +104,10 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
   const config = readEmotesConfig(options.settings ?? {}, warn)
   const now = options.now ?? Date.now
   const words = options.words ?? {}
-  const banter = options.banter ?? {}
+  const banterNow = () => {
+    const lines = typeof options.banter === 'function' ? options.banter() : options.banter
+    return lines && typeof lines === 'object' ? lines : {}
+  }
   let mine = new Set(options.mine ?? [])
   let send = options.send
   const listeners = new Set<(emote: EmoteMessage) => void>()
@@ -128,6 +132,7 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
 
   const banterText = (id: string) => {
     const [, personality, moment] = id.split('.')
+    const banter = banterNow()
     const lines = own(banter, personality) ? banter[personality] : undefined
     return lines && typeof lines === 'object' && own(lines, moment) && typeof lines[moment] === 'string' ? lines[moment] : ''
   }

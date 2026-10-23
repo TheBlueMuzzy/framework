@@ -178,6 +178,19 @@ describe('online: send and receive', () => {
     emotes.receive({ type: 'emote', seat: 'seat-1', id: 'hello' })
     expect(seen.map((e) => e.id)).toEqual(['hello'])
   })
+  it('banter lines are read at every lookup — edited in place or handed as a function (a replaced "banter" object)', () => {
+    const live: Record<string, Record<string, string>> = { bully: { won: 'Too easy.' } }
+    const inPlace = createEmotes({ banter: live, warn: () => {} })
+    live.bully.won = 'Is that all?'
+    live.bully.lost = 'Rigged.'
+    expect([inPlace.text('banter.bully.won'), inPlace.text('banter.bully.lost')]).toEqual(['Is that all?', 'Rigged.'])
+    const file: { banter?: Record<string, Record<string, string>> } = {}
+    const followed = createEmotes({ banter: () => file.banter, warn: () => {} })
+    expect(followed.say('seat-3', 'banter.bully.won')).toEqual({ ok: false, reason: 'unknown' })
+    file.banter = { bully: { won: 'Next!' } }
+    expect(followed.text('banter.bully.won')).toBe('Next!')
+    expect(followed.say('seat-3', 'banter.bully.won')).toEqual({ ok: true })
+  })
   it('online, a bot\'s say() on this device is refused (bots speak from the server: room.emote) — told once, nothing sent', () => {
     const sent: string[] = []
     const warnings: string[] = []

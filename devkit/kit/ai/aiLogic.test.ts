@@ -1,6 +1,6 @@
 // Runs in the framework (not copied into games): the AI tab's thinking.
 import { describe, expect, it } from 'vitest'
-import { aiSections, copyPersonality, freeId, getAt, labelOf, listChanges, moveGoal, searchAi, setAt, settingsName, steadyLabel, withList, withRange, withSteady } from './aiLogic'
+import { BANTER_SECTION, aiSections, applyBanterLive, banterChanges, banterOf, copyPersonality, freeId, getAt, labelOf, lineKeys, listChanges, moveGoal, nextLineKey, searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withList, withRange, withSteady } from './aiLogic'
 import { sampleAi, bully } from './sampleAi.test'
 
 describe('AI tab logic', () => {
@@ -78,5 +78,47 @@ describe('AI tab logic', () => {
     expect(nerve.map((s) => s.title)).toEqual(['AI: banter, nerve & words'])
     expect(searchAi(sections, 'trap')[0].items.map((i) => i.key)).toEqual(['traits.aggression'])
     expect(searchAi(sections, 'wobble').map((s) => s.title)).toEqual(['AI: skill'])
+  })
+})
+
+describe('AI tab logic — banter lines (0.24.0)', () => {
+  const lines = () => ({ Bully: { won: 'Too easy.', won_3: 'Again?', won_2: 'Next!', wonder: 'stray', lost: 'Rigged.' } })
+  it('copies the lines, lists a moment\'s keys in order, picks the next free key', () => {
+    expect(banterOf({ banter: { Bully: { won: 'Hi', bad: 3 }, odd: 'x' } }, ['banter'])).toEqual({ Bully: { won: 'Hi' } })
+    expect(banterOf({}, ['banter'])).toEqual({})
+    expect(lineKeys(lines(), 'Bully', 'won')).toEqual(['won', 'won_2', 'won_3'])
+    expect(nextLineKey(lines(), 'Bully', 'won')).toBe('won_4')
+    expect(nextLineKey(lines(), 'Bully', 'gotHit')).toBe('gotHit')
+    expect(nextLineKey({ Bully: { won_2: 'x' } }, 'Bully', 'won')).toBe('won')
+    expect(strayKeys(lines(), 'Bully', ['won', 'lost'])).toEqual(['wonder'])
+  })
+  it('withLine sets or removes one line without touching the original', () => {
+    const before = lines()
+    const after = withLine(before, 'Bully', 'won', 'Is that all?')
+    expect([before.Bully.won, after.Bully.won]).toEqual(['Too easy.', 'Is that all?'])
+    expect(withLine(before, 'Bully', 'lost', undefined).Bully).not.toHaveProperty('lost')
+    expect(withLine(before, 'Shy', 'won', 'Oh.').Shy).toEqual({ won: 'Oh.' })
+  })
+  it('applyBanterLive edits the game\'s own object in place (the same object it reads from), other keys untouched', () => {
+    const game: Record<string, unknown> = { title: 'Game', banter: { Bully: { won: 'Too easy.', lost: 'Rigged.' }, Gone: { won: 'x' } } }
+    const held = game.banter as Record<string, Record<string, string>>
+    const bullyLines = held.Bully
+    applyBanterLive(game, ['banter'], { Bully: { won: 'Next!' }, Shy: { gotHit: 'Oh.' } })
+    expect(game.banter).toBe(held) // (the same object: the game's lines() sees it)
+    expect(held.Bully).toBe(bullyLines)
+    expect(held).toEqual({ Bully: { won: 'Next!' }, Shy: { gotHit: 'Oh.' } })
+    expect(game.title).toBe('Game')
+    const empty: Record<string, unknown> = {}
+    applyBanterLive(empty, ['ai', 'banter'], { Bully: { won: 'Hi' } })
+    expect(empty).toEqual({ ai: { banter: { Bully: { won: 'Hi' } } } })
+  })
+  it('lists changes for Copy for Claude, and the banter section is searchable by moment', () => {
+    expect(banterChanges({ Bully: { won: 'A', lost: 'B' } }, { Bully: { won: 'C', gotHit: 'D' } })).toEqual([
+      'banter.Bully.won: "A" → "C"', 'banter.Bully.lost: "B" → (removed)', 'banter.Bully.gotHit: (new) → "D"',
+    ])
+    const ai = sampleAi({ banter: { path: 'content/text/en.json', data: {}, moments: ['won', 'gotHit'], describe: { won: 'the game ended and it won' } } })
+    const section = aiSections(ai).find((s) => s.title === BANTER_SECTION)!
+    expect(section.items.map((i) => i.label)).toEqual(['Banter: what it says at each moment', 'won — the game ended and it won', 'gotHit'])
+    expect(searchAi(aiSections(ai), 'ended').map((s) => s.title)).toEqual([BANTER_SECTION])
   })
 })

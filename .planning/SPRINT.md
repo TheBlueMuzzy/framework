@@ -49,7 +49,7 @@ Done when: a game names its moments from its own events, a bot seat says a perso
 - [x] 🤖 1. Moments: the game's moment map from its events (a `moments(event, seat)` on the plug), the moment types, and the banter settings (chance, cooldown, always-allowed) in content — ai/kit/banter.ts
 - [x] 🤖 2. Bots speak through emotes: asBot picks a line (or a preset emote) at each moment and says it via the emote module, timed on the rules clock; online rooms say it from the server — ai/kit/brain.ts
 - [x] 🤖 3. Lines in content/text/en.json (`banter.<personality>.<moment>`), read live; check:framework: every personality with chattiness > 0 has lines, no line hard-coded in src — ai/kit/conformance.mjs
-- [ ] 🤖 4. Dev Kit AI tab: edit each personality's lines per moment, live while a game runs, saved to content/text/en.json — devkit/kit/ai/
+- [x] 🤖 4. Dev Kit AI tab: edit each personality's lines per moment, live while a game runs, saved to content/text/en.json — devkit/kit/ai/
 - [ ] 🤖 5. Proof on a scratch Glyphtender copy: bots chatter during a game (lines appear at the right moments, never two at once, stop on both pauses, muting a bot silences it) — ai/kit/conformance.test.mjs
 Check: ai + emotes + devkit tests, typecheck, lint green (root check:fast); on .scratch/glyphtender-f22 a 4-bot game: lines appear only at named moments, at most one bubble per seat, none during full or half pause, a muted bot says nothing, an edited line in the Dev Kit shows on the next moment without a reload; screenshots looked at by me.
 
