@@ -29,7 +29,7 @@ const mark = (pass: boolean) => `<span class="${pass ? 'ok' : 'no'}">${pass ? '�
 function whatWinsHtml(w: WhatWins): string {
   const cell = (s: SituationWins, i: number) => {
     const g = s.groups.length === 3 ? s.groups[i] : s.groups.length === 2 ? [s.groups[0], undefined, s.groups[1]][i] : i === 1 ? s.groups[0] : undefined
-    return g ? `<td>${pct(g.winRate)} <span class="dim">${g.low === g.high ? num(g.low) : `${num(g.low)}–${num(g.high)}`} · ${g.games}</span></td>` : '<td class="dim">—</td>'
+    return g ? `<td>${pct(g.winRate)} <span class="dim">${g.low === g.high ? num(g.low) : `${num(g.low)} to ${num(g.high)}`} · ${g.games}</span></td>` : '<td class="dim">—</td>'
   }
   const rows = w.all.map((s) => `<tr${s.leftOut ? ' class="dim"' : ''}><th>${esc(s.situation)}</th><td>${esc(s.moment)}</td><td>${s.leftOut ? 'left out' : `${pct(s.edge)}${s.isTheWin ? ' <span class="dim">(the win itself)</span>' : ''}`}</td>${[0, 1, 2].map((i) => cell(s, i)).join('')}</tr>`).join('')
   const top = w.top.length
@@ -39,7 +39,7 @@ function whatWinsHtml(w: WhatWins): string {
 <section class="card">${top}</section>
 <p class="dim">${w.theWin.length ? `${w.theWin.map(esc).join(', ')} at the end decide${w.theWin.length === 1 ? 's' : ''} who wins by ${w.theWin.length === 1 ? 'itself' : 'themselves'} — the score itself, so not in the list. ` : ''}These go with winning; they don't prove they cause it — change a goal and run again to check.</p>
 ${w.leftOut.length ? `<p class="dim" data-what-wins-left="${w.leftOut.length}">Left out: ${w.leftOut.map(esc).join(' · ')}</p>` : ''}
-<div class="scroll"><table><tr><th>situation</th><th>when</th><th>winner had more</th><th>low</th><th>mid</th><th>high</th></tr>${rows}</table></div>`
+<div class="scroll"><table class="wins"><tr><th>situation</th><th>when</th><th>winner had more</th><th>low</th><th>mid</th><th>high</th></tr>${rows}</table></div>`
 }
 
 export function reportHtml(r: CheckReport): string {
@@ -68,7 +68,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans
 h1{margin:0 0 4px}h2{margin:32px 0 8px}.dim{color:var(--dim)}.ok{color:var(--ok);font-weight:600}.no{color:var(--no);font-weight:600}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 .card h3{margin:0 0 6px}ul{margin:0;padding-left:18px}li{margin:2px 0}.scroll{overflow-x:auto}
-table{border-collapse:collapse;background:var(--card);border-radius:8px}th,td{border:1px solid var(--line);padding:6px 10px;text-align:center}td.diag{background:var(--diag)}td.off{background:var(--off)}
+table{border-collapse:collapse;background:var(--card);border-radius:8px}th,td{border:1px solid var(--line);padding:6px 10px;text-align:center}td.diag{background:var(--diag)}td.off{background:var(--off)}table.wins td,table.wins th{white-space:nowrap}
 pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;font-size:13px}
 </style></head><body><main>
 <h1>${esc(r.title)}</h1><p class="dim">${esc(r.subtitle)}</p>
