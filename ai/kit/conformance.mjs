@@ -130,7 +130,8 @@ async function checkBanter(t) {
     const name = BANTER_CHECKS.setting
     if (!chatty.length) t.skip(name, 'no personality talks (chattiness 0)')
     else {
-      const rows = (t.json('content/ui/settings.json')?.tabs ?? []).flatMap((tab) => (Array.isArray(tab?.rows) ? tab.rows : []))
+      const tabs = t.json('content/ui/settings.json')?.tabs // (a broken file is the UI kit check's to report — never a crash here)
+      const rows = (Array.isArray(tabs) ? tabs : []).flatMap((tab) => (Array.isArray(tab?.rows) ? tab.rows : []))
       const row = rows.find((r) => r?.id === 'botChatter' && r.on !== false)
       const code = [...t.gameCode(), ...(t.exists('party') ? t.files({ dirs: ['party'] }).filter((f) => !/\.test\./.test(f.path)) : [])]
         .filter((f) => !f.path.startsWith(`${t.rel}/`))

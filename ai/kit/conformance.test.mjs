@@ -129,5 +129,9 @@ describe('AI checks — banter (F22)', () => {
     const none = tester({ files: { ...files, 'content/ui/settings.json': { tabs: [] } }, code: wired })
     await check(none.t)
     expect(byName(none.results, BANTER_CHECKS.setting)).toMatchObject({ ok: true, warning: true })
+    // review fix: a settings.json whose "tabs" isn't a list → the same warning, not a crash of the whole check
+    const broken = tester({ files: { ...files, 'content/ui/settings.json': { tabs: { game: {} } } }, code: wired })
+    await check(broken.t)
+    expect(byName(broken.results, BANTER_CHECKS.setting)).toMatchObject({ ok: true, warning: true })
   })
 })
