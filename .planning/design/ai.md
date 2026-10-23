@@ -84,6 +84,16 @@ Report = a page with green/red, the grids, and example games to watch.
 - *The AI's own style:* bots value what their goals tell them to; a situation a goal never chases looks weak only because nobody tried it.
 **This sprint takes**: situations + moments, terciles, the same-game edge, the floor + "too few", top 5 sentences on the report and the Dev Kit. **Later (not now)**: logistic regression on several situations at once (what wins *with the others held still*), a chess-style win-probability curve over the game, situation × personality splits.
 
+## Auto-tuner — "Suggest sliders" (F26, built 2026-10-23)
+- **Only suggests** (Muzzy): nothing touches `content/` until the designer presses Apply then Save in the Dev Kit (or copies the values by hand from `npm run ai:tune`'s page).
+- **Which sliders**: the ones the AI tab edits that change play — each trait's range (moved whole, width kept, inside 0–100), nudge, focus, each steady goal already set (0–1). Not chattiness (talk only), extras (game-specific, no known range), goal order or mood shifts (not a number line).
+- **How it searches** — coordinate steps, explainable in one line each: one slider at a time, a step up (or down); keep it only if it's better; a slider that helped goes again the same way; after a pass where nothing helped, halve the step; stop when all green, out of tries / time, or settled (nothing helps at the smallest step). "Better" = more of its own targets green, then more of the other personalities', then closer to its red ones (each red target's shortfall on its own scale). Same seeds for every try (common random numbers), so only the slider changed.
+- **The personality at every table** (its seat moving round, table sizes going round, the rest of the cast shuffled in) — every game teaches the tuner something; the others stay exactly as they are.
+- **Overfitting guard**: the start and the best both play `tuneFreshGames` games on `tuneFreshSeed` (never tuned on); only a best with MORE targets green there is suggested — "closer but still red" isn't enough. Otherwise: "luck, not a real gain — keep what you have".
+- **Honest "can't"**: each target still red says why — "within these ranges" (settled) vs "within this budget" (tries / time) vs "on the edge" (green on the tuning games, red on fresh).
+- **Budget** in `content/ai/arena.json`: tuneGames 12 · tuneTries 20 · tuneSeconds 900 · tuneFreshGames 24 · tuneSeed 7000 · tuneFreshSeed 9000 · tuneStep 0.25 (defaults in code for an older arena.json).
+- **Later (not now)**: several sliders at once (random search / CMA-ES) when one-at-a-time stalls on traits that only work together; tuning goal order; a "stay fun to lose to" guard (win-rate band) as an extra target.
+
 ## Built how (engineering calls — Claude's, logged in Glyphtender TDD)
 - `ai/` module, pure TypeScript, no React, no network — like `table/`. Copied into games with a version stamp.
 - Bot shape unchanged: `(view, seat, rng) → { action, rng }` — a brain is made from (game plug, personality, skill, memory). Beliefs/memory live per bot seat, rebuilt from that seat's events, so a server restart or a rejoin rebuilds them.
