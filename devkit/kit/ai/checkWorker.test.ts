@@ -32,15 +32,15 @@ describe('Run check in a worker', () => {
   it('hands the job over, passes progress on, resolves with the report page and closes the worker', async () => {
     const pair = fakeWorkerPair()
     const asked: unknown[] = []
-    serveCheck(pair.inside, async (job, onProgress) => {
+    serveCheck<{ wordsUrl: string }>(pair.inside, async (job, onProgress, extra) => {
       asked.push(job)
       onProgress(1, 2)
       onProgress(2, 2)
-      return `<p>${job.games}</p>`
+      return `<p>${job.games} ${extra.wordsUrl}</p>`
     })
     const progress: [number, number][] = []
-    const html = await runCheckInWorker(() => pair.page, { games: 6, personalities: [bully], skills, onProgress: (d, t) => progress.push([d, t]) })
-    expect(html).toBe('<p>6</p>')
+    const html = await runCheckInWorker(() => pair.page, { games: 6, personalities: [bully], skills, onProgress: (d, t) => progress.push([d, t]) }, { wordsUrl: 'http://x/words.csv' })
+    expect(html).toBe('<p>6 http://x/words.csv</p>')
     expect(progress).toEqual([[1, 2], [2, 2]])
     expect(asked).toEqual([{ games: 6, personalities: [bully], skills }]) // no onProgress: a function can't be posted
     expect(pair.terminated()).toBe(1)

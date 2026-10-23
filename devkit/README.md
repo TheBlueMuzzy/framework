@@ -233,9 +233,10 @@ import { devKitSettings, runArena } from '../ai/kit/arena'
 import { reportHtml } from '../ai/kit/report'
 serveCheck(self, (job, onProgress) => reportHtml(runArena(arenaPlug, { ...job, targets, settings: devKitSettings(arenaJson, job.games) }, onProgress).report))
 ```
-`kit/ai/checkWorker.ts` is both ends of that worker: `runCheckInWorker(start, options)` on the page (sends the games and the
-tab's personalities + skills, unsaved edits too; passes progress on; closes the worker; rejects with the reason) and
-`serveCheck(self, run)` inside it (`run` may be async, e.g. to fetch a word list first). The AI module's arena
+`kit/ai/checkWorker.ts` is both ends of that worker: `runCheckInWorker(start, options, extra?)` on the page (sends the games
+and the tab's personalities + skills, unsaved edits too, plus any plain `extra` data the worker needs — e.g. the word
+list's full address; passes progress on; closes the worker; rejects with the reason) and `serveCheck(self, (job,
+onProgress, extra) => …)` inside it (it may be async, e.g. to fetch that word list first). The AI module's arena
 (`ai/kit/arena.ts`, F24) plays the games; the Dev Kit still never imports it.
 Sections come from the files' own `_sections` (+ "AI: bio", "AI: watch a game", "AI: Personality Check"; a settings file's
 `_sections` too — its rows are the Tuning tab's `FieldRow`, its `_help._file` line sits at the top); settings no

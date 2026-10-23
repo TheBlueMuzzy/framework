@@ -33,7 +33,11 @@ export function wiringSteps(gameDir) {
   let scripts = {}
   try { scripts = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).scripts ?? {} } catch { /* no package.json: the step shows */ }
   return [
-    { done: /ai-arena\.mjs/.test(scripts['ai:arena'] ?? ''), step: 'package.json "scripts": "ai:arena": "node src/ai/kit/ai-arena.mjs"   (AI-vs-AI games + the Personality Check report on the PC; needs vite, which every web game has)' },
+    {
+      // (a game's own older arena script — Glyphtender's scripts/ai-arena.mjs — doesn't count: it isn't the framework's)
+      done: /src[\\/]ai[\\/]kit[\\/]ai-arena\.mjs/.test(scripts['ai:arena'] ?? ''),
+      step: `package.json "scripts": "ai:arena": "node src/ai/kit/ai-arena.mjs"   (AI-vs-AI games + the Personality Check report on the PC; needs vite, which every web game has)${scripts['ai:arena'] ? `\n       — it says "${scripts['ai:arena']}" now (the game's own arena): switch once src/ai/arenaGame.ts gives the same numbers` : ''}`,
+    },
     {
       done: existsSync(join(gameDir, ARENA_FILE)),
       step: `${ARENA_FILE}: the game's half of the arena — export default async function arenaGame(files) returning { plug, personalities, skills, targets }

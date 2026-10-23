@@ -12,7 +12,8 @@
 //   // src/devkit-game/aiDevKit.ts — on the page
 //   runCheck: (options) => runCheckInWorker(() => new Worker(new URL('./aiCheck.worker.ts', import.meta.url), { type: 'module' }), options)
 //
-// Messages: page → worker { job } (the games, personalities and skills as they are in the tab, unsaved edits too);
+// Messages: page → worker { job, extra } (the games, personalities and skills as they are in the tab, unsaved edits
+// too; extra = anything else the game's worker needs);
 // worker → page { progress: [done, total] } after every game, then { html } or { error }. One check per worker; the
 // page closes the worker when the check is done.
 import type { DevKitAi } from './aiTypes'
@@ -33,8 +34,9 @@ export interface CheckWorkerLike {
 type FromWorker = { progress: [number, number] } | { html: string } | { error: string }
 
 /** On the page: start the worker, send it the job, pass its progress on, and resolve with the report page (HTML).
- *  A check that fails (or a worker that won't start) rejects with the reason in plain English. */
-export function runCheckInWorker(start: () => CheckWorkerLike, { onProgress, ...job }: CheckOptions): Promise<string> {
+ *  `extra` = anything else the game's worker needs, as plain data (e.g. its word list's full address — a worker's own
+ *  address differs from the page's). A check that fails (or a worker that won't start) rejects with the reason. */
+export function runCheckInWorker(start: () => CheckWorkerLike, { onProgress, ...job }: CheckOptions, extra?: unknown): Promise<string> {
   return new Promise((resolve, reject) => {
     let worker: CheckWorkerLike
     try {
@@ -57,17 +59,17 @@ export function runCheckInWorker(start: () => CheckWorkerLike, { onProgress, ...
     })
     worker.addEventListener('error', (event) => finish(() => reject(new Error(event.message || "the check's worker stopped working"))))
     // Plain data only (a personality edited in the tab is plain JSON already)
-    worker.postMessage({ job: JSON.parse(JSON.stringify(job)) as CheckJob })
+    worker.postMessage(JSON.parse(JSON.stringify({ job, extra })))
   })
 }
 
 /** Inside the worker: run each job with the game's own check function (it may be async — e.g. to fetch a word list
- *  first) and send back progress, then the report page or what went wrong. */
-export function serveCheck(scope: CheckWorkerLike, run: (job: CheckJob, onProgress: (done: number, total: number) => void) => string | Promise<string>): void {
+ *  first) and send back progress, then the report page or what went wrong. `extra` = what the page passed along. */
+export function serveCheck<Extra = unknown>(scope: CheckWorkerLike, run: (job: CheckJob, onProgress: (done: number, total: number) => void, extra: Extra) => string | Promise<string>): void {
   scope.addEventListener('message', async (event) => {
-    const { job } = event.data as { job: CheckJob }
+    const { job, extra } = event.data as { job: CheckJob; extra: Extra }
     try {
-      const html = await run(job, (done, total) => scope.postMessage({ progress: [done, total] } satisfies FromWorker))
+      const html = await run(job, (done, total) => scope.postMessage({ progress: [done, total] } satisfies FromWorker), extra)
       scope.postMessage({ html } satisfies FromWorker)
     } catch (e) {
       scope.postMessage({ error: e instanceof Error ? e.message : String(e) } satisfies FromWorker)

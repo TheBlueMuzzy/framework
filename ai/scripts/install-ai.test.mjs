@@ -29,6 +29,11 @@ describe('install-ai', () => {
     expect(JSON.parse(readFileSync(join(game, 'content/ai/arena.json'), 'utf8'))).toMatchObject({ games: 60, minSeats: 2, maxSeats: 4, seed: 1000 })
     expect(lines.join('\n')).toContain('"ai:arena": "node src/ai/kit/ai-arena.mjs"')
     expect(lines.join('\n')).toContain('src/ai/arenaGame.ts')
+    // A game's own older arena script isn't the framework's: the step still shows, naming what it says now
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ scripts: { 'ai:arena': 'node scripts/ai-arena.mjs' } }))
+    const old = []
+    installAi(game, { log: (l) => old.push(l) })
+    expect(old.join('\n')).toContain('it says "node scripts/ai-arena.mjs" now')
     // The game's own numbers are kept; once wired, the steps go quiet
     writeFileSync(join(game, 'content/ai/arena.json'), '{ "games": 12 }')
     writeFileSync(join(game, 'package.json'), JSON.stringify({ scripts: { 'ai:arena': 'node src/ai/kit/ai-arena.mjs' } }))
