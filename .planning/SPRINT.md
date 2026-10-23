@@ -7,7 +7,7 @@ What changes: games can show every player's portrait as a tappable button for em
 Done when: a game passes its seats to the UI kit's PlayerSeats and gets one tappable portrait per seat — tapping yours opens the emote picker, a rival's opens Mute — with the muted mark on a muted rival's chip, in all 5 styles and every size; the emotes module's `<EmoteSeats>` does the wiring in one line; the scratch Glyphtender drops its hand-built SeatEmotes.tsx for it.
 - [x] 🤖 1. PlayerSeats: optional `onSeatTap(seat)` makes each seat a real button (keyboard + screen reader name "Ada — send an emote" / "Bo — mute"), optional per-seat `badge` and `seatProps`; unchanged when not passed — ui-kit/kit/blocks/hud.tsx
 - [x] 🤖 2. `<EmoteSeats seats mine emotes nameFor>` in the emotes module: PlayerSeats + emoteSeatProps + the picker / Mute menu + MutedMark, one line in a game — emotes/kit/ui/EmoteLayer.tsx
-- [ ] 🤖 3. Gallery page (?screen=emotes) shows the seat row in all 5 styles; README, catalog, versions, installer wiring hint — ui-kit/kit/VERSION
+- [x] 🤖 3. Gallery page (?screen=emotes) shows the seat row in all 5 styles; README, catalog, versions, installer wiring hint — ui-kit/kit/VERSION
 - [ ] 🤖 4. Proof on a scratch Glyphtender copy: replace SeatEmotes.tsx with `<EmoteSeats>` — tap yours → picker → bubble, tap a rival → Mute → muted mark; screenshots at every size looked at — emotes/kit/emotes.test.ts
 Check: ui-kit + emotes tests, typecheck, lint, check-ui green (root check:fast); the seat buttons reachable by keyboard and named for screen readers; shots at 390x844, 360x780, 844x390, 768x343, 1100, 1440x900, 1920x1080 looked at by me.
 

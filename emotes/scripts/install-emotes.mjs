@@ -142,15 +142,21 @@ export function wiringSteps(gameDir) {
        export const emoteSave = createSave({ ...EMOTE_SAVE, key: '${saveKey(gameDir)}', version: 1 })
        and list emoteSave in tests/saves/saves.test.ts SAVES (its golden copy ${goldenFile(gameDir)} is already there)`,
   })
+  // <EmoteSeats> (0.3.0, F109) is the seats, the menus and the bubbles in one: it does both steps below
+  const seatRow = inCode(/<EmoteSeats\b/)
+  const easyWay = `THE EASY WAY (both steps in one line, UI kit 0.29.0+):   import { EmoteSeats } from '../emotes/ui/EmoteLayer'
+       <EmoteSeats emotes={emotes} seats={[{ id: seatId, name, avatar }, …]} mine={me} activeId={whoseTurn} />
+       (every seat a button: yours → the phrase picker, a rival's → Mute; the muted mark; the bubbles). By hand instead:`
   if (hasUi) steps.push(
     {
-      done: inCode(/<EmoteBubbles\b/),
-      step: `The bubbles, once, over the table:   import { EmoteBubbles } from '../emotes/ui/EmoteLayer'
+      done: seatRow || inCode(/<EmoteBubbles\b/),
+      step: `The bubbles, once, over the table (or skip this: <EmoteSeats>, the next step's easy way, draws them too):
        <EmoteBubbles emotes={emotes} targetFor={(seat) => \`[data-emote-seat="\${seat}"]\`} nameFor={(seat) => name(seat)} avoid="<your HUD's selector>, [data-emote-seat]" />`,
     },
     {
-      done: inCode(/<EmoteMenu\b/) && inCode(/\bemoteSeatProps\s*\(/),
-      step: `Tappable seats: wrap each seat's chip / portrait in a button with {...emoteSeatProps(seat, seat === me)} that opens
+      done: seatRow || (inCode(/<EmoteMenu\b/) && inCode(/\bemoteSeatProps\s*\(/)),
+      step: `Tappable seats — ${easyWay}
+       wrap each seat's chip / portrait in a button with {...emoteSeatProps(seat, seat === me)} that opens
        <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={\`[data-emote-seat="\${tapped}"]\`} name={…} onClose={…} />
        (your seat → the phrase picker; an opponent's → Mute emotes). Close it when Pause opens. A muted seat's chip: badge={<MutedMark />}.`,
     },
@@ -176,6 +182,20 @@ export function wiringSteps(gameDir) {
     },
   )
   return steps
+}
+
+// The UI kit this module's ui/ needs (EmoteSeats draws the kit's tappable PlayerSeats, 0.29.0)
+export const UI_KIT_NEEDED = '0.29.0'
+/** The game's UI kit version when it's older than UI_KIT_NEEDED, else '' (its VERSION file's text: "0.28.1 (framework …)"). */
+export function uiKitTooOld(versionText) {
+  const have = /^\s*(\d+)\.(\d+)\.(\d+)/.exec(versionText ?? '')
+  if (!have) return ''
+  const need = UI_KIT_NEEDED.split('.').map(Number)
+  for (let i = 0; i < 3; i++) {
+    const h = Number(have[i + 1])
+    if (h !== need[i]) return h < need[i] ? have.slice(1).join('.') : ''
+  }
+  return ''
 }
 
 function kitVersion() {
@@ -206,6 +226,7 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
   }
   const hasUiKit = existsSync(join(game, 'src/ui/kit/VERSION'))
   const hasSaves = existsSync(join(game, 'src/saves/VERSION'))
+  const oldKit = hasUiKit && uiKitTooOld(readText(join(game, 'src/ui/kit/VERSION')))
   const ships = new Map(listFiles(join(emotesDir, 'kit'))
     .filter((f) => !isTest(f) && f !== 'VERSION')
     .filter((f) => hasUiKit || !f.startsWith(UI_FOLDER))
@@ -221,6 +242,7 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
   removed.forEach((f) => log(`  removed ${f}`))
   if (!changed.length && !removed.length) log('  already up to date')
   if (!hasUiKit) log(`  skipped ${UI_FOLDER} (the bubbles and the picker — the game has no UI kit; draw them yourself from onEmote)`)
+  if (oldKit) log(`  ⚠ the game's UI kit is ${oldKit} — ${UI_FOLDER} needs ${UI_KIT_NEEDED}+ (<EmoteSeats> uses its tappable PlayerSeats): update it too — node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit <game-folder>`)
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
   if (words.broken) log(`  ⚠ ${TEXT} isn't valid JSON — add the phrases' words yourself ("emotes": { "hello": "Hello!", … })`)
   else if (words.notObject) log(`  ⚠ ${TEXT} "emotes" isn't a list of words (it should be { "hello": "Hello!", … }) — left as it is; fix it, then run the installer again`)
