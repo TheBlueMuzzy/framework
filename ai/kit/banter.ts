@@ -57,7 +57,7 @@ export const DEFAULT_BANTER_SETTINGS: Required<BanterSettings> = {
   alwaysAllowed: ['won', 'lost'],
   presets: { won: ['goodGame'], lost: ['wellPlayed'], rivalBigMove: ['wow'] },
   delay: { min: 0.6, max: 1.6 },
-  tableGap: 1.5,
+  tableGap: 3, // (longer than a bubble shows — emotes' bubble.showMs 2.5 s — so bots never have two bubbles up at once)
 }
 
 /** content/ai/banter.json → the settings. A bad value → one warning (plain words) + the default for it. Unlisted
