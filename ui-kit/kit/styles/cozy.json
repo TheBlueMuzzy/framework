@@ -31,6 +31,7 @@
   "depth-success": "var(--depth-1)",
   "border-width": "2px",
   "glow": "none",
+  "glow-danger": "none",
   "panel-texture": "radial-gradient(rgb(160 120 70 / 0.07) 1px, transparent 1.5px) 0 0 / 6px 6px",
   "text-case": "none",
   "motion-fast": "180ms",

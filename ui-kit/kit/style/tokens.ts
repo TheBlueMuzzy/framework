@@ -55,6 +55,7 @@ export const otherTokens = {
 export const optionalTokens = {
   'glow': 'none', // a CSS filter on lit things (primary buttons, on-switches, bars, focus), e.g. drop-shadow(…)
   'panel-texture': 'none',
+  'glow-danger': 'none', // the same, in the danger colour, on danger buttons (0.27.0) — Neon: − glows red as + glows cyan
   'depth-success': 'var(--depth-1)', // a success card's shadow (Card tone="success", 0.27.0) — Neon: its glow in green
 } as const
 

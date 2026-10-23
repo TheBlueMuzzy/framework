@@ -31,6 +31,7 @@
   "depth-success": "0 0 18px rgb(57 255 122 / 0.3), inset 0 0 22px rgb(57 255 122 / 0.1)",
   "border-width": "1px",
   "glow": "drop-shadow(0 0 6px rgb(31 229 255 / 0.7))",
+  "glow-danger": "drop-shadow(0 0 6px rgb(255 77 109 / 0.8)) drop-shadow(0 0 3px rgb(255 77 109 / 0.6))",
   "panel-texture": "repeating-linear-gradient(0deg, rgb(31 229 255 / 0.035) 0 1px, transparent 1px 4px)",
   "text-case": "uppercase",
   "motion-fast": "90ms",

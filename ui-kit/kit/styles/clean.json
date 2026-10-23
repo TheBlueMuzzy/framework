@@ -31,6 +31,7 @@
   "depth-success": "var(--depth-1)",
   "border-width": "1px",
   "glow": "none",
+  "glow-danger": "none",
   "panel-texture": "none",
   "text-case": "none",
   "motion-fast": "120ms",

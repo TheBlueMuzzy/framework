@@ -21,7 +21,7 @@ Done when: the 5 items below are in the UI kit in all 5 styles, contrast-tested,
 - [x] 🤖 1. A `success` colour (+ `on-success`) in all 5 styles, contrast-tested; Neon's reads as a clear green next to its cyan — ui-kit/kit/styles/
 - [x] 🤖 2. Card `tone="success"`: border + the style's glow in that colour, the card's size unchanged (no thicker border — cards are fixed size) — ui-kit/kit/controls/Card.tsx
 - [x] 🤖 3. Modal `headerAction` prop, passed to its MenuHeader's action slot (Goops builds Screen + Panel + MenuHeader by hand today to get it; named `headerAction`, not Goops' `action`, because Modal already has `actions` = its bottom buttons) — ui-kit/kit/blocks/dialogs.tsx
-- [ ] 🤖 4. Neon `danger` button with a red glow matching `primary`'s, so − and + look like a pair — ui-kit/kit/controls/Button.tsx
+- [x] 🤖 4. Neon `danger` button with a red glow matching `primary`'s, so − and + look like a pair — ui-kit/kit/controls/Button.tsx
 - [ ] 🤖 5. MenuHeader title beside an action: shrinks a step before wrapping, never breaks inside a word ("UPGRADES" + a compact "RESPEC" at 360/390 portrait rendered "UPGRAD / ES") — ui-kit/kit/blocks/MenuHeader.tsx
 - [ ] 🤖 6. Card `locked` (Muzzy 2026-10-23): greyed out, can't be tapped or focused into an action, announced as "locked" to screen readers, in all 5 styles — whether a game hides locked things or shows them greyed stays the game's call — ui-kit/kit/controls/Card.tsx
 - [ ] 🤖 7. Kit version, changelog, README catalog lines; screenshots of the items in all 5 styles at 360x780, 390x844, 1440x900; then a message to Goops' session with the install command and exact usage — ui-kit/kit/VERSION
