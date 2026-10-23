@@ -122,6 +122,19 @@ describe('the whole Personality Check on Draw to 10', () => {
     expect(reportHtml(report)).toContain('Personality Check — Draw to 10')
   })
 
+  // F24 review: at the lowest (or highest) skill the ladder's own seats share the main skill — they must never count
+  it('ladder games never count in feel, tell-apart or wins, even when the main skill is the ladder\'s low end', () => {
+    const at = (ladderGames: number) => runArena(arenaPlug, request({ mainSkill: 'Apprentice', settings: { games: 12, ladderGames } }))
+    const withLadder = at(10)
+    const without = at(0)
+    expect(withLadder.report.wins).toEqual(without.report.wins)
+    expect(withLadder.report.tell).toEqual(without.report.tell)
+    expect(withLadder.report.feel).toEqual(without.report.feel)
+    expect(withLadder.mixedResults).toHaveLength(12)
+    expect(withLadder.results).toHaveLength(32) // + 10 ladder games for each of the 2 personalities
+    expect(Object.keys(withLadder.report.ladder).length).toBeGreaterThan(0)
+  })
+
   it('the same seed gives the same report; another seed another', () => {
     expect(runArena(arenaPlug, request()).report).toEqual(report)
     expect(runArena(arenaPlug, request({ settings: { games: 80, ladderGames: 20, seed: 4242 } })).report).not.toEqual(report)

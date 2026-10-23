@@ -81,16 +81,16 @@ try {
 } catch (e) {
   stop(e.message)
 }
-const { games, results, report } = result
+const { games, results, mixedResults, report } = result
 console.log(`\n${games.length} games in ${((Date.now() - started) / 1000).toFixed(1)} s`)
 const t = arena.decisionTimes(games)
 console.log(`decision time: median ${t.median.toFixed(1)} ms · 90% ${t.p90.toFixed(1)} ms · slowest ${t.slowest.toFixed(1)} ms (phone ≈ ×4)`)
 
-// Each personality's meter averages at the main skill
+// Each personality's meter averages at the main skill, mixed tables only (the ladder games never count here)
 const mainSkill = arena.arenaPlan(request).main.id
 const columns = game.columns ?? game.plug.tellMeters ?? [...new Set(results.flatMap((g) => g.seats.flatMap((s) => Object.keys(s.meters))))]
 const ids = Object.keys(report.wins.overall)
-const table = [['personality', 'won', ...columns], ...ids.map((id) => [id, report.wins.overall[id].toFixed(2), ...columns.map((m) => (averages(results, m, mainSkill).get(id) ?? 0).toFixed(2))])]
+const table = [['personality', 'won', ...columns], ...ids.map((id) => [id, report.wins.overall[id].toFixed(2), ...columns.map((m) => (averages(mixedResults, m, mainSkill).get(id) ?? 0).toFixed(2))])]
 const widths = table[0].map((_, c) => Math.max(...table.map((row) => String(row[c]).length)))
 console.log('\n' + table.map((row) => row.map((cell, c) => (c ? String(cell).padStart(widths[c] + 2) : String(cell).padEnd(widths[c]))).join('')).join('\n'))
 

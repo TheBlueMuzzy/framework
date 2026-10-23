@@ -216,6 +216,9 @@ export interface ReportOptions {
   skillOrder: string[]
   /** Feel, tell-apart and wins look only at this skill's seats (the ladder looks at every game). */
   mainSkill?: string
+  /** The skill-ladder games, kept apart: then `results` are the mixed tables only, and only the ladder sees these
+   *  (F24 review: a ladder seat at the main skill — the low end of a 2-skill game — was counted as a mixed seat). */
+  ladderResults?: GameResult[]
   subtitle: string
   /** The meters the tell-apart grid looks at. Default: every meter the games measured. */
   tellMeters?: string[]
@@ -232,7 +235,7 @@ export function checkReport(name: string, results: GameResult[], firstNotes: str
   const feel = checkFeelTargets(results, targets.personalities, mainSkill)
   const tell = tellApart(results, tellMeters, mainSkill)
   const wins = winRates(results, mainSkill)
-  const ladder = skillLadder(results, options.skillOrder)
+  const ladder = skillLadder(options.ladderResults ? [...results, ...options.ladderResults] : results, options.skillOrder)
   const names = Object.keys(wins.overall)
   const band = (v: number, min?: number, max?: number) => (min === undefined || v >= min) && (max === undefined || v <= max)
   const pct = (v: number) => `${Math.round(v * 100)}%`
@@ -298,7 +301,7 @@ export function runArena<State, Action, Setup, View>(
   plug: ArenaPlug<State, Action, Setup, View>,
   request: ArenaRequest,
   onProgress?: (done: number, total: number) => void,
-): { games: ArenaGame<State, Action>[]; results: GameResult[]; report: CheckReport } {
+): { games: ArenaGame<State, Action>[]; results: GameResult[]; mixedResults: GameResult[]; report: CheckReport } {
   const { tables, main, settings } = arenaPlan(request)
   const games: ArenaGame<State, Action>[] = []
   for (const t of tables) {
@@ -306,20 +309,24 @@ export function runArena<State, Action, Setup, View>(
     onProgress?.(games.length, tables.length)
   }
   const results = toResults(plug, games)
+  // feel, tell-apart and wins look at the mixed tables only; the ladder games only feed the skill ladder
+  const mixedResults = results.filter((_, i) => tables[i].kind === 'mixed')
+  const ladderResults = results.filter((_, i) => tables[i].kind !== 'mixed')
   const mixed = tables.filter((t) => t.kind === 'mixed')
   const ladder = tables.length - mixed.length
   const sizes = [...new Set(mixed.map((t) => t.seats.length))].sort((a, b) => a - b)
   const players = sizes.length > 1 ? `${sizes[0]}–${sizes[sizes.length - 1]} players` : `${sizes[0] ?? 0} players`
   const subtitle = `${mixed.length} mixed games at ${main.id} (${players})${ladder ? ` + ${ladder} skill-ladder games` : ''} · seed ${settings.seed}`
-  const report = checkReport(plug.name, results, games[0]?.notes ?? [], request.targets, {
+  const report = checkReport(plug.name, mixedResults, games[0]?.notes ?? [], request.targets, {
     skillOrder: request.skills.map((s) => s.id),
     mainSkill: main.id,
+    ladderResults,
     subtitle,
     tellMeters: plug.tellMeters,
     checks: plug.checks,
     notes: settings.notesInReport,
   })
-  return { games, results, report }
+  return { games, results, mixedResults, report }
 }
 
 /** The Dev Kit's Run check plays a smaller batch: the ladder only joins in from `devKitLadderFrom` games asked for. */
