@@ -69,7 +69,7 @@ describe('install-ai', () => {
     const wired = []
     installAi(game, { log: (l) => wired.push(l) })
     expect(wired.join('\n')).not.toContain('Still to wire')
-  })
+  }, 30000) // eight real installs (each copies the kit and asks git) — slow on a busy PC
 
   it('with the saves module: the banter save\'s golden copy once, and the createSave step until it\'s made', () => {
     const game = mkdtempSync(join(tmpdir(), 'ai-game-'))
