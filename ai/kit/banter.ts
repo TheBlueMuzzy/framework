@@ -12,9 +12,17 @@ import { nextRandom } from './random'
 /** A moment's name: a short code name the game picks ("won", "gotTangled"). Its lines are banter.<personality>.<moment>. */
 export type Moment = string
 
+/** A moment with who caused it: `by` = the seat whose move it was (0.5.0 — so a PERSON's good move can always get an
+ *  answer: content/ai/banter.json "answerPeople"). A plain name = cause unknown (never counts as a person's move). */
+export interface MomentBy {
+  moment: Moment
+  by?: number
+}
+
 /** The game's moment map (on its plug): what this event means to this seat — one moment, a few (most important
- *  first: the bot says at most one line per change), or nothing. Seat = the Table's seat number. */
-export type MomentMap<Event> = (event: Event, seat: number) => Moment | readonly Moment[] | null | undefined
+ *  first: the bot says at most one line per change), or nothing. Seat = the Table's seat number. A moment may be a
+ *  plain name or `{ moment, by }` (who caused it — 0.5.0; plain names still work). */
+export type MomentMap<Event> = (event: Event, seat: number) => Moment | MomentBy | readonly (Moment | MomentBy)[] | null | undefined
 
 /** The moment names most games have, with what each means — a starting list for content/ai/banter.json and the Dev
  *  Kit's labels. A game adds its own (any code name), and leaves out the ones it doesn't have. */
@@ -49,6 +57,31 @@ export interface BanterSettings {
    *  for the gap and answers a beat later — or lets its line go when that would be more than delay.max + tableGap
    *  after its moment. 0 = off. */
   tableGap?: number
+  /** The player's "Bot chatter" setting (Settings → Off · Some · Lots): the numbers for Some and Lots. Off = the bots
+   *  say nothing at all. chanceTimes multiplies every moment's chance (capped at 1); cooldownTurns, when given,
+   *  shortens the file's (never lengthens it). Some = ×1 and no cooldown change = the file's own numbers. */
+  levels?: Partial<Record<'some' | 'lots', ChatterNumbers>>
+  /** Moments a PERSON's move always gets one bot's answer to (like Sparky in MTG Arena): when the moment's cause is a
+   *  person's seat (the moment map says `{ moment, by }`), the chattiest bot with a line answers — no chance roll, no
+   *  cooldown; still muted, paused, the table gap and Off. */
+  answerPeople?: string[]
+}
+
+/** One level's numbers (content/ai/banter.json "levels"). */
+export interface ChatterNumbers {
+  /** × every moment's chance (capped at 1). */
+  chanceTimes: number
+  /** cooldownTurns at this level, when shorter than the file's (left out = the file's). */
+  cooldownTurns?: number
+}
+
+/** The player's "Bot chatter" setting. */
+export type ChatterLevel = 'off' | 'some' | 'lots'
+export const CHATTER_LEVELS: readonly ChatterLevel[] = ['off', 'some', 'lots']
+/** A Settings value ("Off", "Some", "lots"…) → the level, or null for anything else. */
+export function chatterLevelOf(value: unknown): ChatterLevel | null {
+  const v = typeof value === 'string' ? value.trim().toLowerCase() : ''
+  return (CHATTER_LEVELS as readonly string[]).includes(v) ? (v as ChatterLevel) : null
 }
 
 export const DEFAULT_BANTER_SETTINGS: Required<BanterSettings> = {
@@ -58,6 +91,20 @@ export const DEFAULT_BANTER_SETTINGS: Required<BanterSettings> = {
   presets: { won: ['goodGame'], lost: ['wellPlayed'], rivalBigMove: ['wow'] },
   delay: { min: 0.6, max: 1.6 },
   tableGap: 3, // (longer than a bubble shows — emotes' bubble.showMs 2.5 s — so bots never have two bubbles up at once)
+  levels: { some: { chanceTimes: 1 }, lots: { chanceTimes: 2, cooldownTurns: 1 } },
+  answerPeople: ['rivalBigMove'],
+}
+
+/** The settings at a chatter level: null for Off (say nothing); Some / Lots scale each chance (capped at 1) and may
+ *  change the cooldown. */
+export function settingsAtLevel(settings: BanterSettings, level: ChatterLevel): BanterSettings | null {
+  if (level === 'off') return null
+  const numbers = settings.levels?.[level] ?? DEFAULT_BANTER_SETTINGS.levels[level] ?? { chanceTimes: 1 }
+  const chance: Record<string, number> = {}
+  for (const moment of Object.keys(settings.chance)) chance[moment] = Math.min(1, settings.chance[moment] * numbers.chanceTimes)
+  // (a level's cooldown only ever shortens it: Lots is never quieter than the file's own numbers)
+  const cooldownTurns = numbers.cooldownTurns === undefined ? settings.cooldownTurns : Math.min(numbers.cooldownTurns, settings.cooldownTurns)
+  return { ...settings, chance, cooldownTurns }
 }
 
 /** content/ai/banter.json → the settings. A bad value → one warning (plain words) + the default for it. Unlisted
@@ -113,6 +160,26 @@ export function readBanterSettings(json: unknown, warn: (message: string) => voi
     if (isNumber(file.tableGap) && file.tableGap >= 0 && file.tableGap <= 60) out.tableGap = file.tableGap
     else warn(`"tableGap" is ${JSON.stringify(file.tableGap)} — seconds, 0–60; using ${d.tableGap}.`)
   }
+  if (file.levels !== undefined) {
+    if (!isObject(file.levels)) warn('"levels" must be { "some": { "chanceTimes": n }, "lots": { "chanceTimes": n, "cooldownTurns": n } } — using the defaults.')
+    else {
+      const levels = { ...d.levels }
+      for (const level of ['some', 'lots'] as const) {
+        const given = file.levels[level]
+        if (given === undefined) continue
+        const g = (isObject(given) ? given : {}) as { chanceTimes?: unknown; cooldownTurns?: unknown }
+        const okTimes = isObject(given) && isNumber(g.chanceTimes) && g.chanceTimes >= 0 && g.chanceTimes <= 10
+        const okCool = g.cooldownTurns === undefined || (isNumber(g.cooldownTurns) && g.cooldownTurns >= 0)
+        if (okTimes && okCool) levels[level] = { chanceTimes: g.chanceTimes as number, ...(g.cooldownTurns === undefined ? {} : { cooldownTurns: Math.round(g.cooldownTurns as number) }) }
+        else warn(`"levels.${level}" must be { "chanceTimes": 0–10, "cooldownTurns": 0 or more (optional) } — using the default.`)
+      }
+      out.levels = levels
+    }
+  }
+  if (file.answerPeople !== undefined) {
+    if (Array.isArray(file.answerPeople) && file.answerPeople.every((m) => typeof m === 'string')) out.answerPeople = file.answerPeople.filter((m) => MOMENT_NAME.test(m))
+    else warn('"answerPeople" must be a list of moment names — using the defaults.')
+  }
   return out
 }
 
@@ -127,12 +194,22 @@ function sees(event: unknown, seat: number): boolean {
 /** What one change means to one seat: every moment the plug names for its events, in order, no repeats. Events the
  *  seat may not see (a Table event's `seen`) are skipped — a bot never comments on a secret. */
 export function momentsFor<Event>(map: MomentMap<Event>, events: readonly Event[], seat: number): Moment[] {
-  const out: Moment[] = []
+  return momentsWithCause(map, events, seat).map((m) => m.moment)
+}
+
+/** momentsFor, with who caused each (`by`, when the moment map said). The first cause named for a moment wins. */
+export function momentsWithCause<Event>(map: MomentMap<Event>, events: readonly Event[], seat: number): MomentBy[] {
+  const out: MomentBy[] = []
   for (const event of events) {
     if (!sees(event, seat)) continue
     const named = map(event, seat)
-    const list = named === null || named === undefined ? [] : typeof named === 'string' ? [named] : named
-    for (const moment of list) if (typeof moment === 'string' && MOMENT_NAME.test(moment) && !out.includes(moment)) out.push(moment)
+    const list: readonly (Moment | MomentBy)[] = named === null || named === undefined ? [] : Array.isArray(named) ? named : [named as Moment | MomentBy]
+    for (const item of list) {
+      const moment = typeof item === 'string' ? item : item && typeof item === 'object' ? item.moment : undefined
+      if (typeof moment !== 'string' || !MOMENT_NAME.test(moment) || out.some((m) => m.moment === moment)) continue
+      const by = typeof item === 'object' && Number.isInteger(item.by) ? item.by : undefined
+      out.push(by === undefined ? { moment } : { moment, by })
+    }
   }
   return out
 }
@@ -182,10 +259,17 @@ export function maybeSay(
   // (own keys only: a moment named "constructor" or "toString" would otherwise read a built-in → NaN → always speak)
   const chance = own(settings.chance, moment) && typeof settings.chance[moment] === 'number' ? settings.chance[moment] : 0
   if (roll.value >= chance * (chattiness / 100)) return { ...quiet, rng: roll.rng }
-  // A line it hasn't said lately: the ones never said, else the one said longest ago.
+  return freshLine(lines, turn, memory, roll.rng)
+}
+
+/** A line it hasn't said lately (the ones never said, else the one said longest ago), remembered as said on this
+ *  turn. No chance roll, no cooldown: maybeSay uses it after its roll, and a bot answering a person's good move
+ *  (answerPeople) uses it straight. */
+export function freshLine(lines: readonly string[], turn: number, memory: BanterMemory, rng: number): { line: string | null; memory: BanterMemory; rng: number } {
+  if (!lines.length) return { line: null, memory, rng }
   const fresh = lines.filter((l) => !memory.said.includes(l))
   const pickFrom = fresh.length ? fresh : [memory.said.find((l) => lines.includes(l))!]
-  const pick = nextRandom(roll.rng)
+  const pick = nextRandom(rng)
   const line = pickFrom[Math.floor(pick.value * pickFrom.length)]
   return { line, memory: { lastSpokeTurn: turn, said: [...memory.said.filter((l) => l !== line), line].slice(-50) }, rng: pick.rng }
 }

@@ -113,5 +113,21 @@ describe('AI checks — banter (F22)', () => {
     await check(quiet.t)
     expect(byName(quiet.results, BANTER_CHECKS.lines)).toMatchObject({ ok: true, detail: 'no personality talks (chattiness 0)' })
     expect(byName(quiet.results, BANTER_CHECKS.wired)).toMatchObject({ skipped: true })
+    expect(byName(quiet.results, BANTER_CHECKS.setting)).toMatchObject({ skipped: true })
+  })
+
+  it('the Bot chatter setting (0.5.0): a row nothing passes on fails; passed on → pass; no row → a warning', async () => {
+    const row = { id: 'botChatter', type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'], default: 'Some' }
+    const files = { 'content/ai/personalities.json': people, 'content/ai/banter.json': settings, 'content/ui/settings.json': { tabs: [{ id: 'game', label: 'Game', rows: [row] }] } }
+    const dead = tester({ files, code: [...wired, { path: 'src/ui/App.tsx', text: '// applyBanterSetting(banter, values) one day' }] })
+    await check(dead.t)
+    expect(byName(dead.results, BANTER_CHECKS.setting)).toMatchObject({ ok: false })
+    expect(byName(dead.results, BANTER_CHECKS.setting).problems[0]).toContain('nothing passes it to the bots')
+    const read = tester({ files, code: [...wired, { path: 'src/ui/App.tsx', text: 'onChange={(values) => applyBanterSetting(banter, values)}' }] })
+    await check(read.t)
+    expect(byName(read.results, BANTER_CHECKS.setting)).toMatchObject({ ok: true, detail: 'content/ui/settings.json botChatter · src/ui/App.tsx' })
+    const none = tester({ files: { ...files, 'content/ui/settings.json': { tabs: [] } }, code: wired })
+    await check(none.t)
+    expect(byName(none.results, BANTER_CHECKS.setting)).toMatchObject({ ok: true, warning: true })
   })
 })

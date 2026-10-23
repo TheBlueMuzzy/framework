@@ -168,7 +168,8 @@ async function checkCredits(t) {
 // link rows (the kit opens them — but a placeholder example.com address fails) · info rows with their own text (except
 // version, whose text must come from the game: info={{ version }}) · the Audio rows once the game passes the values to
 // the audio module (applyAudioSettings / useAudioSettings / readAudioSettings) · the crashes switch once the game
-// passes it on (applyCrashSetting / setOn) · the emotes switch once the game passes it on (applyEmoteSetting / setHideAll).
+// passes it on (applyCrashSetting / setOn) · the emotes switch once the game passes it on (applyEmoteSetting / setHideAll) · the AI's "Bot chatter" once
+// the game passes it on (applyBanterSetting / setChatter).
 export const SETTINGS_FILE = 'content/ui/settings.json'
 export const SETTINGS_CHECK = 'every Settings row that\'s switched on is read by the game'
 export const KIT_ROWS = ['textSize', 'reduceMotion']
@@ -180,6 +181,9 @@ const CRASH_WIRING = /\b(applyCrashSetting|setOn)\s*\(/
 // The emotes module's switch (framework F107): "Hide everyone's emotes", read inside src/emotes once the game passes it on
 export const EMOTE_ROWS = ['hideEmotes']
 const EMOTE_WIRING = /\b(applyEmoteSetting|setHideAll)\s*\(/
+// The AI module's "Bot chatter" (framework F22, ai 0.5.0): read inside src/ai/kit once the game passes it on
+export const BANTER_ROWS = ['botChatter']
+const BANTER_WIRING = /\b(applyBanterSetting|setChatter)\s*\(/
 const VALUE_TYPES = ['slider', 'toggle', 'selector', 'stepper']
 
 /** The rows a player can see: switched on ("on" isn't false) and not headings — [{ id, type, label, tab, url, default }]. */
@@ -344,6 +348,7 @@ export function settingsProblems(schema, code) {
   const audioWired = code.some((f) => AUDIO_WIRING.test(stripComments(f.text)))
   const crashWired = code.some((f) => CRASH_WIRING.test(stripComments(f.text)))
   const emoteWired = code.some((f) => EMOTE_WIRING.test(stripComments(f.text)))
+  const banterWired = code.some((f) => BANTER_WIRING.test(stripComments(f.text)))
   const dead = []
   const placeholder = []
   let read = 0
@@ -359,6 +364,7 @@ export function settingsProblems(schema, code) {
       || (audioWired && AUDIO_ROWS.includes(row.id))
       || (crashWired && CRASH_ROWS.includes(row.id))
       || (emoteWired && EMOTE_ROWS.includes(row.id))
+      || (banterWired && BANTER_ROWS.includes(row.id))
     if (handled) { kit++; continue }
     const reads = row.type === 'info' ? fileFeedsInfo : fileReadsRow // an info row's text only comes in through info={{ … }}
     if (code.some((f) => reads(f.text, row.id))) read++

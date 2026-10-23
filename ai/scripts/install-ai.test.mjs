@@ -53,7 +53,37 @@ describe('install-ai', () => {
     writeFileSync(join(game, 'src/game/bots.ts'), 'const banter = botBanter<GameEvent>(options)')
     const talking = []
     installAi(game, { log: (l) => talking.push(l) })
-    expect(talking.join('\n')).not.toContain('Still to wire')
+    expect(talking.join('\n')).not.toContain('the bots talk (')
+    // 0.5.0: then the "Bot chatter" Settings row and its wiring, until they're there
+    expect(talking.join('\n')).toContain('BANTER_SETTINGS_ROWS')
+    expect(talking.join('\n')).toContain('applyBanterSetting(banter, values)')
+    mkdirSync(join(game, 'content/ui'), { recursive: true })
+    writeFileSync(join(game, 'content/ui/settings.json'), JSON.stringify({ tabs: [{ id: 'game', label: 'Game', rows: [{ id: 'botChatter', type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'], default: 'Some' }] }] }))
+    writeFileSync(join(game, 'src/game/settings.ts'), 'applyBanterSetting(banter, values)')
+    const wired = []
+    installAi(game, { log: (l) => wired.push(l) })
+    expect(wired.join('\n')).not.toContain('Still to wire')
+  })
+
+  it('with the saves module: the banter save\'s golden copy once, and the createSave step until it\'s made', () => {
+    const game = mkdtempSync(join(tmpdir(), 'ai-game-'))
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ name: 'mygame', scripts: {} }))
+    mkdirSync(join(game, 'src/saves'), { recursive: true })
+    writeFileSync(join(game, 'src/saves/VERSION'), '0.9.0')
+    mkdirSync(join(game, 'content/ai'), { recursive: true })
+    writeFileSync(join(game, 'content/ai/personalities.json'), JSON.stringify({ personalities: [{ id: 'Bully', chattiness: 60 }] }))
+    const lines = []
+    installAi(game, { log: (l) => lines.push(l) })
+    const golden = JSON.parse(readFileSync(join(game, 'tests/saves/mygame_banter-v1.json'), 'utf8'))
+    expect(golden).toMatchObject({ stored: { save: 'mygame:banter', version: 1, data: { chatter: 'lots' } }, expect: { chatter: 'lots' } })
+    expect(lines.join('\n')).toContain("createSave({ ...BANTER_SAVE, key: 'mygame:banter', version: 1 })")
+    writeFileSync(join(game, 'tests/saves/mygame_banter-v1.json'), '{ "mine": true }')
+    mkdirSync(join(game, 'src/game'), { recursive: true })
+    writeFileSync(join(game, 'src/game/saves.ts'), 'export const banterSave = createSave({ ...BANTER_SAVE, key: "mygame:banter", version: 1 })')
+    const again = []
+    installAi(game, { log: (l) => again.push(l) })
+    expect(readFileSync(join(game, 'tests/saves/mygame_banter-v1.json'), 'utf8')).toBe('{ "mine": true }') // the game's now
+    expect(again.join('\n')).not.toContain('BANTER_SAVE')
   })
 
   it('a dry run changes nothing', () => {

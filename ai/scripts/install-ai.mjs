@@ -10,7 +10,7 @@
 // src/ai/kit/types.ts, and its arena file (src/ai/arenaGame.ts) against src/ai/kit/arena.ts, in src/ai/.
 import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { dirname, join, relative, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
@@ -48,6 +48,48 @@ function codeCalls(gameDir, re) {
   return files.some((f) => re.test(readFileSync(join(gameDir, f), 'utf8')))
 }
 
+/** The game's name (package.json "name", else its folder) — the save key's start ("goops:banter"). */
+export function gameName(gameDir) {
+  try {
+    const name = JSON.parse(readFileSync(join(gameDir, 'package.json'), 'utf8')).name
+    if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name)) return name
+  } catch { /* no package.json: use the folder name */ }
+  return basename(resolve(gameDir)).toLowerCase().replace(/[^a-z0-9-]/g, '-')
+}
+export const saveKey = (gameDir) => `${gameName(gameDir)}:banter`
+export const goldenFile = (gameDir) => `tests/saves/${saveKey(gameDir).replace(/[^A-Za-z0-9._-]/g, '_')}-v1.json`
+const hasSaves = (gameDir) => existsSync(join(gameDir, 'src/saves/VERSION'))
+
+/** The golden save's text for this game ("Bot chatter" set to Lots). */
+export function goldenText(gameDir) {
+  const key = saveKey(gameDir)
+  const data = { chatter: 'lots' }
+  return JSON.stringify({ about: `The AI module's banter save (${key}), version 1: "Bot chatter" set to Lots. Written by the AI installer.`, stored: { save: key, version: 1, savedAt: '2026-10-23T00:00:00.000Z', data }, expect: data }, null, 2) + '\n'
+}
+
+// "Bot chatter" in Settings (Off · Some · Lots), kept by the saves module — the steps still missing
+function chatterSteps(gameDir) {
+  let rows = []
+  try { rows = JSON.parse(readFileSync(join(gameDir, 'content/ui/settings.json'), 'utf8')).tabs.flatMap((t) => t.rows ?? []) } catch { /* no Settings file */ }
+  const steps = [
+    {
+      done: rows.some((r) => r?.id === 'botChatter' && r.on !== false) || codeCalls(gameDir, /\bBANTER_SETTINGS_ROWS\b/),
+      step: 'Settings: paste BANTER_SETTINGS_ROWS (src/ai/kit/settingsRow.ts — "Bot chatter": Off · Some · Lots, default Some) into a tab\'s "rows" in content/ui/settings.json (under the Emotes heading)',
+    },
+    {
+      done: codeCalls(gameDir, /\b(applyBanterSetting|setChatter)\s*\(/),
+      step: 'The setting reaches the bots: applyBanterSetting(banter, loadSettings(settingsJson)) when botBanter is made, and applyBanterSetting(banter, values) in <Settings onChange> (live)',
+    },
+  ]
+  if (hasSaves(gameDir)) steps.push({
+    done: codeCalls(gameDir, /createSave\s*\(\s*\{\s*\.\.\.BANTER_SAVE/),
+    step: `Kept with the saves module:   import { createSave } from '../saves'   import { BANTER_SAVE } from '../ai/kit/save'
+       export const banterSave = createSave({ ...BANTER_SAVE, key: '${saveKey(gameDir)}', version: 1 })   then botBanter({ …, save: banterSave })
+       and list banterSave in tests/saves/saves.test.ts SAVES (its golden copy ${goldenFile(gameDir)} is already there)`,
+  })
+  return steps.map((s) => ({ ...s, banter: true }))
+}
+
 // The wiring, as { done, step } — so only the missing steps are printed (like the crashes installer's)
 export function wiringSteps(gameDir) {
   let scripts = {}
@@ -67,6 +109,8 @@ export function wiringSteps(gameDir) {
        and banter.hear(events) after every change — online in party/server.ts with say: room.emote (the AI README's "Banter"; needs the emotes module)`,
       banter: true,
     },
+    // Bot chatter (0.5.0, Muzzy 2026-10-23: "this is usually a menu setting") — once a personality talks
+    ...(chattyPersonalities(gameDir).length ? chatterSteps(gameDir) : []),
     {
       done: existsSync(join(gameDir, ARENA_FILE)),
       step: `${ARENA_FILE}: the game's half of the arena — export default async function arenaGame(files) returning { plug, personalities, skills, targets }
@@ -103,7 +147,9 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   const present = listFiles(target).filter((f) => f !== 'VERSION')
   const changed = [...ships.keys()].filter((f) => !present.includes(f) || !readFileSync(ships.get(f)).equals(readFileSync(join(target, f))))
   const removed = present.filter((f) => !ships.has(f))
-  const starter = Object.keys(STARTERS).filter((f) => !existsSync(join(game, f)))
+  // (the banter save's golden copy, once — only when the game has the saves module and a personality talks)
+  const golden = hasSaves(game) && chattyPersonalities(game).length ? [goldenFile(game)] : []
+  const starter = [...Object.keys(STARTERS), ...golden].filter((f) => !existsSync(join(game, f)))
   const { version, commit } = kitVersion()
   log(`AI module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
@@ -120,7 +166,8 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   writeFileSync(join(target, 'VERSION'), `${version} (framework ${commit})\n`)
   for (const f of starter) {
     mkdirSync(dirname(join(game, f)), { recursive: true })
-    copyFileSync(join(aiDir, STARTERS[f]), join(game, f))
+    if (STARTERS[f]) copyFileSync(join(aiDir, STARTERS[f]), join(game, f))
+    else writeFileSync(join(game, f), goldenText(game))
   }
   const missing = wiringSteps(game).filter((w) => !w.done)
   if (missing.length) {

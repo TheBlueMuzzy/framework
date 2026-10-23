@@ -14,7 +14,8 @@
 //   7. Choose — keep the moves within skill.spread of the best, at most skill.topN, pick one weighted by score.
 //   8. Explain— a Decision with a plain-English note (Dev Kit, bug reports — never players).
 // It only ever sees the view it's given. All its randomness comes from the rng it's given (same game → same moves).
-import { linesFor, maybeSay, momentsFor, quietMemory, type BanterLines, type BanterMemory, type BanterSettings, type MomentMap } from './banter'
+import { linesFor, maybeSay, momentsFor, quietMemory, settingsAtLevel, type BanterLines, type BanterMemory, type BanterSettings, type ChatterLevel, type MomentMap } from './banter'
+import { BANTER_SAVE, type BanterSaveLike } from './save'
 import { botWait, paceNow, type PaceClock } from './pace'
 import { nextRandom, randomBetween, shuffle, weightedPick } from './random'
 import type { Context, Decision, GamePlug, Mode, Personality, Range, Skill } from './types'
@@ -301,9 +302,17 @@ export interface BotBanterOptions<Event> {
   seed: number
   /** The clock it waits on. Default: the bots' pace clock — the game's rules clock once it called setPaceClock. */
   clock?: PaceClock
+  /** The player's "Bot chatter" (Settings → Off · Some · Lots) to start at — when there's no save. Default 'some'. */
+  chatter?: ChatterLevel
+  /** Where "Bot chatter" is kept: a saves-module save made with BANTER_SAVE (save.ts). With one, it starts at the
+   *  saved level and setChatter keeps the new one. */
+  save?: BanterSaveLike
 }
 
 export interface BotBanter {
+  /** The player changed "Bot chatter" (applyBanterSetting calls it): live — Off drops any waiting line at once. */
+  setChatter(level: ChatterLevel): void
+  chatter(): ChatterLevel
   /** One change happened at the table: these are its events (all of them — each seat only hears what it may see). */
   hear(events: readonly unknown[]): void
   /** Stop: every waiting line is dropped (the game ended and was left, the screen closed). */
@@ -316,7 +325,9 @@ const paceClockNow = (): PaceClock => ({ now: paceNow, after: botWait })
 
 export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
   const clock = options.clock ?? paceClockNow()
-  const settingsNow = () => (typeof options.settings === 'function' ? options.settings() : options.settings)
+  let level: ChatterLevel = options.save ? BANTER_SAVE.clean(options.save.load()).chatter : options.chatter ?? 'some'
+  // The file's numbers at the player's level (null = Off: nothing is said)
+  const settingsNow = () => settingsAtLevel(typeof options.settings === 'function' ? options.settings() : options.settings, level)
   const memories = new Map<number, BanterMemory>()
   const rngs = new Map<number, number>()
   const waiting = new Map<number, { id: string; cancel: () => void }>()
@@ -330,6 +341,7 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
     waiting.delete(seat)
     if (!options.bots().some((bot) => bot.seat === seat)) return // (a person took the seat back while the line waited)
     const settings = settingsNow()
+    if (!settings) return // (chatter went Off while it waited)
     const gapMs = (settings.tableGap ?? 0) * 1000
     const left = lastSpokeAt === null ? 0 : gapMs - (clock.now() - lastSpokeAt)
     if (gapMs > 0 && left > 0) {
@@ -342,10 +354,23 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
     lastSpokeAt = clock.now()
   }
 
+  const dropWaiting = () => {
+    for (const w of waiting.values()) w.cancel()
+    waiting.clear()
+  }
+
   return {
+    setChatter(next) {
+      if (next === level) return
+      level = next
+      if (level === 'off') dropWaiting()
+      options.save?.save({ chatter: level })
+    },
+    chatter: () => level,
     hear(events) {
       turn += 1
       const settings = settingsNow()
+      if (!settings) return // Off: the bots say nothing at all
       const lines = options.lines()
       for (const bot of options.bots()) {
         const said = memories.get(bot.seat) ?? quietMemory()
@@ -366,10 +391,7 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
         }
       }
     },
-    stop() {
-      for (const w of waiting.values()) w.cancel()
-      waiting.clear()
-    },
+    stop: dropWaiting,
     waiting: () => Object.fromEntries([...waiting].map(([seat, w]) => [seat, w.id])),
   }
 }

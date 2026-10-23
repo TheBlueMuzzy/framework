@@ -37,6 +37,7 @@ export const BANTER_CHECKS = {
   lines: 'every chatty personality has lines',
   hardCoded: 'no banter line is hard-coded',
   wired: 'bots talk through the emote module',
+  setting: 'the Bot chatter setting is read',
 }
 
 /** Comments out, so a how-to comment never counts (strings stay). */
@@ -120,6 +121,24 @@ async function checkBanter(t) {
       else if (!hears.length) problems.push(`${makes.join(', ')} make botBanter, but nothing calls its hear(events) after a change — the bots never hear a moment.`)
       if (problems.length) t.fail(name, problems, 'const banter = botBanter({ moments: plug.moments, bots, settings: readBanterSettings(banterJson), lines: () => text.banter, say: (seat, id) => emotes.say(seatIdOf(seat), id).ok, seed }) — then banter.hear(events) after every change (online: in party/server.ts with say: room.emote). The AI README\'s "Banter".')
       else t.pass(name, `${makes[0]} · hear in ${hears[0]}`)
+    }
+  }
+
+  // 4. (0.5.0) the player's "Bot chatter" (Settings → Off · Some · Lots) reaches the bots — a row that's shown must do
+  // something; no row = a warning (Muzzy 2026-10-23: "this is usually a menu setting")
+  {
+    const name = BANTER_CHECKS.setting
+    if (!chatty.length) t.skip(name, 'no personality talks (chattiness 0)')
+    else {
+      const rows = (t.json('content/ui/settings.json')?.tabs ?? []).flatMap((tab) => (Array.isArray(tab?.rows) ? tab.rows : []))
+      const row = rows.find((r) => r?.id === 'botChatter' && r.on !== false)
+      const code = [...t.gameCode(), ...(t.exists('party') ? t.files({ dirs: ['party'] }).filter((f) => !/\.test\./.test(f.path)) : [])]
+        .filter((f) => !f.path.startsWith(`${t.rel}/`))
+      const applied = code.filter((f) => /\b(applyBanterSetting|setChatter)\s*\(/.test(withoutComments(f.text))).map((f) => f.path)
+      const fix = 'Paste BANTER_SETTINGS_ROWS (src/ai/kit/settingsRow.ts — "Bot chatter": Off · Some · Lots) into a tab\'s rows in content/ui/settings.json, then applyBanterSetting(banter, loadSettings(settingsJson)) when botBanter is made and applyBanterSetting(banter, values) in <Settings onChange>.'
+      if (row && !applied.length) t.fail(name, ['Settings shows "Bot chatter", but nothing passes it to the bots (applyBanterSetting(banter, values) or banter.setChatter(level)) — it would do nothing.'], fix)
+      else if (!row) t.warn(name, ['No "Bot chatter" row in content/ui/settings.json — players can\'t turn the bots\' talk down or off (they talk at content/ai/banter.json\'s own numbers).'], fix)
+      else t.pass(name, `content/ui/settings.json botChatter · ${[...new Set(applied)].join(', ')}`)
     }
   }
 }

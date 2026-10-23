@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.28.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.28.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -121,6 +121,8 @@ gallery's `npm run shoot` uses the same one.
   off each other: with no clear side, a second one stacks a step further out — found in the Glyphtender proof) and
   `useShownPopover`. The Settings check counts `hideEmotes` as read once the game calls `applyEmoteSetting` /
   `setHideAll` (like the crashes switch). Look tests: `kit/blocks/emoteLook.test.tsx`.
+  0.28.1 (F22, ai 0.5.0): the Settings check counts the AI module's "Bot chatter" selector (`botChatter`: Off · Some ·
+  Lots) as read once the game passes it on (`applyBanterSetting` / `setChatter`), like the emotes switch.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
