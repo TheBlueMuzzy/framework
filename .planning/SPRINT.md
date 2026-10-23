@@ -8,7 +8,7 @@ Done when: after an arena run, a game's designer sees which situations predict w
 why: balance and AI goals come from what actually wins, not guesses
 - [x] 🤖 1. Research: how studios mine self-play for "what wins" (card-game win-rate sites, chess engine evaluation terms, board-game AI papers) — which measures, at which moments, how many games are enough, how to say it in plain words → .planning/design/ai.md
 - [x] 🤖 2. Situations: a game names numbers to sample (an optional `situations(state, seat)` on the arena plug, read at set turns); the arena records them per seat per game — ai/kit/arena.ts
-- [ ] 🤖 3. The maths: each situation's win rate by low / mid / high and how strongly it predicts the win, at each sampled turn; too few games → left out, said so — ai/kit/check.ts
+- [x] 🤖 3. The maths: each situation's win rate by low / mid / high and how strongly it predicts the win, at each sampled turn; too few games → left out, said so — ai/kit/wins.ts (new: check.ts was already four checks long)
 - [ ] 🤖 4. The top 5 in plain sentences on the report page and in the Dev Kit's Check panel — ai/kit/report.ts
 - [ ] 🤖 5. Proof on a scratch Glyphtender copy (.scratch/glyphtender-f25): name its situations, run, read the results and check they make sense for that game; screenshots of the report + Check panel looked at — ai/kit/arena.test.ts
 Check: ai + devkit tests, typecheck, lint green (root check:fast); the scratch run's top 5 read by me and sane for Glyphtender; screenshots looked at.
