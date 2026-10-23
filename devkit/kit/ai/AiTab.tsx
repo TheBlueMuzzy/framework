@@ -492,7 +492,7 @@ function BanterLines({ banter, who, chattiness, lines, saved, onChange }: Banter
   const line = (key: string) => (
     <div key={key} className="ai-line">
       {lines[who]?.[key] !== saved[who]?.[key] && <span className="tt-dot" title="Changed, not saved yet" />}
-      <input className="ai-line-text" value={lines[who]?.[key] ?? ''} aria-label={`${who} ${key} line`} onChange={(e) => onChange(key, e.target.value)} />
+      <input className="ai-text ai-line-text" value={lines[who]?.[key] ?? ''} aria-label={`${who} ${key} line`} onChange={(e) => onChange(key, e.target.value)} />
       <button className="tt-reset" onClick={() => onChange(key, undefined)} aria-label={`Remove ${who} ${key}`} title="Remove this line">✕</button>
     </div>
   )
