@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.12.1 — 2026-10-23
+
+The AI check now says what wins: after a batch of bot-vs-bot games, the report lists the five situations that most predict winning in plain sentences ("Players with Magic lead 4 or more after turn 3 win 55% — vs 14% with -3 or less"). A new auto-tuner suggests personality slider values that turn red feel targets green, checks them on fresh games before suggesting, and says honestly when it can't — nothing changes until the designer applies and saves.
+
+### New
+- AI 0.6.0 — "What wins?": a game names the numbers to watch per player (score lead, pieces trapped…); the arena reads them after turns 3 and 5 and at the end, splits players into low / mid / high, and ranks how strongly each predicts the win. Too-small groups are left out and listed, and a number that simply is the final score is named apart as "the win itself".
+- AI 0.6.0 — a game can count its own turns, so a setup phase (like a draft) isn't counted as turns.
+- AI 0.7.0 — the auto-tuner: `npm run ai:tune -- --personality <id>` tries one personality's sliders inside their ranges, keeps what hits more of its feel targets, re-checks the best on at least 30 fresh games, and writes a suggestion page (old → new per slider, each target now → suggested). Results only just over a line are flagged to confirm with more games.
+- Dev Kit 0.25.0 — the Check panel shows the "What wins?" sentences.
+- Dev Kit 0.26.0 — "Suggest sliders" in the AI tab runs the tuner in the background with progress; Apply puts the values in as unsaved edits (Save / Undo unsaved as usual).
+- The AI installer adds `ai:tune` and the new settings to a game's `content/ai/arena.json`, and lists the optional wiring only while it's missing.
+
+### Fixed
+- A small run of equal numbers before a big one keeps its own low / mid / high group.
+- Number ranges on the report read "-78 to -21" everywhere.
+- A name a game gives a measure is shown safely on the report page.
+- A tuning run stops when its Dev Kit panel closes instead of playing on unseen.
+
+### Known issues
+- In Glyphtender's test runs the tuner found no setting that reliably turned a red target green — results there swing a lot from game to game; 30 games a try is the useful minimum (about 40 minutes per personality on a PC).
+- The tuner moves one slider at a time, so it can't find two traits that only help together — planned (several sliders at once).
+
 ## v0.12.0 — 2026-10-23
 
 Players can now talk across the table without typing: tap your own seat, pick a preset phrase ("Well played!"), and it shows in a speech bubble by your seat on every screen, locally and online. Computer players speak through the same bubbles at the game's big moments, always answer a player's good move, and a "Bot chatter" setting (Off · Some · Lots) turns them down. A new personality check plays many bot-vs-bot games and shows whether each personality really plays like itself.
