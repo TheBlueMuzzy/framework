@@ -3,6 +3,7 @@
 // while cooling; the mute menu flips; the announcer speaks at most once a second.
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { useState } from 'react'
 import { EmotePicker, LiveAnnouncer, MuteMenu, MutedMark, SpeechBubble } from './emotes'
 
 afterEach(() => { cleanup(); vi.useRealTimers() })
@@ -58,6 +59,25 @@ describe('EmotePicker', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.pointerDown(document.body)
     expect(onClose).toHaveBeenCalledTimes(2)
+  })
+  it('the focus goes in on open and back to what opened it on close (F109 review: it dropped to <body>)', () => {
+    function Host() {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>Ada</button>
+          {open && <EmotePicker anchor={{ x: 10, y: 10 }} phrases={phrases} onPick={() => {}} onClose={() => setOpen(false)} />}
+        </>
+      )
+    }
+    render(<Host />)
+    const seat = screen.getByRole('button', { name: 'Ada' })
+    seat.focus()
+    fireEvent.click(seat)
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Hello!', hidden: true }))
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    expect(document.activeElement).toBe(seat)
   })
 })
 

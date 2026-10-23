@@ -4,7 +4,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createEmotes } from '../emotes'
-import { EmoteBubbles, EmoteMenu } from './EmoteLayer'
+import { EmoteBubbles, EmoteMenu, EmoteSeats } from './EmoteLayer'
 import template from '../../templates/content/emotes.json'
 import words from '../../templates/content/words.json'
 
@@ -59,5 +59,88 @@ describe('EmoteMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mute emotes', hidden: true }))
     expect(emotes.isMuted('bo')).toBe(true)
     expect(screen.getByRole('button', { name: 'Unmute emotes', hidden: true })).toBeTruthy()
+  })
+})
+
+describe('EmoteSeats (0.3.0, F109: the seat row in one line)', () => {
+  const seats = [{ id: 'me', name: 'Ada' }, { id: 'bo', name: 'Bo' }]
+  it('every seat is a button named for screen readers, tagged for check:framework; the words can be swapped', () => {
+    const emotes = make()
+    const { rerender } = render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    const mine = screen.getByRole('button', { name: 'Ada — send an emote' })
+    const rival = screen.getByRole('button', { name: 'Bo — mute or unmute' })
+    expect(mine.getAttribute('data-emote-seat')).toBe('me')
+    expect(mine.hasAttribute('data-emote-mine')).toBe(true)
+    expect(rival.hasAttribute('data-emote-mine')).toBe(false)
+    expect(rival.getAttribute('aria-expanded')).toBe('false')
+    rerender(<EmoteSeats emotes={emotes} seats={seats} mine={['me']} words={{ mine: '{name}: dire quelque chose' }} />)
+    expect(screen.getByRole('button', { name: 'Ada: dire quelque chose' })).toBeTruthy()
+  })
+  it('tap mine → the picker → a pick shows in my bubble (said once: "Ada: Thanks!")', () => {
+    const emotes = make()
+    render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Ada — send an emote' }))
+    expect(screen.getByRole('dialog', { name: 'Emotes', hidden: true })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Ada — send an emote' }).getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: 'Thanks!', hidden: true }))
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull() // closeAfterSend
+    expect(bubbles()).toEqual(['Thanks!'])
+    expect(screen.getByRole('status').textContent).toBe('Ada: Thanks!')
+  })
+  it('tap a rival → Mute → the muted mark on their portrait, and their next emote never shows; tap again closes', () => {
+    const emotes = make()
+    render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    const rival = () => screen.getByRole('button', { name: 'Bo — mute or unmute' })
+    expect(screen.queryByRole('img', { name: 'Emotes muted' })).toBeNull()
+    fireEvent.click(rival())
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Mute emotes', hidden: true }))
+    expect(emotes.isMuted('bo')).toBe(true)
+    const mark = screen.getByRole('img', { name: 'Emotes muted' })
+    expect(rival().contains(mark)).toBe(true)
+    expect(mark.closest('.kit-seat-badge')).toBeTruthy()
+    act(() => { emotes.receive({ seat: 'bo', id: 'wow' }) })
+    expect(bubbles()).toEqual([])
+    fireEvent.click(rival())
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
+    fireEvent.click(rival()) // the seat's own toggle
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+  })
+  it('Escape on a rival\'s Mute menu puts the focus back on that seat (keyboard players keep their place)', () => {
+    const emotes = make()
+    render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    const rival = screen.getByRole('button', { name: 'Bo — mute or unmute' })
+    rival.focus()
+    fireEvent.click(rival)
+    expect(document.activeElement?.textContent).toBe('Mute emotes')
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    expect(document.activeElement).toBe(rival)
+  })
+  it('a seat that leaves closes its menu for good: back at the table, its menu stays shut until tapped again', () => {
+    const emotes = make()
+    const { rerender } = render(<EmoteSeats emotes={emotes} seats={seats} mine="me" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Bo — mute or unmute' }))
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
+    rerender(<EmoteSeats emotes={emotes} seats={[seats[0]]} mine="me" />)
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    rerender(<EmoteSeats emotes={emotes} seats={[seats[1], seats[0]]} mine="me" />) // back, and the order changed
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+  })
+  it('a seat id with a quote still finds its seat', () => {
+    const emotes = createEmotes({ settings: template, words: words.emotes, mine: ['a"b'], warn: () => {} })
+    render(<EmoteSeats emotes={emotes} seats={[{ id: 'a"b', name: 'Ada' }]} mine={'a"b'} />)
+    act(() => { emotes.sendEmote('a"b', 'hello') })
+    expect(bubbles()).toEqual(['Hello!'])
+    expect(document.querySelector('[data-emote-seat="a\\"b"]')).toBeTruthy()
+  })
+  it('a relayed seat id with a line break (any string up to 64 from the room) neither crashes the row nor breaks the selector', () => {
+    const odd = 'a\nb\\c'
+    const emotes = createEmotes({ settings: template, words: words.emotes, mine: ['me'], warn: () => {} })
+    render(<EmoteSeats emotes={emotes} seats={[{ id: 'me', name: 'Ada' }, { id: odd, name: 'Bo' }]} mine="me" />)
+    act(() => { emotes.receive({ seat: odd, id: 'wow' }) })
+    expect(bubbles()).toEqual(['Wow!'])
+    fireEvent.click(screen.getByRole('button', { name: 'Bo — mute or unmute' }))
+    expect(screen.getByRole('dialog', { name: 'Bo', hidden: true })).toBeTruthy()
   })
 })

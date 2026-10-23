@@ -1,7 +1,9 @@
 // HUD logic: English place names, and the +N float-up appearing when a number changes.
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
-import { Bar, Counter, Hud, HudText, ordinal, Pause, PlayerChip, Score, TurnBanner } from './hud'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { Bar, Counter, Hud, HudText, ordinal, Pause, PlayerChip, PlayerSeats, Score, TurnBanner } from './hud'
+import { Row, Stack } from '../layout'
+import { Avatar, Text } from '../controls'
 import { toMilliseconds } from './motion'
 
 afterEach(() => { cleanup(); document.documentElement.removeAttribute('data-reduce-motion') })
@@ -250,5 +252,64 @@ describe('Pause', () => {
   it('its box wears kit-pause (its side-by-side layout on a phone on its side, blocks.css — 0.7.0)', () => {
     render(<Pause onQuit={() => {}} />)
     expect(document.querySelector('.kit-modal')!.classList.contains('kit-pause')).toBe(true)
+  })
+})
+
+describe('PlayerSeats (0.29.0, F109: the tappable seat row)', () => {
+  const players = [{ id: 'a', name: 'Ada', score: 3 }, { id: 'b', name: 'Bo' }]
+  // What PlayerSeats drew before 0.29.0, kept here to prove a game that passes nothing new sees exactly the same
+  function OldSeats({ players: list, activeId }: { players: { id: string; name: string; avatar?: string; score?: number }[]; activeId?: string }) {
+    return (
+      <Row gap="s">
+        {list.map((p) => (
+          <Row key={p.id} gap="s" className="kit-hud-chip" data-state={p.id === activeId ? 'active' : undefined}>
+            <Avatar name={p.name} src={p.avatar} active={p.id === activeId} />
+            <Stack gap="xs">
+              <Text kind="label">{p.name}</Text>
+              {p.score !== undefined && <Text kind="caption">{p.score}</Text>}
+            </Stack>
+          </Row>
+        ))}
+      </Row>
+    )
+  }
+  it('without onSeatTap / badge / seatProps it draws exactly as before', () => {
+    const before = render(<OldSeats players={players} activeId="b" />).container.innerHTML
+    cleanup()
+    const now = render(<PlayerSeats players={players} activeId="b" />).container.innerHTML
+    expect(now).toBe(before)
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+  })
+  it('with onSeatTap each seat is a real button named for screen readers, and a tap hands back its seat', () => {
+    const tapped: string[] = []
+    render(<PlayerSeats players={[{ ...players[0], tapLabel: 'Ada — send an emote', seatProps: { 'data-emote-seat': 'a', 'data-emote-mine': '' } }, players[1]]}
+      onSeatTap={(s) => tapped.push(s.id)} />)
+    const ada = screen.getByRole('button', { name: 'Ada — send an emote' })
+    const bo = screen.getByRole('button', { name: 'Bo' }) // no tapLabel → its name
+    expect(ada.getAttribute('type')).toBe('button')
+    expect(ada.getAttribute('data-emote-seat')).toBe('a')
+    expect(ada.hasAttribute('data-emote-mine')).toBe(true)
+    expect(bo.hasAttribute('data-emote-mine')).toBe(false)
+    ada.focus() // a real button: Tab reaches it (no tabindex tricks)
+    expect(document.activeElement).toBe(ada)
+    fireEvent.click(ada)
+    fireEvent.click(bo)
+    expect(tapped).toEqual(['a', 'b'])
+  })
+  it('a badge sits on the portrait (inside its box), not beside it: the chip keeps the same parts with or without it', () => {
+    const { container, rerender } = render(<PlayerSeats players={players} onSeatTap={() => {}} />)
+    const parts = () => [...container.querySelectorAll('.kit-hud-chip')].map((chip) => [...chip.children].map((c) => c.className).join(' | '))
+    const without = parts()
+    expect(container.querySelector('.kit-seat-badge')).toBeNull()
+    rerender(<PlayerSeats players={[players[0], { ...players[1], badge: <span role="img" aria-label="Emotes muted">x</span> }]} onSeatTap={() => {}} />)
+    expect(parts()).toEqual(without)
+    const badge = container.querySelector('.kit-seat-badge')!
+    expect(badge.parentElement!.classList.contains('kit-seat-avatar')).toBe(true)
+    expect(screen.getByRole('img', { name: 'Emotes muted' })).toBeTruthy()
+  })
+  it('showNames={false}: portraits only, each still named', () => {
+    render(<PlayerSeats players={players} showNames={false} onSeatTap={() => {}} />)
+    expect(document.querySelector('.kit-text')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Ada' })).toBeTruthy()
   })
 })

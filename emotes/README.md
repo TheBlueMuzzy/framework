@@ -9,7 +9,8 @@ not told), a spam limit holds on the device AND on the room's server, and a Sett
 - Design: `../.planning/design/emotes.md` (research: Hearthstone, MTG Arena, Clash Royale, Marvel Snap, LoR, BGA, Rocket League).
 - Framework sprint 26: F107 = layer 1. Layer 2: a sound per phrase, desktop keys 1–7, the server not sending a muted
   sender's emotes, reply phrases. Layer 3: animated / unlockable emotes. Never: free text chat.
-- Kit **0.2.0** (0.2.0, F22: a bot's `say()` while online is refused — `server` — bots there speak from the room's server, `room.emote`; the banter lines are read at every lookup — `banter` may be the object or a function, `() => text.banter`). No packages. Pure TypeScript core; the UI parts come from the UI kit (0.28.0+); online from Rooms (0.12.0+).
+- Kit **0.4.0** (0.4.0, F110: ships `settings-rows.json` — tells the UI kit's (0.30.0+) Settings check that `hideEmotes` is passed on by `applyEmoteSetting` / `setHideAll`; installed with the kit, not to be edited in the game · 0.3.0, F109: `<EmoteSeats>` — the tappable seat row in one line; its `ui/` needs UI kit **0.29.0+**, and
+  the installer warns when the game's is older · 0.2.0, F22: a bot's `say()` while online is refused — `server` — bots there speak from the room's server, `room.emote`; the banter lines are read at every lookup — `banter` may be the object or a function, `() => text.banter`). No packages. Pure TypeScript core; the UI parts come from the UI kit (0.28.0+); online from Rooms (0.12.0+).
 
 ## What a game gets
 | File (in `src/emotes/`) | Does |
@@ -19,7 +20,7 @@ not told), a spam limit holds on the device AND on the room's server, and a Sett
 | `config.ts` | `content/emotes.json`. A bad value → one warning + the default. |
 | `save.ts` | `EMOTE_SAVE` — the saves-module options for the switch + this match's mutes: `createSave({ ...EMOTE_SAVE, key: '<game>:emotes', version: 1 })`. |
 | `settingsRow.ts` | `EMOTE_SETTINGS_ROWS`: "Hide everyone's emotes" (off), for the UI kit's Settings; `applyEmoteSetting(emotes, values)` passes it on; `emoteSettingsRows(config)` starts it at `mutedByDefault`. |
-| `ui/EmoteLayer.tsx` | `<EmoteBubbles>` (one bubble per seat, pointing at it, replaced in place, said once to screen readers) · `<EmoteMenu>` (your seat → the phrase picker with its cooldown ring; an opponent's → Mute / Unmute) · `useEmoteState` (muted seats, for `<MutedMark />` on a chip) · `emoteSeatProps(seat, mine)`. **Only installed when the game has the UI kit.** |
+| `ui/EmoteLayer.tsx` | **`<EmoteSeats>`** (0.3.0: the tappable seat row — all of the below in one line) · `<EmoteBubbles>` (one bubble per seat, pointing at it, replaced in place, said once to screen readers) · `<EmoteMenu>` (your seat → the phrase picker with its cooldown ring; an opponent's → Mute / Unmute) · `useEmoteState` (muted seats, for `<MutedMark />` on a chip) · `emoteSeatProps(seat, mine)`. **Only installed when the game has the UI kit.** |
 | `conformance.mjs` | Its check:framework part (below). |
 
 Given once (then the game's own): `content/emotes.json`. Added if missing: the starter words in `content/text/en.json`
@@ -51,12 +52,26 @@ A typical wiring (React, online-capable):
 const emotes = useMemo(() => createEmotes({ settings: emotesJson, words: text.emotes, save: emoteSave, mine: [me],
   match: roomCode ?? '', send: online ? (seat, id) => room.sendEmote(id) : undefined }), [me, roomCode])
 useRoom(code, who, { onEmote: (m) => emotes.receive(m) })
-<EmoteBubbles emotes={emotes} targetFor={(s) => `[data-emote-seat="${s}"]`} nameFor={nameOf} avoid=".hud, [data-emote-seat]" />
-<button {...emoteSeatProps(seat, seat === me)} onClick={() => setTapped(seat)}><PlayerChip … badge={isMuted(seat) ? <MutedMark /> : undefined} /></button>
-{tapped && <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={`[data-emote-seat="${tapped}"]`} name={nameOf(tapped)} onClose={() => setTapped(null)} />}
+// THE EASY WAY (0.3.0, F109) — the seat row, its menus, the muted marks and the bubbles, in one line:
+<EmoteSeats emotes={emotes} seats={players.map((p) => ({ id: p.seatId, name: p.name, avatar: p.art }))} mine={me} activeId={turn} />
 ```
+`<EmoteSeats>` = the UI kit's `PlayerSeats` (0.29.0+) with every seat a real button (Tab reaches it, the focus ring
+shows; read out "Ada — send an emote" / "Bo — mute or unmute"): yours opens the picker, a rival's Mute; a muted rival's
+portrait wears the `MutedMark` on its corner (the chip never changes size); the bubbles point at the seats. Options:
+`mine` (one id or a hot seat's several) · `activeId` (whose turn) · `showNames={false}` (portraits only) · `placement`
+(`'bottom'` for a row along the top) · `avoid` (the HUD's selector; the seats are always added) · `nameFor` ·
+`bubbles={false}` (the game draws its own `<EmoteBubbles>`) · `words` (`emoteSeatWords`: the button names + "Emotes
+muted", from the game's text to translate). Escape, a tap outside or the seat again closes the menu.
+
+By hand instead (a game whose seats aren't a row — chips placed round a board):
+```tsx
+<EmoteBubbles emotes={emotes} targetFor={seatSelector} nameFor={nameOf} avoid=".hud, [data-emote-seat]" />
+<button {...emoteSeatProps(seat, seat === me)} onClick={() => setTapped(seat)}><PlayerChip … badge={isMuted(seat) ? <MutedMark /> : undefined} /></button>
+{tapped && <EmoteMenu emotes={emotes} seat={tapped} mine={tapped === me} anchor={seatSelector(tapped)} name={nameOf(tapped)} onClose={() => setTapped(null)} />}
+```
+`seatSelector(seat)` (from `ui/EmoteLayer`) builds `[data-emote-seat="…"]` with the id escaped — a room can relay any seat id, and a raw one with a quote or line break breaks the lookup.
 Clocks: the bubble's timer is on the looks clock (it fades even while paused); Pause closes the picker (the game's
-job); bots speak on the rules clock (F22).
+job — with `<EmoteSeats>`, tapping Pause is a tap outside, so it closes); bots speak on the rules clock (F22).
 
 ## What a game must provide (MODULE-CONTRACTS.md "Emotes") — check:framework checks each
 - every phrase has words (each id in `content/emotes.json` has `emotes.<id>` in `content/text/en.json`);

@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.28.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.30.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -34,7 +34,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 |---|---|
 | the game's UI code keeps the kit's rules (check-ui) | `check-ui.mjs` (with the game's own `check:ui` arguments) finds raw colours, px, fonts, inline styles, stray positioning |
 | check-ui runs in check:fast | the game has no `check:ui` script |
-| every Settings row that's switched on is read by the game | (0.20.0) a row in `content/ui/settings.json` shows in Settings but nothing in the game's own code reads its id (`values.tips`, `const { tips } = values`, `id === 'resetTips'`, `info={{ version }}`, `useSetting('tips')` — 0.20.1: the id as a plain word elsewhere doesn't count) — or a link row opens a placeholder address. Skipped: headings, rows with `"on": false`, text size + reduce motion (the kit applies them), links, info rows with their own text, and the Audio rows once the game passes the values to `applyAudioSettings` |
+| every Settings row that's switched on is read by the game | (0.20.0) a row in `content/ui/settings.json` shows in Settings but nothing in the game's own code reads its id (`values.tips`, `const { tips } = values`, `id === 'resetTips'`, `info={{ version }}`, `useSetting('tips')` — 0.20.1: the id as a plain word elsewhere doesn't count) — or a link row opens a placeholder address. Skipped: headings, rows with `"on": false`, text size + reduce motion (the kit applies them), links, info rows with their own text, the Audio rows once the game passes the values to `applyAudioSettings`, and (0.30.0) a module's own rows once the game passes them on — each module that adds a row ships `settings-rows.json` (below) |
 | nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog |
 | nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
@@ -123,6 +123,24 @@ gallery's `npm run shoot` uses the same one.
   `setHideAll` (like the crashes switch). Look tests: `kit/blocks/emoteLook.test.tsx`.
   0.28.1 (F22, ai 0.5.0): the Settings check counts the AI module's "Bot chatter" selector (`botChatter`: Off · Some ·
   Lots) as read once the game passes it on (`applyBanterSetting` / `setChatter`), like the emotes switch.
+  0.29.0 (F109, the tappable seat row — `kit/blocks/hud.tsx`, gallery `?screen=emotes`): `PlayerSeats` takes
+  `onSeatTap(seat)` — each seat becomes a real button (Tab reaches it, the focus ring shows, read out by the seat's
+  `tapLabel`, e.g. "Ada — send an emote", else its name) — plus per-seat `badge` (a small mark ON the portrait's corner,
+  so the chip is the same size with or without it: the emotes module's `MutedMark`), `seatProps` (attributes for the
+  seat: `data-emote-seat`, `aria-expanded`…), `color` (the portrait's), and `showNames={false}` (portraits only, still
+  named). Without them it draws exactly as before (tested). The emotes module's `<EmoteSeats>` (0.3.0) wires it.
+  0.30.0 (F110, module Settings rows register themselves — `kit/conformance.mjs`): a module that adds a Settings row
+  ships `settings-rows.json` in its `kit/`, copied into the game beside its VERSION (`src/crashes/`, `src/emotes/`,
+  `src/ai/kit/`…): `{ "rows": [{ "id": "hideEmotes", "readBy": ["\\b(applyEmoteSetting|setHideAll)\\s*\\("],
+  "hint": "pass it to the emotes module: …" }] }` — `readBy` = regex sources; a match in the game's own code (comments
+  stripped) counts the row as passed on; `hint` = the failure's "what to do". The Settings check reads every installed
+  one (src/*/ and src/*/kit/ with a VERSION; never node_modules), so a new module with a row needs no UI kit change. A
+  dead module row's line names the module and its hint. The module's own folder never counts as the game's code (its
+  settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
+  a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
+  copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.31.0.
+  The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

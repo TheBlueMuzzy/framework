@@ -14,6 +14,8 @@ describe('install-ai', () => {
     installAi(game, { log: quiet })
     expect(existsSync(join(game, 'src/ai/kit/brain.ts'))).toBe(true)
     expect(existsSync(join(game, 'src/ai/kit/random.ts'))).toBe(true)
+    expect(existsSync(join(game, 'src/ai/kit/settings-rows.json'))).toBe(true) // the UI kit's Settings check reads it (F110)
+    expect(existsSync(join(game, 'src/ai/kit/settingsRows.test.mjs'))).toBe(false)
     expect(existsSync(join(game, 'src/ai/kit/brain.test.ts'))).toBe(false)
     expect(existsSync(join(game, 'src/ai/kit/old.ts'))).toBe(false)
     expect(readFileSync(join(game, 'src/ai/kit/VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+ \(framework /)

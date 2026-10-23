@@ -28,6 +28,7 @@ describe('install-crashes', () => {
     expect(existsSync(join(root, 'src/crashes/capture.ts'))).toBe(true)
     expect(existsSync(join(root, 'src/crashes/crash-report.mjs'))).toBe(true)
     expect(existsSync(join(root, 'src/crashes/conformance.mjs'))).toBe(true)
+    expect(existsSync(join(root, 'src/crashes/settings-rows.json'))).toBe(true) // the UI kit's Settings check reads it (F110)
     expect(existsSync(join(root, 'src/crashes/ui/CrashScreen.tsx'))).toBe(true)
     expect(result.changed.some((f) => /\.test\./.test(f))).toBe(false)
     expect(readFileSync(join(root, 'src/crashes/VERSION'), 'utf8')).toMatch(/^0\.\d+\.\d+ \(framework /)

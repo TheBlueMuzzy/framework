@@ -108,8 +108,15 @@ function PointedPanel({ anchor, label, onClose, placement = 'top', avoid, classN
 
   // Escape or a tap outside closes it (a tap on the seat it came from too: that's the seat's own toggle); the focus
   // goes into it on open and back where it was on close
-  useEffect(() => {
+  // The focus goes back in a LAYOUT effect's cleanup: that runs before React takes the panel out of the page. A plain
+  // effect's cleanup runs after, when the focus has already dropped to <body> — so it never came back to the seat
+  // (F109 review: Escape on a seat's Mute menu lost the focus).
+  useLayoutEffect(() => {
     const before = document.activeElement as HTMLElement | null
+    const panel = bubble.current
+    return () => { if (before?.isConnected && panel?.contains(document.activeElement)) before.focus({ preventScroll: true }) }
+  }, [])
+  useEffect(() => {
     const panel = bubble.current
     panel?.querySelector<HTMLElement>('button:not([aria-disabled="true"]), button')?.focus({ preventScroll: true })
     const key = (event: KeyboardEvent) => { if (event.key === 'Escape') { event.stopPropagation(); close.current() } }
@@ -123,7 +130,6 @@ function PointedPanel({ anchor, label, onClose, placement = 'top', avoid, classN
     return () => {
       document.removeEventListener('keydown', key, true)
       document.removeEventListener('pointerdown', tap, true)
-      if (before?.isConnected && panel?.contains(document.activeElement)) before.focus({ preventScroll: true })
     }
   }, [])
 

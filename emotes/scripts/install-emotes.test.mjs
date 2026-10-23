@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { goldenFile, goldenText, installEmotes, wiringSteps, wordsToAdd } from './install-emotes.mjs'
+import { goldenFile, goldenText, installEmotes, uiKitTooOld, wiringSteps, wordsToAdd } from './install-emotes.mjs'
 import { EMOTE_SAVE } from '../kit/save.ts'
 import { createSave, memoryStorage } from '../saves/index.ts'
 import { checkGoldenSave } from '../../saves/kit/oldSaves.ts'
@@ -29,6 +29,7 @@ describe('install-emotes', () => {
     const result = installEmotes(root, { log: quiet })
     expect(existsSync(join(root, 'src/emotes/emotes.ts'))).toBe(true)
     expect(existsSync(join(root, 'src/emotes/conformance.mjs'))).toBe(true)
+    expect(existsSync(join(root, 'src/emotes/settings-rows.json'))).toBe(true) // the UI kit's Settings check reads it (F110)
     expect(existsSync(join(root, 'src/emotes/ui/EmoteLayer.tsx'))).toBe(true)
     expect(result.changed.some((f) => /\.test\./.test(f))).toBe(false)
     expect(readFileSync(join(root, 'src/emotes/VERSION'), 'utf8')).toMatch(/^0\.\d+\.\d+ \(framework /)
@@ -83,6 +84,24 @@ describe('install-emotes', () => {
         'applyEmoteSetting(emotes, values); const rows = EMOTE_SETTINGS_ROWS',
       ].join('\n') })
     expect(wiringSteps(online).filter((w) => !w.done).map((w) => w.step)).toEqual([])
+  })
+
+  it('<EmoteSeats> (0.3.0) counts for both the bubbles and the tappable seats; the step names it as the easy way', () => {
+    const bare = game({ 'src/ui/kit/VERSION': '0.29.0\n' })
+    expect(wiringSteps(bare).find((w) => /Tappable seats/.test(w.step)).step).toMatch(/<EmoteSeats emotes=/)
+    const easy = game({ 'src/ui/kit/VERSION': '0.29.0\n', 'src/game/Bar.tsx': '<EmoteSeats emotes={emotes} seats={seats} mine={me} />' })
+    expect(wiringSteps(easy).filter((w) => /bubbles|Tappable seats/.test(w.step)).every((w) => w.done)).toBe(true)
+  })
+
+  it('warns when the game\'s UI kit is older than the one <EmoteSeats> needs', () => {
+    expect(uiKitTooOld('0.28.1 (framework abc123)\n')).toBe('0.28.1')
+    expect(uiKitTooOld('0.29.0 (framework abc123)\n')).toBe('')
+    expect(uiKitTooOld('1.0.0\n')).toBe('')
+    expect(uiKitTooOld('0.30.0\n')).toBe('')
+    expect(uiKitTooOld('nonsense')).toBe('')
+    const lines = []
+    installEmotes(game({ 'src/ui/kit/VERSION': '0.28.1 (framework x)\n' }), { dryRun: true, log: (l) => lines.push(l) })
+    expect(lines.join('\n')).toMatch(/UI kit is 0\.28\.1 — .*needs 0\.29\.0\+/)
   })
 
   it('wordsToAdd never re-writes the game\'s text file: one-line objects and \\u escapes stay exactly as they were (F107 proof)', () => {
