@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.13.0 — 2026-10-23
+
+Games can now take emotes and the AI's banter without hand-building anything: one line puts every player's portrait in a row of tappable seats — tap yours to send a phrase, tap a rival's to mute them, with a muted mark on their portrait. Modules now bring their own Settings switches to the framework check, so a new module with a switch needs no UI kit change.
+
+### New
+- UI kit 0.29.0 — the player seat row can make each seat a button (named for screen readers, reachable by keyboard), with a mark on the portrait that never changes the seat's size, and a portraits-only look.
+- Emotes 0.3.0 — `<EmoteSeats>`: the tappable seat row, the phrase picker on your seat, Mute on a rival's, muted marks and the speech bubbles, in one line.
+- UI kit 0.30.0 — the Settings check reads each installed module's own list of its Settings switches (`settings-rows.json`) instead of a list built into the kit.
+- Crashes 0.2.0, Emotes 0.4.0, AI 0.8.0 — each ships its `settings-rows.json`.
+
+### Fixed
+- Closing the phrase picker or the Mute menu puts keyboard focus back on the seat that opened it.
+- A seat id with an odd character (a quote or a line break) from an online room no longer breaks the seat row; the escaped seat lookup (`seatSelector`) is now shared with games that wire seats by hand.
+- A seat that left with its menu open no longer reopens the menu when it comes back.
+- A module's own code no longer counts as the game reading its Settings switch.
+
+### Known issues
+- Games with older crashes / emotes / AI copies (no `settings-rows.json`) are checked against the kit's old built-in list for one more release — reinstall those modules before UI kit 0.31.0.
+- The seat button's spoken name doesn't include the score or "muted" yet — planned.
+
 ## v0.12.1 — 2026-10-23
 
 The AI check now says what wins: after a batch of bot-vs-bot games, the report lists the five situations that most predict winning in plain sentences ("Players with Magic lead 4 or more after turn 3 win 55% — vs 14% with -3 or less"). A new auto-tuner suggests personality slider values that turn red feel targets green, checks them on fresh games before suggesting, and says honestly when it can't — nothing changes until the designer applies and saves.
