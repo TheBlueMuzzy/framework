@@ -10,6 +10,8 @@ import settings from '../content/rooms.json'
 import { rules } from './rules'
 import type { Action, Event, Options, State, View } from './rules'
 
+// With the emotes module: import emotes from '../content/emotes.json' and pass { emotes } as a 4th argument below —
+// the room then relays players' preset phrases (checked and counted here; never stored).
 export default class GameServer extends RoomServer<State, Options, Action, View, Event> {
   constructor(party: PartyRoom) {
     super(party, rules, settings)

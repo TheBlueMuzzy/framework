@@ -99,6 +99,20 @@ describe('useRoom', () => {
     expect(result.current.view).toEqual({ total: 3 })
   })
 
+  it('emotes: sendEmote sends only the id (only while open); relayed emotes reach onEmote, odd ones never do (F107)', () => {
+    const heard: unknown[] = []
+    const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: false }, { onEmote: (e) => heard.push(e) }))
+    const socket = sockets[0]
+    expect(result.current.sendEmote('wow')).toBe(false)
+    socket.open()
+    socket.receive({ type: 'room', room, you: 'seat-1' })
+    expect(result.current.sendEmote('wow')).toBe(true)
+    expect(socket.sent.at(-1)).toEqual({ type: 'emote', id: 'wow' })
+    socket.receive({ type: 'emote', seat: 'seat-2', id: 'wellPlayed' })
+    act(() => { socket.onmessage?.({ data: JSON.stringify({ type: 'emote', seat: 2, id: { evil: true } }) }) })
+    expect(heard).toEqual([{ seat: 'seat-2', id: 'wellPlayed' }])
+  })
+
   it('send / start / ready go out only while open', () => {
     const { result } = renderHook(() => useRoom('BAKU', { name: 'Ann', create: true }))
     const socket = sockets[0]

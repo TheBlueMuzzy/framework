@@ -28,6 +28,14 @@ import type { SavedRoom } from './savedRoom'
 import { readSettings } from './settings'
 import type { RoomSettings } from './settings'
 import { Timers } from './timers'
+import { EmoteGate, readEmoteRoomSettings } from './emotes'
+
+/** Optional extras a game's server passes (Rooms 0.12.0). */
+export interface RoomServerExtras {
+  /** content/emotes.json (the emotes module): players' preset phrases are relayed to every seat, checked and counted
+   *  here. Without it, emote messages are dropped. */
+  emotes?: unknown
+}
 
 // The bits of the host this class uses. PartyServer's Connection fits PartyConnection; party/worker.ts builds
 // the PartyRoom ({ id, getConnection } via LiveConnections). Tests pass simple fakes — so none of this needs
@@ -95,11 +103,16 @@ export class RoomServer<State, Options, Action, View, Event = never> {
   /** Why this game's state can't be saved (a Map, a Date… — see jsonProblem), or null. Then it lives in memory only. */
   private cantSave: string | null = null
   private tools: RoomTools<State, Event>
+  /** The emote gate (content/emotes.json), or null when the game has no emotes. Never stored. */
+  private emoteGate: EmoteGate | null
+  /** Emotes arrived with no gate: logged once. */
+  private toldNoEmotes = false
 
-  constructor(party: PartyRoom, rules: GameRules<State, Options, Action, View, Event>, settings: Partial<RoomSettings> = {}) {
+  constructor(party: PartyRoom, rules: GameRules<State, Options, Action, View, Event>, settings: Partial<RoomSettings> = {}, extras: RoomServerExtras = {}) {
     this.party = party
     this.rules = rules
     this.settings = readSettings(settings)
+    this.emoteGate = extras.emotes === undefined ? null : new EmoteGate(readEmoteRoomSettings(extras.emotes))
     this.timers = new Timers((message) => this.log(message), () => this.changed())
     this.data = newRoom(party.id)
     this.tools = {
@@ -128,7 +141,14 @@ export class RoomServer<State, Options, Action, View, Event = never> {
         return seat ? playedBy(seat) : null
       },
       log: (message) => this.log(message),
+      emote: (seatId, id) => this.emote(seatId, id),
     }
+  }
+
+  /** A seat says a preset phrase — or, from the game's own code (a server bot, F22), a banter line. The same gate as a
+   *  player's: the server's count, then every seat gets it. → true if it went out. */
+  emote(seatId: string, id: string): boolean {
+    return this.relayEmote(seatId, id, true)
   }
 
   // ─── party/worker.ts calls these ──────────────────────────────────
@@ -163,6 +183,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       case 'back_to_lobby': return this.handleBackToLobby(sender, seat)
       case 'action': return this.handleAction(sender, seat, message.action)
       case 'active': return this.handleActive(seat)
+      case 'emote': return void this.relayEmote(seat.id, message.id, false) // (the seat is the connection's own)
     }
   }
 
@@ -300,6 +321,7 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     }
     this.log(`game started with ${this.data.seats.length} seats`)
     this.botTurns.clear() // (a rematch: last game's count is old news)
+    this.emoteGate?.newMatch() // (each match has its own emote cap)
     startPlaying(this.data)
     this.data.personMoved = false
     this.game = state
@@ -386,6 +408,27 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.restartIdleClock(seat.id)
     this.aMoveWasMade()
     this.afterGameChanged()
+  }
+
+  /** An emote → every connected seat, if the gate lets it through. Dropped quietly otherwise (logged once per seat per
+   *  match, no error back). Nothing is stored and nothing else changes — an emote isn't a move and never wakes a save. */
+  private relayEmote(seatId: string, id: string, trusted: boolean): boolean {
+    if (!this.emoteGate) {
+      if (!this.toldNoEmotes) { this.toldNoEmotes = true; this.log('an emote arrived, but this server has no emotes (pass content/emotes.json to RoomServer) — dropped') }
+      return false
+    }
+    const seat = findSeat(this.data, seatId)
+    if (!seat) return false
+    // Counted per PLAYER (their persistentId — never sent anywhere), so leaving the lobby and joining again as a new
+    // seat never refills it; a bot seat the host added is counted by its seat
+    const counter = trusted ? `seat:${seatId}` : `player:${seat.persistentId}`
+    const verdict = this.emoteGate.allow(counter, id, Date.now(), trusted)
+    if (!verdict.ok) {
+      if (this.emoteGate.firstDrop(counter)) this.log(`emotes from ${seatId} dropped (${verdict.why}) — said once`)
+      return false
+    }
+    this.sendToEveryone({ type: 'emote', seat: seatId, id })
+    return true
   }
 
   /** "I'm here" (a tap or a key): a fresh idle clock — and if a bot has their seat because they idled, it's theirs again. */
