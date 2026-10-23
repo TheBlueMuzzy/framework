@@ -69,7 +69,8 @@ Goal: any turn-based game can put a fair, human-feeling AI in any seat — local
 - ✅ F19 🧱 Brain: personality + skill data, see (view only) → imagine hidden → readings → mood shifts → goal roll → candidates → score (main goal + nudge) → choose like a person → explain note; seeded; game plug shape — must:beta · needs: F12, F18 · Glyphtender sprint 14 · built 2026-10-04 (ai kit 0.1.0)
 - ✅ F20 🧱 Fuzzy beliefs: estimates with confidence that decays / rises from the seat's own events; drift; rebuilt from events (rejoin-safe) — must:beta · needs: F19, F13 · built 2026-10-04 (stateless beliefs.ts)
 - ✅ F21 🧱 Pace + background thinking: Web Worker runner, time budget, think-time + speed presets (Slow · Normal · Fast · Instant), server runner inside the room — must:beta · needs: F19
-- 🔨 F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
+- 🔨 F107 🧱 Emotes (Muzzy 2026-10-05: "players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency"): a framework module — a short preset phrase set in content/, a picker, a speech bubble by the seat (UI kit part), mute per opponent, a spam limit, online through the rooms server — the base AI banter speaks through (Muzzy 2026-10-23: "Emotes first") — must:beta · needs: F13 · sprint 26
+- 🔨 F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats), spoken through the emote module (its bubble, its mute) — must:beta · needs: F19, F13, F107
 - ✅ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20 · built 2026-10-04 (Dev Kit 0.6.0, devkit/kit/ai: game plugs in with aiTab(DevKitAi): files as data + validate / watch / runCheck callbacks; Run check opens the F24 report; first game: Glyphtender F41). Not yet: banter lines, pace.json, pause/step in Watch
   why: Muzzy tunes personalities by eye in the game, not by description
 - ✅ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21 · sprint 26 (ai 0.3.0 arena + npm run ai:arena, Dev Kit 0.23.0 Run check in a worker)
@@ -83,6 +84,7 @@ flowchart LR
   F19 --> F20[F20 Fuzzy beliefs]
   F19 --> F21[F21 Pace + background]
   F19 --> F22[F22 Banter]
+  F107[F107 Emotes] --> F22
   F19 --> F23[F23 Dev Kit AI tab]
   F20 -.working.-> F23
   F19 --> F24[F24 Arena + Personality Check]
@@ -213,6 +215,7 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - ✅ F102 🧱 Version module (Muzzy 2026-10-20: "version number visibility is important in all games… should be a built in process, possibly a 'version' framework module that gets added to every game"): one source (version.json, /save bumps it) → a Vite plugin (define + `<meta name="app-version">`), one "vX.Y.Z.B" label on the main menu, the bottom of Settings and the Dev Kit's bug files, an e2e helper that refuses a stale build / cached service worker, check:framework checks the wiring (from Goops' own copy) — should · sprint 22
 - ✅ F103 🔧 Kit fixes from Goops: confirm boxes work without `...kitScreens`, Bar row "at most its share" + dock tight padding as kit options, the Dev Kit check warns when the PAUSED pill sits on the game's HUD — should · sprint 22
 - ✅ F104 🔧 Portrait only, said once (sprint 22 retro + F103 proof: check:framework checked Goops sideways though Muzzy said "the game is not expected to function in horizontal/landscape mode. ever."): content/ui/style.json `orientation`, honoured by check:framework, the screenshot script, the Dev Kit's phone checks and the helper briefs — should · sprint 23
+- 🔨 F108 🔧 Kit pieces for shop / upgrade screens (Goops' session 2026-10-23, its F34 Upgrades screen): a `success` colour in all 5 styles, Card `tone="success"` (same size), Modal `action` prop, Neon `danger` glow matching `primary`, MenuHeader title that shrinks before wrapping and never splits a word — should · sprint 26
 ```mermaid
 flowchart LR
   F80[F80 Everything triggers] --> F82[F82 Live game up]
@@ -243,7 +246,6 @@ flowchart LR
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
-- **Emote module** (Muzzy 2026-10-05): players send predefined messages (MTG Arena / Hearthstone style); the AI module plugs in its triggers + frequency (AI F22) — could
 - **AI standard: looks human** (Muzzy 2026-10-05: "when possible, the AI should visually come across as human. If a human would drag, they should too") — every AI action shows the same motion and timing as a person's; write into design/ai.md when Glyphtender's draft fix lands
 - 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
