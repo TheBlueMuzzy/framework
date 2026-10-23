@@ -83,6 +83,9 @@ export interface Emotes {
   setMatch(match: string): void
   /** The seats played on this device changed (a hot-seat game started, an online seat arrived). */
   setMine(seats: string[]): void
+  /** Online ↔ local in one page (a game with both modes): the room's send while online, undefined for a local game
+   *  (sends show here straight away). Same as the `send` option. */
+  setSend(send: ((seat: string, id: string) => boolean) | undefined): void
   /** Called when a mute, the switch or the match changes (the chips' muted marks redraw). Returns the way to stop. */
   onChange(listener: () => void): () => void
 }
@@ -99,6 +102,7 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
   const words = options.words ?? {}
   const banter = options.banter ?? {}
   let mine = new Set(options.mine ?? [])
+  let send = options.send
   const listeners = new Set<(emote: EmoteMessage) => void>()
   const buckets = new Map<string, Bucket>()
   const own = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key) // (never __proto__ & co.)
@@ -140,9 +144,9 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
   const sendEmote = (seat: string, id: string): SendResult => {
     if (typeof seat !== 'string' || !seat || typeof id !== 'string' || !known(config, id, banterText)) return { ok: false, reason: 'unknown' }
     if (!bucketOf(seat).take(now())) return { ok: false, reason: 'cooling' }
-    if (options.send) {
+    if (send) {
       // (the room keeps its own count too; the bucket here is spent either way, so a dropped line can't be re-pressed at once)
-      return options.send(seat, id) ? { ok: true } : { ok: false, reason: 'offline' }
+      return send(seat, id) ? { ok: true } : { ok: false, reason: 'offline' }
     }
     deliver(seat, id)
     return { ok: true }
@@ -194,6 +198,7 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
       mine = new Set(seats)
       if (kept.seats.some((s) => mine.has(s))) { kept = { ...kept, seats: kept.seats.filter((s) => !mine.has(s)) }; write() }
     },
+    setSend(next) { send = next },
     onChange(listener) {
       changeListeners.add(listener)
       return () => { changeListeners.delete(listener) }

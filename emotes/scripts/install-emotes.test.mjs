@@ -85,6 +85,21 @@ describe('install-emotes', () => {
     expect(wiringSteps(online).filter((w) => !w.done).map((w) => w.step)).toEqual([])
   })
 
+  it('wordsToAdd never re-writes the game\'s text file: one-line objects and \\u escapes stay exactly as they were (F107 proof)', () => {
+    // (Glyphtender's en.json: the first installer re-wrote the whole file — one-line objects spread out, "NBSP" became a raw space)
+    const glyph = '{\n  "end": { "splitWords": "Words\\u00a0{words}" },\n  "ai": {\n    "Scholar": {"name": "the Scholar", "bio": "x"}\n  }\n}\n'
+    const added = wordsToAdd(glyph)
+    expect(added.text.startsWith('{\n  "end": { "splitWords": "Words\\u00a0{words}" },\n  "ai": {\n    "Scholar": {"name": "the Scholar", "bio": "x"}\n  },\n  "emotes": {\n    "hello": "Hello!",')).toBe(true)
+    expect(added.text.endsWith('    "goodGame": "Good game!"\n  }\n}\n')).toBe(true)
+    // its own "emotes" part with some words: only the missing ones go in, at its top, nothing else moves
+    const partial = '{\n  "emotes": {"hello": "Howdy!"},\n  "x": [1, 2]\n}\n'
+    const more = wordsToAdd(partial)
+    expect(JSON.parse(more.text).emotes).toMatchObject({ hello: 'Howdy!', wow: 'Wow!' })
+    expect(more.text).toMatch(/"hello": "Howdy!"\},\n {2}"x": \[1, 2\]\n\}\n$/)
+    expect(wordsToAdd('{\n  "emotes": {}\n}\n').text).toMatch(/^\{\n {2}"emotes": \{\n {4}"hello": "Hello!",[\s\S]*"goodGame": "Good game!"\n {2}\}\n\}\n$/)
+    expect(wordsToAdd('{}').text).toMatch(/^\{\n {2}"emotes"/)
+  })
+
   it('wordsToAdd: nothing to add → no new file', () => {
     expect(wordsToAdd(JSON.stringify({ emotes: { hello: 'a', wellPlayed: 'b', thanks: 'c', wow: 'd', oops: 'e', thinking: 'f', goodGame: 'g' } })).text).toBeNull()
   })

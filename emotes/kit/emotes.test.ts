@@ -178,6 +178,17 @@ describe('online: send and receive', () => {
     emotes.receive({ type: 'emote', seat: 'seat-1', id: 'hello' })
     expect(seen.map((e) => e.id)).toEqual(['hello'])
   })
+  it('setSend switches a page between online and local (a game with both modes)', () => {
+    const sent: string[] = []
+    const { emotes, seen, time } = setup()
+    emotes.setSend((_seat, id) => { sent.push(id); return true })
+    emotes.sendEmote('seat-1', 'hello')
+    expect([sent, seen.length]).toEqual([['hello'], 0])
+    emotes.setSend(undefined)
+    time.wait(1000)
+    emotes.sendEmote('seat-1', 'wow')
+    expect(seen.map((e) => e.id)).toEqual(['wow'])
+  })
   it('not connected → offline; the device bucket still holds a burst back before it reaches the room', () => {
     const { emotes: down } = setup({ send: () => false })
     expect(down.sendEmote('seat-1', 'hello')).toEqual({ ok: false, reason: 'offline' })

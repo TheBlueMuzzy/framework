@@ -55,19 +55,64 @@ function listFiles(dir, base = dir) {
 // What a game's code says, minus comments (a how-to comment is not wiring)
 const withoutComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:'"`\\])\/\/.*$/gm, '$1')
 
-/** The starter words the text file doesn't have yet → { text, added } (text = the new file, or null when nothing to add). */
+/** Where a top-level key's value starts in JSON text (the index of its first character), or -1. Strings are stepped
+ *  over, so a "emotes" inside another object or a string never counts. */
+function topLevelValueAt(text, key) {
+  let depth = 0
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (c === '"') {
+      let j = i + 1
+      while (j < text.length && text[j] !== '"') j += text[j] === '\\' ? 2 : 1
+      if (depth === 1 && text.slice(i + 1, j) === key) {
+        const colon = text.slice(j + 1).match(/^\s*:\s*/)
+        if (colon) return j + 1 + colon[0].length
+      }
+      i = j
+    } else if (c === '{' || c === '[') depth++
+    else if (c === '}' || c === ']') depth--
+  }
+  return -1
+}
+
+/** The starter words the text file doesn't have yet → { text, added } (text = the new file, or null when nothing to
+ *  add). The file is never re-written as a whole: the new lines are put in where they go, so the game's own layout,
+ *  one-line objects and \u escapes stay exactly as they were. Checked by reading the result back. */
 export function wordsToAdd(current) {
   const starter = JSON.parse(readFileSync(join(emotesDir, 'templates', 'content', 'words.json'), 'utf8')).emotes
-  let file = {}
-  if (current.trim()) {
-    try { file = JSON.parse(current) } catch { return { text: null, added: [], broken: true } }
-  }
-  const mine = file.emotes && typeof file.emotes === 'object' ? file.emotes : {}
-  const added = Object.keys(starter).filter((id) => typeof mine[id] !== 'string')
+  if (!current.trim()) return { text: JSON.stringify({ emotes: starter }, null, 2) + '\n', added: Object.keys(starter) }
+  let file
+  try { file = JSON.parse(current) } catch { return { text: null, added: [], broken: true } }
+  if (!file || typeof file !== 'object' || Array.isArray(file)) return { text: null, added: [], broken: true }
+  const mine = file.emotes && typeof file.emotes === 'object' ? file.emotes : null
+  const added = Object.keys(starter).filter((id) => typeof mine?.[id] !== 'string')
   if (!added.length) return { text: null, added }
   const indent = current.match(/\n([ \t]+)"/)?.[1] ?? '  '
-  const next = { ...file, emotes: { ...mine, ...Object.fromEntries(added.map((id) => [id, starter[id]])) } }
-  return { text: JSON.stringify(next, null, indent) + '\n', added }
+  const line = (id, depth) => `${indent.repeat(depth)}${JSON.stringify(id)}: ${JSON.stringify(starter[id])}`
+  const lines = added.map((id) => line(id, 2)).join(',\n')
+  let text
+  if (!mine) {
+    // A new "emotes" part, last in the file
+    const end = current.lastIndexOf('}')
+    const before = current.slice(0, end).replace(/\s*$/, '')
+    const comma = before.endsWith('{') ? '' : ','
+    text = `${before}${comma}\n${indent}"emotes": {\n${lines}\n${indent}}\n}${current.slice(end + 1)}`
+  } else {
+    // Into the game's own "emotes" part, right after its {
+    const at = topLevelValueAt(current, 'emotes')
+    if (at < 0 || current[at] !== '{') return { text: null, added, cantPlace: true }
+    const empty = /^\{\s*\}/.test(current.slice(at))
+    text = empty
+      ? `${current.slice(0, at)}{\n${lines}\n${indent}}${current.slice(at).replace(/^\{\s*\}/, '')}`
+      : `${current.slice(0, at + 1)}\n${lines},${current.slice(at + 1)}`
+  }
+  // Read it back: exactly the old file plus the new words, or nothing is written
+  const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v)
+  const expected = { ...file, emotes: { ...(mine ?? {}), ...Object.fromEntries(added.map((id) => [id, starter[id]])) } }
+  try {
+    if (JSON.stringify(canon(JSON.parse(text))) !== JSON.stringify(canon(expected))) return { text: null, added, cantPlace: true }
+  } catch { return { text: null, added, cantPlace: true } }
+  return { text, added }
 }
 
 // The wiring, as { done, step } — so only the missing steps are printed (like the crashes installer's)
@@ -175,8 +220,9 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
   if (!hasUiKit) log(`  skipped ${UI_FOLDER} (the bubbles and the picker — the game has no UI kit; draw them yourself from onEmote)`)
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
   if (words.broken) log(`  ⚠ ${TEXT} isn't valid JSON — add the phrases' words yourself ("emotes": { "hello": "Hello!", … })`)
+  else if (words.cantPlace) log(`  ⚠ couldn't add the words to ${TEXT} without changing anything else — add them yourself under "emotes": ${words.added.join(', ')} (templates/content/words.json has them)`)
   else if (words.added.length) log(`  words   ${TEXT} "emotes": ${words.added.join(', ')} (only ids that had none)`)
-  if (dryRun) return { changed, removed, starter, words: words.added }
+  if (dryRun) return { changed, removed, starter, words: words.text ? words.added : [] }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
     copyFileSync(ships.get(f), join(target, f))
@@ -200,7 +246,7 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
     missing.forEach((w, i) => log(`  ${i + 1}. ${w.step}`))
   } else log('  Wired.')
   { const step = checkFrameworkStep(game); if (step) log(`  Also: ${step}`) }
-  return { changed, removed, starter, words: words.added }
+  return { changed, removed, starter, words: words.text ? words.added : [] }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
