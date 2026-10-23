@@ -4,7 +4,8 @@
 // What it does: copies kit/ → <game>/src/ai/kit/ (not the tests: they run here, in the framework), plus the PC command
 // scripts/ai-arena.mjs → src/ai/kit/ai-arena.mjs (npm run ai:arena), writes a VERSION file (module version + framework
 // commit), and removes files the module no longer ships — only ever inside src/ai/kit/. Gives the game, ONCE (after
-// that it's the game's, never overwritten): content/ai/arena.json — how the arena plays (games, table sizes, seed…).
+// that it's the game's, never overwritten): content/ai/arena.json — how the arena plays (games, table sizes, seed…) —
+// and content/ai/banter.json — when the bots talk (chance per moment, cooldown, presets, delay; F22).
 // Then prints the steps still missing. The game writes its plug (goals, readings, imagine…) against
 // src/ai/kit/types.ts, and its arena file (src/ai/arenaGame.ts) against src/ai/kit/arena.ts, in src/ai/.
 import { execSync } from 'node:child_process'
@@ -24,7 +25,7 @@ export function checkFrameworkStep(gameDir) {
 const aiDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/ai/kit'
 const COMMAND = 'ai-arena.mjs' // scripts/ai-arena.mjs → src/ai/kit/ai-arena.mjs
-const STARTERS = { 'content/ai/arena.json': 'templates/content/ai/arena.json' }
+const STARTERS = { 'content/ai/arena.json': 'templates/content/ai/arena.json', 'content/ai/banter.json': 'templates/content/ai/banter.json' }
 const ARENA_FILE = 'src/ai/arenaGame.ts'
 const isTest = (path) => /\.test\./.test(path)
 

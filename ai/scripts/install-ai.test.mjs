@@ -27,6 +27,7 @@ describe('install-ai', () => {
     expect(existsSync(join(game, 'src/ai/kit/arena.ts'))).toBe(true)
     expect(readFileSync(join(game, 'src/ai/kit/ai-arena.mjs'), 'utf8')).toBe(readFileSync(new URL('./ai-arena.mjs', import.meta.url), 'utf8'))
     expect(JSON.parse(readFileSync(join(game, 'content/ai/arena.json'), 'utf8'))).toMatchObject({ games: 60, minSeats: 2, maxSeats: 4, seed: 1000 })
+    expect(JSON.parse(readFileSync(join(game, 'content/ai/banter.json'), 'utf8'))).toMatchObject({ cooldownTurns: 2, alwaysAllowed: ['won', 'lost'] })
     expect(lines.join('\n')).toContain('"ai:arena": "node src/ai/kit/ai-arena.mjs"')
     expect(lines.join('\n')).toContain('src/ai/arenaGame.ts')
     // A game's own older arena script isn't the framework's: the step still shows, naming what it says now
