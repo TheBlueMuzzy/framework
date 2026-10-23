@@ -135,17 +135,31 @@ describe('bots talk through the emote module', () => {
     expect(seen).toHaveLength(1)
   })
 
-  it('at most one line waits per seat (a newer moment replaces it), and the table gap stops a second bot talking over the first', () => {
+  it('at most one line waits per seat (a newer moment replaces it); the table gap makes a second bot answer a beat later', () => {
     const { time, seen, banter } = table({ settings: { ...always, tableGap: 3 } })
     banter.hear([{ type: 'hit', by: 1, on: 2 }])
     banter.hear([{ type: 'over', winner: 1 }]) // replaces both waiting lines
     expect(Object.keys(banter.waiting())).toEqual(['1', '2'])
-    time.run(5000)
-    expect(seen.map((e) => e.id)).toEqual(['banter.Bully.won']) // the Shy bot's came in the gap: let go
-    time.run(5000)
-    banter.hear([{ type: 'hit', by: 2, on: 1 }]) // (Shy has no hitRival line; Bully's gotHit has none either)
-    banter.hear([{ type: 'hit', by: 1, on: 2 }]); time.run(5000)
-    expect(seen.map((e) => e.id).slice(1)).toEqual([expect.stringMatching(/^banter\.Bully\.hitRival/)])
+    time.run(1000)
+    expect(seen.map((e) => e.id)).toEqual(['banter.Bully.won']) // the Shy bot's came in the gap: it waits for it…
+    expect(banter.waiting()).toEqual({ 2: 'wellPlayed' })
+    time.run(2999)
+    expect(seen).toHaveLength(1)
+    time.run(1)
+    expect(seen.map((e) => [e.seat, e.id])).toEqual([['seat-2', 'banter.Bully.won'], ['seat-3', 'wellPlayed']]) // …and answers 3 s later
+    expect(seen[1].at - seen[0].at).toBe(3000)
+  })
+
+  it('a third bot whose answer would come too late after its moment (delay.max + tableGap) lets it go', () => {
+    const bots = [1, 2, 3].map((seat) => ({ seat, personality: { id: 'Bully', chattiness: 100 } }))
+    const everyoneWins: MomentMap<Ev> = (e) => (e.type === 'over' ? 'won' : null)
+    const time = rulesClock()
+    const said: string[] = []
+    const banter = botBanter({ moments: everyoneWins, bots: () => bots, settings: { ...always, tableGap: 3 }, lines: () => lines, say: (seat) => { said.push(`${seat}@${time.clock.now()}`); return true }, seed: 3, clock: time.clock })
+    banter.hear([{ type: 'over', winner: 1 }])
+    time.run(20_000)
+    expect(said).toEqual(['1@1000', '2@4000']) // seat 3 would have waited till 7000 (stale after 4000): let go
+    expect(banter.waiting()).toEqual({})
   })
 
   it('lines are read live: a line edited between two moments is the one said next (no reload)', () => {

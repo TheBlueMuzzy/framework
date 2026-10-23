@@ -324,10 +324,18 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
   let lastSpokeAt: number | null = null
   const rngOf = (seat: number) => rngs.get(seat) ?? botSeed(options.seed ^ 0xba7, seat)
 
-  const speak = (seat: number, id: string, memory: BanterMemory) => {
+  // Someone spoke less than tableGap ago: wait for the gap once (a second bot answers a beat later, like people do) —
+  // unless that would make the line later than delay.max + tableGap after its moment (then it's stale: let it go)
+  const speak = (seat: number, id: string, memory: BanterMemory, heardAt: number) => {
     waiting.delete(seat)
-    const gapMs = (settingsNow().tableGap ?? 0) * 1000
-    if (gapMs > 0 && lastSpokeAt !== null && clock.now() - lastSpokeAt < gapMs) return // (someone just spoke: let it go)
+    const settings = settingsNow()
+    const gapMs = (settings.tableGap ?? 0) * 1000
+    const left = lastSpokeAt === null ? 0 : gapMs - (clock.now() - lastSpokeAt)
+    if (gapMs > 0 && left > 0) {
+      const staleAfter = (settings.delay?.max ?? 0) * 1000 + gapMs
+      if (clock.now() + left - heardAt <= staleAfter) waiting.set(seat, { id, cancel: clock.after(left, () => speak(seat, id, memory, heardAt)) })
+      return
+    }
     if (!options.say(seat, id)) return // (muted bots still "go out" — the emote module drops them; false = refused)
     memories.set(seat, memory)
     lastSpokeAt = clock.now()
@@ -351,7 +359,8 @@ export function botBanter<Event>(options: BotBanterOptions<Event>): BotBanter {
           rngs.set(bot.seat, wait.rng)
           waiting.get(bot.seat)?.cancel()
           const id = r.line
-          waiting.set(bot.seat, { id, cancel: clock.after(wait.value, () => speak(bot.seat, id, r.memory)) })
+          const heardAt = clock.now()
+          waiting.set(bot.seat, { id, cancel: clock.after(wait.value, () => speak(bot.seat, id, r.memory, heardAt)) })
           break // (one line per seat per change)
         }
       }

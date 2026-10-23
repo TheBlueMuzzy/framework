@@ -45,7 +45,9 @@ export interface BanterSettings {
   presets?: Record<string, string[]>
   /** Seconds between the moment and the line (picked between min and max, on the rules clock — a pause stops it). */
   delay?: { min: number; max: number }
-  /** Seconds after any bot speaks during which no other bot does (so two bubbles never talk over each other). 0 = off. */
+  /** Seconds after any bot speaks before another may (so two bubbles never talk over each other): a second bot waits
+   *  for the gap and answers a beat later — or lets its line go when that would be more than delay.max + tableGap
+   *  after its moment. 0 = off. */
   tableGap?: number
 }
 

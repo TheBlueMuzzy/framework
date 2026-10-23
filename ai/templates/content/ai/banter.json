@@ -6,7 +6,7 @@
     "alwaysAllowed": "Moments that ignore the cooldown (the end of the game).",
     "presets": "Preset emotes (content/emotes.json phrases) a bot presses at a moment it has no lines of its own for.",
     "delay": "Seconds between the moment and the line (picked between min and max). On the game's rules clock: a pause stops it.",
-    "tableGap": "Seconds after any bot speaks during which no other bot does, so two bubbles never talk over each other. 0 = off."
+    "tableGap": "Seconds after any bot speaks before another may: a second bot answers a beat later (or lets it go if that would come too late after its moment), so two bubbles never talk over each other. 0 = off."
   },
   "chance": { "gameStart": 0.3, "bigMove": 0.5, "rivalBigMove": 0.3, "hitRival": 0.6, "gotHit": 0.5, "closeCall": 0.4, "won": 0.9, "lost": 0.6 },
   "cooldownTurns": 2,
