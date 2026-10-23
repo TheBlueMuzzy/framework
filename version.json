@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.11.1",
-  "build": 3,
+  "version": "0.11.2",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -87,6 +87,11 @@
       "version": "0.11.1",
       "date": "2026-10-21",
       "summary": "Every sound in a game can come out equally loud and on time (audio check + levelled Sound Board drops)"
+    },
+    {
+      "version": "0.11.2",
+      "date": "2026-10-22",
+      "summary": "Crash reports from players"
     }
   ]
 }
