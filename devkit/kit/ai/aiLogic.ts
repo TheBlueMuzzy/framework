@@ -2,7 +2,7 @@
 // edit personalities and skills without ever changing the rest of a content file (_help, _labels, _sections stay).
 import { filterSections, readableKey, type Section } from '../search/searchLogic'
 import { tuningSections, type TuningItem } from '../tuning/tuningSections'
-import type { AiBanterLines, AiFile, AiPersonality, AiSettingsFile, AiShift, DevKitAi } from './aiTypes'
+import type { AiBanterLines, AiFile, AiPersonality, AiSettingsFile, AiShift, AiTuneResult, DevKitAi } from './aiTypes'
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
@@ -134,6 +134,24 @@ export function listChanges(before: { id: string }[], after: { id: string }[]): 
   }
   for (const old of before) if (!after.some((a) => a.id === old.id)) lines.push(`removed: ${old.id}`)
   return lines
+}
+
+// ---- Suggest sliders (0.26.0, framework F26) ----
+
+/** "Apply": the personality as it is in the tab now, with ONLY the suggestion's changed sliders set (a trait's whole
+ *  range, nudge, focus, a steady goal) — any other unsaved edit stays. No suggestion (or another personality's) → as it is. */
+export function withSuggestion(current: AiPersonality, result: AiTuneResult): AiPersonality {
+  const s = result.suggested
+  if (!s || s.id !== current.id) return current
+  let next: AiPersonality = { ...current, traits: { ...current.traits } }
+  for (const { path, changed } of result.sliders) {
+    if (!changed) continue
+    const [kind, name] = path.split('.')
+    if (kind === 'traits' && s.traits[name]) next.traits[name] = { min: s.traits[name].min, max: s.traits[name].max }
+    else if (kind === 'steady' && s.steady?.[name] !== undefined) next = withSteady(next, name, s.steady[name])
+    else if ((kind === 'nudge' || kind === 'focus') && typeof s[kind] === 'number') next = { ...next, [kind]: s[kind] }
+  }
+  return next
 }
 
 // ---- Banter lines (0.24.0, framework F22) ----
@@ -318,7 +336,7 @@ export function aiSections(ai: DevKitAi): AiSection[] {
     ...settingsSections(ai.settings ?? []),
     ...fileSections(ai.skills, 'skills', 'AI: skill'),
     ...(ai.watch ? [tabSection(WATCH_SECTION, [['watch', 'Watch AIs play: notes and beliefs']])] : []),
-    ...(ai.runCheck ? [tabSection(CHECK_SECTION, [['check', 'Run the Personality Check (N games, report)']])] : []),
+    ...(ai.runCheck ? [tabSection(CHECK_SECTION, [['check', 'Run the Personality Check (N games, report)'], ...(ai.suggest ? [['suggest', 'Suggest sliders: the computer tries values to hit its feel targets (tune, auto-tune)'] as [string, string]] : [])])] : []),
   ]
 }
 

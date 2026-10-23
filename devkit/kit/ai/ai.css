@@ -174,6 +174,16 @@
 .ai-wins-list { margin: 0; padding: 0 0 0 20px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
 .ai-wins-none { margin: 0; font-size: 12px; color: #9a9bab; }
 @media (prefers-reduced-motion: reduce) { .ai-bar-fill { transition: none; } }
+/* "Suggest sliders" (0.26.0): old → new per slider, each feel target now → suggested */
+.ai-suggest { margin-top: 6px; padding-top: 8px; border-top: 1px solid #34353f; display: flex; flex-direction: column; gap: 6px; }
+.ai-tune-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ai-tune-table th, .ai-tune-table td { padding: 4px 6px; border-bottom: 1px solid #34353f; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.ai-tune-table thead th { color: #9a9bab; font-weight: 600; }
+.ai-tune-table tbody th { font-weight: 400; }
+.ai-tune-table td { white-space: nowrap; }
+.ai-tune-new { font-weight: 600; color: #8fb4ff; }
+.ai-pass { color: #7bd88f; font-weight: 600; }
+.ai-fail { color: #ff7b7b; font-weight: 600; }
 
 /* banter lines (0.24.0): per moment, a box per line with ✕, then "+ Line" */
 .ai-banter { display: flex; flex-direction: column; gap: 4px; }

@@ -103,6 +103,35 @@ export interface AiBanter {
   describe?: Record<string, string>
 }
 
+/** Where a "Suggest sliders" run is (the AI kit's TuneProgress): "Try 4 / 20", game 3 of 12 — then the fresh check. */
+export interface AiTuneProgress {
+  phase: 'search' | 'fresh'
+  tryNo: number
+  tries: number
+  game: number
+  games: number
+}
+
+/** The AI kit's tuner result (framework ai/ kit/tune.ts TuneResult) — the parts the tab shows. */
+export interface AiTuneResult {
+  personality: string
+  /** better = a suggestion that held up on fresh games · noGain = nothing did · alreadyGreen · noTargets */
+  verdict: 'better' | 'noGain' | 'alreadyGreen' | 'noTargets'
+  message: string
+  /** The personality with the suggested slider values (null = nothing to suggest). */
+  suggested: AiPersonality | null
+  /** Each slider: "traits.caution", "nudge", "focus", "steady.SCORE" — its value now and suggested ("40–60" for a trait). */
+  sliders: { path: string; from: string; to: string; changed: boolean }[]
+  /** Its feel targets on the fresh games, now → suggested. */
+  targets: { label: string; meter: string; wants: string; before: { measured: number; pass: boolean }; after: { measured: number; pass: boolean } }[]
+  cantReach: { label: string; why: string }[]
+  others: { personality: string; label: string; before: boolean; after: boolean }[]
+  tries: number
+  games: number
+  seconds: number
+  settings: { tuneFreshGames: number }
+}
+
 /** What a game plugs into the AI tab. Only the two files are required; each callback adds a part of the tab. */
 export interface DevKitAi {
   personalities: AiFile
@@ -133,4 +162,8 @@ export interface DevKitAi {
   /** Optional: play `games` AI-vs-AI games with these personalities + skills and return the report page (HTML).
    *  Play them in a Web Worker so the page never freezes: runCheckInWorker + serveCheck (checkWorker.ts). */
   runCheck?: (options: { games: number; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (done: number, total: number) => void }) => Promise<string>
+  /** Optional (0.26.0, framework F26): "Suggest sliders" — the AI kit's tuner for one personality, with the tab's
+   *  personalities + skills as they are (unsaved too). It only suggests: the tab's Apply puts the values in as unsaved
+   *  edits. In the check's worker: serveCheck(self, runCheck, tune) + suggestInWorker (checkWorker.ts). */
+  suggest?: (options: { personality: string; personalities: AiPersonality[]; skills: AiSkill[]; onProgress: (p: AiTuneProgress) => void }) => Promise<AiTuneResult>
 }

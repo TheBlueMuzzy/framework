@@ -3,7 +3,7 @@
 // callback, played in a Web Worker so the screen stays alive — checkWorker.ts does both ends); this shows progress and
 // the link.
 import { useEffect, useState } from 'react'
-import type { AiPersonality, AiSkill, DevKitAi } from './aiTypes'
+import type { AiPersonality, AiSkill, AiTuneProgress, AiTuneResult, DevKitAi } from './aiTypes'
 
 const GAME_CHOICES = [6, 20, 60] // a quick look · a fair read · a proper check (slow)
 
@@ -22,9 +22,13 @@ type Props = {
   runCheck: NonNullable<DevKitAi['runCheck']>
   personalities: AiPersonality[]
   skills: AiSkill[]
+  /** "Suggest sliders" (0.26.0): the game's tuner, the personality picked in the tab, and Apply (unsaved edits). */
+  suggest?: DevKitAi['suggest']
+  picked?: string
+  onApply?: (result: AiTuneResult) => void
 }
 
-export function CheckPanel({ runCheck, personalities, skills }: Props) {
+export function CheckPanel({ runCheck, personalities, skills, suggest, picked, onApply }: Props) {
   const [games, setGames] = useState(GAME_CHOICES[0])
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [reportUrl, setReportUrl] = useState<string | null>(null)
@@ -88,6 +92,97 @@ export function CheckPanel({ runCheck, personalities, skills }: Props) {
         </div>
       )}
       {error && <p className="devkit-status is-error">The check stopped: {error}</p>}
+      {suggest && picked && onApply && <SuggestPart suggest={suggest} picked={picked} personalities={personalities} skills={skills} onApply={onApply} />}
+    </div>
+  )
+}
+
+/** How far a tune run is, 0–1: the tries so far (each its games), then the fresh check at the end. */
+export function tuneShare(p: AiTuneProgress): number {
+  if (p.phase === 'fresh') return 1
+  return Math.min(1, (p.tryNo - 1 + p.game / Math.max(1, p.games)) / Math.max(1, p.tries))
+}
+
+const num = (v: number) => (Number.isFinite(v) ? String(v) : '—')
+const Mark = ({ pass }: { pass: boolean }) => <span className={pass ? 'ai-pass' : 'ai-fail'} aria-label={pass ? 'green' : 'red'}>{pass ? '✓' : '✗'}</span>
+
+/** "Suggest sliders" (0.26.0, framework F26): the AI kit's tuner for the picked personality, in the check's worker.
+ *  It only suggests — Apply puts the changed sliders in as unsaved edits (Save / Undo unsaved as usual). */
+function SuggestPart({ suggest, picked, personalities, skills, onApply }: Required<Pick<Props, 'suggest' | 'picked' | 'onApply'>> & Pick<Props, 'personalities' | 'skills'>) {
+  const [progress, setProgress] = useState<AiTuneProgress | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [result, setResult] = useState<AiTuneResult | null>(null)
+  const [applied, setApplied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function run() {
+    setBusy(true)
+    setError(null)
+    setResult(null)
+    setApplied(false)
+    setProgress(null)
+    try {
+      setResult(await suggest({ personality: picked, personalities, skills, onProgress: setProgress }))
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setBusy(false)
+      setProgress(null)
+    }
+  }
+
+  const changed = result?.sliders.filter((s) => s.changed) ?? []
+  const label = !busy ? `Suggest sliders for ${picked}` : !progress ? 'Starting…' : progress.phase === 'fresh' ? `Checking on fresh games… ${progress.game}/${progress.games}` : `Try ${progress.tryNo} / ${progress.tries} · game ${progress.game}/${progress.games}`
+  return (
+    <div className="ai-suggest">
+      <div className="ai-wins-title">Suggest sliders</div>
+      <p className="tt-help">
+        The computer plays small batches of games moving {picked}'s sliders (each inside its range) to hit more of its
+        feel targets, then checks the best on new games. It only suggests: Apply puts the values in as unsaved edits —
+        Save keeps them, Undo unsaved takes them back.
+      </p>
+      <div className="ai-watch-bar">
+        <button className="devkit-btn" onClick={run} disabled={busy}>{label}</button>
+      </div>
+      {busy && (
+        <span className="ai-bar ai-bar-progress" role="progressbar" aria-label="Suggest sliders" aria-valuenow={Math.round((progress ? tuneShare(progress) : 0) * 100)} aria-valuemax={100}>
+          <span className="ai-bar-fill" style={{ width: `${(progress ? tuneShare(progress) : 0) * 100}%` }} />
+        </span>
+      )}
+      {error && <p className="devkit-status is-error">Suggest sliders stopped: {error}</p>}
+      {result && (
+        <div className="ai-wins" data-tune={result.verdict}>
+          <div className="ai-wins-title">{result.personality}</div>
+          <p className={`devkit-status ${result.suggested ? 'is-ok' : ''}`}>{result.message}</p>
+          {changed.length > 0 && (
+            <table className="ai-tune-table">
+              <thead><tr><th>Slider</th><th>Now</th><th>Suggested</th></tr></thead>
+              <tbody>{changed.map((s) => <tr key={s.path}><th>{s.path}</th><td>{s.from}</td><td className="ai-tune-new">{s.to}</td></tr>)}</tbody>
+            </table>
+          )}
+          {result.targets.length > 0 && (
+            <table className="ai-tune-table">
+              <thead><tr><th>Feel target <span className="ai-wins-none">({result.settings.tuneFreshGames} fresh games)</span></th><th>Now</th><th>{result.suggested ? 'Suggested' : 'Best found'}</th></tr></thead>
+              <tbody>{result.targets.map((t, i) => (
+                <tr key={i}>
+                  <th>{t.label} <span className="ai-wins-none">— {t.meter}, wants {t.wants}</span></th>
+                  <td><Mark pass={t.before.pass} /> {num(t.before.measured)}</td>
+                  <td><Mark pass={t.after.pass} /> {num(t.after.measured)}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          )}
+          {result.cantReach.map((c, i) => <p key={i} className="ai-wins-none">Couldn't reach “{c.label}”: {c.why}</p>)}
+          {result.others.map((o, i) => <p key={i} className="ai-wins-none">Also: {o.personality}'s “{o.label}” went {o.before ? 'green' : 'red'} → {o.after ? 'green' : 'red'}</p>)}
+          <p className="ai-wins-none">{result.tries} tries · {result.games} games · {result.seconds} s</p>
+          {result.suggested && !applied && (
+            <div className="ai-watch-bar">
+              <button className="devkit-btn devkit-btn-main" onClick={() => { onApply(result); setApplied(true) }}>Apply to {result.personality}</button>
+            </div>
+          )}
+          {applied && <p className="devkit-status is-ok">Applied to {result.personality} as unsaved edits — Save keeps them, Undo unsaved takes them back.</p>}
+        </div>
+      )}
     </div>
   )
 }

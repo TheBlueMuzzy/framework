@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import { Worker } from 'node:worker_threads'
 import { describe, expect, it } from 'vitest'
-import { runCheckInWorker, serveCheck, type CheckWorkerLike } from './checkWorker'
+import { runCheckInWorker, serveCheck, suggestInWorker, type CheckWorkerLike } from './checkWorker'
 import type { AiPersonality } from './aiTypes'
 
 const bully: AiPersonality = { id: 'Bully', traits: { aggression: { min: 80, max: 95 } }, goals: ['TRAP'], nudge: 0.2, shifts: [], chattiness: 50 }
@@ -56,6 +56,36 @@ describe('Run check in a worker', () => {
     await expect(waiting).rejects.toThrow('out of memory')
     expect(crashing.terminated()).toBe(1)
     await expect(runCheckInWorker(() => { throw new Error('no Worker here') }, { games: 6, personalities: [bully], skills, onProgress: () => {} })).rejects.toThrow("the check's worker didn't start: no Worker here")
+  })
+
+  it('Suggest sliders (0.26.0): a tune job — its progress per game, then the tuner\'s result as plain data', async () => {
+    const pair = fakeWorkerPair()
+    const asked: unknown[] = []
+    serveCheck(pair.inside, () => '<p>not this</p>', (job, onProgress) => {
+      asked.push(job)
+      onProgress({ phase: 'search', tryNo: 1, tries: 2, game: 1, games: 1 })
+      onProgress({ phase: 'fresh', tryNo: 2, tries: 2, game: 1, games: 1 })
+      return { personality: job.personality, verdict: 'noGain', message: 'keep it', when: new Date(0) } // plain data on the way back
+    })
+    const seen: string[] = []
+    const result = await suggestInWorker(() => pair.page, { personality: 'Bully', personalities: [bully], skills, onProgress: (p) => seen.push(`${p.phase} ${p.tryNo}/${p.tries}`) })
+    expect(seen).toEqual(['search 1/2', 'fresh 2/2'])
+    expect(result).toEqual({ personality: 'Bully', verdict: 'noGain', message: 'keep it', when: '1970-01-01T00:00:00.000Z' })
+    expect(asked).toEqual([{ personality: 'Bully', personalities: [bully], skills }])
+    expect(pair.terminated()).toBe(1)
+  })
+
+  it('a worker with no tune function says so in plain English; a failing tune rejects with its reason', async () => {
+    const old = fakeWorkerPair()
+    serveCheck(old.inside, () => '<p>report</p>')
+    await expect(suggestInWorker(() => old.page, { personality: 'Bully', personalities: [bully], skills, onProgress: () => {} })).rejects.toThrow("this game's check worker can't suggest sliders yet")
+    const failing = fakeWorkerPair()
+    serveCheck(failing.inside, () => '', () => { throw new Error('No personality "Bully"') })
+    await expect(suggestInWorker(() => failing.page, { personality: 'Bully', personalities: [], skills, onProgress: () => {} })).rejects.toThrow('No personality "Bully"')
+    // and a check still works on a worker that also tunes
+    const both = fakeWorkerPair()
+    serveCheck(both.inside, (job) => `<p>${job.games}</p>`, () => ({}))
+    await expect(runCheckInWorker(() => both.page, { games: 3, personalities: [bully], skills, onProgress: () => {} })).resolves.toBe('<p>3</p>')
   })
 
   it('in a real worker thread the main thread stays free while the games play', async () => {

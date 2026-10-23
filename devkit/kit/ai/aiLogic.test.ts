@@ -1,7 +1,26 @@
 // Runs in the framework (not copied into games): the AI tab's thinking.
 import { describe, expect, it } from 'vitest'
-import { BANTER_SECTION, aiSections, applyBanterLive, banterChanges, banterOf, copyPersonality, freeId, getAt, labelOf, lineKeys, listChanges, moveGoal, nextLineKey, searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withBanter, withList, withRange, withSteady } from './aiLogic'
-import { sampleAi, bully } from './sampleAi.test'
+import { BANTER_SECTION, aiSections, applyBanterLive, banterChanges, banterOf, copyPersonality, freeId, getAt, labelOf, lineKeys, listChanges, moveGoal, nextLineKey, searchAi, setAt, settingsName, steadyLabel, strayKeys, withLine, withBanter, withList, withRange, withSteady, withSuggestion } from './aiLogic'
+import { sampleAi, bully, bullySuggestion } from './sampleAi.test'
+
+describe('Suggest sliders → Apply (0.26.0)', () => {
+  it('sets only the changed sliders on the personality as it is now — other unsaved edits stay', () => {
+    const edited = { ...bully(), chattiness: 10, goals: ['SCORE', 'TRAP'] } // unsaved edits made after the suggestion started
+    const next = withSuggestion(edited, bullySuggestion())
+    expect(next.traits).toEqual({ aggression: { min: 60, max: 75 }, greed: { min: 30, max: 50 } })
+    expect(next.steady).toEqual({ SCORE: 0.3 })
+    expect(next.nudge).toBe(0.2) // not marked changed → left alone
+    expect(next.chattiness).toBe(10)
+    expect(next.goals).toEqual(['SCORE', 'TRAP'])
+    expect(edited.traits.aggression).toEqual({ min: 80, max: 95 }) // the original is untouched
+  })
+
+  it('nothing suggested, or another personality\'s suggestion, changes nothing', () => {
+    const b = bully()
+    expect(withSuggestion(b, bullySuggestion({ suggested: null }))).toBe(b)
+    expect(withSuggestion({ ...b, id: 'Scholar' }, bullySuggestion()).traits.aggression).toEqual({ min: 80, max: 95 })
+  })
+})
 
 describe('AI tab logic', () => {
   it('a range keeps inside 0–100 and the moved end pushes the other', () => {
