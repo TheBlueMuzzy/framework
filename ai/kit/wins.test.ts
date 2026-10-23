@@ -64,9 +64,18 @@ describe('what wins', () => {
   })
 
   it('fewer is better: the edge goes under 50% and the sentence names the low end', () => {
-    const r = whatWins(perfect.map((g) => ({ seats: g.seats.map((s) => ({ ...s, situations: { end: { tiles: -s.situations!['turn 5'].lead } } })) })))
+    const r = whatWins(perfect.map((g) => ({ seats: g.seats.map((s) => ({ ...s, situations: { 'turn 3': { tiles: -s.situations!['turn 5'].lead } } })) })))
     expect(r.all[0]).toMatchObject({ situation: 'tiles', edge: 0, strength: 1 })
-    expect(r.top[0]).toMatch(/^Players with tiles -?\d+ or less at the end win/)
+    expect(r.top[0]).toMatch(/^Players with tiles -?\d+ or less after turn 3 win/)
+  })
+
+  it('a number that decides the winner at the end is the win itself (the score): named apart, not a sentence', () => {
+    const atEnd = perfect.map((g) => ({ seats: g.seats.map((s) => ({ ...s, situations: { ...s.situations, end: { lead: s.situations!['turn 5'].lead } } })) }))
+    const r = whatWins(atEnd)
+    expect(r.theWin).toEqual(['lead'])
+    expect(r.all.find((s) => s.moment === 'end')).toMatchObject({ isTheWin: true, strength: 1 })
+    expect(r.top[0]).toMatch(/after turn 5/) // its strongest moment that isn't the win itself
+    expect(whatWins(atEnd, { isTheWin: 1.01 }).theWin).toEqual([]) // the bar is a setting
   })
 
   it('tiny samples: left out and said so, never hidden', () => {

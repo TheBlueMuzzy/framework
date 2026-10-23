@@ -38,6 +38,9 @@ export interface SituationWins {
   strength: number
   /** Why it's left out ("too few games"…), or undefined when it counts. */
   leftOut?: string
+  /** At the end and (nearly) always the winner's — it IS the win (the score itself), so it's no advice: kept out of
+   *  the sentences, named apart. */
+  isTheWin?: boolean
 }
 
 export interface WhatWins {
@@ -45,6 +48,8 @@ export interface WhatWins {
   top: string[]
   /** Every situation at every moment, strongest first (those left out last). */
   all: SituationWins[]
+  /** Situations that at the end decide the winner by themselves (the score itself) — kept out of `top`. */
+  theWin: string[]
   /** The plain-English reasons some were left out ("letters in hand at turn 5: too few games (12 pairs, needs 30)"). */
   leftOut: string[]
   /** Every seat's share of the wins on average (the base rate the group win rates sit around). */
@@ -60,6 +65,8 @@ export interface WhatWinsOptions {
   top?: number
   /** Only seats at this skill. */
   skill?: string
+  /** A situation whose strength at the END is at least this is the win itself (the score) — not a sentence. Default 0.95. */
+  isTheWin?: number
 }
 
 const round = (v: number, places = 3) => Math.round(v * 10 ** places) / 10 ** places
@@ -129,6 +136,7 @@ export function sentence(s: SituationWins, minGames = 30): string {
 export function whatWins(results: GameResult[], options: WhatWinsOptions = {}): WhatWins {
   const minGames = options.minGames ?? 30
   const topCount = options.top ?? 5
+  const isTheWin = options.isTheWin ?? 0.95
   const games = results.map((g) => g.seats.filter((s) => s.situations && (!options.skill || s.skill === options.skill)))
   const seats = games.flat()
   // every situation at every moment, in the order first seen
@@ -148,19 +156,21 @@ export function whatWins(results: GameResult[], options: WhatWinsOptions = {}): 
       : e.pairs < minGames ? `too few games (${e.pairs} winner-vs-loser pairs, needs ${minGames})`
       : big.length < 2 ? `too few games (${groups.map((g) => g.games).join(' / ')} in its groups, needs ${minGames} in two of them)`
       : undefined
-    return { situation, moment, groups, edge: e.edge, pairs: e.pairs, strength: round(Math.abs(e.edge - 0.5) * 2), leftOut }
+    const strength = round(Math.abs(e.edge - 0.5) * 2)
+    return { situation, moment, groups, edge: e.edge, pairs: e.pairs, strength, leftOut, ...(!leftOut && moment === 'end' && strength >= isTheWin ? { isTheWin: true } : {}) }
   })
   all.sort((a, b) => Number(!!a.leftOut) - Number(!!b.leftOut) || b.strength - a.strength || b.pairs - a.pairs || a.situation.localeCompare(b.situation) || a.moment.localeCompare(b.moment))
   const shown = new Set<string>()
   const top: string[] = []
   for (const s of all) {
-    if (s.leftOut || shown.has(s.situation) || top.length >= topCount) continue
+    if (s.leftOut || s.isTheWin || shown.has(s.situation) || top.length >= topCount) continue
     shown.add(s.situation)
     top.push(sentence(s, minGames))
   }
   return {
     top,
     all,
+    theWin: all.filter((s) => s.isTheWin).map((s) => s.situation),
     leftOut: all.filter((s) => s.leftOut).map((s) => `${s.situation} ${when(s.moment)}: ${s.leftOut}`),
     baseRate: round(mean(seats.map((s) => s.won))),
     seats: seats.length,

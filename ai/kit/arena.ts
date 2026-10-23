@@ -195,10 +195,12 @@ export interface ArenaSettings {
   whatWinsMinGames: number
   /** How many sentences the report shows. */
   whatWinsTop: number
+  /** A situation this strong at the end (0–1) is the win itself (the score) — named apart, not a sentence. */
+  whatWinsIsTheWin: number
 }
 
 /** Used for anything content/ai/arena.json leaves out (the numbers Glyphtender's own arena used). */
-export const defaultArenaSettings: ArenaSettings = { games: 60, minSeats: 2, maxSeats: 4, ladderGames: 6, seed: 1000, ladderSeedOffset: 4000, notesInReport: 24, whatWinsMoments: [3, 5, 'end'], whatWinsMinGames: 30, whatWinsTop: 5 }
+export const defaultArenaSettings: ArenaSettings = { games: 60, minSeats: 2, maxSeats: 4, ladderGames: 6, seed: 1000, ladderSeedOffset: 4000, notesInReport: 24, whatWinsMoments: [3, 5, 'end'], whatWinsMinGames: 30, whatWinsTop: 5, whatWinsIsTheWin: 0.95 }
 
 /** One game to play: who sits where, its seed, what kind of table. */
 export interface ArenaTable {
@@ -388,7 +390,7 @@ export function runArena<State, Action, Setup, View>(
     tellMeters: plug.tellMeters,
     checks: plug.checks,
     notes: settings.notesInReport,
-    whatWins: { minGames: settings.whatWinsMinGames, top: settings.whatWinsTop },
+    whatWins: { minGames: settings.whatWinsMinGames, top: settings.whatWinsTop, isTheWin: settings.whatWinsIsTheWin },
   })
   return { games, results, mixedResults, report }
 }

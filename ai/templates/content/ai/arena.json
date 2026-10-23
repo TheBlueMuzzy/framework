@@ -14,7 +14,8 @@
     "devKitLadderGames": "…of this many games per personality.",
     "whatWinsMoments": "\"What wins?\": when the game's situations (score lead, letters in hand…) are read — after each player's own turn N (numbers), and \"end\". Early turns say what to aim for; \"end\" says what winners ended with.",
     "whatWinsMinGames": "A low / mid / high group (or a situation's winner-vs-loser pairs) with fewer than this many games is left out of \"What wins?\" and listed as too few games. 30 ≈ ±18% — more games, surer numbers.",
-    "whatWinsTop": "How many \"What wins?\" sentences the report and the Dev Kit show."
+    "whatWinsTop": "How many \"What wins?\" sentences the report and the Dev Kit show.",
+    "whatWinsIsTheWin": "A situation that at the end picks the winner this reliably (0-1: 0.95 = in 95% of the games) is the win itself, like the score - named apart, not in the list."
   },
   "games": 60,
   "minSeats": 2,
@@ -33,5 +34,6 @@
     "end"
   ],
   "whatWinsMinGames": 30,
-  "whatWinsTop": 5
+  "whatWinsTop": 5,
+  "whatWinsIsTheWin": 0.95
 }
