@@ -86,6 +86,16 @@ describe('situations ("What wins?", F25)', () => {
     expect(() => playArenaGame(word, seats, 1000, 'mixed', ['end'])).toThrow(/it gave "lots"/)
   })
 
+  it('the moments from content/ai/arena.json: turn numbers and "end"; anything else refused in plain English', () => {
+    expect(arenaPlan(request({ settings: { games: 1, ladderGames: 0, whatWinsMoments: [2, 'end'] } })).settings.whatWinsMoments).toEqual([2, 'end'])
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: ['turn 3'] } }))).toThrow(`"whatWinsMoments": "turn 3" isn't a turn number (1, 2, 3…) or "end"`)
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: [0] } }))).toThrow(/0 isn't a turn number/)
+    expect(() => arenaPlan(request({ settings: { games: 1, whatWinsMoments: 'end' as never } }))).toThrow(/should be a list like/)
+    // a game's imported JSON (strings typed as string) fits the settings as it is
+    const fromJson: { whatWinsMoments: (string | number)[] } = JSON.parse('{"whatWinsMoments":[3,"end"]}')
+    expect(runArena(arenaPlug, request({ settings: { games: 2, ladderGames: 0, ...fromJson } })).games[0].situations[0]).toHaveProperty('end')
+  })
+
   it('an old plug without situations keeps working: no situations in its results', () => {
     const { situations: _none, ...old } = arenaPlug
     void _none

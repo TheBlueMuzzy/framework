@@ -114,7 +114,7 @@ export function playArenaGame<State, Action, Setup, View>(
   seed: number,
   kind: TableKind = 'mixed',
   /** When to read the plug's situations (if it has any). */
-  moments: Moment[] = defaultArenaSettings.whatWinsMoments,
+  moments: Moment[] = momentsOf(defaultArenaSettings.whatWinsMoments),
 ): ArenaGame<State, Action> {
   const { rules } = plug
   let state = rules.setup(plug.setup(seats, seed, kind))
@@ -183,8 +183,9 @@ export interface ArenaSettings {
   ladderSeedOffset: number
   /** How many decision notes of the first game go in the report. */
   notesInReport: number
-  /** "What wins?" (F25): when the plug's situations are read — after each seat's own turn N, and 'end'. */
-  whatWinsMoments: Moment[]
+  /** "What wins?" (F25): when the plug's situations are read — after each seat's own turn N, and 'end'. (Strings
+   *  allowed so a game's imported arena.json fits as it is; anything but "end" or a whole number is refused.) */
+  whatWinsMoments: (Moment | string)[]
   /** A low / mid / high group, or a situation's winner-vs-loser pairs, below this many → "too few games", left out. */
   whatWinsMinGames: number
   /** How many sentences the report shows. */
@@ -319,10 +320,20 @@ export interface ArenaRequest {
   settings?: Partial<ArenaSettings>
 }
 
+/** content/ai/arena.json's whatWinsMoments, checked: whole turn numbers (1 or more) and "end". Throws in plain English. */
+export function momentsOf(list: unknown): Moment[] {
+  if (!Array.isArray(list)) throw new Error(`content/ai/arena.json "whatWinsMoments" should be a list like [3, 5, "end"] (got ${JSON.stringify(list)})`)
+  return list.map((m) => {
+    if (m === 'end' || (Number.isInteger(m) && (m as number) >= 1)) return m as Moment
+    throw new Error(`content/ai/arena.json "whatWinsMoments": ${JSON.stringify(m)} isn't a turn number (1, 2, 3…) or "end"`)
+  })
+}
+
 /** The whole run as a list of tables: mixed first, then the ladder. Throws in plain English for a skill or
  *  personality that isn't there. */
 export function arenaPlan(request: ArenaRequest): { tables: ArenaTable[]; main: Skill; settings: ArenaSettings } {
   const settings = { ...defaultArenaSettings, ...request.settings }
+  settings.whatWinsMoments = momentsOf(settings.whatWinsMoments)
   const { personalities, skills } = request
   if (!personalities.length) throw new Error('No personalities to play')
   if (!skills.length) throw new Error('No skills to play at')
@@ -352,7 +363,7 @@ export function runArena<State, Action, Setup, View>(
   const { tables, main, settings } = arenaPlan(request)
   const games: ArenaGame<State, Action>[] = []
   for (const t of tables) {
-    games.push(playArenaGame(plug, t.seats, t.seed, t.kind, settings.whatWinsMoments))
+    games.push(playArenaGame(plug, t.seats, t.seed, t.kind, momentsOf(settings.whatWinsMoments)))
     onProgress?.(games.length, tables.length)
   }
   const results = toResults(plug, games)
