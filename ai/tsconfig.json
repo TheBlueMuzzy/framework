@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["kit"]
+  "include": ["kit", "fixtures"]
 }
