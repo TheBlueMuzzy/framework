@@ -322,6 +322,31 @@ export function runArena<State, Action, Setup, View>(
   return { games, results, report }
 }
 
+/** The Dev Kit's Run check plays a smaller batch: the ladder only joins in from `devKitLadderFrom` games asked for. */
+export interface DevKitArenaSettings {
+  devKitLadderFrom: number
+  devKitLadderGames: number
+}
+export const defaultDevKitArenaSettings: DevKitArenaSettings = { devKitLadderFrom: 20, devKitLadderGames: 2 }
+
+/** The settings for a Dev Kit Run check of `games` games. */
+export function devKitSettings(settings: Partial<ArenaSettings & DevKitArenaSettings>, games: number): Partial<ArenaSettings> {
+  const { devKitLadderFrom, devKitLadderGames } = { ...defaultDevKitArenaSettings, ...settings }
+  return { ...settings, games, ladderGames: games >= devKitLadderFrom ? devKitLadderGames : 0 }
+}
+
+/** What a game's arena file (src/ai/arenaGame.ts) gives `npm run ai:arena`: its plug and its cast. Personalities and
+ *  skills are the game's content/ai/ files as it reads them (leave out any it never offers players). */
+export interface ArenaGameFile<State, Action, Setup, View> {
+  plug: ArenaPlug<State, Action, Setup, View>
+  personalities: Personality[]
+  /** Lowest first. */
+  skills: Skill[]
+  targets: CheckTargets
+  /** Meters to print per personality on the PC (default: the plug's tellMeters, else every meter). */
+  columns?: string[]
+}
+
 /** Decision times across games, in ms (this machine; a phone is roughly 4× slower). */
 export function decisionTimes(games: { decisionMs: number[] }[]): { median: number; p90: number; slowest: number; count: number } {
   const ms = games.flatMap((g) => g.decisionMs).sort((a, b) => a - b)
