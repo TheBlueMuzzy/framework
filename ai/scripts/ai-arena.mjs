@@ -106,7 +106,7 @@ async function tune() {
   if (r.targets.length) {
     console.log(`\nfeel targets on ${r.settings.tuneFreshGames} fresh games (now → ${r.suggested ? 'suggested' : 'best found'}):`)
     const mark = (pass) => (pass ? '✓' : '✗')
-    r.targets.forEach((t) => console.log(`  ${mark(t.before.pass)} ${t.before.measured} → ${mark(t.after.pass)} ${t.after.measured}  ${t.label} (${t.meter}, wants ${t.wants})`))
+    r.targets.forEach((t) => console.log(`  ${mark(t.before.pass)} ${t.before.measured} → ${mark(t.after.pass)} ${t.after.measured}${t.after.borderline ? ' (just over the line)' : ''}  ${t.label} (${t.meter}, wants ${t.wants})`))
   }
   r.cantReach.forEach((c) => console.log(`  ! ${c.label}: ${c.why}`))
   r.others.forEach((o) => console.log(`  also: ${o.personality}'s "${o.label}" went ${o.before ? 'green' : 'red'} → ${o.after ? 'green' : 'red'}`))

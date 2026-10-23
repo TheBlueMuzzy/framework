@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import type { ArenaPlug, ArenaRequest, CheckTargets } from './arena'
 import type { FeelTarget } from './check'
-import { defaultTuneSettings, isBetter, shortfall, sliderText, sliderValue, slidersOf, tunePersonality, tuneTables, withSlider, type TuneResult } from './tune'
+import { defaultTuneSettings, edgeOf, isBetter, JUST_OVER, shortfall, sliderText, sliderValue, slidersOf, tunePersonality, tuneTables, withSlider, type TuneResult } from './tune'
 import type { Personality } from './types'
 import { tuneHtml } from './report'
 import { arenaPlug, careful, greedy, skills, targets, type Action, type Setup, type State, type View } from '../fixtures/drawTo10'
@@ -47,6 +47,15 @@ describe('scoring a try', () => {
     expect(isBetter({ own: 1, others: 2, gap: 0.2 }, { own: 1, others: 2, gap: 0.2 })).toBe(false) // a tie isn't better
   })
 
+  it('edgeOf: how far past its line a target is (the Glyphtender proof: 0.6 against "≥ 0.6" is only just over)', () => {
+    const t = { meter: 'm', op: '>=' as const, value: 0.6, label: '', measured: 0.6, pass: true }
+    expect(edgeOf(t)).toBeLessThan(JUST_OVER)
+    expect(edgeOf({ ...t, measured: 0.75 })).toBeGreaterThan(JUST_OVER)
+    expect(edgeOf({ ...t, measured: 0.5, pass: false })).toBeLessThan(0)
+    expect(edgeOf({ ...t, op: 'beats', value: 0.55, measured: 0.56 })).toBeLessThan(JUST_OVER)
+    expect(edgeOf({ ...t, op: 'tableBest', rival: { personality: 'x', measured: 2 }, measured: 4 })).toBeGreaterThan(JUST_OVER)
+  })
+
   it('a red target\'s shortfall is on its own scale; green is 0', () => {
     const t = { meter: 'm', op: '>=' as const, value: 10, label: '', measured: 5, pass: false }
     expect(shortfall(t)).toBeCloseTo(0.5)
@@ -76,7 +85,17 @@ describe('tunePersonality', () => {
     expect(r.suggested!.traits.caution.min).toBeLessThanOrEqual(30)
     expect(r.stoppedBy).toBe('allGreen')
     expect(r.cantReach).toEqual([])
-    expect(r.message).toMatch(/0 → 1 of 1 targets green on 6 fresh games/)
+    expect(r.message).toMatch(/0 → 1 of 1 targets green on 6 fresh games\.$/) // well over the line: no warning
+    expect(r.targets[0].after.borderline).toBeUndefined()
+  })
+
+  it('a target that lands only just over its line is flagged "confirm with npm run ai:arena"', () => {
+    // caution's low end moves in steps of 21 from 80: 59 → 38; "≤ 38" lands exactly on the line
+    const r = tunePersonality(cautionPlug, req(withTargets([{ meter: 'caution', op: '<=', value: 38, label: 'on the line' }])), 'Careful', { settings: quick })
+    expect(r.verdict).toBe('better')
+    expect(r.targets[0].after).toEqual({ measured: 38, pass: true, borderline: true })
+    expect(r.message).toMatch(/One of them is only just over the line — confirm with npm run ai:arena \(more games\) before saving\./)
+    expect(tuneHtml(r, 'g')).toContain('just over')
   })
 
   it('stays inside every slider\'s range (real games, many tries)', () => {

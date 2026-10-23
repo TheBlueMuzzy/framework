@@ -94,7 +94,7 @@ ${body}
 export function tuneHtml(r: TuneResult, game: string): string {
   const num = (v: number) => (Number.isFinite(v) ? String(v) : '—')
   const sliders = r.sliders.map((s) => `<tr><th class="l">${esc(s.path)}</th><td>${esc(s.from)}</td><td class="${s.changed ? 'changed' : 'dim'}">${s.changed ? esc(s.to) : 'same'}</td></tr>`).join('')
-  const targets = r.targets.map((t) => `<tr><th class="l">${esc(t.label)} <span class="dim">— ${esc(t.meter)}, wants ${esc(t.wants)}</span></th><td>${mark(t.before.pass)} ${num(t.before.measured)}</td><td>${mark(t.after.pass)} ${num(t.after.measured)}</td></tr>`).join('')
+  const targets = r.targets.map((t) => `<tr><th class="l">${esc(t.label)} <span class="dim">— ${esc(t.meter)}, wants ${esc(t.wants)}</span></th><td>${mark(t.before.pass)} ${num(t.before.measured)}</td><td>${mark(t.after.pass)} ${num(t.after.measured)}${t.after.borderline ? ' <span class="dim">just over</span>' : ''}</td></tr>`).join('')
   const green = (k: 'before' | 'after') => r.targets.filter((t) => t[k].pass).length
   const body = `<h1>Suggested sliders — ${esc(r.personality)}</h1><p class="dim">${esc(game)} · ${esc(r.subtitle)}</p>
 <section class="card" data-tune-verdict="${esc(r.verdict)}"><p><span class="${r.verdict === 'better' ? 'ok' : r.verdict === 'alreadyGreen' ? 'ok' : 'no'}">${esc(r.message)}</span></p>

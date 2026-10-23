@@ -123,7 +123,7 @@ export interface AiTuneResult {
   /** Each slider: "traits.caution", "nudge", "focus", "steady.SCORE" — its value now and suggested ("40–60" for a trait). */
   sliders: { path: string; from: string; to: string; changed: boolean }[]
   /** Its feel targets on the fresh games, now → suggested. */
-  targets: { label: string; meter: string; wants: string; before: { measured: number; pass: boolean }; after: { measured: number; pass: boolean } }[]
+  targets: { label: string; meter: string; wants: string; before: { measured: number; pass: boolean }; after: { measured: number; pass: boolean; borderline?: boolean } }[]
   cantReach: { label: string; why: string }[]
   others: { personality: string; label: string; before: boolean; after: boolean }[]
   tries: number

@@ -167,7 +167,7 @@ function SuggestPart({ suggest, picked, personalities, skills, onApply }: Requir
                 <tr key={i}>
                   <th>{t.label} <span className="ai-wins-none">— {t.meter}, wants {t.wants}</span></th>
                   <td><Mark pass={t.before.pass} /> {num(t.before.measured)}</td>
-                  <td><Mark pass={t.after.pass} /> {num(t.after.measured)}</td>
+                  <td><Mark pass={t.after.pass} /> {num(t.after.measured)}{t.after.borderline && <span className="ai-wins-none"> just over</span>}</td>
                 </tr>
               ))}</tbody>
             </table>

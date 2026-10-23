@@ -131,6 +131,24 @@ export function shortfall(t: TargetResult): number {
   return (t.op === 'tableBest' ? rival - t.measured : t.measured - rival) / size + 0.01 // a tie is still red
 }
 
+/** How far a target is past its line, on its own scale (the mirror of shortfall): below 0 = red, 0.02 = only just
+ *  green. "Just over" = under JUST_OVER — the Glyphtender proof's Strategist went 0.5 → 0.6 against "≥ 0.6" on the
+ *  tuner's fresh games and read 0.53 on a bigger ai:arena run: a target that lands on its line may be luck. */
+export function edgeOf(t: TargetResult): number {
+  if (!Number.isFinite(t.measured)) return -1
+  const rel = (gap: number, size: number) => gap / Math.max(Math.abs(size), 1e-6)
+  if (t.op === '>=') return rel(t.measured - (t.value ?? 0), t.value || 1)
+  if (t.op === '<=') return rel((t.value ?? 0) - t.measured, t.value || 1)
+  if (t.op === 'beats') return t.measured - (t.value ?? 0.5)
+  if (t.op === 'neverExtreme') return t.pass ? 1 : -t.measured
+  if (t.op === 'nearAverage') return rel((t.value ?? 0) - Math.abs(t.measured - (t.rival?.measured ?? 0)), t.rival?.measured || 1)
+  const rival = t.rival?.measured ?? t.measured
+  const size = Math.abs(rival) + Math.abs(t.measured) || 1
+  return (t.op === 'tableBest' ? t.measured - rival : rival - t.measured) / size
+}
+/** A green target closer than this to its line is flagged "only just over" (5% of its own scale). */
+export const JUST_OVER = 0.05
+
 /** How good one batch is for the tuned personality. */
 export interface TuneScore {
   /** Its own targets green. */
@@ -181,7 +199,8 @@ export interface TuneTargetChange {
   /** What it wants, in words ("≥ 0.6", "the table's highest", "wins ≥ 55% vs Survivor"). */
   wants: string
   before: { measured: number; pass: boolean }
-  after: { measured: number; pass: boolean }
+  /** borderline = green, but only just over its line (edgeOf < JUST_OVER) — confirm with a bigger run. */
+  after: { measured: number; pass: boolean; borderline?: boolean }
 }
 
 export interface TuneResult {
@@ -320,8 +339,9 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
   const targetsOut: TuneTargetChange[] = targets.map((t, k) => {
     const a = freshStart[start.id][k]
     const b = after[start.id][k]
-    return { label: t.label, meter: t.meter, op: t.op, wants: wantsText(t), before: { measured: a.measured, pass: a.pass }, after: { measured: b.measured, pass: b.pass } }
+    return { label: t.label, meter: t.meter, op: t.op, wants: wantsText(t), before: { measured: a.measured, pass: a.pass }, after: { measured: b.measured, pass: b.pass, ...(b.pass && edgeOf(b) < JUST_OVER ? { borderline: true } : {}) } }
   })
+  const newlyBorderline = targetsOut.filter((t) => !t.before.pass && t.after.borderline).length
   const others = Object.keys(request.targets.personalities).filter((p) => p !== start.id).flatMap((p) =>
     (freshStart[p] ?? []).flatMap((t, k) => (after[p]?.[k] && after[p][k].pass !== t.pass ? [{ personality: p, label: t.label, before: t.pass, after: after[p][k].pass }] : [])))
   const allGreenAtStart = startScore.own === targets.length && !changedAny
@@ -335,7 +355,7 @@ export function tunePersonality<State, Action, Setup, View>(plug: ArenaPlug<Stat
   const greenAfter = targetsOut.filter((t) => t.after.pass).length
   const verdict: TuneResult['verdict'] = heldUp ? 'better' : allGreenAtStart ? 'alreadyGreen' : 'noGain'
   const message = verdict === 'better'
-    ? `Suggested: ${greenBefore} → ${greenAfter} of ${targets.length} targets green on ${settings.tuneFreshGames} fresh games.`
+    ? `Suggested: ${greenBefore} → ${greenAfter} of ${targets.length} targets green on ${settings.tuneFreshGames} fresh games.${newlyBorderline ? ` ${newlyBorderline === 1 ? 'One of them is' : `${newlyBorderline} of them are`} only just over the line — confirm with npm run ai:arena (more games) before saving.` : ''}`
     : verdict === 'alreadyGreen'
       ? `All ${targets.length} of ${start.id}'s targets are green already — nothing to change.`
       : bestScore.own > log[0].own
