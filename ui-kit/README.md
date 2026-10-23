@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.26.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.26.1**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -96,6 +96,8 @@ gallery's `npm run shoot` uses the same one.
   · `"landscape"`. check:framework's browser checks skip the phone sizes it rules out and say so (`portrait` drops
   844×390 + 768×343; desktop sizes stay: a portrait game still runs in a desktop window); an unknown value warns and
   checks every size. The Dev Kit's PAUSED pill check uses sideways phones for a landscape game.
+  0.26.1 (F89): the Settings check counts the crashes module's "Send crash reports" switch (`crashReports`) as read
+  once the game passes its values on (`applyCrashSetting` / `setOn`), like the Audio rows.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

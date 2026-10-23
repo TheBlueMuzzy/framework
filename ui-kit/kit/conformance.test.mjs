@@ -237,6 +237,12 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     // the Audio rows count as handled only once the game hands the values to the audio module
     expect(settingsProblems(schema, []).dead.map((r) => r.id)).toEqual(['masterVolume', 'mono'])
   })
+  it('the crash-reports switch counts as read once the game passes it to the crashes module (F89 proof)', () => {
+    const schema = tab([{ id: 'crashReports', type: 'toggle', label: 'Send crash reports', default: true }])
+    expect(settingsProblems(schema, []).dead.map((r) => r.id)).toEqual(['crashReports'])
+    expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: '// applyCrashSetting(values) later' }]).dead.map((r) => r.id)).toEqual(['crashReports'])
+    expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: 'applyCrashSetting(loadSettings(schema))' }]).dead).toEqual([])
+  })
   it('the version row needs its text from the game, and a placeholder link fails', () => {
     const found = settingsProblems(tab([
       { id: 'version', type: 'info', label: 'Version', default: '0.1.0' },
