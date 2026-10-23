@@ -29,6 +29,7 @@ describe('install-emotes', () => {
     const result = installEmotes(root, { log: quiet })
     expect(existsSync(join(root, 'src/emotes/emotes.ts'))).toBe(true)
     expect(existsSync(join(root, 'src/emotes/conformance.mjs'))).toBe(true)
+    expect(existsSync(join(root, 'src/emotes/settings-rows.json'))).toBe(true) // the UI kit's Settings check reads it (F110)
     expect(existsSync(join(root, 'src/emotes/ui/EmoteLayer.tsx'))).toBe(true)
     expect(result.changed.some((f) => /\.test\./.test(f))).toBe(false)
     expect(readFileSync(join(root, 'src/emotes/VERSION'), 'utf8')).toMatch(/^0\.\d+\.\d+ \(framework /)

@@ -186,6 +186,51 @@ export const BANTER_ROWS = ['botChatter']
 const BANTER_WIRING = /\b(applyBanterSetting|setChatter)\s*\(/
 const VALUE_TYPES = ['slider', 'toggle', 'selector', 'stepper']
 
+// ---- a module's own Settings rows (0.30.0, F110) ----
+// A module that adds a Settings row ships settings-rows.json in its kit/; its installer copies it into the game next to
+// the module's VERSION (src/crashes/, src/emotes/, src/ai/kit/ …). The shape:
+//   { "about": "…",
+//     "rows": [ { "id": "hideEmotes",                                  ← the row's id in content/ui/settings.json
+//                 "readBy": ["\\b(applyEmoteSetting|setHideAll)\\s*\\("], ← regex sources: a match in the game's own code
+//                                                                        (comments stripped) = the row is passed on
+//                 "hint": "pass it to the emotes module: …" } ] }       ← what to do when nothing matches (optional)
+// The Settings check reads every installed one, so a new module with a row needs no UI kit change. The patterns come
+// from a file, so each is compiled with a try/catch: a broken file or pattern is a plain-English failure naming the
+// module, never a crash.
+export const ROW_MANIFEST = 'settings-rows.json'
+const MAX_PATTERN = 300 // a pattern longer than this isn't a wiring call's name
+
+/** One module's settings-rows.json text → { module, file, rows: [{ id, readBy: [RegExp], hint }], problems: [plain words] }. */
+export function readRowManifest(text, { module, file = `src/${module}/${ROW_MANIFEST}` }) {
+  const fix = `reinstall the module (node ~/.claude/config/bmuz/scripts/install-module.mjs ${module} .) — the game's copy isn't meant to be edited`
+  const broken = (why) => ({ module, file, rows: [], problems: [`${file} ${why}, so the ${module} module's Settings rows can't be checked — ${fix}`] })
+  let data
+  try { data = JSON.parse(text) } catch (e) { return broken(`isn't valid JSON (${String(e?.message ?? e).split('\n')[0]})`) }
+  if (!data || typeof data !== 'object' || !Array.isArray(data.rows)) return broken('has no "rows" list')
+  const rows = []
+  const problems = []
+  data.rows.forEach((row, i) => {
+    if (!row || typeof row.id !== 'string' || !row.id.trim()) {
+      problems.push(`${file} row ${i + 1} has no "id", so the ${module} module's row can't be matched to Settings — ${fix}`)
+      return
+    }
+    const sources = Array.isArray(row.readBy) ? row.readBy : []
+    if (!sources.length) problems.push(`${file} "${row.id}" has no "readBy" patterns, so the ${module} module can't say what passes it on — ${fix}`)
+    const readBy = []
+    for (const source of sources) {
+      if (typeof source !== 'string' || !source || source.length > MAX_PATTERN) {
+        problems.push(`${file} "${row.id}": a "readBy" entry isn't a short pattern (text, 1–${MAX_PATTERN} characters) — ${fix}`)
+        continue
+      }
+      try { readBy.push(new RegExp(source)) } catch (e) {
+        problems.push(`${file} "${row.id}": the pattern ${JSON.stringify(source)} isn't one the check can use (${String(e?.message ?? e).split('\n')[0]}) — ${fix}`)
+      }
+    }
+    rows.push({ id: row.id, readBy, hint: typeof row.hint === 'string' ? row.hint : '' })
+  })
+  return { module, file, rows, problems }
+}
+
 /** The rows a player can see: switched on ("on" isn't false) and not headings — [{ id, type, label, tab, url, default }]. */
 export function liveRows(schema) {
   const tabs = Array.isArray(schema?.tabs) ? schema.tabs : []
