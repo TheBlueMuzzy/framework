@@ -13,6 +13,8 @@ export const colourTokens = {
   'accent': 'Highlights: fills, active rings (never behind text)',
   'danger': 'Destructive buttons, errors',
   'on-danger': 'Text on danger',
+  'success': 'Good / done / owned: a bought upgrade\'s card edge (Card tone="success"), a success badge. Reads as green in every style (0.27.0)',
+  'on-success': 'Text on success',
   'muted': 'Quiet text: hints, captions',
   'border': 'Outlines, dividers, empty tracks',
   'focus': 'Keyboard/gamepad focus ring',

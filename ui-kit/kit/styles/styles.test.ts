@@ -6,11 +6,21 @@ import { requiredTokenNames, optionalTokens } from '../style/tokens'
 
 // Text colour → the backgrounds it is drawn on
 const textPairs: [text: string, background: string][] = [
-  ['on-bg', 'bg'], ['on-surface', 'surface'], ['on-primary', 'primary'], ['on-danger', 'danger'],
+  ['on-bg', 'bg'], ['on-surface', 'surface'], ['on-primary', 'primary'], ['on-danger', 'danger'], ['on-success', 'success'],
   ['muted', 'surface'], ['muted', 'bg'], // captions, hints and inactive tabs sit on both
   ['on-game', 'game-shade'], ['accent', 'game-shade'], // HUD text on the game: its shadow is what it reads against
 ]
-const shapePairs: [shape: string, background: string][] = [['focus', 'bg'], ['focus', 'surface']]
+// success is also a card's edge (Card tone="success", 0.27.0): a shape on the card's surface
+const shapePairs: [shape: string, background: string][] = [['focus', 'bg'], ['focus', 'surface'], ['success', 'surface']]
+
+// Hue of a #rrggbb colour, 0–360 (red 0, green 120, cyan 180, blue 240)
+function hue(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  const max = Math.max(r, g, b), d = max - Math.min(r, g, b)
+  if (!d) return 0
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return (h * 60 + 360) % 360
+}
 
 // WCAG relative luminance of a #rrggbb colour
 function luminance(hex: string) {
@@ -39,4 +49,15 @@ describe.each(Object.entries(presets))('preset %s', (_name, preset) => {
   it.each(shapePairs)('%s ring on %s is at least 3:1', (shape, background) => {
     expect(contrast(String(preset[shape as keyof typeof preset]), String(preset[background as keyof typeof preset]))).toBeGreaterThanOrEqual(3)
   })
+
+  it('success reads as green (hue 90–160°) and is not the primary colour', () => {
+    const h = hue(String(preset.success))
+    expect(h).toBeGreaterThanOrEqual(90)
+    expect(h).toBeLessThanOrEqual(160)
+    expect(String(preset.success).toLowerCase()).not.toBe(String(preset.primary).toLowerCase())
+  })
+})
+
+it('Neon: success is a clear green, well apart from its cyan primary (at least 35° of hue)', () => {
+  expect(hue(String(presets.neon.primary)) - hue(String(presets.neon.success))).toBeGreaterThanOrEqual(35)
 })

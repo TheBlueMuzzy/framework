@@ -18,10 +18,10 @@ import {
 const start = () => uiColoursFrom(cartoon)
 
 describe('the colour list', () => {
-  it('covers exactly the kit\'s 15 colour tokens', () => {
+  it('covers exactly the kit\'s 17 colour tokens', () => {
     const kit = [...Object.keys(colourTokens), ...Object.keys(lineColourTokens)].sort()
     expect(UI_COLOURS.map((c) => c.token).sort()).toEqual(kit)
-    expect(UI_COLOURS).toHaveLength(15)
+    expect(UI_COLOURS).toHaveLength(17)
   })
   it('gives friendly labels', () => {
     expect(uiLabel('primary')).toBe('Main buttons (primary)')

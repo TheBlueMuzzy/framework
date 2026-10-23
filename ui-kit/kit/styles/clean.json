@@ -8,6 +8,8 @@
   "accent": "#f0a030",
   "danger": "#c62f3a",
   "on-danger": "#ffffff",
+  "success": "#1e7d45",
+  "on-success": "#ffffff",
   "muted": "#5b6270",
   "border": "#d5d9e0",
   "focus": "#0b57d0",
