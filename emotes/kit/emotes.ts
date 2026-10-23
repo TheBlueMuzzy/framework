@@ -83,6 +83,8 @@ export interface Emotes {
   setMatch(match: string): void
   /** The seats played on this device changed (a hot-seat game started, an online seat arrived). */
   setMine(seats: string[]): void
+  /** Called when a mute, the switch or the match changes (the chips' muted marks redraw). Returns the way to stop. */
+  onChange(listener: () => void): () => void
 }
 
 /** Is this an id the module knows: one of the phrases, or a banter line that has words? */
@@ -109,7 +111,9 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
   if (isNew) kept = { ...kept, hideAll: config.mutedByDefault }
   const match = options.match ?? ''
   if (kept.match !== match) kept = { ...kept, match, seats: [] }
+  const changeListeners = new Set<() => void>()
   const write = () => {
+    for (const listener of [...changeListeners]) listener()
     if (!save) return
     const result = save.save(kept) as { ok?: boolean; message?: string } | undefined
     if (result && result.ok === false) warn(`couldn't keep the emote settings (${result.message ?? 'storage refused'}) — they last until the page closes.`)
@@ -189,6 +193,10 @@ export function createEmotes(options: EmotesOptions = {}): Emotes {
     setMine(seats) {
       mine = new Set(seats)
       if (kept.seats.some((s) => mine.has(s))) { kept = { ...kept, seats: kept.seats.filter((s) => !mine.has(s)) }; write() }
+    },
+    onChange(listener) {
+      changeListeners.add(listener)
+      return () => { changeListeners.delete(listener) }
     },
   }
 }

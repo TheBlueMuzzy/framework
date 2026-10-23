@@ -243,6 +243,12 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: '// applyCrashSetting(values) later' }]).dead.map((r) => r.id)).toEqual(['crashReports'])
     expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: 'applyCrashSetting(loadSettings(schema))' }]).dead).toEqual([])
   })
+  it('the Hide emotes switch counts as read once the game passes it to the emotes module (F107)', () => {
+    const schema = tab([{ id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes', default: false }])
+    expect(settingsProblems(schema, []).dead.map((r) => r.id)).toEqual(['hideEmotes'])
+    expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: '// applyEmoteSetting(emotes, values) later' }]).dead.map((r) => r.id)).toEqual(['hideEmotes'])
+    expect(settingsProblems(schema, [{ path: 'src/main.tsx', text: 'applyEmoteSetting(emotes, loadSettings(schema))' }]).dead).toEqual([])
+  })
   it('the version row needs its text from the game, and a placeholder link fails', () => {
     const found = settingsProblems(tab([
       { id: 'version', type: 'info', label: 'Version', default: '0.1.0' },

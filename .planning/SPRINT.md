@@ -37,7 +37,7 @@ Ask Muzzy: emotes shown by default (default: yes, with a "Hide emotes" Settings 
 Ask Muzzy: spam limit — default 3 in a row, then one every 4 s (content/emotes.json, editable).
 - [x] 🤖 1. Research how studios do it (Hearthstone, MTG Arena, Clash Royale, Marvel Snap, board-game apps): phrase sets, the picker, mute / squelch, spam limits, online relay, accessibility, what's left out (free chat) — and which layers this sprint takes → .planning/design/emotes.md
 - [x] 🤖 2. The module: phrase set + limits in content/emotes.json, `sendEmote(seat, id)` / `onEmote`, the spam limit, mute per seat (kept with the saves module), a bot-facing `say(seat, id)` — emotes/kit/
-- [ ] 🤖 3. SpeechBubble part in the UI kit + an EmotePicker: points at its seat, clear of the HUD, fixed size for the longest phrase, all 5 styles, reduce-motion = no pop, timings in content — ui-kit/kit/blocks/
+- [x] 🤖 3. SpeechBubble part in the UI kit + an EmotePicker: points at its seat, clear of the HUD, fixed size for the longest phrase, all 5 styles, reduce-motion = no pop, timings in content — ui-kit/kit/blocks/
 - [ ] 🤖 4. Online: an `emote` room message through the rooms kit (rate-limited on the server, never trusted from the browser), shown to every seat that hasn't muted the sender — rooms/kit/
 - [ ] 🤖 5. Installer, check:framework part (phrases in content, no phrase hard-coded, the picker reachable), README, MODULE-CONTRACTS section — emotes/scripts/
 - [ ] 🤖 6. Proof on a scratch Glyphtender copy: send emotes in a local game and a two-tab online game, mute one, spam is held back; screenshots of bubble + picker at every size — emotes/kit/
