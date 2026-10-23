@@ -34,3 +34,4 @@
 - 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).
 - 2026-10-22 — F89 built (waiting for OK): when a player's game breaks, the game reports it to its own small server; `npm run crashes` shows real file lines and session start says "N new errors from players".
 - 2026-10-22 — F89 approved: games can report their crashes to a server of their own, read on the PC with real file lines.
+- 2026-10-22 — Released v0.11.2: crash reports from players (crashes 0.1.0, UI kit 0.26.1, Dev Kit 0.22.1); the security review's 3 fixes — the token goes only to its own server, player text framed as data, other sites' file paths dropped.
