@@ -44,6 +44,12 @@ describe('install-ai', () => {
     expect(readFileSync(join(game, 'content/ai/arena.json'), 'utf8')).toBe('{ "games": 12 }')
     expect(second).toMatchObject({ changed: [], removed: [], starter: [] })
     expect(again.join('\n')).not.toContain('Still to wire')
+    // 0.7.0 (F26): with the framework's ai:arena, the installer adds "ai:tune" itself — once
+    expect(again.join('\n')).toContain('added   package.json "ai:tune": "node src/ai/kit/ai-arena.mjs --tune"')
+    expect(JSON.parse(readFileSync(join(game, 'package.json'), 'utf8')).scripts['ai:tune']).toBe('node src/ai/kit/ai-arena.mjs --tune')
+    const thrice = []
+    installAi(game, { log: (l) => thrice.push(l) })
+    expect(thrice.join('\n')).not.toContain('ai:tune')
     // 0.6.0: "What wins?" is offered (optional) until the arena plug names its situations
     expect(again.join('\n')).toContain('Optional: "What wins?": name the game\'s situations')
     writeFileSync(join(game, 'src/ai/arenaGame.ts'), 'export const plug = { situations: (state, seat) => ({ lead: 1 }) }')
@@ -91,6 +97,22 @@ describe('install-ai', () => {
     expect(readFileSync(join(game, 'tests/saves/mygame_banter-v1.json'), 'utf8')).toBe('{ "mine": true }') // the game's now
     expect(again.join('\n')).not.toContain('BANTER_SAVE')
   })
+
+  it('0.7.0: offers the Dev Kit\'s "Suggest sliders" (optional) once the game\'s worker serves the check, until it tunes', () => {
+    const game = mkdtempSync(join(tmpdir(), 'ai-game-'))
+    writeFileSync(join(game, 'package.json'), JSON.stringify({ scripts: { 'ai:tune': 'my own' } }))
+    mkdirSync(join(game, 'src/devkit-game'), { recursive: true })
+    const step = 'Optional: The Dev Kit\'s "Suggest sliders"'
+    const run = () => { const out = []; installAi(game, { log: (l) => out.push(l) }); return out.join('\n') }
+    expect(run()).not.toContain(step) // no Dev Kit check yet
+    writeFileSync(join(game, 'src/devkit-game/aiCheck.worker.ts'), 'serveCheck<{ wordsUrl: string }>(self, async (tab) => run(tab))')
+    expect(run()).toContain(step)
+    writeFileSync(join(game, 'src/devkit-game/aiCheck.worker.ts'), 'serveCheck(self, run, (job, onProgress) => tunePersonality(plug, job, job.personality, { onProgress }))')
+    writeFileSync(join(game, 'src/devkit-game/aiCheck.ts'), 'export const suggest = (o) => suggestInWorker(start, o)')
+    const done = run()
+    expect(done).not.toContain(step)
+    expect(JSON.parse(readFileSync(join(game, 'package.json'), 'utf8')).scripts['ai:tune']).toBe('my own') // a game's own is left alone
+  }, 30000)
 
   it('a dry run changes nothing', () => {
     const game = mkdtempSync(join(tmpdir(), 'ai-game-'))

@@ -1,6 +1,7 @@
 // THE AI MODULE — THE PERSONALITY CHECK REPORT. One self-contained HTML page (no scripts, no files) a game's arena
 // writes after a run: feel targets green/red, the tell-apart grid, win shares, the skill ladder, example notes.
 import type { TargetResult } from './check'
+import type { TuneResult } from './tune'
 import { span, type SituationWins, type WhatWins } from './wins'
 
 export interface CheckReport {
@@ -19,7 +20,8 @@ export interface CheckReport {
   whatWins?: WhatWins
 }
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+/** Anything game-named (personality, meter, label…) goes through this before it's on a page. */
+export const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 const pct = (v: number) => `${Math.round(v * 100)}%`
 const mark = (pass: boolean) => `<span class="${pass ? 'ok' : 'no'}">${pass ? '✓' : '✗'}</span>`
 
@@ -59,8 +61,19 @@ export function reportHtml(r: CheckReport): string {
   const winTable = `<table><tr><th>win share</th>${h2h.map((n) => `<th>${esc(n)}</th>`).join('')}<th>overall</th><th>skill ladder</th></tr>${h2h
     .map((a) => `<tr><th>${esc(a)}</th>${h2h.map((b) => (a === b ? '<td class="dim">—</td>' : `<td>${r.wins.headToHead[a]?.[b] !== undefined ? pct(r.wins.headToHead[a][b]) : ''}</td>`)).join('')}<td>${pct(r.wins.overall[a])}</td><td>${r.ladder[a] !== undefined ? pct(r.ladder[a]) : ''}</td></tr>`)
     .join('')}</table>`
+  return page('Personality Check', `<h1>${esc(r.title)}</h1><p class="dim">${esc(r.subtitle)}</p>
+<h2>For all of them</h2><ul>${r.all.map((a) => `<li>${mark(a.pass)} ${esc(a.label)} <span class="dim">— ${esc(a.detail)}</span></li>`).join('')}</ul>
+<h2>Does each one feel like itself?</h2><div class="cards">${feelRows}</div>
+<h2>Can you tell them apart? <span class="dim">(${pct(r.tell.overall)} guessed right from behaviour alone)</span></h2><div class="scroll">${grid}</div>
+<h2>Does everyone win sometimes?</h2><div class="scroll">${winTable}</div>
+${r.whatWins ? whatWinsHtml(r.whatWins) : ''}
+${r.notes?.length ? `<h2>How they think (one game)</h2><pre>${r.notes.map(esc).join('\n')}</pre>` : ''}`)
+}
+
+/** The page every AI report shares (the Personality Check, the tuner's suggestion): one self-contained HTML file. */
+function page(title: string, body: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Personality Check</title><style>
+<title>${esc(title)}</title><style>
 :root{--bg:#f6f3ee;--card:#fff;--ink:#2a2622;--dim:#857c72;--ok:#2f7d4f;--no:#b4432f;--line:#e2dbd1;--diag:#dcefe2;--off:#f7e1dc}
 @media (prefers-color-scheme:dark){:root{--bg:#171a22;--card:#20242e;--ink:#ece6dc;--dim:#9a93a0;--ok:#6fcf97;--no:#f08a76;--line:#323848;--diag:#1f3b2c;--off:#45251f}}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}main{max-width:1000px;margin:0 auto;padding:24px 16px}
@@ -69,13 +82,37 @@ h1{margin:0 0 4px}h2{margin:32px 0 8px}.dim{color:var(--dim)}.ok{color:var(--ok)
 .card h3{margin:0 0 6px}ul{margin:0;padding-left:18px}li{margin:2px 0}.scroll{overflow-x:auto}
 table{border-collapse:collapse;background:var(--card);border-radius:8px}th,td{border:1px solid var(--line);padding:6px 10px;text-align:center}td.diag{background:var(--diag)}td.off{background:var(--off)}table.wins td,table.wins th{white-space:nowrap}
 pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;font-size:13px}
+th.l,td.l{text-align:left}td.changed{font-weight:600}
 </style></head><body><main>
-<h1>${esc(r.title)}</h1><p class="dim">${esc(r.subtitle)}</p>
-<h2>For all of them</h2><ul>${r.all.map((a) => `<li>${mark(a.pass)} ${esc(a.label)} <span class="dim">— ${esc(a.detail)}</span></li>`).join('')}</ul>
-<h2>Does each one feel like itself?</h2><div class="cards">${feelRows}</div>
-<h2>Can you tell them apart? <span class="dim">(${pct(r.tell.overall)} guessed right from behaviour alone)</span></h2><div class="scroll">${grid}</div>
-<h2>Does everyone win sometimes?</h2><div class="scroll">${winTable}</div>
-${r.whatWins ? whatWinsHtml(r.whatWins) : ''}
-${r.notes?.length ? `<h2>How they think (one game)</h2><pre>${r.notes.map(esc).join('\n')}</pre>` : ''}
+${body}
 </main></body></html>`
+}
+
+/** The tuner's suggestion (tune.ts) as a page: the verdict, old → new per slider, each target before → after on the
+ *  fresh games, what it couldn't reach and why, other personalities' targets that changed, and every try. Nothing on
+ *  it is applied — the designer does that. */
+export function tuneHtml(r: TuneResult, game: string): string {
+  const num = (v: number) => (Number.isFinite(v) ? String(v) : '—')
+  const sliders = r.sliders.map((s) => `<tr><th class="l">${esc(s.path)}</th><td>${esc(s.from)}</td><td class="${s.changed ? 'changed' : 'dim'}">${s.changed ? esc(s.to) : 'same'}</td></tr>`).join('')
+  const targets = r.targets.map((t) => `<tr><th class="l">${esc(t.label)} <span class="dim">— ${esc(t.meter)}, wants ${esc(t.wants)}</span></th><td>${mark(t.before.pass)} ${num(t.before.measured)}</td><td>${mark(t.after.pass)} ${num(t.after.measured)}</td></tr>`).join('')
+  const green = (k: 'before' | 'after') => r.targets.filter((t) => t[k].pass).length
+  const body = `<h1>Suggested sliders — ${esc(r.personality)}</h1><p class="dim">${esc(game)} · ${esc(r.subtitle)}</p>
+<section class="card" data-tune-verdict="${esc(r.verdict)}"><p><span class="${r.verdict === 'better' ? 'ok' : r.verdict === 'alreadyGreen' ? 'ok' : 'no'}">${esc(r.message)}</span></p>
+<p class="dim">${r.tries} tries · ${r.games} games · ${r.seconds} s · stopped: ${esc(stopWords[r.stoppedBy])}. Nothing was written — apply it in the Dev Kit's AI tab (Suggest sliders → Apply → Save), or copy the new values into content/ai/personalities.json.</p></section>
+${r.targets.length ? `<h2>Its feel targets <span class="dim">(on ${r.settings.tuneFreshGames} fresh games: ${green('before')} → ${green('after')} of ${r.targets.length} green)</span></h2>
+<div class="scroll"><table><tr><th class="l">target</th><th>now</th><th>${r.suggested ? 'suggested' : 'best found'}</th></tr>${targets}</table></div>` : ''}
+${r.cantReach.length ? `<h2>Couldn't reach</h2><ul>${r.cantReach.map((c) => `<li>${mark(false)} ${esc(c.label)} <span class="dim">— ${esc(c.why)}</span></li>`).join('')}</ul>` : ''}
+${r.others.length ? `<h2>Other personalities' targets that changed</h2><ul>${r.others.map((o) => `<li>${mark(o.after)} ${esc(o.personality)}: ${esc(o.label)} <span class="dim">— was ${o.before ? 'green' : 'red'}</span></li>`).join('')}</ul>` : ''}
+<h2>Sliders <span class="dim">(old → new; each stays inside its range)</span></h2>
+<div class="scroll"><table><tr><th class="l">slider</th><th>now</th><th>suggested</th></tr>${sliders}</table></div>
+${r.log.length ? `<h2>How it searched <span class="dim">(on the tuning games)</span></h2><ol>${r.log.map((l) => `<li>${esc(l.change)} → ${l.own}/${r.targets.length} green${l.tryNo > 1 ? (l.kept ? ' <span class="ok">kept</span>' : ' <span class="dim">not kept</span>') : ''}</li>`).join('')}</ol>` : ''}`
+  return page(`Suggested sliders — ${r.personality}`, body)
+}
+
+const stopWords: Record<TuneResult['stoppedBy'], string> = {
+  allGreen: 'every target green on the tuning games',
+  tries: 'out of tries',
+  time: 'out of time',
+  settled: 'no slider helped, even at the smallest step',
+  noTargets: 'no targets',
 }

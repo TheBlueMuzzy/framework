@@ -4,6 +4,7 @@ import type { ArenaPlug, ArenaRequest, CheckTargets } from './arena'
 import type { FeelTarget } from './check'
 import { defaultTuneSettings, isBetter, shortfall, sliderText, sliderValue, slidersOf, tunePersonality, tuneTables, withSlider, type TuneResult } from './tune'
 import type { Personality } from './types'
+import { tuneHtml } from './report'
 import { arenaPlug, careful, greedy, skills, targets, type Action, type Setup, type State, type View } from '../fixtures/drawTo10'
 
 // A plug whose meter IS the seat's caution (its range's low end) — so a target on it is reached by one slider, with no
@@ -170,6 +171,19 @@ describe('tunePersonality', () => {
     tunePersonality(cautionPlug, req(withTargets([{ meter: 'caution', op: '<=', value: 60, label: 'x' }])), 'Careful', { settings: { ...quick, tuneGames: 2, tuneFreshGames: 2 }, onProgress: (p) => seen.push(`${p.phase} ${p.tryNo}/${p.tries} ${p.game}/${p.games}`) })
     expect(seen.slice(0, 3)).toEqual(['search 1/200 1/2', 'search 1/200 2/2', 'search 2/200 1/2'])
     expect(seen.at(-1)).toMatch(/^fresh .* 2\/2$/)
+  })
+
+  it('its page escapes everything game-named (personality, slider, meter, label, the game) and shows old → new', () => {
+    const odd: Personality = { ...careful, id: '<b>Odd</b>', traits: { '"x"<i>': { min: 80, max: 95 }, ...careful.traits } }
+    const plug = { ...cautionPlug, meters: (game: Parameters<typeof cautionPlug.meters>[0]) => game.seats.map((s) => ({ '<m>': s.personality.traits['"x"<i>']?.min ?? 0 })) }
+    const t: CheckTargets = { personalities: { '<b>Odd</b>': [{ meter: '<m>', op: '<=', value: 30, label: '<script>alert(1)</script>' }] }, all: [] }
+    const r = tunePersonality(plug, { personalities: [odd, greedy], skills, targets: t }, '<b>Odd</b>', { settings: quick })
+    const html = tuneHtml(r, '<Game & "Co">')
+    expect(html).not.toMatch(/<script>|<b>Odd|<i>|<m>|<Game/)
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
+    expect(html).toContain('&lt;Game &amp; &quot;Co&quot;&gt;')
+    expect(html).toContain('data-tune-verdict="better"')
+    expect(html).toMatch(/<td>80–95<\/td><td class="changed">\d+–\d+<\/td>/)
   })
 
   it('has defaults for every budget number — the same as the installer\'s starter arena.json, each with a help line', () => {

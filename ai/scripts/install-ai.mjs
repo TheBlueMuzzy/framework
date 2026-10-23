@@ -117,6 +117,14 @@ export function wiringSteps(gameDir) {
        (plug = its rules, setup(seats, seed, kind) with its board choice, bot, meters, winners — src/ai/kit/arena.ts ArenaGameFile; the AI README's "Arena")`,
     },
     {
+      // "Suggest sliders" in the Dev Kit (0.7.0, F26): once the game's Dev Kit worker plays the check, until it tunes too
+      done: !codeCalls(gameDir, /\bserveCheck\s*(<[^>()]*>)?\s*\(/) || (codeCalls(gameDir, /\bsuggestInWorker\s*\(/) && codeCalls(gameDir, /\btunePersonality\s*\(/)),
+      optional: true,
+      step: `The Dev Kit's "Suggest sliders" (Dev Kit 0.26.0): in the check's worker give serveCheck a second function —
+       serveCheck(self, runCheck, (job, onProgress) => tunePersonality(plug, { personalities: job.personalities, skills: job.skills, targets, mainSkill }, job.personality, { settings: arenaJson, onProgress }))
+       (tunePersonality from src/ai/kit/tune.ts) — and in the AI tab's plug: suggest: (options) => suggestInWorker(startWorker, options)   (the AI README's "Suggest sliders")`,
+    },
+    {
       // "What wins?" (0.6.0, F25): once the arena file is there, until its plug names situations
       done: !existsSync(join(gameDir, ARENA_FILE)) || /\bsituations\s*[:(]/.test(readFileSync(join(gameDir, ARENA_FILE), 'utf8')),
       optional: true,
@@ -124,6 +132,25 @@ export function wiringSteps(gameDir) {
        — the report, npm run ai:arena and the Dev Kit's Run check then say which predict the win (read after turns 3, 5 and at the end: content/ai/arena.json "whatWinsMoments"; the AI README's "What wins?")`,
     },
   ]
+}
+
+export const TUNE_SCRIPT = 'node src/ai/kit/ai-arena.mjs --tune'
+
+/** npm run ai:tune (0.7.0, F26) — added to package.json by the installer itself, once the game runs the framework's
+ *  ai:arena (the tuner plays the same arena file). A game's own different "ai:tune" is left alone. Only when missing. */
+export function addTuneScript(gameDir, { dryRun = false, log = console.log } = {}) {
+  const path = join(gameDir, 'package.json')
+  if (!existsSync(path)) return false
+  const text = readFileSync(path, 'utf8')
+  let pkg
+  try { pkg = JSON.parse(text) } catch { return false }
+  if (!/src[\\/]ai[\\/]kit[\\/]ai-arena\.mjs/.test(pkg.scripts?.['ai:arena'] ?? '') || pkg.scripts['ai:tune'] !== undefined) return false
+  pkg.scripts = { ...pkg.scripts, 'ai:tune': TUNE_SCRIPT }
+  const indent = text.match(/^[ \t]+(?=")/m)?.[0] ?? '  '
+  const eol = text.includes('\r\n') ? '\r\n' : '\n'
+  if (!dryRun) writeFileSync(path, JSON.stringify(pkg, null, indent).replaceAll('\n', eol) + eol)
+  log(`  added   package.json "ai:tune": "${TUNE_SCRIPT}"   (npm run ai:tune -- --personality <id>: suggested sliders, never written)`)
+  return true
 }
 
 function listFiles(dir, base = dir) {
@@ -163,7 +190,10 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   removed.forEach((f) => log(`  removed ${f}`))
   if (!changed.length && !removed.length) log('  already up to date')
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
-  if (dryRun) return { changed, removed, starter }
+  if (dryRun) {
+    addTuneScript(game, { dryRun, log })
+    return { changed, removed, starter }
+  }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
     copyFileSync(ships.get(f), join(target, f))
@@ -176,6 +206,7 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
     if (STARTERS[f]) copyFileSync(join(aiDir, STARTERS[f]), join(game, f))
     else writeFileSync(join(game, f), goldenText(game))
   }
+  addTuneScript(game, { log })
   const missing = wiringSteps(game).filter((w) => !w.done && !w.optional)
   if (missing.length) {
     log(`  Still to wire${missing.every((w) => !w.banter) ? ' (only for the arena — npm run ai:arena)' : ''}:`)

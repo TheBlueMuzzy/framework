@@ -58,6 +58,26 @@ describe('npm run ai:arena', () => {
     expect(named.out).not.toMatch(/\nCareful/) // only the Greedy played
   }, 30000)
 
+  it('--tune (npm run ai:tune): prints the suggestion, writes its page, and never touches content/', () => {
+    const dir = gameFolder({ games: 6, reportPath: 'out/check.html', tuneGames: 3, tuneFreshGames: 4 })
+    const before = readFileSync(join(dir, 'content/ai/arena.json'), 'utf8') + readFileSync(join(dir, 'content/ai/cast.json'), 'utf8')
+    const r = arenaRun(dir, '--tune', '--personality', 'careful', '--budget', 'tries=4,seconds=0')
+    expect(r.code, r.out).toBe(0)
+    expect(r.out).toContain('3 games a try at Steady · up to 4 tries · checked on 4 fresh games')
+    expect(r.out).toMatch(/Careful: (Suggested|No slider|The best try|All \d)/)
+    expect(r.out).toMatch(/feel targets on 4 fresh games \(now → (suggested|best found)\):/)
+    expect(r.out).toContain('Nothing was written to content/')
+    const path = /page: (.+)/.exec(r.out)[1].trim()
+    expect(path).toBe(join(dir, 'out', 'ai-tune-Careful.html'))
+    const html = readFileSync(path, 'utf8')
+    expect(html).toContain('Suggested sliders — Careful')
+    expect(html).toMatch(/data-tune-verdict="(better|noGain|alreadyGreen)"/)
+    expect(readFileSync(join(dir, 'content/ai/arena.json'), 'utf8') + readFileSync(join(dir, 'content/ai/cast.json'), 'utf8')).toBe(before)
+    expect(arenaRun(dir, '--tune')).toMatchObject({ code: 1, out: expect.stringContaining('ai:tune: which personality? npm run ai:tune -- --personality <id>   (there are Careful, Greedy)') })
+    expect(arenaRun(dir, '--tune', '--personality', 'Nobody')).toMatchObject({ code: 1, out: expect.stringContaining('No personality "Nobody"') })
+    expect(arenaRun(dir, '--tune', '--personality', 'Careful', '--budget', 'lots=3')).toMatchObject({ code: 1, out: expect.stringContaining('--budget wants name=number pairs') })
+  }, 60000)
+
   it('says what is wrong in plain English', () => {
     const dir = gameFolder()
     expect(arenaRun(dir, '--skill', 'Wizard')).toMatchObject({ code: 1, out: expect.stringContaining('No skill "Wizard" (there are Apprentice, Steady, Expert)') })
