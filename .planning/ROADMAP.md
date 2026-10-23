@@ -72,7 +72,7 @@ Goal: any turn-based game can put a fair, human-feeling AI in any seat — local
 - 🔨 F22 🧱 Banter: moments from events → line picker (chattiness, cooldown, no repeats) + UI kit SpeechBubble part — must:beta · needs: F19, F13
 - ✅ F23 🔧 Dev Kit AI tab: personality editor (range sliders, goal order, nudge, shifts, skill, bio/banter) saving to content/ai/, and "watch a game" with decision notes + belief meters — must:beta · needs: F19, ~F20 · built 2026-10-04 (Dev Kit 0.6.0, devkit/kit/ai: game plugs in with aiTab(DevKitAi): files as data + validate / watch / runCheck callbacks; Run check opens the F24 report; first game: Glyphtender F41). Not yet: banter lines, pace.json, pause/step in Watch
   why: Muzzy tunes personalities by eye in the game, not by description
-- 🔨 F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21
+- ✅ F24 🔧 Arena + Personality Check: N AI-vs-AI games (Node + Dev Kit), behaviour meters, feel targets green/red, tell-apart grid, win-rate grid, skill ladder, report page — must:beta · needs: F19, ~F21 · sprint 26 (ai 0.3.0 arena + npm run ai:arena, Dev Kit 0.23.0 Run check in a worker)
   why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
 - ⏳ F25 🔧 "What wins?" report: which situations predict winning, from self-play — should · needs: F24
 - ⏳ F26 🔧 Auto-tuner: suggests slider values that hit a personality's feel targets — could · needs: F24
