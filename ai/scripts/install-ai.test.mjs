@@ -44,6 +44,16 @@ describe('install-ai', () => {
     expect(readFileSync(join(game, 'content/ai/arena.json'), 'utf8')).toBe('{ "games": 12 }')
     expect(second).toMatchObject({ changed: [], removed: [], starter: [] })
     expect(again.join('\n')).not.toContain('Still to wire')
+    // A personality that talks asks for the banter wiring until botBanter is in the game's code
+    writeFileSync(join(game, 'content/ai/personalities.json'), JSON.stringify({ personalities: [{ id: 'Bully', chattiness: 60 }, { id: 'Mute', chattiness: 0 }] }))
+    const chat = []
+    installAi(game, { log: (l) => chat.push(l) })
+    expect(chat.join('\n')).toContain('the bots talk (Bully has chattiness > 0)')
+    mkdirSync(join(game, 'src/game'), { recursive: true })
+    writeFileSync(join(game, 'src/game/bots.ts'), 'const banter = botBanter(options)')
+    const talking = []
+    installAi(game, { log: (l) => talking.push(l) })
+    expect(talking.join('\n')).not.toContain('Still to wire')
   })
 
   it('a dry run changes nothing', () => {

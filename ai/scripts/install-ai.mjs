@@ -29,6 +29,25 @@ const STARTERS = { 'content/ai/arena.json': 'templates/content/ai/arena.json', '
 const ARENA_FILE = 'src/ai/arenaGame.ts'
 const isTest = (path) => /\.test\./.test(path)
 
+/** The ids of the game's personalities with chattiness > 0 (content/ai/*.json files with a "personalities" list). */
+export function chattyPersonalities(gameDir) {
+  const dir = join(gameDir, 'content/ai')
+  if (!existsSync(dir)) return []
+  return readdirSync(dir).filter((f) => f.endsWith('.json')).flatMap((f) => {
+    try {
+      const list = JSON.parse(readFileSync(join(dir, f), 'utf8')).personalities
+      return Array.isArray(list) ? list.filter((p) => p && typeof p.id === 'string' && p.chattiness > 0).map((p) => p.id) : []
+    } catch { return [] }
+  })
+}
+
+/** Does the game's own code (src/ outside the kit, party/) match? */
+function codeCalls(gameDir, re) {
+  const files = ['src', 'party'].flatMap((d) => listFiles(join(gameDir, d)).map((f) => join(d, f).replaceAll('\\', '/')))
+    .filter((f) => /\.(m?[jt]sx?)$/.test(f) && !isTest(f) && !f.startsWith(`${KIT_TARGET}/`))
+  return files.some((f) => re.test(readFileSync(join(gameDir, f), 'utf8')))
+}
+
 // The wiring, as { done, step } — so only the missing steps are printed (like the crashes installer's)
 export function wiringSteps(gameDir) {
   let scripts = {}
@@ -38,6 +57,15 @@ export function wiringSteps(gameDir) {
       // (a game's own older arena script — Glyphtender's scripts/ai-arena.mjs — doesn't count: it isn't the framework's)
       done: /src[\\/]ai[\\/]kit[\\/]ai-arena\.mjs/.test(scripts['ai:arena'] ?? ''),
       step: `package.json "scripts": "ai:arena": "node src/ai/kit/ai-arena.mjs"   (AI-vs-AI games + the Personality Check report on the PC; needs vite, which every web game has)${scripts['ai:arena'] ? `\n       — it says "${scripts['ai:arena']}" now (the game's own arena): switch once src/ai/arenaGame.ts gives the same numbers` : ''}`,
+    },
+    {
+      // Banter (F22): only asked for once a personality talks (chattiness > 0)
+      done: !chattyPersonalities(gameDir).length || codeCalls(gameDir, /\bbotBanter\s*\(/),
+      step: `the bots talk (${chattyPersonalities(gameDir).join(', ')} ${chattyPersonalities(gameDir).length === 1 ? 'has' : 'have'} chattiness > 0): their lines in content/text/en.json "banter": { "<personality>": { "<moment>": "…" } } (the Dev Kit's AI tab edits them),
+       the moments in the plug (moments(event, seat) → the names in content/ai/banter.json "chance"), then
+       const banter = botBanter({ moments: plug.moments, bots, settings: readBanterSettings(banterJson), lines: () => text.banter, say: (seat, id) => emotes.say(seatIdOf(seat), id).ok, seed })
+       and banter.hear(events) after every change — online in party/server.ts with say: room.emote (the AI README's "Banter"; needs the emotes module)`,
+      banter: true,
     },
     {
       done: existsSync(join(gameDir, ARENA_FILE)),
@@ -96,7 +124,7 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   }
   const missing = wiringSteps(game).filter((w) => !w.done)
   if (missing.length) {
-    log('  Still to wire (only for the arena — npm run ai:arena):')
+    log(`  Still to wire${missing.every((w) => !w.banter) ? ' (only for the arena — npm run ai:arena)' : ''}:`)
     missing.forEach((w, i) => log(`  ${i + 1}. ${w.step}`))
   }
   { const step = checkFrameworkStep(gameDir); if (step) log(`  Also: ${step}`) }

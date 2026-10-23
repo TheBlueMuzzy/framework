@@ -84,7 +84,11 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
 
 **How it's checked — `npm run check:framework`** (`kit/conformance.mjs`): *personalities live in content/ai/* (fails
 with no `content/ai/*.json`) · *bots wait on the rules clock* (fails when nothing calls `setPaceClock(rulesClock)`, and
-names bot code — files importing `ai/kit/pace` — still waiting on `setTimeout` / `performance.now`). The Personality
+names bot code — files importing `ai/kit/pace` — still waiting on `setTimeout` / `performance.now`) · banter (F22):
+*every chatty personality has lines* (each personality with chattiness > 0 has a line in `content/text/en.json`
+`"banter"` for one of the moments `content/ai/banter.json` names; a line for a moment never named is a warning) ·
+*no banter line is hard-coded* (a line's words in `src/` or `party/` fail, named) · *bots talk through the emote
+module* (chatty personalities need `botBanter(…)` and its `hear(events)` in the game's code or its server). The Personality
 Check (`check.ts`) is a balance tool the game runs on purpose — not a wiring promise, so it isn't part of it.
 
 ## Install / update in a game
