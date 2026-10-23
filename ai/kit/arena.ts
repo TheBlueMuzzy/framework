@@ -9,8 +9,13 @@
 // Used by `npm run ai:arena` (ai-arena.mjs) and the Dev Kit's Run check (inside a Web Worker).
 // Design: framework .planning/design/ai.md ("Arena + Personality Check").
 import { botSeed } from './brain'
-import type { GameResult } from './check'
+import { averages, checkFeelTargets, skillLadder, tellApart, winRates, type FeelTarget, type GameResult } from './check'
+import { shuffle } from './random'
+import type { CheckReport } from './report'
 import type { Decision, Personality, Skill } from './types'
+
+/** A number per personality, worked out from the results (a game's own "for all of them" check). */
+export type PersonalityNumbers = (results: GameResult[], skill?: string) => Map<string, number>
 
 /** The part of the Table's Rules the arena uses (a game's Rules fits as it is — table/kit/core.ts). */
 export interface ArenaRules<State, Action, Setup, View> {
@@ -50,6 +55,10 @@ export interface ArenaPlug<State, Action, Setup, View> {
   fast?: boolean
   /** Stop a game after this many moves (an error: the game never ended). Default 5000. */
   maxMoves?: number
+  /** The meters the tell-apart grid looks at. Default: every meter (leave out ones that give the answer away). */
+  tellMeters?: string[]
+  /** The game's own "for all of them" checks, by the name feel-targets.json uses (e.g. Glyphtender's "callsIt"). */
+  checks?: Record<string, PersonalityNumbers>
   /** Where a seat's randomness starts. Default: the AI kit's botSeed rule (a game moving its own arena up can keep
    *  its old rule, so its old numbers stay the same). */
   seatRng?: (seed: number, seat: number) => number
@@ -117,4 +126,205 @@ export function toResults<State, Action, Setup, View>(plug: ArenaPlug<State, Act
       })),
     }
   })
+}
+
+// ─── Seating plans ───
+
+/** How a run is shaped. The game keeps its own numbers in content/ai/arena.json (the installer gives it a starter). */
+export interface ArenaSettings {
+  /** Mixed tables at the main skill. */
+  games: number
+  /** Table sizes go round minSeats, minSeats + 1 … maxSeats, game after game. */
+  minSeats: number
+  maxSeats: number
+  /** Skill-ladder games per personality: its highest skill against its lowest, two seats, sides swapped each game. */
+  ladderGames: number
+  /** The first mixed game's seed (game g plays seed + g); it also seeds the seating shuffle. */
+  seed: number
+  /** Ladder game g plays seed + ladderSeedOffset + g. */
+  ladderSeedOffset: number
+  /** How many decision notes of the first game go in the report. */
+  notesInReport: number
+}
+
+/** Used for anything content/ai/arena.json leaves out (the numbers Glyphtender's own arena used). */
+export const defaultArenaSettings: ArenaSettings = { games: 60, minSeats: 2, maxSeats: 4, ladderGames: 6, seed: 1000, ladderSeedOffset: 4000, notesInReport: 24 }
+
+/** One game to play: who sits where, its seed, what kind of table. */
+export interface ArenaTable {
+  seats: ArenaSeat[]
+  seed: number
+  kind: TableKind
+}
+
+/** Mixed tables: sizes going round min → max seats, personalities shuffled (seeded — the same plan every run). A table
+ *  bigger than the cast gets repeats (3 personalities at 4 seats = one of them twice). `only` = these exact seats every
+ *  game instead. */
+export function mixedTables(personalities: Personality[], skill: Skill, games: number, settings: Pick<ArenaSettings, 'minSeats' | 'maxSeats' | 'seed'>, only: Personality[] = []): ArenaTable[] {
+  const sizes = Math.max(1, settings.maxSeats - settings.minSeats + 1)
+  let rng = settings.seed
+  const tables: ArenaTable[] = []
+  for (let g = 0; g < games; g++) {
+    let cast = only
+    if (!only.length) {
+      const n = settings.minSeats + (g % sizes)
+      cast = []
+      while (cast.length < n && personalities.length) {
+        const s = shuffle(personalities, rng)
+        rng = s.rng
+        cast = [...cast, ...s.items]
+      }
+      cast = cast.slice(0, n)
+    }
+    tables.push({ seats: cast.map((personality) => ({ personality, skill })), seed: settings.seed + g, kind: 'mixed' })
+  }
+  return tables
+}
+
+/** Skill-ladder tables: for each personality, `gamesEach` two-seat games of its `high` skill against its `low` one,
+ *  swapping who goes first every game. */
+export function ladderTables(personalities: Personality[], low: Skill, high: Skill, gamesEach: number, seed: number): ArenaTable[] {
+  return personalities.flatMap((personality) =>
+    Array.from({ length: gamesEach }, (_, g) => {
+      const seats = [{ personality, skill: high }, { personality, skill: low }]
+      return { seats: g % 2 ? seats.reverse() : seats, seed: seed + g, kind: 'ladder' as const }
+    }),
+  )
+}
+
+// ─── The whole Personality Check ───
+
+/** A "for all of them" check: each personality's number must sit inside min…max. Built in: 'tellApart' (how often
+ *  the tell-apart grid recognises it), 'skillLadder' (its higher skill's share of the wins), 'winRate' (its overall
+ *  win share), 'meter' (its average of `meter`). Anything else = one of the game plug's own `checks`. */
+export interface AllCheck {
+  check: string
+  meter?: string
+  min?: number
+  max?: number
+  label: string
+}
+
+/** The game's content/ai/feel-targets.json: feel targets per personality + the checks for all of them. */
+export interface CheckTargets {
+  personalities: Record<string, FeelTarget[]>
+  all: AllCheck[]
+}
+
+export interface ReportOptions {
+  /** Skills in order, lowest first (for the skill ladder). */
+  skillOrder: string[]
+  /** Feel, tell-apart and wins look only at this skill's seats (the ladder looks at every game). */
+  mainSkill?: string
+  subtitle: string
+  /** The meters the tell-apart grid looks at. Default: every meter the games measured. */
+  tellMeters?: string[]
+  /** The game's own "for all of them" checks, by name. */
+  checks?: Record<string, PersonalityNumbers>
+  /** How many notes of the first game to show. Default 24. */
+  notes?: number
+}
+
+/** The whole Personality Check for a batch of results, ready for reportHtml. Pure: the same results = the same report. */
+export function checkReport(name: string, results: GameResult[], firstNotes: string[], targets: CheckTargets, options: ReportOptions): CheckReport {
+  const { mainSkill } = options
+  const tellMeters = options.tellMeters ?? [...new Set(results.flatMap((g) => g.seats.flatMap((s) => Object.keys(s.meters))))]
+  const feel = checkFeelTargets(results, targets.personalities, mainSkill)
+  const tell = tellApart(results, tellMeters, mainSkill)
+  const wins = winRates(results, mainSkill)
+  const ladder = skillLadder(results, options.skillOrder)
+  const names = Object.keys(wins.overall)
+  const band = (v: number, min?: number, max?: number) => (min === undefined || v >= min) && (max === undefined || v <= max)
+  const pct = (v: number) => `${Math.round(v * 100)}%`
+  const numbersFor = (t: AllCheck): Map<string, number> | null => {
+    if (t.check === 'tellApart') return new Map(Object.entries(tell.accuracy))
+    if (t.check === 'skillLadder') return new Map(Object.entries(ladder))
+    if (t.check === 'winRate') return new Map(Object.entries(wins.overall))
+    if (t.check === 'meter') return t.meter ? averages(results, t.meter, mainSkill) : null
+    return options.checks?.[t.check]?.(results, mainSkill) ?? null
+  }
+  const all = targets.all.map((t) => {
+    const numbers = numbersFor(t)
+    if (!numbers) return { label: t.label, pass: false, detail: `no check called "${t.check}"${t.check === 'meter' ? ' (it needs a "meter")' : ''}` }
+    const measured = names.filter((n) => numbers.get(n) !== undefined).map((n) => [n, numbers.get(n)!] as const)
+    const failing = measured.filter(([, v]) => !band(v, t.min, t.max))
+    const notMeasured = names.length - measured.length
+    const pass = measured.length > 0 && failing.length === 0
+    const detail = !measured.length ? 'not measured in these games' : failing.length ? `off: ${failing.map(([n, v]) => `${n} ${pct(v)}`).join(', ')}` : `all ${measured.length} in range${notMeasured ? ` (${notMeasured} not measured)` : ''}`
+    return { label: t.label, pass, detail }
+  })
+  return { title: `Personality Check — ${name}`, subtitle: options.subtitle, feel, all, tell, wins, ladder, notes: firstNotes.slice(0, options.notes ?? 24) }
+}
+
+/** What to play: the cast, their skills, the targets, and anything to change from the settings for this run. */
+export interface ArenaRequest {
+  personalities: Personality[]
+  /** Lowest first (the ladder plays the last against the first). */
+  skills: Skill[]
+  targets: CheckTargets
+  /** The skill the mixed tables play at. Default: the middle one. */
+  mainSkill?: string
+  /** Play only these personalities (ids), all of them every game, instead of mixed tables. */
+  only?: string[]
+  settings?: Partial<ArenaSettings>
+}
+
+/** The whole run as a list of tables: mixed first, then the ladder. Throws in plain English for a skill or
+ *  personality that isn't there. */
+export function arenaPlan(request: ArenaRequest): { tables: ArenaTable[]; main: Skill; settings: ArenaSettings } {
+  const settings = { ...defaultArenaSettings, ...request.settings }
+  const { personalities, skills } = request
+  if (!personalities.length) throw new Error('No personalities to play')
+  if (!skills.length) throw new Error('No skills to play at')
+  const main = request.mainSkill === undefined ? skills[Math.floor((skills.length - 1) / 2)] : skills.find((s) => s.id === request.mainSkill)
+  if (!main) throw new Error(`No skill "${request.mainSkill}" (there are ${skills.map((s) => s.id).join(', ')})`)
+  const only = (request.only ?? []).map((id) => {
+    const found = personalities.find((p) => p.id.toLowerCase() === id.toLowerCase())
+    if (!found) throw new Error(`No personality "${id}" (there are ${personalities.map((p) => p.id).join(', ')})`)
+    return found
+  })
+  const mixed = mixedTables(personalities, main, settings.games, settings, only)
+  const low = skills[0]
+  const high = skills[skills.length - 1]
+  const ladder = settings.ladderGames > 0 && low !== high ? ladderTables(only.length ? only : personalities, low, high, settings.ladderGames, settings.seed + settings.ladderSeedOffset) : []
+  return { tables: [...mixed, ...ladder], main, settings }
+}
+
+/** How many games a request plays in all (a progress bar's end). */
+export const arenaTotal = (request: ArenaRequest) => arenaPlan(request).tables.length
+
+/** Play the whole request and build its report. onProgress(done, total) after every game. Same request = same report. */
+export function runArena<State, Action, Setup, View>(
+  plug: ArenaPlug<State, Action, Setup, View>,
+  request: ArenaRequest,
+  onProgress?: (done: number, total: number) => void,
+): { games: ArenaGame<State, Action>[]; results: GameResult[]; report: CheckReport } {
+  const { tables, main, settings } = arenaPlan(request)
+  const games: ArenaGame<State, Action>[] = []
+  for (const t of tables) {
+    games.push(playArenaGame(plug, t.seats, t.seed, t.kind))
+    onProgress?.(games.length, tables.length)
+  }
+  const results = toResults(plug, games)
+  const mixed = tables.filter((t) => t.kind === 'mixed')
+  const ladder = tables.length - mixed.length
+  const sizes = [...new Set(mixed.map((t) => t.seats.length))].sort((a, b) => a - b)
+  const players = sizes.length > 1 ? `${sizes[0]}–${sizes[sizes.length - 1]} players` : `${sizes[0] ?? 0} players`
+  const subtitle = `${mixed.length} mixed games at ${main.id} (${players})${ladder ? ` + ${ladder} skill-ladder games` : ''} · seed ${settings.seed}`
+  const report = checkReport(plug.name, results, games[0]?.notes ?? [], request.targets, {
+    skillOrder: request.skills.map((s) => s.id),
+    mainSkill: main.id,
+    subtitle,
+    tellMeters: plug.tellMeters,
+    checks: plug.checks,
+    notes: settings.notesInReport,
+  })
+  return { games, results, report }
+}
+
+/** Decision times across games, in ms (this machine; a phone is roughly 4× slower). */
+export function decisionTimes(games: { decisionMs: number[] }[]): { median: number; p90: number; slowest: number; count: number } {
+  const ms = games.flatMap((g) => g.decisionMs).sort((a, b) => a - b)
+  const at = (q: number) => (ms.length ? ms[Math.min(ms.length - 1, Math.floor(q * ms.length))] : 0)
+  return { median: at(0.5), p90: at(0.9), slowest: at(1), count: ms.length }
 }
