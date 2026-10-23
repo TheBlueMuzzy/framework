@@ -93,7 +93,8 @@ export default async function arenaGame(files: { read(path: string): Promise<str
   and the AI tab's `runCheck` starts it with `runCheckInWorker` (Dev Kit 0.23.0 `ai/checkWorker.ts`) — the page never freezes.
 - **What wins? (0.6.0, F25)** — the plug's optional `situations(state, seat)` names numbers per seat (true/false → 1/0;
   anything else that isn't a number stops the run, in plain English). The arena reads them after each seat's own turn N
-  (a turn = its moves until someone else acts) and at the end; `wins.ts` `whatWins(results)` splits each situation at
+  (a turn = its moves until someone else acts — or the plug's optional `turns(state, seat)`, the game's own count, e.g.
+  leaving a draft out) and at the end; `wins.ts` `whatWins(results)` splits each situation at
   each moment into low / mid / high (terciles — equal numbers never split), works out each group's win rate and **the
   edge** (in winner-vs-loser pairs of the same game, how often the winner had more; 50% = says nothing), leaves out
   anything under `whatWinsMinGames` (and lists it), and writes the strongest as sentences — one per situation, at its

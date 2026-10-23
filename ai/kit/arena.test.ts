@@ -75,6 +75,11 @@ describe('situations ("What wins?", F25)', () => {
     const game = playArenaGame(plug, seats, 1, 'mixed', [1])
     expect(game.situations).toEqual([{ 'turn 1': { moves: 2 } }, { 'turn 1': { moves: 3 } }])
     expect(count).toBe(2) // read only at its moments, not after every move
+    // the game's own turn count (plug.turns): seat 0's first move was a draft, not a turn — its turn 1 is its 2nd move
+    const draft = playArenaGame({ ...plug, turns: (s: { n: number }, seat: number) => (seat === 0 ? Math.max(0, s.n - 1) : s.n >= 3 ? 1 : 0) }, seats, 1, 'mixed', [1])
+    expect(draft.situations).toEqual([{ 'turn 1': { moves: 2 } }, { 'turn 1': { moves: 3 } }])
+    const late = playArenaGame({ ...plug, turns: () => 0 }, seats, 1, 'mixed', [1])
+    expect(late.situations).toEqual([{}, {}]) // never reached turn 1 the game's way
   })
 
   it('true/false count as 1/0; anything else that isn\'t a number stops the run in plain English', () => {

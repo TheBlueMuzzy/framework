@@ -67,6 +67,9 @@ export interface ArenaPlug<State, Action, Setup, View> {
    *  hand", "glyphlings trapped"… Read after each seat's own turns 3, 5… and at the end (content/ai/arena.json
    *  `whatWinsMoments`); the report says which of them predict the win. Numbers only (true/false → 1/0). */
   situations?: (state: State, seat: number) => Record<string, number>
+  /** How many of its own turns this seat has finished, the game's way (e.g. a draft that isn't "a turn" left out).
+   *  Default: a turn = the seat's moves until someone else acts. */
+  turns?: (state: State, seat: number) => number
 }
 
 /** When situations are read: after the seat's own turn N (a number), or 'end' (the game as it ended). */
@@ -138,10 +141,12 @@ export function playArenaGame<State, Action, Setup, View>(
     rngs[seat] = picked.rng
     state = rules.apply(state, seat, picked.action, plug.fast ? { fast: true } : undefined).state
     moves.push({ seat, action: picked.action })
-    // A seat's turn ends when someone else acts next (or the game ends) — then its own turn count goes up
-    if (plug.situations && (rules.isOver(state) || rules.toAct(state)[0] !== seat)) {
-      turns[seat]++
-      if (turnsAt.has(turns[seat])) situations[seat][momentName(turns[seat])] = readSituations(plug, state, seat, momentName(turns[seat]))
+    // The seat's own turn count: the game's (plug.turns), or +1 when someone else acts next (or the game ends)
+    if (plug.situations) {
+      const before = turns[seat]
+      turns[seat] = plug.turns ? plug.turns(state, seat) : rules.isOver(state) || rules.toAct(state)[0] !== seat ? before + 1 : before
+      const now = turns[seat]
+      if (now !== before && turnsAt.has(now) && !situations[seat][momentName(now)]) situations[seat][momentName(now)] = readSituations(plug, state, seat, momentName(now))
     }
   }
   if (plug.situations && moments.includes('end')) seats.forEach((_, i) => (situations[i].end = readSituations(plug, state, i, 'end')))
