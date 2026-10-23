@@ -245,8 +245,8 @@ flowchart LR
 
 ## v0.11 — Games take the AI  ← current · planned 2026-10-23
 Goal (Muzzy 2026-10-23, "a go"): the pieces a game still hand-builds before it can take emotes, banter and the AI check — so Glyphtender's session can install them in one go.
-- 🔨 F109 🔧 Tappable seat row: the UI kit's PlayerSeats can make each seat a button (tap → the emote picker on yours, Mute on a rival's), with the muted mark on the chip and the emote seat tags — the emotes module's `<EmoteSeats>` wires it; Glyphtender's hand-built SeatEmotes.tsx no longer needed (v0.5 look-back) — should · needs: F107 · sprint 28
-- 🔨 F110 🔧 Module Settings rows register themselves: each module ships its rows + what counts as "read" in one manifest the UI kit's Settings check reads, so a new module (crashes, emotes, ai…) needs no UI kit change (v0.5 look-back) — should · needs: F107, F22 · sprint 28
+- ✅ F109 🔧 Tappable seat row: the UI kit's PlayerSeats can make each seat a button (tap → the emote picker on yours, Mute on a rival's), with the muted mark on the chip and the emote seat tags — the emotes module's `<EmoteSeats>` wires it; Glyphtender's hand-built SeatEmotes.tsx no longer needed (v0.5 look-back) — should · needs: F107 · sprint 28
+- ✅ F110 🔧 Module Settings rows register themselves: each module ships its rows + what counts as "read" in one manifest the UI kit's Settings check reads, so a new module (crashes, emotes, ai…) needs no UI kit change (v0.5 look-back) — should · needs: F107, F22 · sprint 28
 ```mermaid
 flowchart LR
   F107[F107 Emotes] --> F109[F109 Tappable seat row]

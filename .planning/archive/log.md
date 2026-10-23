@@ -33,3 +33,4 @@
 - 2026-10-21 — Released v0.11.1: every sound in a game can come out at the same loudness and start on time — an audio check report with a fix, and the Sound Board levels dropped sounds.
 - 2026-10-22 — Sprint 25 planned: when a player's game breaks, you hear about it (crash reports, on by default with a Settings switch).
 - 2026-10-22 — F89 built (waiting for OK): when a player's game breaks, the game reports it to its own small server; `npm run crashes` shows real file lines and session start says "N new errors from players".
+- 2026-10-22 — F89 approved: games can report their crashes to a server of their own, read on the PC with real file lines.
