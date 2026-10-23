@@ -112,7 +112,8 @@ async function checkBanter(t) {
     if (!chatty.length) t.skip(name, 'no personality talks (chattiness 0)')
     else {
       const code = [...t.gameCode(), ...(t.exists('party') ? t.files({ dirs: ['party'] }).filter((f) => !/\.test\./.test(f.path)) : [])]
-      const makes = code.filter((f) => /\bbotBanter\s*\(/.test(withoutComments(f.text))).map((f) => f.path)
+      // (botBanter<GameEvent>({ … }) counts too — the scratch Glyphtender proof wrote it that way)
+      const makes = code.filter((f) => /\bbotBanter\s*(<[^>()]*>)?\s*\(/.test(withoutComments(f.text))).map((f) => f.path)
       const hears = code.filter((f) => /\.hear\s*\(/.test(withoutComments(f.text))).map((f) => f.path)
       const problems = []
       if (!makes.length) problems.push(`${chatty.map((p) => p.id).join(', ')} ${chatty.length === 1 ? 'has' : 'have'} chattiness > 0, but nothing makes the bots' voice (botBanter) — they never talk.`)

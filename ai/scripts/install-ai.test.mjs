@@ -50,7 +50,7 @@ describe('install-ai', () => {
     installAi(game, { log: (l) => chat.push(l) })
     expect(chat.join('\n')).toContain('the bots talk (Bully has chattiness > 0)')
     mkdirSync(join(game, 'src/game'), { recursive: true })
-    writeFileSync(join(game, 'src/game/bots.ts'), 'const banter = botBanter(options)')
+    writeFileSync(join(game, 'src/game/bots.ts'), 'const banter = botBanter<GameEvent>(options)')
     const talking = []
     installAi(game, { log: (l) => talking.push(l) })
     expect(talking.join('\n')).not.toContain('Still to wire')
