@@ -1,0 +1,29 @@
+# Sprint 26 — AI players that talk, and proof each personality plays like itself
+Started 2026-10-22 · Milestone v0.5 The AI (its last two musts) · Features: F24, F22
+From the v0.11.2 release: Muzzy said `/develop` to the plan (2026-10-22). Both features were half built during Glyphtender sprint 14 (ai kit: check.ts + report.ts, banter.ts); a helper mapped what's left (below). Order: F24 first (it moves Glyphtender's own arena up, so the Banter proof can lean on the arena's games), then F22.
+
+## F24 🔧 Arena + Personality Check
+Done when: any turn-based game on the Table can play N seeded AI-vs-AI games with the framework's own arena (mixed 2–4 seat tables + a skill ladder), get the whole CheckReport (feel targets green/red, tell-apart grid, win rates, skill ladder, "for all of them" checks) and its report page — from `npm run ai:arena` on the PC and from the Dev Kit's "Run check" (played off the page's main thread so it never freezes); meters and board choices stay the game's.
+why: proves a personality *feels* like itself (behaviour), not just that its numbers are set
+- [ ] 🤖 1. Arena loop: one whole game with bots in every seat (viewFor → bot → rules.apply until over), per-seat seeded randomness, notes and decision time — generic, from Glyphtender's src/ai/arena.ts playArenaGame + toResults — ai/kit/arena.ts
+- [ ] 🤖 2. Seating plans + the whole report: seeded shuffled 2–4 seat tables, ladder games, total count, the generic "for all of them" checks, building CheckReport (from Glyphtender's personalityCheck + runPersonalityCheck) — ai/kit/arena.ts
+- [ ] 🤖 3. A test game: the Table's "Draw to 10" plus two tiny personalities with different goals, so the arena + check are proven without a real game (a careful one and a greedy one must tell apart) — ai/kit/arena.test.ts
+- [ ] 🤖 4. `npm run ai:arena` on the PC (--games, --seats, --ladder, --notes, --seed): plays through the game's own rules, writes the report page — ai/scripts/ai-arena.mjs
+- [ ] 🤖 5. The Dev Kit's Run check plays in a Web Worker (a helper the game hands its rules to), with progress, so the page never freezes — devkit/kit/ai/CheckPanel.tsx
+- [ ] 🤖 6. Installer, README, MODULE-CONTRACTS line; proof on a scratch Glyphtender copy: the framework arena on Glyphtender's rules gives the same report as Glyphtender's own arena for the same seed — ai/scripts/install-ai.mjs
+Check: ai tests, typecheck, lint green (root check:fast); Draw to 10 arena tells its two personalities apart and its ladder orders skill; on .scratch/glyphtender-f24 the framework arena and Glyphtender's own give the same numbers for the same seed, `npm run ai:arena` writes a report page I open and look at, and the Dev Kit Run check finishes without freezing the page (a frame-time measurement while it runs).
+
+## F22 🧱 Banter
+Done when: a game names its moments from its own events, a bot seat says a personality's line at those moments (chance × chattiness, cooldown, no repeats) on the rules clock (both pauses stop it), the lines live in content/text/en.json per personality per moment and are editable live in the Dev Kit's AI tab, and the UI kit has a SpeechBubble part — the same in all 5 styles, fixed size from the start, padding on every side, reduce-motion honoured.
+- [ ] 🤖 1. Moments: the game's moment map from its events (a `moments(event, seat)` on the plug), the moment types, and the banter settings (chance, cooldown, always-allowed) in content — ai/kit/banter.ts
+- [ ] 🤖 2. Bots speak: asBot picks a line at each moment and hands it to the game (`onSay`), timed on the rules clock; online rooms say it from the server — ai/kit/brain.ts
+- [ ] 🤖 3. Lines in content/text/en.json (`banter.<personality>.<moment>`), read live; check:framework: every personality with chattiness > 0 has lines, no line hard-coded in src — ai/kit/conformance.mjs
+- [ ] 🤖 4. SpeechBubble part: points at its seat, sits clear of the HUD, fixed size for the longest line, in all 5 styles, reduce-motion = no pop, timings in content/ui/style.json; screenshots at every size — ui-kit/kit/blocks/
+- [ ] 🤖 5. Dev Kit AI tab: edit each personality's lines per moment, live while a game runs, saved to content/text/en.json — devkit/kit/ai/
+- [ ] 🤖 6. Proof on a scratch Glyphtender copy: bots chatter during a game (lines appear at the right moments, never two at once, stop on both pauses), screenshots at every size — ai/kit/conformance.test.mjs
+Check: ai + ui-kit + devkit tests, typecheck, lint green (root check:fast, check-ui); on .scratch/glyphtender-f22 a 4-bot game: lines appear only at named moments, at most one bubble per seat, none during full or half pause, an edited line in the Dev Kit shows on the next moment without a reload; bubble screenshots in all 5 styles at 390x844, 360x780, 844x390, 768x343, 1100, 1440x900, 1920x1080, looked at by me (edges measured to the visible bubble).
+
+Notes:
+- Plan-lint: only the old F61 / F59 / F60 line (Goops' session). No BUGS.md in the framework.
+- Helper map (2026-10-22): framework has banter.ts maybeSay + quietMemory, check.ts (feelTargets, tellApart, winRates, skillLadder), report.ts reportHtml, the Dev Kit CheckPanel (the game plays, the panel opens the page). Missing: moments from events, bot wiring, SpeechBubble, banter lines editor (F23 "not yet"), any arena runner. Glyphtender has a game-side arena (src/ai/arena.ts, src/devkit-game/aiCheckRun.ts + aiCheck.ts worker, scripts/ai-arena.mjs) — the generic parts move up; its meters and board choice stay. Glyphtender has chattiness per personality but no lines.
+- Technical calls (Claude): lines and bubble timing in content/ (Dev Kit + Obsidian edit them); the bubble's look comes from the game's UI style; Glyphtender's own starter lines and switching to the framework arena are its own session's job — this sprint only touches scratch copies of it.
