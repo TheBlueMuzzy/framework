@@ -111,13 +111,13 @@ export const margin = (n: number) => (n > 0 ? 1 / Math.sqrt(n) : 1)
 /** "after turn 5" / "at the end". */
 const when = (moment: string) => (moment === 'end' ? 'at the end' : `after ${moment}`)
 
-/** How a group reads in a sentence: the top one "10 or more", the bottom one "-3 or less", a middle one "2–6",
+/** How a group reads in a sentence: the top one "10 or more", the bottom one "-3 or less", a middle one "2 to 6",
  *  one number just "1". */
 function range(g: WinsGroup, place: 'top' | 'bottom' | 'middle'): string {
   if (g.low === g.high) return num(g.low)
   if (place === 'top') return `${num(g.low)} or more`
   if (place === 'bottom') return `${num(g.high)} or less`
-  return `${num(g.low)}–${num(g.high)}`
+  return `${num(g.low)} to ${num(g.high)}` // "to", not a dash: "-2.33–3.5" reads as a sum and wraps at the dash
 }
 
 /** One situation as a sentence: its group that wins most, against the one that wins least (big-enough groups only —

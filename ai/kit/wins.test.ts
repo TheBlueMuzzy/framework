@@ -97,12 +97,12 @@ describe('what wins', () => {
 
   it('a middle group that wins best says so (a total that\'s high but not bust)', () => {
     const s = { situation: 'total', moment: 'end', edge: 0.6, pairs: 90, strength: 0.2, groups: [{ low: 0, high: 4, games: 40, winRate: 0.2 }, { low: 5, high: 8, games: 40, winRate: 0.7 }, { low: 9, high: 15, games: 40, winRate: 0.1 }] }
-    expect(sentence(s)).toBe('Players with total 5–8 at the end win 70% (of 40 games, ±16%) — vs 10% with 9 or more')
+    expect(sentence(s)).toBe('Players with total 5 to 8 at the end win 70% (of 40 games, ±16%) — vs 10% with 9 or more')
   })
 
   it('a group too small for the sentence is skipped; old results without situations give nothing', () => {
     const s = { situation: 'x', moment: 'turn 3', edge: 0.8, pairs: 90, strength: 0.6, groups: [{ low: 0, high: 1, games: 50, winRate: 0.2 }, { low: 2, high: 3, games: 50, winRate: 0.6 }, { low: 4, high: 9, games: 5, winRate: 1 }] }
-    expect(sentence(s)).toBe('Players with x 2–3 after turn 3 win 60% (of 50 games, ±14%) — vs 20% with 1 or less')
+    expect(sentence(s)).toBe('Players with x 2 to 3 after turn 3 win 60% (of 50 games, ±14%) — vs 20% with 1 or less')
     expect(whatWins([{ seats: [{ personality: 'A', skill: 'Mid', meters: {}, won: 1 }] }])).toMatchObject({ top: [], all: [], seats: 0 })
   })
 })
