@@ -108,7 +108,7 @@ describe('RoomServer: emotes', () => {
     const { ann, bob } = startGame()
     for (let i = 0; i < 500; i++) say(bob, { type: 'emote', id: 'wow' })
     expect(ann.emotes()).toHaveLength(3)
-    vi.advanceTimersByTime(3999)
+    vi.advanceTimersByTime(2999) // (refillSeconds 4, less the server's 1 s of network slack)
     say(bob, { type: 'emote', id: 'wow' })
     expect(ann.emotes()).toHaveLength(3)
     vi.advanceTimersByTime(1)
@@ -197,5 +197,17 @@ describe('EmoteGate + readEmoteRoomSettings', () => {
   it('__proto__ and other built-in names are never phrases', () => {
     const gate = new EmoteGate(readEmoteRoomSettings({ phrases: ['hello'] }))
     for (const id of ['__proto__', 'constructor', 'toString']) expect(gate.allow('seat-1', id, 0).ok).toBe(false)
+  })
+
+  it('a fair player pressing the moment their own ring fills is never dropped by network jitter (review F107)', () => {
+    // The device (3 in a row, one back every 4 s, 800 ms apart) allows sends at 0, 800, 1600, then 4000 ms. The first
+    // arrives 300 ms late and the fourth only 50 ms late — the server sees them 3750 ms apart, not 4000.
+    const gate = new EmoteGate(readEmoteRoomSettings({ phrases: ['hello'], server: { burst: 3, refillSeconds: 4 } }))
+    for (const at of [300, 850, 1650]) expect(gate.allow('p', 'hello', at).ok).toBe(true)
+    expect(gate.allow('p', 'hello', 4050).ok).toBe(true)
+    // …but the long-run rate still holds: a flood right after is held back, and over a minute it's ~burst + 60/4
+    let sent = 0
+    for (let at = 4100; at < 64_050; at += 50) if (gate.allow('p', 'hello', at).ok) sent++
+    expect(sent).toBeLessThanOrEqual(16)
   })
 })

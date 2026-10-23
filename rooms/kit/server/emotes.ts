@@ -38,6 +38,8 @@ export function readEmoteRoomSettings(json: unknown): EmoteRoomSettings {
 }
 
 type Count = { tokens: number; stamp: number; inMatch: number }
+/** How much earlier than the device's own count a send may arrive (network delays differ message to message). */
+const JITTER_MS = 1000
 
 /** The room's emote gate: one count per key (the room passes one key per player, or per server-bot seat). */
 export class EmoteGate {
@@ -61,7 +63,11 @@ export class EmoteGate {
       count.tokens = Math.min(this.settings.burst, count.tokens + (now - count.stamp) / (this.settings.refillSeconds * 1000))
       count.stamp = now
     }
-    if (count.tokens < 1 - 1e-9) return { ok: false, why: 'too_many' }
+    // Network slack: the device keeps the same count, so a fair player pressing the moment their ring fills can reach
+    // here a little early after a slow first message. Up to 1 s (at most half a send) early is let through — the count
+    // then dips below 0 and pays it back, so the long-run rate never changes.
+    const slack = Math.min(0.5, JITTER_MS / (this.settings.refillSeconds * 1000))
+    if (count.tokens < 1 - slack - 1e-9) return { ok: false, why: 'too_many' }
     count.tokens -= 1
     count.inMatch += 1
     return { ok: true }
