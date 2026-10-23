@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
-import { Button, RoomCodeInput, ScrollArea, Selector, Stepper, Tabs, Toggle, setControlSound } from '.'
+import { Button, Card, RoomCodeInput, ScrollArea, Selector, Stepper, Tabs, Text, Toggle, setControlSound } from '.'
 
 afterEach(cleanup)
 
@@ -209,5 +209,27 @@ describe('ScrollArea "more this way" flags', () => {
   it('stays keyboard-focusable (arrow keys scroll it)', () => {
     render(<ScrollArea label="List"><p>rows</p></ScrollArea>)
     expect(screen.getByRole('region', { name: 'List' }).tabIndex).toBe(0)
+  })
+})
+
+describe('Card locked (0.27.0)', () => {
+  it('is never a button, even with onClick: not tappable, not tabbed to, aria-disabled, read out with "Locked"', () => {
+    let taps = 0
+    const { container } = render(<Card title="Slow drip" locked onClick={() => taps++}><Text>Opens at rank 6</Text></Card>)
+    expect(screen.queryByRole('button')).toBeNull()
+    const card = screen.getByRole('article')
+    expect(card.getAttribute('aria-disabled')).toBe('true')
+    expect(card.hasAttribute('data-locked')).toBe(true)
+    expect(card.textContent).toBe('Slow drip LockedOpens at rank 6')
+    expect(container.querySelector('[tabindex]')).toBeNull()
+    fireEvent.click(card)
+    expect(taps).toBe(0)
+  })
+
+  it('says "Locked" in the game\'s own words (lockedLabel); an open card says nothing extra', () => {
+    const { rerender } = render(<Card title="Lent" locked lockedLabel="Verrouillé" />)
+    expect(screen.getByRole('article').textContent).toBe('Lent Verrouillé')
+    rerender(<Card title="Lent" />)
+    expect(screen.getByRole('article').textContent).toBe('Lent')
   })
 })
