@@ -1,7 +1,7 @@
 // THE AI MODULE — THE PERSONALITY CHECK REPORT. One self-contained HTML page (no scripts, no files) a game's arena
 // writes after a run: feel targets green/red, the tell-apart grid, win shares, the skill ladder, example notes.
 import type { TargetResult } from './check'
-import type { SituationWins, WhatWins } from './wins'
+import { span, type SituationWins, type WhatWins } from './wins'
 
 export interface CheckReport {
   title: string
@@ -21,7 +21,6 @@ export interface CheckReport {
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const pct = (v: number) => `${Math.round(v * 100)}%`
-const num = (v: number) => String(Math.round(v * 100) / 100)
 const mark = (pass: boolean) => `<span class="${pass ? 'ok' : 'no'}">${pass ? '✓' : '✗'}</span>`
 
 /** "What wins?": the top sentences in a card (the Dev Kit's Check panel reads them from `data-what-wins`), the
@@ -29,7 +28,7 @@ const mark = (pass: boolean) => `<span class="${pass ? 'ok' : 'no'}">${pass ? '�
 function whatWinsHtml(w: WhatWins): string {
   const cell = (s: SituationWins, i: number) => {
     const g = s.groups.length === 3 ? s.groups[i] : s.groups.length === 2 ? [s.groups[0], undefined, s.groups[1]][i] : i === 1 ? s.groups[0] : undefined
-    return g ? `<td>${pct(g.winRate)} <span class="dim">${g.low === g.high ? num(g.low) : `${num(g.low)} to ${num(g.high)}`} · ${g.games}</span></td>` : '<td class="dim">—</td>'
+    return g ? `<td>${pct(g.winRate)} <span class="dim">${span(g.low, g.high)} · ${g.games}</span></td>` : '<td class="dim">—</td>'
   }
   const rows = w.all.map((s) => `<tr${s.leftOut ? ' class="dim"' : ''}><th>${esc(s.situation)}</th><td>${esc(s.moment)}</td><td>${s.leftOut ? 'left out' : `${pct(s.edge)}${s.isTheWin ? ' <span class="dim">(the win itself)</span>' : ''}`}</td>${[0, 1, 2].map((i) => cell(s, i)).join('')}</tr>`).join('')
   const top = w.top.length
@@ -48,7 +47,7 @@ export function reportHtml(r: CheckReport): string {
     .map(([p, list]) => {
       const passed = list.filter((t) => t.pass).length
       const items = list
-        .map((t) => `<li>${mark(t.pass)} ${esc(t.label)} <span class="dim">— ${t.meter} ${t.measured}${t.op === 'beats' ? ` (wins ${Math.round(t.measured * 100)}% of its games with the ${esc(t.against ?? '')}; target ${Math.round((t.value ?? 0.5) * 100)}%)` : t.extremes ? (t.extremes.length ? ` (extreme on: ${t.extremes.map(esc).join(', ')})` : '') : t.op === 'nearAverage' && t.rival ? ` (table average ${t.rival.measured}, within ${t.value})` : t.rival ? ` (next best: ${esc(t.rival.personality)} ${t.rival.measured})` : t.value !== undefined ? ` (target ${t.op} ${t.value})` : ''}</span></li>`)
+        .map((t) => `<li>${mark(t.pass)} ${esc(t.label)} <span class="dim">— ${esc(t.meter)} ${t.measured}${t.op === 'beats' ? ` (wins ${Math.round(t.measured * 100)}% of its games with the ${esc(t.against ?? '')}; target ${Math.round((t.value ?? 0.5) * 100)}%)` : t.extremes ? (t.extremes.length ? ` (extreme on: ${t.extremes.map(esc).join(', ')})` : '') : t.op === 'nearAverage' && t.rival ? ` (table average ${t.rival.measured}, within ${t.value})` : t.rival ? ` (next best: ${esc(t.rival.personality)} ${t.rival.measured})` : t.value !== undefined ? ` (target ${t.op} ${t.value})` : ''}</span></li>`)
         .join('')
       return `<section class="card"><h3>${esc(p)} <span class="${passed === list.length ? 'ok' : 'no'}">${passed}/${list.length}</span></h3><ul>${items}</ul></section>`
     })

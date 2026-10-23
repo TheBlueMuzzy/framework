@@ -73,6 +73,9 @@ const round = (v: number, places = 3) => Math.round(v * 10 ** places) / 10 ** pl
 const mean = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : 0)
 const pct = (v: number) => `${Math.round(v * 100)}%`
 const num = (v: number) => String(round(v, 2))
+/** A low…high span in words, the same on the report's table and in the sentences: "-78 to -21", one number just
+ *  "4". "to", never a dash — "-78–-21" reads as a sum and wraps at the dash. */
+export const span = (low: number, high: number) => (low === high ? num(low) : `${num(low)} to ${num(high)}`)
 
 /** Split numbers into up to three groups by size — about a third each, but equal numbers always stay together
  *  (so 0/1 numbers make two groups, and one number repeated makes one). Each cut goes at the change of number
@@ -118,7 +121,7 @@ function range(g: WinsGroup, place: 'top' | 'bottom' | 'middle'): string {
   if (g.low === g.high) return num(g.low)
   if (place === 'top') return `${num(g.low)} or more`
   if (place === 'bottom') return `${num(g.high)} or less`
-  return `${num(g.low)} to ${num(g.high)}` // "to", not a dash: "-2.33–3.5" reads as a sum and wraps at the dash
+  return span(g.low, g.high)
 }
 
 /** One situation as a sentence: its group that wins most, against the one that wins least (big-enough groups only —

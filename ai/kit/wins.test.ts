@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { GameResult } from './check'
-import { edge, margin, sentence, terciles, whatWins } from './wins'
+import { reportHtml } from './report'
+import { edge, margin, sentence, span, terciles, whatWins, type SituationWins } from './wins'
 
 // Two-player games where seat 0 has `a` and seat 1 has `b` of a situation, and `winner` won (or null = a shared win)
 const game = (a: number, b: number, winner: 0 | 1 | null, moment = 'turn 5', extra: Record<string, [number, number]> = {}): GameResult => ({
@@ -108,6 +109,21 @@ describe('what wins', () => {
 })
 
 describe('review fixes', () => {
+  it('the report table writes a span like the sentences: "-78 to -21", never a dash after a minus', () => {
+    const w = whatWins([])
+    const s: SituationWins = { situation: 'score lead', moment: 'end', edge: 0.9, pairs: 60, strength: 0.8, groups: [
+      { low: -78, high: -21, games: 40, winRate: 0.1 }, { low: -2.666, high: 3.5, games: 40, winRate: 0.5 }, { low: 4, high: 4, games: 40, winRate: 0.9 }] }
+    const html = reportHtml({ title: 't', subtitle: '', feel: {}, all: [], tell: { accuracy: {}, overall: 0, grid: {} }, wins: { overall: {}, headToHead: {} }, ladder: {}, whatWins: { ...w, all: [s] } })
+    expect(html).toContain('-78 to -21')
+    expect(html).toContain('-2.67 to 3.5')
+    expect(html).not.toMatch(/\d–-?\d/)
+    expect(span(-17, -3)).toBe('-17 to -3')
+    expect(span(4, 4)).toBe('4')
+  })
+  it('a game-named meter on the report is escaped', () => {
+    const html = reportHtml({ title: 't', subtitle: '', feel: { A: [{ label: 'x', meter: '<img src=x onerror=alert(1)>', measured: 1, pass: true } as never] }, all: [], tell: { accuracy: {}, overall: 0, grid: {} }, wins: { overall: {}, headToHead: {} }, ladder: {} })
+    expect(html).not.toContain('<img')
+  })
   it('a smaller first run of equal numbers stays its own group (not swallowed by a big middle run)', () => {
     // a count that's 0 for a fifth, 1 for most, 2 for a tenth: three groups, so 0 vs 1 can still be compared
     const values = [...Array(20).fill(0), ...Array(70).fill(1), ...Array(10).fill(2)]
