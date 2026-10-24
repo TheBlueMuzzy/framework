@@ -286,13 +286,13 @@ flowchart LR
   F117[F117 Log trims itself]
 ```
 
-## v0.15 — Checks you can trust  ← current · planned 2026-10-24
+## v0.15 — Checks you can trust  ✅ released 2026-10-24 (v0.17.0) · planned 2026-10-24
 Goal (Muzzy 2026-10-24, /develop on the plan's pick a): a red check means a real problem — a busy port says who holds it, the kit's own gallery is clean, and the framework check never builds a command line out of file names.
-- 🔨 F118 🔧 Port pre-flight in check:full: before any e2e starts, every port it will use is checked; a taken one fails at once with "port N is held by <command> in <folder>" (Goops' session: a leftover vite on 5291 showed up as a meta-tag timeout, two nights) — should · sprint 32
-- 🔨 F119 🔧 The UI kit gallery passes its own layout checks: the 56 older cut-off names and overlaps (Results names, the Room share line, Feedback toast, lobby, hud) fixed in the kit or its demos, so a new problem stands out — should · sprint 32
-- 🔨 F120 🔧 check-framework runs commands as an argument list, never one shell string built from file names (security review 2026-10-19, low) — should · sprint 32
-- 🔨 F121 ✨ TalkingBubble colours from the game's content: `colours` { fill, ink, outline, outlineWidth, more } read live like `feel` (Goops F35 — Muzzy 2026-10-24: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text."); the style's colours stay the default; a contrast floor — should · needs: F111 · sprint 32
-- 🔨 F122 🔧 Dev Kit Fonts library lists every installed font: the PC's own font folders (Windows: C:/Windows/Fonts + the user's; mac ~/Library/Fonts + /Library/Fonts; Linux font dirs) join the designer's font folder, server side — no browser permission, any browser, Try + Add to game as today, installed fonts marked 🔴 until their licence is checked (Goops' session idea 2026-10-23) — could · sprint 32
+- ✅ F118 🔧 Port pre-flight in check:full: before any e2e starts, every port it will use is checked; a taken one fails at once with "port N is held by <command> in <folder>" (Goops' session: a leftover vite on 5291 showed up as a meta-tag timeout, two nights) — should · sprint 32
+- ✅ F119 🔧 The UI kit gallery passes its own layout checks: the 56 older cut-off names and overlaps (Results names, the Room share line, Feedback toast, lobby, hud) fixed in the kit or its demos, so a new problem stands out — should · sprint 32
+- ✅ F120 🔧 check-framework runs commands as an argument list, never one shell string built from file names (security review 2026-10-19, low) — should · sprint 32
+- ✅ F121 ✨ TalkingBubble colours from the game's content: `colours` { fill, ink, outline, outlineWidth, more } read live like `feel` (Goops F35 — Muzzy 2026-10-24: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text."); the style's colours stay the default; a contrast floor — should · needs: F111 · sprint 32
+- ✅ F122 🔧 Dev Kit Fonts library lists every installed font: the PC's own font folders (Windows: C:/Windows/Fonts + the user's; mac ~/Library/Fonts + /Library/Fonts; Linux font dirs) join the designer's font folder, server side — no browser permission, any browser, Try + Add to game as today, installed fonts marked 🔴 until their licence is checked (Goops' session idea 2026-10-23) — could · sprint 32
 ```mermaid
 flowchart LR
   F118[F118 Port pre-flight]
