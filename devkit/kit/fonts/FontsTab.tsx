@@ -268,7 +268,7 @@ function FontsEditor({ query }: { query: string }) {
             </div>
             {onLibrary && tried?.libraryPath && (
               <p className="ft-warn">
-                {tried.name} is from your font library, not in the game yet — Save waits.{' '}
+                {tried.name} is {isInstalledPath(tried.libraryPath) ? 'installed on this PC' : 'from your font library'}, not in the game yet — Save waits.{' '}
                 <button className="devkit-btn" disabled={busy !== null} onClick={() => addToGame(tried.libraryPath!)}>Add to game</button>
               </p>
             )}
@@ -322,8 +322,11 @@ function FontsEditor({ query }: { query: string }) {
               <p className="ft-warn">🔴 {warning} An installed font is always added with licence "unknown".</p>
               <p className="ct-legend">
                 {installed.folders.join(' · ') || 'No installed-font folder found'} · {installed.fonts.length}{installed.more ? '+' : ''} families (Try / Add use each
-                one's regular style){skippedWords && ` · not listed: ${skippedWords} — a browser can't load those from a page`}{' '}
-                <button className="devkit-btn" disabled={busy !== null} onClick={lookAgain} title="Read the installed-font folders again (after installing a font)">Look again</button>
+                one's regular style){skippedWords && ` · not listed: ${skippedWords} — a browser can't load those from a page`}
+              </p>
+              <p className="ct-legend">
+                <button className="devkit-btn" disabled={busy !== null} onClick={lookAgain} title="Read the installed-font folders again (after installing a font)">Look again</button>{' '}
+                after installing a font (the list is read once per npm run dev)
               </p>
               {libraryRows(installedFonts)}
             </>

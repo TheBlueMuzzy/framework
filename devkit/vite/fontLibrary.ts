@@ -293,7 +293,10 @@ const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '_').re
 export type FontEntry = { name: string; file: string; licence: string; licenceNote?: string; note?: string; pixelSize?: number }
 
 /** The one-line warning an installed font comes with (the tab shows it too). */
-export const INSTALLED_NOTE = "most fonts that come with Windows (or a Mac) can't ship in a game — check its licence"
+export function installedNote(platform: string = process.platform): string {
+  const system = platform === 'win32' ? 'Windows' : platform === 'darwin' ? 'a Mac' : 'the computer'
+  return `most fonts that come with ${system} can't ship in a game: check its licence`
+}
 
 /**
  * Copy a library font into the game: public/fonts/<its folder>/<file> plus the licence / readme files beside it (from
@@ -346,7 +349,7 @@ export function addLibraryFont(root: string, roots: LibraryRoot[], path: string)
     file: gameFile,
     licence: 'unknown',
     licenceNote: from.installed
-      ? `Added from the fonts ${where} — ${INSTALLED_NOTE}`
+      ? `Added from the fonts ${where} — ${installedNote()}`
       : `Added from ${where} — check its licence (the files beside it in public/fonts/${dirName}/)`,
   }
   fontsFile.fonts = [...fonts, font]

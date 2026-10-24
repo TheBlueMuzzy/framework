@@ -147,6 +147,7 @@ describe('Fonts tab', () => {
     fireEvent.click(sampleNamed('Title', 'Consolas'))
     expect(document.documentElement.style.getPropertyValue('--font-title')).toBe("'Consolas', system-ui, sans-serif")
     expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByText(/Consolas is installed on this PC, not in the game yet/)).toBeTruthy()
 
     await act(async () => fireEvent.click([...consolas.querySelectorAll('button')].find((b) => b.textContent === 'Add to game')!))
     expect(calls.find((c) => c.url === '/__devkit/font-library/add')!.body).toEqual({ path: 'installed1:consola.ttf' })

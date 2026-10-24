@@ -3,7 +3,7 @@ import { homedir, tmpdir } from 'node:os'
 import { join, posix, resolve, win32 } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
-  INSTALLED_NOTE, addLibraryFont, installedFontFolders, installedFontsOn, libraryFile, libraryFolder, libraryPathFile, libraryRoots,
+  addLibraryFont, installedNote, installedFontFolders, installedFontsOn, libraryFile, libraryFolder, libraryPathFile, libraryRoots,
   listInstalled, listLibrary, prettyFontName, readFontNames, type LibraryRoot,
 } from './fontLibrary'
 
@@ -227,7 +227,8 @@ describe('adding to the game', () => {
   it('an installed font: named by its family, always 🔴 unknown with the warning, nothing else from that folder', () => {
     const added = addLibraryFont(game, roots, 'installed1:tstbd.ttf')
     expect(added.font).toMatchObject({ name: 'Test Sans', file: 'test_sans/tstbd.ttf', licence: 'unknown' })
-    expect(added.font.licenceNote).toContain(INSTALLED_NOTE)
+    expect(added.font.licenceNote).toContain(installedNote())
+    expect(installedNote('win32')).toBe("most fonts that come with Windows can't ship in a game: check its licence")
     expect(added.wrote).toEqual(['public/fonts/test_sans/tstbd.ttf', 'content/ui/fonts.json', 'content/credits.json'])
     expect(existsSync(join(game, 'public', 'fonts', 'test_sans', 'licence.txt'))).toBe(false)
     const credits = JSON.parse(readFileSync(join(game, 'content', 'credits.json'), 'utf8'))
