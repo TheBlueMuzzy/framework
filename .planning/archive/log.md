@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-23 — Sprint 27 planned: finish the AI — see which situations win, and let the computer suggest personality settings (F25, F26).
 - 2026-10-23 — Released v0.12.0 (v0.5 The AI milestone): players send preset phrases in speech bubbles, computer players talk at big moments and answer good moves (Bot chatter setting), a personality check proves each AI plays like itself, shop-screen kit pieces.
 - 2026-10-23 — F22 approved: computer players talk at the game's moments through the emote bubble, always answer a player's good move, and a Bot chatter setting (Off · Some · Lots) turns them down.
 - 2026-10-23 — F107 + F108 approved: players send preset phrases in a speech bubble (mute, spam limit, online), and shop screens get a success colour, locked cards and a header action.

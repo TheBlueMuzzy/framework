@@ -268,7 +268,7 @@ flowchart LR
 
 ## v0.13 — Games feed the framework  ← current · planned 2026-10-24
 Goal (Muzzy 2026-10-24, "yes. go"): a second window pulls finished game pieces out into modules while the game keeps going — just for Muzzy's BMUZ setup.
-- 🔨 F114 🔧 Extraction queue: a shared queue in the framework repo (game, commit, files, what it does, the e2e checks that prove it); a command to add / list entries; a warning on edits to files being extracted (bug fixes only, logged on the entry); a swap command (install the module, delete the game's copy, run its checks unchanged, one commit); rules in PROJECT-FILES + /develop; a trial on a scratch Goops — should · sprint 30
+- ✅ F114 🔧 Extraction queue: a shared queue in the framework repo (game, commit, files, what it does, the e2e checks that prove it); a command to add / list entries; a warning on edits to files being extracted (bug fixes only, logged on the entry); a swap command (install the module, delete the game's copy, run its checks unchanged, one commit); rules in PROJECT-FILES + /develop; a trial on a scratch Goops — should · sprint 30
 ```mermaid
 flowchart LR
   F114[F114 Extraction queue]
@@ -285,6 +285,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-24 — **StatList replays its reveal when its stats change** (Goops' session, after installing v0.14.0 — check:full ALL PASS 24 at 67d2b0f): a Modal that swaps its stats (Goops' second payday) keeps the same StatList mounted, so the reveal doesn't replay; Goops passes `key={payIndex}`. Restart the reveal (and onRevealed) by itself when the rows change.
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
