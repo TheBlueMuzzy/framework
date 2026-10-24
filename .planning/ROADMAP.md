@@ -286,6 +286,18 @@ flowchart LR
   F117[F117 Log trims itself]
 ```
 
+## v0.15 — Checks you can trust  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, /develop on the plan's pick a): a red check means a real problem — a busy port says who holds it, the kit's own gallery is clean, and the framework check never builds a command line out of file names.
+- 🔨 F118 🔧 Port pre-flight in check:full: before any e2e starts, every port it will use is checked; a taken one fails at once with "port N is held by <command> in <folder>" (Goops' session: a leftover vite on 5291 showed up as a meta-tag timeout, two nights) — should · sprint 32
+- 🔨 F119 🔧 The UI kit gallery passes its own layout checks: the 56 older cut-off names and overlaps (Results names, the Room share line, Feedback toast, lobby, hud) fixed in the kit or its demos, so a new problem stands out — should · sprint 32
+- 🔨 F120 🔧 check-framework runs commands as an argument list, never one shell string built from file names (security review 2026-10-19, low) — should · sprint 32
+```mermaid
+flowchart LR
+  F118[F118 Port pre-flight]
+  F119[F119 Clean gallery]
+  F120[F120 No shell strings]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -297,7 +309,6 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-24 — **check:full names who holds a port** (Goops' session: a framework helper's leftover vite on 5291 turned its check:full red as a meta-tag timeout, two nights running): a pre-flight in the check-all template (or a port registry per game) that says "port 5291 is held by <command> in <folder>" before any e2e starts. For now: framework helpers use 6000–6999 and stop their servers (/develop line).
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
@@ -314,8 +325,6 @@ flowchart LR
 - 2026-10-19 — **Saves switch-over, per game (F86 proof, scratch copies):** Goops → install `saves`, goops-progress becomes a createSave (progress, v1, `oldSave` for the old {v:1} record, both fields highest), golden saves v1 + v1-module, `setSavesConfig` in main.tsx, later the Settings rows + `askToKeepSaves()`. Glyphtender → install, glyphtender:new-game v2 with the 2-letter upgrade step, golden saves v1/v2/v2-module, room code under `storageAllowed` until F95, Settings rows + Save code screen; still to move: onlineOptions.ts (same 2-letter marker), tutorial/progress.ts, wordOutbox.ts; fullscreen.ts under `storageAllowed`. Steps in `saves/README.md`.
 - 2026-10-19 — **Saves: after a part-way code import, reload the game** (review): the panel says which saves came back but the running game still shows the old values until a reload.
 - 2026-10-19 — **Saves: test on real Safari, Firefox, a real itch.io page and a real incognito window** — Playwright Chromium only so far; the private-window guess may never fire in Chrome (same quota as a normal profile).
-- 2026-10-19 — **check-framework `t.run` builds one shell string** (security review, low): `devkit/kit/check-framework.mjs` runs with `shell: true` and quotes only spaces and `"`, so a game test file named with `$( )` or `;` would run a command. Not an escalation (the checks already run the game's own code) — pass an argument list instead.
-- 2026-10-19 — **UI kit gallery still has 56 older problems** (found by F88's shoot run, older checks): 34 cut-off texts (Results names, the Room share line) + 22 overlaps (Feedback toast, lobby, hud screens) — the kit's own demos should pass its own checks.
 - 2026-10-19 — **Hand to Goops' session (found by F88, read-only on a scratch copy):** the new quality bars pass; 5 older gaps — 27 art files not in credits, 2 🔴 fonts (gb_boot, Press Start DX), no code reads content/credits.json, Settings "Version" row has no text, no `conformance.startPlay` in the adapter (only the first screen gets checked).
 - 2026-10-19 — **Hand to Goops' session (found by today's plan-lint fix, read-only):** F33, F49, F53 are ⏳ but everything they need is done — set them 🟢 (or add `· waits: <what>`).
 - 2026-10-19 — **Hand to Goops' session (found by F87, read-only):** its sprint 08 features F30 + F32 have no `Check:` line (their test plan) — plan-lint names them at its next plan edit, and `F30: done` / `F32: done` will need a `Checked:` line.
