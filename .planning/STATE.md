@@ -11,7 +11,7 @@ Reviewed through: framework 2e3ff56 (1156e96..2e3ff56 version 0.1.1 read whole b
 
 ## Where we are
 Stage: deliver   Milestone: v0.15 Checks you can trust ✅   Sprint: 32 (archived)
-Doing: nothing — released v0.17.1   Branch: main   Version: 0.17.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.33.0 · Dev Kit 0.27.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.1)
+Doing: nothing — released v0.17.1   Branch: main   Version: 0.17.1 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.33.0 · Dev Kit 0.27.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.17.1
 
 ## Key facts

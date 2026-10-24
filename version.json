@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.17.0",
-  "build": 2,
+  "version": "0.17.1",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -127,6 +127,11 @@
       "version": "0.17.0",
       "date": "2026-10-24",
       "summary": "Checks you can trust: busy ports named, a clean gallery, bubble colours, installed fonts"
+    },
+    {
+      "version": "0.17.1",
+      "date": "2026-10-24",
+      "summary": "A game's own main menu can show the version"
     }
   ]
 }

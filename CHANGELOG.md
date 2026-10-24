@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.17.1 — 2026-10-24
+
+A game that draws its own main menu or Settings screen, instead of using the UI kit's, can now show the version there and pass the framework check.
+
+### New
+- Version module 0.1.1: put `data-version-spot="main-menu"` (or `"settings"`) on the element that shows `{versionLabel}`, in a file that imports it from `../version`. The check accepts that in place of the kit's `<MainMenu version>` / `<Settings version>`. A mark in a comment, or a file that only imports the label without showing it, still fails.
+
 ## v0.17.0 — 2026-10-24
 
 The checks now say exactly what's wrong instead of failing in confusing ways, and the kit's own sample screens pass its layout rules. A talking bubble can take its colours from a game's own settings, and the Dev Kit's Fonts tab can try every font installed on the computer.

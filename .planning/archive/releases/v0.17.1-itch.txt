@@ -1,0 +1,6 @@
+v0.17.1 — 2026-10-24
+
+A game that draws its own main menu or Settings screen, instead of using the UI kit's, can now show the version there and pass the framework check.
+
+NEW
+• Version module 0.1.1: put data-version-spot="main-menu" (or "settings") on the element that shows {versionLabel}, in a file that imports it from ../version. The check accepts that in place of the kit's <MainMenu version> / <Settings version>. A mark in a comment, or a file that only imports the label without showing it, still fails.
