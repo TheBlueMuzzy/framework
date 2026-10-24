@@ -274,6 +274,18 @@ flowchart LR
   F114[F114 Extraction queue]
 ```
 
+## v0.14 — Story pieces made solid  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, /develop on the plan's pick a): the pieces Goops now uses behave well everywhere — a reveal that replays, a bubble every player can follow — and the planner stops needing hand-trimming.
+- 🔨 F115 ✨ StatList replays its reveal when its rows change (a Modal swapping paydays) — onRevealed once per reveal; no `key` workaround — should · needs: F113 · sprint 31
+- 🔨 F116 ✨ Talking bubble for every player: one lasting shared announcer so screen readers read each new line (the emote bubbles too), keyboard focus moves to a new bubble, the same line twice restarts, bad talk.json values clamped — should · needs: F111 · sprint 31
+- 🔨 F117 🔧 plan-lint trims the STATE Log itself: past 10 entries the oldest move to archive/log.md (newest first), said in one line — should · sprint 31
+```mermaid
+flowchart LR
+  F113[F113 Report reveal] --> F115[F115 Reveal replays]
+  F111[F111 Talking bubble] --> F116[F116 Bubble for every player]
+  F117[F117 Log trims itself]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -285,12 +297,10 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-24 — **StatList replays its reveal when its stats change** (Goops' session, after installing v0.14.0 — check:full ALL PASS 24 at 67d2b0f): a Modal that swaps its stats (Goops' second payday) keeps the same StatList mounted, so the reveal doesn't replay; Goops passes `key={payIndex}`. Restart the reveal (and onRevealed) by itself when the rows change.
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
 - 2026-10-23 — **A tappable seat row in the UI kit** (v0.5 look-back): emotes need one tappable portrait per seat; the scratch Glyphtender had to hand-build `SeatEmotes.tsx` — a kit part (seats in a row, each with `emoteSeatProps` + the muted mark) so every game with opponents gets it.
-- 2026-10-23 — **plan-lint trims the STATE Log itself** (v0.5 look-back): "Log has 11 entries" stopped 4 edits this sprint, each fixed by hand-moving the oldest line to archive/log.md — the hook (or save.mjs) can move it.
 - 2026-10-23 — **BMUZ rule: game ↔ framework sessions message each other** (Goops' session, its Sprint 12 retro): a game session needing a framework change messages the framework session directly (what + why + evidence, "don't install until done"), the framework session replies "done" + the install-module command, the game confirms; the request is also written in the game's STATE/SPRINT Notes; neither asks the other to do what its own rules block. F108 went ask → installed in ~1 h this way. Muzzy OK'd 2026-10-23 → landed in config/bmuz/PROJECT-FILES.md "Game ↔ framework sessions talk directly".
 - 2026-10-23 — **Dev Kit Fonts tab: every font on the designer's machine** (Goops' session): Chrome's Local Font Access (`queryLocalFonts()`, asks permission) lists installed fonts to try live, so a game keeps only the fonts it uses.
 - 2026-10-22 — **Hand to Glyphtender's session (found by the F24 proof, read-only):** its own `scripts/ai-arena.mjs` seats every 2-player table as Scholar vs Survivor, so the Strategist never plays 2-player (0% wins there vs 20% with a fair shuffle), and its Dev Kit check seats tables another way — switching to the framework arena (ai 0.3.0: `npm run ai:arena`, `src/ai/arenaGame.ts`) fixes both; the installer names its old `ai:arena` line.
