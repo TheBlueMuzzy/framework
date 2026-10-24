@@ -5,8 +5,8 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { liveRegion } from './emotes'
 import {
-  DEFAULT_TALK_FEEL, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk, stepTalk,
-  squelchGap, talkOutline, waveOffsets, type TalkFeel, type TalkState,
+  DEFAULT_TALK_FEEL, TALK_FEEL_RANGES, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk,
+  stepTalk, squelchGap, talkFeel, talkOutline, waveOffsets, type TalkFeel, type TalkState,
 } from './talkingBubble'
 
 const feel = (over: Partial<TalkFeel> = {}): TalkFeel => ({ ...DEFAULT_TALK_FEEL, ...over })
@@ -137,6 +137,30 @@ describe('the spikes and the outline', () => {
     expect(Math.max(...out)).toBe(0) // level 0: no wave
     expect(waveOffsets(points, s, feel({ waveStart: 0.5, waveEnd: 0.5 }), 1, half).sides).toEqual({ top: true, right: true, bottom: true, left: true })
   })
+  it('a bad talk.json (0.32.0): out-of-range numbers pulled into range; null / missing / NaN / words = the default', () => {
+    const bad = { variability: 5, waveStart: 'x', spikeGap: null, typeSpeed: Number.NaN, talkHeight: -3, popSize: Infinity, roundness: 99, pauseMs: '400' }
+    expect(talkFeel(bad)).toEqual({ ...DEFAULT_TALK_FEEL, variability: 1, talkHeight: 0, roundness: 10 })
+    expect(talkFeel(null)).toEqual(DEFAULT_TALK_FEEL)
+    expect(talkFeel(undefined)).toEqual(DEFAULT_TALK_FEEL)
+    expect(talkFeel({ spikeGap: 0, typeSpeed: 0, squelchEvery: -1, waveEnd: 2 })).toMatchObject({ spikeGap: 2, typeSpeed: 1, squelchEvery: 0, waveEnd: 1 })
+    expect(talkFeel({ typeSpeed: 40 }).typeSpeed).toBe(40) // a good value is kept as is
+    for (const [key, [low, high]] of Object.entries(TALK_FEEL_RANGES)) {
+      const value = DEFAULT_TALK_FEEL[key as keyof TalkFeel]
+      expect(value >= low && value <= high, `${key}'s approved value is inside its range`).toBe(true)
+    }
+  })
+  it('…so the outline it draws is whole: variability 5 (spikes turned inside out before) stays a proper wave', () => {
+    const { points } = talkOutline(box)
+    const s = startTalk(); s.level = 1
+    const f = talkFeel({ variability: 5, waveStart: 'x', waveEnd: 1, spikeGap: null })
+    let rnd = 0
+    const spread = () => ((rnd = (rnd + 0.37) % 1), rnd) // a spread of picks, the extremes included
+    waveOffsets(points, s, f, 1, spread)
+    for (let i = 0; i < 40; i++) stepTalk(s, 1 / 120, 'banana banana', f, spread)
+    const { out } = waveOffsets(points, s, f, 1, spread)
+    expect(s.widths.every((w) => w > 0)).toBe(true)
+    expect([...out].every((o) => Number.isFinite(o) && o >= 0)).toBe(true)
+  })
   it('bevel corners are cut straight (Neon, Pixel)', () => {
     const round = talkOutline(box).points.length, bevel = talkOutline({ ...box, bevel: true }).points.length
     expect(bevel).toBeLessThan(round) // a 12 px corner: an arc of ~19 px vs a cut of ~17 px
@@ -239,5 +263,89 @@ describe('<TalkingBubble>', () => {
     frames(1)
     expect(typed()).toBe('')
     expect(rest()).toBe('Second.')
+  })
+
+  // 0.32.0 (F116, the sprint 29 review's minors)
+  const region = () => liveRegion()
+  it('says each line through the page\'s ONE lasting live region: no region of its own, the same element\'s text changes', () => {
+    const before = region()
+    const { rerender, unmount } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Found some scraps." speaker="The Veteran" />)
+    expect(document.querySelectorAll('[role="status"]')).toHaveLength(1)
+    expect(before.textContent).toBe('The Veteran: Found some scraps.')
+    frames(60)
+    expect(before.textContent).toBe('The Veteran: Found some scraps.') // once — never letter by letter
+    rerender(<TalkingBubble target={{ x: 50, y: 50 }} text="Bad wire." speaker="The Veteran" />)
+    expect(before.textContent).toBe('The Veteran: Bad wire.')
+    unmount()
+    expect(region()).toBe(before)
+    expect(before.isConnected).toBe(true)
+    render(<TalkingBubble target={{ x: 50, y: 50 }} text="Oh! Hi!" />) // a new bubble: the same region
+    expect(document.querySelectorAll('[role="status"]')).toHaveLength(1)
+    expect(before.textContent).toBe('Oh! Hi!')
+  })
+  it('a line said twice (a new lineId, the same words) restarts — typed again, said again, onTyped again', () => {
+    const onTyped = vi.fn()
+    const { rerender } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hold on." lineId={1} onTyped={onTyped} />)
+    frames(120)
+    expect(typed()).toBe('Hold on.')
+    expect(onTyped).toHaveBeenCalledTimes(1)
+    const said = region().textContent
+    rerender(<TalkingBubble target={{ x: 50, y: 50 }} text="Hold on." lineId={1} onTyped={onTyped} />) // the same line re-rendered
+    frames(1)
+    expect(typed()).toBe('Hold on.')
+    expect(region().textContent).toBe(said)
+    rerender(<TalkingBubble target={{ x: 50, y: 50 }} text="Hold on." lineId={2} onTyped={onTyped} />) // said again
+    frames(1)
+    expect(typed()).toBe('')
+    expect(rest()).toBe('Hold on.')
+    expect(region().textContent).not.toBe(said) // changed, so a screen reader says it again
+    expect(region().textContent!.trim()).toBe('Hold on.')
+    frames(120)
+    expect(onTyped).toHaveBeenCalledTimes(2)
+  })
+  it('a confirmable bubble takes the keyboard focus when it appears (a frame later) and gives it back when it goes', () => {
+    const outside = document.body.appendChild(document.createElement('button'))
+    outside.focus()
+    const { unmount } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Glad you're not goop yet." onConfirm={() => {}} />)
+    frames(1)
+    const bubble = screen.getByRole('button', { name: 'Next', hidden: true })
+    expect(document.activeElement).toBe(bubble)
+    fireEvent.keyDown(document.activeElement!, { key: 'Enter' }) // Enter goes straight to it: the whole line shows
+    frames(1)
+    expect(typed()).toBe("Glad you're not goop yet.")
+    unmount()
+    expect(document.activeElement).toBe(outside)
+    outside.remove()
+  })
+  it.each([
+    ['a text box', () => document.createElement('input')],
+    ['a textarea', () => document.createElement('textarea')],
+    ['a select', () => document.createElement('select')],
+    ['an editable', () => { const el = document.createElement('div'); el.contentEditable = 'true'; el.tabIndex = 0; Object.defineProperty(el, 'isContentEditable', { value: true }); return el }],
+  ])('…but never out of %s the player is typing in', (_, make) => {
+    const field = document.body.appendChild(make())
+    field.focus()
+    expect(document.activeElement).toBe(field)
+    render(<TalkingBubble target={{ x: 50, y: 50 }} text="Psst." onConfirm={() => {}} />)
+    frames(2)
+    expect(document.activeElement).toBe(field)
+    field.remove()
+  })
+  it('a bubble that is not a button never takes the focus', () => {
+    const outside = document.body.appendChild(document.createElement('button'))
+    outside.focus()
+    render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi" />)
+    frames(2)
+    expect(document.activeElement).toBe(outside)
+    outside.remove()
+  })
+  it('a bad talk.json still talks: null / words / out-of-range values fall back or are pulled in, every frame', () => {
+    const live: Record<string, unknown> = { typeSpeed: null, variability: 5, waveStart: 'x', spikeGap: 0 }
+    render(<TalkingBubble target={{ x: 50, y: 50 }} text="abcdefghijklmnopqrstuvwxyz" feel={live} />)
+    frames(60) // 1 s at the default 22 a second (null → the default), after the grow
+    expect(typed()!.length).toBeGreaterThan(5)
+    live.typeSpeed = -10 // pulled up to 1 a second: still types, never stalls or runs wild
+    frames(120)
+    expect(typed()!.length).toBeLessThan(26)
   })
 })
