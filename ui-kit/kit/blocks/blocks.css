@@ -390,9 +390,11 @@
   .kit-countdown { background: var(--surface) var(--panel-texture); color: var(--on-surface); border: var(--border-width) solid var(--border);
     box-shadow: var(--depth-2); animation: kit-pop var(--motion-normal) var(--ease); }
   .kit-end-title { animation: kit-pop calc(var(--motion-normal) * 2) var(--ease) backwards; }
-  /* Results rows arrive one after another: each waits one fast motion longer than the row above */
-  .kit-result-row { animation: var(--enter) var(--motion-normal) var(--ease) backwards; animation-delay: calc(var(--kit-i, 0) * var(--motion-fast)); }
-  .kit-result-row + .kit-result-row { border-block-start: var(--border-width) solid var(--border); }
+  /* Results rows arrive one after another: each waits one fast motion longer than the row above.
+     Stats rows with reveal (0.31.0) use the SAME entrance, each waiting --kit-step (the game's ms per row) longer;
+     a waiting row is held at the entrance's first frame (backwards: unseen), so it keeps its space. */
+  .kit-result-row, .kit-stat-row[data-reveal] { animation: var(--enter) var(--motion-normal) var(--ease) backwards; animation-delay: calc(var(--kit-i, 0) * var(--kit-step, var(--motion-fast))); }
+  .kit-result-row + .kit-result-row, .kit-stat-row + .kit-stat-row { border-block-start: var(--border-width) solid var(--border); }
   .kit-player-chip { transition: opacity var(--motion-normal) var(--ease), filter var(--motion-normal) var(--ease); }
   .kit-player-chip[data-dim] { opacity: 0.35; }
   .kit-dot[data-status="good"] { background: var(--primary); }

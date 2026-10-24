@@ -118,17 +118,43 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
 // onSwipeUp (0.12.0): a swipe up anywhere on the report does it too (Goops: "swipe up to end the day" = back to the
 // console); words.swipe = the quiet line at the bottom that says so (plain words, not a button).
 // Victory onQuit (0.12.0): a second, quieter way out beside Continue (words.quit, art.quit) — like GameOver's.
-type Stat = { label: string; value: ReactNode }
+// reveal (0.31.0, Goops' payslip): ms per row — the stats rows arrive one after another with the Results rows' entrance
+// (the same motion; each row `reveal` ms after the one above); all at once with reduce motion. Waiting rows hold their
+// space, so the card is its final size from the start. onRevealed: once, when the last row is in (at once with reduce
+// motion, no rows or no reveal). It follows the CSS animation, so the Dev Kit's full pause holds it too.
+export type Stat = { label: string; value: ReactNode }
+type RevealProps = { reveal?: number; onRevealed?: () => void }
+function StatList({ stats, reveal, onRevealed }: RevealProps & { stats: Stat[] }) {
+  const revealing = reveal !== undefined && stats.length > 0 && !reduceMotion()
+  const done = useRef(onRevealed)
+  useEffect(() => { done.current = onRevealed }) // always call the latest onRevealed
+  const fired = useRef(false)
+  const finish = () => { if (!fired.current) { fired.current = true; done.current?.() } }
+  useEffect(() => { if (!revealing) finish() }, []) // eslint-disable-line react-hooks/exhaustive-deps -- once, on arrival
+  if (stats.length === 0) return null
+  const last = stats.length - 1
+  return (
+    <Stack gap="xs" className="kit-stats">
+      {stats.map((s, i) => (
+        <div key={s.label} className="kit-stat-row" data-reveal={revealing || undefined}
+          style={revealing ? { '--kit-i': i, '--kit-step': `${reveal}ms` } as CSSProperties : undefined}
+          onAnimationEnd={revealing && i === last ? (e) => { if (e.target === e.currentTarget) finish() } : undefined}>
+          <ListRow label={s.label}><Text kind="label">{s.value}</Text></ListRow>
+        </div>
+      ))}
+    </Stack>
+  )
+}
 type EndArt = { frame?: PanelFrame; backdrop?: string; onSwipeUp?: () => void }
-type EndScreenProps = EndArt & { title: string; message?: string; stats?: Stat[]; swipeHint?: string; children: ReactNode }
-function EndScreen({ title, message, stats = [], children, frame, backdrop, onSwipeUp, swipeHint }: EndScreenProps) {
+type EndScreenProps = EndArt & RevealProps & { title: string; message?: string; stats?: Stat[]; swipeHint?: string; children: ReactNode }
+function EndScreen({ title, message, stats = [], reveal, onRevealed, children, frame, backdrop, onSwipeUp, swipeHint }: EndScreenProps) {
   return (
     <Screen label={title} backdrop={backdrop} swipe={onSwipeUp ? { up: onSwipeUp } : undefined}>
       <Panel depth={2} gap="m" className="kit-modal kit-centred kit-end" frame={frame}>
         <Stack gap="m" className="kit-end-info">
           <span className="kit-end-title"><Text kind="display">{title}</Text></span>
           {message && <Text>{message}</Text>}
-          {stats.length > 0 && <Stack gap="xs">{stats.map((s) => <ListRow key={s.label} label={s.label}><Text kind="label">{s.value}</Text></ListRow>)}</Stack>}
+          <StatList stats={stats} reveal={reveal} onRevealed={onRevealed} />
         </Stack>
         <Stack gap="s" className="kit-end-actions">
           {children}
@@ -139,7 +165,7 @@ function EndScreen({ title, message, stats = [], children, frame, backdrop, onSw
   )
 }
 export const victoryWords = { title: 'Victory!', continue: 'Continue', quit: 'Quit', swipe: '⇧ Swipe up to go back' }
-type VictoryProps = EndArt & {
+type VictoryProps = EndArt & RevealProps & {
   message?: string; stats?: Stat[]; onContinue: () => void; onQuit?: () => void; words?: Partial<typeof victoryWords>
   art?: { continue?: ButtonArt; quit?: ButtonArt }
 }
@@ -153,7 +179,7 @@ export function Victory({ message, stats, onContinue, onQuit, words, art, ...loo
   )
 }
 export const gameOverWords = { title: 'Game over', retry: 'Try again', quit: 'Quit', swipe: '⇧ Swipe up to go back' }
-type GameOverProps = EndArt & {
+type GameOverProps = EndArt & RevealProps & {
   message?: string; stats?: Stat[]; onRetry?: () => void; onQuit?: () => void; words?: Partial<typeof gameOverWords>
   art?: { retry?: ButtonArt; quit?: ButtonArt }
 }
