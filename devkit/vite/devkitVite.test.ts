@@ -1,6 +1,7 @@
 // @vitest-environment node
 // Runs in the framework (not copied into games).
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { request } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
@@ -211,6 +212,18 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     expect((await fontFile('folder:pixel/licence.txt')).status).toBe(400)
     expect((await fontFile('installed1:../../secret.ttf')).status).toBe(400)
     expect((await fetch(`${url}/__devkit/font-library`, { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
+  })
+  it('a page on another name for this server (DNS rebinding: Host evil.example, same "origin") gets nothing', async () => {
+    // Vite's own host check runs before the Dev Kit's endpoints (Vite 6+) — this keeps it that way. fetch can't set Host.
+    const ask = (method: string, path: string, body?: string) => new Promise<number>((done, fail) => {
+      const req = request(`${url}${path}`, { method, headers: { Host: 'evil.example', Origin: 'http://evil.example', 'Content-Type': 'application/json' } }, (res) => { res.resume(); done(res.statusCode ?? 0) })
+      req.on('error', fail)
+      req.end(body)
+    })
+    expect(await ask('GET', '/__devkit/font-library')).toBe(403)
+    expect(await ask('GET', `/__devkit/font-library/file?path=${encodeURIComponent('folder:pixel/Tiny Font.ttf')}`)).toBe(403)
+    expect(await ask('POST', '/__devkit/font-library/add', JSON.stringify({ path: 'folder:pixel/Tiny Font.ttf' }))).toBe(403)
+    expect(existsSync(join(game, 'public/fonts'))).toBe(false)
   })
   it('lists the computer\'s installed fonts too (one row per family) — and the off switch hides them', async () => {
     const list = await (await fetch(`${url}/__devkit/font-library`)).json()
