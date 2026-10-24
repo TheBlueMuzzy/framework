@@ -536,7 +536,6 @@ to search sets `searchable: false` (no box).
   a test file named `a&b.test.ts` or `$(x).test.ts` is just a name, nothing runs. On Windows npm / npx (.cmd files)
   run as this Node + npm's own `npm-cli.js` / `npx-cli.js` (`commandLine`), so no shell is needed there either.
 - 0.27.0 (framework F122): the Fonts tab's library also lists **every font installed on the computer** — a new
-- 0.27.1 (found by Goops): the framework check's own test of npm / npx reads the tool's JSON line, not just the last line — npm 11 can print a "npm warn Unknown env config" line after it (an unknown npm setting in the environment), which turned the test red and made install-module refuse the Dev Kit.
   **Installed on this PC** group beside **Your font folder** (Windows `%WINDIR%\Fonts` + `%LOCALAPPDATA%\Microsoft\Windows\Fonts`,
   macOS `/System/Library/Fonts` · `/Library/Fonts` · `~/Library/Fonts`, Linux `/usr/share/fonts` · `/usr/local/share/fonts` ·
   `~/.local/share/fonts` · `~/.fonts`; only the ones that exist). One row per family (the name read from the font itself;
@@ -545,4 +544,5 @@ to search sets `searchable: false` (no box).
   Windows can't ship in a game". `.ttc` collections and old `.fon` screen fonts aren't listed (a browser can't load them
   from a page) — the group says how many. Off: `"installedFonts": false` in devkit.local.json or `DEVKIT_INSTALLED_FONTS=0`.
   Library paths now name their folder (`folder:…` / `installed1:…`), checked against that one folder only.
+- 0.27.1 (found by Goops): the framework check's own test of npm / npx reads the tool's JSON line, not just the last line — npm 11 can print a "npm warn Unknown env config" line after it (an unknown npm setting in the environment), which turned the test red and made install-module refuse the Dev Kit.
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
