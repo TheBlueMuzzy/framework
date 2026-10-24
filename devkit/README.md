@@ -545,4 +545,5 @@ to search sets `searchable: false` (no box).
   from a page) — the group says how many. Off: `"installedFonts": false` in devkit.local.json or `DEVKIT_INSTALLED_FONTS=0`.
   Library paths now name their folder (`folder:…` / `installed1:…`), checked against that one folder only.
 - 0.27.1 (found by Goops): the framework check's own test of npm / npx reads the tool's JSON line, not just the last line — npm 11 can print a "npm warn Unknown env config" line after it (an unknown npm setting in the environment), which turned the test red and made install-module refuse the Dev Kit.
+- 0.27.2 (framework F128): the installer asks git for the kit’s commit once per run, not on every install — two git processes per install took 0.2–2 s each under check:fast (saves did the same in 0.6.2).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).

@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.33.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.33.2** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -232,6 +232,8 @@ gallery's `npm run shoot` uses the same one.
   least — it used to keep its length and stick out of the plate). HUDs that already fit look the same; a plain
   `Screen` (menus) is unchanged. The overlap check now also sees a solid piece covering part of a bar, meter or
   picture (see "nothing overlaps" below); the gallery shoot adds a 360×780 phone and a 667×375 phone on its side.
+  0.33.2 (F128 — `scripts/install-kit.mjs`): the installer asks git for the kit’s commit once per run, not on every
+  install — two git processes per install took 0.2–2 s each under check:fast (saves did the same in 0.6.2).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

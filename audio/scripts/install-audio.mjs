@@ -54,7 +54,16 @@ function listFiles(dir, base = dir) {
   })
 }
 
+// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
+// 0.6.2 did in F125: the install tests call installAudio many times, and under check:fast those git runs were most of the test's time).
+// The kit's commit can't change while one install runs, so asking again only costs time.
+let kitVersionOnce = null
 function kitVersion() {
+  kitVersionOnce ??= readKitVersion()
+  return kitVersionOnce
+}
+
+function readKitVersion() {
   const version = readFileSync(join(audioDir, 'kit', 'VERSION'), 'utf8').trim()
   let commit = 'no git'
   try {

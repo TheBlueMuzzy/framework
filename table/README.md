@@ -1,6 +1,6 @@
 # Table
 
-The foundation a turn-based game's rules stand on (framework v0.4 — design: `../.planning/design/table.md`). Proven slice by slice in Glyphtender v0.6. Kit **0.8.0** (0.8.0: its promise check runs the game's selfTest) — Game core + Zones & pieces + Turns & flow + Event feed + Drag referee + Rack order + Seats + who played each move.
+The foundation a turn-based game's rules stand on (framework v0.4 — design: `../.planning/design/table.md`). Proven slice by slice in Glyphtender v0.6. Kit **0.8.1** (0.8.1, F128: the installer asks git for the kit’s commit once per run, not on every install) (0.8.0: its promise check runs the game's selfTest) — Game core + Zones & pieces + Turns & flow + Event feed + Drag referee + Rack order + Seats + who played each move.
 
 ## What a game gets (0.1.0 — Game core)
 | Part | Does |
