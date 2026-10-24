@@ -189,6 +189,98 @@ describe('StatList reveal', () => {
   })
 })
 
+// REPLAY (0.32.0, Goops' payslip Modal swapping its stats without a key): new rows BY CONTENT = a new reveal.
+describe('StatList replays its reveal when its rows change', () => {
+  const day1 = [{ label: 'Wage', value: '$120' }, { label: 'Rent', value: '−$40', tone: 'danger' as const }, { label: 'Net pay', value: '$80' }]
+  const day2 = [{ label: 'Wage', value: '$140' }, { label: 'Rent', value: '−$40', tone: 'danger' as const }, { label: 'Net pay', value: '$100' }]
+  const rows = (container: HTMLElement) => [...container.querySelectorAll<HTMLElement>('.kit-stat-row')]
+  const last = (container: HTMLElement) => rows(container).at(-1)!
+
+  it('new values under the same labels: fresh rows (their entrances play again) and onRevealed once more', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<StatList stats={day1} reveal={350} onRevealed={onRevealed} />)
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledTimes(1)
+    const before = rows(container)
+    rerender(<StatList stats={day2} reveal={350} onRevealed={onRevealed} />)
+    const after = rows(container)
+    expect(after.map((r) => r.textContent)).toEqual(['Wage$140', 'Rent▼−$40', 'Net pay$100'])
+    expect(after.some((r) => before.includes(r))).toBe(false) // every row is new, so the CSS entrance runs again
+    expect(after.map((r) => r.style.getPropertyValue('--kit-i'))).toEqual(['0', '1', '2']) // from the top
+    expect(onRevealed).toHaveBeenCalledTimes(1) // not until the new last row is in
+    fireEvent.animationEnd(last(container))
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledTimes(2)
+    rerender(<StatList stats={day1} reveal={350} onRevealed={onRevealed} />) // and back again: a third reveal
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledTimes(3)
+  })
+
+  it('the same rows re-rendered (a new array of new objects with the same words) do not replay', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<StatList stats={day1} reveal={350} onRevealed={onRevealed} />)
+    fireEvent.animationEnd(last(container))
+    const before = rows(container)
+    rerender(<StatList stats={day1.map((s) => ({ ...s }))} reveal={350} onRevealed={onRevealed} />)
+    rerender(<StatList stats={structuredClone(day1)} reveal={350} onRevealed={vi.fn()} />)
+    expect(rows(container)).toEqual(before) // the very same elements: nothing restarts
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledOnce()
+  })
+
+  it('a value that is an element compares by its words: same words = same rows, new words = a new reveal', () => {
+    const onRevealed = vi.fn()
+    const pay = (n: number) => [{ label: 'Pay', value: <b>${n}</b> }]
+    const { container, rerender } = render(<StatList stats={pay(5)} reveal={350} onRevealed={onRevealed} />)
+    const before = rows(container)
+    rerender(<StatList stats={pay(5)} reveal={350} onRevealed={onRevealed} />) // a new element, the same words
+    expect(rows(container)).toEqual(before)
+    rerender(<StatList stats={pay(6)} reveal={350} onRevealed={onRevealed} />)
+    expect(rows(container)[0]).not.toBe(before[0])
+    expect(rows(container)[0].textContent).toBe('Pay$6')
+  })
+
+  it('a tone change counts as new rows too', () => {
+    const { container, rerender } = render(<StatList stats={day1} reveal={350} />)
+    const before = rows(container)
+    rerender(<StatList stats={[day1[0], day1[1], { ...day1[2], tone: 'success' }]} reveal={350} />)
+    expect(rows(container)[0]).not.toBe(before[0])
+  })
+
+  it('reduce motion: the new rows are all there at once, and onRevealed fires again straight away', () => {
+    document.documentElement.setAttribute('data-reduce-motion', '')
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<StatList stats={day1} reveal={350} onRevealed={onRevealed} />)
+    expect(onRevealed).toHaveBeenCalledTimes(1)
+    rerender(<StatList stats={day2} reveal={350} onRevealed={onRevealed} />)
+    expect(rows(container).some((r) => r.hasAttribute('data-reveal'))).toBe(false)
+    expect(onRevealed).toHaveBeenCalledTimes(2)
+    rerender(<StatList stats={day2} reveal={350} onRevealed={onRevealed} />) // the same rows: no third call
+    expect(onRevealed).toHaveBeenCalledTimes(2)
+  })
+
+  it('Victory / GameOver inherit it: new stats replay, and their scroll starts from the top again', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<Victory stats={day1} reveal={200} onRevealed={onRevealed} onContinue={() => {}} />)
+    const box = container.querySelector<HTMLElement>('.kit-scroll')!
+    const scrollTo = vi.fn((to: ScrollToOptions) => { box.scrollTop = to.top ?? 0 })
+    box.scrollTo = scrollTo as unknown as typeof box.scrollTo
+    fireEvent.animationEnd(last(container))
+    box.scrollTop = 120 // the first reveal followed its rows down
+    rerender(<Victory stats={day2} reveal={200} onRevealed={onRevealed} onContinue={() => {}} />)
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledTimes(2)
+
+    const over = vi.fn()
+    const game = render(<GameOver stats={day1} reveal={200} onRevealed={over} />)
+    fireEvent.animationEnd(last(game.container))
+    game.rerender(<GameOver stats={day2} reveal={200} onRevealed={over} />)
+    fireEvent.animationEnd(last(game.container))
+    expect(over).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('Victory / GameOver reveal', () => {
   const stats = [{ label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }]
   it('Victory passes reveal + onRevealed to its StatList', () => {
