@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-23 — F109 + F110 approved: every player's portrait can be a tap-to-emote / tap-to-mute button, and modules bring their own Settings rows to the check.
+- 2026-10-23 — Sprint 28 planned: games take the AI — a tappable seat row and module Settings rows that plug themselves in (F109, F110).
 - 2026-10-23 — Released v0.12.1: the AI report says which situations predict winning, and an auto-tuner suggests personality sliders (checked on fresh games; the designer applies).
 - 2026-10-23 — F25 + F26 approved: the AI report says which situations predict winning, and the Dev Kit can suggest personality sliders (checked on fresh games; you apply).
 - 2026-10-23 — Sprint 27 planned: finish the AI — see which situations win, and let the computer suggest personality settings (F25, F26).
