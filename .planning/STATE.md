@@ -11,7 +11,7 @@ Reviewed through: framework d33c2ee (102a4d6..d33c2ee Dev Kit 0.27.1 test fix re
 
 ## Where we are
 Stage: deliver   Milestone: v0.16 The kit holds up on a phone ✅   Sprint: 33 (archived)
-Doing: — (released v0.18.0)   Branch: dev/v0-16-phone-kit   Version: 0.17.1 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.33.1 · Dev Kit 0.27.1 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.2 · version 0.1.1)
+Doing: — (released v0.18.0)   Branch: dev/v0-16-phone-kit   Version: 0.18.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.33.1 · Dev Kit 0.27.1 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.2 · version 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.18.0
 
 ## Key facts

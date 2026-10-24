@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.18.0 — 2026-10-24
+
+On a small phone, a HUD's corner pieces no longer slide under their neighbours: the corners keep their width and the middle of the row gives way. The page check now also catches a solid chip or badge sitting on part of a bar, meter or picture.
+
+### Fixed
+- UI kit 0.33.1: a HUD corner (bars, coins, score) could shrink below its content and slide under the piece next to it. On an upright Cozy phone the coins chip covered the end of the Health bar; on a 667×375 phone on its side, Roll crossed "40%". Corners now keep their width, a bar with a set width gets shorter inside its plate, and the middle wraps instead. Only HUD screens change; menus and other screens look exactly as before.
+- Saves 0.6.2: installing the saves module no longer starts git on every install, so its test stays fast on a busy computer (5 s → under 0.3 s).
+- Dev Kit 0.27.1: its own npm / npx test no longer goes red when npm prints a warning about an unknown setting, so a game with such a setting can install the Dev Kit again.
+
+### New
+- UI kit 0.33.1: the page check reports `overlap: "Coins" covers part of "Health"` when a solid piece crosses the edge of a bar, meter, picture or avatar. On-purpose layering is left alone: a dialog over the HUD, a badge on its own card, a label on its own bar, toasts and anything moving.
+- The UI kit's screenshot run also shoots a 360×780 phone and a 667×375 phone on its side.
+
+### Known issues
+- The screenshot run still lists 16 older finds that the new check and sizes made visible. They're in the roadmap's Ideas for a later sprint: the parts page's HUD demo at 200% text, the talking bubble over a picker on a phone on its side, and 1 px edges on the pinned screen.
+
 ## v0.17.1 — 2026-10-24
 
 A game that draws its own main menu or Settings screen, instead of using the UI kit's, can now show the version there and pass the framework check.
