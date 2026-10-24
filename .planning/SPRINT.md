@@ -1,0 +1,29 @@
+# Sprint 29 — Story bubbles that talk, and modules that never break a game's checks
+Started 2026-10-23 · Milestone v0.12 Story bubbles + clean installs · Features: F111, F112
+Muzzy 2026-10-23: "go" to the sprint plan (counts as his yes to F112's install-module change). Auto mode as in sprints 26–28: one helper per feature, commit per task, save per feature, each feature waits for his OK; nothing released. Helpers commit or send a one-line status at least every 45 min.
+What changes: a new talking bubble in the UI kit gallery; installing a module no longer breaks a game's own lint / full check. What stays the same: the emote bubbles, every game (Goops installs the bubble itself when told the version), Goops' own files.
+
+## F111 ✨ Talking bubble
+Done when: a UI kit piece `<TalkingBubble>` grows from its tail tip, types its text out with rests at . ! ? … (full) and , — (half), fizzes a stretch of its outline as a speech wave while typing, pops the outline (never the text) per syllable, squelches now and then while it waits to be confirmed; a plain-outline style without the wave; Muzzy's approved values as defaults in the game's content/, live in the Dev Kit; reduce motion respected; screen readers hear the line once; gallery page in all 5 styles at every size; matches Goops' sketch S9 side by side.
+- [ ] 🤖 1. Port the sketch's update() + draw() into a kit piece: grow from the tail tip (320 ms ease-out-back), type-out, rests (pauseMs, half at commas) — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 2. The outline speech wave (waveStart / waveEnd / spikeGap / talkHeight / roundness / variability, heights re-picked ~25×/s, tail never fizzes), syllable pops on the outline only, idle squelch every squelchEvery ± 1.5 s — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 3. Outline `style`: "wave" | "plain" (plain = the same grow + type + rests, no wave) — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 4. Defaults = the approved values (waveStart 0, waveEnd 0.34, spikeGap 19, talkHeight 51, roundness 3, variability 0.45, popSize 0.025, typeSpeed 22, pauseMs 380, squelchEvery 2.5) read live from the game's content/ (Dev Kit editable) — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 5. Reduce motion (no wave / pops / grow: text shown whole), screen reader hears the full line once, tests — ui-kit/kit/blocks/talkingBubble.test.tsx
+- [ ] 🤖 6. Gallery page (?screen=talk) in all 5 styles, shoot at every size; README, CATALOG, VERSION — ui-kit/gallery/
+- [ ] 🙋 7. Compare it with the Goops sketch in the gallery (tuning)
+Check: ui-kit tests, typecheck, lint, check-ui green (root check:fast); shots at 390x844, 360x780, 844x390, 768x343, 1100, 1440x900, 1920x1080 looked at by me; a side-by-side of the sketch and the kit piece.
+
+## F112 🐞 Modules never trip a game's checks
+Done when: install-module adds the installed module's folder to the game's eslint ignores (or refuses with the one line to add when it can't edit the config safely), then the game's OWN lint passes after an install; the Dev Kit's checks treat every src/ folder with a VERSION file as a module (not the game's code), not only the names in KIT_FOLDERS; tested; proven on scratch copies of Goops and Glyphtender (their repos untouched).
+- [ ] 🤖 1. install-module adds the module folder to the game's eslint `globalIgnores` (only its own entry; the rest of the file untouched) or refuses with the line — ~/.claude/config/bmuz/scripts/install-module.mjs
+- [ ] 🤖 2. The Dev Kit's gameCode() skips every src/ folder with a VERSION file (KIT_FOLDERS kept as the known list) — devkit/kit/check-framework.mjs
+- [ ] 🤖 3. Tests: a fake game whose lint has react-refresh on installs the Dev Kit and its own lint passes; a made-up module with a VERSION isn't read as game code — devkit/kit/check-framework.test.mjs
+- [ ] 🤖 4. Proof on scratch clones of Goops and Glyphtender: install each module, run the game's own lint + check:framework — ~/Documents/dev/.scratch/
+Check: devkit tests + root check:fast green; the game's own `npm run lint` green after install on both scratch clones, read by me.
+
+Notes:
+- F111 sources (Goops, read-only): goops/.planning/research/sketches/speaker-bubble.html (update() + draw()), goops/.planning/design/story.md "The speaker bubble", goops/.planning/research/speaker-bubble/picks.json. Builds on F107's SpeechBubble (same intention → same motion). Spike shape from roundness: needle → sine → semicircle; widths drift with variability. Tell Goops' session the version when released (its F09 story moments, after its sprint 13).
+- F112 source: Goops' session 2026-10-23 — Dev Kit 0.26.0's src/devkit/ai/CheckPanel.tsx exports whatWinsFrom / tuneShare beside the component → react-refresh/only-export-components fails a game's lint (the framework's lint has it off). Glyphtender ignores only src/ui/kit, src/audio, sketches. Goops already ignores src/devkit itself.
+- Ask Muzzy: typeable knob values in the sketch starter (Goops; a BMUZ config edit, not in this sprint) — yes / no.
+- UI kit 0.31.0 was to drop OLD_MODULE_ROWS (v0.13.0 known issue). Glyphtender hasn't reinstalled crashes / emotes / ai yet, so the fallback stays one more release (decided 2026-10-23, Claude).

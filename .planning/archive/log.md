@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-22 — Sprint 26 planned: AI players that talk, and proof each personality plays like itself (F22 Banter, F24 Arena + Personality Check).
 - 2026-10-20 — F103 built (waiting for OK): confirm boxes can't silently fail any more, bars fit small phones without workarounds, and the Dev Kit warns when its PAUSED pill covers the game's HUD.
 - 2026-10-20 — F102 approved: every game can show the same version number on its menu, in Settings and in bug reports, and its tests refuse an outdated build.
 - 2026-10-20 — Sprint 21 planned: saves ready to move to phone, desktop, Steam or Unity later (the store and Unity parts wait until a game needs them).
