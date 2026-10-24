@@ -209,6 +209,8 @@ describe('<TalkingBubble>', () => {
     frames(1)
     expect(typed()).toBe("Glad you're not goop yet.")
     expect(onConfirm).not.toHaveBeenCalled()
+    fireEvent.keyDown(button, { key: 'Enter', repeat: true })
+    expect(onConfirm).not.toHaveBeenCalled() // a held key's repeat never confirms
     fireEvent.keyDown(button, { key: 'Enter' })
     expect(onConfirm).toHaveBeenCalledOnce()
   })

@@ -398,7 +398,12 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
     if (s.phase !== 'wait') finishTalk(s, p.text, { ...DEFAULT_TALK_FEEL, ...p.feel }, Math.random)
     else p.onConfirm?.()
   }
-  const key = (event: KeyboardEvent) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); confirm() } }
+  // A held key's repeats are ignored, or holding Enter skipped through every line
+  const key = (event: KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    if (!event.repeat) confirm()
+  }
   const button = !!onConfirm
   const content = (
     <div ref={layer} {...{ popover: 'manual' }} className="kit-scope kit-callout-layer kit-talk-layer" data-outline={outline}>
