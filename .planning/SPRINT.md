@@ -30,6 +30,7 @@ Goops' session 2026-10-23 for its F41 payslip report (portrait only). Done when:
 - [x] 🤖 2. `<StatList stats reveal onRevealed />` block (Victory / GameOver use it inside) + per-row `tone` — ui-kit/kit/blocks/flow.tsx
 - [x] 🤖 3. Tests: rows hidden then shown in order, onRevealed once, reduce motion = all at once + onRevealed, size unchanged during the reveal — ui-kit/kit/blocks/flow.test.tsx
 - [x] 🤖 4. Gallery (a payslip-like Modal with StatList + a revealed Victory), README, CATALOG — ui-kit/gallery/
+- [ ] 🤖 5. Victory / GameOver hold their stats in a ScrollArea (title, message, buttons stay put; edge fade, no scroll bar; short lists unchanged); the reveal scrolls to keep the newest row in view (Goops F41 payslip: 692 px of rows in a 605 px frame at 390x844) — ui-kit/kit/blocks/flow.tsx
 Check: ui-kit tests + root check:fast; shots at the portrait sizes (390x844, 360x780) plus 1100 + 1440x900 looked at by me; card size measured before / mid / after the reveal.
 Checked: 2026-10-23 (Claude) — root check:fast 20/20 at 684564a; ui-kit 523 tests, check-ui 150 files. Card size identical before / mid / after in 40 runs (helper, measurements.json); shots looked at by me: payslip-cartoon-390x844-mid (later rows hidden, space kept), victoryreveal-pixel-390x844-after (▼ / ▲ badges, 24 px+ room). Review: 1 real fixed + 2 tests (684564a onRevealed followed a row no longer last). Limit: a list taller than the screen reveals rows out of sight (Notes).
 

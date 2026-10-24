@@ -11,7 +11,7 @@ Reviewed through: framework 684564a (sprint 29 F111 + F112 687aea9..daea510 + ~/
 
 ## Where we are
 Stage: develop   Milestone: v0.12 Story bubbles + clean installs   Sprint: 29
-Doing: F111 · F112 · F113 — waiting for Muzzy's OK   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
+Doing: F111 · F112 — waiting for Muzzy's OK · F113 task 5 (stats scroll) — building   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.13.0
 
 ## Key facts
