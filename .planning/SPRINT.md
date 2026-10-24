@@ -22,7 +22,7 @@ Check: `npm run shoot` → 0 problems; ui-kit tests + check-ui + root check:fast
 ## F120 🔧 check-framework never builds a shell string
 Done when: `t.run` in check-framework passes an argument list (no `shell: true` with a joined string); npx / .cmd on Windows still work; a test file named with `$( )` or `;` runs nothing; Dev Kit patch version.
 - [x] 🤖 1. Run commands as argument lists (Windows .cmd handled without a shell string) — devkit/kit/check-framework.mjs
-- [ ] 🤖 2. Tests: odd file names are passed as data; npx still runs on Windows — devkit/kit/check-framework.test.mjs
+- [x] 🤖 2. Tests: odd file names are passed as data; npx still runs on Windows — devkit/kit/check-framework.test.mjs
 - [ ] 🤖 3. Same pattern elsewhere? grep the framework + BMUZ scripts for shell: true with joined strings; fix or list — devkit/README.md
 Check: devkit tests + root check:fast; check:framework on a scratch Goops clone still passes.
 

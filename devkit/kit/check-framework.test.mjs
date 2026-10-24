@@ -1,9 +1,9 @@
 // @vitest-environment node
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DEFAULT_PORT, KNOWN_GAPS_CHECK, adapterFile, applyKnownGaps, readKnownGaps, findModules, formatReport, gameCode, healthSummary, linesMatching, makeTester, readArgs, saveHealth, serverUrl } from './check-framework.mjs'
+import { DEFAULT_PORT, KNOWN_GAPS_CHECK, adapterFile, commandLine, applyKnownGaps, readKnownGaps, findModules, formatReport, gameCode, healthSummary, linesMatching, makeTester, readArgs, saveHealth, serverUrl } from './check-framework.mjs'
 import { firstDiff, nudged, unreadTuning } from './conformance.mjs'
 
 let game
@@ -221,4 +221,42 @@ describe('known gaps (0.20.1)', () => {
     write('content/devkit.json', JSON.stringify({ knownGaps: { check: HALF } }))
     expect(readKnownGaps(game).problems[0]).toMatch(/must be a list/)
   })
+})
+
+describe('t.run never builds a shell string (0.26.2, F120)', () => {
+  // names a check could pass along (test files found in the repo): each would run a command if a shell read it
+  const ODD = ['$(echo pwned).test.ts', 'a;echo pwned.test.ts', 'b&echo.>marker.txt', 'c|echo.>marker2.txt', 'd %PATH% `whoami` "q".test.ts']
+  const tester = () => makeTester({ root: game, module: { rel: 'src/devkit', version: '1' }, modules: [], shared: {}, staticOnly: true, results: [] })
+
+  it('commandLine: node = this Node; npm / npx on Windows = this Node + npm\'s own cli file; anything else as it is', () => {
+    const win = { platform: 'win32', execPath: 'C:\\node\\node.exe', env: {}, exists: (p) => p.endsWith('npx-cli.js') }
+    expect(commandLine('node', ['x.mjs'], win)).toEqual({ file: 'C:\\node\\node.exe', args: ['x.mjs'] })
+    expect(commandLine('npx', ['vitest', 'run'], win)).toEqual({ file: 'C:\\node\\node.exe', args: [join('C:\\node', 'node_modules', 'npm', 'bin', 'npx-cli.js'), 'vitest', 'run'] })
+    const running = { ...win, env: { npm_execpath: 'D:\\tools\\npm\\bin\\npm-cli.js' } } // started by `npm run check:framework`
+    expect(commandLine('npx', ['vitest'], running).args[0]).toBe(join('D:\\tools\\npm\\bin', 'npx-cli.js'))
+    expect(commandLine('npm', ['test'], { ...win, exists: () => false }).error).toMatch(/couldn't find npm's npm-cli\.js/)
+    expect(commandLine('npx', ['vitest'], { platform: 'linux', execPath: '/usr/bin/node', env: {} })).toEqual({ file: 'npx', args: ['vitest'] })
+    expect(commandLine('git', ['status'], win)).toEqual({ file: 'git', args: ['status'] })
+  })
+
+  it('odd file names reach the program as data — nothing runs, nothing is written', () => {
+    write('show.mjs', 'console.log(JSON.stringify(process.argv.slice(2)))')
+    const r = tester().run('node', ['show.mjs', ...ODD])
+    expect(r.code).toBe(0)
+    expect(JSON.parse(r.out)).toEqual(ODD)
+    expect(readdirSync(game)).toEqual(['show.mjs'])
+  })
+
+  it('npm and npx still run (on Windows they are .cmd files) — a game\'s tool gets the odd names as data too', () => {
+    write('package.json', '{ "name": "g", "version": "1.0.0" }')
+    write('tool/package.json', '{ "name": "show-args", "version": "1.0.0", "bin": { "show-args": "show.mjs" } }')
+    write('tool/show.mjs', '#!/usr/bin/env node\nconsole.log(JSON.stringify(process.argv.slice(2)))\n')
+    const t = tester()
+    const install = t.run('npm', ['install', '--offline', '--no-audit', '--no-fund', './tool']) // a local folder: no network
+    expect(install.code, install.out).toBe(0)
+    const r = t.run('npx', ['--offline', 'show-args', ...ODD])
+    expect(r.code, r.out).toBe(0)
+    expect(JSON.parse(r.out.trim().split('\n').pop())).toEqual(ODD)
+    expect(readdirSync(game).sort()).toEqual(['node_modules', 'package-lock.json', 'package.json', 'tool'])
+  }, 60_000)
 })
