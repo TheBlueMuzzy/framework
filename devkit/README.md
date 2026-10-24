@@ -536,6 +536,7 @@ to search sets `searchable: false` (no box).
   a test file named `a&b.test.ts` or `$(x).test.ts` is just a name, nothing runs. On Windows npm / npx (.cmd files)
   run as this Node + npm's own `npm-cli.js` / `npx-cli.js` (`commandLine`), so no shell is needed there either.
 - 0.27.0 (framework F122): the Fonts tab's library also lists **every font installed on the computer** — a new
+- 0.27.1 (found by Goops): the framework check's own test of npm / npx reads the tool's JSON line, not just the last line — npm 11 can print a "npm warn Unknown env config" line after it (an unknown npm setting in the environment), which turned the test red and made install-module refuse the Dev Kit.
   **Installed on this PC** group beside **Your font folder** (Windows `%WINDIR%\Fonts` + `%LOCALAPPDATA%\Microsoft\Windows\Fonts`,
   macOS `/System/Library/Fonts` · `/Library/Fonts` · `~/Library/Fonts`, Linux `/usr/share/fonts` · `/usr/local/share/fonts` ·
   `~/.local/share/fonts` · `~/.fonts`; only the ones that exist). One row per family (the name read from the font itself;
