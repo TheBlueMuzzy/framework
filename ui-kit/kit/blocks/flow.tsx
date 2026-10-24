@@ -140,13 +140,19 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
   const fired = useRef(false) // once, whether the last row's entrance ends or there's nothing to wait for
   const finish = () => { if (!fired.current) { fired.current = true; done.current?.() } }
   const lastRow = useRef<HTMLDivElement>(null)
+  // Follows whichever row is last now: new stats mid-reveal can add, drop or swap the last row (review fix)
+  const lastKey = stats.length > 0 ? stats[stats.length - 1].label : undefined
   useEffect(() => {
     const el = lastRow.current
     if (!revealing || !el) { finish(); return }
-    const onEnd = (e: AnimationEvent) => { if (e.target === el) finish() } // (the row's own entrance, not a part inside it)
+    // Nothing left to play on it (its entrance already over, or the style has none): it's in now
+    if (typeof el.getAnimations === 'function' && el.getAnimations().length === 0) { finish(); return }
+    // (the row's own entrance, not a part inside it; a cancelled entrance — e.g. hidden — has nothing more to show)
+    const onEnd = (e: AnimationEvent) => { if (e.target === el) finish() }
     el.addEventListener('animationend', onEnd)
-    return () => el.removeEventListener('animationend', onEnd)
-  }, [revealing])
+    el.addEventListener('animationcancel', onEnd)
+    return () => { el.removeEventListener('animationend', onEnd); el.removeEventListener('animationcancel', onEnd) }
+  }, [revealing, lastKey, stats.length])
   if (stats.length === 0) return null
   const last = stats.length - 1
   const waits = (i: number) => (revealing ? i : undefined) // row i waits i steps (no reveal: no variables at all)

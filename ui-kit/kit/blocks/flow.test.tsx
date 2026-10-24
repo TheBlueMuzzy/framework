@@ -126,6 +126,33 @@ describe('StatList reveal', () => {
     expect(second).toHaveBeenCalledOnce()
   })
 
+  it('new stats mid-reveal (review fix): it waits for the NEW last row — not the old one, nor a removed one', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<StatList stats={stats.slice(0, 3)} reveal={350} onRevealed={onRevealed} />)
+    const oldLast = last(container)
+    rerender(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />) // a row added at the end
+    fireEvent.animationEnd(oldLast)
+    expect(onRevealed).not.toHaveBeenCalled() // no longer the last row
+    rerender(<StatList stats={[...stats.slice(0, 3), { label: 'Take home', value: '$80' }]} reveal={350} onRevealed={onRevealed} />) // last row swapped
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledOnce()
+  })
+
+  it('a last row that has nothing left to play (already in, cancelled, or a style with no entrance) does not hold it forever', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />)
+    fireEvent.animationEnd(rows(container)[2]) // row 3 is in
+    const row3 = rows(container)[2] as HTMLElement & { getAnimations?: () => Animation[] }
+    row3.getAnimations = () => [] // (jsdom has no animations: say row 3's is over)
+    rerender(<StatList stats={stats.slice(0, 3)} reveal={350} onRevealed={onRevealed} />) // the waiting last row dropped
+    expect(onRevealed).toHaveBeenCalledOnce()
+
+    const cancelled = vi.fn()
+    const again = render(<StatList stats={stats} reveal={350} onRevealed={cancelled} />)
+    fireEvent(last(again.container), new Event('animationcancel'))
+    expect(cancelled).toHaveBeenCalledOnce()
+  })
+
   it('reduce motion: every row is there at once, and onRevealed fires once straight away', () => {
     document.documentElement.setAttribute('data-reduce-motion', '')
     const onRevealed = vi.fn()
