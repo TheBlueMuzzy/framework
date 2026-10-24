@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-24 — **Sprint 30 (v0.13 Games feed the framework): F114 extraction queue built, reviewed (6 real fixed), trial green — waiting for Muzzy's OK.** Muzzy "yes. go". Also done 2026-10-24 on his yes: the hand-off card's Questions holds only questions + a Your to-dos section (handoff-check); typeable sketch knobs (a helper, in ~/.claude). Before: 2026-10-24 — **Released v0.14.0 — the v0.12 "Story bubbles + clean installs" milestone ✅** (UI kit 0.31.0: TalkingBubble, Victory/GameOver reveal + StatList + scrolling stats; Dev Kit 0.26.1 + install-module: module folders in the game's eslint ignores). Next: tell Goops' session the versions + install command; then /sprint (or /roadmap). Ask Muzzy: hand-off card Questions-only (ROADMAP Ideas), the extraction queue (Ideas), typeable sketch knobs — each a BMUZ config change needing his yes. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
+2026-10-24 — **Sprint 30 (v0.13 Games feed the framework): F114 extraction queue built, reviewed (6 real fixed), trial green — approved by Muzzy 2026-10-24.** Muzzy "yes. go". Also done 2026-10-24 on his yes: the hand-off card's Questions holds only questions + a Your to-dos section (handoff-check); typeable sketch knobs (a helper, in ~/.claude). Before: 2026-10-24 — **Released v0.14.0 — the v0.12 "Story bubbles + clean installs" milestone ✅** (UI kit 0.31.0: TalkingBubble, Victory/GameOver reveal + StatList + scrolling stats; Dev Kit 0.26.1 + install-module: module folders in the game's eslint ignores). Next: tell Goops' session the versions + install command; then /sprint (or /roadmap). Ask Muzzy: hand-off card Questions-only (ROADMAP Ideas), the extraction queue (Ideas), typeable sketch knobs — each a BMUZ config change needing his yes. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 4a1b207 (sprint 30 F114 1428fc8..4a1b207 + ~/.claude
 
 ## Where we are
 Stage: develop   Milestone: v0.13 Games feed the framework   Sprint: 30
-Doing: F114 — waiting for Muzzy's OK   Branch: dev/v0-13-extraction   Version: 0.14.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.31.0 · Dev Kit 0.26.1 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
+Doing: —   Branch: dev/v0-13-extraction   Version: 0.14.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.31.0 · Dev Kit 0.26.1 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.14.0
 
 ## Key facts
@@ -32,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-24 — F114 approved: a game session can hand a finished piece to the framework window, which builds it as a module and swaps it back in with the game's own checks as the contract.
 - 2026-10-24 — Sprint 30 planned: a second window turns finished game pieces into framework modules (F114 extraction queue).
 - 2026-10-24 — Released v0.14.0 (v0.12 Story bubbles + clean installs): a talking bubble for story moments, report rows that appear one at a time with long lists that scroll, and installs that keep a game's own checks green.
 - 2026-10-23 — F111 + F112 + F113 approved: a talking bubble for story moments, module installs that keep a game's lint green, and report rows that appear one at a time (long lists scroll).
@@ -41,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-23 — Sprint 28 planned: games take the AI — a tappable seat row and module Settings rows that plug themselves in (F109, F110).
 - 2026-10-23 — Released v0.12.1: the AI report says which situations predict winning, and an auto-tuner suggests personality sliders (checked on fresh games; the designer applies).
 - 2026-10-23 — F25 + F26 approved: the AI report says which situations predict winning, and the Dev Kit can suggest personality sliders (checked on fresh games; you apply).
-- 2026-10-23 — Sprint 27 planned: finish the AI — see which situations win, and let the computer suggest personality settings (F25, F26).

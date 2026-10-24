@@ -268,7 +268,7 @@ flowchart LR
 
 ## v0.13 — Games feed the framework  ← current · planned 2026-10-24
 Goal (Muzzy 2026-10-24, "yes. go"): a second window pulls finished game pieces out into modules while the game keeps going — just for Muzzy's BMUZ setup.
-- 🔨 F114 🔧 Extraction queue: a shared queue in the framework repo (game, commit, files, what it does, the e2e checks that prove it); a command to add / list entries; a warning on edits to files being extracted (bug fixes only, logged on the entry); a swap command (install the module, delete the game's copy, run its checks unchanged, one commit); rules in PROJECT-FILES + /develop; a trial on a scratch Goops — should · sprint 30
+- ✅ F114 🔧 Extraction queue: a shared queue in the framework repo (game, commit, files, what it does, the e2e checks that prove it); a command to add / list entries; a warning on edits to files being extracted (bug fixes only, logged on the entry); a swap command (install the module, delete the game's copy, run its checks unchanged, one commit); rules in PROJECT-FILES + /develop; a trial on a scratch Goops — should · sprint 30
 ```mermaid
 flowchart LR
   F114[F114 Extraction queue]
