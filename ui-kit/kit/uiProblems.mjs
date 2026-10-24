@@ -240,7 +240,10 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     if (!box || scrolls(box)) return ''
     const b = box.getBoundingClientRect()
     const s = getComputedStyle(box)
-    const inside = { left: b.left + parseFloat(s.borderLeftWidth), top: b.top + parseFloat(s.borderTopWidth), right: b.right - parseFloat(s.borderRightWidth), bottom: b.bottom - parseFloat(s.borderBottomWidth) }
+    // Its border as drawn: a box shrunk by a transform (a chip pinned to the table) has a thinner border on screen than
+    // its style says (0.33.2: Pixel's 4px border at a pin scale of 0.44 is 1.75px, not 4 — the words had 3.5px of room)
+    const k = box.offsetWidth ? b.width / box.offsetWidth : 1
+    const inside = { left: b.left + parseFloat(s.borderLeftWidth) * k, top: b.top + parseFloat(s.borderTopWidth) * k, right: b.right - parseFloat(s.borderRightWidth) * k, bottom: b.bottom - parseFloat(s.borderBottomWidth) * k }
     const midX = (content.left + content.right) / 2, midY = (content.top + content.bottom) / 2
     if (midX < b.left || midX > b.right || midY < b.top || midY > b.bottom) return '' // it sits outside the box, not in it
     const room = Math.min(content.left - inside.left, content.top - inside.top, inside.right - content.right, inside.bottom - content.bottom)

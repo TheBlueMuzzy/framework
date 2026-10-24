@@ -162,6 +162,13 @@ describe('findProblems — quality bars', () => {
     expect(only('edge', found)).toEqual([])
   })
 
+  it('edge: a chip shrunk by a transform (pinned to a table) is measured with its border as drawn', async () => {
+    const chip = (pad) => `display:inline-block;background:#29366f;color:#fff;border:8px solid #f4f4f4;padding:${pad}px;transform:scale(0.4);transform-origin:0 0`
+    const found = await problemsOn(`<div style="background:#1a1c2c;padding:20px;height:200px">
+      <div style="${chip(8)}">Roomy</div><br><div style="${chip(1)};margin-top:-30px">Tight</div></div>`)
+    expect(only('edge', found)).toEqual(['edge: "Tight" touches the edge of its box (<div>, its own) — 0 px of room'])
+  })
+
   it('edge: a picture marked data-ui-bleed may run edge to edge; a badge hanging outside the card is not "in" it', async () => {
     const found = await problemsOn(`<div style="${card};padding:0;margin:20px;position:relative;overflow:hidden">
       <img data-ui-bleed alt="" style="display:block;width:100%;height:60px;background:#933">
