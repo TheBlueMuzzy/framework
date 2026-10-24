@@ -16,9 +16,9 @@ import { findProblems } from '../kit/uiProblems.mjs'
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
 // Shown in every style, for picking a style and catching a style that breaks one of them
-const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'emotes']
+const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'emotes', 'talk']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu']
+const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },

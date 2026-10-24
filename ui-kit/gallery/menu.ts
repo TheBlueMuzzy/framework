@@ -9,6 +9,7 @@ export const menu: MenuGroup[] = [
     { id: 'confirm', name: 'Confirm', about: '“Are you sure?” with the yes in danger red' },
     { id: 'rewards', name: 'Reward popup', about: 'A tile per reward, then Collect' },
     { id: 'teach', name: 'Callouts', about: 'Speech-bubble tips pointing at a target: flips to fit, a dimmed pause, a point, a moving piece' },
+    { id: 'talk', name: 'Talking bubble', about: 'A story line someone says: grows from its pointer, types out with rests, its outline fizzes as a speech wave and pops per syllable; tap for the next line' },
     { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
   ] },
   { title: 'Front end', entries: [
