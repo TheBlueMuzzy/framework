@@ -6,7 +6,7 @@ What changes: a busy port fails at once and names who holds it; the kit's galler
 ## F118 🔧 Port pre-flight in check:full
 Done when: the check-all template, before starting any e2e, collects every port its scripts will use (the E2E list's args + each script's declared ports) and checks each; a taken port fails the run at once naming the port, the process (command line) and its folder, plus the stop-servers.mjs line to free it; free ports → no change; works on Windows and in GitHub's Linux runner; games get it when their check-all is updated (checkup names older copies).
 - [x] 🤖 1. Collect the run's ports (E2E args + the "ports:" each script declares) — ~/.claude/config/bmuz/templates/check-all.mjs
-- [ ] 🤖 2. Who holds a port: a small cross-platform lookup (Windows netstat + process command line; Linux ss/lsof) shared with stop-servers.mjs — ~/.claude/config/bmuz/scripts/stop-servers.mjs
+- [x] 🤖 2. Who holds a port: a small cross-platform lookup (Windows netstat + process command line; Linux ss/lsof) shared with stop-servers.mjs — ~/.claude/config/bmuz/scripts/stop-servers.mjs
 - [ ] 🤖 3. Fail fast with the plain message + the line to free it; tests with a real listener — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 - [ ] 🤖 4. Checkup / update path: games with an older check-all are named, and the change is copied into a scratch Goops clone and run with 5291 held — ~/.claude/config/bmuz/HOOKS.md
 Check: test-scripts green; a scratch Goops check:full with a server on 5291 fails in seconds naming it, and passes once it's stopped.
