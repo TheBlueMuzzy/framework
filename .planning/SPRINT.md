@@ -19,10 +19,11 @@ Check: shoot 0 problems at every size with F124's new rule on; screenshots of th
 
 ## F125 🔧 The saves install test that times out under load
 Done when: the cause of the 5.1 s run under check:fast is found and fixed (not a longer limit), and check:fast passes 3 runs in a row.
-- [ ] 🤖 1. Measure each step of the slow test under load (what it waits on: copies, re-reads, a spawned process) — saves/scripts/install-saves.test.mjs
-- [ ] 🤖 2. Fix the cause in the installer or the test — saves/scripts/install-saves.mjs
-- [ ] 🤖 3. Prove it: the test's time under check:fast load, then 3 green check:fast runs — saves/scripts/install-saves.test.mjs
+- [x] 🤖 1. Measure each step of the slow test under load (what it waits on: copies, re-reads, a spawned process) — saves/scripts/install-saves.test.mjs
+- [x] 🤖 2. Fix the cause in the installer or the test — saves/scripts/install-saves.mjs
+- [x] 🤖 3. Prove it: the test's time under check:fast load, then 3 green check:fast runs — saves/scripts/install-saves.test.mjs
 Check: saves tests; 3 check:fast runs green; the test's time under load noted here.
+Checked: 2026-10-24 (Claude) — cause measured by the helper: each installSaves started 2 git processes (55–63 ms idle, 170–620 ms under check:fast), 3 installs = up to ~3.2 s of the 5.1 s; fix 4891109 asks git once per run (saves 0.6.2). The test under check:fast load: 65 / 270 / 102 ms (was 5113); 3 check:fast runs in a row ✓ all 20 (saves 6–7 s, was 17). Review: diff read whole by Claude — a CLI run never spans two commits, no bugs. No visual change.
 
 Notes:
 - Order: F124 before F123 (the check must see the bug first, so the fix is proven by it); F125 any time (different files).
