@@ -2,7 +2,8 @@
 //   screenshots/<page>-<size>.png                    menu + parts page (phone, phone landscape, desktop)
 //   screenshots/parts-<style>-<size>.png             the parts page in every style
 //   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop,
-//                                                    and the key screens in every style
+//                                                    and the key screens in every style (also on a 360×780
+//                                                    phone; the landscape ones also on a 667×375 phone on its side)
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
@@ -23,6 +24,9 @@ const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'e
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },
   landscape: { name: 'phone-landscape', width: 844, height: 390, mobile: true },
+  // 0.33.1 (F124): the narrowest common phone, and a small phone on its side — where HUD corners squeeze hardest
+  small: { name: 'phone-small', width: 360, height: 780, mobile: true },
+  smallLandscape: { name: 'phone-small-landscape', width: 667, height: 375, mobile: true },
   desktop: { name: 'desktop', width: 1440, height: 900, mobile: false },
 }
 
@@ -191,6 +195,11 @@ try {
   }
   for (const preset of presetNames) {
     for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.landscape.name}`, sizes.landscape, `?screen=${id}&preset=${preset}`)
+  }
+  // The small phone (key screens) and the small phone on its side (the landscape screens), in every style
+  for (const preset of presetNames) {
+    for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${sizes.small.name}`, sizes.small, `?screen=${id}&preset=${preset}`)
+    for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.smallLandscape.name}`, sizes.smallLandscape, `?screen=${id}&preset=${preset}`)
   }
   // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
   await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',

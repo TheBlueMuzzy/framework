@@ -135,21 +135,24 @@ function HudSample() {
   const players = [{ id: 'a', name: 'Muzzy', score: 42 }, { id: 'b', name: 'Sam', score: 37 }, { id: 'c', name: 'Ada', score: 18 }]
   const turn = players[tick % 3]
   // A phone on its side has little height: like a game would, the sample moves things aside instead of stacking them —
-  // Roll beside the seats, the connection up by the coins (stacked, the turn banner landed on the seats)
+  // Roll beside the seats, the connection up by the coins (stacked, the turn banner landed on the seats).
+  // 0.33.1 (F123): and it needs less room, as a game on a small phone on its side would — portraits only (the names are
+  // read out), the score as just its number, no lives row, the hint without its detail line (667×375 and 768×343 had
+  // no room for them)
   const short = useShortScreen()
   const connection = <ConnectionDot status="weak" />
-  const seatsRow = <PlayerSeats players={players} activeId={turn.id} />
+  const seatsRow = <PlayerSeats players={players} activeId={turn.id} showNames={!short} />
   const roll = <Button onClick={() => toast('Rolled!')}>Roll</Button>
   return (
     <Hud
       vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label="Energy" value={40 + (tick % 4) * 20} variant="accent" width="s" showLabel />
-        <Bar label="Lives" pips value={2} max={3} /></Stack>}
-      status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
+        {!short && <Bar label="Lives" pips value={2} max={3} />}</Stack>}
+      status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
         <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>{short && connection}</Row>}
       onPause={() => screens.push('pause')}
       banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
-        {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail="Up to 3 times">Hold to Roll</HudText>}</Stack>}
+        {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail={short ? undefined : 'Up to 3 times'}>Hold to Roll</HudText>}</Stack>}
       bottomLeft={!short && connection}
       bottomRight={<Row gap="s"><HudText size="s" live>{`${40 + (tick % 4) * 20}%`}</HudText><Rank place={2} of={3} /></Row>}
       actions={short
