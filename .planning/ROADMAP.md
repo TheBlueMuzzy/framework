@@ -335,6 +335,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-24 — **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
+- 2026-10-24 — **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.
 - 2026-10-24 — → v0.17 F126. **🐞 The shoot's 16 left-over finds** (sprint 33, after F123 — none are HUD corners): (1) the parts page's "HUD demo" is a plain Screen, and at 200% text "Round 2" covers part of "Health" — give plain Screens the phone fallback (middle on its own row) or build the demo with Hud; (2) talk screen on a 667×375 phone (and Pixel at 844×390, flickers): the talking bubble covers the "Colours" picker's Next (F121 area); (3) pinned, Pixel, 360×780: 8 `edge:` lines at 1 px. They were already there; F124 and the new shoot sizes made them visible.
 - 2026-10-24 — → v0.17 F127. **uiProblems: a solid chip covering another card's text** (found by F124): coins over "Score 120" isn't flagged — the text rule takes the chip for "something covering it". Extend F124's covered-piece rule to text targets.
 - 2026-10-24 — → v0.17 F128. **The other installers start git on every install too** (found by F125): install-ai / -audio / -crashes / -devkit / -emotes each run git rev-parse + git status per call, like saves did (2 × 0.2–0.6 s under load) — one shared kitVersion helper asked once per run, before their tests hit the same 5 s limit.
