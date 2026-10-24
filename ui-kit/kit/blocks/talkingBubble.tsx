@@ -65,6 +65,25 @@ export const DEFAULT_TALK_FEEL: TalkFeel = {
   popSize: 0.025, typeSpeed: 22, pauseMs: 380, squelchEvery: 2.5,
 }
 
+/** The safe range of each number (0.32.0): wider than the sketch's sliders, narrow enough that nothing draws broken
+ *  (variability over ~1.18 turned spikes inside out; a spike gap near 0 meant thousands of spikes). */
+export const TALK_FEEL_RANGES: Record<keyof TalkFeel, readonly [number, number]> = {
+  waveStart: [0, 1], waveEnd: [0, 1], spikeGap: [2, 200], talkHeight: [0, 120], roundness: [0, 10], variability: [0, 1],
+  popSize: [0, 0.25], typeSpeed: [1, 1000], pauseMs: [0, 10000], squelchEvery: [0, 60],
+}
+
+/** The numbers the bubble uses: each of `feel`'s pulled into its safe range; a missing, null, NaN or non-number one
+ *  (a bad talk.json) is DEFAULT_TALK_FEEL's. */
+export function talkFeel(feel?: Partial<Record<keyof TalkFeel, unknown>> | null): TalkFeel {
+  const out = { ...DEFAULT_TALK_FEEL }
+  if (!feel || typeof feel !== 'object') return out
+  for (const key of Object.keys(TALK_FEEL_RANGES) as (keyof TalkFeel)[]) {
+    const value = feel[key], [low, high] = TALK_FEEL_RANGES[key]
+    if (typeof value === 'number' && Number.isFinite(value)) out[key] = Math.min(high, Math.max(low, value))
+  }
+  return out
+}
+
 // Fixed (S9 picks.json "_fixed"): the grow, the beat before typing starts, the squelch spread
 export const TALK_GROW_MS = 320
 const PRE_TYPE_S = 0.15
@@ -286,8 +305,9 @@ export type TalkingBubbleProps = {
   speaker?: string
   /** "wave" (default) — the outline fizzes while it talks · "plain" — no wave, no squelch. */
   outline?: 'wave' | 'plain'
-  /** The numbers (content/tuning/talk.json) — any left out are DEFAULT_TALK_FEEL's. Read every frame (live). */
-  feel?: Partial<TalkFeel>
+  /** The numbers (content/tuning/talk.json) — any left out are DEFAULT_TALK_FEEL's. Read every frame (live). Each is
+   *  kept in its safe range (TALK_FEEL_RANGES); a null / NaN / non-number one is the default (talkFeel). */
+  feel?: Partial<Record<keyof TalkFeel, unknown>> | null
   placement?: CalloutPlacement
   /** A CSS selector of what it must stay clear of (the HUD). */
   avoid?: string
@@ -354,7 +374,7 @@ export function TalkingBubble({ target, text, lineId, speaker, outline = 'wave',
     const tick = () => {
       const at = performance.now()
       const dt = Math.min((at - last) / 1000, MAX_FRAME_S); last = at
-      const p = props.current, f: TalkFeel = { ...DEFAULT_TALK_FEEL, ...p.feel }, s = talk.current
+      const p = props.current, f = talkFeel(p.feel), s = talk.current
       // A new line gets its own onTyped — even under reduce motion, where it's whole before this frame ever sees it type
       if (s !== line) { line = s; typedFired = false }
       const still = reduceMotion(), plain = p.outline === 'plain'
@@ -422,7 +442,7 @@ export function TalkingBubble({ target, text, lineId, speaker, outline = 'wave',
 
   const confirm = () => {
     const s = talk.current, p = props.current
-    if (s.phase !== 'wait') finishTalk(s, p.text, { ...DEFAULT_TALK_FEEL, ...p.feel }, Math.random)
+    if (s.phase !== 'wait') finishTalk(s, p.text, talkFeel(p.feel), Math.random)
     else p.onConfirm?.()
   }
   // A held key's repeats are ignored, or holding Enter skipped through every line

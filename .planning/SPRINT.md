@@ -14,7 +14,7 @@ Check: ui-kit tests + root check:fast; the gallery payslip swapped twice in a re
 Sprint 29 review minors: the LiveAnnouncer is created with its text (some screen readers skip it), focus isn't moved to a remounted bubble, the same line twice doesn't restart, bad talk.json values draw broken outlines. Done when: one lasting announcer region (mounted once, text changes) reads every new bubble line and every emote; a new bubble with onConfirm takes keyboard focus (without stealing it from a text box); the same text said again restarts; out-of-range / missing feel values fall back to the defaults; tests.
 - [x] 🤖 1. A lasting shared announcer (mounted once per page, text changes) used by TalkingBubble and the emote bubbles — ui-kit/kit/blocks/emotes.tsx
 - [x] 🤖 2. Focus moves to a new confirmable bubble (unless the player is typing in a field); a line said twice restarts (a line counter, not the text) — ui-kit/kit/blocks/talkingBubble.tsx
-- [ ] 🤖 3. Feel values clamped to safe ranges, missing / null → the default — ui-kit/kit/blocks/talkingBubble.tsx
+- [x] 🤖 3. Feel values clamped to safe ranges, missing / null → the default — ui-kit/kit/blocks/talkingBubble.tsx
 - [ ] 🤖 4. Tests (announcer region stays, text changes per line; focus; repeat; clamping) + a real-browser accessibility-tree check — ui-kit/kit/blocks/talkingBubble.test.tsx
 Check: ui-kit + emotes tests, root check:fast; the gallery talk page read through Playwright's accessibility snapshot shows each line once in the live region.
 
