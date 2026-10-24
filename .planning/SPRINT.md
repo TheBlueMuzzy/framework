@@ -5,7 +5,7 @@ What changes: Goops (after it reinstalls) gets a reveal that replays by itself a
 
 ## F115 ✨ StatList replays its reveal when its rows change
 Goops' session 2026-10-24: a Modal that swaps its stats keeps the same StatList mounted, so the reveal doesn't replay (Goops passes key={payIndex}). Done when: new rows (by content) restart the reveal and a fresh onRevealed; the same rows re-rendered don't; Victory / GameOver too; tests.
-- [ ] 🤖 1. Restart the reveal when the rows change (by labels + values), fresh onRevealed guard — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 1. Restart the reveal when the rows change (by labels + values), fresh onRevealed guard — ui-kit/kit/blocks/flow.tsx
 - [ ] 🤖 2. Tests: swap rows → replays + onRevealed again; same rows re-rendered → no replay; reduce motion — ui-kit/kit/blocks/flow.test.tsx
 - [ ] 🤖 3. Gallery payslip "Next payday" swaps rows without a key; README line — ui-kit/gallery/Report.tsx
 Check: ui-kit tests + root check:fast; the gallery payslip swapped twice in a real browser, reveal replays each time.

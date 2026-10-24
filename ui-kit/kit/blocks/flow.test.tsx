@@ -130,7 +130,7 @@ describe('StatList reveal', () => {
     const onRevealed = vi.fn()
     const { container, rerender } = render(<StatList stats={stats.slice(0, 3)} reveal={350} onRevealed={onRevealed} />)
     const oldLast = last(container)
-    rerender(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />) // a row added at the end
+    rerender(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />) // a row added at the end (0.32.0: a new reveal)
     fireEvent.animationEnd(oldLast)
     expect(onRevealed).not.toHaveBeenCalled() // no longer the last row
     rerender(<StatList stats={[...stats.slice(0, 3), { label: 'Take home', value: '$80' }]} reveal={350} onRevealed={onRevealed} />) // last row swapped
@@ -138,14 +138,15 @@ describe('StatList reveal', () => {
     expect(onRevealed).toHaveBeenCalledOnce()
   })
 
-  it('a last row that has nothing left to play (already in, cancelled, or a style with no entrance) does not hold it forever', () => {
+  it('a last row that has nothing left to play (a style with no entrance, or a cancelled one) does not hold it forever', () => {
     const onRevealed = vi.fn()
-    const { container, rerender } = render(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />)
-    fireEvent.animationEnd(rows(container)[2]) // row 3 is in
-    const row3 = rows(container)[2] as HTMLElement & { getAnimations?: () => Animation[] }
-    row3.getAnimations = () => [] // (jsdom has no animations: say row 3's is over)
-    rerender(<StatList stats={stats.slice(0, 3)} reveal={350} onRevealed={onRevealed} />) // the waiting last row dropped
-    expect(onRevealed).toHaveBeenCalledOnce()
+    const proto = HTMLElement.prototype as { getAnimations?: () => Animation[] }
+    proto.getAnimations = () => [] // (jsdom has no animations: say the style plays none)
+    try {
+      render(<StatList stats={stats} reveal={350} onRevealed={onRevealed} />)
+      expect(onRevealed).toHaveBeenCalledOnce()
+    } finally { delete proto.getAnimations }
+    cleanup()
 
     const cancelled = vi.fn()
     const again = render(<StatList stats={stats} reveal={350} onRevealed={cancelled} />)
