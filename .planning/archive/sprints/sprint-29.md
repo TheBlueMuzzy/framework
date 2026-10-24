@@ -34,6 +34,11 @@ Goops' session 2026-10-23 for its F41 payslip report (portrait only). Done when:
 Check: ui-kit tests + root check:fast; shots at the portrait sizes (390x844, 360x780) plus 1100 + 1440x900 looked at by me; card size measured before / mid / after the reveal.
 Checked: 2026-10-23 (Claude) — root check:fast 20/20 at 684564a; ui-kit 523 tests, check-ui 150 files. Task 5 (c6b41c5): root check:fast 20/20, ui-kit 562 tests; card size identical before / mid / after in 30 runs, title + buttons always on screen; shot looked at by me: victoryreveal-clean-390x844-mid (long fines wrap, top fade, newest row in view, buttons fixed); diff read whole by me (follows only rows' own entrances, downward only, stops when the player scrolls) — no bugs. Card size identical before / mid / after in 40 runs (helper, measurements.json); shots looked at by me: payslip-cartoon-390x844-mid (later rows hidden, space kept), victoryreveal-pixel-390x844-after (▼ / ▲ badges, 24 px+ room). Review: 1 real fixed + 2 tests (684564a onRevealed followed a row no longer last). Limit: a list taller than the screen reveals rows out of sight (Notes).
 
+Retro: (Claude's draft — Muzzy 2026-10-23: "approved", no lines of his own; edit freely)
+- went well: two of Goops' requests (the report reveal, then the long-list scroll) went from message to built, reviewed and checked inside the same sprint, about an hour each, without stopping the other features
+- went wrong: helpers in fresh worktrees lost time because no module folder had node_modules (18 of 20 checks failed until npm ci in each); and a Stack ref passed the UI kit's own typecheck but broke three other modules' — only the root check:fast caught it
+- change: helper briefs run npm ci in every module folder first (landed: /develop SKILL.md "Helpers in worktrees"); kit helpers run the root check:fast, never only the kit's own tests (already in every brief this sprint — keep it)
+
 Notes:
 - Muzzy 2026-10-23: F111 + F112 + F113 "approved" (the bubble keeps the sketch's approved values).
 - F113 review minors left: game CSS aimed at `.kit-listrow + .kit-listrow` no longer reaches Victory/GameOver stats (rows wrapped) · row keys by label (two equal labels clash — as before) · onRevealed is once per mount. Helper's surprise: tasks 1–3 commits failed check-ui (style object) — check:fast caught it before hand-back.
