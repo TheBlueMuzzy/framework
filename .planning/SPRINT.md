@@ -10,6 +10,7 @@ Done when: the check-all template, before starting any e2e, collects every port 
 - [x] 🤖 3. Fail fast with the plain message + the line to free it; tests with a real listener — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 - [x] 🤖 4. Checkup / update path: games with an older check-all are named, and the change is copied into a scratch Goops clone and run with 5291 held — ~/.claude/config/bmuz/HOOKS.md
 Check: test-scripts green; a scratch Goops check:full with a server on 5291 fails in seconds naming it, and passes once it's stopped.
+Checked: 2026-10-24 (Claude) — test-scripts 335/335 (review run), port-preflight 10/10 also on Linux (WSL); scratch Goops (helper): a real vite on 5291 → check:full stopped in 1 s naming `vite --port 5291 --strictPort` + its folder; freed → crack-spread ALL PASS. Review: 3 real fixed + tests in ~/.claude (a DEFAULT_PORT counted as a run port; no time limit on the port lookup → could hang; a check-all copied without ports.mjs broke check:fast too). No visual change.
 
 ## F119 🔧 The UI kit gallery passes its own layout checks
 Done when: `npm run shoot` in ui-kit reports 0 problems (was 56: 34 cut-off texts — Results names, the Room share line — and 22 overlaps — Feedback toast, lobby, hud), each fixed at its cause (the kit part when a game would hit it too; the demo when only the demo is wrong), every style and size; screenshots before / after of each fixed screen.
@@ -18,6 +19,7 @@ Done when: `npm run shoot` in ui-kit reports 0 problems (was 56: 34 cut-off text
 - [x] 🤖 3. Fix the demo-only causes — ui-kit/gallery/Screens.tsx
 - [x] 🤖 4. Shoot reports 0; tests for any kit-part change; after shots looked at — ui-kit/kit/VERSION
 Check: `npm run shoot` → 0 problems; ui-kit tests + check-ui + root check:fast; before / after shots of every changed screen looked at by me.
+Checked: 2026-10-24 (Claude) — shoot "316 screenshots … No overflow, clipped controls, small targets, stray focus rings or console errors found" (was 56); ui-kit 629 tests; check-ui ✓; root check:fast 20/20 at 2fa60a4. Shots looked at by me: results-cartoon-phone ("Sherman Meredith" wraps to two lines, room round every row), room-cartoon-phone-landscape (Leave / I'm ready clear of the waiting line). Review: no bugs (a 38-letter one-word name tried in 4 sizes × 5 styles — no overflow).
 
 ## F120 🔧 check-framework never builds a shell string
 Done when: `t.run` in check-framework passes an argument list (no `shell: true` with a joined string); npx / .cmd on Windows still work; a test file named with `$( )` or `;` runs nothing; Dev Kit patch version.
@@ -25,6 +27,7 @@ Done when: `t.run` in check-framework passes an argument list (no `shell: true` 
 - [x] 🤖 2. Tests: odd file names are passed as data; npx still runs on Windows — devkit/kit/check-framework.test.mjs
 - [x] 🤖 3. Same pattern elsewhere? grep the framework + BMUZ scripts for shell: true with joined strings; fix or list — devkit/README.md
 Check: devkit tests + root check:fast; check:framework on a scratch Goops clone still passes.
+Checked: 2026-10-24 (Claude) — devkit 502 tests (3 new: odd names `$( )` `;` `&` `|` `%PATH%` quotes arrive as data, the old code really made marker.txt); test-scripts no-shell suite; scratch Goops check:framework PASS with the new file. Review: sound, no injection path. No visual change.
 
 ## F121 ✨ TalkingBubble colours from the game's content (pulled in mid-sprint)
 Goops' session 2026-10-24 for its F35 — Muzzy: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text." Sketch S9: fill #f4f4f2, text #222, outline #555 at 1.6 px, the "more" ▼ #888. Done when: `colours?: { fill, ink, outline, outlineWidth, more }` (each optional) paints the bubble, read every frame so content/tuning/talk.json edits apply live; unset = the style's colours exactly as today; the part itself still holds no colours (values come from the game); ink vs fill below 4.5:1 falls back to the style's text colour (and says so once in the console in dev); text stays body size; works with outline "wave" and "plain"; all 5 styles.
@@ -32,6 +35,7 @@ Goops' session 2026-10-24 for its F35 — Muzzy: "veteran is a light colored bub
 - [x] 🤖 2. Contrast floor (4.5:1, else the style's ink) + safe parsing (bad colour strings ignored) — ui-kit/kit/blocks/talkingBubble.tsx
 - [x] 🤖 3. Tests + gallery: the S9 "paper" colours beside the style colours in all 5 styles; README / CATALOG — ui-kit/kit/blocks/talkingBubble.test.tsx
 Check: ui-kit tests, check-ui, root check:fast; shots of the paper bubble in neon + clean at 390x844 looked at by me (light bubble, dark text, outline visible).
+Checked: 2026-10-24 (Claude) — ui-kit 629, check-ui ✓, root check:fast 20/20 at 2fa60a4; unset colours byte-identical (helper's before/after computed styles + 10 shots); shot looked at by me: paper-neon-390x844-typing (light #f4f4f2 bubble, dark text, grey outline + spikes, room round the words). Review: 1 real fixed + test (2fa60a4 — currentColor / var() / env() / CSS-wide keywords passed as colours in a real browser). Minors: transparent fill counts as solid for contrast; ▼ has no contrast check.
 
 Notes:
 - F118 ports convention (template header): numbers ≥ 1024 in an E2E line's args + each script's `const …PORT = <number>` + a `// ports: …` header line. Goops' and Glyphtender's scripts already match it — no script edits needed. The lookup is `~/.claude/config/bmuz/templates/ports.mjs`; a game copies it to `scripts/ports.mjs` (check-all can't reach ~/.claude on GitHub's runner), stop-servers.mjs imports the template copy. On Windows a process's working folder can't be asked for, so "in <folder>" comes from its command line (the part before node_modules, or a script's folder) and is left out when the command line has neither (`node hold.mjs`).
