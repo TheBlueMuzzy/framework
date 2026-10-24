@@ -2,13 +2,16 @@
 // The glue on a page: a sent emote shows in its seat's bubble (one per seat, replaced in place), a muted seat's never
 // does, a bot's say() uses the same bubble, and the picker holds back past the spam limit.
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { liveRegion } from '../../ui/kit'
 import { createEmotes } from '../emotes'
 import { EmoteBubbles, EmoteMenu, EmoteSeats } from './EmoteLayer'
 import template from '../../templates/content/emotes.json'
 import words from '../../templates/content/words.json'
 
 afterEach(() => { cleanup(); vi.useRealTimers() })
+// The UI kit's one live region (0.32.0), on the page past its first moment — as it is once EmoteBubbles has mounted
+beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) })
 const make = () => createEmotes({ settings: template, words: words.emotes, banter: { bully: { won: 'Too easy.' } }, mine: ['me'], warn: () => {} })
 const bubbles = () => [...document.querySelectorAll('.kit-speech-text')].map((el) => el.textContent)
 
@@ -36,6 +39,21 @@ describe('EmoteBubbles', () => {
     expect(bubbles()).toEqual(['Oops!'])
     act(() => { vi.advanceTimersByTime(2500 + 1000) })
     expect(bubbles()).toEqual([])
+  })
+  it('every emote is said through the page\'s ONE lasting live region — the same emote again is said again', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(Date.now() + 60_000) // (clear of the last test's announcements: at most one a second)
+    const emotes = make()
+    const region = liveRegion()
+    const view = render(<EmoteBubbles emotes={emotes} targetFor={() => ({ x: 20, y: 20 })} nameFor={() => 'Ada'} />)
+    expect(document.querySelectorAll('[role="status"]')).toHaveLength(1) // no region of its own
+    act(() => { emotes.sendEmote('me', 'hello') })
+    const first = region.textContent
+    act(() => { vi.advanceTimersByTime(1500); emotes.receive({ seat: 'me', id: 'hello' }) })
+    expect(region.textContent).not.toBe(first) // changed, so it's read again
+    expect([first, region.textContent].map((t) => t!.trim())).toEqual(['Ada: Hello!', 'Ada: Hello!'])
+    view.unmount()
+    expect(region.isConnected).toBe(true) // it outlasts the bubbles
   })
 })
 

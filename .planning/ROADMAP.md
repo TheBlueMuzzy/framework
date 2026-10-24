@@ -276,9 +276,9 @@ flowchart LR
 
 ## v0.14 — Story pieces made solid  ← current · planned 2026-10-24
 Goal (Muzzy 2026-10-24, /develop on the plan's pick a): the pieces Goops now uses behave well everywhere — a reveal that replays, a bubble every player can follow — and the planner stops needing hand-trimming.
-- 🔨 F115 ✨ StatList replays its reveal when its rows change (a Modal swapping paydays) — onRevealed once per reveal; no `key` workaround — should · needs: F113 · sprint 31
-- 🔨 F116 ✨ Talking bubble for every player: one lasting shared announcer so screen readers read each new line (the emote bubbles too), keyboard focus moves to a new bubble, the same line twice restarts, bad talk.json values clamped — should · needs: F111 · sprint 31
-- 🔨 F117 🔧 plan-lint trims the STATE Log itself: past 10 entries the oldest move to archive/log.md (newest first), said in one line — should · sprint 31
+- ✅ F115 ✨ StatList replays its reveal when its rows change (a Modal swapping paydays) — onRevealed once per reveal; no `key` workaround — should · needs: F113 · sprint 31
+- ✅ F116 ✨ Talking bubble for every player: one lasting shared announcer so screen readers read each new line (the emote bubbles too), keyboard focus moves to a new bubble, the same line twice restarts, bad talk.json values clamped — should · needs: F111 · sprint 31
+- ✅ F117 🔧 plan-lint trims the STATE Log itself: past 10 entries the oldest move to archive/log.md (newest first), said in one line — should · sprint 31
 ```mermaid
 flowchart LR
   F113[F113 Report reveal] --> F115[F115 Reveal replays]
@@ -297,6 +297,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-24 — **check:full names who holds a port** (Goops' session: a framework helper's leftover vite on 5291 turned its check:full red as a meta-tag timeout, two nights running): a pre-flight in the check-all template (or a port registry per game) that says "port 5291 is held by <command> in <folder>" before any e2e starts. For now: framework helpers use 6000–6999 and stop their servers (/develop line).
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.

@@ -7,7 +7,7 @@
 // &emote=bubbles|picker|cooling|mute opens straight on that view (for the screenshots); &still keeps bubbles up and
 // mutes nobody.
 import { useEffect, useState } from 'react'
-import { EmotePicker, HudText, MuteMenu, MutedMark, PlayerSeats, Row, Screen, Selector, SpeechBubble, Stack, type Seat } from '../kit'
+import { EmotePicker, HudText, LiveAnnouncer, MuteMenu, MutedMark, PlayerSeats, Row, Screen, Selector, SpeechBubble, Stack, type Seat } from '../kit'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 
 const views = ['Bubbles', 'Picker', 'Cooling', 'Mute']
@@ -73,6 +73,9 @@ export function EmotesSample() {
         return line && <SpeechBubble key={`${p.id}-${line.key}`} target={seatOf(p.id)} text={line.text} sizeTo={sizeTo}
           showMs={still ? 3_600_000 : 2500} placement={p.id === 'me' ? 'top' : 'bottom'} avoid={avoid} />
       })}
+      {/* your own line, said once to screen readers (as the emotes module's EmoteBubbles does for every seat's newest) */}
+      <LiveAnnouncer stamp={said.me?.key ?? 0} text={said.me ? `${nameOf('me')}: ${said.me.text}` : ''} />
+
       {(view === 'Picker' || view === 'Cooling') && (
         <EmotePicker anchor={seatOf('me')} phrases={phrases} readyIn={view === 'Cooling' ? 3200 : 0} avoid=".gallery-emote-hud"
           onPick={(id) => { setSaid({ me: { text: phrases.find((p) => p.id === id)!.label, key: Date.now() } }); setView('Bubbles') }}

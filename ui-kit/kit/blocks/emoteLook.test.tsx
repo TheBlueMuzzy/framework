@@ -64,3 +64,26 @@ describe.each(Object.keys(presets))('Emotes in %s', (preset) => {
     await page.setViewportSize({ width: 360, height: 780 })
   })
 })
+
+// The page's one live region (0.32.0, liveRegion() — last on <body>) under a full-height game: it must not give the
+// page a 1 px scroll (it did in the gallery before `.kit-live` pulled it up — F116)
+describe('the live region on a full-height page', () => {
+  it('adds no page scroll and stays 1 px, unseen', async () => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await showInStyle(page, 'clean', '')
+    const after = await page.evaluate(() => {
+      document.body.replaceChildren()
+      const game = document.body.appendChild(document.createElement('div'))
+      game.style.blockSize = '100vh'
+      const region = document.body.appendChild(document.createElement('div'))
+      region.className = 'kit-sr-only kit-live'
+      region.textContent = 'The Veteran: Found some scraps. Left them in your panel.'
+      const r = region.getBoundingClientRect()
+      return { scroll: document.documentElement.scrollHeight, view: innerHeight, wide: document.documentElement.scrollWidth, size: [r.width, r.height] }
+    })
+    expect(after.scroll).toBe(after.view)
+    expect(after.wide).toBe(390)
+    expect(after.size).toEqual([1, 1])
+    await page.setViewportSize({ width: 360, height: 780 })
+  })
+})

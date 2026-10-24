@@ -16,7 +16,9 @@ let sent: Sent[] = []
 
 // A transport that records; `fail` makes it reject (offline) or throw.
 let fail: 'no' | 'reject' | 'throw' = 'no'
+let attempts = 0 // every call to the transport, sent or not (settle() waits for these to stop)
 const record: SendReport = (address, body, leaving) => {
+  attempts++
   if (fail === 'throw') throw new Error('network gone')
   if (fail === 'reject') return Promise.reject(new TypeError('Failed to fetch'))
   sent.push({ address, body, report: JSON.parse(body), leaving })
@@ -32,8 +34,18 @@ function start(client: Partial<ClientConfig> = {}, more: { dev?: boolean; versio
   })
 }
 
-// The fingerprint is made with crypto.subtle, which answers a moment later
-const settle = () => new Promise((resolve) => setTimeout(resolve, 20))
+// The fingerprint is made with crypto.subtle, which answers a moment later — later still on a busy machine (sprint 31:
+// a fixed 20 ms wait lost reports while check:fast ran 20 checks side by side). So: wait until the transport has had
+// no new call for three 20 ms turns in a row (at most 2 s).
+const tick = () => new Promise((resolve) => setTimeout(resolve, 20))
+async function settle() {
+  let quiet = 0
+  for (let waited = 0; quiet < 3 && waited < 2000; waited += 20) {
+    const before = attempts
+    await tick()
+    quiet = attempts === before ? quiet + 1 : 0
+  }
+}
 
 /** An error with a stack as Chrome writes it, from the game's own files. */
 function gameError(message: string, file = 'assets/index-Bx12.js', line = 1, col = 48211, Kind = TypeError) {
