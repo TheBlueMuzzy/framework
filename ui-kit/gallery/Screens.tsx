@@ -2,7 +2,7 @@
 // The Stage is a stand-in game; opening a screen pushes it on the stack, exactly like a game would.
 // Back, Esc or the phone's Back close it; when the last one closes, the gallery goes back to its menu.
 // The buttons are wired up like a small game: Main menu → Settings, Results → Victory → Post-game, and so on.
-import { createContext, useContext, useEffect, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
 import { EmotesSample } from './Emotes'
@@ -117,6 +117,16 @@ function Modes() {
   return <ModeSelect modes={modes} value={mode} onChange={setMode} onStart={() => screens.replace('countdown')} />
 }
 
+// A short window (a phone on its side) — the kit's own short-screen line (blocks.css: max-height 30rem); follows rotation
+const shortScreen = '(max-height: 30rem)'
+function useShortScreen() {
+  return useSyncExternalStore((changed) => {
+    const query = matchMedia(shortScreen)
+    query.addEventListener('change', changed)
+    return () => query.removeEventListener('change', changed)
+  }, () => matchMedia(shortScreen).matches)
+}
+
 // A HUD whose numbers change every 1.5 s, to show the float-ups, combo pop, timer and turn banner.
 // It sits on a dark stand-in game: the turn banner and the instructions are plain HudText (never button-like).
 function HudSample() {
@@ -124,19 +134,27 @@ function HudSample() {
   useEffect(() => { const timer = setInterval(() => setTick((n) => n + 1), 1500); return () => clearInterval(timer) }, [])
   const players = [{ id: 'a', name: 'Muzzy', score: 42 }, { id: 'b', name: 'Sam', score: 37 }, { id: 'c', name: 'Ada', score: 18 }]
   const turn = players[tick % 3]
+  // A phone on its side has little height: like a game would, the sample moves things aside instead of stacking them —
+  // Roll beside the seats, the connection up by the coins (stacked, the turn banner landed on the seats)
+  const short = useShortScreen()
+  const connection = <ConnectionDot status="weak" />
+  const seatsRow = <PlayerSeats players={players} activeId={turn.id} />
+  const roll = <Button onClick={() => toast('Rolled!')}>Roll</Button>
   return (
     <Hud
       vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label="Energy" value={40 + (tick % 4) * 20} variant="accent" width="s" showLabel />
         <Bar label="Lives" pips value={2} max={3} /></Stack>}
       status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
-        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button></Row>}
+        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>{short && connection}</Row>}
       onPause={() => screens.push('pause')}
       banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
         {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail="Up to 3 times">Hold to Roll</HudText>}</Stack>}
-      bottomLeft={<ConnectionDot status="weak" />}
+      bottomLeft={!short && connection}
       bottomRight={<Row gap="s"><HudText size="s" live>{`${40 + (tick % 4) * 20}%`}</HudText><Rank place={2} of={3} /></Row>}
-      actions={<Stack gap="s"><PlayerSeats players={players} activeId={turn.id} /><Row justify="center"><Button onClick={() => toast('Rolled!')}>Roll</Button></Row></Stack>}
+      actions={short
+        ? <Row gap="s" justify="center">{seatsRow}{roll}</Row>
+        : <Stack gap="s">{seatsRow}<Row justify="center">{roll}</Row></Stack>}
     />
   )
 }
