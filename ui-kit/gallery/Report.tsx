@@ -2,7 +2,8 @@
 // ?screen=payslip: a Modal holding a StatList — the day's wage, five deductions (danger), the debt, net pay and a rank
 //   up (success), arriving one row after another. Continue waits for onRevealed (it's there, greyed, from the start, so
 //   the card never grows); Replay runs the reveal again.
-// ?screen=victoryreveal: Victory with reveal — the same rows, the same motion.
+// ?screen=victoryreveal: Victory with reveal — the same motion, a list too long for a phone (it scrolls; the scroll
+//   follows the newest row until you scroll it yourself).
 // The ms per row is a tuning number, kept in content/ like a game's would be (gallery/content/tuning/report.json).
 import { useState } from 'react'
 import { Button, Modal, screens, ScrollArea, StatList, Victory, type Stat } from '../kit'
@@ -36,11 +37,18 @@ export function PayslipSample() {
   )
 }
 
+// A long list with long names (0.31.0, Goops' end-of-day case: more rows than a phone has room for), so the
+// ScrollArea shows: the title, message and buttons stay in sight; the rows scroll and the reveal follows the newest one.
 const victoryStats: Stat[] = [
+  { label: 'Gross pay', value: '$140' },
+  { label: 'Fine: unauthorised goop contact (Vat Hygiene Compliance Division)', value: '−$25', tone: 'danger' },
+  { label: 'Fine: excess breathing surcharge (Breathable Air Holdings Ltd)', value: '−$12', tone: 'danger' },
+  { label: 'Fine: uniform wear recovery (Consolidated Garment Services)', value: '−$8', tone: 'danger' },
+  { label: 'Rent: company dormitory, block C', value: '−$35', tone: 'danger' },
+  { label: 'Debt to the company', value: '$1,240', tone: 'danger' },
   { label: 'Goop cleared', value: '84%' },
-  { label: 'Spills', value: '3', tone: 'danger' },
   { label: 'Best streak', value: '12', tone: 'success' },
-  { label: 'Time', value: '6:42' },
+  { label: 'Net pay', value: '$60', tone: 'success' },
 ]
 
 export function VictoryRevealSample() {

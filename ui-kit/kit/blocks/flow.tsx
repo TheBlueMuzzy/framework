@@ -127,6 +127,10 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
 // danger / success colour: a small ▼ / ▲ tag in that colour before the value (a Badge, like Results' winner star), so
 // the shape says it too, never colour alone (read out as words.danger / words.success). The value itself keeps the
 // panel's text colour: some styles' danger isn't readable as text on their panel (Pixel's is 2:1).
+// Long lists (0.31.0, Goops' payslip: 692 px of rows in a 605 px frame): Victory / GameOver hold their stats in a
+// ScrollArea, so the title, message and buttons stay put and in sight and only the rows scroll (edge fade, no bar);
+// a list that fits looks and sizes as before. With reveal the scroll follows the newest row (StatList, in any
+// ScrollArea) until the player scrolls it themselves.
 export type Stat = { label: string; value: ReactNode; tone?: 'danger' | 'success' }
 export const statListWords = { danger: 'Loss', success: 'Gain' }
 type RevealProps = { reveal?: number; onRevealed?: () => void }
@@ -153,6 +157,33 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
     el.addEventListener('animationcancel', onEnd)
     return () => { el.removeEventListener('animationend', onEnd); el.removeEventListener('animationcancel', onEnd) }
   }, [revealing, lastKey, stats.length])
+  // In a ScrollArea (Victory / GameOver's own, or yours round a StatList) the scroll follows the reveal: as each row
+  // starts its entrance it's scrolled into view (smoothly; at once with reduce motion), clear of the "more below" fade.
+  // A player who scrolls it themselves (wheel, touch, a press, the keys) takes over: it stops following.
+  useEffect(() => {
+    const stack = lastRow.current?.parentElement // the rows' own list (.kit-stats)
+    const box = stack?.closest<HTMLElement>('.kit-scroll')
+    if (!revealing || !stack || !box) return
+    let theirs = false
+    const takeOver = () => { theirs = true }
+    const follow = (e: AnimationEvent) => {
+      const row = e.target as HTMLElement
+      if (theirs || row.parentElement !== stack) return // only a row's own entrance (not a part inside it)
+      // where the row's bottom is in the box's contents (offsets ignore the entrance's own movement)
+      const stackTop = stack.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop
+      const bottom = stackTop + row.offsetTop - stack.offsetTop + row.offsetHeight
+      const room = parseFloat(getComputedStyle(row).scrollMarginBlockEnd) || 0 // the fade's height (blocks.css)
+      const top = bottom + room - box.clientHeight
+      if (top > box.scrollTop + 1) box.scrollTo({ top, behavior: reduceMotion() ? 'auto' : 'smooth' })
+    }
+    const intents = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const
+    for (const name of intents) box.addEventListener(name, takeOver, { passive: true })
+    box.addEventListener('animationstart', follow)
+    return () => {
+      for (const name of intents) box.removeEventListener(name, takeOver)
+      box.removeEventListener('animationstart', follow)
+    }
+  }, [revealing])
   if (stats.length === 0) return null
   const last = stats.length - 1
   const waits = (i: number) => (revealing ? i : undefined) // row i waits i steps (no reveal: no variables at all)
@@ -181,7 +212,9 @@ function EndScreen({ title, message, stats = [], reveal, onRevealed, children, f
         <Stack gap="m" className="kit-end-info">
           <span className="kit-end-title"><Text kind="display">{title}</Text></span>
           {message && <Text>{message}</Text>}
-          <StatList stats={stats} reveal={reveal} onRevealed={onRevealed} />
+          {stats.length > 0
+            ? <ScrollArea label={title}><StatList stats={stats} reveal={reveal} onRevealed={onRevealed} /></ScrollArea>
+            : <StatList stats={stats} onRevealed={onRevealed} />}
         </Stack>
         <Stack gap="s" className="kit-end-actions">
           {children}

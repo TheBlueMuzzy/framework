@@ -207,3 +207,80 @@ describe('Victory / GameOver reveal', () => {
     expect([...container.querySelectorAll('.kit-listrow')].map((r) => r.textContent)).toEqual(['Points212', 'Time6:42'])
   })
 })
+
+// LONG LISTS (0.31.0, Goops' payslip: 692 px of rows in a 605 px frame): the stats scroll in their own ScrollArea —
+// the title, message and buttons are outside it, so they stay put. The real layout (buttons in sight at a phone's
+// size, a short list's card unchanged) is in statListLook.test.tsx; here, what's where and the follow-the-reveal rules.
+describe('Victory / GameOver: the stats scroll, nothing else does', () => {
+  const stats = [{ label: 'Points', value: 212 }, { label: 'Time', value: '6:42' }, { label: 'Fines', value: '−$40', tone: 'danger' as const }]
+  it('the rows sit in a ScrollArea named after the title; the title, message and buttons are outside it', () => {
+    const { container } = render(<Victory message="Shift over." stats={stats} onContinue={() => {}} onQuit={() => {}} />)
+    const box = container.querySelector<HTMLElement>('.kit-end-info .kit-scroll')! // (Results' pattern: named like its screen)
+    expect(box.getAttribute('aria-label')).toBe('Victory!')
+    expect(box.querySelectorAll('.kit-stat-row')).toHaveLength(3)
+    for (const text of ['Victory!', 'Shift over.', 'Continue', 'Quit']) expect(box.contains(screen.getByText(text))).toBe(false)
+    expect(container.querySelectorAll('.kit-scroll')).toHaveLength(1)
+  })
+  it('GameOver the same; no stats = no scroll box (and onRevealed still fires at once)', () => {
+    const onRevealed = vi.fn()
+    const { container, rerender } = render(<GameOver stats={stats} onRetry={() => {}} />)
+    const box = container.querySelector('.kit-end-info .kit-scroll')!
+    expect([box.getAttribute('aria-label'), box.querySelectorAll('.kit-stat-row').length]).toEqual(['Game over', 3])
+    rerender(<GameOver onRetry={() => {}} reveal={200} onRevealed={onRevealed} />)
+    expect(container.querySelector('.kit-scroll')).toBeNull()
+    expect(onRevealed).toHaveBeenCalledOnce()
+  })
+})
+
+describe('the reveal follows the newest row in its ScrollArea', () => {
+  const stats = Array.from({ length: 6 }, (_, i) => ({ label: `Row ${i + 1}`, value: i }))
+  // jsdom has no layout: give the box a 100 px window and each row 50 px, row i at i × 50 px
+  const setUp = (props: { reveal?: number } = { reveal: 200 }) => {
+    const view = render(<Victory stats={stats} onContinue={() => {}} {...props} />)
+    const box = view.container.querySelector<HTMLElement>('.kit-scroll')!
+    const rows = [...view.container.querySelectorAll<HTMLElement>('.kit-stat-row')]
+    Object.defineProperty(box, 'clientHeight', { value: 100 })
+    rows.forEach((row, i) => {
+      Object.defineProperty(row, 'offsetTop', { value: i * 50 })
+      Object.defineProperty(row, 'offsetHeight', { value: 50 })
+    })
+    const list = view.container.querySelector<HTMLElement>('.kit-stats')!
+    list.getBoundingClientRect = () => ({ top: -box.scrollTop }) as DOMRect // the list moves up as the box scrolls
+    const scrollTo = vi.fn((to: ScrollToOptions) => { box.scrollTop = to.top ?? 0 })
+    box.scrollTo = scrollTo as unknown as typeof box.scrollTo
+    return { box, rows, scrollTo }
+  }
+
+  it('as a row starts its entrance below the window, the box scrolls (smoothly) to bring it into view', () => {
+    const { rows, scrollTo } = setUp()
+    fireEvent.animationStart(rows[0]) // in view already: no scroll
+    fireEvent.animationStart(rows[1])
+    expect(scrollTo).not.toHaveBeenCalled()
+    fireEvent.animationStart(rows[2]) // bottom at 150 px in a 100 px window → scroll to 50
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 50, behavior: 'smooth' })
+    fireEvent.animationStart(rows[4])
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 150, behavior: 'smooth' })
+  })
+
+  it('only a row\'s own entrance counts, not a part animating inside it', () => {
+    const { rows, scrollTo } = setUp()
+    rows[5].querySelector('.kit-listrow')!.dispatchEvent(new Event('animationstart', { bubbles: true }))
+    expect(scrollTo).not.toHaveBeenCalled()
+  })
+
+  it.each(['wheel', 'touchstart', 'pointerdown', 'keydown'])('a player who scrolls it themselves (%s) takes over: it stops following', (intent) => {
+    const { box, rows, scrollTo } = setUp()
+    fireEvent.animationStart(rows[2])
+    expect(scrollTo).toHaveBeenCalledOnce()
+    box.dispatchEvent(new Event(intent, { bubbles: true }))
+    fireEvent.animationStart(rows[3])
+    fireEvent.animationStart(rows[5])
+    expect(scrollTo).toHaveBeenCalledOnce()
+  })
+
+  it('no reveal (or reduce motion): nothing to follow — the scroll is left alone', () => {
+    const { rows, scrollTo } = setUp({})
+    fireEvent.animationStart(rows[5])
+    expect(scrollTo).not.toHaveBeenCalled()
+  })
+})

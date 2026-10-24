@@ -165,6 +165,16 @@ gallery's `npm run shoot` uses the same one.
   text colour (Pixel's danger is 2:1 on its panel). `Badge` gets `variant="success"`. No `reveal` = the old rows,
   unchanged. Tests: `kit/blocks/flow.test.tsx` + `kit/blocks/statListLook.test.tsx` (real browser, 5 styles: unseen
   then seen in order, the card's box the same before / mid / after and as with no reveal).
+  Long lists (F113 task 5, Goops: 692 px of rows in a 605 px frame at 390×844): Victory / GameOver hold their stats in
+  a `ScrollArea` (named after the title), so the title, message and buttons stay put and in sight — only the rows
+  scroll (edge fade where there's more, no scroll bar), at every size (on its side too: the report column scrolls). A
+  list that fits: the same card, size and look as before. With `reveal`, a `StatList` in any ScrollArea (Victory's, or
+  yours round one in a Modal) scrolls each row into view as its entrance starts — smoothly, and clear of the "more
+  below" fade (`scroll-margin-block-end` = `--kit-scroll-fade`) — until the player scrolls it themselves (wheel, touch,
+  a press, the keys): then it stops following. Tests: flow.test.tsx (what's inside the box, the follow rules, a manual
+  scroll taking over) + statListLook.test.tsx (real browser, 5 styles × 5 sizes: title + buttons in sight, no page or
+  card scroll, the list scrolls; a short list's card the same size as without the box). Game CSS aimed at the old
+  `.kit-end-info > .kit-stats` path: the rows now sit one level deeper, `.kit-end-info > .kit-scroll > .kit-stats`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

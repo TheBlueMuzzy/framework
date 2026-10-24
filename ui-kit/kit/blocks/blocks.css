@@ -278,9 +278,18 @@
   }
   .kit-end-title { display: inline-block; }
   .kit-end-swipe { display: block; text-align: center; padding-block-start: var(--gap-xs); } /* "⇧ Swipe up…": words, not a button */
-  /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0) */
+  /* Victory / Game over with a long list (0.31.0): only the stats' ScrollArea gives up height — the title, message
+     and buttons keep theirs, so they stay in sight and the rows scroll under the edge fade */
+  .kit-screen > [data-slot="center"] > .kit-panel > .kit-end-info { flex-shrink: 1; }
+  .kit-end-info > :not(.kit-scroll) { flex-shrink: 0; }
+  /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
+  .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
+  /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);
+     the report's column is never taller than the card, so a long list scrolls there too (0.31.0) */
   @media (max-height: 30rem) and (min-width: 40rem) {
-    .kit-end { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center; column-gap: var(--gap-l); }
+    .kit-end { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
+      align-items: center; column-gap: var(--gap-l); }
+    .kit-end > .kit-end-info { max-block-size: 100%; }
   }
   .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }
 
