@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.33.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.33.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -35,7 +35,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | the game's UI code keeps the kit's rules (check-ui) | `check-ui.mjs` (with the game's own `check:ui` arguments) finds raw colours, px, fonts, inline styles, stray positioning |
 | check-ui runs in check:fast | the game has no `check:ui` script |
 | every Settings row that's switched on is read by the game | (0.20.0) a row in `content/ui/settings.json` shows in Settings but nothing in the game's own code reads its id (`values.tips`, `const { tips } = values`, `id === 'resetTips'`, `info={{ version }}`, `useSetting('tips')` — 0.20.1: the id as a plain word elsewhere doesn't count) — or a link row opens a placeholder address. Skipped: headings, rows with `"on": false`, text size + reduce motion (the kit applies them), links, info rows with their own text, the Audio rows once the game passes the values to `applyAudioSettings`, and (0.30.0) a module's own rows once the game passes them on — each module that adds a row ships `settings-rows.json` (below) |
-| nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog |
+| nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog. (0.33.1) Also a solid chip, badge, button or panel slid PART-way onto a bar, meter or picture ("Coins" covers part of "Health") — not one laid wholly over it (a dialog) or wholly on it (a chip on a backdrop picture), not one in the bar's own card (a badge on its portrait, a label on its own bar), not a toast / tooltip / modal in the top layer |
 | nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
 | no focus ring without the keyboard | a focus ring shows on the first screen without any key pressed |
@@ -221,6 +221,17 @@ gallery's `npm run shoot` uses the same one.
   (never unreadable). Each dropped value is said once in the dev console. Text stays body size. Works with outline
   "wave" and "plain"; the ▼ uses `more`. Helpers: `talkColours`, `isColour`, `contrastRatio`. Tests:
   `kit/blocks/talkingBubble.test.tsx`, `kit/blocks/blocksCss.test.mjs`.
+  0.33.1 (F123 + F124 — `kit/blocks/blocks.css`, `kit/uiProblems.mjs`): **HUD corners keep their content's width; the
+  middle of the row gives way.** Every Screen slot could shrink to nothing, so a HUD's middle took all the room it
+  wanted and a corner slid under it (the coins chip on the end of the Health bar on an upright Cozy phone; Roll over
+  "40%" on a 667×375 phone). Now, on a HUD screen: each corner is at least as wide as its narrowest content; the top
+  and bottom middles get what's left (and wrap in it — e.g. the status row puts the score under "Round 1" when there's
+  no room); the screen has five columns, so a wide top corner doesn't squeeze the bottom row's actions; a middle with
+  no corners beside it has the whole row. On a phone (≤ 40rem) each left corner gives way to the right corner of ITS
+  OWN row, staying inside its room: its bars get shorter inside their plates (a `width` bar shrinks to 2rem at the
+  least — it used to keep its length and stick out of the plate). HUDs that already fit look the same; a plain
+  `Screen` (menus) is unchanged. The overlap check now also sees a solid piece covering part of a bar, meter or
+  picture (see "nothing overlaps" below); the gallery shoot adds a 360×780 phone and a 667×375 phone on its side.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
