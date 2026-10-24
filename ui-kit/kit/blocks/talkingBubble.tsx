@@ -323,6 +323,9 @@ export function isColour(value: unknown): value is string {
   if (typeof value !== 'string') return false
   const v = value.trim()
   if (!v || v.length > 64 || /[;{}<>]/.test(v)) return false
+  // Not a colour of its own (the browser says yes to these): currentColor paints the fill in the words' own colour,
+  // var() / env() / attr() and inherit … revert point somewhere else — the contrast floor couldn't judge what they show
+  if (/currentcolor|\b(?:var|env|attr)\s*\(|^(?:inherit|initial|unset|revert|revert-layer)$/i.test(v)) return false
   const css = browserCss()
   return css ? css.supports('color', v) : readRgb(v) !== null
 }

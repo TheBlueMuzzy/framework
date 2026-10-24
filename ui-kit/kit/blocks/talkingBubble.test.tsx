@@ -433,6 +433,17 @@ describe('talkColours (the parsing and the contrast floor)', () => {
     expect(colourRgb('#222')).toEqual([34, 34, 34])
     expect(colourRgb('hsl(0 0% 100%)')!.map(Math.round)).toEqual([255, 255, 255])
   })
+  // Review fix: a real browser's CSS.supports says yes to all of these — currentColor as the fill painted it in the
+  // words' own colour (unreadable) while the floor judged a different colour
+  it('in a browser too: currentColor, var() / env() / attr() and inherit … revert are no colour', () => {
+    vi.stubGlobal('CSS', { supports: () => true }) // what Chromium answers for each of them
+    try {
+      for (const bad of ['currentColor', 'CURRENTCOLOR', 'color-mix(in srgb, currentColor 50%, white)', 'var(--x)', 'var(--x, url(x))',
+        'env(x)', 'attr(x)', 'inherit', 'initial', 'unset', 'revert', 'revert-layer']) expect(isColour(bad), bad).toBe(false)
+      expect(isColour('ivory')).toBe(true)
+      expect(talkColours({ fill: 'currentColor', ink: '#000' }, { fill: '#fff', ink: '#111' }).colours).toEqual({ ink: '#000' })
+    } finally { vi.unstubAllGlobals() }
+  })
   it('contrast: black on white is 21 : 1; paper ink on paper fill passes the floor', () => {
     expect(contrastRatio('#000', '#fff')).toBeCloseTo(21, 5)
     expect(contrastRatio('#222', '#f4f4f2')!).toBeGreaterThan(TALK_MIN_CONTRAST)
