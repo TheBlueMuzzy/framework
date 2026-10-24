@@ -13,6 +13,7 @@ Done when: a game session adds a queue entry (game, commit, files, what it does,
 - [x] 🤖 5. Rules: PROJECT-FILES.md "Extraction queue" + one /develop line + HOOKS.md row; tests in test-scripts / test-hooks — ~/.claude/config/bmuz/PROJECT-FILES.md
 - [x] 🤖 6. Trial on a scratch Goops clone: queue a small finished piece, build it as a framework module on a scratch framework copy, swap it back, the game's checks pass unchanged — ~/Documents/dev/.scratch/
 Check: test-scripts + test-hooks green; the trial's before / after check results read by me.
+Checked: 2026-10-24 (Claude) — test-scripts 315/315 + test-hooks 563/563 (review run); my own runs after: extract 42/42, guard-edits 63/63. Trial (helper, .scratch/framework-f114): Goops rng.ts → module random 0.1.0 → swap in one commit; game test 484/484, build, lint, e2e:smoke phone + desktop identical before / after. Review: 6 real fixed + tests (3 were ways a hand-edited queue line could run a command, delete outside the game or pass a git option — closed), and guard-edits rule 1 now protects any src/<x>/ with a VERSION (swapped-in modules). No visual change.
 
 Notes:
 - Goops' suggested candidates (for real runs later, its session's call): the lesson runner (F30, reused by story moments), console repair mini-games, a profile module (name, maybe avatar — Goops F66).
