@@ -231,9 +231,9 @@ describe('t.run never builds a shell string (0.26.2, F120)', () => {
   it('commandLine: node = this Node; npm / npx on Windows = this Node + npm\'s own cli file; anything else as it is', () => {
     const win = { platform: 'win32', execPath: 'C:\\node\\node.exe', env: {}, exists: (p) => p.endsWith('npx-cli.js') }
     expect(commandLine('node', ['x.mjs'], win)).toEqual({ file: 'C:\\node\\node.exe', args: ['x.mjs'] })
-    expect(commandLine('npx', ['vitest', 'run'], win)).toEqual({ file: 'C:\\node\\node.exe', args: [join('C:\\node', 'node_modules', 'npm', 'bin', 'npx-cli.js'), 'vitest', 'run'] })
+    expect(commandLine('npx', ['vitest', 'run'], win)).toEqual({ file: 'C:\\node\\node.exe', args: ['C:\\node\\node_modules\\npm\\bin\\npx-cli.js', 'vitest', 'run'] })
     const running = { ...win, env: { npm_execpath: 'D:\\tools\\npm\\bin\\npm-cli.js' } } // started by `npm run check:framework`
-    expect(commandLine('npx', ['vitest'], running).args[0]).toBe(join('D:\\tools\\npm\\bin', 'npx-cli.js'))
+    expect(commandLine('npx', ['vitest'], running).args[0]).toBe('D:\\tools\\npm\\bin\\npx-cli.js')
     expect(commandLine('npm', ['test'], { ...win, exists: () => false }).error).toMatch(/couldn't find npm's npm-cli\.js/)
     expect(commandLine('npx', ['vitest'], { platform: 'linux', execPath: '/usr/bin/node', env: {} })).toEqual({ file: 'npx', args: ['vitest'] })
     expect(commandLine('git', ['status'], win)).toEqual({ file: 'git', args: ['status'] })

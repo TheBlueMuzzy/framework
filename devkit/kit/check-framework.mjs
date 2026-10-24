@@ -21,7 +21,7 @@
 import { spawnSync } from 'node:child_process'
 import net from 'node:net'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, relative } from 'node:path'
+import { join, relative, win32 } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 export const DEFAULT_PORT = 5197
@@ -44,9 +44,9 @@ export function commandLine(command, args, { platform = process.platform, execPa
   if (command === 'node') return { file: execPath, args }
   if (platform !== 'win32' || !/^(npm|npx)$/.test(command)) return { file: command, args }
   const cli = `${command}-cli.js`
-  const places = [
-    /npm-cli\.js$/.test(env.npm_execpath ?? '') ? join(dirname(env.npm_execpath), cli) : null, // the npm running this
-    join(dirname(execPath), 'node_modules', 'npm', 'bin', cli), // the npm installed with Node
+  const places = [ // Windows path rules, whatever machine runs this (the tests run on Linux too)
+    /npm-cli\.js$/.test(env.npm_execpath ?? '') ? win32.join(win32.dirname(env.npm_execpath), cli) : null, // the npm running this
+    win32.join(win32.dirname(execPath), 'node_modules', 'npm', 'bin', cli), // the npm installed with Node
   ].filter(Boolean)
   const found = places.find((p) => exists(p))
   return found ? { file: execPath, args: [found, ...args] } : { error: `couldn't find npm's ${cli} (looked in ${places.join(', ')}) — reinstall Node.js with its npm` }
