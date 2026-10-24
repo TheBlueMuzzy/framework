@@ -149,11 +149,13 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
   }, [revealing])
   if (stats.length === 0) return null
   const last = stats.length - 1
+  const waits = (i: number) => (revealing ? i : undefined) // row i waits i steps (no reveal: no variables at all)
+  const step = revealing ? `${reveal}ms` : undefined
   return (
     <Stack gap="xs" className="kit-stats">
       {stats.map((s, i) => (
         <div key={s.label} ref={i === last ? lastRow : undefined} className="kit-stat-row" data-reveal={revealing || undefined} data-tone={s.tone}
-          style={revealing ? { '--kit-i': i, '--kit-step': `${reveal}ms` } as CSSProperties : undefined}>
+          style={{ '--kit-i': waits(i), '--kit-step': step } as CSSProperties}>
           <ListRow label={s.label}>
             {s.tone
               ? <Row gap="xs" className="kit-nowrap"><Badge variant={s.tone}><span role="img" aria-label={w[s.tone]}>{toneMark[s.tone]}</span></Badge><Text kind="label">{s.value}</Text></Row>

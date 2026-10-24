@@ -7,6 +7,7 @@ import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
 import { EmotesSample } from './Emotes'
 import { TalkSample } from './Talk'
+import { PayslipSample, VictoryRevealSample } from './Report'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
 import {
   ArtLayer, ArtStage, LevelMeter, PullHandle, SnapControl, TitleArt, type LevelStep,
@@ -509,6 +510,8 @@ const samples: Record<string, ComponentType> = {
     onRematch={() => screens.replace('countdown')} onQuit={() => { screens.pop(); screens.pop() }} />,
   victory: () => <Victory message="You beat Sam by 25 points." stats={stats} onContinue={() => screens.replace('postgame')}
     onQuit={() => screens.pop()} onSwipeUp={() => screens.pop()} words={{ swipe: '⇧ Swipe up to go back' }} />,
+  victoryreveal: VictoryRevealSample,
+  payslip: PayslipSample,
   gameover: () => <GameOver message="Out of lives on round 4." stats={stats} onRetry={() => screens.replace('countdown')} onQuit={() => screens.pop()} />,
   artend: () => <GameOver message="Out of lives on round 4." stats={stats} frame={woodFrame} backdrop={art('backdrop.svg')}
     art={{ retry: redButton, quit: tealButton }} onRetry={() => screens.replace('artmenu')} onQuit={() => screens.pop()} />,
