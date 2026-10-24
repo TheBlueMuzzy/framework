@@ -97,6 +97,8 @@ describe('Version checks', () => {
     expect(noLabel[CHECKS.shown].problems.join('\n')).toMatch(/No <MainMenu>.*data-version-spot="main-menu"/)
     const commented = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly, 'src/ui/Console.tsx': "import { versionLabel } from '../version'\n// data-version-spot=\"main-menu\"\nexport const C = () => <b>{versionLabel}</b>\n" })
     expect(commented[CHECKS.shown].ok).toBe(false)
+    const importedOnly = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly, 'src/ui/Console.tsx': "import {\n  versionLabel,\n} from '../version'\nexport const C = () => <div data-version-spot=\"main-menu\">v1</div>\n" })
+    expect(importedOnly[CHECKS.shown].ok).toBe(false)
     // a kit <MainMenu> without the version still fails, even with a marked spot elsewhere
     const both = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly + 'export const M = () => <MainMenu title="G" />\n', 'src/ui/Console.tsx': console })
     expect(both[CHECKS.shown].problems.join('\n')).toMatch(/<MainMenu> has no version prop/)

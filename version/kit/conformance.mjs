@@ -97,8 +97,9 @@ export function versionProps(files, tag) {
  *  data-version-spot="<spot>" in a file that shows versionLabel from the version module → their paths. */
 export function ownSpots(files, spot) {
   const marked = new RegExp(`\\bdata-version-spot\\s*=\\s*(["'])${spot}\\1|\\bdata-version-spot\\s*=\\s*\\{\\s*(["'])${spot}\\2\\s*\\}`)
+  const shows = (code) => /\bversionLabel\b/.test(code.replace(/^\s*import\b[^;]*?\bfrom\s*['"][^'"]*['"]/gm, '')) // not just imported
   return files
-    .filter(({ text }) => FROM_MODULE.test(text) && marked.test(withoutComments(text)) && /\bversionLabel\b/.test(withoutComments(text)))
+    .filter(({ text }) => FROM_MODULE.test(text) && marked.test(withoutComments(text)) && shows(withoutComments(text)))
     .map(({ path }) => path)
 }
 
