@@ -276,9 +276,9 @@ flowchart LR
 
 ## v0.14 — Story pieces made solid  ← current · planned 2026-10-24
 Goal (Muzzy 2026-10-24, /develop on the plan's pick a): the pieces Goops now uses behave well everywhere — a reveal that replays, a bubble every player can follow — and the planner stops needing hand-trimming.
-- 🔨 F115 ✨ StatList replays its reveal when its rows change (a Modal swapping paydays) — onRevealed once per reveal; no `key` workaround — should · needs: F113 · sprint 31
-- 🔨 F116 ✨ Talking bubble for every player: one lasting shared announcer so screen readers read each new line (the emote bubbles too), keyboard focus moves to a new bubble, the same line twice restarts, bad talk.json values clamped — should · needs: F111 · sprint 31
-- 🔨 F117 🔧 plan-lint trims the STATE Log itself: past 10 entries the oldest move to archive/log.md (newest first), said in one line — should · sprint 31
+- ✅ F115 ✨ StatList replays its reveal when its rows change (a Modal swapping paydays) — onRevealed once per reveal; no `key` workaround — should · needs: F113 · sprint 31
+- ✅ F116 ✨ Talking bubble for every player: one lasting shared announcer so screen readers read each new line (the emote bubbles too), keyboard focus moves to a new bubble, the same line twice restarts, bad talk.json values clamped — should · needs: F111 · sprint 31
+- ✅ F117 🔧 plan-lint trims the STATE Log itself: past 10 entries the oldest move to archive/log.md (newest first), said in one line — should · sprint 31
 ```mermaid
 flowchart LR
   F113[F113 Report reveal] --> F115[F115 Reveal replays]
