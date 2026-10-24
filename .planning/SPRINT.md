@@ -22,6 +22,14 @@ Done when: install-module adds the installed module's folder to the game's eslin
 - [x] 🤖 4. Proof on scratch clones of Goops and Glyphtender: install each module, run the game's own lint + check:framework — ~/Documents/dev/.scratch/
 Check: devkit tests + root check:fast green; the game's own `npm run lint` green after install on both scratch clones, read by me.
 
+## F113 ✨ Report rows one at a time (pulled in mid-sprint)
+Goops' session 2026-10-23 for its F41 payslip report (portrait only). Done when: Victory / GameOver take `reveal?: number` (ms per row) — stats rows appear one after another with the Results screen's stagger (kit-result-row + --kit-i), all at once under reduce motion, the card its final size from the start (rows hold their space while hidden); `onRevealed` fires when the last row shows; `<StatList stats reveal onRevealed />` is the same rows as a block a Modal can hold; each row can carry `tone` "danger" | "success" (like Card tone); gallery shows it in all 5 styles.
+- [ ] 🤖 1. `reveal` + `onRevealed` on Victory / GameOver, reusing the Results stagger, fixed size from the start — ui-kit/kit/blocks/flow.tsx
+- [ ] 🤖 2. `<StatList stats reveal onRevealed />` block (Victory / GameOver use it inside) + per-row `tone` — ui-kit/kit/blocks/flow.tsx
+- [ ] 🤖 3. Tests: rows hidden then shown in order, onRevealed once, reduce motion = all at once + onRevealed, size unchanged during the reveal — ui-kit/kit/blocks/flow.test.tsx
+- [ ] 🤖 4. Gallery (a payslip-like Modal with StatList + a revealed Victory), README, CATALOG — ui-kit/gallery/
+Check: ui-kit tests + root check:fast; shots at the portrait sizes (390x844, 360x780) plus 1100 + 1440x900 looked at by me; card size measured before / mid / after the reveal.
+
 Notes:
 - F111 sources (Goops, read-only): goops/.planning/research/sketches/speaker-bubble.html (update() + draw()), goops/.planning/design/story.md "The speaker bubble", goops/.planning/research/speaker-bubble/picks.json. Builds on F107's SpeechBubble (same intention → same motion). Spike shape from roundness: needle → sine → semicircle; widths drift with variability. Tell Goops' session the version when released (its F09 story moments, after its sprint 13).
 - F112 source: Goops' session 2026-10-23 — Dev Kit 0.26.0's src/devkit/ai/CheckPanel.tsx exports whatWinsFrom / tuneShare beside the component → react-refresh/only-export-components fails a game's lint (the framework's lint has it off). Glyphtender ignores only src/ui/kit, src/audio, sketches. Goops already ignores src/devkit itself.

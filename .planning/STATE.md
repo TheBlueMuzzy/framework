@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-23 — **Sprint 29 planned (v0.12 Story bubbles + clean installs): F111 talking bubble (UI kit) + F112 modules never trip a game's checks (install-module eslint ignores, Dev Kit skips every VERSION folder).** Muzzy "go" (= his yes to F112's install-module change). Auto mode: one helper per feature, each waits for his OK, nothing released. Ask Muzzy: typeable knob values in the sketch starter. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
+2026-10-23 — **Sprint 29 planned (v0.12 Story bubbles + clean installs): F111 talking bubble (UI kit) + F112 modules never trip a game's checks (install-module eslint ignores, Dev Kit skips every VERSION folder) + F113 report rows one at a time (pulled in mid-sprint for Goops F41).** F111 + F112 built and merged on the branch, check:fast 20/20; review running; F113 helper building. Muzzy "go" (= his yes to F112's install-module change). Auto mode: one helper per feature, each waits for his OK, nothing released. Ask Muzzy: typeable knob values in the sketch starter. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 71d0dfc (sprint 28 F110 50ede98..10df792: helper rev
 
 ## Where we are
 Stage: develop   Milestone: v0.12 Story bubbles + clean installs   Sprint: 29
-Doing: F111 + F112 — building   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
+Doing: F111 + F112 — review · F113 — building   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.13.0
 
 ## Key facts
