@@ -153,6 +153,18 @@ gallery's `npm run shoot` uses the same one.
   S9 values) — a game keeps them in `content/tuning/talk.json` and passes the object as `feel`; read every frame, so
   Dev Kit edits apply live. Each style paints it (surface, border, border width, corners — bevel in Neon / Pixel — and
   its depth-2 shadow). Tests: `kit/blocks/talkingBubble.test.tsx`.
+  0.31.0 (F113, Goops' payslip report — `kit/blocks/flow.tsx`, gallery `?screen=payslip` · `?screen=victoryreveal`):
+  report rows one at a time. `Victory` / `GameOver` take `reveal` (ms per row): the stats rows arrive one after another
+  with the Results rows' entrance (the same CSS rule — `--kit-step` = the game's ms in place of the fast motion time);
+  all at once with reduce motion. Waiting rows hold their space (unseen, not missing), so the card is its final size
+  from the start (fixed-size safe). `onRevealed` fires once when the last row is in — at once with reduce motion, no
+  rows, or no reveal; it follows the CSS animation, so the Dev Kit's full pause holds the reveal and the callback.
+  `<StatList stats reveal onRevealed words />` = the same rows as a block for a Modal (inside a ScrollArea) or your
+  own card — Victory / GameOver use it. A row's `tone` "danger" | "success" puts a ▼ / ▲ `Badge` in that colour before
+  the value (read out `words.danger` "Loss" / `words.success` "Gain" — never colour alone); the value keeps the panel's
+  text colour (Pixel's danger is 2:1 on its panel). `Badge` gets `variant="success"`. No `reveal` = the old rows,
+  unchanged. Tests: `kit/blocks/flow.test.tsx` + `kit/blocks/statListLook.test.tsx` (real browser, 5 styles: unseen
+  then seen in order, the card's box the same before / mid / after and as with no reveal).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

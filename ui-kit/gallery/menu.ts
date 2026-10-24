@@ -43,6 +43,8 @@ export const menu: MenuGroup[] = [
     { id: 'endgame', name: 'Results: end of game', about: 'Title, player colours, winner star, Rematch / Quit' },
     { id: 'endgamedim', name: 'Results: over the game', about: 'dim: the game stays visible behind, darkened' },
     { id: 'victory', name: 'Victory', about: 'The big win, with stats' },
+    { id: 'victoryreveal', name: 'Victory: rows one at a time', about: 'reveal: the stats arrive one after another (the Results rows’ motion), the card its final size from the start' },
+    { id: 'payslip', name: 'Report in a Modal', about: 'StatList in a Modal: a payslip — deductions ▼, net pay + rank up ▲, one row at a time; Continue waits for onRevealed, Replay' },
     { id: 'gameover', name: 'Game over', about: 'Try again or quit' },
     { id: 'artend', name: 'Game over: game art', about: 'The report inside the game’s frame picture (corners never stretch), art buttons' },
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },
