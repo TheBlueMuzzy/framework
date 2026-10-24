@@ -208,6 +208,19 @@ gallery's `npm run shoot` uses the same one.
   styles): `kit/blocks/nameFit.test.tsx`. **`--kit-toasts-top`** (like `--kit-toasts-start` / `-end`): room to keep
   clear above top toasts, for a bar of the page's own over the game — the gallery sets it to its bar's height on a
   narrow phone, where its Menu + style buttons fill the bar. Unset = as before. Test: `kit/blocks/toastsTop.test.tsx`.
+  0.33.0 (F121, Goops' F35 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk&colours=paper`): **a TalkingBubble
+  in the game's own colours.** `colours={{ fill, ink, outline, outlineWidth, more }}` — each optional; the game keeps
+  them in content/tuning/talk.json (e.g. `"colours": { "fill": "#f4f4f2", "ink": "#222", "outline": "#555",
+  "outlineWidth": 1.6, "more": "#888" }`, Goops' Veteran: a light bubble with dark words) and passes that object.
+  Read every frame like `feel`, so Dev Kit edits apply live. They become `--kit-talk-*` on the bubble; each one not
+  set is the style's colour exactly as before (no variable written at all — computed styles and pixels identical in
+  all 5 styles). The part still holds no colours: they come in as the game's data. Safe: only real colours count
+  (the browser's `CSS.supports('color', …)`; without a browser only hex / rgb() / hsl()); anything else is ignored;
+  `outlineWidth` is a number in px at 100% text size, pulled into 0–8. **Contrast floor:** `ink` under 4.5 : 1 on the
+  fill → the style's text colour; if the style's text doesn't read on the game's fill either, the style's fill too
+  (never unreadable). Each dropped value is said once in the dev console. Text stays body size. Works with outline
+  "wave" and "plain"; the ▼ uses `more`. Helpers: `talkColours`, `isColour`, `contrastRatio`. Tests:
+  `kit/blocks/talkingBubble.test.tsx`, `kit/blocks/blocksCss.test.mjs`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

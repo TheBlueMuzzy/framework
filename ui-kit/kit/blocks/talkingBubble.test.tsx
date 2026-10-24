@@ -7,6 +7,7 @@ import { liveRegion } from './emotes'
 import {
   DEFAULT_TALK_FEEL, TALK_FEEL_RANGES, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk,
   stepTalk, squelchGap, talkFeel, talkOutline, waveOffsets, type TalkFeel, type TalkState,
+  TALK_MIN_CONTRAST, colourRgb, contrastRatio, isColour, talkColours,
 } from './talkingBubble'
 
 const feel = (over: Partial<TalkFeel> = {}): TalkFeel => ({ ...DEFAULT_TALK_FEEL, ...over })
@@ -347,5 +348,102 @@ describe('<TalkingBubble>', () => {
     live.typeSpeed = -10 // pulled up to 1 a second: still types, never stalls or runs wild
     frames(120)
     expect(typed()!.length).toBeLessThan(26)
+  })
+
+  // 0.33.0 (F121): the game's own colours — Goops' Veteran is a light bubble with dark words
+  describe('colours', () => {
+    const paper = { fill: '#f4f4f2', ink: '#222', outline: '#555', outlineWidth: 1.6, more: '#888' } // sketch S9
+    const bubble = () => document.querySelector<HTMLElement>('.kit-talk')!
+    const vars = () => Object.fromEntries(['--kit-talk-fill', '--kit-talk-ink', '--kit-talk-outline', '--kit-talk-outline-width', '--kit-talk-more']
+      .map((n) => [n, bubble().style.getPropertyValue(n)]).filter(([, v]) => v))
+    // The style's own colours, as the page has them (neon: light words on a dark bubble)
+    beforeEach(() => { document.documentElement.style.setProperty('--surface', '#0c1424'); document.documentElement.style.setProperty('--on-surface', '#dff8ff') })
+    afterEach(() => { document.documentElement.removeAttribute('style') })
+
+    it('unset = today: no colours (or null, or {}) writes nothing — the same element, attribute for attribute', () => {
+      const html = (colours?: Record<string, unknown> | null) => {
+        const { unmount } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi there." colours={colours} />)
+        frames(30)
+        const out = document.querySelector('.kit-talk-layer')!.outerHTML
+        unmount()
+        return out
+      }
+      const today = html()
+      expect(today).not.toContain('--kit-talk-fill')
+      expect(html(null)).toBe(today)
+      expect(html({})).toBe(today) // (each colour not set falls back to exactly the style's: blocksCss.test.mjs)
+    })
+    it('the paper colours paint the bubble: fill, words, outline, its width (rem: grows with the text), the ▼', () => {
+      render(<TalkingBubble target={{ x: 50, y: 50 }} text="Found some scraps." colours={paper} onConfirm={() => {}} />)
+      frames(2)
+      expect(vars()).toEqual({ '--kit-talk-fill': '#f4f4f2', '--kit-talk-ink': '#222', '--kit-talk-outline': '#555',
+        '--kit-talk-outline-width': '0.1rem', '--kit-talk-more': '#888' })
+    })
+    it('reads them live: a changed value in the same object applies without a re-render (Dev Kit edits)', () => {
+      const live: Record<string, unknown> = { ...paper }
+      render(<TalkingBubble target={{ x: 50, y: 50 }} text="Found some scraps." colours={live} />)
+      frames(2)
+      live.fill = '#fffbe6'; live.outlineWidth = 3
+      frames(1)
+      expect(vars()['--kit-talk-fill']).toBe('#fffbe6')
+      expect(vars()['--kit-talk-outline-width']).toBe('0.1875rem')
+      delete live.more // taken out → the style's again
+      frames(1)
+      expect(vars()['--kit-talk-more']).toBeUndefined()
+    })
+    it('bad strings are ignored (the style colour instead), and each is said once in dev', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const bad = { fill: '#f4f4f2', ink: '#222', outline: 'red; display: none', more: 42, outlineWidth: '3px' }
+      render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi." colours={bad} />)
+      frames(10)
+      expect(vars()).toEqual({ '--kit-talk-fill': '#f4f4f2', '--kit-talk-ink': '#222' })
+      expect(warn).toHaveBeenCalledTimes(3) // outline, more, outlineWidth — once each, not every frame
+      expect(String(warn.mock.calls[0][0])).toContain('colours.outline')
+    })
+    it('low contrast: ink under 4.5 : 1 on the fill → the style text colour (a dev warning, once)', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi." colours={{ fill: '#1a1a1a', ink: '#333' }} />)
+      frames(10)
+      expect(vars()).toEqual({ '--kit-talk-fill': '#1a1a1a' }) // the style's light words read on it
+      expect(warn).toHaveBeenCalledOnce()
+      expect(String(warn.mock.calls[0][0])).toContain('colours.ink #333 on #1a1a1a is under 4.5 : 1')
+    })
+    it('outlineWidth is a number pulled into 0–8', () => {
+      const { rerender } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi." colours={{ outlineWidth: 40 }} />)
+      frames(1)
+      expect(vars()['--kit-talk-outline-width']).toBe('0.5rem') // 8 px
+      rerender(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi." colours={{ outlineWidth: -3 }} />)
+      frames(1)
+      expect(vars()['--kit-talk-outline-width']).toBe('0rem')
+    })
+    it('works with outline "plain" too, and the words stay body size', () => {
+      render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hi." outline="plain" colours={paper} />)
+      frames(2)
+      expect(vars()['--kit-talk-fill']).toBe('#f4f4f2')
+      expect(document.querySelector('.kit-talk-typed')!.closest('.kit-text')!.getAttribute('data-kind')).toBe('body')
+    })
+  })
+})
+
+describe('talkColours (the parsing and the contrast floor)', () => {
+  const neon = { fill: '#0c1424', ink: '#dff8ff' }
+  it('reads hex, rgb() and hsl() (commas or spaces, with alpha); anything else is no colour', () => {
+    for (const ok of ['#222', '#f4f4f2', '#f4f4f2cc', 'rgb(34, 34, 34)', 'rgb(34 34 34 / 50%)', 'rgba(0,0,0,0.5)', 'hsl(60 7% 95%)', 'hsl(0, 0%, 13%)']) expect(isColour(ok), ok).toBe(true)
+    for (const bad of ['', 'red; x: y', '#12', '#ggg', 'rgb(1,2)', 'url(x)', 'var(--surface)', '12', 12, null, {}, '#fff}']) expect(isColour(bad), String(bad)).toBe(false)
+    expect(colourRgb('#222')).toEqual([34, 34, 34])
+    expect(colourRgb('hsl(0 0% 100%)')!.map(Math.round)).toEqual([255, 255, 255])
+  })
+  it('contrast: black on white is 21 : 1; paper ink on paper fill passes the floor', () => {
+    expect(contrastRatio('#000', '#fff')).toBeCloseTo(21, 5)
+    expect(contrastRatio('#222', '#f4f4f2')!).toBeGreaterThan(TALK_MIN_CONTRAST)
+  })
+  it('a light fill the style light words cannot read on, with no ink of its own → the style fill too (never unreadable)', () => {
+    const { colours, problems } = talkColours({ fill: '#f4f4f2', outline: '#555' }, neon)
+    expect(colours).toEqual({ outline: '#555' })
+    expect(problems[0]).toContain('colours.fill')
+  })
+  it('nothing given → nothing, no problems', () => {
+    expect(talkColours(undefined, neon)).toEqual({ colours: {}, problems: [] })
+    expect(talkColours('paper', neon)).toEqual({ colours: {}, problems: [] })
   })
 })
