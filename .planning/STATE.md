@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-23 — **Sprint 29 planned (v0.12 Story bubbles + clean installs): F111 talking bubble (UI kit) + F112 modules never trip a game's checks (install-module eslint ignores, Dev Kit skips every VERSION folder) + F113 report rows one at a time (pulled in mid-sprint for Goops F41).** All three built, reviewed (5 real bugs fixed + tests) and checked (check:fast 20/20 at c6b41c5, incl. F113 task 5: Victory / GameOver stats scroll) on dev/v0-12-story-bubbles — waiting for Muzzy's OK on each. Then /deliver (UI kit 0.31.0, Dev Kit 0.26.1) → tell Goops' session the versions. Muzzy "go" (= his yes to F112's install-module change). Auto mode: one helper per feature, each waits for his OK, nothing released. Ask Muzzy: typeable knob values in the sketch starter. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
+2026-10-23 — **Sprint 29 planned (v0.12 Story bubbles + clean installs): F111 talking bubble (UI kit) + F112 modules never trip a game's checks (install-module eslint ignores, Dev Kit skips every VERSION folder) + F113 report rows one at a time (pulled in mid-sprint for Goops F41).** All three approved by Muzzy (2026-10-23). Next: retro + archive sprint 29, then /deliver (UI kit 0.31.0, Dev Kit 0.26.1) → tell Goops' session the versions. Muzzy "go" (= his yes to F112's install-module change). Auto mode: one helper per feature, each waits for his OK, nothing released. Ask Muzzy: typeable knob values in the sketch starter. Before: **Released v0.13.0** — the v0.11 "Games take the AI" milestone ✅ (UI kit 0.30.0, emotes 0.4.0, crashes 0.2.0, ai 0.8.0). Open from before: Ask Muzzy muted-mark place + Glyphtender chip plate (defaults in place); v0.9 F62 is Goops' session's; Glyphtender only as scratch copies; going live with a crash server is Muzzy's call; crash token at `~/.config/bmuz/crashes/<server host>.token`.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework c6b41c5 (F113 task 5 05f856b..c6b41c5: read whole by
 
 ## Where we are
 Stage: develop   Milestone: v0.12 Story bubbles + clean installs   Sprint: 29
-Doing: F111 · F112 · F113 — waiting for Muzzy's OK   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
+Doing: —   Branch: dev/v0-12-story-bubbles   Version: 0.13.0 (emotes 0.4.0 · ai 0.8.0 · rooms 0.12.0 · UI kit 0.30.0 · Dev Kit 0.26.0 · crashes 0.1.0 · audio 0.4.0 · saves 0.6.1 · version 0.1.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.13.0
 
 ## Key facts
@@ -32,6 +32,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-23 — F111 + F112 + F113 approved: a talking bubble for story moments, module installs that keep a game's lint green, and report rows that appear one at a time (long lists scroll).
 - 2026-10-23 — Sprint 29 planned: a talking bubble for story moments, and modules that never break a game's checks (F111, F112).
 - 2026-10-23 — Released v0.13.0 (v0.11 Games take the AI milestone): tappable seat rows for emotes and mute in one line, and modules bring their own Settings switches to the check.
 - 2026-10-23 — F109 + F110 approved: every player's portrait can be a tap-to-emote / tap-to-mute button, and modules bring their own Settings rows to the check.
@@ -41,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-23 — Sprint 27 planned: finish the AI — see which situations win, and let the computer suggest personality settings (F25, F26).
 - 2026-10-23 — Released v0.12.0 (v0.5 The AI milestone): players send preset phrases in speech bubbles, computer players talk at big moments and answer good moves (Bot chatter setting), a personality check proves each AI plays like itself, shop-screen kit pieces.
 - 2026-10-23 — F22 approved: computer players talk at the game's moments through the emote bubble, always answer a player's good move, and a Bot chatter setting (Off · Some · Lots) turns them down.
-- 2026-10-23 — F107 + F108 approved: players send preset phrases in a speech bubble (mute, spam limit, online), and shop screens get a success colour, locked cards and a header action.
