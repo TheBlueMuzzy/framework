@@ -302,6 +302,17 @@ flowchart LR
   F122[F122 Installed fonts]
 ```
 
+## v0.16 — The kit holds up on a phone  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, /sprint pick a): nothing in a HUD slides under its neighbour on a small phone, the page check catches a covered bar, and check:fast stops going red by load.
+- 🔨 F123 🐞 HUD corner slots keep their content's width: `.kit-screen > [data-slot] { min-inline-size: 0 }` (kit.css) lets a corner shrink and slide under its neighbour — the coins chip on the end of the Health bar (upright Cozy phone), Roll crossing "40%" on a 667×375 phone; fixed in the kit at every size, the middle gives way instead — should · needs: F124 · sprint 33
+- 🔨 F124 🔧 uiProblems sees a covered bar: a solid chip, badge or panel on top of a bar / meter / art (no text, not a control) counts as an overlap, so F123's kind of bug can't hide — should · sprint 33
+- 🔨 F125 🔧 The saves install test that times out under load: find what it waits on (5.1 s under check:fast vs 2.3 s for all 10 alone) and fix the cause, not the limit — could · sprint 33
+```mermaid
+flowchart LR
+  F124[F124 Covered bar check] --> F123[F123 Corner slots]
+  F125[F125 Slow saves test]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -313,9 +324,9 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-24 — **saves: the install test that times out under load**: "the Save code screen (ui/) only goes into a game with the UI kit…" took 5.1 s under check:fast's 20 side-by-side checks (2.3 s for all 10 alone) and went red once at /deliver v0.17.0. Find out what it waits on (real file copies? an npm call?) before giving it a longer limit.
+- 2026-10-24 — → v0.16 F125. **saves: the install test that times out under load**: "the Save code screen (ui/) only goes into a game with the UI kit…" took 5.1 s under check:fast's 20 side-by-side checks (2.3 s for all 10 alone) and went red once at /deliver v0.17.0. Find out what it waits on (real file copies? an npm call?) before giving it a longer limit.
 - 2026-10-24 — **Retire OLD_MODULE_ROWS for real** (look-back v0.15): its "out in" date has slipped twice (0.33.0 → 0.34.0) because Glyphtender still hasn't reinstalled crashes / emotes / ai. Plan it as a task in Glyphtender's next sprint (reinstall the three, its checks green), then delete the fallback in UI kit 0.34.0 — and give each game the F118 port pre-flight (check-all + `scripts/ports.mjs`) in the same pass.
-- 2026-10-24 — **🐞 UI kit: a corner slot can shrink below its content** (found by F119): `.kit-screen > [data-slot] { min-inline-size: 0 }` lets a HUD corner slide under its neighbour — the coins chip sits on the end of the Health bar on an upright Cozy phone, and on a 667×375 phone the sample's Roll crosses "40%". And the page check misses it: an opaque chip covering a bar (no text, not a control) isn't an overlap it looks for — teach uiProblems that, then fix the slot rule.
+- 2026-10-24 — → v0.16 F123 + F124. **🐞 UI kit: a corner slot can shrink below its content** (found by F119): `.kit-screen > [data-slot] { min-inline-size: 0 }` lets a HUD corner slide under its neighbour — the coins chip sits on the end of the Health bar on an upright Cozy phone, and on a 667×375 phone the sample's Roll crosses "40%". And the page check misses it: an opaque chip covering a bar (no text, not a control) isn't an overlap it looks for — teach uiProblems that, then fix the slot rule.
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
