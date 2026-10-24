@@ -93,6 +93,10 @@ describe('devkitInReleaseBuilds — the release-build switch', () => {
   })
 })
 
+// On Windows a closed Vite server's file watcher lets go of the game folder a moment later, so deleting it straight
+// away can fail with ENOTEMPTY / EBUSY (F128: one check:fast run in three). rmSync retries those itself when asked.
+const STILL_LETTING_GO = { maxRetries: 10, retryDelay: 100 }
+
 describe('the plugin in a real Vite dev server', () => {
   let game: string
   let server: ViteDevServer
@@ -108,7 +112,7 @@ describe('the plugin in a real Vite dev server', () => {
   })
   afterEach(async () => {
     await server.close()
-    rmSync(game, { recursive: true, force: true })
+    rmSync(game, { recursive: true, force: true, ...STILL_LETTING_GO })
   })
   const save = (body: object, headers: Record<string, string> = {}) =>
     fetch(`${url}/__devkit/save`, {
@@ -197,7 +201,7 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
   })
   afterEach(async () => {
     await server.close()
-    rmSync(base, { recursive: true, force: true })
+    rmSync(base, { recursive: true, force: true, ...STILL_LETTING_GO })
   })
   const fontFile = (path: string) => fetch(`${url}/__devkit/font-library/file?path=${encodeURIComponent(path)}`)
 
@@ -273,7 +277,7 @@ describe('live tuning by default — content/tuning imports come back live (0.18
   })
   afterEach(async () => {
     await server.close()
-    rmSync(game, { recursive: true, force: true })
+    rmSync(game, { recursive: true, force: true, ...STILL_LETTING_GO })
   })
 
   it('names only files directly in content/tuning, with no query', () => {
