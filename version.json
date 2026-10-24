@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.16.0",
-  "build": 2,
+  "version": "0.17.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -122,6 +122,11 @@
       "version": "0.16.0",
       "date": "2026-10-24",
       "summary": "Story pieces made solid: reveal replays, every bubble line heard, the Log trims itself"
+    },
+    {
+      "version": "0.17.0",
+      "date": "2026-10-24",
+      "summary": "Checks you can trust: busy ports named, a clean gallery, bubble colours, installed fonts"
     }
   ]
 }

@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.17.0 — 2026-10-24
+
+The checks now say exactly what's wrong instead of failing in confusing ways, and the kit's own sample screens pass its layout rules. A talking bubble can take its colours from a game's own settings, and the Dev Kit's Fonts tab can try every font installed on the computer.
+
+### New
+- UI kit 0.33.0: the talking bubble takes an optional `colours` setting (fill, text, outline, pointer), which can be edited live. With nothing set, the bubble looks the same as before. If the text would be hard to read, it falls back to the style's text colour.
+- Dev Kit 0.27.0: the Fonts tab lists every font installed on the computer, beside the designer's font folder, with no browser permission needed. "Try" previews a font live; "Add to game" copies it in, marked 🔴 until its licence is checked. `"installedFonts": false` turns the list off.
+- Game checks (`check-all` template + `ports.mjs`): a full check stops at once when a port it needs is busy. It names the program holding the port and the command that frees it.
+
+### Fixed
+- Long player names wrap onto a second line instead of being cut off with "…".
+- On a sideways phone, the Lobby room no longer covers its own text, and the HUD sample and toasts keep clear of other things on screen.
+- Dev Kit 0.26.2: the framework check passes file names to programs as plain data. A name with odd characters can never run a command, and the Windows warning about it is gone.
+
+### Known issues
+- Games with older crashes / emotes / AI copies (no `settings-rows.json`) are still checked against the kit's old built-in list, until UI kit 0.34.0.
+- On a phone, the HUD's corner pieces can be squeezed under each other: planned.
+- The bubble counts a see-through fill as solid when it checks contrast: rare, planned.
+- A bubble that appears takes focus from a Dev Kit slider being nudged with the arrow keys: rare, planned.
+
 ## v0.16.0 — 2026-10-24
 
 The talking bubble and the report reveal now work for every player: screen readers hear each line and emote once, keyboard players land on the bubble, and a report replays its reveal by itself when its rows change.
