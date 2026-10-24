@@ -40,7 +40,7 @@ Checked: 2026-10-24 (Claude) — ui-kit 629, check-ui ✓, root check:fast 20/20
 ## F122 🔧 Dev Kit Fonts library lists every installed font (pulled in, auto mode)
 Goops' session idea (2026-10-23): try every font on the designer's machine live. Claude's call (2026-10-24, auto mode): extend the existing server-side library (devkit/vite/fontLibrary.ts) with the PC's installed-font folders instead of Chrome's queryLocalFonts() — no permission prompt, any browser, the files can be copied by "Add to game", and one code path. Done when: the Fonts tab's library shows the designer's folder AND the installed fonts (grouped "Installed on this PC" / the folder), searchable; Try previews live; Add to game copies like today and marks an installed font 🔴 unknown licence (most system fonts can't ship); only font files inside those folders are ever read (same safety rules); a big Windows font folder stays quick (listing capped + search).
 - [x] 🤖 1. Installed-font folders per OS as extra library roots (env / devkit.local.json can turn them off) — devkit/vite/fontLibrary.ts
-- [ ] 🤖 2. The tab groups them ("Installed on this PC" / "Your font folder"), search covers both, the 🔴 note on Add — devkit/kit/fonts/FontsTab.tsx
+- [x] 🤖 2. The tab groups them ("Installed on this PC" / "Your font folder"), search covers both, the 🔴 note on Add — devkit/kit/fonts/FontsTab.tsx
 - [ ] 🤖 3. Tests (roots per OS, safety: no path outside a root, cap, Add marks unknown) + a real try in the gallery or a scratch game — devkit/kit/fonts/FontsTab.test.tsx
 Check: devkit tests + root check:fast; the Fonts tab on a scratch game lists Windows fonts, Try changes the game live, a shot looked at by me.
 

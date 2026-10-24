@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fontRoleTokens } from '../../../ui-kit/kit/style/tokens'
 import {
   FONT_ROLES, FONT_TOKENS, crispness, cssPixels, firstFontName, fontChoices, fontValue, fontWords, gameFontFor, isFont,
-  licenceChip, prettyFontName, rolesOnLibraryFonts,
+  installedNote, isInstalledPath, licenceChip, prettyFontName, rolesOnLibraryFonts,
 } from './fontsLogic'
 
 describe('font roles', () => {
@@ -64,6 +64,17 @@ describe('choices', () => {
     expect(gameFontFor('press_start_dx/Press Start DX.ttf', game)?.name).toBe('Press Start DX')
     expect(gameFontFor('other/press start dx.TTF', game)?.name).toBe('Press Start DX')
     expect(gameFontFor('x/y.ttf', game)).toBeUndefined()
+    // library paths name their root (Dev Kit 0.27.0)
+    expect(gameFontFor('folder:press_start_dx/Press Start DX.ttf', game)?.name).toBe('Press Start DX')
+    expect(gameFontFor('installed1:Press Start DX.ttf', game)?.name).toBe('Press Start DX')
+    expect(prettyFontName('installed1:arialbd.ttf')).toBe('Arialbd')
+  })
+  it('installed fonts: which paths, and the warning', () => {
+    expect(isInstalledPath('installed2:arial.ttf')).toBe(true)
+    expect(isInstalledPath('folder:installed2:arial.ttf')).toBe(false)
+    expect(installedNote('win32')).toBe("Most fonts that come with Windows can't ship in a game — check its licence.")
+    expect(installedNote('darwin')).toContain('a Mac')
+    expect(installedNote(undefined)).toContain('the computer')
   })
   it('library names match the dev server', () => {
     expect(prettyFontName('gb_boot/gbb__.ttf')).toBe('Gbb')
