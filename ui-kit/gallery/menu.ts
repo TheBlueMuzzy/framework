@@ -9,6 +9,7 @@ export const menu: MenuGroup[] = [
     { id: 'confirm', name: 'Confirm', about: '“Are you sure?” with the yes in danger red' },
     { id: 'rewards', name: 'Reward popup', about: 'A tile per reward, then Collect' },
     { id: 'teach', name: 'Callouts', about: 'Speech-bubble tips pointing at a target: flips to fit, a dimmed pause, a point, a moving piece' },
+    { id: 'talk', name: 'Talking bubble', about: 'A story line someone says: grows from its pointer, types out with rests, its outline fizzes as a speech wave and pops per syllable; tap for the next line' },
     { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
   ] },
   { title: 'Front end', entries: [
@@ -42,6 +43,8 @@ export const menu: MenuGroup[] = [
     { id: 'endgame', name: 'Results: end of game', about: 'Title, player colours, winner star, Rematch / Quit' },
     { id: 'endgamedim', name: 'Results: over the game', about: 'dim: the game stays visible behind, darkened' },
     { id: 'victory', name: 'Victory', about: 'The big win, with stats' },
+    { id: 'victoryreveal', name: 'Victory: rows one at a time', about: 'reveal: the stats arrive one after another (the Results rows’ motion), the card its final size from the start; a long list scrolls (buttons stay in sight) and the scroll follows the newest row' },
+    { id: 'payslip', name: 'Report in a Modal', about: 'StatList in a Modal: a payslip — deductions ▼, net pay + rank up ▲, one row at a time; Continue waits for onRevealed, Replay' },
     { id: 'gameover', name: 'Game over', about: 'Try again or quit' },
     { id: 'artend', name: 'Game over: game art', about: 'The report inside the game’s frame picture (corners never stretch), art buttons' },
     { id: 'postgame', name: 'Post-game', about: 'Rematch, lobby or quit' },

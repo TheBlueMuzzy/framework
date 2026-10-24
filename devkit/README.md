@@ -528,4 +528,7 @@ to search sets `searchable: false` (no box).
   suggested (✓ / ✗, measured on fresh games), what it couldn't reach and why. It only suggests: **Apply** puts the
   changed sliders in as unsaved edits of that personality (other unsaved edits stay — `aiLogic.ts` `withSuggestion`);
   Save writes them, Undo unsaved takes them back. A worker without a tune function says so in plain English.
+- 0.26.1 (framework F112): the framework check's `gameCode()` (what the checks read as the game's own code) skips
+  every installed module — any `src/<x>/` or `src/<x>/kit/` holding a VERSION, not only the folders this Dev Kit knows
+  by name (`KIT_FOLDERS`) — so a module newer than the Dev Kit is never mistaken for the game's code.
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
