@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — Sprint 30 planned: a second window turns finished game pieces into framework modules (F114 extraction queue).
 - 2026-10-24 — Released v0.14.0 (v0.12 Story bubbles + clean installs): a talking bubble for story moments, report rows that appear one at a time with long lists that scroll, and installs that keep a game's own checks green.
 - 2026-10-23 — F111 + F112 + F113 approved: a talking bubble for story moments, module installs that keep a game's lint green, and report rows that appear one at a time (long lists scroll).
 - 2026-10-23 — Sprint 29 planned: a talking bubble for story moments, and modules that never break a game's checks (F111, F112).
