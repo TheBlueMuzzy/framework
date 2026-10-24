@@ -129,23 +129,32 @@
   /* Phones: the corners share the first row and the top-centre piece gets its own row below,
      so three things never squeeze into one narrow line. Same at the bottom. A HUD on a narrow game box
      (--kit-frame-w, 0.11.2) gets the same layout from its own width, whatever the window's width. */
+  /* The right corners (score + pause) size to their pieces; each left corner gives way to the right corner IN ITS OWN ROW
+     (0.33.1, F123): three columns, so the top-left only loses what the top-right needs and the bottom-left only what
+     the bottom-right needs (with two shared columns a wide top-right squeezed the bottom-left too). A left corner stays
+     inside its room — its bars get shorter — instead of keeping its full width and sliding under the right one (the
+     coins sat on the end of the Health bar on an upright Cozy phone). */
   @media (max-width: 40rem) {
     .kit-screen:has(> [data-slot] > .kit-hud-slot) {
-      grid-template-columns: minmax(0, 1fr) auto; /* the right corner (score + pause) sizes to its pieces; the left gives way */
+      grid-template-columns: minmax(0, 1fr) auto auto;
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-      grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
+      grid-template-areas: "top-left top-right top-right" "top top top" "center center center" "bottom-left bottom-left bottom-right" "bottom bottom bottom";
     }
+    .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="bottom-left"]) { min-inline-size: 0; max-inline-size: 100%; }
   }
   @container (max-width: 40rem) {
     .kit-screen:has(> [data-slot] > .kit-hud-slot) {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-      grid-template-areas: "top-left top-right" "top top" "center center" "bottom-left bottom-right" "bottom bottom";
+      grid-template-areas: "top-left top-right top-right" "top top top" "center center center" "bottom-left bottom-left bottom-right" "bottom bottom bottom";
     }
+    .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="bottom-left"]) { min-inline-size: 0; max-inline-size: 100%; }
   }
-  /* Bar width (s / m / l): the bar keeps that length and its plate hugs it. Unset = it fills the room it's given. */
+  /* Bar width (s / m / l): the bar keeps that length and its plate hugs it. Unset = it fills the room it's given.
+     Squeezed (a phone's left corner giving way, 0.33.1): the bar gets shorter inside its plate, down to 2rem, like a
+     bar without a width — before, it held its length and stuck out of the plate. */
   .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
-  .kit-hud-chip[data-width] > .kit-progress { flex: none; min-inline-size: 0; inline-size: var(--kit-bar-w); max-inline-size: 100%; }
+  .kit-hud-chip[data-width] > .kit-progress { flex: 0 1 auto; min-inline-size: 2rem; inline-size: var(--kit-bar-w); }
   .kit-hud-chip[data-width="s"] { --kit-bar-w: 4rem; }
   .kit-hud-chip[data-width="m"] { --kit-bar-w: 8rem; }
   .kit-hud-chip[data-width="l"] { --kit-bar-w: 14rem; }
