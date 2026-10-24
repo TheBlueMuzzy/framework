@@ -43,6 +43,38 @@ describe('findProblems — overlap', () => {
   })
 })
 
+// 0.33.1 (F124) — a solid piece sliding onto a bar, meter or picture (no words there, so the check above missed it)
+const plate = 'display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fff;border-radius:12px'
+const bar = (label, width = 160) => `<div role="progressbar" aria-label="${label}" style="width:${width}px;height:10px;background:#ddd;border-radius:5px">
+  <span style="display:block;width:70%;height:100%;background:#c33"></span></div>`
+describe('findProblems — a solid piece covering a bar or picture', () => {
+  it('a coins chip sitting on the end of the Health bar is flagged once', async () => {
+    const found = await problemsOn(`<div style="background:#554;position:absolute;inset:0">
+      <div style="${plate};position:absolute;left:10px;top:10px"><span>❤</span> ${bar('Health')}</div>
+      <div aria-label="Coins" style="${plate};position:absolute;left:150px;top:6px"><span style="background:#fc0;border-radius:50%">🪙</span> 250</div>
+      <img alt="Map" style="position:absolute;left:10px;top:120px;width:120px;height:80px;background:#396">
+      <span class="kit-badge" style="position:absolute;left:100px;top:110px;background:#336;color:#fff;padding:2px 8px">NEW</span></div>`)
+    expect(only('overlap', found)).toEqual([
+      'overlap: "Coins" covers part of "Health"',
+      'overlap: "NEW" covers part of "Map"',
+    ])
+  })
+
+  it('a dialog wholly over the HUD, a chip wholly on a backdrop picture, a badge in its own card and a label on its own bar are not', async () => {
+    const found = await problemsOn(`<div style="background:#554;position:absolute;inset:0">
+      <div style="${plate};position:absolute;left:10px;top:10px"><span>❤</span> ${bar('Health')}</div>
+      <div style="position:absolute;left:0;top:0;width:400px;height:90px;background:#222;color:#fff"><p style="margin:12px 14px">Paused</p></div>
+      <img alt="Backdrop" style="position:absolute;left:0;top:100px;width:400px;height:120px;background:#396">
+      <div style="${plate};position:absolute;left:20px;top:120px">Round 1</div>
+      <div style="${plate};position:absolute;left:20px;top:240px;position:absolute">
+        <span style="display:inline-grid"><span class="kit-avatar" role="img" aria-label="Ada" style="grid-area:1/1;width:44px;height:44px;background:#933"></span>
+          <span class="kit-badge" style="grid-area:1/1;align-self:end;justify-self:end;margin:-4px;background:#336;color:#fff;font-size:11px;padding:1px 3px">Bot</span></span> Ada</div>
+      <div style="${plate};position:absolute;left:180px;top:240px;display:grid"><div style="grid-area:1/1">${bar('Energy', 180)}</div>
+        <span style="grid-area:1/1;place-self:center;font-size:12px;background:#eef;padding:0 4px;border-radius:4px">Energy 40%</span></div></div>`)
+    expect(only('overlap', found)).toEqual([])
+  })
+})
+
 // 0.21.0 — the quality bars: faint text, things touching their box's edge, cards that grow
 const only = (kind, found) => found.filter((p) => p.startsWith(`${kind}:`))
 const card = 'background:#fff;border:2px solid #333;border-radius:12px;padding:12px;width:220px'
