@@ -55,6 +55,16 @@ describe('reading the game', () => {
     expect(code.map((f) => f.path)).toEqual(['src/engine/tick.ts'])
     expect(linesMatching(code, /setTimeout\(/)).toEqual(['src/engine/tick.ts:3  setTimeout(() => drop(), 500)'])
   })
+  it('F112: a module this Dev Kit has never heard of (a src/ folder with a VERSION) is not game code', () => {
+    write('src/engine/tick.ts', 'setTimeout(() => drop(), 500)\n')
+    write('src/sparkles/VERSION', '0.1.0\n') // made-up module, not in KIT_FOLDERS
+    write('src/sparkles/Sparkle.tsx', 'setTimeout(f, 1)')
+    write('src/maps/kit/VERSION', '0.2.0\n') // a src/<x>/kit/ module: its kit/ is skipped, the game's src/maps/ stays
+    write('src/maps/kit/grid.ts', 'setTimeout(f, 1)')
+    write('src/maps/level1.ts', 'export const level = 1\n')
+    write('src/notamodule/thing.ts', 'export const x = 1\n') // no VERSION → still the game's
+    expect(gameCode(game).map((f) => f.path).sort()).toEqual(['src/engine/tick.ts', 'src/maps/level1.ts', 'src/notamodule/thing.ts'])
+  })
 })
 
 describe('the tester + report', () => {

@@ -17,7 +17,7 @@ Check: ui-kit tests, typecheck, lint, check-ui green (root check:fast); shots at
 ## F112 🐞 Modules never trip a game's checks
 Done when: install-module adds the installed module's folder to the game's eslint ignores (or refuses with the one line to add when it can't edit the config safely), then the game's OWN lint passes after an install; the Dev Kit's checks treat every src/ folder with a VERSION file as a module (not the game's code), not only the names in KIT_FOLDERS; tested; proven on scratch copies of Goops and Glyphtender (their repos untouched).
 - [x] 🤖 1. install-module adds the module folder to the game's eslint `globalIgnores` (only its own entry; the rest of the file untouched) or refuses with the line — ~/.claude/config/bmuz/scripts/install-module.mjs
-- [ ] 🤖 2. The Dev Kit's gameCode() skips every src/ folder with a VERSION file (KIT_FOLDERS kept as the known list) — devkit/kit/check-framework.mjs
+- [x] 🤖 2. The Dev Kit's gameCode() skips every src/ folder with a VERSION file (KIT_FOLDERS kept as the known list) — devkit/kit/check-framework.mjs
 - [ ] 🤖 3. Tests: a fake game whose lint has react-refresh on installs the Dev Kit and its own lint passes; a made-up module with a VERSION isn't read as game code — devkit/kit/check-framework.test.mjs
 - [ ] 🤖 4. Proof on scratch clones of Goops and Glyphtender: install each module, run the game's own lint + check:framework — ~/Documents/dev/.scratch/
 Check: devkit tests + root check:fast green; the game's own `npm run lint` green after install on both scratch clones, read by me.
