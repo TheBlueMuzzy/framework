@@ -22,7 +22,7 @@ Check: ui-kit + emotes tests, root check:fast; the gallery talk page read throug
 Moved the oldest Log line to archive/log.md by hand 6+ times in sprints 28–30. Done when: an edit that leaves STATE's Log over 10 entries makes the hook move the oldest ones to the top of archive/log.md (newest first, header kept, CRLF kept) and say so in one line instead of refusing; tests.
 - [x] 🤖 1. plan-lint moves the overflow to archive/log.md instead of flagging it — ~/.claude/config/bmuz/hooks/plan-lint.mjs
 - [x] 🤖 2. Tests: 11 → 10 + 1 archived on top; 13 → 3 archived in order; a missing archive file is created with its header; CRLF kept — ~/.claude/config/bmuz/hooks/test-hooks.mjs
-- [ ] 🤖 3. HOOKS.md + PROJECT-FILES.md lines — ~/.claude/config/bmuz/HOOKS.md
+- [x] 🤖 3. HOOKS.md + PROJECT-FILES.md lines — ~/.claude/config/bmuz/HOOKS.md
 Check: test-hooks plan-lint suite green; one real STATE edit past 10 trimmed by itself.
 
 Notes:
