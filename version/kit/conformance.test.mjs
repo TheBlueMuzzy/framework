@@ -85,6 +85,22 @@ describe('Version checks', () => {
     const none = await run({ ...WIRED, 'src/ui/menus.tsx': 'export const Footer = () => null\n' }, ['version'])
     expect(none[CHECKS.shown].ok).toBe(false)
   })
+
+  it('a main menu the game draws itself counts when its element says data-version-spot="main-menu" and shows versionLabel', async () => {
+    const settingsOnly = "import { versionLabel } from '../version'\nexport const Prefs = () => <Settings version={versionLabel} />\n"
+    const console = "import { versionLabel } from '../version'\nexport const Console = () => <div className=\"row\" data-version-spot=\"main-menu\">{versionLabel}</div>\n"
+    const r = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly, 'src/ui/Console.tsx': console })
+    expect(r[CHECKS.shown].ok, String(r[CHECKS.shown].problems)).toBe(true)
+    expect(r[CHECKS.shown].detail).toContain('main-menu in src/ui/Console.tsx')
+    // the mark alone isn't enough: no versionLabel from the module in that file, or the mark only in a comment
+    const noLabel = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly, 'src/ui/Console.tsx': 'export const Console = () => <div data-version-spot="main-menu">v1</div>\n' })
+    expect(noLabel[CHECKS.shown].problems.join('\n')).toMatch(/No <MainMenu>.*data-version-spot="main-menu"/)
+    const commented = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly, 'src/ui/Console.tsx': "import { versionLabel } from '../version'\n// data-version-spot=\"main-menu\"\nexport const C = () => <b>{versionLabel}</b>\n" })
+    expect(commented[CHECKS.shown].ok).toBe(false)
+    // a kit <MainMenu> without the version still fails, even with a marked spot elsewhere
+    const both = await run({ ...WIRED, 'src/ui/menus.tsx': settingsOnly + 'export const M = () => <MainMenu title="G" />\n', 'src/ui/Console.tsx': console })
+    expect(both[CHECKS.shown].problems.join('\n')).toMatch(/<MainMenu> has no version prop/)
+  })
 })
 
 describe('reading tags', () => {

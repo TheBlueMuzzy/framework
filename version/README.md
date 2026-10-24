@@ -26,7 +26,10 @@ installer, then its checks in the game). The installer copies `kit/` → `src/ve
    import { versionPlugin } from './src/version/vitePlugin.mjs'
    plugins: [react(), versionPlugin(), …]
    ```
-2. **The main menu** (UI kit): `<MainMenu version={versionLabel} …>` — the footer line.
+2. **The main menu** (UI kit): `<MainMenu version={versionLabel} …>` — the footer line. A main menu the game draws
+   itself (Goops' console art): put `data-version-spot="main-menu"` on the element that shows `{versionLabel}` (the
+   same file imports it from `../version`); check:framework accepts that instead of `<MainMenu>`. A game-drawn Settings
+   screen: `data-version-spot="settings"`.
 3. **Settings** (UI kit 0.24.0+): `<Settings version={versionLabel} …>` — one caption line under the pages, the same
    spot on every tab, so no About tab is needed (an info row with id `version` fills itself from it too).
 4. **The Dev Kit adapter:** `version: versionLabel,` — stamped as given on snapshots and bug files.
