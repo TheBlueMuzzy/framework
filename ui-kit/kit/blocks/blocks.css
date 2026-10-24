@@ -126,6 +126,22 @@
   .kit-hud-text .kit-stack { align-items: center; }
   .kit-hud-text .kit-text { overflow-wrap: normal; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { justify-self: center; }
+  /* HUD corners keep their content's width; the middle of the row gives way (0.33.1, F123). Every slot could shrink to
+     nothing before (kit.css), so the middle took all the room it wanted first and a corner slid under it — Roll over
+     "40%" on a 667×375 phone, the coins over the end of the Health bar on an upright Cozy phone.
+     Five columns, so the top and bottom rows don't share their corners' widths: the top corners take two columns each,
+     the bottom middle the three inner ones (a HUD's top corners are wide — bars, coins — and so is its bottom middle —
+     the action buttons; with three shared columns the wide top corners squeezed the actions on a phone on its side).
+     The four outer columns share the spare room evenly, so both middles stay centred while there's room. A middle with
+     no corners in its row has the whole row. (A plain Screen keeps its three columns — kit.css.) */
+  .kit-screen:has(> [data-slot] > .kit-hud-slot) {
+    grid-template-columns: 1fr 1fr minmax(0, auto) 1fr 1fr;
+    grid-template-areas: "top-left top-left top top-right top-right" "center center center center center" "bottom-left bottom bottom bottom bottom-right";
+  }
+  .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="top-right"], [data-slot="bottom-left"], [data-slot="bottom-right"]) { min-inline-size: min-content; }
+  .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { max-inline-size: 100%; }
+  .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="top-left"], [data-slot="top-right"]))) > [data-slot="top"],
+  .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="bottom-left"], [data-slot="bottom-right"]))) > [data-slot="bottom"] { grid-column: 1 / -1; }
   /* Phones: the corners share the first row and the top-centre piece gets its own row below,
      so three things never squeeze into one narrow line. Same at the bottom. A HUD on a narrow game box
      (--kit-frame-w, 0.11.2) gets the same layout from its own width, whatever the window's width. */

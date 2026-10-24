@@ -40,23 +40,14 @@
   .kit-screen {
     position: absolute; inset: 0;
     display: grid; gap: var(--gap-m);
-    /* 0.33.1 (F123): five columns, so the top and bottom rows don't have to share their corners' widths — the top
-       corners take the two outer columns each, the bottom middle the three inner ones. (A HUD's top corners are wide
-       (bars, coins) and its bottom middle is (the action buttons): with three shared columns the wide top corners
-       squeezed the bottom middle on a phone on its side.) The outer columns stay equal, so both middles stay centred. */
-    grid-template-columns: 1fr 1fr minmax(0, auto) 1fr 1fr;
+    grid-template-columns: 1fr auto 1fr;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas: "top-left top-left top top-right top-right" "center center center center center" "bottom-left bottom bottom bottom bottom-right";
+    grid-template-areas: "top-left top top-right" "center center center" "bottom-left bottom bottom-right";
     padding: max(var(--gap-m), env(safe-area-inset-top)) max(var(--gap-m), env(safe-area-inset-right))
              max(var(--gap-m), env(safe-area-inset-bottom)) max(var(--gap-m), env(safe-area-inset-left));
     pointer-events: none; /* empty space lets taps reach the game */
   }
   .kit-screen > [data-slot] { pointer-events: auto; min-inline-size: 0; }
-  /* 0.33.1 (F123): a corner keeps at least its content's narrowest width (its 1fr column can't get narrower); the
-     middle of the row gets what's left and wraps in it. (Every slot could shrink to nothing before, so the middle took
-     all the room it wanted first and a corner slid under it: Roll over "40%" on a 667×375 phone.) */
-  .kit-screen > :is([data-slot="top-left"], [data-slot="top-right"], [data-slot="bottom-left"], [data-slot="bottom-right"]) { min-inline-size: min-content; }
-  .kit-screen > :is([data-slot="top"], [data-slot="bottom"]) { max-inline-size: 100%; }
   .kit-screen > [data-slot="top-left"] { grid-area: top-left; justify-self: start; }
   .kit-screen > [data-slot="top"] { grid-area: top; }
   .kit-screen > [data-slot="top-right"] { grid-area: top-right; justify-self: end; }
@@ -85,10 +76,6 @@
   }
   .kit-screen > [data-slot="bottom-left"] { grid-area: bottom-left; justify-self: start; }
   .kit-screen > [data-slot="bottom"] { grid-area: bottom; }
-  /* A middle with no corners in its row has the whole row (0.33.1, F123 — as before: the five columns would otherwise
-     hold it to the middle three) */
-  .kit-screen:not(:has(> :is([data-slot="top-left"], [data-slot="top-right"]))) > [data-slot="top"],
-  .kit-screen:not(:has(> :is([data-slot="bottom-left"], [data-slot="bottom-right"]))) > [data-slot="bottom"] { grid-column: 1 / -1; }
   .kit-screen > [data-slot="bottom-right"] { grid-area: bottom-right; justify-self: end; }
   /* <Screen scroll>: the screen itself scrolls (drag anywhere on it, wheel, keys), with no scroll bar. The middle row
      grows to fit (minmax(min-content, 1fr): the whole centre, so the end padding and shadow scroll into view too); the centre
@@ -409,7 +396,7 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
       grid-template-areas: "top-left center top-right" "bottom center ." "bottom-left center bottom-right";
     }
-    .kit-screen[data-column] > [data-slot="bottom"] { place-self: center; grid-column: bottom; }
+    .kit-screen[data-column] > [data-slot="bottom"] { place-self: center; }
   }
   /* <Screen swipe>: the whole screen catches the swipe, not just its slots */
   .kit-screen[data-swipe] { pointer-events: auto; }
