@@ -254,7 +254,7 @@ flowchart LR
   F22[F22 Banter] --> F110
 ```
 
-## v0.12 — Story bubbles + clean installs  ← current · planned 2026-10-23
+## v0.12 — Story bubbles + clean installs  ✅ released 2026-10-24 (v0.14.0) · planned 2026-10-23
 Goal (Muzzy 2026-10-23, "go"): a talking bubble for story moments (Goops F09 first), and modules that never break a game's own checks.
 - ✅ F111 ✨ Talking bubble: a UI kit speech bubble that grows from its tail, types its text out with rests, fizzes its outline as a speech wave and pops it per syllable, squelches while waiting; a plain style without the wave; values in content/, live in the Dev Kit (Goops sketch S9, Muzzy-approved feel) — should · needs: F107 · sprint 29
 - ✅ F112 🐞 Modules never trip a game's checks: install-module adds the module folder to the game's eslint ignores; the Dev Kit's checks skip every src/ folder with a VERSION file (Goops' report + F110's find) — must · sprint 29

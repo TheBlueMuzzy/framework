@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.13.0",
-  "build": 4,
+  "version": "0.14.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -107,6 +107,11 @@
       "version": "0.13.0",
       "date": "2026-10-23",
       "summary": "Games take the AI: tappable seat rows, modules bring their own Settings switches"
+    },
+    {
+      "version": "0.14.0",
+      "date": "2026-10-24",
+      "summary": "Story bubbles + clean installs: a talking bubble, report rows revealed one at a time, installs that keep a game's checks green"
     }
   ]
 }
