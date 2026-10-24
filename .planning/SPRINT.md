@@ -9,6 +9,7 @@ Goops' session 2026-10-24: a Modal that swaps its stats keeps the same StatList 
 - [x] 🤖 2. Tests: swap rows → replays + onRevealed again; same rows re-rendered → no replay; reduce motion — ui-kit/kit/blocks/flow.test.tsx
 - [x] 🤖 3. Gallery payslip "Next payday" swaps rows without a key; README line — ui-kit/gallery/Report.tsx
 Check: ui-kit tests + root check:fast; the gallery payslip swapped twice in a real browser, reveal replays each time.
+Checked: 2026-10-24 (Claude) — root check:fast 20/20 at d621d59; ui-kit 586 tests. Helper real-browser: Next payday ×2 at 390x844 + 1440x900 → row 1 at 0.73, rows 2–9 at 0 80 ms after each click, card size unchanged; shot looked at by me: payslip-clean-390x844-day5-mid (day 5 restarts from row 1, buttons greyed, room round everything). Review: 1 real fixed + test (cb7f3ac — <Money cents={n} /> values never replayed).
 
 ## F116 ✨ Talking bubble for every player
 Sprint 29 review minors: the LiveAnnouncer is created with its text (some screen readers skip it), focus isn't moved to a remounted bubble, the same line twice doesn't restart, bad talk.json values draw broken outlines. Done when: one lasting announcer region (mounted once, text changes) reads every new bubble line and every emote; a new bubble with onConfirm takes keyboard focus (without stealing it from a text box); the same text said again restarts; out-of-range / missing feel values fall back to the defaults; tests.
@@ -17,6 +18,7 @@ Sprint 29 review minors: the LiveAnnouncer is created with its text (some screen
 - [x] 🤖 3. Feel values clamped to safe ranges, missing / null → the default — ui-kit/kit/blocks/talkingBubble.tsx
 - [x] 🤖 4. Tests (announcer region stays, text changes per line; focus; repeat; clamping) + a real-browser accessibility-tree check — ui-kit/kit/blocks/talkingBubble.test.tsx
 Check: ui-kit + emotes tests, root check:fast; the gallery talk page read through Playwright's accessibility snapshot shows each line once in the live region.
+Checked: 2026-10-24 (Claude) — root check:fast 20/20; ui-kit 586, emotes 55. Helper real-browser (talk-check.json): one region, created empty, each of 5 lines arrives once (accessibility snapshot `status: "The Veteran: …"`), focus on the bubble at load, an emote picked twice announced twice. Review: no bugs (minors in Notes: a focused range slider loses focus when a bubble appears; the region sits outside aria-modal dialogs — check VoiceOver on a real device).
 
 ## F117 🔧 plan-lint trims the STATE Log itself
 Moved the oldest Log line to archive/log.md by hand 6+ times in sprints 28–30. Done when: an edit that leaves STATE's Log over 10 entries makes the hook move the oldest ones to the top of archive/log.md (newest first, header kept, CRLF kept) and say so in one line instead of refusing; tests.
@@ -24,6 +26,7 @@ Moved the oldest Log line to archive/log.md by hand 6+ times in sprints 28–30.
 - [x] 🤖 2. Tests: 11 → 10 + 1 archived on top; 13 → 3 archived in order; a missing archive file is created with its header; CRLF kept — ~/.claude/config/bmuz/hooks/test-hooks.mjs
 - [x] 🤖 3. HOOKS.md + PROJECT-FILES.md lines — ~/.claude/config/bmuz/HOOKS.md
 Check: test-hooks plan-lint suite green; one real STATE edit past 10 trimmed by itself.
+Checked: 2026-10-24 (Claude) — test-hooks 580/580, test-scripts 316/316 (review run); helper scratch try: 11th Log line → the oldest moved under the archive header, nothing else changed. Review: 1 real fixed + 4 tests (an archive with no header — Glyphtender's — got moved lines below an older entry). This very STATE has been trimming itself since.
 
 Notes:
 - Fixed on the side (2026-10-24, Claude): crashes kit/capture.test.ts was flaky when check:fast ran its 20 checks side by side — a fixed 20 ms settle() lost reports still being fingerprinted; settle() now waits until the transport has had no new call for three 20 ms turns (max 2 s). 165/165. Also stopped a helper's leftover gallery server on 5291 (Goops' e2e port) and landed a /develop line: framework helpers use 6000–6999 and stop their servers.
