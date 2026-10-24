@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — F114 approved: a game session can hand a finished piece to the framework window, which builds it as a module and swaps it back in with the game's own checks as the contract.
 - 2026-10-24 — Sprint 30 planned: a second window turns finished game pieces into framework modules (F114 extraction queue).
 - 2026-10-24 — Released v0.14.0 (v0.12 Story bubbles + clean installs): a talking bubble for story moments, report rows that appear one at a time with long lists that scroll, and installs that keep a game's own checks green.
 - 2026-10-23 — F111 + F112 + F113 approved: a talking bubble for story moments, module installs that keep a game's lint green, and report rows that appear one at a time (long lists scroll).
