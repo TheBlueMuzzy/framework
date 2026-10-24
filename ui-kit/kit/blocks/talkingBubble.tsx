@@ -17,6 +17,9 @@
 //   FIXED SIZE from the start: the whole line is laid out (the untyped part unseen), so it never grows while typing.
 //   onConfirm: the bubble becomes a button ("Next" — `words`): a tap / Enter / Space while typing shows the whole line;
 //   once it's all there, it calls onConfirm. Without onConfirm it never catches taps. onTyped: the whole line is showing.
+//   0.32.0: a confirmable bubble takes the keyboard focus when it appears (not out of a text box the player is typing
+//   in) and gives it back when it goes. lineId: a new one restarts the bubble even with the same words (a line said
+//   twice) — pass the script's line number or a counter you bump per line.
 //   feel: the numbers (DEFAULT_TALK_FEEL = Muzzy's approved S9 values). A game keeps them in content/tuning/talk.json and
 //   passes that object; they're read every frame, so Dev Kit edits apply live. Spike sizes are px at 100% text size.
 //   Reduce motion (device or the kit's switch): no grow, no wave, no pops — the whole line just shows.
@@ -275,6 +278,10 @@ export type TalkingBubbleProps = {
   target: CalloutTarget
   /** The line, in the current language. A new line restarts it (grow, then type). */
   text: string
+  /** Which line this is — the script's line number, or a counter the game bumps per line (0.32.0). A new lineId
+   *  restarts the bubble (and says it again) even when the words are the same: a line said twice. Without it, only
+   *  new words restart it. */
+  lineId?: string | number
   /** Who's talking, said in front of the line for screen readers ("The Veteran: …"). */
   speaker?: string
   /** "wave" (default) — the outline fizzes while it talks · "plain" — no wave, no squelch. */
@@ -302,7 +309,7 @@ function shadowFilter(depth: string) {
   return lengths.length >= 2 ? `drop-shadow(${lengths.join(' ')} ${colour})` : 'none'
 }
 
-export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, placement = 'top', avoid, onConfirm, onTyped, words }: TalkingBubbleProps) {
+export function TalkingBubble({ target, text, lineId, speaker, outline = 'wave', feel, placement = 'top', avoid, onConfirm, onTyped, words }: TalkingBubbleProps) {
   const w = { ...talkWords, ...words }
   const layer = useRef<HTMLDivElement>(null)
   const bubble = useRef<HTMLDivElement>(null)
@@ -317,12 +324,27 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
   useShownPopover(layer)
   useCalloutPlace(layer, bubble, now)
 
-  // A new line starts over (grow, then type)
-  useLayoutEffect(() => { talk.current = startTalk() }, [text])
+  // A new line (new words, or a new lineId: the same words said again) starts over (grow, then type)
+  useLayoutEffect(() => { talk.current = startTalk() }, [text, lineId])
   // …and is said once through the page's one live region (made on mount, so it's there before the first line)
   useEffect(() => { liveRegion() }, [])
   const said = speaker ? `${speaker}: ${text}` : text
-  useEffect(() => { announce(said) }, [text]) // eslint-disable-line react-hooks/exhaustive-deps -- once per line, not per speaker change
+  useEffect(() => { announce(said) }, [text, lineId]) // eslint-disable-line react-hooks/exhaustive-deps -- once per line, not per speaker change
+
+  // A bubble you confirm takes the keyboard focus when it appears (Enter / Space go on; a screen reader lands on it),
+  // a frame later like a pausing Callout's button — but never out of a text box, select or editable the player is
+  // typing in. When it goes, the focus goes back where it was (in a LAYOUT cleanup: before React removes it — F109).
+  const button = !!onConfirm
+  useLayoutEffect(() => {
+    if (!button) return
+    const before = document.activeElement as HTMLElement | null
+    const el = bubble.current
+    const frame = schedule(() => { if (!typingIn(document.activeElement)) el?.focus({ preventScroll: true, focusVisible: false } as FocusOptions) })
+    return () => {
+      cancel(frame)
+      if (before?.isConnected && before !== el && el?.contains(document.activeElement)) before.focus({ preventScroll: true })
+    }
+  }, [button])
 
   // The frame loop: steps the talking at the sketch's fixed step, then draws the outline and the typed words.
   // Everything here writes to the page directly (refs) — never React state per frame.
@@ -409,7 +431,6 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
     event.preventDefault()
     if (!event.repeat) confirm()
   }
-  const button = !!onConfirm
   const content = (
     <div ref={layer} {...{ popover: 'manual' }} className="kit-scope kit-callout-layer kit-talk-layer" data-outline={outline}>
       <div className="kit-callout-frame" aria-hidden />
@@ -426,6 +447,13 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
     </div>
   )
   return typeof document === 'undefined' ? null : createPortal(content, document.body)
+}
+
+// The player is typing there: a text box (any input but a button-like one), a textarea, a select or an editable
+const typingIn = (el: Element | null) => {
+  if (!el) return false
+  if (el instanceof HTMLInputElement) return !['button', 'submit', 'reset', 'checkbox', 'radio', 'range', 'color', 'file', 'image'].includes(el.type)
+  return el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || (el as HTMLElement).isContentEditable === true
 }
 
 // One frame later (a timer where there are no animation frames, e.g. tests)
