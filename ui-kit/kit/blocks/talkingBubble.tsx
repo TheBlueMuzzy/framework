@@ -12,7 +12,8 @@
 //      (0 needle → 5 sine → 10 semicircle). The pointer never fizzes. At a rest the wave relaxes flat.
 //   4. Each syllable pops the OUTLINE a little (`popSize`) — the words never move.
 //   5. Done, waiting to be confirmed: now and then (`squelchEvery` ± 1.5 s) the outline squelches — a burst of static.
-//   style "wave" (default) or "plain" (the same grow, typing, rests and pops — no wave, no squelch).
+//   outline "wave" (default) or "plain" (the same grow, typing, rests and pops — no wave, no squelch). (Not named
+//   `style`: that's the CSS prop — check-ui would flag every game that passes it.)
 //   FIXED SIZE from the start: the whole line is laid out (the untyped part unseen), so it never grows while typing.
 //   onConfirm: the bubble becomes a button ("Next" — `words`): a tap / Enter / Space while typing shows the whole line;
 //   once it's all there, it calls onConfirm. Without onConfirm it never catches taps. onTyped: the whole line is showing.
@@ -104,7 +105,7 @@ export function finishTalk(s: TalkState, text: string, feel: TalkFeel, rnd: Rand
   s.phase = 'wait'; s.shown = text.length; s.levelTarget = 0; s.nextSquelch = squelchGap(feel, rnd)
 }
 
-/** One step of `dt` seconds. `style` plain: no voice level (so no wave, no squelch); pops stay. */
+/** One step of `dt` seconds. `outline` plain: no voice level (so no wave, no squelch); pops stay. */
 export function stepTalk(s: TalkState, dt: number, text: string, feel: TalkFeel, rnd: Random = Math.random, plain = false) {
   s.t += dt
   if (s.phase === 'grow' && s.t * 1000 >= TALK_GROW_MS) { s.phase = 'pre'; s.t = 0 }
@@ -276,7 +277,7 @@ export type TalkingBubbleProps = {
   /** Who's talking, said in front of the line for screen readers ("The Veteran: …"). */
   speaker?: string
   /** "wave" (default) — the outline fizzes while it talks · "plain" — no wave, no squelch. */
-  style?: 'wave' | 'plain'
+  outline?: 'wave' | 'plain'
   /** The numbers (content/tuning/talk.json) — any left out are DEFAULT_TALK_FEEL's. Read every frame (live). */
   feel?: Partial<TalkFeel>
   placement?: CalloutPlacement
@@ -300,7 +301,7 @@ function shadowFilter(depth: string) {
   return lengths.length >= 2 ? `drop-shadow(${lengths.join(' ')} ${colour})` : 'none'
 }
 
-export function TalkingBubble({ target, text, speaker, style = 'wave', feel, placement = 'top', avoid, onConfirm, onTyped, words }: TalkingBubbleProps) {
+export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, placement = 'top', avoid, onConfirm, onTyped, words }: TalkingBubbleProps) {
   const w = { ...talkWords, ...words }
   const layer = useRef<HTMLDivElement>(null)
   const bubble = useRef<HTMLDivElement>(null)
@@ -309,9 +310,9 @@ export function TalkingBubble({ target, text, speaker, style = 'wave', feel, pla
   const typed = useRef<HTMLSpanElement>(null)
   const rest = useRef<HTMLSpanElement>(null)
   const now = useRef<CalloutPlaceInput>({ target, placement, avoid })
-  const props = useRef({ text, style, feel, onConfirm, onTyped })
+  const props = useRef({ text, outline, feel, onConfirm, onTyped })
   const talk = useRef<TalkState>(startTalk())
-  useLayoutEffect(() => { now.current = { target, placement, avoid }; props.current = { text, style, feel, onConfirm, onTyped } })
+  useLayoutEffect(() => { now.current = { target, placement, avoid }; props.current = { text, outline, feel, onConfirm, onTyped } })
   useShownPopover(layer)
   useCalloutPlace(layer, bubble, now)
 
@@ -326,7 +327,7 @@ export function TalkingBubble({ target, text, speaker, style = 'wave', feel, pla
       const at = performance.now()
       const dt = Math.min((at - last) / 1000, MAX_FRAME_S); last = at
       const p = props.current, f: TalkFeel = { ...DEFAULT_TALK_FEEL, ...p.feel }, s = talk.current
-      const still = reduceMotion(), plain = p.style === 'plain'
+      const still = reduceMotion(), plain = p.outline === 'plain'
       if (still) { if (s.phase !== 'wait') finishTalk(s, p.text, f, Math.random); s.level = 0; s.levelTarget = 0; s.pop = 0; s.popV = 0 }
       carry += dt
       while (carry >= STEP_S) { stepTalk(s, STEP_S, p.text, f, Math.random, plain); carry -= STEP_S }
@@ -397,7 +398,7 @@ export function TalkingBubble({ target, text, speaker, style = 'wave', feel, pla
   const key = (event: KeyboardEvent) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); confirm() } }
   const button = !!onConfirm
   const content = (
-    <div ref={layer} {...{ popover: 'manual' }} className="kit-scope kit-callout-layer kit-talk-layer" data-style={style}>
+    <div ref={layer} {...{ popover: 'manual' }} className="kit-scope kit-callout-layer kit-talk-layer" data-outline={outline}>
       <div className="kit-callout-frame" aria-hidden />
       <div ref={bubble} className="kit-callout kit-talk" data-phase="grow" data-confirm={button || undefined}
         role={button ? 'button' : undefined} tabIndex={button ? 0 : undefined} aria-label={button ? w.next : undefined}

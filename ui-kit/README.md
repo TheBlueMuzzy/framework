@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.30.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.31.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -139,8 +139,20 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.31.0.
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.32.0 (kept
+  through 0.31.0: Glyphtender hadn't reinstalled those modules yet).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
+  0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
+  story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
+  outline is drawn: it grows open from its pointer's tip (320 ms, ease-out-back), types the line out with rests at
+  . ! ? … (`pauseMs`) and half at , —, fizzes a stretch of its outline as a spiky speech wave while it types (the
+  pointer never fizzes), pops the OUTLINE per syllable (the words never move) and squelches now and then while it
+  waits. `outline` "wave" | "plain" (no wave / squelch). Fixed size from the start. `onConfirm` makes it a button
+  ("Next"): a tap while typing shows the whole line, then confirms. Reduce motion: the whole line at once, nothing
+  moves. Screen readers: the full line once (`speaker` in front). The numbers: `DEFAULT_TALK_FEEL` (Muzzy's approved
+  S9 values) — a game keeps them in `content/tuning/talk.json` and passes the object as `feel`; read every frame, so
+  Dev Kit edits apply live. Each style paints it (surface, border, border width, corners — bevel in Neon / Pixel — and
+  its depth-2 shadow). Tests: `kit/blocks/talkingBubble.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
