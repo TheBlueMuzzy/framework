@@ -306,7 +306,7 @@ flowchart LR
 Goal (Muzzy 2026-10-24, /sprint pick a): nothing in a HUD slides under its neighbour on a small phone, the page check catches a covered bar, and check:fast stops going red by load.
 - 🔨 F123 🐞 HUD corner slots keep their content's width: `.kit-screen > [data-slot] { min-inline-size: 0 }` (kit.css) lets a corner shrink and slide under its neighbour — the coins chip on the end of the Health bar (upright Cozy phone), Roll crossing "40%" on a 667×375 phone; fixed in the kit at every size, the middle gives way instead — should · needs: F124 · sprint 33
 - 🔨 F124 🔧 uiProblems sees a covered bar: a solid chip, badge or panel on top of a bar / meter / art (no text, not a control) counts as an overlap, so F123's kind of bug can't hide — should · sprint 33
-- 🔨 F125 🔧 The saves install test that times out under load: find what it waits on (5.1 s under check:fast vs 2.3 s for all 10 alone) and fix the cause, not the limit — could · sprint 33
+- ✅ F125 🔧 The saves install test that times out under load: find what it waits on (5.1 s under check:fast vs 2.3 s for all 10 alone) and fix the cause, not the limit — could · sprint 33
 ```mermaid
 flowchart LR
   F124[F124 Covered bar check] --> F123[F123 Corner slots]
