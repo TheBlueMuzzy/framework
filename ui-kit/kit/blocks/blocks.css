@@ -321,11 +321,13 @@
      In a letterboxed game (--kit-frame-w / --kit-frame-h, see kit.css) they stay on the game picture, out of the black bars.
      --kit-toasts-start / --kit-toasts-end: room to keep clear at the game picture's left / right edge (default none),
      e.g. a game whose left half is its board: :root { --kit-toasts-start: calc(var(--kit-frame-w, 100vw) / 2); }
-     puts toasts over the right half. (Plain % would be of the window, not the game picture.) */
+     puts toasts over the right half. (Plain % would be of the window, not the game picture.)
+     --kit-toasts-top (0.33.0): room to keep clear above top toasts — a bar of the page's own over the game (the
+     gallery's Menu + style bar: toasts sat on its buttons). Default none. */
   .kit-toasts { --kit-letterbox-h: calc((100dvh - var(--kit-frame-h, 100dvh)) / 2);
     --kit-letterbox-w: calc((100vw - var(--kit-frame-w, 100vw)) / 2);
     inset-block: 0 auto; inset-inline: calc(var(--kit-letterbox-w) + var(--kit-toasts-start, 0%)) calc(var(--kit-letterbox-w) + var(--kit-toasts-end, 0%));
-    margin: calc(var(--kit-letterbox-h) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
+    margin: calc(var(--kit-letterbox-h) + var(--kit-toasts-top, 0rem) + max(var(--gap-m), env(safe-area-inset-top))) auto 0; padding: 0; border: 0; background: none;
     overflow: visible; display: none; flex-direction: column; align-items: center; gap: var(--gap-s);
     max-inline-size: calc(var(--kit-frame-w, 100vw) - var(--kit-toasts-start, 0%) - var(--kit-toasts-end, 0%) - 2 * var(--gap-m)); }
   .kit-toasts[data-place="center"] { inset-block: 0; margin: auto; }

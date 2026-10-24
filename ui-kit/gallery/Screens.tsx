@@ -552,6 +552,21 @@ const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(open
 type StageProps = { id: string; preset: string; onPreset: (preset: string) => void; onMenu: () => void }
 export function Stage({ id, preset, onPreset, onMenu }: StageProps) {
   useEffect(() => { if (isKnown(id)) (openers[id] ?? (() => screens.push(id)))() }, [id])
+  // The bar isn't part of the game. On a narrow phone its two buttons fill it, so top toasts keep clear of it
+  // (--kit-toasts-top = its height, measured — it changes with the style and the text size); wider, toasts sit in the
+  // bar's empty middle, as before — below it they'd land on a short screen's card (a phone on its side)
+  useEffect(() => {
+    const bar = document.querySelector<HTMLElement>('.gallery-bar')
+    const root = document.documentElement.style
+    if (!bar) return
+    const narrow = matchMedia('(max-width: 40rem)')
+    const keepClear = () => narrow.matches ? root.setProperty('--kit-toasts-top', `${bar.getBoundingClientRect().height}px`)
+      : root.removeProperty('--kit-toasts-top')
+    const watch = new ResizeObserver(keepClear)
+    watch.observe(bar)
+    keepClear()
+    return () => { watch.disconnect(); root.removeProperty('--kit-toasts-top') }
+  }, [])
   return (
     <div className="gallery-stage-page">
       <Row gap="s" justify="between" className="gallery-bar">

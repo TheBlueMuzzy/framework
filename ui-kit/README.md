@@ -205,7 +205,9 @@ gallery's `npm run shoot` uses the same one.
   side:** the two columns share the card half and half (was 1 : 1.25, which wrapped Leave / I'm ready onto two lines),
   and the left column's last row never shrinks below its buttons — so Leave / I'm ready never slide up over the
   waiting line; on a very small phone the card scrolls instead (its last-resort scroll). Tests (real browser, all 5
-  styles): `kit/blocks/nameFit.test.tsx`.
+  styles): `kit/blocks/nameFit.test.tsx`. **`--kit-toasts-top`** (like `--kit-toasts-start` / `-end`): room to keep
+  clear above top toasts, for a bar of the page's own over the game — the gallery sets it to its bar's height on a
+  narrow phone, where its Menu + style buttons fill the bar. Unset = as before. Test: `kit/blocks/toastsTop.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
