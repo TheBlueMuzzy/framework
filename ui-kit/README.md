@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.31.0**. What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.32.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -139,8 +139,8 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.32.0 (kept
-  through 0.31.0: Glyphtender hadn't reinstalled those modules yet).
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.33.0 (kept
+  through 0.32.0: Glyphtender hadn't reinstalled those modules yet).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
   0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
   story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
@@ -175,6 +175,29 @@ gallery's `npm run shoot` uses the same one.
   scroll taking over) + statListLook.test.tsx (real browser, 5 styles × 5 sizes: title + buttons in sight, no page or
   card scroll, the list scrolls; a short list's card the same size as without the box). Game CSS aimed at the old
   `.kit-end-info > .kit-stats` path: the rows now sit one level deeper, `.kit-end-info > .kit-scroll > .kit-stats`.
+  0.32.0 (F115, Goops' payslip Modal — `kit/blocks/flow.tsx`, gallery `?screen=payslip` "Next payday"): a `StatList`
+  (and so Victory / GameOver) replays its reveal by itself when its rows change BY CONTENT — labels, values (a number,
+  text, or an element's words) and tones: fresh rows from the top, the scroll back to the top, and `onRevealed` once
+  more for the new rows (at once with reduce motion). The same rows re-rendered (a new array of new objects with the
+  same words) never replay. The `key={…}` workaround for swapped stats is no longer needed — a key is only for
+  replaying the SAME rows (the gallery's Replay). Tests: `kit/blocks/flow.test.tsx`.
+  0.32.0 (F116, the sprint 29 review's minors — `kit/blocks/emotes.tsx`, `kit/blocks/talkingBubble.tsx`): the talking
+  bubble for every player. **One lasting live region per page:** `announce(text)` / `liveRegion()` — made once (on
+  first use, or when a LiveAnnouncer / TalkingBubble mounts), straight on `<body>`, never removed; only its text
+  changes, and its very first line waits 100 ms so the region is on the page before its text (screen readers skip a
+  region made together with its words). The same line twice is still said twice (the text toggles a trailing
+  no-break space). TalkingBubble and `LiveAnnouncer` (so the emotes module's EmoteBubbles) both speak through it;
+  `LiveAnnouncer` keeps its props and its one-a-second limit, but draws nothing now (game CSS or tests that looked for
+  its own `<span role="status">` find the page's `.kit-live` instead). **Focus:** a TalkingBubble with `onConfirm`
+  takes the keyboard focus a frame after it appears (like a pausing Callout's button; no ring unless the keyboard is
+  in use) — never out of a text box, textarea, select or editable the player is typing in — and gives it back when it
+  goes. **`lineId`:** a new one restarts the bubble (typed and said again) even with the same words — pass the
+  script's line number or a counter bumped per line. **Safe numbers:** `talkFeel(feel)` keeps each value in
+  `TALK_FEEL_RANGES` (e.g. variability 0–1, spikeGap 2–200, typeSpeed 1–1000); null, NaN, words or a missing key →
+  `DEFAULT_TALK_FEEL`'s — a bad talk.json can't draw a broken outline. The live region is pulled up by its 1 px
+  (`.kit-live`), so it never gives a full-height page a scroll. Tests: `kit/blocks/talkingBubble.test.tsx`,
+  `kit/blocks/emotes.test.tsx`, `kit/blocks/emoteLook.test.tsx` (real browser: no page scroll), and the emotes
+  module's `kit/ui/EmoteLayer.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
