@@ -31,3 +31,8 @@ Notes:
 - F123 scoped to HUD screens (blocks.css), not kit.css as the task line said: on every Screen it moved the parts demo's Roll 4 px and pushed Pause off-screen at 200% text. The gallery HUD sample drops names / Lives / the hint's detail on a short phone on its side — it had more than fits at 667×375 in any layout.
 - Order: F124 before F123 (the check must see the bug first, so the fix is proven by it); F125 any time (different files).
 - UI kit bumps to 0.33.1, not 0.34.0: 0.34.0 is promised as the release that drops OLD_MODULE_ROWS, which waits for Glyphtender's reinstall (ROADMAP Ideas).
+
+Retro:
+- went well: the check was built first and found the bug before the fix proved it gone; F125's cause was measured, not given a longer limit
+- went wrong: new screenshot sizes surfaced 16 older finds only at the end, so F123's "0 problems" couldn't be met
+- change: (Muzzy 2026-10-24) shoot the new sizes first — a sprint that adds a check or size runs it on today's code as task 1 (→ /sprint skill line)
