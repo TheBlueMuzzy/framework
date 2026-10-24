@@ -9,7 +9,7 @@ Done when: a UI kit piece `<TalkingBubble>` grows from its tail tip, types its t
 - [x] 🤖 2. The outline speech wave (waveStart / waveEnd / spikeGap / talkHeight / roundness / variability, heights re-picked ~25×/s, tail never fizzes), syllable pops on the outline only, idle squelch every squelchEvery ± 1.5 s — ui-kit/kit/blocks/talkingBubble.tsx
 - [x] 🤖 3. Outline `style`: "wave" | "plain" (plain = the same grow + type + rests, no wave) — ui-kit/kit/blocks/talkingBubble.tsx
 - [x] 🤖 4. Defaults = the approved values (waveStart 0, waveEnd 0.34, spikeGap 19, talkHeight 51, roundness 3, variability 0.45, popSize 0.025, typeSpeed 22, pauseMs 380, squelchEvery 2.5) read live from the game's content/ (Dev Kit editable) — ui-kit/kit/blocks/talkingBubble.tsx
-- [ ] 🤖 5. Reduce motion (no wave / pops / grow: text shown whole), screen reader hears the full line once, tests — ui-kit/kit/blocks/talkingBubble.test.tsx
+- [x] 🤖 5. Reduce motion (no wave / pops / grow: text shown whole), screen reader hears the full line once, tests — ui-kit/kit/blocks/talkingBubble.test.tsx
 - [ ] 🤖 6. Gallery page (?screen=talk) in all 5 styles, shoot at every size; README, CATALOG, VERSION — ui-kit/gallery/
 - [ ] 🙋 7. Compare it with the Goops sketch in the gallery (tuning)
 Check: ui-kit tests, typecheck, lint, check-ui green (root check:fast); shots at 390x844, 360x780, 844x390, 768x343, 1100, 1440x900, 1920x1080 looked at by me; a side-by-side of the sketch and the kit piece.
