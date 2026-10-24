@@ -202,17 +202,33 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
 
   it('lists the library and serves one font file — nothing outside it, nothing for another site', async () => {
     const list = await (await fetch(`${url}/__devkit/font-library`)).json()
-    expect(list).toMatchObject({ found: true, more: false, fonts: [{ path: 'pixel/Tiny Font.ttf', name: 'Tiny Font', folder: 'pixel' }] })
-    const file = await fontFile('pixel/Tiny Font.ttf')
+    expect(list).toMatchObject({ found: true, more: false, fonts: [{ path: 'folder:pixel/Tiny Font.ttf', name: 'Tiny Font', folder: 'pixel', file: 'pixel/Tiny Font.ttf' }] })
+    const file = await fontFile('folder:pixel/Tiny Font.ttf')
     expect(file.headers.get('content-type')).toBe('font/ttf')
     expect(await file.text()).toBe('not really a font')
-    expect((await fontFile('../secret.ttf')).status).toBe(400)
-    expect((await fontFile('pixel/licence.txt')).status).toBe(400)
+    expect((await fontFile('folder:../secret.ttf')).status).toBe(400)
+    expect((await fontFile('pixel/Tiny Font.ttf')).status).toBe(400) // no root named
+    expect((await fontFile('folder:pixel/licence.txt')).status).toBe(400)
+    expect((await fontFile('installed1:../../secret.ttf')).status).toBe(400)
     expect((await fetch(`${url}/__devkit/font-library`, { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
+  })
+  it('lists the computer\'s installed fonts too (one row per family) — and the off switch hides them', async () => {
+    const list = await (await fetch(`${url}/__devkit/font-library`)).json()
+    expect(list.installed).toMatchObject({ on: true, more: false })
+    expect(list.installed.fonts.every((f: { path: string }) => /^installed\d+:/.test(f.path))).toBe(true)
+    if (list.installed.fonts.length > 0) { // (a computer with installed fonts — every desktop)
+      const first = await fontFile(list.installed.fonts[0].path)
+      expect(first.status).toBe(200)
+      expect(first.headers.get('content-type')).toMatch(/^font\//)
+    }
+    writeFileSync(join(game, 'devkit.local.json'), JSON.stringify({ fontLibrary: join(base, 'library'), installedFonts: false }))
+    const off = await (await fetch(`${url}/__devkit/font-library`)).json()
+    expect(off.installed).toEqual({ on: false, folders: [], fonts: [], more: false, skipped: {}, platform: process.platform })
+    expect(off.fonts).toHaveLength(1)
   })
   it('Add to game copies it + its licence into public/fonts/ and lists it — only from the game page', async () => {
     const add = (headers: Record<string, string>) => fetch(`${url}/__devkit/font-library/add`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ path: 'pixel/Tiny Font.ttf' }),
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ path: 'folder:pixel/Tiny Font.ttf' }),
     })
     expect((await add({ Origin: 'http://evil.example' })).status).toBe(403)
     const res = await add({ Origin: url })
