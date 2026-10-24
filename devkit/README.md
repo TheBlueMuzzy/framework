@@ -531,4 +531,7 @@ to search sets `searchable: false` (no box).
 - 0.26.1 (framework F112): the framework check's `gameCode()` (what the checks read as the game's own code) skips
   every installed module — any `src/<x>/` or `src/<x>/kit/` holding a VERSION, not only the folders this Dev Kit knows
   by name (`KIT_FOLDERS`) — so a module newer than the Dev Kit is never mistaken for the game's code.
+- 0.26.2 (framework F120): the framework check's `t.run` passes its arguments as a list, never as one shell string —
+  a test file named `a&b.test.ts` or `$(x).test.ts` is just a name, nothing runs. On Windows npm / npx (.cmd files)
+  run as this Node + npm's own `npm-cli.js` / `npx-cli.js` (`commandLine`), so no shell is needed there either.
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
