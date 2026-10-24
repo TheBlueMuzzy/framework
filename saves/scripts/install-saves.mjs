@@ -205,7 +205,16 @@ function listFiles(dir, base = dir) {
   })
 }
 
+// Worked out once per run: it starts two git processes, which take 0.2–0.6 s each on a busy Windows PC (F125: the
+// install tests call installSaves 15 times, so 30 git runs pushed one test past vitest's 5 s limit under check:fast).
+// The kit's commit can't change while one install runs, so asking again only costs time.
+let kitVersionOnce = null
 function kitVersion() {
+  kitVersionOnce ??= readKitVersion()
+  return kitVersionOnce
+}
+
+function readKitVersion() {
   const version = readFileSync(join(savesDir, 'kit', 'VERSION'), 'utf8').trim()
   let commit = 'no git'
   try {
