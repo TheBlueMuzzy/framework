@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.32.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.33.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -139,8 +139,8 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.33.0 (kept
-  through 0.32.0: Glyphtender hadn't reinstalled those modules yet).
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.34.0 (kept
+  through 0.33.0: Glyphtender hadn't reinstalled those modules yet).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
   0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
   story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
@@ -198,6 +198,16 @@ gallery's `npm run shoot` uses the same one.
   (`.kit-live`), so it never gives a full-height page a scroll. Tests: `kit/blocks/talkingBubble.test.tsx`,
   `kit/blocks/emotes.test.tsx`, `kit/blocks/emoteLook.test.tsx` (real browser: no page scroll), and the emotes
   module's `kit/ui/EmoteLayer.test.tsx`.
+  0.33.0 (F119, the gallery passes its own layout checks — `kit/blocks/blocks.css`): **names are never cut short.** A
+  name in Results, the Lobby room or the Seat picker (`.kit-result-name`) wraps at its spaces (one over-long word
+  breaks too) and its badges (★, You, Host) move under it when the row is narrow — no more "Sherman Mere…" or "Muz…"
+  on a phone; the Lobby room's "Share this code with your friends" wraps the same way. **Lobby room on a phone on its
+  side:** the two columns share the card half and half (was 1 : 1.25, which wrapped Leave / I'm ready onto two lines),
+  and the left column's last row never shrinks below its buttons — so Leave / I'm ready never slide up over the
+  waiting line; on a very small phone the card scrolls instead (its last-resort scroll). Tests (real browser, all 5
+  styles): `kit/blocks/nameFit.test.tsx`. **`--kit-toasts-top`** (like `--kit-toasts-start` / `-end`): room to keep
+  clear above top toasts, for a bar of the page's own over the game — the gallery sets it to its bar's height on a
+  narrow phone, where its Menu + style buttons fill the bar. Unset = as before. Test: `kit/blocks/toastsTop.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
