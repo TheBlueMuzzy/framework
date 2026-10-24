@@ -26,6 +26,13 @@ Done when: `t.run` in check-framework passes an argument list (no `shell: true` 
 - [x] 🤖 3. Same pattern elsewhere? grep the framework + BMUZ scripts for shell: true with joined strings; fix or list — devkit/README.md
 Check: devkit tests + root check:fast; check:framework on a scratch Goops clone still passes.
 
+## F121 ✨ TalkingBubble colours from the game's content (pulled in mid-sprint)
+Goops' session 2026-10-24 for its F35 — Muzzy: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text." Sketch S9: fill #f4f4f2, text #222, outline #555 at 1.6 px, the "more" ▼ #888. Done when: `colours?: { fill, ink, outline, outlineWidth, more }` (each optional) paints the bubble, read every frame so content/tuning/talk.json edits apply live; unset = the style's colours exactly as today; the part itself still holds no colours (values come from the game); ink vs fill below 4.5:1 falls back to the style's text colour (and says so once in the console in dev); text stays body size; works with outline "wave" and "plain"; all 5 styles.
+- [ ] 🤖 1. `colours` prop → CSS custom properties on the bubble, read live; unset = today — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 2. Contrast floor (4.5:1, else the style's ink) + safe parsing (bad colour strings ignored) — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 3. Tests + gallery: the S9 "paper" colours beside the style colours in all 5 styles; README / CATALOG — ui-kit/kit/blocks/talkingBubble.test.tsx
+Check: ui-kit tests, check-ui, root check:fast; shots of the paper bubble in neon + clean at 390x844 looked at by me (light bubble, dark text, outline visible).
+
 Notes:
 - F118 ports convention (template header): numbers ≥ 1024 in an E2E line's args + each script's `const …PORT = <number>` + a `// ports: …` header line. Goops' and Glyphtender's scripts already match it — no script edits needed. The lookup is `~/.claude/config/bmuz/templates/ports.mjs`; a game copies it to `scripts/ports.mjs` (check-all can't reach ~/.claude on GitHub's runner), stop-servers.mjs imports the template copy. On Windows a process's working folder can't be asked for, so "in <folder>" comes from its command line (the part before node_modules, or a script's folder) and is left out when the command line has neither (`node hold.mjs`).
 - F118: checkup §7 + install-module name glyphtender and goops today (no pre-flight yet) — their copies get it on their next check-all update, not in this sprint.

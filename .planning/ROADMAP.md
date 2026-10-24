@@ -291,11 +291,13 @@ Goal (Muzzy 2026-10-24, /develop on the plan's pick a): a red check means a real
 - 🔨 F118 🔧 Port pre-flight in check:full: before any e2e starts, every port it will use is checked; a taken one fails at once with "port N is held by <command> in <folder>" (Goops' session: a leftover vite on 5291 showed up as a meta-tag timeout, two nights) — should · sprint 32
 - 🔨 F119 🔧 The UI kit gallery passes its own layout checks: the 56 older cut-off names and overlaps (Results names, the Room share line, Feedback toast, lobby, hud) fixed in the kit or its demos, so a new problem stands out — should · sprint 32
 - 🔨 F120 🔧 check-framework runs commands as an argument list, never one shell string built from file names (security review 2026-10-19, low) — should · sprint 32
+- 🔨 F121 ✨ TalkingBubble colours from the game's content: `colours` { fill, ink, outline, outlineWidth, more } read live like `feel` (Goops F35 — Muzzy 2026-10-24: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text."); the style's colours stay the default; a contrast floor — should · needs: F111 · sprint 32
 ```mermaid
 flowchart LR
   F118[F118 Port pre-flight]
   F119[F119 Clean gallery]
   F120[F120 No shell strings]
+  F111[F111 Talking bubble] --> F121[F121 Bubble colours]
 ```
 
 ## Later
