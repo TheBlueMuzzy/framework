@@ -2,7 +2,8 @@
 // pointer never fizzes, the wave's sides), and the part — reduce motion shows the line whole, screen readers hear it
 // once, a tap finishes then confirms, and the numbers are read live (a changed value takes effect without a re-render).
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { liveRegion } from './emotes'
 import {
   DEFAULT_TALK_FEEL, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk, stepTalk,
   squelchGap, talkOutline, waveOffsets, type TalkFeel, type TalkState,
@@ -143,6 +144,8 @@ describe('the spikes and the outline', () => {
 })
 
 describe('<TalkingBubble>', () => {
+  // The page's one live region, already on the page past its first moment (as it is after a game's first line)
+  beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) })
   // Frames by hand: each tick moves the clock 1/60 s and runs the queued frames
   let now = 0
   let queued: FrameRequestCallback[] = []

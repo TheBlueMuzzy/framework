@@ -20,13 +20,14 @@
 //   feel: the numbers (DEFAULT_TALK_FEEL = Muzzy's approved S9 values). A game keeps them in content/tuning/talk.json and
 //   passes that object; they're read every frame, so Dev Kit edits apply live. Spike sizes are px at 100% text size.
 //   Reduce motion (device or the kit's switch): no grow, no wave, no pops — the whole line just shows.
-//   Screen readers: the full line is said once (a LiveAnnouncer, `speaker` in front), never letter by letter.
+//   Screen readers: the full line is said once (the page's one live region — announce(), 0.32.0 — `speaker` in
+//   front), never letter by letter.
 //   Pause: animation frames only (the Dev Kit's full pause holds them; a frame's time is capped, so no jump after).
-import { useLayoutEffect, useRef, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Text } from '../controls'
 import { type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
-import { LiveAnnouncer } from './emotes'
+import { announce, liveRegion } from './emotes'
 import { reduceMotion } from './motion'
 import { useCalloutPlace, useShownPopover, type CalloutPlaceInput } from './teach'
 
@@ -318,6 +319,10 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
 
   // A new line starts over (grow, then type)
   useLayoutEffect(() => { talk.current = startTalk() }, [text])
+  // …and is said once through the page's one live region (made on mount, so it's there before the first line)
+  useEffect(() => { liveRegion() }, [])
+  const said = speaker ? `${speaker}: ${text}` : text
+  useEffect(() => { announce(said) }, [text]) // eslint-disable-line react-hooks/exhaustive-deps -- once per line, not per speaker change
 
   // The frame loop: steps the talking at the sketch's fixed step, then draws the outline and the typed words.
   // Everything here writes to the page directly (refs) — never React state per frame.
@@ -420,12 +425,7 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
       </div>
     </div>
   )
-  return (
-    <>
-      {typeof document === 'undefined' ? null : createPortal(content, document.body)}
-      <LiveAnnouncer text={speaker ? `${speaker}: ${text}` : text} stamp={text} minGapMs={0} />
-    </>
-  )
+  return typeof document === 'undefined' ? null : createPortal(content, document.body)
 }
 
 // One frame later (a timer where there are no animation frames, e.g. tests)
