@@ -139,12 +139,19 @@ export const statListWords = { danger: 'Loss', success: 'Gain' }
 type RevealProps = { reveal?: number; onRevealed?: () => void }
 type StatListProps = RevealProps & { stats: Stat[]; words?: Partial<typeof statListWords> }
 const toneMark = { danger: '▼', success: '▲' }
-// The words a value shows (a number, text, or an element's text inside) — what "the same rows" compares
+// The words a value shows (a number, text, or an element's text inside) — what "the same rows" compares.
+// An element's plain props count too (review fix: <Money cents={500} /> has no text inside, so a new amount under the
+// same label never replayed and onRevealed never came); functions and objects (a new onClick / style each render) don't.
 function textOf(node: ReactNode): string {
   if (node === null || node === undefined || typeof node === 'boolean') return ''
   if (typeof node === 'string' || typeof node === 'number' || typeof node === 'bigint') return String(node)
   if (Array.isArray(node)) return node.map(textOf).join('')
-  if (isValidElement<{ children?: ReactNode }>(node)) return textOf(node.props.children)
+  if (isValidElement<Record<string, unknown>>(node)) {
+    const { children, ...props } = node.props
+    const plain = Object.keys(props).sort().filter((k) => ['string', 'number', 'bigint', 'boolean'].includes(typeof props[k]))
+    const marks = plain.map((k) => `${k}=${String(props[k])}`).join(',')
+    return (marks ? `<${marks}>` : '') + textOf(children as ReactNode)
+  }
   return ''
 }
 const rowsText = (stats: Stat[]) => JSON.stringify(stats.map((s) => [s.label, textOf(s.value), s.tone ?? '']))

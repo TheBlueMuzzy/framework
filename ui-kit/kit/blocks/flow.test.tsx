@@ -240,6 +240,21 @@ describe('StatList replays its reveal when its rows change', () => {
     expect(rows(container)[0].textContent).toBe('Pay$6')
   })
 
+  it('an element value with its number in a prop (no text inside) still replays when the number changes (review fix)', () => {
+    const Money = ({ cents }: { cents: number }) => <>${cents / 100}</>
+    const onRevealed = vi.fn()
+    const pay = (cents: number) => [{ label: 'Pay', value: <Money cents={cents} /> }]
+    const { container, rerender } = render(<StatList stats={pay(500)} reveal={350} onRevealed={onRevealed} />)
+    fireEvent.animationEnd(last(container))
+    const before = rows(container)
+    rerender(<StatList stats={pay(500)} reveal={350} onRevealed={onRevealed} />) // a new element, the same amount
+    expect(rows(container)).toEqual(before)
+    rerender(<StatList stats={pay(600)} reveal={350} onRevealed={onRevealed} />)
+    expect(rows(container)[0]).not.toBe(before[0])
+    fireEvent.animationEnd(last(container))
+    expect(onRevealed).toHaveBeenCalledTimes(2)
+  })
+
   it('a tone change counts as new rows too', () => {
     const { container, rerender } = render(<StatList stats={day1} reveal={350} />)
     const before = rows(container)
