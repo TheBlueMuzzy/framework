@@ -175,6 +175,12 @@ gallery's `npm run shoot` uses the same one.
   scroll taking over) + statListLook.test.tsx (real browser, 5 styles × 5 sizes: title + buttons in sight, no page or
   card scroll, the list scrolls; a short list's card the same size as without the box). Game CSS aimed at the old
   `.kit-end-info > .kit-stats` path: the rows now sit one level deeper, `.kit-end-info > .kit-scroll > .kit-stats`.
+  0.32.0 (F115, Goops' payslip Modal — `kit/blocks/flow.tsx`, gallery `?screen=payslip` "Next payday"): a `StatList`
+  (and so Victory / GameOver) replays its reveal by itself when its rows change BY CONTENT — labels, values (a number,
+  text, or an element's words) and tones: fresh rows from the top, the scroll back to the top, and `onRevealed` once
+  more for the new rows (at once with reduce motion). The same rows re-rendered (a new array of new objects with the
+  same words) never replay. The `key={…}` workaround for swapped stats is no longer needed — a key is only for
+  replaying the SAME rows (the gallery's Replay). Tests: `kit/blocks/flow.test.tsx`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
