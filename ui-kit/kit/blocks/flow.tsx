@@ -137,17 +137,23 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
   const revealing = reveal !== undefined && stats.length > 0 && !reduceMotion()
   const done = useRef(onRevealed)
   useEffect(() => { done.current = onRevealed }) // always call the latest onRevealed
-  const fired = useRef(false)
+  const fired = useRef(false) // once, whether the last row's entrance ends or there's nothing to wait for
   const finish = () => { if (!fired.current) { fired.current = true; done.current?.() } }
-  useEffect(() => { if (!revealing) finish() }, []) // eslint-disable-line react-hooks/exhaustive-deps -- once, on arrival
+  const lastRow = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = lastRow.current
+    if (!revealing || !el) { finish(); return }
+    const onEnd = (e: AnimationEvent) => { if (e.target === el) finish() } // (the row's own entrance, not a part inside it)
+    el.addEventListener('animationend', onEnd)
+    return () => el.removeEventListener('animationend', onEnd)
+  }, [revealing])
   if (stats.length === 0) return null
   const last = stats.length - 1
   return (
     <Stack gap="xs" className="kit-stats">
       {stats.map((s, i) => (
-        <div key={s.label} className="kit-stat-row" data-reveal={revealing || undefined} data-tone={s.tone}
-          style={revealing ? { '--kit-i': i, '--kit-step': `${reveal}ms` } as CSSProperties : undefined}
-          onAnimationEnd={revealing && i === last ? (e) => { if (e.target === e.currentTarget) finish() } : undefined}>
+        <div key={s.label} ref={i === last ? lastRow : undefined} className="kit-stat-row" data-reveal={revealing || undefined} data-tone={s.tone}
+          style={revealing ? { '--kit-i': i, '--kit-step': `${reveal}ms` } as CSSProperties : undefined}>
           <ListRow label={s.label}>
             {s.tone
               ? <Row gap="xs" className="kit-nowrap"><Badge variant={s.tone}><span role="img" aria-label={w[s.tone]}>{toneMark[s.tone]}</span></Badge><Text kind="label">{s.value}</Text></Row>
