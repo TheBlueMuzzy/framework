@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.15.0 — 2026-10-24
+
+A game can now hand a finished piece to the framework while it keeps being built: the piece waits in a shared queue, becomes a framework module, and swaps back into the game in one step, with the game's own checks as the proof that nothing changed.
+
+### New
+- The extraction queue (`.planning/extractions.md`, Muzzy's setup only): a game adds a piece with its files, what it does and the checks that prove it; the framework marks it building, then released; the game swaps it for the module in one commit — or, if its checks go red, the attempt is set aside on its own branch and the game is left as it was.
+- While a piece is queued, editing its files in the game warns "bug fixes only" and asks for a one-line log on the queue entry (never blocks).
+- install-module takes modules born from the queue: each lists its own game folders, so no installer list has to grow.
+
+### Fixed
+- A framework module installed in a game is protected from edits there whatever its name — not only the built-in ones.
+
+### Known issues
+- A swap doesn't yet rewrite shortcut imports (`@/…`), mocked module paths or template-string imports — such a swap goes red and is set aside, never half-done.
+- StatList doesn't replay its reveal when a popup swaps its rows — pass a `key` for now (planned).
+
 ## v0.14.0 — 2026-10-24
 
 Story characters can now talk: a speech bubble grows from its tail, types its line out with pauses, and fizzes its outline like a voice while it speaks. End-of-game reports can reveal their rows one at a time, and a long report scrolls inside its card so the buttons always stay in sight. Installing a framework piece into a game no longer breaks the game's own code checks.

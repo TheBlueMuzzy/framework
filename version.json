@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.14.0",
-  "build": 1,
+  "version": "0.15.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -112,6 +112,11 @@
       "version": "0.14.0",
       "date": "2026-10-24",
       "summary": "Story bubbles + clean installs: a talking bubble, report rows revealed one at a time, installs that keep a game's checks green"
+    },
+    {
+      "version": "0.15.0",
+      "date": "2026-10-24",
+      "summary": "Games feed the framework: the extraction queue"
     }
   ]
 }
