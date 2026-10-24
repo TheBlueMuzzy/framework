@@ -323,10 +323,13 @@ export function TalkingBubble({ target, text, speaker, outline = 'wave', feel, p
   // Everything here writes to the page directly (refs) — never React state per frame.
   useLayoutEffect(() => {
     let frame = 0, last = performance.now(), carry = 0, drawn = '', room = '', phase = '', words = '', typedFired = false
+    let line: TalkState | null = null // the talk onTyped was last judged for (a new line = a new TalkState)
     const tick = () => {
       const at = performance.now()
       const dt = Math.min((at - last) / 1000, MAX_FRAME_S); last = at
       const p = props.current, f: TalkFeel = { ...DEFAULT_TALK_FEEL, ...p.feel }, s = talk.current
+      // A new line gets its own onTyped — even under reduce motion, where it's whole before this frame ever sees it type
+      if (s !== line) { line = s; typedFired = false }
       const still = reduceMotion(), plain = p.outline === 'plain'
       if (still) { if (s.phase !== 'wait') finishTalk(s, p.text, f, Math.random); s.level = 0; s.levelTarget = 0; s.pop = 0; s.popV = 0 }
       carry += dt

@@ -190,6 +190,16 @@ describe('<TalkingBubble>', () => {
     frames(300)
     expect(onTyped).toHaveBeenCalledOnce()
   })
+  it('reduce motion: a new line in the same bubble says onTyped again (review fix — it was missed: never seen typing)', () => {
+    document.documentElement.setAttribute('data-reduce-motion', '')
+    const onTyped = vi.fn()
+    const { rerender } = render(<TalkingBubble target={{ x: 50, y: 50 }} text="Hold on." onTyped={onTyped} />)
+    frames(10)
+    rerender(<TalkingBubble target={{ x: 50, y: 50 }} text="Bad wire." onTyped={onTyped} />)
+    frames(10)
+    expect(typed()).toBe('Bad wire.')
+    expect(onTyped).toHaveBeenCalledTimes(2)
+  })
   it('with onConfirm it is a button ("Next"): a tap while typing shows the whole line, the next tap confirms', () => {
     const onConfirm = vi.fn()
     render(<TalkingBubble target={{ x: 50, y: 50 }} text="Glad you're not goop yet." onConfirm={onConfirm} words={{ next: 'Go on' }} />)
