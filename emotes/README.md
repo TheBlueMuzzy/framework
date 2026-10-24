@@ -9,7 +9,7 @@ not told), a spam limit holds on the device AND on the room's server, and a Sett
 - Design: `../.planning/design/emotes.md` (research: Hearthstone, MTG Arena, Clash Royale, Marvel Snap, LoR, BGA, Rocket League).
 - Framework sprint 26: F107 = layer 1. Layer 2: a sound per phrase, desktop keys 1–7, the server not sending a muted
   sender's emotes, reply phrases. Layer 3: animated / unlockable emotes. Never: free text chat.
-- Kit **0.4.0** (0.4.0, F110: ships `settings-rows.json` — tells the UI kit's (0.30.0+) Settings check that `hideEmotes` is passed on by `applyEmoteSetting` / `setHideAll`; installed with the kit, not to be edited in the game · 0.3.0, F109: `<EmoteSeats>` — the tappable seat row in one line; its `ui/` needs UI kit **0.29.0+**, and
+- Kit **0.4.1** (0.4.1, F128: the installer asks git for the kit’s commit once per run, not on every install) (0.4.0, F110: ships `settings-rows.json` — tells the UI kit's (0.30.0+) Settings check that `hideEmotes` is passed on by `applyEmoteSetting` / `setHideAll`; installed with the kit, not to be edited in the game · 0.3.0, F109: `<EmoteSeats>` — the tappable seat row in one line; its `ui/` needs UI kit **0.29.0+**, and
   the installer warns when the game's is older · 0.2.0, F22: a bot's `say()` while online is refused — `server` — bots there speak from the room's server, `room.emote`; the banter lines are read at every lookup — `banter` may be the object or a function, `() => text.banter`). No packages. Pure TypeScript core; the UI parts come from the UI kit (0.28.0+); online from Rooms (0.12.0+).
 
 ## What a game gets
