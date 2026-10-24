@@ -27,3 +27,11 @@ describe('blocks.css 0.25.0', () => {
     expect(line).not.toMatch(/\dpx/)
   })
 })
+
+describe('blocks.css 0.33.0 (F121)', () => {
+  it('TalkingBubble: each game colour not set falls back to exactly the style token it replaced', () => {
+    for (const exact of ['fill: var(--kit-talk-fill, var(--surface))', 'stroke: var(--kit-talk-outline, var(--border))',
+      'stroke-width: var(--kit-talk-outline-width, var(--border-width))', 'color: var(--kit-talk-ink, var(--on-surface))',
+      '.kit-talk-more > .kit-text[data-kind] { color: var(--kit-talk-more, var(--muted)); }']) expect(css).toContain(exact)
+  })
+})

@@ -8,5 +8,12 @@
   "popSize": 0.025,
   "typeSpeed": 22,
   "pauseMs": 380,
-  "squelchEvery": 2.5
+  "squelchEvery": 2.5,
+  "colours": {
+    "fill": "#f4f4f2",
+    "ink": "#222",
+    "outline": "#555",
+    "outlineWidth": 1.6,
+    "more": "#888"
+  }
 }
