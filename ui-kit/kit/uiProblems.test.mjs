@@ -75,6 +75,43 @@ describe('findProblems — a solid piece covering a bar or picture', () => {
   })
 })
 
+// 0.33.2 (F127) — a solid piece sliding onto another card's words (the coins chip on "Score 120": the text-over-text
+// check stopped at the chip's background and said nothing)
+describe('findProblems — a solid piece covering text', () => {
+  it('a coins chip over the end of "Score 120" is flagged once', async () => {
+    const found = await problemsOn(`<div style="background:#554;position:absolute;inset:0">
+      <div style="${plate};position:absolute;left:10px;top:10px;color:#222">Score 120</div>
+      <div aria-label="Coins" style="${plate};padding-left:40px;position:absolute;left:75px;top:8px"><span>🪙</span><span>250</span></div></div>`)
+    expect(only('overlap', found)).toEqual(['overlap: "Coins" covers part of "Score 120"'])
+  })
+
+  it('a chip whose own words cross the text is said once, as words over words', async () => {
+    const found = await problemsOn(`<div style="background:#554;position:absolute;inset:0">
+      <div style="${plate};position:absolute;left:10px;top:10px;color:#222">Score 120</div>
+      <div style="${plate};position:absolute;left:70px;top:8px">Coins 250</div></div>`)
+    expect(only('overlap', found)).toEqual(['overlap: "Score 120" × "Coins 250"'])
+  })
+
+  it('a label on its own chip, a key chip in a sentence, a badge in its card, a dialog wholly over text, text on its backdrop panel, a tooltip and a moving chip are not', async () => {
+    const found = await problemsOn(`<div style="background:#554;position:absolute;inset:0;color:#fff">
+      <div style="${plate};position:absolute;left:10px;top:10px;width:30px;white-space:nowrap;color:#222"><span>Long label</span></div>
+      <p style="position:absolute;left:200px;top:0">Press <span style="background:#fc0;color:#222;padding:0 4px">A</span> to jump</p>
+      <div style="${plate};position:absolute;left:10px;top:60px;color:#222"><span>Ada Lovelace</span>
+        <span class="kit-badge" style="position:absolute;left:40px;top:4px;width:14px;height:14px;border-radius:50%;background:#c33"></span></div>
+      <p style="position:absolute;left:200px;top:50px;margin:0">Round 3</p>
+      <div style="position:absolute;left:180px;top:40px;width:200px;height:50px;background:#222"><p style="margin:4px">Paused</p></div>
+      <div style="position:absolute;left:0;top:120px;width:400px;height:100px;background:#335"></div>
+      <p style="position:absolute;left:20px;top:130px;margin:0">Night falls</p>
+      <p style="position:absolute;left:20px;top:250px;margin:0">Hold to charge</p>
+      <div id="tip" popover style="position:fixed;inset:auto;left:60px;top:244px;margin:0;width:40px;height:30px;background:#fff;border:0;padding:0"></div>
+      <p style="position:absolute;left:220px;top:250px;margin:0">Combo meter</p>
+      <div style="position:absolute;left:260px;top:244px;width:30px;height:30px;background:#c33;animation:drift 9s linear"></div></div>
+      <style>@keyframes drift { to { transform: translateX(40px) } }</style>
+      <script>document.getElementById('tip').showPopover()</script>`)
+    expect(only('overlap', found)).toEqual([])
+  })
+})
+
 // 0.21.0 — the quality bars: faint text, things touching their box's edge, cards that grow
 const only = (kind, found) => found.filter((p) => p.startsWith(`${kind}:`))
 const card = 'background:#fff;border:2px solid #333;border-radius:12px;padding:12px;width:220px'
