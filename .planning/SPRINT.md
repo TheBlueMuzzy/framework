@@ -11,7 +11,7 @@ Done when: a game session adds a queue entry (game, commit, files, what it does,
 - [x] 🤖 3. Frozen-files warning: an edit to an open entry's file in that game warns (never blocks) and asks for a one-line fix log on the entry — ~/.claude/config/bmuz/hooks/guard-edits.mjs
 - [x] 🤖 4. `extract.mjs swap <id>` in the game: install-module the released module, delete the old files, run the entry's checks unchanged, one commit — ~/.claude/config/bmuz/scripts/install-module.mjs
 - [x] 🤖 5. Rules: PROJECT-FILES.md "Extraction queue" + one /develop line + HOOKS.md row; tests in test-scripts / test-hooks — ~/.claude/config/bmuz/PROJECT-FILES.md
-- [ ] 🤖 6. Trial on a scratch Goops clone: queue a small finished piece, build it as a framework module on a scratch framework copy, swap it back, the game's checks pass unchanged — ~/Documents/dev/.scratch/
+- [x] 🤖 6. Trial on a scratch Goops clone: queue a small finished piece, build it as a framework module on a scratch framework copy, swap it back, the game's checks pass unchanged — ~/Documents/dev/.scratch/
 Check: test-scripts + test-hooks green; the trial's before / after check results read by me.
 
 Notes:
