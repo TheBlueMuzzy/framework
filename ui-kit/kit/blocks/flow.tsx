@@ -122,9 +122,18 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
 // (the same motion; each row `reveal` ms after the one above); all at once with reduce motion. Waiting rows hold their
 // space, so the card is its final size from the start. onRevealed: once, when the last row is in (at once with reduce
 // motion, no rows or no reveal). It follows the CSS animation, so the Dev Kit's full pause holds it too.
-export type Stat = { label: string; value: ReactNode }
+// STAT LIST (0.31.0) — the same rows as a block, for a Modal or your own card: <StatList stats reveal onRevealed />.
+// A row's tone: "danger" (a loss, a deduction, a debt) or "success" (net pay, a rank up) — like Card's tone, the style's
+// danger / success colour: a small ▼ / ▲ tag in that colour before the value (a Badge, like Results' winner star), so
+// the shape says it too, never colour alone (read out as words.danger / words.success). The value itself keeps the
+// panel's text colour: some styles' danger isn't readable as text on their panel (Pixel's is 2:1).
+export type Stat = { label: string; value: ReactNode; tone?: 'danger' | 'success' }
+export const statListWords = { danger: 'Loss', success: 'Gain' }
 type RevealProps = { reveal?: number; onRevealed?: () => void }
-function StatList({ stats, reveal, onRevealed }: RevealProps & { stats: Stat[] }) {
+type StatListProps = RevealProps & { stats: Stat[]; words?: Partial<typeof statListWords> }
+const toneMark = { danger: '▼', success: '▲' }
+export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
+  const w = { ...statListWords, ...words }
   const revealing = reveal !== undefined && stats.length > 0 && !reduceMotion()
   const done = useRef(onRevealed)
   useEffect(() => { done.current = onRevealed }) // always call the latest onRevealed
@@ -136,10 +145,14 @@ function StatList({ stats, reveal, onRevealed }: RevealProps & { stats: Stat[] }
   return (
     <Stack gap="xs" className="kit-stats">
       {stats.map((s, i) => (
-        <div key={s.label} className="kit-stat-row" data-reveal={revealing || undefined}
+        <div key={s.label} className="kit-stat-row" data-reveal={revealing || undefined} data-tone={s.tone}
           style={revealing ? { '--kit-i': i, '--kit-step': `${reveal}ms` } as CSSProperties : undefined}
           onAnimationEnd={revealing && i === last ? (e) => { if (e.target === e.currentTarget) finish() } : undefined}>
-          <ListRow label={s.label}><Text kind="label">{s.value}</Text></ListRow>
+          <ListRow label={s.label}>
+            {s.tone
+              ? <Row gap="xs" className="kit-nowrap"><Badge variant={s.tone}><span role="img" aria-label={w[s.tone]}>{toneMark[s.tone]}</span></Badge><Text kind="label">{s.value}</Text></Row>
+              : <Text kind="label">{s.value}</Text>}
+          </ListRow>
         </div>
       ))}
     </Stack>
