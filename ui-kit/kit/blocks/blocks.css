@@ -221,9 +221,10 @@
   /* Flow: the countdown number on a round plate, and the end-screen title */
   .kit-countdown { display: inline-grid; place-items: center; min-inline-size: 11rem; padding: var(--gap-l); aspect-ratio: 1; border-radius: 50%; }
   .kit-countdown .kit-text { font-size: calc(var(--text-display) * 2.75); line-height: 1; }
+  /* A name (Results, Lobby room, Seat picker) is never cut short: it wraps at its spaces (a single over-long word breaks
+     too), and its badges (★, You, Host) move under it when the row is too narrow — never "Sherman Mere…" (0.33.0) */
   .kit-result-name { flex: 1 1 0; min-inline-size: 0; }
-  .kit-result-name { flex-wrap: nowrap; }
-  .kit-result-name > .kit-text { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
   .kit-place { min-inline-size: 3.5ch; }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
      the list on the right, so the list keeps its height instead of shrinking to one row */
@@ -246,10 +247,11 @@
       grid-template-rows: auto minmax(0, 1fr); align-content: start; }
     .kit-pause > :not(.kit-menu) { grid-column: 1; }
     .kit-pause > .kit-menu { grid-column: 2; grid-row: 1 / -1; }
-    .kit-modal.kit-lobby-room { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-      grid-template-rows: auto auto minmax(0, 1fr); align-content: start; }
+    /* half and half (0.33.0: 1 : 1.25 wrapped Leave / I'm ready onto two lines), and the last row never shrinks below
+       its buttons (a plain 1fr, not minmax(0, 1fr)): too little height → the card scrolls, never buttons over words */
+    .kit-modal.kit-lobby-room { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr; align-content: start; }
     .kit-lobby-room > :not(.kit-scroll) { grid-column: 1; }
-    .kit-lobby-room > .kit-row:first-child .kit-result-name > .kit-text { white-space: normal; } /* the code wraps, never "Room BA…" */
     .kit-lobby-room > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-lobby-room > .kit-row:last-child { grid-row: 3; align-self: end; }
     .kit-modal.kit-lobby-join { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

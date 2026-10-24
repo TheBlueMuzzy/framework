@@ -13,8 +13,8 @@ Check: test-scripts green; a scratch Goops check:full with a server on 5291 fail
 
 ## F119 🔧 The UI kit gallery passes its own layout checks
 Done when: `npm run shoot` in ui-kit reports 0 problems (was 56: 34 cut-off texts — Results names, the Room share line — and 22 overlaps — Feedback toast, lobby, hud), each fixed at its cause (the kit part when a game would hit it too; the demo when only the demo is wrong), every style and size; screenshots before / after of each fixed screen.
-- [ ] 🤖 1. Sort the 56 by cause (kit part vs demo) with a before shot of each — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. Fix the kit-part causes (cut-off names → the kit's fit / wrap rules) — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 1. Sort the 56 by cause (kit part vs demo) with a before shot of each — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. Fix the kit-part causes (cut-off names → the kit's fit / wrap rules) — ui-kit/kit/blocks/flow.tsx
 - [ ] 🤖 3. Fix the demo-only causes — ui-kit/gallery/Screens.tsx
 - [ ] 🤖 4. Shoot reports 0; tests for any kit-part change; after shots looked at — ui-kit/kit/VERSION
 Check: `npm run shoot` → 0 problems; ui-kit tests + check-ui + root check:fast; before / after shots of every changed screen looked at by me.
@@ -27,3 +27,10 @@ Done when: `t.run` in check-framework passes an argument list (no `shell: true` 
 Check: devkit tests + root check:fast; check:framework on a scratch Goops clone still passes.
 
 Notes:
+- F119 task 1, the 56 sorted (before shots: ~/Documents/dev/.scratch/framework-f119/before/, 39 screens):
+  - KIT, 34 cut-off: one rule, `.kit-result-name > .kit-text` ellipsis (Results names: results phone ×5 styles "Muzzy" + "Sherman Meredith" = 10, endgame / endgamedim phone ×5 + landscape ×4 each = 18 "Muzzy"; the Lobby room's share line: room phone ×5 + roomauto clean = 6). A real game with 5 players or the kit's own default words hits it.
+  - KIT, 5 overlaps: Lobby room on a phone on its side (cartoon, cozy ×2, neon, pixel): Leave / I'm ready wrapped onto two lines in the 1 : 1.25 left column and, pinned to the bottom of a minmax(0, 1fr) row, slid up over the waiting line.
+  - DEMO, 4 overlaps: Feedback (clean phone) — its toasts sit over the gallery's own top bar (Menu / style switcher), which no game has.
+  - DEMO, 13 overlaps: HUD on a phone on its side (clean 1, cartoon 3, cozy 3, neon 1, pixel 5) — the sample packs 3 vitals bars, a 3-line turn banner and seats with Roll stacked under them into 335 px of height (390 minus the gallery bar).
+- F119 call (Claude): names WRAP rather than shrink — the kit's MenuHeader rule (never split a word, never "…"); badges move under the name when the row is narrow. Lobby room landscape: columns half and half + a plain 1fr last row (too little height → the card's last-resort scroll, never buttons over words). On a 667×375 phone cozy / pixel now scroll ~10 px instead of overlapping.
+- F119: UI kit VERSION → 0.33.0 (kit parts changed). OLD_MODULE_ROWS kept; conformance.mjs comment + README now say "out in 0.34.0, kept through 0.33.0" (Glyphtender still hasn't reinstalled crashes / emotes / ai). CHANGELOG / v0.16.0 release notes still say 0.33.0 — history, left as written. Still says 0.32.0/0.33.0 outside this repo: `~/.claude/config/bmuz/MODULE-CONTRACTS.md` — for the main session.
