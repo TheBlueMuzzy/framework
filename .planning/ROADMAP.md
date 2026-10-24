@@ -292,12 +292,14 @@ Goal (Muzzy 2026-10-24, /develop on the plan's pick a): a red check means a real
 - 🔨 F119 🔧 The UI kit gallery passes its own layout checks: the 56 older cut-off names and overlaps (Results names, the Room share line, Feedback toast, lobby, hud) fixed in the kit or its demos, so a new problem stands out — should · sprint 32
 - 🔨 F120 🔧 check-framework runs commands as an argument list, never one shell string built from file names (security review 2026-10-19, low) — should · sprint 32
 - 🔨 F121 ✨ TalkingBubble colours from the game's content: `colours` { fill, ink, outline, outlineWidth, more } read live like `feel` (Goops F35 — Muzzy 2026-10-24: "veteran is a light colored bubble with dark text. but you have it as a dark colored bubble with white text."); the style's colours stay the default; a contrast floor — should · needs: F111 · sprint 32
+- 🔨 F122 🔧 Dev Kit Fonts library lists every installed font: the PC's own font folders (Windows: C:/Windows/Fonts + the user's; mac ~/Library/Fonts + /Library/Fonts; Linux font dirs) join the designer's font folder, server side — no browser permission, any browser, Try + Add to game as today, installed fonts marked 🔴 until their licence is checked (Goops' session idea 2026-10-23) — could · sprint 32
 ```mermaid
 flowchart LR
   F118[F118 Port pre-flight]
   F119[F119 Clean gallery]
   F120[F120 No shell strings]
   F111[F111 Talking bubble] --> F121[F121 Bubble colours]
+  F122[F122 Installed fonts]
 ```
 
 ## Later
@@ -317,7 +319,6 @@ flowchart LR
 - 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
 - 2026-10-23 — **A tappable seat row in the UI kit** (v0.5 look-back): emotes need one tappable portrait per seat; the scratch Glyphtender had to hand-build `SeatEmotes.tsx` — a kit part (seats in a row, each with `emoteSeatProps` + the muted mark) so every game with opponents gets it.
 - 2026-10-23 — **BMUZ rule: game ↔ framework sessions message each other** (Goops' session, its Sprint 12 retro): a game session needing a framework change messages the framework session directly (what + why + evidence, "don't install until done"), the framework session replies "done" + the install-module command, the game confirms; the request is also written in the game's STATE/SPRINT Notes; neither asks the other to do what its own rules block. F108 went ask → installed in ~1 h this way. Muzzy OK'd 2026-10-23 → landed in config/bmuz/PROJECT-FILES.md "Game ↔ framework sessions talk directly".
-- 2026-10-23 — **Dev Kit Fonts tab: every font on the designer's machine** (Goops' session): Chrome's Local Font Access (`queryLocalFonts()`, asks permission) lists installed fonts to try live, so a game keeps only the fonts it uses.
 - 2026-10-22 — **Hand to Glyphtender's session (found by the F24 proof, read-only):** its own `scripts/ai-arena.mjs` seats every 2-player table as Scholar vs Survivor, so the Strategist never plays 2-player (0% wins there vs 20% with a fair shuffle), and its Dev Kit check seats tables another way — switching to the framework arena (ai 0.3.0: `npm run ai:arena`, `src/ai/arenaGame.ts`) fixes both; the installer names its old `ai:arena` line.
 - 2026-10-21 — **Audio: more spike shaving for very short clicks?** (F31 listen: Muzzy liked 6 dB of shaving on the 60 ms tank spin, 3.5 on the others) — if more short sounds want it, a per-file or "short sounds" maxLimitingDb in content/audio.json.
 - **Store release run-through** (Muzzy 2026-10-20: "when i'm ready to actually release games… a big runthrough with you to get app store, play store, steam and itch.io (and any other platforms) figured out") — accounts, fees, store pages, signing, a real Steam Cloud test of F97; until then games go out on GitHub Pages only — could
