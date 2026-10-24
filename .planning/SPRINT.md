@@ -16,6 +16,7 @@ Done when: `npm run shoot` reports 0 problems with F124 + F127 on, at every shoo
 - [ ] 🤖 2. Talk screen on a phone on its side: the talking bubble no longer covers the Colours picker — ui-kit/gallery/Talk.tsx
 - [ ] 🤖 3. Pinned, Pixel, 360×780: the 1 px `edge:` lines get their room — ui-kit/gallery/Screens.tsx
 - [ ] 🤖 4. Full shoot 0 problems; before/after shots of the changed screens, README / CATALOG note, UI kit 0.33.2 — ui-kit/kit/VERSION
+- [x] 🤖 5. A kit control inside an ArtLayer keeps its 44 px tap floor (Goops' report mid-sprint: art.css wiped kit.css's .kit-target floor; RANK SELECT was 29 px) — 1c9ee9d — ui-kit/kit/art.css
 Check: shoot 0 problems; I look at the parts 200% text shot, the talk 667×375 shot and a desktop shot myself.
 
 ## F128 🔧 Every installer asks git once per run
@@ -26,6 +27,7 @@ Done when: each of the 9 other installers (ai, audio, crashes, devkit, emotes, r
 Check: every module's tests; 3 check:fast runs green.
 
 Notes:
+- Mid-sprint (Goops, 2026-10-24): a Button in an ArtLayer measured 29 px — art.css's `> * { min-block-size: 0 }` came after kit.css's .kit-target floor. Fixed for the art layer only (PullHandle / SnapControl set their own hit areas on purpose); a real-browser test (artTarget.test.mjs) fails on the old rule. README line + 0.33.2 land with F126's version bump.
 - Order: F127 before F126 (its new finds become F126's fixes); F128 any time (different files) — 2 helpers in parallel.
 - Each installer gets its own small cache, not a shared helper: modules stay self-contained (Claude's call).
 - UI kit 0.33.2 (fixes + a stricter check); 0.34.0 stays reserved for dropping OLD_MODULE_ROWS.
