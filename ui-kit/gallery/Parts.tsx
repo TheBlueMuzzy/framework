@@ -1,7 +1,7 @@
 // PARTS — every layout box and control on one page, built only from style names.
 import { useState, type ReactNode } from 'react'
 import {
-  Screen, Panel, Stack, Row, Grid,
+  Hud, Panel, Stack, Row, Grid,
   Avatar, Badge, Button, Card, Carousel, ListRow, ProgressBar, RoomCodeInput, ScrollArea,
   Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle,
 } from '../kit'
@@ -39,17 +39,19 @@ function LayoutBoxes() {
     <Section title="Layout boxes">
       <Text kind="caption">Screen: safe slots around the edges, the centre in the middle. Taps pass through empty space.</Text>
       <div className="gallery-stage">
-        <Screen
-          label="HUD demo"
-          topLeft={<Row gap="s"><Avatar name="Muzzy" active /><ProgressBar label="Health" value={0.7} variant="danger" /></Row>}
-          top={<Badge variant="primary">Round 2</Badge>}
-          topRight={<Button variant="secondary" icon aria-label="Pause">❚❚</Button>}
+        {/* Built with Hud (0.33.2): its corners keep their width and, in a narrow box, the middle takes its own row.
+            As a plain Screen, "Round 2" slid over the Health bar at 200% text (a plain Screen's three columns let a
+            corner shrink to nothing — fine for menus, which is what plain Screens are for). */}
+        <Hud
+          words={{ label: 'HUD demo' }}
+          vitals={<Row gap="s"><Avatar name="Muzzy" active /><ProgressBar label="Health" value={0.7} variant="danger" /></Row>}
+          status={<Badge variant="primary">Round 2</Badge>}
+          onPause={() => {}}
           bottomLeft={<Badge>corner</Badge>}
-          bottom={<Button>Roll</Button>}
+          actions={<Button>Roll</Button>}
           bottomRight={<Badge variant="danger">3 left</Badge>}
-        >
-          <Panel depth={2}><Text kind="heading">Centre</Text></Panel>
-        </Screen>
+          banner={<Panel depth={2}><Text kind="heading">Centre</Text></Panel>}
+        />
       </div>
       <Grid gap="m" min="m">
         <Panel gap="s"><Text kind="label">Panel · Stack</Text><Badge>one</Badge><Badge>two</Badge><Badge>three</Badge></Panel>

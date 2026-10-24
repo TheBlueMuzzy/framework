@@ -35,7 +35,7 @@ The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/con
 | the game's UI code keeps the kit's rules (check-ui) | `check-ui.mjs` (with the game's own `check:ui` arguments) finds raw colours, px, fonts, inline styles, stray positioning |
 | check-ui runs in check:fast | the game has no `check:ui` script |
 | every Settings row that's switched on is read by the game | (0.20.0) a row in `content/ui/settings.json` shows in Settings but nothing in the game's own code reads its id (`values.tips`, `const { tips } = values`, `id === 'resetTips'`, `info={{ version }}`, `useSetting('tips')` — 0.20.1: the id as a plain word elsewhere doesn't count) — or a link row opens a placeholder address. Skipped: headings, rows with `"on": false`, text size + reduce motion (the kit applies them), links, info rows with their own text, the Audio rows once the game passes the values to `applyAudioSettings`, and (0.30.0) a module's own rows once the game passes them on — each module that adds a row ships `settings-rows.json` (below) |
-| nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog. (0.33.1) Also a solid chip, badge, button or panel slid PART-way onto a bar, meter or picture ("Coins" covers part of "Health") — not one laid wholly over it (a dialog) or wholly on it (a chip on a backdrop picture), not one in the bar's own card (a badge on its portrait, a label on its own bar), not a toast / tooltip / modal in the top layer |
+| nothing overlaps | two shown things sit on top of each other (text over text, a control over text) — not when one holds the other, or both are under a dialog. (0.33.1) Also a solid chip, badge, button or panel slid PART-way onto a bar, meter or picture ("Coins" covers part of "Health") — not one laid wholly over it (a dialog) or wholly on it (a chip on a backdrop picture), not one in the bar's own card (a badge on its portrait, a label on its own bar), not a toast / tooltip / modal in the top layer. (0.33.2) The same for a piece over part of another card's words ("Coins" covers part of "Score 120") — not a label on its own chip, a key chip inside its sentence, a badge in the words' own card, a dialog wholly over them, words wholly on a backdrop panel, or words whose own chip is on top |
 | nothing is clipped or wider than the screen | a control is cut off at the edge of a box that hides overflow or sits past the screen edge (outside anything that scrolls), text is cut off, or the page is wider than the screen |
 | every tap target is at least 44 px | a shown button / link / switch / tab / slider / box is under 44×44 |
 | no focus ring without the keyboard | a focus ring shows on the first screen without any key pressed |
@@ -234,6 +234,21 @@ gallery's `npm run shoot` uses the same one.
   picture (see "nothing overlaps" below); the gallery shoot adds a 360×780 phone and a 667×375 phone on its side.
   0.33.2 (F128 — `scripts/install-kit.mjs`): the installer asks git for the kit’s commit once per run, not on every
   install — two git processes per install took 0.2–2 s each under check:fast (saves did the same in 0.6.2).
+  Also in 0.33.2 — `kit/art.css`: a kit control in an `ArtLayer` (`.kit-art-layer > .kit-target`) keeps its 44 px
+  tap floor (the layer's children reset their min sizes, a Button's too; found by Goops; `kit/artTarget.test.mjs`).
+  And F127 + F126 — `kit/uiProblems.mjs`, the gallery: **the overlap check sees a chip covering text.** A solid
+  chip, badge or panel over PART of another card's words is said as `overlap: "Coins" covers part of "Score 120"`
+  (the text-over-text check stopped at the chip's background and said nothing — the coins chip sat on "Score 120"
+  on a 667×375 HUD before 0.33.1). Same on-purpose exemptions as for bars, plus: the piece must be on top (words
+  whose own chip lies over the piece aren't "covered"); a piece wholly inside a run of words still counts (it hides
+  letters); a pair already said as "X × Y" isn't said twice. On today's gallery it found nothing new. **The edge
+  check measures a shrunk box's border as drawn**: a chip pinned to the table (a transform) has a thinner border on
+  screen than its style says, so Pixel's 4 px border at pin scale 0.44 was read as 4 px and its words "touched" the
+  edge (they had 3.5 px). Games may see new "covers part of" lines and lose false "edge:" lines on pinned chips.
+  Gallery: the parts page's HUD demo is built with `Hud` (a plain `Screen` lets a corner shrink to nothing, so at
+  200% text "Round 2" slid over the Health bar — plain Screens are for menus; see `Screen` in CATALOG); the talk
+  sample's pickers sit one per top corner on a phone on its side (both in one corner wrapped to two rows and the
+  bubble covered the second). The shoot: 0 problems.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
