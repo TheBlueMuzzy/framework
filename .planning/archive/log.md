@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-23 — F111 + F112 + F113 approved: a talking bubble for story moments, module installs that keep a game's lint green, and report rows that appear one at a time (long lists scroll).
+- 2026-10-23 — Sprint 29 planned: a talking bubble for story moments, and modules that never break a game's checks (F111, F112).
 - 2026-10-23 — Released v0.13.0 (v0.11 Games take the AI milestone): tappable seat rows for emotes and mute in one line, and modules bring their own Settings switches to the check.
 - 2026-10-23 — F109 + F110 approved: every player's portrait can be a tap-to-emote / tap-to-mute button, and modules bring their own Settings rows to the check.
 - 2026-10-23 — Sprint 28 planned: games take the AI — a tappable seat row and module Settings rows that plug themselves in (F109, F110).
