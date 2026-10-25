@@ -272,7 +272,11 @@
   .kit-countdown .kit-text { font-size: calc(var(--text-display) * 2.75); line-height: 1; }
   /* A name (Results, Lobby room, Seat picker) is never cut short: it wraps at its spaces (a single over-long word breaks
      too), and its badges (★, You, Host) move under it when the row is too narrow — never "Sherman Mere…" (0.33.0) */
-  .kit-result-name { flex: 1 1 0; min-inline-size: 0; }
+  /* …and never narrower than its longest word or badge (0.35.4, F147: "Sa / m", "Zipp / y" in Fantasy at 200% text — the
+     points beside it took the room): its row's label keeps that much, so the points move under the name instead. A word
+     wider than the whole row still breaks (max 100%: a flex item's own minimum never passes its max). */
+  .kit-result-name { flex: 1 1 0; max-inline-size: 100%; }
+  .kit-listrow-text:has(.kit-result-name) { min-inline-size: auto; max-inline-size: 100%; }
   .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
   .kit-place { min-inline-size: 3.5ch; }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
