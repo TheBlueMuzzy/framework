@@ -13,9 +13,12 @@ Checked: 2026-10-25 5:45 PM (Claude) — `SHOOT_PORT=6150 npm run shoot` on e216
 
 ## F147 🐞 Every look holds up at 200% text
 Done when: the shoot is 0 problems with every 200% shot from F146, and nothing changed at 100% (the 100% shots stay 0 problems).
-- [ ] 🤖 1. Cozy + Pixel HUD sideways at 200%: "Hold to Roll" off the seats row — ui-kit/kit/blocks/blocks.css
-- [ ] 🤖 2. Whatever else F146's list holds, fixed in the kit (not hidden in the gallery) — ui-kit/kit/blocks/hud.tsx
-- [ ] 🤖 3. The shoot 0 problems; the touched screens looked at at 100% and 200% — ui-kit/gallery/Screens.tsx
+- [ ] 🤖 1. HUD sideways (F): "Hold to Roll" off the seats and Roll — Cozy, Pixel — ui-kit/kit/blocks/blocks.css
+- [ ] 🤖 2. Button words off their edges (A, B): the ‹ Back and Pause's buttons at 200% in a wider font — ui-kit/kit/kit.css
+- [ ] 🤖 3. Words never break mid-word when they fit (C, D): pickers ("Accessibility", "Wave"), cards ("Room", "QX2T", "Zippy") — ui-kit/kit/kit.css
+- [ ] 🤖 4. A title wider than its box drops a size (E): seats "progress" — Neon, Pixel — ui-kit/kit/blocks/MenuHeader.tsx
+- [ ] 🤖 5. Bubbles at 200% (G, H): the emotes SpeechBubble (Cozy) and the TalkingBubble past the screen's edge upright (Pixel) — ui-kit/kit/blocks/talkingBubble.tsx
+- [ ] 🤖 6. The shoot 0 problems (talk sideways per Muzzy's answer); the 100% shots unchanged; the touched screens looked at — ui-kit/scripts/shoot.mjs
 Check: ui-kit tests; the shoot 0 problems; shots looked at.
 
 Notes:
