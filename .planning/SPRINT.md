@@ -64,3 +64,9 @@ Notes:
 - No open P0/P1 bugs in this repo.
 - Opt-in list in content/devkit.json, not every content file: style.json has the Color tab, text/ is words, credits/levels aren't knobs — a game names what it tunes (Claude's call).
 - Built by Claude in this chat (two small Dev Kit features, different files); the game is never edited — proofs run in `.scratch/framework-f132/`.
+- Security review (helper): no real issues; it found my new check-ui url() pattern could take minutes on a broken url( full of "" pairs (measured: 86 s at 24 pairs) — fixed before release with a test (0 ms at 5000 pairs).
+
+Retro:
+- went well: every feature proven where it's used — saves through the real Dev Kit in a scratch Glyphtender (one-line diffs), Mode select measured in a real browser before and after; tests failed on the old code before each fix
+- went wrong: F136's old note was out of date (3 modes already filled 3 columns; the real case was 2); my first F135 fix hid real colours in inline styles (caught by tests); my new CSS pattern could hang on broken input (caught by the security review); a proof server outlived its script (stop-servers.mjs now in the script)
+- change: (Muzzy 2026-10-24) measure an old bug first — a bug from an old note is reproduced on today's code before its fix is planned (→ /sprint skill line)
