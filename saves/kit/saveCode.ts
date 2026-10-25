@@ -72,6 +72,10 @@ export type CodeResult =
   /** restored / notRestored are there when writing started: then restored names what DID change (empty = nothing). */
   | { ok: false; message: string; restored?: string[]; notRestored?: string[] }
 
+/** Did PART of a code come in? (0.6.3, F137) Then the game holds some new saves but still shows the old values —
+ *  it needs the same reload as a full load (the Save code panel offers it). */
+export const partlyLoaded = (result: CodeResult) => !result.ok && (result.restored?.length ?? 0) > 0
+
 /** A pasted code (or a file's text) → checked, then written. { ok: false } without `restored` (or with it empty) =
  *  nothing was changed; with saves in `restored`, those were (the message says so). */
 export async function readSaveCode(code: string, saves: AnySave[]): Promise<CodeResult> {

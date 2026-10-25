@@ -26,14 +26,14 @@ Checked: 2026-10-24 (Claude) — 5 tests on Glyphtender's drag.json from before 
 Done when: a 0 handed to a kit part (children, a badge, a detail, an icon, a slot) shows as "0" inside its place — never loose on the page and never lost; ui-kit tests and the shoot unchanged otherwise.
 - [x] 🤖 1. One small `shown()` helper; every `x && <…>` whose x can be a number (React-node props and children — 12 lines) and the HUD / Screen slots use it — ui-kit/kit/shown.ts
 - [x] 🤖 2. Tests: MainMenu children 0 · PlayerChip badge 0 with the name hidden · ListRow detail 0 · Screen and Hud slots 0 (they fail on the old code) — ui-kit/kit/shown.test.tsx
-- [ ] 🤖 3. README line (0.33.3) — ui-kit/README.md
+- [x] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; the tests fail on the old code.
 
 ## F135 🐞 check-ui reads CSS with a data: URL
 Done when: `check-ui --css` reads `background: url(data:image/png;base64,…)` as ONE declaration (no false warning from the ";" or ":" inside it), and still warns on the real cases.
 - [x] 🤖 1. Split declarations on ";" and ":" only outside quotes and brackets — ui-kit/kit/check-ui.mjs
 - [x] 🤖 2. Tests: a data: URL and a quoted ";" give no warning; real breaks still warn — ui-kit/scripts/check-ui.test.mjs
-- [ ] 🤖 3. README line (0.33.3) — ui-kit/README.md
+- [x] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; check-ui on the kit's own CSS unchanged.
 
 ## F136 🐞 Mode select fills its row
@@ -45,10 +45,10 @@ Check: ui-kit tests; a desktop shot of the gallery's Mode select looked at by Cl
 
 ## F137 🐞 A part-way save code tells the player to reload
 Done when: after a save code that only partly loads, the panel says what came back AND that the game needs a reload to show it, with a Reload button; a code that fully loads behaves as before.
-- [ ] 🤖 1. Read what SaveCodePanel does on `partly` and what a game passes it — saves/kit/ui/SaveCodePanel.tsx
-- [ ] 🤖 2. The part-way message offers Reload (the same reload a full load uses) — saves/kit/ui/SaveCodePanel.tsx
-- [ ] 🤖 3. Tests: part-way → the message + a Reload that reloads; full → as before — saves/kit/ui/SaveCodePanel.test.tsx
-- [ ] 🤖 4. READMEs + versions (UI kit 0.33.3 for F134–F136, saves 0.6.3) — saves/kit/VERSION
+- [x] 🤖 1. Read what SaveCodePanel does on `partly` and what a game passes it — saves/kit/ui/SaveCodePanel.tsx
+- [x] 🤖 2. The part-way message offers Reload (the same reload a full load uses) — saves/kit/ui/SaveCodePanel.tsx
+- [x] 🤖 3. Tests: part-way → the message + a Reload that reloads; full → as before (the decision is `partlyLoaded()`, tested; the panel has no test of its own here — the saves module tests without a page) — saves/kit/saveCode.test.ts
+- [x] 🤖 4. READMEs + versions (UI kit 0.33.3 for F134–F136, saves 0.6.3) — saves/kit/VERSION
 Check: saves + ui-kit tests; the shoot 0 problems.
 
 Notes:
