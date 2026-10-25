@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.35.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.4** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -336,6 +336,16 @@ gallery's `npm run shoot` uses the same one.
 - 0.35.3 (F145, Muzzy 2026-10-25): the page check's `overlap:` leaves a toast or tooltip (anything in the top layer)
   over the page alone — on top by design; two of them over each other still count. `hud-text-max` 1.25 approved.
   The shoot's `knownShots` lists shots Muzzy accepted as they are (talk sideways at 200%), printed as "known".
+- 0.35.4 (F147): **every look holds up at 200% text** (the shoot's 200% shots in the 6 other looks, F146). The HUD's
+  top-middle row keeps its pieces side by side (its words wrap, "Round / 1"; a dropped score chip pushed the turn banner
+  onto the seats in Cozy and Pixel sideways). The Seat picker's and the Lobby room's titles drop a size like the end
+  screens' (`.kit-fit-title`). A name (Results, Lobby, Seat picker) keeps its longest word — the points move under it.
+  A ◀ value ▶ picker whose value won't fit between its arrows puts it on its own line, the arrows under it at the two
+  ends (`fitPicker`; "Accessibility" at 200%). MenuHeader's ‹ stops growing inside a thick border (Pixel). The
+  TalkingBubble's wave never leaves the screen (`keepWaveInside`), and a bubble wider than its room stays on the window.
+  A bubble is "stuck" on what it avoids only after 300 ms (`STUCK_SETTLE_MS`: a frame or two while things re-place is
+  not). The page check measures words in their own font (the kit's lining-nums emptied the `font` shorthand, so every
+  word was measured in 10px sans-serif — Back and Pause's buttons read as touching their edge). Same at 100%.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
