@@ -13,6 +13,7 @@ import { createServer } from 'vite'
 import { chromium } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
+import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
@@ -39,6 +40,10 @@ mkdirSync('screenshots/screens', { recursive: true })
 const PORT = Number(process.env.SHOOT_PORT) || 5180
 const server = await createServer({ server: { port: PORT, strictPort: true } })
 await server.listen()
+// An edit while the run goes stops it at the next shot (F129): Vite would reload screens on the new code mid-run
+// (named from ui-kit/, not the server's root, which is gallery/ — a kit file would read ../kit/…)
+const codeChanges = watchCodeChanges(server.watcher, process.cwd())
+class CodeChanged extends Error {}
 const browser = await chromium.launch()
 let problemCount = 0
 let shotCount = 0
@@ -64,6 +69,7 @@ function report(name, problems) {
 
 // query: the gallery link, e.g. '?screen=settings&preset=neon'. prepare: clicks etc. before the shot.
 async function shoot(file, size, query, prepare) {
+  if (codeChanges().length) throw new CodeChanged()
   const page = await pageFor(size)
   page.errors = []
   await page.goto(`http://localhost:${PORT}/${query}`)
@@ -204,9 +210,16 @@ try {
   // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
   await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
     (page) => page.getByRole('button', { name: 'Copy' }).click())
+} catch (e) {
+  if (!(e instanceof CodeChanged)) throw e
 } finally {
   await browser.close()
   await server.close()
+}
+// (also an edit during the last shot)
+if (codeChanges().length) {
+  console.log(`\n${changedMessage(codeChanges())}`)
+  process.exit(2)
 }
 console.log(`\n${shotCount} screenshots in ${Math.round((Date.now() - started) / 1000)} s`)
 console.log(problemCount ? `${problemCount} problem(s) found` : 'No overflow, clipped controls, small targets, stray focus rings or console errors found')
