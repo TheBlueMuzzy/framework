@@ -26,7 +26,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Size budget: core ≤ ~1,000 lines; built screens ≈ 60 lines each (~1,500).
 **Run/deploy**
 - Default branch `main`. Remote: public GitHub TheBlueMuzzy/framework (public 2026-10-23 — Actions minutes free).
-- Security reviewed: 81aced0 (2026-10-24, v0.18.0..81aced0 read whole by a Claude helper: installers caching their fixed git calls, art.css selectors, the page check's geometry, fixed-HTML tests, gallery JSX, test cleanup retries — no outside input, nothing runs from data; no issues)
+- Security reviewed: d439ffc (2026-10-24, v0.19.0..d439ffc read whole by a Claude helper: the shoot watching Vite's file watcher, page text only ever going to console.warn — never HTML, dev-only; no commands, writes or deletes; no issues)
 - Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.

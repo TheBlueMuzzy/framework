@@ -25,3 +25,8 @@ Notes:
 - F131 (a module's Settings row registers itself) was dropped from option A before planning: reading the code showed it's already built — F110, UI kit 0.30.0: each module ships settings-rows.json and the Settings check reads every installed one, so a new module needs no kit change. The Ideas line was written before F110 and is now marked done. Only the old-copy fallback (OLD_MODULE_ROWS) is left, and it waits on Glyphtender reinstalling (0.34.0).
 - No open P0/P1 bugs in this repo.
 - Both features are small and touch different files → built by Claude in this chat, no helpers (F130 task 1 runs before task 2, per the sprint rule for a new check).
+
+Retro:
+- went well: both features proven in real runs, not only tests (a file touched mid-shoot stopped it; a bubble forced stuck in the gallery warned once); the first try's poor warning names were caught by reading the real output
+- went wrong: F131 was offered from an Ideas line that F110 had already built — found only when planning its tasks; the proof script's screenshot landed in the repo (ui-kit/stuck.png) and was committed by /save until the security review spotted it
+- change: (Muzzy 2026-10-24) check old ideas against the code before offering them as features (→ /sprint skill line)
