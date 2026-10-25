@@ -10,7 +10,7 @@ Done when: the sketch shows 3 takes per look on a menu, a HUD and a dialog with 
 Ask Muzzy: Dark console — Console 1 (living-room dashboard) is the draft; or Console 2 (handheld) / Console 3 (terminal)? Fantasy — Fantasy 2 (tavern, wood & gold) is the draft; or Fantasy 1 (parchment) / Fantasy 3 (arcane)?
 Check: the sketch's checks above; picks.json has both looks.
 
-## F139 🎨 The two looks in the UI kit
+## F139 ✨ The two looks in the UI kit
 Done when: content/ui/style.json "preset": "console" or "fantasy" gives a full look (every setting every look has, contrast checked by the kit's own style tests), with its fonts bundled and credited; the screenshot run shows 0 problems for both at every size.
 - [ ] 🤖 1. Claude's draft picks (with why) in picks.json; console.json + fantasy.json drafted from them, then the screenshot check run on them first — list what it finds before fixing anything — ui-kit/kit/styles/console.json
 - [ ] 🤖 2. Cinzel + Alegreya (SIL OFL) self-hosted like the kit's other fonts, credited — ui-kit/kit/fonts/fonts.css
