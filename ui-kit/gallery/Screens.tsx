@@ -118,14 +118,19 @@ function Modes() {
   return <ModeSelect modes={modes} value={mode} onChange={setMode} onStart={() => screens.replace('countdown')} />
 }
 
-// A short window (a phone on its side) — the kit's own short-screen line (blocks.css: max-height 30rem); follows rotation
-const shortScreen = '(max-height: 30rem)'
+// A short window (a phone on its side) — the kit's own short-screen line (blocks.css: max-height 30rem); follows rotation.
+// F145: counted in the page's own text size, as a game should — Settings' Text size sets the page's font size, which a
+// media query never sees, so an upright phone at 200% (30 lines of its text don't fit) is short too.
+// Answers '' (not short), 'upright' or 'sideways'.
+const isShortScreen = () => innerHeight > 30 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16) ? ''
+  : innerWidth > innerHeight ? 'sideways' : 'upright'
 function useShortScreen() {
   return useSyncExternalStore((changed) => {
-    const query = matchMedia(shortScreen)
-    query.addEventListener('change', changed)
-    return () => query.removeEventListener('change', changed)
-  }, () => matchMedia(shortScreen).matches)
+    addEventListener('resize', changed)
+    const textSize = new MutationObserver(changed) // Text size changes the page's style attribute
+    textSize.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] })
+    return () => { removeEventListener('resize', changed); textSize.disconnect() }
+  }, isShortScreen)
 }
 
 // A HUD whose numbers change every 1.5 s, to show the float-ups, combo pop, timer and turn banner.
@@ -139,8 +144,11 @@ function HudSample() {
   // Roll beside the seats, the connection up by the coins (stacked, the turn banner landed on the seats).
   // 0.33.1 (F123): and it needs less room, as a game on a small phone on its side would — portraits only (the names are
   // read out), the score as just its number, no lives row, the hint without its detail line (667×375 and 768×343 had
-  // no room for them)
-  const short = useShortScreen()
+  // no room for them). F145: short counts the text size, so an upright phone at 200% does the same — except the
+  // connection, which stays at the bottom when upright (by the coins it squeezed the bars off: no width to spare there)
+  const shortness = useShortScreen()
+  const short = shortness !== ''
+  const byCoins = shortness === 'sideways'
   const connection = <ConnectionDot status="weak" />
   const seatsRow = <PlayerSeats players={players} activeId={turn.id} showNames={!short} />
   const roll = <Button onClick={() => toast('Rolled!')}>Roll</Button>
@@ -150,11 +158,11 @@ function HudSample() {
         {!short && <Bar label="Lives" pips value={2} max={3} />}</Stack>}
       status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
-        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>{short && connection}</Row>}
+        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>{byCoins && connection}</Row>}
       onPause={() => screens.push('pause')}
       banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
         {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail={short ? undefined : 'Up to 3 times'}>Hold to Roll</HudText>}</Stack>}
-      bottomLeft={!short && connection}
+      bottomLeft={!byCoins && connection}
       bottomRight={<Row gap="s"><HudText size="s" live>{`${40 + (tick % 4) * 20}%`}</HudText><Rank place={2} of={3} /></Row>}
       actions={short
         ? <Row gap="s" justify="center">{seatsRow}{roll}</Row>

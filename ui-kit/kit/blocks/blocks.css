@@ -88,6 +88,16 @@
   /* Pips: little segments (lives, hearts, page dots) */
   .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }
 
+  /* HUD words at big text (0.36.0, F145): in the HUD and on every HUD piece (in a Hud or a plain Screen, pinned to the
+     table), the text sizes are the style's HUD ones — the same as everywhere else until Text size passes the style's
+     hud-text-max (1.5 = 150%), then they stop growing. At 200% a phone's HUD was words over words with Roll off the
+     screen; menus and dialogs keep growing all the way. The pieces set their own size so a plain Screen's 200% body
+     text doesn't reach them by inheritance. */
+  :is(.kit-screen:has(> [data-slot] > .kit-hud-slot), .kit-hud-dock, .kit-hud-text, .kit-hud-chip, .kit-timer, .kit-seats, .kit-pinned) {
+    --text-body: var(--hud-text-body); --text-heading: var(--hud-text-heading);
+    --text-title: var(--hud-text-title); --text-display: var(--hud-text-display);
+  }
+  :is(.kit-hud-text, .kit-hud-chip, .kit-timer, .kit-seats) { font-size: var(--text-body); }
   /* HUD: its slots let taps through to the game; only buttons and inputs catch them */
   .kit-screen > [data-slot]:has(> .kit-hud-slot) { pointer-events: none; }
   .kit-hud-slot { display: contents; }
@@ -98,6 +108,10 @@
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
+  /* …but a chip's sentence (ConnectionDot's "Weak connection", 0.36.0, F145) may go onto two lines between its words in
+     a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
+     Only there: in a right corner it would narrow the corner's other pieces' row too. */
+  .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { white-space: normal; }
   /* a bar in a HUD corner gives way when the other corner grows (a 5-digit score pushed the Score chip over the bars on
      a 390px phone — Goops 2026-10-17): it shrinks to 2rem instead of holding its 6rem minimum. Bars with a width keep it. */
   .kit-hud-chip:not([data-width]) { max-inline-size: 100%; min-inline-size: 0; }
@@ -171,9 +185,10 @@
      bar without a width — before, it held its length and stuck out of the plate. */
   .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
   .kit-hud-chip[data-width] > .kit-progress { flex: 0 1 auto; min-inline-size: 2rem; inline-size: var(--kit-bar-w); }
-  .kit-hud-chip[data-width="s"] { --kit-bar-w: 4rem; }
-  .kit-hud-chip[data-width="m"] { --kit-bar-w: 8rem; }
-  .kit-hud-chip[data-width="l"] { --kit-bar-w: 14rem; }
+  /* (in hud-rem, 0.36.0: they stop growing with the HUD's words) */
+  .kit-hud-chip[data-width="s"] { --kit-bar-w: calc(4 * var(--hud-rem)); }
+  .kit-hud-chip[data-width="m"] { --kit-bar-w: calc(8 * var(--hud-rem)); }
+  .kit-hud-chip[data-width="l"] { --kit-bar-w: calc(14 * var(--hud-rem)); }
   /* Bar 0.17.0. A share of its row (width={0.24}): that much of the row, never narrower than its label above */
   :is(.kit-hud-chip, .kit-bar)[data-width="share"] { flex: none; inline-size: calc(var(--kit-bar-share) * 100%); min-inline-size: max-content; max-inline-size: 100%; }
   .kit-hud-chip:is([data-width="share"], [data-width="at-most"]) > .kit-progress { flex: 1 1 auto; inline-size: auto; }
@@ -219,6 +234,7 @@
   .kit-hud-text[data-fit] { inline-size: 100%; min-inline-size: 0; }
   .kit-hud-text[data-fit] .kit-text { white-space: nowrap; }
   .kit-hud-text[data-fitted] .kit-text { font-size: max(var(--text-body), var(--kit-fit-size)); line-height: var(--kit-fit-line, normal); }
+  .kit-hud-text[data-fit-wrap] .kit-text { white-space: normal; } /* too wide even at the floor: two lines, whole words (0.36.0) */
 
   /* HUD dock (0.17.0): a panel on the HUD column's bottom edge, edge to edge, --kit-hud-dock-size tall (more only if
      its contents need it). The HUD's own bottom slots sit above it. It shows meters, so taps go through it to the game.
@@ -242,7 +258,7 @@
   .kit-float-anchor > .kit-float-up { inline-size: 0; display: flex; justify-content: center; }
   .kit-player-chip-score .kit-float-anchor > .kit-text { min-inline-size: calc(var(--kit-digits, 1) * 1ch); font-variant-numeric: tabular-nums lining-nums; text-align: end; }
   .kit-combo { display: inline-block; }
-  .kit-timer { display: inline-grid; place-items: center; inline-size: 3.5rem; aspect-ratio: 1; border-radius: 50%; }
+  .kit-timer { display: inline-grid; place-items: center; inline-size: calc(3.5 * var(--hud-rem)); aspect-ratio: 1; border-radius: 50%; } /* (hud-rem: stops growing with the HUD's words, 0.36.0) */
   /* Flow: the countdown number on a round plate, and the end-screen title */
   .kit-countdown { display: inline-grid; place-items: center; min-inline-size: 11rem; padding: var(--gap-l); aspect-ratio: 1; border-radius: 50%; }
   .kit-countdown .kit-text { font-size: calc(var(--text-display) * 2.75); line-height: 1; }
@@ -318,7 +334,7 @@
       align-items: center; column-gap: var(--gap-l); }
     .kit-end > .kit-end-info { max-block-size: 100%; }
   }
-  .kit-dot { inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; }
+  .kit-dot { flex: none; inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; } /* (flex: none — a squeezed chip never squashes it) */
 
   /* Player chip: a HUD plate for one player, placed by the game (never catches taps) */
   .kit-player-chip { pointer-events: none; align-items: center; inline-size: max-content; }
