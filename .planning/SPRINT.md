@@ -9,7 +9,7 @@ Done when: a game lists extra content files in content/devkit.json ("tuningFiles
 - [x] 🤖 2. content/devkit.json "tuningFiles": the listed files are found and shown, each named by its path — devkit/kit/tuning/tuningFiles.ts
 - [x] 🤖 3. Save writes each file to its own path; a server-read file says when its changes arrive — devkit/kit/tuning/TuningTab.tsx
 - [x] 🤖 4. Tests: a listed file shows + saves to its path · a missing or non-content path is refused in plain words · same name as a tuning file doesn't clash · nothing listed = as before — devkit/kit/tuning/TuningTab.test.tsx
-- [ ] 🤖 5. Proof in the scratch Glyphtender: rooms.json in the Tuning tab, a slider → Save → only that value changed in the file (screenshot); README + Dev Kit 0.28.0 — devkit/kit/VERSION
+- [x] 🤖 5. Proof in the scratch Glyphtender: rooms.json in the Tuning tab, a slider → Save → only that value changed in the file (screenshot); README + Dev Kit 0.28.0 — devkit/kit/VERSION
 Check: devkit tests; the proof's screenshot looked at by Claude; `git diff` of the saved file shows only the moved value.
 
 ## F133 🔧 Save keeps a hand-wrapped list wrapped
@@ -17,7 +17,7 @@ Done when: a list written over a few lines by hand (Glyphtender drag.json "_sect
 - [x] 🤖 1. readLayout notes where a hand-wrapped list breaks its lines — devkit/vite/formatJson.ts
 - [x] 🤖 2. Writing keeps those breaks (same items → same lines; items added or removed → the nearest sensible layout, said in a comment) — devkit/vite/formatJson.ts
 - [x] 🤖 3. Tests: Glyphtender's real drag.json saves with an empty diff; a changed value keeps the breaks; one-line and one-per-line lists unchanged — devkit/vite/formatJson.test.ts
-- [ ] 🤖 4. README line (lands in Dev Kit 0.28.0) — devkit/README.md
+- [x] 🤖 4. README line (lands in Dev Kit 0.28.0) — devkit/README.md
 Check: devkit tests; a save of a copy of Glyphtender's drag.json with nothing changed leaves `git diff` empty.
 
 Notes:
