@@ -4,7 +4,7 @@
 // and still working when the browser refuses to save.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react'
-import { Callout } from './teach'
+import { Callout, stuckLine, stuckTeller } from './teach'
 import { placeCallout } from './callout'
 import { tipsMemory, tipsStorageKey, useTips } from './tips'
 
@@ -122,5 +122,43 @@ describe('tips memory', () => {
     tips.markSeen('x')
     expect(tipsMemory('test-tips-3').seen('x')).toBe(true)
     get.mockRestore(); set.mockRestore()
+  })
+})
+
+// F130 (0.33.3): a bubble that can't stay clear of its `avoid` says so — once when it gets stuck, again only after
+// it was clear in between, never every frame, nothing in a production build
+describe('a bubble stuck on what it avoids', () => {
+  afterEach(() => { vi.unstubAllEnvs() })
+
+  it('says once when it gets stuck, not on every frame after', () => {
+    const said: string[] = []
+    const tell = stuckTeller((line) => said.push(line))
+    tell(true, () => 'stuck')
+    tell(true, () => 'stuck') // the next frames: still stuck
+    tell(true, () => 'stuck')
+    expect(said).toEqual(['stuck'])
+  })
+
+  it('stays quiet while it is clear (without making the line), and says it again after a clear spell', () => {
+    const said: string[] = []
+    const line = vi.fn(() => 'stuck')
+    const tell = stuckTeller((l) => said.push(l))
+    tell(false, line)
+    expect(line).not.toHaveBeenCalled()
+    tell(true, line)
+    tell(false, line)
+    tell(true, line)
+    expect(said).toEqual(['stuck', 'stuck'])
+  })
+
+  it('says nothing in a production build', () => {
+    vi.stubEnv('DEV', false)
+    const said: string[] = []
+    stuckTeller((line) => said.push(line))(true, () => 'stuck')
+    expect(said).toEqual([])
+  })
+
+  it('names the bubble and every piece it covers', () => {
+    expect(stuckLine('TalkingBubble at "The Veteran"', ['Score', 'Coins'])).toBe('[ui-kit] the TalkingBubble at "The Veteran" can’t stay clear of "Score", "Coins" (its avoid): no side has room, so it covers it — make room there, or point it at something else')
   })
 })

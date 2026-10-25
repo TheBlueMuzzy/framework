@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
 Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.33.2** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.33.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -249,6 +249,15 @@ gallery's `npm run shoot` uses the same one.
   200% text "Round 2" slid over the Health bar — plain Screens are for menus; see `Screen` in CATALOG); the talk
   sample's pickers sit one per top corner on a phone on its side (both in one corner wrapped to two rows and the
   bubble covered the second). The shoot: 0 problems.
+  0.33.3 (F129 — `scripts/shoot.mjs`, `scripts/codeChanges.mjs`): **the shoot stops when a file changes mid-run.**
+  Its Vite server reloads screens on an edit, so a run that saw one mixed shots of two versions of the code; now an
+  edit, a new file or a deleted one (its own screenshots don't count) ends the run at the next shot with
+  `✗ stopped: kit/kit.css changed during the run …` and exit code 2 — run it again when nothing is being edited.
+  And F130 — `kit/blocks/teach.tsx`: **a bubble that can't stay clear of its `avoid` says so.** The shared pointing
+  placement (Callout, SpeechBubble, EmotePicker, MuteMenu, TalkingBubble) used to cover what it was told to avoid
+  without a word when no side had room; now it prints one dev-console warning naming the bubble, what it points at and
+  what it covers (once until it's clear again; never in a production build). Placement is unchanged. The shoot counts
+  `[ui-kit]` warnings as problems; today's gallery has none.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
@@ -277,5 +286,5 @@ gallery's `npm run shoot` uses the same one.
   Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
   public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
-  (`SHOOT_PORT=5281` when 5180 is busy)
+  (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3)
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

@@ -324,6 +324,16 @@ flowchart LR
   F128[F128 Installers ask git once]
 ```
 
+## v0.18 — The kit speaks up  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, "A go"): the kit's own tools say so when their result can't be trusted — a screenshot run that saw the code change, a bubble that couldn't stay clear of what it avoids.
+- ✅ F129 🔧 The shoot stops on a file change mid-run: an edit while `npm run shoot` runs ends it red, naming the file, so a result is about one version of the code — should · sprint 35
+- ✅ F130 🔧 A bubble that can't stay clear says so: TalkingBubble / teach callout / emote bubble print one dev-console warning when no side keeps them off their `avoid` — could · sprint 35
+```mermaid
+flowchart LR
+  F129[F129 Shoot stops on a change]
+  F130[F130 Bubble avoid warning]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -335,8 +345,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-24 — **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
-- 2026-10-24 — **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.
+- 2026-10-24 — → v0.18 F129. **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
+- 2026-10-24 — → v0.18 F130. **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.
 - 2026-10-24 — → v0.17 F126. **🐞 The shoot's 16 left-over finds** (sprint 33, after F123 — none are HUD corners): (1) the parts page's "HUD demo" is a plain Screen, and at 200% text "Round 2" covers part of "Health" — give plain Screens the phone fallback (middle on its own row) or build the demo with Hud; (2) talk screen on a 667×375 phone (and Pixel at 844×390, flickers): the talking bubble covers the "Colours" picker's Next (F121 area); (3) pinned, Pixel, 360×780: 8 `edge:` lines at 1 px. They were already there; F124 and the new shoot sizes made them visible.
 - 2026-10-24 — → v0.17 F127. **uiProblems: a solid chip covering another card's text** (found by F124): coins over "Score 120" isn't flagged — the text rule takes the chip for "something covering it". Extend F124's covered-piece rule to text targets.
 - 2026-10-24 — → v0.17 F128. **The other installers start git on every install too** (found by F125): install-ai / -audio / -crashes / -devkit / -emotes each run git rev-parse + git status per call, like saves did (2 × 0.2–0.6 s under load) — one shared kitVersion helper asked once per run, before their tests hit the same 5 s limit.
@@ -345,7 +355,7 @@ flowchart LR
 - 2026-10-24 — → v0.16 F123 + F124. **🐞 UI kit: a corner slot can shrink below its content** (found by F119): `.kit-screen > [data-slot] { min-inline-size: 0 }` lets a HUD corner slide under its neighbour — the coins chip sits on the end of the Health bar on an upright Cozy phone, and on a 667×375 phone the sample's Roll crosses "40%". And the page check misses it: an opaque chip covering a bar (no text, not a control) isn't an overlap it looks for — teach uiProblems that, then fix the slot rule.
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.
-- 2026-10-23 — **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
+- 2026-10-23 — ✅ done in F110 (UI kit 0.30.0, settings-rows.json; noticed 2026-10-24). **A module's Settings row registers itself** (v0.5 look-back): crashes, emotes and ai each copied the same row + save pattern, and the UI kit's Settings check had to learn each new key by hand (`hideEmotes`, `botChatter`) — one shared "module settings row" shape the check reads, so a new module needs no UI kit change.
 - 2026-10-23 — **A tappable seat row in the UI kit** (v0.5 look-back): emotes need one tappable portrait per seat; the scratch Glyphtender had to hand-build `SeatEmotes.tsx` — a kit part (seats in a row, each with `emoteSeatProps` + the muted mark) so every game with opponents gets it.
 - 2026-10-23 — **BMUZ rule: game ↔ framework sessions message each other** (Goops' session, its Sprint 12 retro): a game session needing a framework change messages the framework session directly (what + why + evidence, "don't install until done"), the framework session replies "done" + the install-module command, the game confirms; the request is also written in the game's STATE/SPRINT Notes; neither asks the other to do what its own rules block. F108 went ask → installed in ~1 h this way. Muzzy OK'd 2026-10-23 → landed in config/bmuz/PROJECT-FILES.md "Game ↔ framework sessions talk directly".
 - 2026-10-22 — **Hand to Glyphtender's session (found by the F24 proof, read-only):** its own `scripts/ai-arena.mjs` seats every 2-player table as Scholar vs Survivor, so the Strategist never plays 2-player (0% wins there vs 20% with a fair shuffle), and its Dev Kit check seats tables another way — switching to the framework arena (ai 0.3.0: `npm run ai:arena`, `src/ai/arenaGame.ts`) fixes both; the installer names its old `ai:arena` line.
