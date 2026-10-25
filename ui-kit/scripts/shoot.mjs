@@ -1,8 +1,9 @@
 // SCREENSHOTS — the gallery's menu and parts page, and every built screen, saved to screenshots/.
 //   screenshots/<page>-<size>.png                    menu + parts page (phone, phone landscape, desktop)
 //   screenshots/parts-<style>-<size>.png             the parts page in every style
-//   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop,
-//                                                    and the key screens in every style (also on a 360×780
+//   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop (and at 200% text on a
+//                                                    phone + a phone on its side: …-text-200, F144),
+//                                                  and the key screens in every style (also on a 360×780
 //                                                    phone; the landscape ones also on a 667×375 phone on its side)
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
@@ -181,12 +182,20 @@ try {
     await shoot(`parts-${size.name}`, size, '?screen=parts')
   }
   // Accessibility floor: browser text size at 200%
-  await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' }))
-  // …and Settings at 200% on its Accessibility tab (0.34.1, F141): the ◀ tab ▶ picker shows its longest word there
-  await shoot('screens/settings-clean-phone-text-200', sizes.phone, '?screen=settings', async (page) => {
-    await page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
-    while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
-  })
+  const text200 = (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+  await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', text200)
+  // …and EVERY screen at 200%, in Clean, on a phone upright and on its side (F144) — every screen both ways,
+  // whatever a game's own orientation. Settings opens on its Accessibility tab (0.34.1, F141): the ◀ tab ▶ picker
+  // shows its longest word there.
+  const openers = {
+    settings: async (page) => {
+      await text200(page)
+      while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+    },
+  }
+  for (const size of [sizes.phone, sizes.landscape]) {
+    for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
+  }
   // Live restyle: change a tweak with the dev switcher and check it repaints
   await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
     await page.getByLabel('Next Corners').click()

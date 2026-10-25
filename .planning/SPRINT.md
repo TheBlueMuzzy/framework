@@ -5,7 +5,7 @@ What changes: the screenshot run looks at every screen with the biggest text set
 
 ## F144 🔧 The shoot sees every screen at 200% text
 Done when: npm run shoot takes every gallery screen at 200% text on an upright phone (390×844) and a sideways one (844×390), in the Clean look, and lists what it finds — before anything is fixed.
-- [ ] 🤖 1. Every gallery screen at 200% on both phones in the shoot (the parts / Settings 200% shots show how) — ui-kit/scripts/shoot.mjs
+- [x] 🤖 1. Every gallery screen at 200% on both phones in the shoot (the parts / Settings 200% shots show how) — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 2. Run it on today's code and list every problem by screen in Notes, before any fix (F141's scan list is the starting guess) — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 3. The shoot's run time stays reasonable (say how many shots it added and the new run time; only Clean at 200%, not every look) — ui-kit/README.md
 Check: the shoot runs the new shots; the list is in Notes.
