@@ -6,7 +6,8 @@
 //              screen edge (and not in something that scrolls), or text cut off
 //   "overlap:" two things on screen sit on top of each other (text over text, a control over text…) — new in 0.18.0;
 //              and a solid chip, badge or panel slid part-way onto a bar, meter or picture — 0.33.1 — or onto
-//              another card's words — 0.33.2
+//              another card's words — 0.33.2. A toast or tooltip (the top layer) over the page is on top by design
+//              and never counts — two of them over each other do (0.35.3)
 //   "focus:"   a focus ring showing although nobody used the keyboard
 //   "faint:"   text too faint to read against what's behind it: under 4.5:1, or 3:1 for big text (24 px, or 18.66 px
 //              bold) — the WCAG AA line. Skipped where it can't be judged: text over a picture, gradient, canvas or
@@ -307,10 +308,15 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       if (edge) problems.push(`edge: "${name(el)}" ${edge}`)
     }
     const crossed = [] // pairs already said as "X × Y" (the covered-piece check below doesn't say them twice)
+    // A toast or tooltip floats in the top layer on purpose, over whatever is under it (at 200% text the toasts covered
+    // the card's words — Muzzy 2026-10-25: on top by design, 0.35.3). Only things in the SAME layer can collide: two
+    // toasts over each other still count.
+    const inTopLayer = (el) => !!el.closest(':popover-open')
     for (let i = 0; i < things.length; i++) {
       for (let j = i + 1; j < things.length; j++) {
         const a = things[i], b = things[j]
         if (a.contains(b) || b.contains(a)) continue
+        if (inTopLayer(a) !== inTopLayer(b)) continue
         const at = crossing(boxes[i], boxes[j])
         if (!at) continue
         let seenA = false, seenB = false

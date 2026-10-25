@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.35.2** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -330,9 +330,12 @@ gallery's `npm run shoot` uses the same one.
   - The page check's `split:` also flags a TITLE word broken across lines when it's wider than its box (a title can
     drop a size; body words still may wrap) — no new finding on any gallery screen at 100% or 200%.
 - 0.35.2 (F145, the in-game part): **HUD words stop growing at `hud-text-max` × their normal size** (a style value a game's
-  tweaks may set; default 1.25 — Ask Muzzy) — in a Hud and on every HUD piece (HudText, chips, seats, player chips, the
+  tweaks may set; default 1.25) — in a Hud and on every HUD piece (HudText, chips, seats, player chips, the
   timer ring and bar lengths via `--hud-rem`, pinned pieces); menus and dialogs keep growing to 200%. ConnectionDot's words
   may wrap in a left corner, and a `HudText fit` still too wide at its floor takes two lines. Same at 100%.
+- 0.35.3 (F145, Muzzy 2026-10-25): the page check's `overlap:` leaves a toast or tooltip (anything in the top layer)
+  over the page alone — on top by design; two of them over each other still count. `hud-text-max` 1.25 approved.
+  The shoot's `knownShots` lists shots Muzzy accepted as they are (talk sideways at 200%), printed as "known".
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

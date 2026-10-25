@@ -64,7 +64,19 @@ async function pageFor(size) {
   return (pages[size.name] = page)
 }
 
+// Shots whose problems Muzzy accepted as they are — printed as "known" with his reason, not counted. One shot each,
+// never a whole screen: the same screen at other sizes and looks is still checked.
+const knownShots = {
+  'screens/talk-clean-phone-landscape-text-200.png': 'Muzzy 2026-10-25 (F145): a 3-line bubble at 200% has no room on a short screen — the kit warns, the game makes room',
+}
+let knownCount = 0
+
 function report(name, problems) {
+  if (knownShots[name] && problems.length) {
+    knownCount += problems.length
+    console.log(`~ ${name} — ${problems.length} known: ${knownShots[name]}${problems.map((p) => `\n    ${p}`).join('')}`)
+    return
+  }
   problemCount += problems.length
   console.log(`${problems.length ? '✗' : '✓'} ${name}${problems.map((p) => `\n    ${p}`).join('')}`)
 }
@@ -237,5 +249,6 @@ if (codeChanges().length) {
   process.exit(2)
 }
 console.log(`\n${shotCount} screenshots in ${Math.round((Date.now() - started) / 1000)} s`)
+if (knownCount) console.log(`(${knownCount} known problem(s) on accepted shots, not counted — knownShots)`)
 console.log(problemCount ? `${problemCount} problem(s) found` : 'No overflow, clipped controls, small targets, stray focus rings or console errors found')
 process.exit(problemCount ? 1 : 0)
