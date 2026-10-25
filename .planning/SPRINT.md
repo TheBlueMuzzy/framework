@@ -12,11 +12,11 @@ Check: the sketch's checks above; picks.json has both looks.
 
 ## F139 ✨ The two looks in the UI kit
 Done when: content/ui/style.json "preset": "console" or "fantasy" gives a full look (every setting every look has, contrast checked by the kit's own style tests), with its fonts bundled and credited; the screenshot run shows 0 problems for both at every size.
-- [ ] 🤖 1. Claude's draft picks (with why) in picks.json; console.json + fantasy.json drafted from them, then the screenshot check run on them first — list what it finds before fixing anything — ui-kit/kit/styles/console.json
-- [ ] 🤖 2. Cinzel + Alegreya (SIL OFL) self-hosted like the kit's other fonts, credited — ui-kit/kit/fonts/fonts.css
-- [ ] 🤖 3. Both looks registered; the style tests (same settings as every look, contrast, success reads green) pass — ui-kit/kit/styles/index.ts
+- [x] 🤖 1. Claude's draft picks (with why) in picks.json; console.json + fantasy.json drafted from them, then the screenshot check run on them first — list what it finds before fixing anything — ui-kit/kit/styles/console.json
+- [x] 🤖 2. Cinzel + Alegreya (SIL OFL) self-hosted like the kit's other fonts, credited — ui-kit/kit/fonts/fonts.css
+- [x] 🤖 3. Both looks registered; the style tests (same settings as every look, contrast, success reads green) pass — ui-kit/kit/styles/index.ts
 - [ ] 🤖 4. Fix what task 1 found; the shoot 0 problems with 7 looks — ui-kit/kit/styles/fantasy.json
-- [ ] 🤖 5. Desktop + phone shots of both looks' menu, HUD and a dialog looked at by Claude — ui-kit/scripts/shoot.mjs
+- [x] 🤖 5. Desktop + phone shots of both looks' menu, HUD and a dialog looked at by Claude — ui-kit/scripts/shoot.mjs
 Check: ui-kit tests; the shoot; the shots looked at.
 
 ## F140 🔧 Everything that lists the looks knows all 7

@@ -12,5 +12,9 @@
   { "paths": ["kit/fonts/orbitron.woff2"], "source": "Google Fonts (via Fontsource, self-hosted)", "author": "Matt McInerney",
     "licence": "SIL OFL 1.1", "light": "🟡", "url": "https://fonts.google.com/specimen/Orbitron", "credit": "Orbitron by Matt McInerney, SIL Open Font License 1.1" },
   { "paths": ["kit/fonts/exo-2.woff2"], "source": "Google Fonts (via Fontsource, self-hosted)", "author": "Natanael Gama",
-    "licence": "SIL OFL 1.1", "light": "🟡", "url": "https://fonts.google.com/specimen/Exo+2", "credit": "Exo 2 by Natanael Gama, SIL Open Font License 1.1" }
+    "licence": "SIL OFL 1.1", "light": "🟡", "url": "https://fonts.google.com/specimen/Exo+2", "credit": "Exo 2 by Natanael Gama, SIL Open Font License 1.1" },
+  { "paths": ["kit/fonts/cinzel.woff2"], "source": "Google Fonts (via Fontsource, self-hosted)", "author": "Natanael Gama",
+    "licence": "SIL OFL 1.1", "light": "🟡", "url": "https://fonts.google.com/specimen/Cinzel", "credit": "Cinzel by Natanael Gama, SIL Open Font License 1.1" },
+  { "paths": ["kit/fonts/alegreya.woff2"], "source": "Google Fonts (via Fontsource, self-hosted)", "author": "Juan Pablo del Peral (Huerta Tipográfica)",
+    "licence": "SIL OFL 1.1", "light": "🟡", "url": "https://fonts.google.com/specimen/Alegreya", "credit": "Alegreya by Juan Pablo del Peral (Huerta Tipográfica), SIL Open Font License 1.1" }
 ]

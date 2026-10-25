@@ -1,0 +1,19 @@
+{
+  "_about": "Which S1 take each new UI kit look is built from (F138). Claude's draft, 2026-10-25 (Muzzy said \"go auto\"): Muzzy confirms or swaps by playing .planning/research/sketches/s1-new-looks.html and pasting Copy values for Claude.",
+  "console": {
+    "take": 0,
+    "name": "Console 1 · Living-room dashboard",
+    "by": "Claude (draft)",
+    "why": "The plainest reading of 'dark console': a games console's own menus — dark navy, big soft tiles, one bright blue, no outlines. It's the one most games could wear without fighting their art; the handheld is close to Cartoon, and the terminal to Pixel / Neon.",
+    "knobs": { "take": 0, "shift": 0, "lightness": 9, "lift": 7, "corners": 1.1, "edge": 0, "glow": 0.55, "titleSize": 1.15 },
+    "kit": "ui-kit/kit/styles/console.json"
+  },
+  "fantasy": {
+    "take": 4,
+    "name": "Fantasy 2 · Tavern (wood & gold)",
+    "by": "Claude (draft)",
+    "why": "Dark wood and gold with a carved-capitals title: reads 'fantasy' at a glance and stays dark, so game art and HUDs sit on it well. Parchment is a light look (the kit already has Cozy for warm light); Arcane is the most striking but its bevel + all-caps fight long text. Its accent was moved from ember red to pewter blue (hue 195) so it doesn't sit on top of the danger red.",
+    "knobs": { "take": 4, "shift": 0, "lightness": 10, "lift": 6, "corners": 0.5, "edge": 2, "glow": 0.45, "titleSize": 1.2 },
+    "kit": "ui-kit/kit/styles/fantasy.json"
+  }
+}
