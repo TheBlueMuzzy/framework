@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-25 — **Released v0.22.0 (v0.20 Two new looks) — next: /sprint (or /roadmap)** · Sprint 37 done: F138 · F139 · F140 ✅ (Muzzy approved 2026-10-25) (UI kit 0.34.0: Dark console + Fantasy looks, drafted from sketch S1's Console 1 + Fantasy 2; Cinzel + Alegreya fonts; numbers full height in every font). Shoot 639 shots 0 problems · check:fast green.
+2026-10-25 — **Released v0.22.0 (v0.20 Two new looks) — next: /sprint (or /roadmap)** · Look-back done (.planning/archive/lookbacks/v0.20.md): tests may not wait a fixed time (root eslint rule) · · Sprint 37 done: F138 · F139 · F140 ✅ (Muzzy approved 2026-10-25) (UI kit 0.34.0: Dark console + Fantasy looks, drafted from sketch S1's Console 1 + Fantasy 2; Cinzel + Alegreya fonts; numbers full height in every font). Shoot 639 shots 0 problems · check:fast green.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -43,4 +43,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-24 — Released v0.18.0 (v0.16 The kit holds up on a phone): HUD corners keep their width on small phones, the page check sees a chip covering a bar, and the saves test stays fast under load.
 - 2026-10-24 — Sprint 33 planned: the kit holds up on a phone (F124 covered-bar check, F123 HUD corner slots, F125 slow saves test).
 - 2026-10-24 — Released v0.17.1: a game that draws its own main menu (Goops' console) can show the version there and pass the check.
-- 2026-10-24 — Released v0.17.0 (v0.15 Checks you can trust): checks name a busy port at once, the kit gallery is clean, bubbles take a game's colours, and the Fonts tab tries every installed font.

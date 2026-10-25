@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — Released v0.17.0 (v0.15 Checks you can trust): checks name a busy port at once, the kit gallery is clean, bubbles take a game's colours, and the Fonts tab tries every installed font.
 - 2026-10-24 — F118–F122 approved.
 - 2026-10-24 — Sprint 32 planned: checks you can trust (F118 port pre-flight, F119 clean gallery, F120 no shell strings).
 - 2026-10-24 — Released v0.16.0 (v0.14 Story pieces made solid): the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
