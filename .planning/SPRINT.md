@@ -26,12 +26,14 @@ Checked: 2026-10-24 (Claude) — 5 tests on Glyphtender's drag.json from before 
 Done when: a 0 handed to a kit part (children, a badge, a detail, an icon, a slot) shows as "0" inside its place — never loose on the page and never lost; ui-kit tests and the shoot unchanged otherwise.
 - [x] 🤖 1. One small `shown()` helper; every `x && <…>` whose x can be a number (React-node props and children — 12 lines) and the HUD / Screen slots use it — ui-kit/kit/shown.ts
 - [x] 🤖 2. Tests: MainMenu children 0 · PlayerChip badge 0 with the name hidden · ListRow detail 0 · Screen and Hud slots 0 (they fail on the old code) — ui-kit/kit/shown.test.tsx
+- [ ] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; the tests fail on the old code.
 
 ## F135 🐞 check-ui reads CSS with a data: URL
 Done when: `check-ui --css` reads `background: url(data:image/png;base64,…)` as ONE declaration (no false warning from the ";" or ":" inside it), and still warns on the real cases.
-- [ ] 🤖 1. Split declarations on ";" and ":" only outside quotes and brackets — ui-kit/kit/check-ui.mjs
-- [ ] 🤖 2. Tests: a data: URL and a quoted ";" give no warning; real breaks still warn — ui-kit/kit/check-ui.test.mjs
+- [x] 🤖 1. Split declarations on ";" and ":" only outside quotes and brackets — ui-kit/kit/check-ui.mjs
+- [x] 🤖 2. Tests: a data: URL and a quoted ";" give no warning; real breaks still warn — ui-kit/scripts/check-ui.test.mjs
+- [ ] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; check-ui on the kit's own CSS unchanged.
 
 ## F136 🐞 Mode select fills its row
