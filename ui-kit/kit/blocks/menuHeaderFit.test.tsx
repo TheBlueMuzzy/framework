@@ -10,6 +10,7 @@ import { openBrowser, showInStyle } from '../stylePage.test-util.mjs'
 import { Button, Text } from '../controls'
 import { Modal } from './dialogs'
 import { fitMenuTitle } from './MenuHeader'
+import { Lobby, SeatPicker } from './online'
 
 let browser: Browser
 beforeAll(async () => { browser = await openBrowser() }, 60_000)
@@ -117,6 +118,38 @@ describe('End-screen title (Game over, display size) in a narrow report', () => 
     // 200%: a step or two down (how many depends on the computer's fonts — GitHub's Linux needed two); 100%: its size
     if (textSize === '100%') expect(t.fit).toBe('')
     else expect(['small', 'smaller']).toContain(t.fit)
+    await page.close()
+  })
+})
+
+// F147 (0.35.4): the Seat picker's title ("Game in progr / ess" in Neon and Pixel at 200% text) and the Lobby room's
+// ("Roo / m" beside Copy in Cozy) fit the same way — a .kit-fit-title box (no pop)
+describe('Seat picker and Lobby room titles fit like the end screens\'', () => {
+  it('both titles sit in a fitted box', () => {
+    const noop = () => {}
+    expect(renderToStaticMarkup(<SeatPicker seats={[{ id: 'z', name: 'Zippy' }]} onPick={noop} onCancel={noop} />))
+      .toContain('<span class="kit-fit-title"><h2 class="kit-text" data-kind="title">Game in progress</h2></span>')
+    expect(renderToStaticMarkup(<Lobby roomCode="QX2T" onCreate={noop} onJoin={noop} onStart={noop} onLeave={noop} />))
+      .toContain('<span class="kit-fit-title"><h2 class="kit-text" data-kind="title">Room <span>QX2T</span></h2></span>')
+  })
+
+  it.each(['neon', 'pixel'])('in %s at 200% text, "progress" stays whole: the title drops a step', async (preset) => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+    await showInStyle(page, preset, `<div style="inline-size: 300px; display: flex; flex-direction: column">${renderToStaticMarkup(
+      <span className="kit-fit-title"><Text kind="title">Game in progress</Text></span>)}</div>`)
+    const t = await page.evaluate(`(() => {
+      document.documentElement.style.fontSize = '200%'
+      const box = document.querySelector('.kit-fit-title')
+      ;(${fitMenuTitle.toString()})(box, false)
+      const text = box.firstElementChild.firstChild, out = []
+      for (const m of text.data.matchAll(/\\S+/g)) {
+        const r = document.createRange(); r.setStart(text, m.index); r.setEnd(text, m.index + m[0].length)
+        out.push(new Set([...r.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top))).size)
+      }
+      return { fit: box.dataset.fit, wordLines: out }
+    })()`) as { fit: string; wordLines: number[] }
+    expect(t.wordLines).toEqual([1, 1, 1])
+    expect(['small', 'smaller']).toContain(t.fit)
     await page.close()
   })
 })

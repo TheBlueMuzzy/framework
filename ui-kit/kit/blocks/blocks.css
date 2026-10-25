@@ -329,15 +329,17 @@
     .kit-main-menu-buttons[data-many] { display: grid; grid-template-columns: 1fr 1fr; } /* 6+ buttons, extras counted (0.24.0) */
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
-  .kit-end-title { display: inline-block; }
+  :is(.kit-end-title, .kit-fit-title) { display: inline-block; }
   /* End-screen titles fit like MenuHeader's (0.35.1, F145; useTitleFit): a word wider than its line drops the title a
      step, then another — never split ("Ga / me / ove / r" inside the art Game over's frame at 200% text). Only "split"
-     (too wide even at body size) lets that one word break. */
-  .kit-end-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
-  .kit-end-title[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
-  .kit-end-title[data-fit="small"] > .kit-text[data-kind="title"],
-  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
-  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="title"], .kit-end-title[data-fit="split"] > .kit-text { font-size: var(--text-body); }
+     (too wide even at body size) lets that one word break. The Seat picker's and the Lobby room's titles fit the same
+     way (.kit-fit-title: no pop as it opens — 0.35.4, F147: "Game in progr / ess" in Neon and Pixel, "Roo / m" in Cozy
+     at 200% text). */
+  :is(.kit-end-title, .kit-fit-title)[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="small"] > .kit-text[data-kind="title"],
+  :is(.kit-end-title, .kit-fit-title)[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="smaller"] > .kit-text[data-kind="title"], :is(.kit-end-title, .kit-fit-title)[data-fit="split"] > .kit-text { font-size: var(--text-body); }
   .kit-end-swipe { display: block; text-align: center; padding-block-start: var(--gap-xs); } /* "⇧ Swipe up…": words, not a button */
   /* Victory / Game over with a long list (0.31.0): only the stats' ScrollArea gives up height — the title, message
      and buttons keep theirs, so they stay in sight and the rows scroll under the edge fade */
