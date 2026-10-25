@@ -33,10 +33,18 @@ async function titleOn(page: Page, preset: string, markup: string, { alone = fal
     const wordLines = []
     for (const m of text.data.matchAll(/\\S+/g)) wordLines.push(linesOf(m.index, m.index + m[0].length))
     const action = (box.nextElementSibling ?? box).getBoundingClientRect()
-    return { fit: box.dataset.fit, wordLines, actionBelow: action.top >= box.getBoundingClientRect().bottom - 1, overflows: words.scrollWidth > box.clientWidth + 1,
+    // is the longest word wider than the box even at body size (the floor)? Depends on the fonts this computer has —
+    // GitHub's Linux draws Clean in a wider fallback than Windows (v0.21 /deliver: its Checks went red)
+    const probe = words.cloneNode(true)
+    probe.style.cssText = 'position: absolute; white-space: nowrap; font-size: var(--text-body)'
+    probe.textContent = text.data.split(/\\s+/).reduce((a, b) => (b.length > a.length ? b : a), '')
+    box.append(probe)
+    const bodyWide = probe.getBoundingClientRect().width > box.clientWidth + 0.5
+    probe.remove()
+    return { fit: box.dataset.fit, bodyWide, wordLines, actionBelow: action.top >= box.getBoundingClientRect().bottom - 1, overflows: words.scrollWidth > box.clientWidth + 1,
       size: getComputedStyle(words).fontSize, heading: getComputedStyle(document.documentElement).getPropertyValue('--text-heading'),
       body: getComputedStyle(document.documentElement).getPropertyValue('--text-body') }
-  })()`) as Promise<{ fit: string; wordLines: number[]; actionBelow: boolean; overflows: boolean; size: string; heading: string; body: string }>
+  })()`) as Promise<{ fit: string; bodyWide: boolean; wordLines: number[]; actionBelow: boolean; overflows: boolean; size: string; heading: string; body: string }>
 }
 
 describe.each(Object.keys(presets))('MenuHeader title beside an action in %s', (preset) => {
@@ -71,12 +79,13 @@ describe.each(Object.keys(presets))('MenuHeader title beside an action in %s', (
     const alone = (title: string) => renderToStaticMarkup(<Modal title={title} actions={<Button>Quit</Button>}><p>Hold on.</p></Modal>)
     const big = await titleOn(page, preset, alone('Reconnecting…'), { alone: true, textSize: '200%' })
     expect(big.overflows).toBe(false)
-    // Clean / Cozy / Cartoon / Console: a step or two down and whole. A wide font (Pixel, Neon, Fantasy) is wider than
-    // the line even at body size — the floor at 200% — so there, and only there, the word may break ("split")
-    if (['clean', 'cozy', 'cartoon', 'console'].includes(preset)) {
+    // A step or two down and whole — unless the word is wider than the line even at body size (the floor at 200%: a
+    // wide font — Pixel, Neon, Fantasy, or a wide fallback font on another computer); there, and only there, it may
+    // break ("split")
+    if (!big.bodyWide) {
       expect(big.wordLines).toEqual([1])
       expect(['small', 'smaller']).toContain(big.fit)
-    } else expect(['small', 'smaller', 'split']).toContain(big.fit)
+    } else expect(big.fit).toBe('split')
     const normal = await titleOn(page, preset, alone('Reconnecting…'), { alone: true })
     expect(normal.fit).toBe('')
     const words = await titleOn(page, preset, alone('Choose your next big adventure'), { alone: true })
@@ -105,7 +114,9 @@ describe('End-screen title (Game over, display size) in a narrow report', () => 
       return { fit: box.dataset.fit, wordLines: out }
     })()`) as { fit: string; wordLines: number[] }
     expect(t.wordLines).toEqual([1, 1])
-    expect(t.fit).toBe(textSize === '100%' ? '' : 'small') // 200%: one step down, the style's title size
+    // 200%: a step or two down (how many depends on the computer's fonts — GitHub's Linux needed two); 100%: its size
+    if (textSize === '100%') expect(t.fit).toBe('')
+    else expect(['small', 'smaller']).toContain(t.fit)
     await page.close()
   })
 })
