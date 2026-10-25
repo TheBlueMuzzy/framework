@@ -16,6 +16,8 @@
 //              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
+//   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
+//              box it's drawn in; a word wider than that box may still wrap — 0.34.1
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
 // (a game's on-purpose overlap, e.g. a title drawn over its own shadow copy), and things covered by something else
@@ -251,6 +253,40 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
     return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
   }
+
+  // ---- words split in the middle (0.34.1) ----
+  // A word broken across two lines in the middle ("Accessibil / ity" in a ◀ tab ▶ picker at 200% text). Flagged only
+  // when the word would fit on one line of the box it's drawn in (the nearest card, chip, button or panel around it —
+  // or the screen, when there's none): then the layout squeezed it (arrows too wide, a row's neighbour taking the room).
+  // A word wider than that box has nowhere to go and may still wrap. Breaks at a space, hyphen, dash or slash are
+  // where words end, not "in the middle".
+  const splitWords = (el) => {
+    const out = []
+    const range = document.createRange()
+    for (const n of wordsIn(el, false)) {
+      for (const m of n.textContent.matchAll(/[^\s\-­‐-—/]{2,}/g)) {
+        range.setStart(n, m.index)
+        range.setEnd(n, m.index + m[0].length)
+        const lines = [...range.getClientRects()].filter((r) => r.width > 0.5)
+        if (lines.length < 2) continue
+        const tops = lines.map((r) => r.top)
+        if (Math.max(...tops) - Math.min(...tops) < Math.min(...lines.map((r) => r.height)) / 2) continue // one line
+        let box = el
+        while (box && box !== document.body && !drawsBox(box)) box = box.parentElement
+        let room = innerWidth, what = 'the screen'
+        if (box && box !== document.body) {
+          const s = getComputedStyle(box)
+          const k = box.offsetWidth ? box.getBoundingClientRect().width / box.offsetWidth : 1 // (shrunk by a transform)
+          room = box.getBoundingClientRect().width - k * ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'].reduce((sum, side) => sum + parseFloat(s[side]), 0)
+          what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
+        }
+        const wide = lines.reduce((sum, r) => sum + r.width, 0)
+        if (wide <= room + 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
+      }
+    }
+    return out
+  }
+  for (const el of texts) problems.push(...splitWords(el))
 
   const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')

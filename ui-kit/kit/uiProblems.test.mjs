@@ -230,3 +230,22 @@ describe('findProblems — quality bars', () => {
     expect(only('grows', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
   })
 })
+
+// 0.34.1 (F141) — a word broken in the middle at a big text size
+describe('findProblems — words split in the middle', () => {
+  it('the ◀ Accessibility ▶ picker squeezed by its arrows is flagged once: the word fits its box', async () => {
+    const found = await problemsOn(`
+      <div style="display:flex;width:300px;border:1px solid #888;border-radius:8px">
+        <button style="width:110px">◀</button>
+        <span style="flex:1 1 0;min-width:0;text-align:center;overflow-wrap:anywhere">Accessibility</span>
+        <button style="width:110px">▶</button></div>`)
+    expect(only('split', found)).toEqual(['split: "Accessibility" is broken in the middle across 2 lines, though it fits on one line of its box (<div>)'])
+  })
+
+  it('a word too long for its box at all may wrap; words wrapping at spaces and hyphens are fine', async () => {
+    const found = await problemsOn(`
+      <div style="width:90px;padding:4px;border:1px solid #888;overflow-wrap:anywhere">Supercalifragilistic</div>
+      <p style="width:90px;margin:8px">Red-green colour-blind mode for players</p>`)
+    expect(only('split', found)).toEqual([])
+  })
+})

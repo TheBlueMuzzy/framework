@@ -131,8 +131,10 @@
   :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope) button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope) button:disabled { cursor: not-allowed; }
 
-  /* text-wrap: pretty — wrapped lines never end with one word alone on the last line (no orphans) */
-  .kit-text { margin: 0; overflow-wrap: anywhere; text-wrap: pretty; }
+  /* text-wrap: pretty — wrapped lines never end with one word alone on the last line (no orphans).
+     break-word (0.34.1, was anywhere): whole words wrap; a word only breaks when it's wider than its whole line — so a
+     row never squeezes a label into "Lock / down" at big text (anywhere let it shrink to one letter wide) */
+  .kit-text { margin: 0; overflow-wrap: break-word; text-wrap: pretty; }
   .kit-text[data-kind="display"] { font-size: var(--text-display); line-height: 1.1; font-weight: 800; }
   .kit-text[data-kind="title"] { font-size: var(--text-title); line-height: 1.15; font-weight: 700; }
   .kit-text[data-kind="heading"] { font-size: var(--text-heading); line-height: 1.2; font-weight: 700; }
@@ -141,7 +143,11 @@
   .kit-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--gap-s);
     padding: var(--gap-s) var(--gap-l); border-style: solid; font-weight: 600; text-align: center; user-select: none; }
   /* Icon-only: the glyph is title-sized so it fills the (at least 44px) button instead of floating small in it */
-  .kit-button[data-icon] { padding: 0 0.15em; aspect-ratio: 1; font-size: var(--text-title); line-height: 1; } /* 0.21.0: a little room each side, so a wide glyph at a big text size never touches the edge */
+  /* 0.21.0: a little room each side, so a wide glyph at a big text size never touches the edge. 0.34.1: the glyph
+     stops growing at three quarters of the 44px button, so even a wide one (◀) and its side room stay 44px wide — at
+     200% text an icon stays tap-sized and the WORDS get the room (◀ ▶ had grown to 67px each and squeezed
+     "Accessibility" in Settings' tab picker into two pieces). Every style's title size is under that at 100%. */
+  .kit-button[data-icon] { padding: 0 0.15em; aspect-ratio: 1; font-size: min(var(--text-title), var(--target-min) * 0.75); line-height: 1; }
   /* size="…px": as tall as the game asks (e.g. a board hex), and at least that wide — never below target-min */
   .kit-button[data-sized] { min-block-size: max(var(--target-min), var(--kit-button-size)); min-inline-size: max(var(--target-min), var(--kit-button-size)); }
   /* compact: a gap-m each side of the label instead of gap-l (a row of big buttons on one line on a narrow phone) */
@@ -166,13 +172,15 @@
 
   .kit-picker { display: inline-flex; align-items: center; gap: var(--gap-xs); max-inline-size: 100%; }
   .kit-picker > .kit-button { flex: none; }
-  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: anywhere; }
+  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: break-word; padding-block: var(--gap-xs); }
+  /* 0.34.1: whole words; and a little room above and below, so at 200% text (when the words are taller than the 44px
+     arrows) they don't touch the picker's border — at 100% the arrows are taller anyway, so nothing moves */
   .kit-stepper .kit-picker-value { flex-basis: 2.5rem; }
   /* Sized by its values (Selector): its own width is the longest option's — every option piled in one spot, only the
      current one seen (ArrowPicker sizes) */
   .kit-picker-sized { display: grid; flex: 0 1 auto; min-inline-size: 0; }
   .kit-picker-sized > * { grid-area: 1 / 1; min-inline-size: 0; }
-  .kit-picker-sizer { visibility: hidden; text-align: center; font-weight: 600; overflow-wrap: anywhere; } /* (sized like the value) */
+  .kit-picker-sizer { visibility: hidden; text-align: center; font-weight: 600; overflow-wrap: break-word; } /* (sized like the value) */
 
   .kit-tabs { display: flex; flex-wrap: wrap; gap: var(--gap-xs); padding: var(--gap-xs); }
 
