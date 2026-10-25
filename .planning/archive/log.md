@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-24 — F118–F122 approved.
+- 2026-10-24 — Sprint 32 planned: checks you can trust (F118 port pre-flight, F119 clean gallery, F120 no shell strings).
 - 2026-10-24 — Released v0.16.0 (v0.14 Story pieces made solid): the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
 - 2026-10-24 — F115 + F116 + F117 approved: the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
 - 2026-10-24 — Sprint 31 planned: make the new story pieces solid (F115 reveal replays, F116 bubble for every player, F117 log trims itself).
