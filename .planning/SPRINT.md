@@ -25,10 +25,15 @@ Done when: a game can show a What's new panel that appears once on the first lau
 - [x] 🤖 2. The "should it show?" logic + the last-seen record, with tests for every rule — ui-kit/kit/blocks/whatsNew.ts (moved from version/kit/index.ts: see design §4c)
 - [x] 🤖 3. The WhatsNew panel (kit parts only: a Modal, the lines, a link, one close button) + a gallery screen — ui-kit/kit/blocks/dialogs.tsx
 - [x] 🤖 4. The shoot covers it at every size; 0 problems; desktop + phone shots looked at — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 5. CATALOG + README + the game-ui skill name it; versions bumped (UI kit; version unchanged — nothing in it changed) — ui-kit/CATALOG.md
+- [x] 🤖 5. CATALOG + README + the game-ui skill name it; versions bumped (UI kit; version unchanged — nothing in it changed) — ui-kit/CATALOG.md
 Check: version + ui-kit tests; the shoot; the shots looked at.
+Checked: root `npm run check:fast` → "✓ all 20 checks passed" (ui-kit 46 files / 758 tests incl. 20 rule tests in whatsNew.test.ts + 5 in dialogs.test.tsx; version tests untouched, green); ui-kit `tsc --noEmit` 0 errors, `npm run check-ui` "✓ UI rules pass (164 files checked)"; `SHOOT_PORT=6143 npm run shoot` → "656 screenshots in 615 s · No overflow, clipped controls, small targets, stray focus rings or console errors found" (16 whatsnew shots: Clean phone + desktop, every style on both landscape phones). Looked at: Clean desktop (centred card, 4 lines on one line each, Full notes + Got it bottom right), Clean phone (2 lines wrap at whole words, padding all round), Fantasy small landscape (fits without scrolling, gold Got it). A test proven to fail: the same-version rule broken (<= → <) failed 2 tests.
 
 Notes:
+- F143 calls (design §4c): the rule + last-seen record live in the UI kit (`kit/blocks/whatsNew.ts`), NOT version/kit/index.ts — the kit already keeps its own small records (Settings, tips) and the saves module's check exempts the kit's saving; the saves module has no consent gate to respect ("consent" there = askToKeepSaves, the browser's persist request). The game passes `appVersion` in, as it passes versionLabel to MainMenu, so the version module is unchanged (stays 0.1.2).
+- F143 changed from the lead: last seen is remembered when the panel OPENS, not when it closes — Esc, Back and the dim close it too, and React's StrictMode runs the main menu's effect twice; recording at open makes both safe with no unmount bookkeeping (a tab killed while it shows → missed; harmless).
+- F143 added to the lead: a newer version shows the NEWEST entry above last seen, up to this version — so a hotfix 0.4.1 (no entry) right after 0.4.0 still shows 0.4.0's lines to a player who skipped 0.4.0. Only one panel, never a pile.
+- F143 surprise: a private window can't remember, so it reads as a first install every launch → never shows there (by design, no nagging).
 - Ideas checked against the code before planning (Explore helper, 2026-10-25): already done — toasts under the gallery bar (UI kit 0.33.0, blocks.css:350), MainMenu counts extra buttons (0.24.0, frontend.tsx:46), HUB machine to-do at session start (F80, session-start.sh:25). Still open, left in Later: a guard for a second dev server / wrangler without --persist-to.
 - No open P0/P1 bugs in this repo.
 - Goops is running in another window: no game is touched this sprint (framework only).

@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.34.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -31,6 +31,9 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
   `screens.pop()` on B — and calls **`markPadUsed()`** (from the kit) on any pad press, so the screen the kit opens
   next shows the focus ring, like after a key. The browser's own `gamepadconnected` (fired only after a first press)
   already counts, so a game that skips it still rings from the first screen — until the player clicks or taps.
+- **What's new after an update** (0.35.0, optional): the highlight lines in `content/text/whats-new.json`, and the MAIN
+  MENU (never mid-game) calls `useEffect(() => { showWhatsNew({ version: appVersion, ...whatsNew, words: text.whatsNew }) }, [])`
+  (`appVersion` from the version module). An entry only for a version worth announcing.
 
 ## How it's checked — `npm run check:framework`
 The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/conformance.mjs` on the game:
@@ -143,8 +146,8 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.35.0 (kept
-  through 0.34.0: Glyphtender hadn't reinstalled those modules yet; 0.34.0 went to the two new looks).
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.36.0 (kept
+  through 0.34.0: Glyphtender hadn't reinstalled those modules yet; 0.34.0 went to the two new looks, 0.35.0 to What's new).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
   0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
   story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
@@ -298,6 +301,14 @@ gallery's `npm run shoot` uses the same one.
   although it would fit on one line of the box it's drawn in (a word wider than its card may still wrap); games'
   `check:framework` reports it as "no word is broken in the middle". The shoot adds Settings at 200% on a phone, on its
   Accessibility tab (640 shots, 0 problems).
+- 0.35.0 (F143, framework sprint 38 — `kit/blocks/whatsNew.ts`, `kit/blocks/dialogs.tsx`, gallery `?screen=whatsnew`):
+  **What's new after an update.** `showWhatsNew({ version: appVersion, ...whatsNew })`, called by the game's main menu,
+  opens a `WhatsNew` panel (a Modal: 3–5 highlight lines, "Full notes" when there's a web `notesUrl`, "Got it") once, on
+  the first launch after the X.Y.Z changes — never on a first install, a build-only bump, a version with no entry, a
+  downgrade or "dev". The lines live in the game's `content/text/whats-new.json`; last seen is one string under
+  `kit-whats-new:<game folder>`, remembered when the panel opens. The rule is a pure function (`whatsNewDecision`,
+  a test per rule). Design: `.planning/design/ui-kit.md` §4c. The shoot adds it (656 shots, 0 problems). The
+  old-module-rows fallback now goes in 0.36.0.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
