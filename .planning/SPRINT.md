@@ -3,13 +3,13 @@ Started 2026-10-24 · Milestone v0.20 Two new looks · Features: F138, F139, F14
 Muzzy 2026-10-24: "go auto" on option A (the looks). Running unattended: Claude builds the sketch, drafts each look from its own pick of the takes, and leaves the choice open for Muzzy (Ask Muzzy below).
 What changes: a sketch to pick and tune the looks in, then 7 looks in the kit instead of 5 (every game's style picker, the gallery, the screenshot run). What stays the same: every existing look and every game's screens — a game only changes look when its content/ui/style.json says so.
 
-## F138 ❓ Which take is each look
+## F138 ✅ Which take is each look
 Done when: the sketch shows 3 takes per look on a menu, a HUD and a dialog with knobs, Copy values works, and each look has a pick on record (Claude's draft until Muzzy confirms or swaps).
 - [x] 🤖 1. The sketch: 6 takes (3 console, 3 fantasy), 8 knobs, presets, Copy values — checked at 1280×800 + 390×844, every knob moves the look, 0 console errors — .planning/research/sketches/s1-new-looks.html
-- [ ] 🙋 2. Muzzy: play the sketch (planner → Sketches), keep or swap each pick, tune, Copy values for Claude — .planning/research/new-looks/picks.json
+- [x] 🙋 2. Muzzy: play the sketch (planner → Sketches), keep or swap each pick, tune, Copy values for Claude — .planning/research/new-looks/picks.json
 Ask Muzzy: Dark console — Console 1 (living-room dashboard) is the draft; or Console 2 (handheld) / Console 3 (terminal)? Fantasy — Fantasy 2 (tavern, wood & gold) is the draft; or Fantasy 1 (parchment) / Fantasy 3 (arcane)?
 Check: the sketch's checks above; picks.json has both looks.
-Checked: 2026-10-25 (Claude) — sketch at 1280×800 and 390×844: 6 takes drawn, every knob (8) changes the look between its ends, no sideways scroll, 0 console errors; all 6 desktop shots looked at (the take name was unreadable over the parchment take → given its own dark pill). picks.json has both looks with why. The 🙋 pick stays open: Muzzy confirms or swaps.
+Checked: 2026-10-25 (Claude) — sketch at 1280×800 and 390×844: 6 takes drawn, every knob (8) changes the look between its ends, no sideways scroll, 0 console errors; all 6 desktop shots looked at (the take name was unreadable over the parchment take → given its own dark pill). picks.json has both looks with why. Muzzy 2026-10-25: "approved sketch" — both draft picks kept (Console 1, Fantasy 2).
 
 ## F139 ✨ The two looks in the UI kit
 Done when: content/ui/style.json "preset": "console" or "fantasy" gives a full look (every setting every look has, contrast checked by the kit's own style tests), with its fonts bundled and credited; the screenshot run shows 0 problems for both at every size.
