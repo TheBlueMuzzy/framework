@@ -253,6 +253,11 @@ gallery's `npm run shoot` uses the same one.
   Its Vite server reloads screens on an edit, so a run that saw one mixed shots of two versions of the code; now an
   edit, a new file or a deleted one (its own screenshots don't count) ends the run at the next shot with
   `✗ stopped: kit/kit.css changed during the run …` and exit code 2 — run it again when nothing is being edited.
+  And F130 — `kit/blocks/teach.tsx`: **a bubble that can't stay clear of its `avoid` says so.** The shared pointing
+  placement (Callout, SpeechBubble, EmotePicker, MuteMenu, TalkingBubble) used to cover what it was told to avoid
+  without a word when no side had room; now it prints one dev-console warning naming the bubble, what it points at and
+  what it covers (once until it's clear again; never in a production build). Placement is unchanged. The shoot counts
+  `[ui-kit]` warnings as problems; today's gallery has none.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

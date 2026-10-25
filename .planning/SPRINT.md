@@ -15,7 +15,7 @@ Done when: a TalkingBubble, teach callout or emote bubble whose `avoid` can't be
 - [x] 🤖 1. Run the warning on today's gallery at every shoot size and list what it already finds — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. The shared placement warns once when no side is clear — ui-kit/kit/blocks/teach.tsx
 - [x] 🤖 3. Tests: no clear side → one warning naming the covered piece; clear again → quiet; a later block → warns again; production → none — ui-kit/kit/blocks/teach.test.tsx
-- [ ] 🤖 4. README / CATALOG `avoid` note — ui-kit/CATALOG.md
+- [x] 🤖 4. README / CATALOG `avoid` note — ui-kit/CATALOG.md
 Check: ui-kit tests; task 1's list is in Notes; shoot still 0 problems.
 
 Notes:
