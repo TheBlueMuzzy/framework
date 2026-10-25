@@ -367,6 +367,8 @@ gallery's `npm run shoot` uses the same one.
   (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3). **200% text (F144):** every
   gallery screen in Clean at 200% text, on a 390×844 phone and an 844×390 phone on its side
   (`screens/<id>-clean-phone-text-200`, `…-clean-phone-landscape-text-200`; Settings opens on its Accessibility tab) —
-  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). Clean only: the looks share
-  one layout, so a 200% problem shows in Clean first.
+  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). **And the 18 key screens at
+  200% in the 6 other looks (F146)**, both phones (`screens/<id>-<look>-phone[-landscape]-text-200`): 216 shots more,
+  961 in 918 s (about 3½ minutes more). The looks share one layout, but not one font — a wider font (Cozy, Pixel,
+  Fantasy, Neon) broke words and buttons at 200% where Clean's fit, so every look is shot.
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
