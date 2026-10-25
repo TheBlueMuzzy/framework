@@ -340,7 +340,7 @@ Goal (Muzzy 2026-10-24, "a then b. C later i think"): the Dev Kit edits every fi
 - ✅ F133 🔧 Save keeps a hand-wrapped list wrapped: a list laid out over a few lines (Glyphtender drag.json "_sections") no longer comes back one value per line — should · sprint 36
 - ✅ F134 🐞 No stray "0" under a part: MainMenu `children && …` (frontend.tsx), and the same pattern in layout.tsx and PullHandle.tsx, render 0 when given 0 — could · sprint 36
 - ✅ F135 🐞 check-ui reads CSS with a data: URL: `--css` splits on every ";" and ":" (check-ui.mjs), so a data:…;base64 value gives a false warning — could · sprint 36
-- 🔨 F136 🐞 Mode select fills its row on desktop: `.kit-grid` uses auto-fill, leaving an empty 4th column with 3 modes — could · sprint 36
+- ✅ F136 🐞 Mode select fills its row on desktop: `.kit-grid` uses auto-fill, leaving an empty 4th column with 3 modes — could · sprint 36
 - 🔨 F137 🐞 A part-way save code tells the player to reload: SaveCodePanel shows a danger toast and stops, so the game keeps showing the old values — could · sprint 36
 ```mermaid
 flowchart LR
