@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.20.0 — 2026-10-24
+
+A speech bubble that can't keep clear of what it was told to avoid now says so in the dev console, instead of quietly covering it. The UI kit's screenshot run stops when a file changes while it runs, so its result is always about one version of the code.
+
+### New
+- UI kit 0.33.3: when no side keeps a TalkingBubble, speech bubble, emote picker or mute menu off its `avoid`, it prints one dev-console warning naming the bubble, what it points at and what it covers — once, and again only after it was clear in between. Nothing changes on screen, and nothing prints in a game players download.
+- UI kit 0.33.3: the screenshot run (`npm run shoot`) stops at the next shot when a file is edited, added or deleted mid-run, naming the file, and asks to run it again. It also counts the kit's own dev warnings as problems.
+
 ## v0.19.0 — 2026-10-24
 
 A kit button placed inside an art layer keeps its full 44 px tap size again. The UI kit's screenshot run comes back clean: 475 shots, 0 problems. The page check now also catches a chip sitting on another piece's words.

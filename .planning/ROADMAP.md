@@ -324,7 +324,7 @@ flowchart LR
   F128[F128 Installers ask git once]
 ```
 
-## v0.18 — The kit speaks up  ← current · planned 2026-10-24
+## v0.18 — The kit speaks up  ✅ released 2026-10-24 (v0.20.0) · planned 2026-10-24
 Goal (Muzzy 2026-10-24, "A go"): the kit's own tools say so when their result can't be trusted — a screenshot run that saw the code change, a bubble that couldn't stay clear of what it avoids.
 - ✅ F129 🔧 The shoot stops on a file change mid-run: an edit while `npm run shoot` runs ends it red, naming the file, so a result is about one version of the code — should · sprint 35
 - ✅ F130 🔧 A bubble that can't stay clear says so: TalkingBubble / teach callout / emote bubble print one dev-console warning when no side keeps them off their `avoid` — could · sprint 35
