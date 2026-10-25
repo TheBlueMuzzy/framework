@@ -352,7 +352,7 @@ flowchart LR
   F137[F137 Part-way save code reload]
 ```
 
-## v0.20 — Two new looks  ← current · planned 2026-10-24
+## v0.20 — Two new looks  ✅ released 2026-10-25 (v0.22.0) · planned 2026-10-24
 Goal (Muzzy 2026-10-24, "go auto" on option A): the UI kit gets "Dark console" and "Fantasy" — picked from a sketch of 3 takes each — so a game can choose from 7 looks.
 - ✅ F138 ❓ Which take is each look: the sketch (3 console takes, 3 fantasy takes, knobs) — Console 1 + Fantasy 2, kept by Muzzy 2026-10-25 — must · sprint 37
 - ✅ F139 ✨ The two looks in the UI kit: console.json + fantasy.json, their fonts bundled and credited, the style tests and the shoot clean — must · needs: F138 · sprint 37
