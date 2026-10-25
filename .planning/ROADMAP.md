@@ -362,6 +362,21 @@ flowchart LR
   F138[F138 Which take] --> F139[F139 Looks in the kit] --> F140[F140 Lists know 7]
 ```
 
+## v0.21 — The kit meets every player  ✅ released 2026-10-25 (v0.23.0) · planned 2026-10-25
+Goal (Muzzy 2026-10-25, "go auto" after v0.20): three things players notice — big text never splits a word, a gamepad player sees where they are from the first screen, and a game can say "what's new" once after an update. Old ideas checked against the code first: 4 of 7 were already done (toasts under the gallery bar, MainMenu extras counted, machine to-do at session start; the persist-to guard stays in Later).
+- ✅ F141 🐞 Big text never splits a word: the ◀ option ▶ picker breaks "Accessibility" mid-word at 200% (kit.css overflow-wrap: anywhere), and the page check has no rule for it — should · sprint 38
+- ✅ F142 🐞 A gamepad player sees the focus ring from the first screen: ScreenStack shows it only after a key press, so a pad-only game hides where you are — should · sprint 38
+- ✅ F143 ✨ What's new after an update: once, on the first launch after the version changes — 3–5 highlights, a full-notes link, one tap to close; never on a first install or mid-game (research: research/patch-notes-and-dependencies.md) — should · sprint 38
+- ✅ F144 🔧 The shoot sees every screen at 200% text: one upright and one sideways phone, every gallery screen — so big-text problems are found by the check, not by hand (F141's scan found 6 screens it never shot) — should · sprint 39
+- ✅ F145 🐞 Every screen holds up at 200% text: what F144 finds — Reconnecting's title, the art Game over, the HUD overlaps, the menu buttons, Continue's line, the toast/tooltip, room's short button — should · needs: F144 · sprint 39
+```mermaid
+flowchart LR
+  F141[F141 Words stay whole]
+  F142[F142 Gamepad focus ring]
+  F143[F143 What's new]
+  F144[F144 Shoot at 200%] --> F145[F145 Every screen at 200%]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -373,6 +388,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.
 - 2026-10-24 — → v0.18 F129. **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
 - 2026-10-24 — → v0.18 F130. **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.
 - 2026-10-24 — → v0.17 F126. **🐞 The shoot's 16 left-over finds** (sprint 33, after F123 — none are HUD corners): (1) the parts page's "HUD demo" is a plain Screen, and at 200% text "Round 2" covers part of "Health" — give plain Screens the phone fallback (middle on its own row) or build the demo with Hud; (2) talk screen on a 667×375 phone (and Pixel at 844×390, flickers): the talking bubble covers the "Colours" picker's Next (F121 area); (3) pinned, Pixel, 360×780: 8 `edge:` lines at 1 px. They were already there; F124 and the new shoot sizes made them visible.

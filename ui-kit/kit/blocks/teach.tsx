@@ -17,6 +17,7 @@ import { createPortal } from 'react-dom'
 import { Row, Stack } from '../layout'
 import { Button, Text } from '../controls'
 import { calloutWords, placeCallout, type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
+import { focusRing } from '../keysOrPad'
 
 type Box = { left: number; top: number; right: number; bottom: number }
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(value, Math.max(low, high)))
@@ -187,7 +188,7 @@ export function Callout({ target, text, title, action, placement = 'auto', onDis
   // (a frame later: a screen opening in the same moment moves the focus into itself first)
   useEffect(() => {
     if (!dim || !action) return
-    const frame = schedule(() => bubble.current?.querySelector('button')?.focus({ preventScroll: true, focusVisible: false } as FocusOptions))
+    const frame = schedule(() => bubble.current?.querySelector('button')?.focus(focusRing({ preventScroll: true })))
     return () => cancel(frame)
   }, [dim, action])
 

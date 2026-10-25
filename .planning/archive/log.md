@@ -1,4 +1,7 @@
 # Log archive (newest first)
+- 2026-10-24 — Released v0.18.0 (v0.16 The kit holds up on a phone): HUD corners keep their width on small phones, the page check sees a chip covering a bar, and the saves test stays fast under load.
+- 2026-10-24 — Sprint 33 planned: the kit holds up on a phone (F124 covered-bar check, F123 HUD corner slots, F125 slow saves test).
+- 2026-10-24 — Released v0.17.1: a game that draws its own main menu (Goops' console) can show the version there and pass the check.
 - 2026-10-24 — Released v0.17.0 (v0.15 Checks you can trust): checks name a busy port at once, the kit gallery is clean, bubbles take a game's colours, and the Fonts tab tries every installed font.
 - 2026-10-24 — F118–F122 approved.
 - 2026-10-24 — Sprint 32 planned: checks you can trust (F118 port pre-flight, F119 clean gallery, F120 no shell strings).

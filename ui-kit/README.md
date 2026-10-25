@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.34.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -27,6 +27,13 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
   themselves; a game's own card: `const fixed = useFixedSize()` → `<div ref={fixed}>`).
 - **Comfort rows in Settings** (0.21.0): `reduceMotion` switched on in `content/ui/settings.json` — always; and
   `masterVolume` too when the audio module is installed. The kit's default settings file has both.
+- **A gamepad** (0.34.1): the kit doesn't read pads itself. The game sends the d-pad as arrow keys, calls
+  `screens.pop()` on B — and calls **`markPadUsed()`** (from the kit) on any pad press, so the screen the kit opens
+  next shows the focus ring, like after a key. The browser's own `gamepadconnected` (fired only after a first press)
+  already counts, so a game that skips it still rings from the first screen — until the player clicks or taps.
+- **What's new after an update** (0.35.0, optional): the highlight lines in `content/text/whats-new.json`, and the MAIN
+  MENU (never mid-game) calls `useEffect(() => { showWhatsNew({ version: appVersion, ...whatsNew, words: text.whatsNew }) }, [])`
+  (`appVersion` from the version module). An entry only for a version worth announcing.
 
 ## How it's checked — `npm run check:framework`
 The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/conformance.mjs` on the game:
@@ -139,8 +146,8 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.35.0 (kept
-  through 0.34.0: Glyphtender hadn't reinstalled those modules yet; 0.34.0 went to the two new looks).
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.36.0 (kept
+  through 0.34.0: Glyphtender hadn't reinstalled those modules yet; 0.34.0 went to the two new looks, 0.35.0 to What's new).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
   0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
   story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
@@ -278,6 +285,57 @@ gallery's `npm run shoot` uses the same one.
   kit's text; a player chip's score keeps its equal-width digits too) — Alegreya draws old-style numbers by default, so
   "v0.1.0" read "vO.1.O"; fonts that already draw lining numbers look the same. `scripts/pick-sheet.mjs` takes
   `SHOOT_PORT` like the shoot.
+- 0.34.1 (F142, framework sprint 38): **a gamepad player sees the focus ring from the first screen.** New
+  `kit/keysOrPad.ts`: one "is the player on keys or a pad?" flag that ScreenStack, TalkingBubble and Callout's pause
+  all ask. A key press or the browser's `gamepadconnected` (Chrome and Firefox only report a pad after a button press)
+  → focus moved by the kit shows the ring; a click or tap → it doesn't. The latest kind of input wins (before, one
+  key press ever was enough, and a pad never counted). New export **`markPadUsed()`** for a game's own pad code.
+  Also: a TalkingBubble with `onConfirm` and a pausing Callout's button now show the ring for key players too (before,
+  never).
+- 0.34.1 (F141 — `kit/kit.css`, `kit/blocks/blocks.css`, `kit/uiProblems.mjs`): **big text never splits a word.** At
+  200% text Settings' ◀ tab ▶ picker showed "Accessibil / ity" and a row's label could be squeezed to "Lock / down".
+  Kit text and the picker now wrap whole words (`overflow-wrap: break-word`, was `anywhere` — a word only breaks when
+  it's wider than its whole line); an icon button's glyph stops growing at ¾ of its 44 px button (the Settings header's
+  ‹ at 44 px), so at big text the WORDS get the room, not the arrows — nothing changes at 100% in any look; the picker's
+  value has a little room above and below. The page check has a new kind, **`split:`** — a word broken in the middle
+  although it would fit on one line of the box it's drawn in (a word wider than its card may still wrap); games'
+  `check:framework` reports it as "no word is broken in the middle". The shoot adds Settings at 200% on a phone, on its
+  Accessibility tab (640 shots, 0 problems).
+- 0.35.0 (F143, framework sprint 38 — `kit/blocks/whatsNew.ts`, `kit/blocks/dialogs.tsx`, gallery `?screen=whatsnew`):
+  **What's new after an update.** `showWhatsNew({ version: appVersion, ...whatsNew })`, called by the game's main menu,
+  opens a `WhatsNew` panel (a Modal: 3–5 highlight lines, "Full notes" when there's a web `notesUrl`, "Got it") once, on
+  the first launch after the X.Y.Z changes — never on a first install, a build-only bump, a version with no entry, a
+  downgrade or "dev". The lines live in the game's `content/text/whats-new.json`; last seen is one string under
+  `kit-whats-new:<game folder>`, remembered when the panel opens. The rule is a pure function (`whatsNewDecision`,
+  a test per rule). Design: `.planning/design/ui-kit.md` §4c. The shoot adds it (656 shots, 0 problems). The
+  old-module-rows fallback now goes in 0.36.0.
+- 0.35.1 (F145, framework sprint 39): **every screen holds up at 200% text.** Two helpers in parallel — the in-game
+  screens (HUD, dock, chips, pinned, emotes: lines below) and every other screen (this part). Nothing changes at 100%:
+  the 100% shots are pixel-for-pixel the same, except the main menu's words (anti-aliased a hair differently now that
+  it can scroll). Every other screen:
+  - **Titles never split a word.** MenuHeader's fit (0.27.0) now runs on a title alone too — at full size it still
+    wraps between words; a word wider than its line drops it a step (heading size, then body) instead of
+    "Reconnecti / ng…". The end screens' titles (Victory, Game over, Results) fit the same way (`useTitleFit`, shared).
+    On a short screen (30rem tall or less) a title is at most a tenth of its height and a display title a seventh
+    (`--kit-short-title` 10dvh / `--kit-short-display` 14dvh), never under body size — above every style's 100% sizes.
+  - **A card's list keeps a floor.** A ScrollArea straight in a card gives up height only down to `--kit-scroll-min`
+    (4rem) or its whole contents if shorter; past that the card scrolls as one (the Room's player list was a 16 px
+    sliver). Victory / Game over's report joins the card's rows when upright, so its list keeps the floor too.
+    The scroll box's edge room is at most half the card's side gap (it grew to the whole gap at 200%).
+  - **The main menu scrolls as one** (`<Screen scroll>`) when it's taller than the window — buttons slid over the tagline
+    and the version line. A scrolling screen re-centres once its pictures load (the art menu's logo).
+  - Results on a phone on its side keeps its buttons' row whole (Quit slid over the message; now the card scrolls).
+  - An avatar's initials stop at 45% of its 44 px circle ("SM" overflowed it). An art frame (`Panel frame`) no longer
+    grows with the text size, like the style's gaps — its rem are counted at 16 px; the same at 100%.
+  - The page check's `split:` also flags a TITLE word broken across lines when it's wider than its box (a title can
+    drop a size; body words still may wrap) — no new finding on any gallery screen at 100% or 200%.
+- 0.35.2 (F145, the in-game part): **HUD words stop growing at `hud-text-max` × their normal size** (a style value a game's
+  tweaks may set; default 1.25) — in a Hud and on every HUD piece (HudText, chips, seats, player chips, the
+  timer ring and bar lengths via `--hud-rem`, pinned pieces); menus and dialogs keep growing to 200%. ConnectionDot's words
+  may wrap in a left corner, and a `HudText fit` still too wide at its floor takes two lines. Same at 100%.
+- 0.35.3 (F145, Muzzy 2026-10-25): the page check's `overlap:` leaves a toast or tooltip (anything in the top layer)
+  over the page alone — on top by design; two of them over each other still count. `hud-text-max` 1.25 approved.
+  The shoot's `knownShots` lists shots Muzzy accepted as they are (talk sideways at 200%), printed as "known".
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
@@ -306,5 +364,9 @@ gallery's `npm run shoot` uses the same one.
   Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
   public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
-  (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3)
+  (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3). **200% text (F144):** every
+  gallery screen in Clean at 200% text, on a 390×844 phone and an 844×390 phone on its side
+  (`screens/<id>-clean-phone-text-200`, `…-clean-phone-landscape-text-200`; Settings opens on its Accessibility tab) —
+  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). Clean only: the looks share
+  one layout, so a 200% problem shows in Clean first.
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

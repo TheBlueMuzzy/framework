@@ -32,6 +32,8 @@ const KINDS = [
   { kind: 'faint', name: 'text is easy to read (contrast)', fix: 'Put text in the style\'s colour for its background (on-surface on surface, on-primary on primary…), not a faded or see-through one — 4.5:1, or 3:1 for big text. Quieter text = smaller (caption), not paler.' },
   { kind: 'edge', name: 'nothing touches the edge of its box', fix: 'Give the box padding on every side (the kit\'s gap names) so its text, icons, avatars and badges never touch its edge. Something meant to run edge to edge (a cover picture, a divider) → data-ui-bleed on it.' },
   { kind: 'grows', name: 'cards keep their size while they fill in', fix: 'Make the card its final size from the start — room for everything it can hold (a min size from the kit\'s sizes, numbers in a slot wide enough for their biggest value) — so filling in never pushes things around.' },
+  // 0.34.1 (F141)
+  { kind: 'split', name: 'no word is broken in the middle', fix: 'Give the word room on its line: wrap whole words (overflow-wrap: break-word, not anywhere), and don\'t let a neighbour squeeze it (a min size of its longest word, or the row wrapping) — big text (200%) shows it first.' },
 ]
 
 /** problems per screen ("phone · menu" → ["small: 30×30 px — "Close"", …]) → one row per kind: each problem + where. */
@@ -256,7 +258,7 @@ export function readRowManifest(text, { module, file = `src/${module}/${ROW_MANI
   return { module, file, rows, problems }
 }
 
-// ONE-RELEASE FALLBACK (0.30.0, F110 — take it out in 0.35.0 (0.34.0 went to the two new looks); kept through 0.34.0 because Glyphtender hadn't
+// ONE-RELEASE FALLBACK (0.30.0, F110 — take it out in 0.36.0 (0.34.0 went to the two new looks, 0.35.0 went to What's new); kept through 0.34.0 because Glyphtender hadn't
 // reinstalled crashes / emotes / ai yet, decided 2026-10-23): module copies older than their settings-rows.json
 // (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still get their row counted, exactly as the kit's old hard-coded lists
 // did. Used ONLY for one of these folders installed (a VERSION) WITHOUT the file — updating the module makes it unused.

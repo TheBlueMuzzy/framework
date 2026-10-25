@@ -69,6 +69,33 @@ line (`carrier.travel`, `travellingLook`); **picking a piece up again = a new de
 **straight lines, not arcs**, for pieces that don't jump; **no feedback flicker** — a zone's feedback starts only well
 past its edge and stops only back inside (two edges). Card hands (insertion marker, make room) come next.
 
+## 4c. What's new after an update (F143, 2026-10-25)
+A polite "here's what changed" panel: once, on the first launch after the version changes; never on a first install,
+never mid-game; 3–5 highlight lines, an optional "full notes" link, one tap to close.
+- **The lines live in the game's content:** `content/text/whats-new.json` —
+  `{ "notesUrl": "https://…" (optional), "versions": { "0.4.0": ["line", …], … } }`. One entry per X.Y.Z the game wants to
+  announce. "Skip build-only / patch-only" = simply no entry — the game decides, no rule to argue with. Over 5 lines →
+  the first 5 show and the dev console says so.
+- **The rule (a pure function, `whatsNewDecision`, tested rule by rule):** compares X.Y.Z only (the build number never
+  counts). "dev" or a version that can't be read → nothing. No "last seen" yet (first install) or a garbled one →
+  remember this version, show nothing. Same X.Y.Z (incl. a build-only bump) or an older one (a downgrade) → nothing, the
+  record stays. Newer → the **newest entry above the last seen, up to this version** (so a hotfix 0.4.1 with no entry
+  right after 0.4.0 still shows 0.4.0's lines to a player who skipped it); no such entry → remember quietly.
+- **Last seen is stored by the UI kit,** like the tips memory: one string ("0.4.0") under `kit-whats-new:<game folder>`
+  (the settings/tips slot naming), read and written in try/catch — a private window just forgets. *Why the UI kit and
+  not the version or saves module:* the kit already keeps its own small records (Settings, tips) and the saves module's
+  rule exempts the kit's own saving (`storageAllowed` is only for game code); the saves module has no consent gate to
+  respect — "consent" there is `askToKeepSaves()` (the browser's keep-my-data request), which a one-string record doesn't
+  need. The kit stays free of the version module, as `<MainMenu version={versionLabel}>` already is: the game passes it.
+- **Not mid-game: the kit never pops it.** The game calls one thing at a safe moment — when its main menu shows:
+  `useEffect(() => { showWhatsNew({ version: appVersion, ...whatsNew }) }, [])`. It decides, remembers, and opens the
+  panel as a kit screen (Esc, Back, tapping the dim all close it). **Remembered when it opens, not when it closes:** any
+  way of closing then counts, and React's double start-up while developing can't open it twice. (A tab killed while it
+  is open → that player misses it; harmless.)
+- **The panel `<WhatsNew>`:** a Modal (title "What's new in v0.4" — X.Y, or X.Y.Z when Z isn't 0 — from `words.title`
+  with `{version}`), the lines as Text, a "Full notes" Button only when there's a `notesUrl` (http/https only, opens a new
+  tab), and one close Button ("Got it"). Kit parts only.
+
 ## 5. How it behaves (the passive skill: `game-ui`)
 Kicks in on its own whenever a game needs a screen, panel, button or HUD piece, or when UI looks off or breaks on a phone. `/develop` also calls it by name for any UI task.
 1. **Style chosen?** If the game has no `style.json`: show the gallery in all 5 presets (phone + desktop screenshots) and suggest one with an MDA reason ("Cozy — warm and forgiving, fits the relaxed pillar"). You pick; it's logged in the TDD. *The only time it asks you anything.*

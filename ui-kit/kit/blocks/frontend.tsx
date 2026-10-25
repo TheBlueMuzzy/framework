@@ -46,8 +46,11 @@ export function MainMenu({ title, subtitle, version, children, items, words, tit
   // On a phone on its side the buttons go in two columns from six on — the extra buttons (children) count too
   // (0.24.0: Glyphtender's 5 items + Full screen stayed one column and ran off the top once the version footer took a row)
   const buttonCount = buttons.length + Children.toArray(children).length
+  // scroll (0.35.1, F145): taller than the window (200% text on a phone, upright or on its side) → the whole menu
+  // scrolls as one, the version line under it — before, the buttons slid over the tagline and the version. When it
+  // fits, it looks just as before (the centre opens in the middle).
   return (
-    <Screen label={title} bottom={version && <span className="kit-menu-version"><Text kind="caption">{version}</Text></span>} backdrop={backdrop}>
+    <Screen scroll label={title} bottom={version && <span className="kit-menu-version"><Text kind="caption">{version}</Text></span>} backdrop={backdrop}>
       <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
           {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} /> : <Text kind="display">{title}</Text>}

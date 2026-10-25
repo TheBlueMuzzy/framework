@@ -1,0 +1,12 @@
+{
+  "notesUrl": "https://example.com/roll-better/devlog",
+  "versions": {
+    "0.3.0": ["Online play with friends"],
+    "0.4.0": [
+      "Two new boards: the Harbour and the Night Market",
+      "Dice settle faster after a big throw",
+      "Settings remember your text size",
+      "Fixed: the score could skip a row on small phones"
+    ]
+  }
+}

@@ -160,6 +160,11 @@ function keepCentredOnOpen(box: HTMLDivElement, keep: 'margin' | 'variable') {
   place(true)
   let open = true
   document.fonts?.ready.then(() => { if (open) place(true) }) // (already loaded: straight away, before any tap)
+  // …and its pictures, like the fonts (0.35.1): a title logo arriving after the first measure (the main menu's
+  // titleArt) left the menu sitting low
+  const pictures = Array.from(box.querySelectorAll('img')).filter((img) => !img.complete)
+  const onPicture = () => { if (open) place(true) }
+  for (const img of pictures) img.addEventListener('load', onPicture, { once: true })
   const onResize = () => place()
   const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(onResize)
   if (observer) observer.observe(screen)
@@ -168,6 +173,7 @@ function keepCentredOnOpen(box: HTMLDivElement, keep: 'margin' | 'variable') {
     open = false
     observer?.disconnect()
     window.removeEventListener('resize', onResize)
+    for (const img of pictures) img.removeEventListener('load', onPicture)
   }
 }
 
@@ -189,14 +195,18 @@ export function Panel({ gap = 'm', depth = 1, frame, className = '', style, ...r
 // ink = which style colour the words inside take, to read on the frame's own window: 'on-surface' (default, like any
 // panel), 'on-bg' or 'on-game' (light words over a dark game in most styles).
 export type PanelFrame = { src: string; slice: [number, number, number, number]; scale?: number; ink?: 'on-surface' | 'on-bg' | 'on-game' }
+// The frame's thickness doesn't grow with the player's text size (0.35.1, F145), like the style's gaps: at 200% text
+// the wood ate twice the room and left the report a 126 px strip ("Ga / me / ove / r") — so its rem are counted at the
+// usual 16 px. Same size as before at 100%.
+const REM_PX = 16
 export function frameVariables({ src, slice, scale = 0.0625, ink = 'on-surface' }: PanelFrame): CSSProperties {
   return {
     '--kit-art-frame-ink': `var(--${ink})`,
     '--kit-art-frame': `url("${encodeURI(src)}")`,
     '--kit-art-frame-slice': slice.join(' '),
-    '--kit-art-frame-width': slice.map((n) => `${+(n * scale).toFixed(4)}rem`).join(' '),
+    '--kit-art-frame-width': slice.map((n) => `${+(n * scale * REM_PX).toFixed(3)}px`).join(' '),
     // short windows (a phone on its side): the frame drawn at 60%, so the report keeps the room
-    '--kit-art-frame-width-short': slice.map((n) => `${+(n * scale * 0.6).toFixed(4)}rem`).join(' '),
+    '--kit-art-frame-width-short': slice.map((n) => `${+(n * scale * 0.6 * REM_PX).toFixed(3)}px`).join(' '),
   } as CSSProperties
 }
 

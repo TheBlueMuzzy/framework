@@ -45,6 +45,6 @@ describe('MenuHeader', () => {
     const box = container.querySelector<HTMLElement>('.kit-menu-header-title')!
     box.dataset.fit = 'tight' // what a narrow phone measures (jsdom can't measure)
     rerender(<MenuHeader title="UPGRADES" />)
-    expect(box.hasAttribute('data-fit')).toBe(false)
+    expect(box.dataset.fit).toBe('') // refit alone (0.35.1): the full title size
   })
 })

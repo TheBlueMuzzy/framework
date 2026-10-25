@@ -1,8 +1,9 @@
 // SCREENSHOTS — the gallery's menu and parts page, and every built screen, saved to screenshots/.
 //   screenshots/<page>-<size>.png                    menu + parts page (phone, phone landscape, desktop)
 //   screenshots/parts-<style>-<size>.png             the parts page in every style
-//   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop,
-//                                                    and the key screens in every style (also on a 360×780
+//   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop (and at 200% text on a
+//                                                    phone + a phone on its side: …-text-200, F144),
+//                                                  and the key screens in every style (also on a 360×780
 //                                                    phone; the landscape ones also on a 667×375 phone on its side)
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
@@ -20,7 +21,7 @@ const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json'))
 // Shown in every style, for picking a style and catching a style that breaks one of them
 const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'emotes', 'talk', 'payslip', 'victoryreveal']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk']
+const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk', 'whatsnew']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },
@@ -63,7 +64,19 @@ async function pageFor(size) {
   return (pages[size.name] = page)
 }
 
+// Shots whose problems Muzzy accepted as they are — printed as "known" with his reason, not counted. One shot each,
+// never a whole screen: the same screen at other sizes and looks is still checked.
+const knownShots = {
+  'screens/talk-clean-phone-landscape-text-200.png': 'Muzzy 2026-10-25 (F145): a 3-line bubble at 200% has no room on a short screen — the kit warns, the game makes room',
+}
+let knownCount = 0
+
 function report(name, problems) {
+  if (knownShots[name] && problems.length) {
+    knownCount += problems.length
+    console.log(`~ ${name} — ${problems.length} known: ${knownShots[name]}${problems.map((p) => `\n    ${p}`).join('')}`)
+    return
+  }
   problemCount += problems.length
   console.log(`${problems.length ? '✗' : '✓'} ${name}${problems.map((p) => `\n    ${p}`).join('')}`)
 }
@@ -181,7 +194,20 @@ try {
     await shoot(`parts-${size.name}`, size, '?screen=parts')
   }
   // Accessibility floor: browser text size at 200%
-  await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' }))
+  const text200 = (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+  await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', text200)
+  // …and EVERY screen at 200%, in Clean, on a phone upright and on its side (F144) — every screen both ways,
+  // whatever a game's own orientation. Settings opens on its Accessibility tab (0.34.1, F141): the ◀ tab ▶ picker
+  // shows its longest word there.
+  const openers = {
+    settings: async (page) => {
+      await text200(page)
+      while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+    },
+  }
+  for (const size of [sizes.phone, sizes.landscape]) {
+    for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
+  }
   // Live restyle: change a tweak with the dev switcher and check it repaints
   await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
     await page.getByLabel('Next Corners').click()
@@ -223,5 +249,6 @@ if (codeChanges().length) {
   process.exit(2)
 }
 console.log(`\n${shotCount} screenshots in ${Math.round((Date.now() - started) / 1000)} s`)
+if (knownCount) console.log(`(${knownCount} known problem(s) on accepted shots, not counted — knownShots)`)
 console.log(problemCount ? `${problemCount} problem(s) found` : 'No overflow, clipped controls, small targets, stray focus rings or console errors found')
 process.exit(problemCount ? 1 : 0)

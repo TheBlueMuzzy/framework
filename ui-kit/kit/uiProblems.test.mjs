@@ -110,6 +110,19 @@ describe('findProblems — a solid piece covering text', () => {
       <script>document.getElementById('tip').showPopover()</script>`)
     expect(only('overlap', found)).toEqual([])
   })
+
+  // 0.35.3 (F145, Muzzy 2026-10-25): toasts at 200% text stacked over the card's words and buttons — on top by design
+  it('words in the top layer (a toast) over the page are not an overlap; two toasts over each other still are', async () => {
+    const toast = 'position:fixed;inset:auto;margin:0;border:0;padding:4px;background:#fff'
+    const found = await problemsOn(`
+      <p style="position:absolute;left:20px;top:20px;margin:0">Win a round to earn trophies</p>
+      <button style="position:absolute;left:20px;top:60px">More</button>
+      <div id="a" popover="manual" style="${toast};left:10px;top:14px;width:300px">Sam joined the room</div>
+      <div id="b" popover="manual" style="${toast};left:10px;top:200px;width:200px">Connection lost</div>
+      <div id="c" popover="manual" style="${toast};left:30px;top:204px;width:200px">Tap to close me</div>
+      <script>for (const id of 'abc') document.getElementById(id).showPopover()</script>`)
+    expect(only('overlap', found)).toEqual(['overlap: "Connection lost" × "Tap to close me"'])
+  })
 })
 
 // 0.21.0 — the quality bars: faint text, things touching their box's edge, cards that grow
@@ -228,5 +241,36 @@ describe('findProblems — quality bars', () => {
     })
     await frames(6)
     expect(only('grows', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
+  })
+})
+
+// 0.34.1 (F141) — a word broken in the middle at a big text size
+describe('findProblems — words split in the middle', () => {
+  it('the ◀ Accessibility ▶ picker squeezed by its arrows is flagged once: the word fits its box', async () => {
+    const found = await problemsOn(`
+      <div style="display:flex;width:300px;border:1px solid #888;border-radius:8px">
+        <button style="width:110px">◀</button>
+        <span style="flex:1 1 0;min-width:0;text-align:center;overflow-wrap:anywhere">Accessibility</span>
+        <button style="width:110px">▶</button></div>`)
+    expect(only('split', found)).toEqual(['split: "Accessibility" is broken in the middle across 2 lines, though it fits on one line of its box (<div>)'])
+  })
+
+  it('a word too long for its box at all may wrap; words wrapping at spaces and hyphens are fine', async () => {
+    const found = await problemsOn(`
+      <div style="width:90px;padding:4px;border:1px solid #888;overflow-wrap:anywhere">Supercalifragilistic</div>
+      <p style="width:90px;margin:8px">Red-green colour-blind mode for players</p>`)
+    expect(only('split', found)).toEqual([])
+  })
+
+  // 0.35.1 (F145): Reconnecting's "Reconnecti / ng…" — a title word wider than its whole card at 200% text. Not a squeeze
+  // (the word fits nowhere at that size), but a title can drop a size, so a broken title word is flagged too
+  it('a TITLE word wider than its box is flagged; the same word as plain text is not', async () => {
+    const found = await problemsOn(`
+      <div style="width:120px;padding:4px;border:1px solid #888">
+        <h2 class="kit-text" data-kind="title" style="font-size:32px;margin:0;overflow-wrap:break-word">Reconnecting…</h2>
+        <p class="kit-text" style="font-size:32px;margin:0;overflow-wrap:break-word">Reconnecting…</p></div>`)
+    const split = only('split', found)
+    expect(split).toHaveLength(1) // the title only
+    expect(split[0]).toMatch(/^split: "Reconnecting…" is broken in the middle across \d lines — a title word wider than its box \(<div>\)/)
   })
 })

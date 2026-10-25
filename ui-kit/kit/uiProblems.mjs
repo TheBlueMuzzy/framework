@@ -6,7 +6,8 @@
 //              screen edge (and not in something that scrolls), or text cut off
 //   "overlap:" two things on screen sit on top of each other (text over text, a control over text…) — new in 0.18.0;
 //              and a solid chip, badge or panel slid part-way onto a bar, meter or picture — 0.33.1 — or onto
-//              another card's words — 0.33.2
+//              another card's words — 0.33.2. A toast or tooltip (the top layer) over the page is on top by design
+//              and never counts — two of them over each other do (0.35.3)
 //   "focus:"   a focus ring showing although nobody used the keyboard
 //   "faint:"   text too faint to read against what's behind it: under 4.5:1, or 3:1 for big text (24 px, or 18.66 px
 //              bold) — the WCAG AA line. Skipped where it can't be judged: text over a picture, gradient, canvas or
@@ -16,6 +17,9 @@
 //              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
+//   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
+//              box it's drawn in; a word wider than that box may still wrap — 0.34.1 — unless it's in a title (0.35.1:
+//              a title can drop a size instead — "Reconnecti / ng…")
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
 // (a game's on-purpose overlap, e.g. a title drawn over its own shadow copy), and things covered by something else
@@ -252,6 +256,43 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
   }
 
+  // ---- words split in the middle (0.34.1) ----
+  // A word broken across two lines in the middle ("Accessibil / ity" in a ◀ tab ▶ picker at 200% text). Flagged only
+  // when the word would fit on one line of the box it's drawn in (the nearest card, chip, button or panel around it —
+  // or the screen, when there's none): then the layout squeezed it (arrows too wide, a row's neighbour taking the room).
+  // A word wider than that box has nowhere to go and may still wrap. Breaks at a space, hyphen, dash or slash are
+  // where words end, not "in the middle".
+  const splitWords = (el) => {
+    const out = []
+    const range = document.createRange()
+    for (const n of wordsIn(el, false)) {
+      for (const m of n.textContent.matchAll(/[^\s\-­‐-—/]{2,}/g)) {
+        range.setStart(n, m.index)
+        range.setEnd(n, m.index + m[0].length)
+        const lines = [...range.getClientRects()].filter((r) => r.width > 0.5)
+        if (lines.length < 2) continue
+        const tops = lines.map((r) => r.top)
+        if (Math.max(...tops) - Math.min(...tops) < Math.min(...lines.map((r) => r.height)) / 2) continue // one line
+        let box = el
+        while (box && box !== document.body && !drawsBox(box)) box = box.parentElement
+        let room = innerWidth, what = 'the screen'
+        if (box && box !== document.body) {
+          const s = getComputedStyle(box)
+          const k = box.offsetWidth ? box.getBoundingClientRect().width / box.offsetWidth : 1 // (shrunk by a transform)
+          room = box.getBoundingClientRect().width - k * ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'].reduce((sum, side) => sum + parseFloat(s[side]), 0)
+          what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
+        }
+        const wide = lines.reduce((sum, r) => sum + r.width, 0)
+        if (wide <= room + 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
+        // …and a TITLE's word even when it's wider than its box (0.35.1, F145: "Reconnecti / ng…" at 200% text): a title
+        // has a smaller size to go to (MenuHeader and the end screens drop a step), so a split one was never fitted
+        else if (el.matches('.kit-text:is([data-kind="title"], [data-kind="display"])')) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines — a title word wider than its box (${what}): drop the title a size instead (MenuHeader / useTitleFit)`)
+      }
+    }
+    return out
+  }
+  for (const el of texts) problems.push(...splitWords(el))
+
   const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')
   hitAll.textContent = '* { pointer-events: auto !important; }'
@@ -267,10 +308,15 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       if (edge) problems.push(`edge: "${name(el)}" ${edge}`)
     }
     const crossed = [] // pairs already said as "X × Y" (the covered-piece check below doesn't say them twice)
+    // A toast or tooltip floats in the top layer on purpose, over whatever is under it (at 200% text the toasts covered
+    // the card's words — Muzzy 2026-10-25: on top by design, 0.35.3). Only things in the SAME layer can collide: two
+    // toasts over each other still count.
+    const inTopLayer = (el) => !!el.closest(':popover-open')
     for (let i = 0; i < things.length; i++) {
       for (let j = i + 1; j < things.length; j++) {
         const a = things[i], b = things[j]
         if (a.contains(b) || b.contains(a)) continue
+        if (inTopLayer(a) !== inTopLayer(b)) continue
         const at = crossing(boxes[i], boxes[j])
         if (!at) continue
         let seenA = false, seenB = false
