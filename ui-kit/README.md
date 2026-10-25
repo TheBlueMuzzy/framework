@@ -337,5 +337,9 @@ gallery's `npm run shoot` uses the same one.
   Not from F103 but seen on the way: audio 0.2.1 has no checks (update it), `content/credits.json` misses public/art and
   public/fonts, and two fonts in the font library are 🔴 (no licence) — check:framework's UI kit part fails on them.
 - `npm run shoot` — screenshots of every screen in every style at phone / landscape / desktop, with what's wrong on each
-  (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3)
+  (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3). **200% text (F144):** every
+  gallery screen in Clean at 200% text, on a 390×844 phone and an 844×390 phone on its side
+  (`screens/<id>-clean-phone-text-200`, `…-clean-phone-landscape-text-200`; Settings opens on its Accessibility tab) —
+  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). Clean only: the looks share
+  one layout, so a 200% problem shows in Clean first.
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

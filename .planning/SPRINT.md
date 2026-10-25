@@ -7,8 +7,9 @@ What changes: the screenshot run looks at every screen with the biggest text set
 Done when: npm run shoot takes every gallery screen at 200% text on an upright phone (390×844) and a sideways one (844×390), in the Clean look, and lists what it finds — before anything is fixed.
 - [x] 🤖 1. Every gallery screen at 200% on both phones in the shoot (the parts / Settings 200% shots show how) — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. Run it on today's code and list every problem by screen in Notes, before any fix (F141's scan list is the starting guess) — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 3. The shoot's run time stays reasonable (say how many shots it added and the new run time; only Clean at 200%, not every look) — ui-kit/README.md
+- [x] 🤖 3. The shoot's run time stays reasonable (say how many shots it added and the new run time; only Clean at 200%, not every look) — ui-kit/README.md
 Check: the shoot runs the new shots; the list is in Notes.
+Checked: 2026-10-25 (helper) — `SHOOT_PORT=6144 npm run shoot`: 745 screenshots in 695 s (was 656 in 615 s; +90 = 45 screens × 2 phones, the old Settings 200% shot folded in), **exit 1 with 89 problems — expected for F144**: all on 31 of the new 200% shots, the 100% shots + parts-phone-text-200 still 0; the list is in Notes. Looked at reconnecting / results / modes 200% shots myself. Root `npm run check:fast`: ✓ all 20 checks passed. No kit/ or gallery/ code changed.
 
 ## F145 🐞 Every screen holds up at 200% text
 Done when: the shoot is 0 problems with every 200% shot from F144, and nothing changed at 100% (the 100% shots stay 0 problems; desktop + phone shots at 100% looked at for the screens touched).
