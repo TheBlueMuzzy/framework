@@ -1,8 +1,8 @@
 # Game UI kit
 
-Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in five styles —
-Clean · Cozy · Cartoon · Pixel · Neon — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.33.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
+Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
+Kit **0.34.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -139,8 +139,8 @@ gallery's `npm run shoot` uses the same one.
   settingsRow.ts defines the call — the Dev Kit's gameCode() only leaves out the modules it knows by name). Each pattern is compiled with a try/catch: bad JSON, no rows or
   a bad pattern = a plain-English failure naming the module and file, never a crash. **One-release fallback:** module
   copies older than their manifest (crashes ≤ 0.1.0, emotes ≤ 0.3.0, ai ≤ 0.7.0) still pass through the old hard-coded
-  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.34.0 (kept
-  through 0.33.0: Glyphtender hadn't reinstalled those modules yet).
+  lists (`OLD_MODULE_ROWS`), used only for one of those folders installed without the file — take it out in 0.35.0 (kept
+  through 0.34.0: Glyphtender hadn't reinstalled those modules yet; 0.34.0 went to the two new looks).
   The CRASH_ROWS / EMOTE_ROWS / BANTER_ROWS exports are gone (nothing used them).
   0.31.0 (F111, from Goops' sketch S9 — `kit/blocks/talkingBubble.tsx`, gallery `?screen=talk`): `TalkingBubble`, a
   story line someone SAYS. A Callout underneath (the same placement, pointer and colours as the emote bubble), but its
@@ -266,6 +266,18 @@ gallery's `npm run shoot` uses the same one.
   `:` (an inline SVG's `fill='#fff'` read as a raw colour); what's inside `url(…)` and quotes isn't checked as a style
   value. F136 — `Grid fill` (`kit/layout.tsx`, `kit.css`): **Mode select spreads fewer modes over its row** — 2 modes
   on a desktop panel left an empty column; 3+ modes and phones look the same.
+- 0.34.0 (F138–F140, framework sprint 37): **two new looks — Dark console (`"preset": "console"`) and Fantasy
+  (`"preset": "fantasy"`)**, so a game picks from seven. Dark console = a games console's own menus: dark navy, big soft
+  corners, no outlines, one bright blue, Exo 2 titles + Nunito. Fantasy = dark wood and gold: small corners, 2 px gold
+  edges, Cinzel carved-capital titles, Alegreya book serif for reading and numbers (Cinzel's 0 reads as O). Both pass
+  the style tests (same settings as every look, 4.5 : 1 text, 3 : 1 focus ring, a green success) and the shoot (639 shots
+  with 7 looks, 0 problems). New fonts `kit/fonts/cinzel.woff2` + `alegreya.woff2` (SIL OFL 1.1, credited in
+  content/credits.json); a game only downloads the fonts its look uses. Picked from the framework's sketch S1 (three takes
+  per look) — Claude's draft picks (Console 1 · Fantasy 2) until Muzzy confirms or swaps. The old-module-rows fallback now
+  goes in 0.35.0. Also `kit.css`: **numbers are full height in every font** (`font-variant-numeric: lining-nums` on the
+  kit's text; a player chip's score keeps its equal-width digits too) — Alegreya draws old-style numbers by default, so
+  "v0.1.0" read "vO.1.O"; fonts that already draw lining numbers look the same. `scripts/pick-sheet.mjs` takes
+  `SHOOT_PORT` like the shoot.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

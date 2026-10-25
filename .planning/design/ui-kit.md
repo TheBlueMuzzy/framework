@@ -28,8 +28,10 @@ Research found 7 style families that every kit maker repeats. Starting with **5 
 | **Cartoon** | casual mobile, party | chunky pills, thick outlines, heavy rounded font, bouncy pop |
 | **Pixel** | retro / 8-bit | square steps, pixel font, hard shadows, no easing |
 | **Neon** | sci-fi, dark | chamfered corners, thin glow lines, techno font, flicker-in |
+| **Dark console** (`console`, 0.34.0) | a games console’s own menus | big soft corners, no outlines, one bright blue, Exo 2 titles + Nunito, quick fades |
+| **Fantasy** (`fantasy`, 0.34.0) | dark wood and gold | small corners, gold 2 px edges, Cinzel carved capitals + Alegreya book serif, gentle float |
 
-Later, only when a game asks: **Dark console** and **Fantasy** (fantasy needs textures).
+Dark console and Fantasy were added in 0.34.0 (framework sprint 37, picked from sketch S1 — Claude’s draft picks until Muzzy confirms; `.planning/research/new-looks/picks.json`). Fantasy is flat for now: wood / parchment textures are the optional extra below.
 **Textures are an optional extra** on any preset (e.g. Kenney CC0 wood/stone panels via 9-slice). The flat look always works without them.
 **Per game:** `content/ui/style.json` = `{ "preset": "cozy", "tweaks": { "accent": "#e07a5f", "corners": "rounder" } }`. You edit it in Obsidian/Dev Kit or just say "rounder, more orange". Real art later = add textures/fonts, no screen code changes.
 **Accessibility floor sits outside the styles** so no preset can break it: text ≥ 18px on phones and PC, 4.5:1 contrast (tested for every preset), 44px touch targets, visible focus ring, text scales to 200%, reduce-motion respected.

@@ -21,9 +21,9 @@ Check: ui-kit tests; the shoot; the shots looked at.
 
 ## F140 🔧 Everything that lists the looks knows all 7
 Done when: the gallery's style switcher, the pick sheet, the CATALOG, the game-ui skill and the version notes name 7 looks; UI kit 0.34.0.
-- [ ] 🤖 1. The pick sheet's feel lines for the two new looks — ui-kit/scripts/pick-sheet.mjs
-- [ ] 🤖 2. CATALOG + README (0.34.0; the old-module-rows drop moves to 0.35.0) — ui-kit/CATALOG.md
-- [ ] 🤖 3. The game-ui skill and the BMUZ catalogs say 7 looks — ui-kit/README.md
+- [x] 🤖 1. The pick sheet's feel lines for the two new looks — ui-kit/scripts/pick-sheet.mjs
+- [x] 🤖 2. CATALOG + README (0.34.0; the old-module-rows drop moves to 0.35.0) — ui-kit/CATALOG.md
+- [x] 🤖 3. The game-ui skill and the BMUZ catalogs say 7 looks — ui-kit/README.md
 Check: grep for "five styles" / "5 styles" finds none left; ui-kit tests.
 
 Notes:

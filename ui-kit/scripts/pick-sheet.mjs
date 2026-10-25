@@ -1,4 +1,4 @@
-// STYLE-PICK SHEET — one image of a screen in all 5 styles side by side, for picking a game's style.
+// STYLE-PICK SHEET — one image of a screen in every style side by side (7 since 0.34.0), for picking a game's style.
 // Usage: node scripts/pick-sheet.mjs [screen]     (default: settings — it shows the most parts:
 //        tabs, sliders, switches, ◀ option ▶ and buttons; any id from gallery/menu.ts works, e.g. menu, hud)
 // Saves screenshots/pick-sheet.png. Starts its own Vite server on port 5180 and uses Playwright's
@@ -19,6 +19,8 @@ const feels = {
   cartoon: 'casual mobile, party, bouncy',
   pixel: 'retro, 8-bit',
   neon: 'sci-fi, dark, glowing',
+  console: 'console menus — dark, soft, one bright colour',
+  fantasy: 'dark wood and gold, carved-capital titles',
 }
 const presetNames = Object.keys(feels).filter((name) => readdirSync('kit/styles').includes(`${name}.json`))
 
@@ -28,7 +30,9 @@ if (!screenIds.includes(screen)) {
   process.exit(1)
 }
 
-const server = await createServer({ server: { port: 5180, strictPort: true } })
+// SHOOT_PORT=5281 node scripts/pick-sheet.mjs — when 5180 is busy (the gallery open), like npm run shoot
+const PORT = Number(process.env.SHOOT_PORT) || 5180
+const server = await createServer({ server: { port: PORT, strictPort: true } })
 await server.listen()
 const browser = await chromium.launch()
 
@@ -36,7 +40,7 @@ const browser = await chromium.launch()
 const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
 const shots = []
 for (const preset of presetNames) {
-  await phone.goto(`http://localhost:5180/?screen=${screen}&preset=${preset}`)
+  await phone.goto(`http://localhost:${PORT}/?screen=${screen}&preset=${preset}`)
   await phone.waitForSelector('.gallery-game .kit-screen')
   await phone.addStyleTag({ content: '.gallery-bar { display: none !important; }' }) // hide the gallery's own bar
   await phone.evaluate(() => document.fonts.ready)
