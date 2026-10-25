@@ -12,9 +12,9 @@ Check: ui-kit tests; a real shoot run with a file touched part-way stops; a full
 
 ## F130 🔧 A bubble that can't stay clear says so
 Done when: a TalkingBubble, teach callout or emote bubble whose `avoid` can't be met on any side prints one dev-console warning naming what it covers (once until it's clear again, not every frame); nothing prints in a production build; placement is unchanged.
-- [ ] 🤖 1. Run the warning on today's gallery at every shoot size and list what it already finds — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. The shared placement warns once when no side is clear — ui-kit/kit/blocks/teach.tsx
-- [ ] 🤖 3. Tests: no clear side → one warning naming the covered piece; clear again → quiet; a later block → warns again; production → none — ui-kit/kit/blocks/teach.test.tsx
+- [x] 🤖 1. Run the warning on today's gallery at every shoot size and list what it already finds — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. The shared placement warns once when no side is clear — ui-kit/kit/blocks/teach.tsx
+- [x] 🤖 3. Tests: no clear side → one warning naming the covered piece; clear again → quiet; a later block → warns again; production → none — ui-kit/kit/blocks/teach.test.tsx
 - [ ] 🤖 4. README / CATALOG `avoid` note — ui-kit/CATALOG.md
 Check: ui-kit tests; task 1's list is in Notes; shoot still 0 problems.
 

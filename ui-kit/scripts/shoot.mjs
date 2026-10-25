@@ -58,7 +58,8 @@ async function pageFor(size) {
   })
   page.errors = []
   page.on('pageerror', (e) => page.errors.push(e.message))
-  page.on('console', (m) => m.type() === 'error' && page.errors.push(m.text()))
+  // console errors, and the kit's own dev warnings (a bubble stuck on what it avoids, F130) — the gallery has none
+  page.on('console', (m) => (m.type() === 'error' || (m.type() === 'warning' && m.text().startsWith('[ui-kit]'))) && page.errors.push(m.text()))
   return (pages[size.name] = page)
 }
 

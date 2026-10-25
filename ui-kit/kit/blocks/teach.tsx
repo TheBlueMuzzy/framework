@@ -59,6 +59,7 @@ export type CalloutPlaceInput = {
 export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble: RefObject<HTMLDivElement | null>, now: RefObject<CalloutPlaceInput>) {
   useLayoutEffect(() => {
     let frame = 0, last = ''
+    const tellStuck = stuckTeller()
     const place = () => {
       const el = layer.current, box = bubble.current
       if (!el || !box) return
@@ -84,7 +85,8 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       let spot = placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
       // Clear of the HUD: the first side (in the usual order) where it fits without covering anything to avoid
       const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target, box) : []
-      const covers = (s: typeof spot) => avoid.some((a) => overlaps({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height }, a))
+      const spotBox = (s: typeof spot) => ({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height })
+      const covers = (s: typeof spot) => avoid.some((a) => overlaps(spotBox(s), a.box))
       if (avoid.length && covers(spot)) {
         const sides = sidesFor(now.current.placement)
         // No clear side next to the target (two seats side by side, both talking): one step further out on a side,
@@ -94,6 +96,9 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
           .find((s, i) => s.side === tries[i].side && !covers(s))
         if (clear) spot = clear
       }
+      // No side kept it clear (F130): it covers what it was told to avoid — said once in dev, so it gets fixed on purpose
+      const covered = avoid.filter((a) => overlaps(spotBox(spot), a.box))
+      tellStuck(covered.length > 0, () => stuckLine(bubbleName(box, now.current.target), covered.map((a) => nameOf(a.el))))
       // The pointer sits inside the bubble's border box; its centre goes on the middle of the border line
       const border = (box.offsetWidth - box.clientWidth) / 2
       const tipX = spot.tipX - border + (spot.side === 'left' ? -border / 2 : spot.side === 'right' ? border / 2 : 0)
@@ -117,15 +122,47 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
 
 // The boxes of what a bubble must stay off (visible ones only), minus any that hold the target (its own seat's HUD)
 // and the bubble itself (a selector like .kit-speech names it too)
-function avoidBoxes(selector: string, target: CalloutTarget, self: Element): Box[] {
+function avoidBoxes(selector: string, target: CalloutTarget, self: Element): { el: Element; box: Box }[] {
   const targetEl = typeof target === 'string' ? document.querySelector(target) : target instanceof Element ? target : null
   return [...document.querySelectorAll(selector)]
     .filter((el) => el !== self && !(targetEl && el.contains(targetEl)))
     .filter((el) => getComputedStyle(el).visibility !== 'hidden')
-    .map((el) => el.getBoundingClientRect())
-    .filter((r) => r.width > 0 && r.height > 0)
-    .map((r) => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom }))
+    .map((el) => ({ el, r: el.getBoundingClientRect() }))
+    .filter(({ r }) => r.width > 0 && r.height > 0)
+    .map(({ el, r }) => ({ el, box: { left: r.left, top: r.top, right: r.right, bottom: r.bottom } }))
 }
+
+// What a person would call a piece in a warning: its label, else its words as shown, else its class
+function nameOf(el: Element): string {
+  const words = (el.getAttribute('aria-label') || (el as HTMLElement).innerText || el.textContent || '').replace(/\s+/g, ' ').trim()
+  if (words) return words.length > 30 ? `${words.slice(0, 29)}…` : words
+  return el.classList[0] ? `.${el.classList[0]}` : el.tagName.toLowerCase()
+}
+
+// Which part the bubble is, and what it points at: 'TalkingBubble at "The Veteran"'
+const PARTS: [string, string][] = [['kit-talk', 'TalkingBubble'], ['kit-speech', 'SpeechBubble'], ['kit-emote-picker', 'EmotePicker']]
+function bubbleName(box: Element, target: CalloutTarget): string {
+  const part = PARTS.find(([cls]) => box.classList.contains(cls))?.[1] ?? (box.classList.contains('kit-pointed') ? 'MuteMenu' : 'Callout')
+  const el = typeof target === 'string' ? document.querySelector(target) : target instanceof Element ? target : null
+  return el ? `${part} at "${nameOf(el)}"` : part
+}
+
+/** A bubble that can't stay clear of its `avoid` says so in the dev console (F130, 0.33.3): once when it gets stuck,
+ *  and again only after it was clear in between — never every frame. Nothing in a production build.
+ *  `line` is made only when it's said (naming the pieces reads the page). */
+export function stuckTeller(warn: (line: string) => void = (line) => console.warn(line)) {
+  let stuck = false
+  return (now: boolean, line: () => string) => {
+    if (!now) { stuck = false; return }
+    if (stuck) return
+    stuck = true
+    if (import.meta.env?.DEV) warn(line())
+  }
+}
+
+/** The warning's words: which bubble, and what it covers. */
+export const stuckLine = (bubble: string, covered: string[]) =>
+  `[ui-kit] the ${bubble} can’t stay clear of ${covered.map((n) => `"${n}"`).join(', ')} (its avoid): no side has room, so it covers it — make room there, or point it at something else`
 
 /** Show a popover layer while mounted (above the game and any open screen). */
 export function useShownPopover(layer: RefObject<HTMLDivElement | null>) {
