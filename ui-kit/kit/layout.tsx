@@ -160,6 +160,11 @@ function keepCentredOnOpen(box: HTMLDivElement, keep: 'margin' | 'variable') {
   place(true)
   let open = true
   document.fonts?.ready.then(() => { if (open) place(true) }) // (already loaded: straight away, before any tap)
+  // …and its pictures, like the fonts (0.35.1): a title logo arriving after the first measure (the main menu's
+  // titleArt) left the menu sitting low
+  const pictures = Array.from(box.querySelectorAll('img')).filter((img) => !img.complete)
+  const onPicture = () => { if (open) place(true) }
+  for (const img of pictures) img.addEventListener('load', onPicture, { once: true })
   const onResize = () => place()
   const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(onResize)
   if (observer) observer.observe(screen)
@@ -168,6 +173,7 @@ function keepCentredOnOpen(box: HTMLDivElement, keep: 'margin' | 'variable') {
     open = false
     observer?.disconnect()
     window.removeEventListener('resize', onResize)
+    for (const img of pictures) img.removeEventListener('load', onPicture)
   }
 }
 
