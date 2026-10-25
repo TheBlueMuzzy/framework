@@ -53,6 +53,9 @@ describe('crashRootOptions', () => {
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = actBefore
     expect(document.body.textContent).toContain('Something broke')
     expect(document.body.textContent).toContain('The problem was reported.')
+    // the report goes out after its SHA-256 fingerprint (crypto.subtle, async): wait for it, not a fixed time — on a
+    // busy computer (check:fast beside a screenshot run) 50 ms wasn't always enough (2026-10-25)
+    await vi.waitFor(() => expect(sent).toHaveLength(1), { timeout: 2000 })
     expect(sent.map((body) => JSON.parse(body).kind)).toEqual(['react'])
   })
 
@@ -66,8 +69,8 @@ describe('crashRootOptions', () => {
     const place = document.createElement('div')
     document.body.append(place)
     await act(async () => { createRoot(place, crashRootOptions()).render(<Boundary><Broken /></Boundary>) })
-    await new Promise((resolve) => setTimeout(resolve, 20))
     expect(place.textContent).toBe('boundary caught it')
+    await vi.waitFor(() => expect(sent).toHaveLength(1), { timeout: 2000 }) // (after its async fingerprint, as above)
     expect(sent.map((body) => JSON.parse(body).kind)).toEqual(['react'])
     place.remove()
   })

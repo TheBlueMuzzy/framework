@@ -352,6 +352,16 @@ flowchart LR
   F137[F137 Part-way save code reload]
 ```
 
+## v0.20 — Two new looks  ✅ released 2026-10-25 (v0.22.0) · planned 2026-10-24
+Goal (Muzzy 2026-10-24, "go auto" on option A): the UI kit gets "Dark console" and "Fantasy" — picked from a sketch of 3 takes each — so a game can choose from 7 looks.
+- ✅ F138 ❓ Which take is each look: the sketch (3 console takes, 3 fantasy takes, knobs) — Console 1 + Fantasy 2, kept by Muzzy 2026-10-25 — must · sprint 37
+- ✅ F139 ✨ The two looks in the UI kit: console.json + fantasy.json, their fonts bundled and credited, the style tests and the shoot clean — must · needs: F138 · sprint 37
+- ✅ F140 🔧 Everything that lists the looks knows all 7: pick sheet, CATALOG, README, the game-ui skill — should · needs: F139 · sprint 37
+```mermaid
+flowchart LR
+  F138[F138 Which take] --> F139[F139 Looks in the kit] --> F140[F140 Lists know 7]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -359,7 +369,7 @@ flowchart LR
 - ✅ done (noticed 2026-10-24: the Dev Kit Color tab — every UI kit colour + "UI shape & feel" sliders, live, saved to content/ui/style.json; devkit/kit/color/). 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
 - Textured extras (Kenney CC0 9-slice panels) — could
-- Dark console + Fantasy presets — could (Muzzy 2026-10-24: "C later" — after v0.19; /sketch samples to pick from first)
+- → v0.20 F138–F140. Dark console + Fantasy presets — could (Muzzy 2026-10-24: "C later" — after v0.19; /sketch samples to pick from first)
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
@@ -369,7 +379,7 @@ flowchart LR
 - 2026-10-24 — → v0.17 F127. **uiProblems: a solid chip covering another card's text** (found by F124): coins over "Score 120" isn't flagged — the text rule takes the chip for "something covering it". Extend F124's covered-piece rule to text targets.
 - 2026-10-24 — → v0.17 F128. **The other installers start git on every install too** (found by F125): install-ai / -audio / -crashes / -devkit / -emotes each run git rev-parse + git status per call, like saves did (2 × 0.2–0.6 s under load) — one shared kitVersion helper asked once per run, before their tests hit the same 5 s limit.
 - 2026-10-24 — → v0.16 F125. **saves: the install test that times out under load**: "the Save code screen (ui/) only goes into a game with the UI kit…" took 5.1 s under check:fast's 20 side-by-side checks (2.3 s for all 10 alone) and went red once at /deliver v0.17.0. Find out what it waits on (real file copies? an npm call?) before giving it a longer limit.
-- 2026-10-24 — **Retire OLD_MODULE_ROWS for real** (look-back v0.15): its "out in" date has slipped twice (0.33.0 → 0.34.0) because Glyphtender still hasn't reinstalled crashes / emotes / ai. Plan it as a task in Glyphtender's next sprint (reinstall the three, its checks green), then delete the fallback in UI kit 0.34.0 — and give each game the F118 port pre-flight (check-all + `scripts/ports.mjs`) in the same pass.
+- 2026-10-24 — **Retire OLD_MODULE_ROWS for real** (look-back v0.15): its "out in" date has slipped twice (0.33.0 → 0.34.0) because Glyphtender still hasn't reinstalled crashes / emotes / ai. Plan it as a task in Glyphtender's next sprint (reinstall the three, its checks green), then delete the fallback in UI kit 0.35.0 (0.34.0 went to the two new looks, 2026-10-25) — and give each game the F118 port pre-flight (check-all + `scripts/ports.mjs`) in the same pass.
 - 2026-10-24 — → v0.16 F123 + F124. **🐞 UI kit: a corner slot can shrink below its content** (found by F119): `.kit-screen > [data-slot] { min-inline-size: 0 }` lets a HUD corner slide under its neighbour — the coins chip sits on the end of the Health bar on an upright Cozy phone, and on a 667×375 phone the sample's Roll crosses "40%". And the page check misses it: an opaque chip covering a bar (no text, not a control) isn't an overlap it looks for — teach uiProblems that, then fix the slot rule.
 - 2026-10-23 — **Hand to Glyphtender's session (found by the F25 / F26 proofs, scratch copy only):** (1) "What wins?" says players with LESS room to move win more (the Strategist keeps the most room and wins ~20%) — "glyphling freedom" may not be what wins; (2) the Strategist's "tangles a rival in ≥ 60% of games" barely moves with its sliders (the tuner's best held at 0.53 on 120 fresh games) — the gap is in its TRAP goal or the target's number; (3) set `tuneGames` 30 in its own content/ai/arena.json when it installs ai 0.7.0 (12 a try was luck twice there).
 - 2026-10-23 — **Small AI-report choices left at their defaults** (Muzzy approved F25/F26 without picking): "of N games" counts each player's game once (17lands style) — "player-games" would be plainer; `ai:tune` on the PC could default to 30 games a try while the Dev Kit button stays quick. Pick when a game first uses them.

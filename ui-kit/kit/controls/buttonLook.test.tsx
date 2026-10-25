@@ -1,6 +1,7 @@
 // @vitest-environment node
-// Button looks in a real browser (0.27.0): a danger button is lit like primary in a style that glows (Neon), in its
-// own red — so a − / + pair (danger / primary) looks like a pair. Styles without a glow stay unlit.
+// Button looks in a real browser (0.27.0): a danger button is lit like primary in a style that glows (Neon; Dark
+// console and Fantasy since 0.34.0), in its own red — so a − / + pair (danger / primary) looks like a pair. Styles
+// without a glow stay unlit.
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright'
@@ -27,7 +28,11 @@ describe.each(Object.keys(presets))('− / + in %s', (preset) => {
     expect(danger === 'none').toBe(primary === 'none')
     if (primary !== 'none') {
       expect(danger).toContain('drop-shadow')
-      expect(danger).toContain('255, 77, 109') // Neon's danger red, not its cyan
+      // in this style's own danger red (Neon 255 77 109), not its primary colour — read from its glow-danger setting
+      // (0.34.0: Dark console and Fantasy glow too; this line held Neon's red only)
+      const red = String(presets[preset]['glow-danger']).match(/rgb\((\d+) (\d+) (\d+)/)!.slice(1).join(', ')
+      expect(danger).toContain(red)
+      expect(primary).not.toContain(red)
     }
   })
 })

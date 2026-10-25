@@ -240,7 +240,7 @@
   /* 0.21.0: a number that counts up never widens its chip — the +N floats over it without taking room (no width,
      centred over the number), and a PlayerChip's score slot is as wide as its final number from the start (--kit-digits) */
   .kit-float-anchor > .kit-float-up { inline-size: 0; display: flex; justify-content: center; }
-  .kit-player-chip-score .kit-float-anchor > .kit-text { min-inline-size: calc(var(--kit-digits, 1) * 1ch); font-variant-numeric: tabular-nums; text-align: end; }
+  .kit-player-chip-score .kit-float-anchor > .kit-text { min-inline-size: calc(var(--kit-digits, 1) * 1ch); font-variant-numeric: tabular-nums lining-nums; text-align: end; }
   .kit-combo { display: inline-block; }
   .kit-timer { display: inline-grid; place-items: center; inline-size: 3.5rem; aspect-ratio: 1; border-radius: 50%; }
   /* Flow: the countdown number on a round plate, and the end-screen title */

@@ -253,7 +253,9 @@
 /* ───────────── kit-style: paint, from style variables only ───────────── */
 @layer kit-style {
   .kit-page { background: var(--bg); }
-  :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope) { color: var(--on-bg); font-family: var(--font-body); }
+  /* lining-nums (0.34.0): full-height numbers in every font — Fantasy's Alegreya draws old-style ones by default, where
+     a 0 is a small o ("v0.1" read "vO.1"); fonts that already draw lining numbers don't change */
+  :where(.kit-page, .kit-screen, .kit-toasts, .kit-scope) { color: var(--on-bg); font-family: var(--font-body); font-variant-numeric: lining-nums; }
   .kit-overlay[data-open] { background: color-mix(in srgb, var(--bg) 70%, transparent); } /* dims the game under it */
   .kit-panel {
     background: var(--surface) var(--panel-texture); color: var(--on-surface);
