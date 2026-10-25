@@ -85,6 +85,53 @@ describe('the Tuning tab', () => {
     vi.unstubAllGlobals()
   })
 
+  // F132 (0.28.0): a file listed in content/devkit.json "tuningFiles" — shown, saved to its own path, its note said
+  const rooms = { name: 'rooms', path: 'content/rooms.json', after: 'the room server reads it when it starts — restart npm run party:dev',
+    data: { _labels: { idleWarnAfterMs: 'Idle: the warning bar shows after (ms)' }, idleWarnAfterMs: 30000, allowBots: true } }
+
+  it('a listed file shows beside the tuning files, with its "after" note', () => {
+    render(<TuningTab files={[...files, rooms]} />)
+    expect(screen.getByText('content/rooms.json: the room server reads it when it starts — restart npm run party:dev.')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /physics\.json/ }).length).toBeGreaterThan(0) // the tuning file's section…
+    expect(screen.getAllByRole('button', { name: /rooms\.json/ }).length).toBeGreaterThan(0) // …beside the listed one's
+    cleanup()
+    render(<TuningTab files={[...files, rooms]} query="idle" />) // (a search opens every section)
+    expect((screen.getByLabelText('idleWarnAfterMs') as HTMLInputElement).value).toBe('30000')
+  })
+
+  it('Save writes a listed file to its own path and says when the change reaches the game', async () => {
+    const fetchMock = vi.fn(async () => new Response('{"ok":true}', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<TuningTab files={[...files, rooms]} query="idle" />)
+    fireEvent.change(screen.getByLabelText('idleWarnAfterMs'), { target: { value: '20000' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+    expect(fetchMock).toHaveBeenCalledTimes(1) // only the changed file
+    const body = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)
+    expect(body.path).toBe('content/rooms.json')
+    expect(body.data).toEqual({ ...rooms.data, idleWarnAfterMs: 20000 })
+    // (two status lines while searching: the search's count, and Save's)
+    expect(screen.getAllByRole('status').map((s) => s.textContent)).toContain('Saved content/rooms.json — refresh and it stays. content/rooms.json: the room server reads it when it starts — restart npm run party:dev.')
+    vi.unstubAllGlobals()
+  })
+
+  it('Copy for Claude names a listed file by its path', async () => {
+    const writeText = vi.fn(async () => {})
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    render(<TuningTab files={[...files, rooms]} query="idle" />)
+    fireEvent.change(screen.getByLabelText('idleWarnAfterMs'), { target: { value: '45000' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy for Claude' })) })
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('- content/rooms.json: idleWarnAfterMs: 30000 → 45000'))
+    vi.unstubAllGlobals()
+  })
+
+  it('what\'s wrong with the "tuningFiles" list is said at the top; with nothing listed the tab is as before', () => {
+    render(<TuningTab files={files} problems={['"tuningFiles": content/nope.json doesn’t exist — left out']} />)
+    expect(screen.getByText('"tuningFiles": content/nope.json doesn’t exist — left out')).toBeTruthy()
+    cleanup()
+    render(<TuningTab files={files} />)
+    expect(screen.queryByText(/tuningFiles|restart/)).toBeNull()
+  })
+
   it('Copy for Claude lists "file: key old → new"', async () => {
     const writeText = vi.fn(async () => {})
     vi.stubGlobal('navigator', { clipboard: { writeText } })

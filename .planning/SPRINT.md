@@ -5,10 +5,10 @@ What changes: the Dev Kit's Tuning tab can show content files outside content/tu
 
 ## F132 🔧 The Tuning tab edits more than content/tuning/
 Done when: a game lists extra content files in content/devkit.json ("tuningFiles": ["content/rooms.json"]) and each shows in the Tuning tab as its own section(s) with the same sliders, search, Select-tab and Save as tuning files; Save writes it back to its own path; a file only the room server reads says its changes arrive when the server reloads; no listed files → the tab is as before.
-- [ ] 🤖 1. Spike: in a scratch copy of Glyphtender, list the content files with numbers a designer tunes (besides tuning/) and how rooms.json reaches the room server (live, on reload, or neither) — Notes — devkit/kit/tuning/tuningFiles.ts
-- [ ] 🤖 2. content/devkit.json "tuningFiles": the listed files are found and shown, each named by its path — devkit/kit/tuning/tuningFiles.ts
-- [ ] 🤖 3. Save writes each file to its own path; a server-read file says when its changes arrive — devkit/kit/tuning/TuningTab.tsx
-- [ ] 🤖 4. Tests: a listed file shows + saves to its path · a missing or non-content path is refused in plain words · same name as a tuning file doesn't clash · nothing listed = as before — devkit/kit/tuning/TuningTab.test.tsx
+- [x] 🤖 1. Spike: in a scratch copy of Glyphtender, list the content files with numbers a designer tunes (besides tuning/) and how rooms.json reaches the room server (live, on reload, or neither) — Notes — devkit/kit/tuning/tuningFiles.ts
+- [x] 🤖 2. content/devkit.json "tuningFiles": the listed files are found and shown, each named by its path — devkit/kit/tuning/tuningFiles.ts
+- [x] 🤖 3. Save writes each file to its own path; a server-read file says when its changes arrive — devkit/kit/tuning/TuningTab.tsx
+- [x] 🤖 4. Tests: a listed file shows + saves to its path · a missing or non-content path is refused in plain words · same name as a tuning file doesn't clash · nothing listed = as before — devkit/kit/tuning/TuningTab.test.tsx
 - [ ] 🤖 5. Proof in the scratch Glyphtender: rooms.json in the Tuning tab, a slider → Save → only that value changed in the file (screenshot); README + Dev Kit 0.28.0 — devkit/kit/VERSION
 Check: devkit tests; the proof's screenshot looked at by Claude; `git diff` of the saved file shows only the moved value.
 
@@ -21,6 +21,8 @@ Done when: a list written over a few lines by hand (Glyphtender drag.json "_sect
 Check: devkit tests; a save of a copy of Glyphtender's drag.json with nothing changed leaves `git diff` empty.
 
 Notes:
+- F132 spike (Glyphtender, read only): content/rooms.json is read by the room server (party/server.ts, glyphtenderRules.ts) once when it starts — its own _help says "restart npm run party:dev after a change"; the client never imports it. Other knob files beside tuning/: content/ai/*.json (pace, skills…), content/data/*.json. So a listed file needs (a) live in the browser like tuning files (for client-read ones) and (b) an "after" note for server-read ones.
+- F132 design (Claude's calls): the Dev Kit's Vite plugin reads the list and builds a small virtual module with only the listed files' data (first try imported them with ?devkit-file — Vite didn't treat that as JSON outside a glob; reading the files in the plugin is simpler and watches each file). The list's problems (outside content/, a tuning file, style.json, missing, a name clash with a tuning file, broken JSON) are shown at the top of the tab. Listed files' settings join the Select tab's list too, so a game's "every setting is on an object" test names their knobs until they're placed — Muzzy's rule that a click shows everything.
 - Ideas checked against the code before planning (sprint 35 retro): Theme Tuner, the tappable seat row and the shoot's Pause wait were already built → marked done in ROADMAP (f5359bf). F132's and F133's gaps confirmed in devkit/kit/tuning/tuningFiles.ts:9 and devkit/vite/formatJson.ts:21.
 - No open P0/P1 bugs in this repo.
 - Opt-in list in content/devkit.json, not every content file: style.json has the Color tab, text/ is words, credits/levels aren't knobs — a game names what it tunes (Claude's call).
