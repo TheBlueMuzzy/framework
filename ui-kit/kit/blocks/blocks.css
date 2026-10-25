@@ -47,7 +47,7 @@
   .kit-menu-header > .kit-button, .kit-menu-header-action { flex: none; }
   /* ‹ is a small, low glyph in most fonts: drawn bigger, so it reads as an arrow and not a speck (the button stays
      square and at least 44px) */
-  .kit-menu-header > .kit-button[data-icon] { font-size: min(calc(var(--text-title) * 1.4), var(--target-min)); } /* (never past its 44px button: at 200% text it touched the edge, 0.34.1) */
+  .kit-menu-header > .kit-button[data-icon] { font-size: min(calc(var(--text-title) * 1.4), calc(var(--target-min) - var(--border-width))); } /* (never past its 44px button: at 200% text it touched the edge, 0.34.1 — nor past the inside of a thick border: Pixel's 4px one left VT323's low ‹ 1px from the bottom, 0.35.4) */
   .kit-menu-header-action { display: flex; align-items: center; gap: var(--gap-s); }
   /* A menu inside a dialog (Pause) fills the dialog's width, so the room left and right of the buttons is the
      dialog's own padding on both sides — even all round (it used to keep its 22rem and leave a wide gap on the right) */

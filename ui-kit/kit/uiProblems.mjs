@@ -209,7 +209,10 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const rects = nodes.flatMap((n) => {
       range.selectNodeContents(n)
       const s = getComputedStyle(n.parentElement)
-      pixel.font = s.font
+      // (from its parts: the `font` shorthand reads "" when the text has a font-variant the shorthand can't say — the kit's
+      // lining-nums, 0.34.0 — and the canvas then kept its last font, 10px sans-serif: every word was measured in the
+      // wrong font, so "Settings" in Cozy read as touching its button's edge with 6 px of room — 0.35.4, F147)
+      pixel.font = `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`
       const words = n.textContent.trim()
       const ink = pixel.measureText(s.textTransform === 'uppercase' ? words.toUpperCase() : words)
       return [...range.getClientRects()].map((r) => {

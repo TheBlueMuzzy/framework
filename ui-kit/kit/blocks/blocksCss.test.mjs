@@ -41,4 +41,8 @@ describe('blocks.css 0.35.4 (F147)', () => {
     expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row {')).toContain('flex-wrap: nowrap')
     expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row > :not(.kit-hud-text)')).toContain('flex-shrink: 0')
   })
+
+  it('MenuHeader ‹ stops growing inside its border, not at the button\'s outside', () => {
+    expect(rule('.kit-menu-header > .kit-button[data-icon] {')).toContain('calc(var(--target-min) - var(--border-width))')
+  })
 })
