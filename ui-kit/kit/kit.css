@@ -138,6 +138,14 @@
   .kit-text[data-kind="display"] { font-size: var(--text-display); line-height: 1.1; font-weight: 800; }
   .kit-text[data-kind="title"] { font-size: var(--text-title); line-height: 1.15; font-weight: 700; }
   .kit-text[data-kind="heading"] { font-size: var(--text-heading); line-height: 1.2; font-weight: 700; }
+  /* Short screens (a phone on its side) at big text (0.35.1, F145): a title is at most a tenth of the screen's height
+     (--kit-short-title) and a display title a seventh (--kit-short-display) — never under body size. At 200% text a
+     56 px title on a 390 px-tall phone left the card's list a sliver. At 100% text both caps are above every style's
+     sizes, so nothing changes there. */
+  @media (max-height: 30rem) {
+    .kit-text[data-kind="title"] { font-size: max(var(--text-body), min(var(--text-title), var(--kit-short-title, 10dvh))); }
+    .kit-text[data-kind="display"] { font-size: max(var(--text-body), min(var(--text-display), var(--kit-short-display, 14dvh))); }
+  }
   .kit-text[data-kind="label"] { font-weight: 600; }
 
   .kit-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--gap-s);
@@ -242,6 +250,12 @@
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: auto;
     scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) / 2); padding: var(--kit-scroll-room); margin: calc(-1 * var(--kit-scroll-room)); }
   .kit-scroll::-webkit-scrollbar { display: none; }
+  /* (0.35.1, F145) It gives up height only down to --kit-scroll-min (default 4rem: two rows or so, growing with the text
+     size) — or its whole contents, if shorter. Past that, the card itself scrolls as one (the last resort above): at
+     200% text on a phone the Room's player list was squeezed to a 16 px sliver under the big words, and the Seat picker's
+     list to 43 px. ScrollArea measures its contents (--kit-scroll-contents). Only straight in a card: one inside a
+     stack of its own (Victory's report) would spill out of that stack instead. */
+  .kit-panel > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
   .kit-scroll[data-scrolls] { overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }
