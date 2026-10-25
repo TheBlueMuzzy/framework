@@ -6,7 +6,7 @@ What changes: big text wraps whole words; a gamepad player sees the focus ring f
 ## F141 🐞 Big text never splits a word
 Done when: at 200% text no kit word breaks mid-word (the ◀ option ▶ picker above all), the page check flags a mid-word break, and the shoot is 0 problems.
 - [x] 🤖 1. Measure today first: shoot Settings on a phone at 200% text and list every mid-word break (and anything else the new shot finds) before fixing — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. uiProblems flags a word split across lines (a test for the picker case + one that a long single word in a narrow box may still wrap) — ui-kit/kit/uiProblems.mjs
+- [x] 🤖 2. uiProblems flags a word split across lines (a test for the picker case + one that a long single word in a narrow box may still wrap) — ui-kit/kit/uiProblems.mjs
 - [ ] 🤖 3. The picker's value and sizer wrap whole words (kit.css overflow-wrap) and anything task 1 found; shoot 0 problems — ui-kit/kit/kit.css
 Check: ui-kit tests; the shoot (0 problems, with the 200% Settings shot); that shot looked at.
 
@@ -36,3 +36,5 @@ Notes:
   - Parts page (already in the shoot, `parts-phone-text-200`): "Lockdown" in the Carousel's label + caption row → "Lock / down" (`.kit-text` has overflow-wrap: anywhere, so a flex row squeezes a label below its word).
   - Not in the shoot at 200% (seen by the scan only): Art end screen "Game over" (both words split), Reconnecting "Reconnecting…".
   - Surprise, out of F141's scope (only seen by the scan, no shoot covers these at 200%): the HUD screens at 200% have many overlaps (hud: 11, e.g. "Muzzy" × "Hold to Roll"; huddock: 2), "Roll" past the screen edge, chips clipped; menu: kit buttons 1 px from their edge + "Play" × the tagline; continuemenu, feedback (tooltip/toast over words), room ("Play online" 32 px tall), artend overlaps. → Ask Muzzy / plan: a "200% text on every screen" sweep as its own feature.
+- F141 task 2 — the rule chosen: a word broken across lines in the middle is flagged ("split:") only when it is no wider than the inside of the box it's drawn in (the nearest card, chip, button or panel — or the screen if none). Measured, not tried: the word's pieces added up vs that box. So the picker IS flagged (word 199 px, picker box 306 px — the arrows squeezed it), a word wider than its card is not. Breaks at a space, hyphen, dash, soft hyphen or slash are word ends. Both tests were proven to fail with the rule broken each way.
+- Surprise: conformance.mjs (games' check:framework) only reports kinds listed in its KINDS table — a new kind there would have been silently dropped. Added "no word is broken in the middle" with its fix line.
