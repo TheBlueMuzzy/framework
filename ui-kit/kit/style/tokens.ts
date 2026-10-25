@@ -67,7 +67,7 @@ export const fontRoleTokens = {
   'font-heading': 'var(--font-display)', // headings: Text kind heading, card titles, room-code boxes, art buttons' words
 } as const
 
-// In-game words at big text (0.36.0, F145). Presets leave it out; a game's tweaks may set it. The player's Text size
+// In-game words at big text (0.35.2, F145). Presets leave it out; a game's tweaks may set it. The player's Text size
 // grows every word, but HUD words (HudText, HUD chips, seats, player chips, the timer, pinned pieces) stop growing at
 // this many times their normal size — at 200% a phone's HUD had no room left for the game (words over words, Roll off
 // the screen). Menus and dialogs, read at rest, keep growing all the way. 1 = HUD words never grow; never below 1.

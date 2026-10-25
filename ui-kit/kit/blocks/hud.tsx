@@ -250,7 +250,7 @@ function useFitText(box: RefObject<HTMLDivElement | null>, text: string | null) 
         el.style.setProperty('--kit-fit-line', lineHeight === 'normal' ? `${size * 1.2}px` : lineHeight)
         el.setAttribute('data-fitted', '')
         // Still too wide at the body text size (its floor — big text, a wide font): the words take two lines instead
-        // of running over the corners beside them (0.36.0, F145)
+        // of running over the corners beside them (0.35.2, F145)
         if (line.scrollWidth > room + 0.5) el.setAttribute('data-fit-wrap', '')
       }
     }
@@ -393,7 +393,7 @@ export function Rank({ place, of, format = ordinal, label = 'Place' }: RankProps
 }
 
 // CONNECTION DOT — online status. Says it in words too when something's wrong.
-// Its words may take two lines (between words) when its HUD corner gives way — big text on an upright phone (0.36.0).
+// Its words may take two lines (between words) when its HUD corner gives way — big text on an upright phone (0.35.2).
 export const connectionWords = { good: 'Connected', weak: 'Weak connection', lost: 'Offline' }
 export function ConnectionDot({ status, words }: { status: 'good' | 'weak' | 'lost'; words?: Partial<typeof connectionWords> }) {
   const w = { ...connectionWords, ...words }

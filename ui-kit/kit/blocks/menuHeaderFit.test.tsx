@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright'
 import { presets } from '../styles'
 import { openBrowser, showInStyle } from '../stylePage.test-util.mjs'
-import { Button } from '../controls'
+import { Button, Text } from '../controls'
 import { Modal } from './dialogs'
 import { fitMenuTitle } from './MenuHeader'
 
@@ -21,17 +21,18 @@ const upgrades = (onBack: boolean) => renderToStaticMarkup(<Modal title="UPGRADE
 </Modal>)
 
 // What the title did: its size step, how many lines each word sits on, and whether it fits its box
-async function titleOn(page: Page, preset: string, markup: string) {
+async function titleOn(page: Page, preset: string, markup: string, { alone = false, textSize = '100%' } = {}) {
   await showInStyle(page, preset, markup)
   return page.evaluate(`(() => {
+    document.documentElement.style.fontSize = '${textSize}'
     const box = document.querySelector('.kit-menu-header-title')
-    ;(${fitMenuTitle.toString()})(box)
+    ;(${fitMenuTitle.toString()})(box, ${!alone})
     const words = box.firstElementChild, text = words.firstChild
     const linesOf = (start, end) => { const r = document.createRange(); r.setStart(text, start); r.setEnd(text, end)
       return new Set([...r.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top))).size }
     const wordLines = []
     for (const m of text.data.matchAll(/\\S+/g)) wordLines.push(linesOf(m.index, m.index + m[0].length))
-    const action = box.nextElementSibling.getBoundingClientRect()
+    const action = (box.nextElementSibling ?? box).getBoundingClientRect()
     return { fit: box.dataset.fit, wordLines, actionBelow: action.top >= box.getBoundingClientRect().bottom - 1, overflows: words.scrollWidth > box.clientWidth + 1,
       size: getComputedStyle(words).fontSize, heading: getComputedStyle(document.documentElement).getPropertyValue('--text-heading'),
       body: getComputedStyle(document.documentElement).getPropertyValue('--text-body') }
@@ -60,6 +61,51 @@ describe.each(Object.keys(presets))('MenuHeader title beside an action in %s', (
     const t = await titleOn(page, preset, upgrades(true))
     expect(t.fit).toBe('')
     expect(t.wordLines).toEqual([1])
+    await page.close()
+  })
+
+  // F145 (0.35.1): a title ALONE — Reconnecting's "Reconnecti / ng…" on a 390 phone at 200% text. A word wider than
+  // its line drops the title a step instead of splitting; at 100% it keeps its title size (and still wraps between words)
+  it('a title alone at 200% text: never split; at 100%: title size', async () => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+    const alone = (title: string) => renderToStaticMarkup(<Modal title={title} actions={<Button>Quit</Button>}><p>Hold on.</p></Modal>)
+    const big = await titleOn(page, preset, alone('Reconnecting…'), { alone: true, textSize: '200%' })
+    expect(big.overflows).toBe(false)
+    // Clean / Cozy / Cartoon / Console: a step or two down and whole. A wide font (Pixel, Neon, Fantasy) is wider than
+    // the line even at body size — the floor at 200% — so there, and only there, the word may break ("split")
+    if (['clean', 'cozy', 'cartoon', 'console'].includes(preset)) {
+      expect(big.wordLines).toEqual([1])
+      expect(['small', 'smaller']).toContain(big.fit)
+    } else expect(['small', 'smaller', 'split']).toContain(big.fit)
+    const normal = await titleOn(page, preset, alone('Reconnecting…'), { alone: true })
+    expect(normal.fit).toBe('')
+    const words = await titleOn(page, preset, alone('Choose your next big adventure'), { alone: true })
+    expect(words.fit).toBe('') // many short words: wraps between them at full size, as before
+    expect(Math.max(...words.wordLines)).toBe(1)
+    await page.close()
+  })
+})
+
+// F145 (0.35.1): the end screens' titles fit the same way (useTitleFit) — the art Game over's frame left its display
+// title "Ga / me / ove / r" at 200% text. In a narrow report it drops a step instead; at 100% it keeps its size.
+describe('End-screen title (Game over, display size) in a narrow report', () => {
+  it.each(['100%', '200%'])('at %s text: whole words', async (textSize) => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+    await showInStyle(page, 'clean', `<div style="inline-size: 160px; display: flex; flex-direction: column">${renderToStaticMarkup(
+      <span className="kit-end-title"><Text kind="display">Game over</Text></span>)}</div>`)
+    const t = await page.evaluate(`(() => {
+      document.documentElement.style.fontSize = '${textSize}'
+      const box = document.querySelector('.kit-end-title')
+      ;(${fitMenuTitle.toString()})(box, false)
+      const text = box.firstElementChild.firstChild, out = []
+      for (const m of text.data.matchAll(/\\S+/g)) {
+        const r = document.createRange(); r.setStart(text, m.index); r.setEnd(text, m.index + m[0].length)
+        out.push(new Set([...r.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top))).size)
+      }
+      return { fit: box.dataset.fit, wordLines: out }
+    })()`) as { fit: string; wordLines: number[] }
+    expect(t.wordLines).toEqual([1, 1])
+    expect(t.fit).toBe(textSize === '100%' ? '' : 'small') // 200%: one step down, the style's title size
     await page.close()
   })
 })

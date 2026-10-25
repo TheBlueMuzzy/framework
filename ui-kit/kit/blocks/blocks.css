@@ -33,9 +33,12 @@
   /* Beside an action (0.27.0): words never split; MenuHeader's fitMenuTitle first drops the title a step (heading size)
      when it won't fit on one line ("measure" = how it's measured: title size, one line) */
   .kit-menu-header[data-action] > .kit-menu-header-title > .kit-text { overflow-wrap: normal; }
+  /* …and alone too (0.35.1, F145: "Reconnecti / ng…" at 200% text): a word wider than its line drops the title the
+     same steps; only "split" (too wide even at body size) lets that one word break */
+  .kit-menu-header-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
   .kit-menu-header-title[data-fit="measure"] > .kit-text { white-space: nowrap; }
   .kit-menu-header-title:is([data-fit="small"], [data-fit="tight"]) > .kit-text { font-size: var(--text-heading); }
-  .kit-menu-header-title[data-fit="smaller"] > .kit-text { font-size: var(--text-body); }
+  .kit-menu-header-title:is([data-fit="smaller"], [data-fit="split"]) > .kit-text { font-size: var(--text-body); }
   /* tight: a word too wide even at body size — the action moves under the title (right-aligned), so the word gets the
      row instead of splitting */
   .kit-menu-header:has(> .kit-menu-header-title[data-fit="tight"]) { flex-wrap: wrap; }
@@ -88,7 +91,7 @@
   /* Pips: little segments (lives, hearts, page dots) */
   .kit-pip { inline-size: 0.875rem; block-size: 0.875rem; }
 
-  /* HUD words at big text (0.36.0, F145): in the HUD and on every HUD piece (in a Hud or a plain Screen, pinned to the
+  /* HUD words at big text (0.35.2, F145): in the HUD and on every HUD piece (in a Hud or a plain Screen, pinned to the
      table), the text sizes are the style's HUD ones — the same as everywhere else until Text size passes the style's
      hud-text-max (1.5 = 150%), then they stop growing. At 200% a phone's HUD was words over words with Roll off the
      screen; menus and dialogs keep growing all the way. The pieces set their own size so a plain Screen's 200% body
@@ -108,7 +111,7 @@
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
-  /* …but a chip's sentence (ConnectionDot's "Weak connection", 0.36.0, F145) may go onto two lines between its words in
+  /* …but a chip's sentence (ConnectionDot's "Weak connection", 0.35.2, F145) may go onto two lines between its words in
      a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
      Only there: in a right corner it would narrow the corner's other pieces' row too. */
   .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { white-space: normal; }
@@ -185,7 +188,7 @@
      bar without a width — before, it held its length and stuck out of the plate. */
   .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
   .kit-hud-chip[data-width] > .kit-progress { flex: 0 1 auto; min-inline-size: 2rem; inline-size: var(--kit-bar-w); }
-  /* (in hud-rem, 0.36.0: they stop growing with the HUD's words) */
+  /* (in hud-rem, 0.35.2: they stop growing with the HUD's words) */
   .kit-hud-chip[data-width="s"] { --kit-bar-w: calc(4 * var(--hud-rem)); }
   .kit-hud-chip[data-width="m"] { --kit-bar-w: calc(8 * var(--hud-rem)); }
   .kit-hud-chip[data-width="l"] { --kit-bar-w: calc(14 * var(--hud-rem)); }
@@ -234,7 +237,7 @@
   .kit-hud-text[data-fit] { inline-size: 100%; min-inline-size: 0; }
   .kit-hud-text[data-fit] .kit-text { white-space: nowrap; }
   .kit-hud-text[data-fitted] .kit-text { font-size: max(var(--text-body), var(--kit-fit-size)); line-height: var(--kit-fit-line, normal); }
-  .kit-hud-text[data-fit-wrap] .kit-text { white-space: normal; } /* too wide even at the floor: two lines, whole words (0.36.0) */
+  .kit-hud-text[data-fit-wrap] .kit-text { white-space: normal; } /* too wide even at the floor: two lines, whole words (0.35.2) */
 
   /* HUD dock (0.17.0): a panel on the HUD column's bottom edge, edge to edge, --kit-hud-dock-size tall (more only if
      its contents need it). The HUD's own bottom slots sit above it. It shows meters, so taps go through it to the game.
@@ -258,7 +261,7 @@
   .kit-float-anchor > .kit-float-up { inline-size: 0; display: flex; justify-content: center; }
   .kit-player-chip-score .kit-float-anchor > .kit-text { min-inline-size: calc(var(--kit-digits, 1) * 1ch); font-variant-numeric: tabular-nums lining-nums; text-align: end; }
   .kit-combo { display: inline-block; }
-  .kit-timer { display: inline-grid; place-items: center; inline-size: calc(3.5 * var(--hud-rem)); aspect-ratio: 1; border-radius: 50%; } /* (hud-rem: stops growing with the HUD's words, 0.36.0) */
+  .kit-timer { display: inline-grid; place-items: center; inline-size: calc(3.5 * var(--hud-rem)); aspect-ratio: 1; border-radius: 50%; } /* (hud-rem: stops growing with the HUD's words, 0.35.2) */
   /* Flow: the countdown number on a round plate, and the end-screen title */
   .kit-countdown { display: inline-grid; place-items: center; min-inline-size: 11rem; padding: var(--gap-l); aspect-ratio: 1; border-radius: 50%; }
   .kit-countdown .kit-text { font-size: calc(var(--text-display) * 2.75); line-height: 1; }
@@ -269,9 +272,11 @@
   .kit-place { min-inline-size: 3.5ch; }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
      the list on the right, so the list keeps its height instead of shrinking to one row */
+  /* (0.35.1, F145) The buttons' row never shrinks below its buttons (a plain 1fr, like the Lobby room's below): at 200%
+     text Quit / Rematch slid up over the message; too little height → the card scrolls instead */
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-results { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
-      grid-template-rows: auto auto minmax(0, 1fr); align-content: start; }
+      grid-template-rows: auto auto 1fr; align-content: start; }
     .kit-results > :not(.kit-scroll) { grid-column: 1; }
     .kit-results > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-results > .kit-row:last-child { align-self: end; justify-content: start; }
@@ -320,11 +325,26 @@
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   .kit-end-title { display: inline-block; }
+  /* End-screen titles fit like MenuHeader's (0.35.1, F145; useTitleFit): a word wider than its line drops the title a
+     step, then another — never split ("Ga / me / ove / r" inside the art Game over's frame at 200% text). Only "split"
+     (too wide even at body size) lets that one word break. */
+  .kit-end-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
+  .kit-end-title[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
+  .kit-end-title[data-fit="small"] > .kit-text[data-kind="title"],
+  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
+  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="title"], .kit-end-title[data-fit="split"] > .kit-text { font-size: var(--text-body); }
   .kit-end-swipe { display: block; text-align: center; padding-block-start: var(--gap-xs); } /* "⇧ Swipe up…": words, not a button */
   /* Victory / Game over with a long list (0.31.0): only the stats' ScrollArea gives up height — the title, message
      and buttons keep theirs, so they stay in sight and the rows scroll under the edge fade */
   .kit-screen > [data-slot="center"] > .kit-panel > .kit-end-info { flex-shrink: 1; }
   .kit-end-info > :not(.kit-scroll) { flex-shrink: 0; }
+  /* (0.35.1, F145) Except on a short, wide screen (below), the report's parts are the card's own rows — the same gaps —
+     so its list keeps the card's list floor (kit.css) and, with too little height, the card scrolls as one. At 200% text
+     the list was squeezed to 16 px inside the art Game over's frame and the report spilled over the buttons. */
+  @media (height > 30rem), (width < 40rem) {
+    .kit-end > .kit-end-info { display: contents; }
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+  }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
   /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);

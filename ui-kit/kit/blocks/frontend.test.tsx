@@ -19,6 +19,12 @@ describe('MainMenu', () => {
     expect(screen.getByText('v0.1.0.12')).toBeTruthy()
   })
 
+  // F145 (0.35.1): at 200% text on a phone the buttons slid over the tagline and the version — the menu scrolls as one now
+  it('scrolls as one when it is taller than the window (a whole-screen scroll, the version under it)', () => {
+    const { container } = render(<MainMenu title="Game" onPlay={() => {}} version="v0.1.0.12" />)
+    expect(container.querySelector('.kit-screen')?.hasAttribute('data-scroll')).toBe(true)
+  })
+
   it('named buttons: fixed order, only the ones passed, first is primary (kit 0.1 games)', () => {
     render(<MainMenu title="Game" onQuit={() => {}} onPlay={() => {}} onSettings={() => {}} words={{ play: 'Go' }} />)
     expect(buttonNames()).toEqual(['Go', 'Settings', 'Quit'])

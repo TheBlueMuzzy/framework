@@ -138,6 +138,14 @@
   .kit-text[data-kind="display"] { font-size: var(--text-display); line-height: 1.1; font-weight: 800; }
   .kit-text[data-kind="title"] { font-size: var(--text-title); line-height: 1.15; font-weight: 700; }
   .kit-text[data-kind="heading"] { font-size: var(--text-heading); line-height: 1.2; font-weight: 700; }
+  /* Short screens (a phone on its side) at big text (0.35.1, F145): a title is at most a tenth of the screen's height
+     (--kit-short-title) and a display title a seventh (--kit-short-display) — never under body size. At 200% text a
+     56 px title on a 390 px-tall phone left the card's list a sliver. At 100% text both caps are above every style's
+     sizes, so nothing changes there. */
+  @media (max-height: 30rem) {
+    .kit-text[data-kind="title"] { font-size: max(var(--text-body), min(var(--text-title), var(--kit-short-title, 10dvh))); }
+    .kit-text[data-kind="display"] { font-size: max(var(--text-body), min(var(--text-display), var(--kit-short-display, 14dvh))); }
+  }
   .kit-text[data-kind="label"] { font-weight: 600; }
 
   .kit-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--gap-s);
@@ -220,7 +228,9 @@
   .kit-live { margin-block: -0.0625rem 0; }
 
   .kit-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 0 var(--gap-s); font-weight: 700; line-height: 1.6; border-style: solid; }
-  .kit-avatar { display: inline-grid; place-items: center; flex: none; inline-size: var(--target-min); block-size: var(--target-min); overflow: hidden; font-weight: 600; }
+  /* (its initials never outgrow it: at 200% text "SM" was wider than the 44px circle — 0.35.1, like an icon button's glyph) */
+  .kit-avatar { display: inline-grid; place-items: center; flex: none; inline-size: var(--target-min); block-size: var(--target-min); overflow: hidden; font-weight: 600;
+    font-size: min(1em, var(--target-min) * 0.45); }
   .kit-avatar img { inline-size: 100%; block-size: 100%; object-fit: cover; }
 
   .kit-progress { display: block; min-inline-size: 6rem; block-size: 0.75rem; overflow: hidden; }
@@ -235,11 +245,18 @@
   /* No scroll bar (0.10.0, Muzzy: "remove all scroll bars"): drag, swipe, wheel and keys still scroll it, and its edges
      fade while there's more that way (kit-style below). It only keeps swipes to itself (overscroll contain) while it
      really can scroll (data-scrolls, set by ScrollArea.tsx): one that fits must never eat a swipe (B027). */
-  /* (0.36.0, F145: that room never reaches past a Screen's own padding — at 200% text 0.5rem was the whole 16 px, so a
-     ScrollArea straight in a Screen, Player chips', ran into the screen's edge and was cut off there) */
+  /* (0.35.1, F145) That room is at most half the card's side gap: at 200% text 0.5rem grew to the whole gap on a phone
+     on its side, so the scroll box ran to the card's very edge. Outlines and shadows don't grow with text. (The same
+     keeps a ScrollArea straight in a Screen inside the Screen's padding — Player chips' was cut off at its edge.) */
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: auto;
-    scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) - 3px); padding: var(--kit-scroll-room); margin: calc(var(--kit-scroll-room) * -1); }
+    scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) / 2); padding: var(--kit-scroll-room); margin: calc(-1 * var(--kit-scroll-room)); }
   .kit-scroll::-webkit-scrollbar { display: none; }
+  /* (0.35.1, F145) It gives up height only down to --kit-scroll-min (default 4rem: two rows or so, growing with the text
+     size) — or its whole contents, if shorter. Past that, the card itself scrolls as one (the last resort above): at
+     200% text on a phone the Room's player list was squeezed to a 16 px sliver under the big words, and the Seat picker's
+     list to 43 px. ScrollArea measures its contents (--kit-scroll-contents). Only straight in a card: one inside a
+     stack of its own (Victory's report) would spill out of that stack instead. */
+  .kit-panel > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
   .kit-scroll[data-scrolls] { overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }

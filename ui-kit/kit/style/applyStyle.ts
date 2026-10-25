@@ -41,7 +41,7 @@ export function resolveStyle(file: StyleFile): Record<string, string> {
   vars['text-heading'] = rem(body * scale)
   vars['text-title'] = rem(body * scale ** 2)
   vars['text-display'] = rem(body * scale ** 3)
-  // HUD words (0.36.0, F145): the same sizes, but they stop growing at hud-text-max × their normal size (Text size
+  // HUD words (0.35.2, F145): the same sizes, but they stop growing at hud-text-max × their normal size (Text size
   // grows the page's rem; REM_PX is a rem at normal text size). Below the cap — every normal text size — they're equal.
   const hudMax = Math.max(1, Number(s['hud-text-max']) || hudTokens['hud-text-max'])
   const hudCap = (size: number) => `min(${rem(size)}, ${Math.round(size * REM_PX * hudMax * 100) / 100}px)`
