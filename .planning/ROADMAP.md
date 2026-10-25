@@ -313,6 +313,17 @@ flowchart LR
   F125[F125 Slow saves test]
 ```
 
+## v0.17 — A clean screenshot run  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, /develop on sprint option A): the kit's screenshot run comes back with 0 problems, the page check also sees a chip covering a card's text, and no installer test can time out under load.
+- ✅ F127 🔧 uiProblems sees a chip covering text: F124's covered-piece rule also counts a solid chip crossing another card's words (coins over "Score 120"), with the same on-purpose exemptions — should · sprint 34
+- ✅ F126 🐞 The shoot's 16 left-over finds → 0: the parts page's HUD demo at 200% text, the talking bubble over the Colours picker on a phone on its side, pinned Pixel 1 px edges — should · needs: F127 · sprint 34
+- ✅ F128 🔧 Every installer asks git once per run: the 9 other installers cache their git answer like saves 0.6.2 — could · sprint 34
+```mermaid
+flowchart LR
+  F127[F127 Chip over text check] --> F126[F126 Shoot finds to 0]
+  F128[F128 Installers ask git once]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -324,9 +335,11 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-24 — **🐞 The shoot's 16 left-over finds** (sprint 33, after F123 — none are HUD corners): (1) the parts page's "HUD demo" is a plain Screen, and at 200% text "Round 2" covers part of "Health" — give plain Screens the phone fallback (middle on its own row) or build the demo with Hud; (2) talk screen on a 667×375 phone (and Pixel at 844×390, flickers): the talking bubble covers the "Colours" picker's Next (F121 area); (3) pinned, Pixel, 360×780: 8 `edge:` lines at 1 px. They were already there; F124 and the new shoot sizes made them visible.
-- 2026-10-24 — **uiProblems: a solid chip covering another card's text** (found by F124): coins over "Score 120" isn't flagged — the text rule takes the chip for "something covering it". Extend F124's covered-piece rule to text targets.
-- 2026-10-24 — **The other installers start git on every install too** (found by F125): install-ai / -audio / -crashes / -devkit / -emotes each run git rev-parse + git status per call, like saves did (2 × 0.2–0.6 s under load) — one shared kitVersion helper asked once per run, before their tests hit the same 5 s limit.
+- 2026-10-24 — **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
+- 2026-10-24 — **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.
+- 2026-10-24 — → v0.17 F126. **🐞 The shoot's 16 left-over finds** (sprint 33, after F123 — none are HUD corners): (1) the parts page's "HUD demo" is a plain Screen, and at 200% text "Round 2" covers part of "Health" — give plain Screens the phone fallback (middle on its own row) or build the demo with Hud; (2) talk screen on a 667×375 phone (and Pixel at 844×390, flickers): the talking bubble covers the "Colours" picker's Next (F121 area); (3) pinned, Pixel, 360×780: 8 `edge:` lines at 1 px. They were already there; F124 and the new shoot sizes made them visible.
+- 2026-10-24 — → v0.17 F127. **uiProblems: a solid chip covering another card's text** (found by F124): coins over "Score 120" isn't flagged — the text rule takes the chip for "something covering it". Extend F124's covered-piece rule to text targets.
+- 2026-10-24 — → v0.17 F128. **The other installers start git on every install too** (found by F125): install-ai / -audio / -crashes / -devkit / -emotes each run git rev-parse + git status per call, like saves did (2 × 0.2–0.6 s under load) — one shared kitVersion helper asked once per run, before their tests hit the same 5 s limit.
 - 2026-10-24 — → v0.16 F125. **saves: the install test that times out under load**: "the Save code screen (ui/) only goes into a game with the UI kit…" took 5.1 s under check:fast's 20 side-by-side checks (2.3 s for all 10 alone) and went red once at /deliver v0.17.0. Find out what it waits on (real file copies? an npm call?) before giving it a longer limit.
 - 2026-10-24 — **Retire OLD_MODULE_ROWS for real** (look-back v0.15): its "out in" date has slipped twice (0.33.0 → 0.34.0) because Glyphtender still hasn't reinstalled crashes / emotes / ai. Plan it as a task in Glyphtender's next sprint (reinstall the three, its checks green), then delete the fallback in UI kit 0.34.0 — and give each game the F118 port pre-flight (check-all + `scripts/ports.mjs`) in the same pass.
 - 2026-10-24 — → v0.16 F123 + F124. **🐞 UI kit: a corner slot can shrink below its content** (found by F119): `.kit-screen > [data-slot] { min-inline-size: 0 }` lets a HUD corner slide under its neighbour — the coins chip sits on the end of the Health bar on an upright Cozy phone, and on a 667×375 phone the sample's Roll crosses "40%". And the page check misses it: an opaque chip covering a bar (no text, not a control) isn't an overlap it looks for — teach uiProblems that, then fix the slot rule.

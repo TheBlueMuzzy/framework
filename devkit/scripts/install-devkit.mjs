@@ -61,7 +61,16 @@ function removeInside(target, file, log) {
 }
 
 // "0.1.0" + "a1b2c3d" — the kit's version and the framework commit it's copied from
+// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
+// 0.6.2 did in F125: the install tests call installDevkit many times, and under check:fast those git runs were most of the test's time).
+// The kit's commit can't change while one install runs, so asking again only costs time.
+let kitVersionOnce = null
 function kitVersion() {
+  kitVersionOnce ??= readKitVersion()
+  return kitVersionOnce
+}
+
+function readKitVersion() {
   const version = readText(join(devkitDir, 'kit', 'VERSION')).trim()
   let commit = 'no git'
   try {
