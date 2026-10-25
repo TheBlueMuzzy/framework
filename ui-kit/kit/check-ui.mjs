@@ -48,7 +48,8 @@ function splitOutside(text, mark) {
 
 // A CSS value without what's inside url(…) and quotes: that's a picture or text, not a style value
 // (an SVG's fill='#fff' is the picture's own colour)
-const cssStyleValue = (value) => value.replace(/url\((?:"[^"]*"|'[^']*'|[^)])*\)/g, 'url()').replace(/"[^"]*"|'[^']*'/g, '""')
+// (the last branch leaves out quotes, so a broken url( full of "" can't make the pattern try every split — review)
+const cssStyleValue = (value) => value.replace(/url\((?:"[^"]*"|'[^']*'|[^)"'])*\)/g, 'url()').replace(/"[^"]*"|'[^']*'/g, '""')
 
 function valueProblems(value) {
   const found = []

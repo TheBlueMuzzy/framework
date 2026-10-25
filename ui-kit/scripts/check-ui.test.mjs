@@ -25,6 +25,12 @@ describe('check-ui', () => {
     expect(messages('kit/a.css', `.x { content: "a; b: #fff"; }`)).toEqual([]) // a ";" or colour in quoted text too
   })
 
+  it('a broken url( full of quotes is checked at once, not after minutes (security review)', () => {
+    const started = Date.now()
+    messages('kit/a.css', `.x { background: url(${'""'.repeat(5000)} }`)
+    expect(Date.now() - started).toBeLessThan(1000)
+  })
+
   it('still catches a real problem next to a data: URL, on its own line', () => {
     const found = checkSource('kit/a.css', `.x {\n  background: url(data:image/png;base64,AAAA);\n  padding: 4px;\n}`)
     expect(found.map((p) => [p.line, p.message])).toEqual([[3, 'px size — use a gap name or rem']])
