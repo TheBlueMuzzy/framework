@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-25 — **Sprint 37: F138 ✅ (Muzzy kept both picks) · F139 · F140 checked + reviewed, waiting on his OK** (UI kit 0.34.0: Dark console + Fantasy looks, drafted from sketch S1's Console 1 + Fantasy 2; Cinzel + Alegreya fonts; numbers full height in every font). Shoot 639 shots 0 problems · check:fast green. Muzzy: look at the two looks in the kit gallery (localhost:5180, style switcher), then approve → `Fnn: done`, retro, /deliver v0.20.
+2026-10-25 — **Sprint 37 done: F138 · F139 · F140 ✅ (Muzzy approved 2026-10-25)** (UI kit 0.34.0: Dark console + Fantasy looks, drafted from sketch S1's Console 1 + Fantasy 2; Cinzel + Alegreya fonts; numbers full height in every font). Shoot 639 shots 0 problems · check:fast green. Next: Muzzy's 3-line retro → archive sprint 37 → /deliver v0.20.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework f40a4e8 (F138–F140 + the crashes test read whole b
 
 ## Where we are
 Stage: develop   Milestone: v0.20 Two new looks   Sprint: 37
-Doing: F139 · F140 — waiting for Muzzy's OK (F138 ✅ picks kept)   Branch: dev/v0-20-new-looks   Version: 0.21.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: sprint 37 retro, then /deliver v0.20   Branch: dev/v0-20-new-looks   Version: 0.21.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.21.0
 
 ## Key facts
