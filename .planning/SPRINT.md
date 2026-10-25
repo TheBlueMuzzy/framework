@@ -16,7 +16,7 @@ Done when: the shoot is 0 problems with every 200% shot from F144, and nothing c
 - [x] 🤖 1. Titles that can't fit shrink to fit, like MenuHeader's (Reconnecting "Reconnecti / ng…", the art Game over) — ui-kit/kit/blocks/online.tsx
 - [x] 🤖 2. The HUD at 200%: no overlaps, nothing past the screen edge ("Roll") — ui-kit/kit/blocks/hud.tsx
 - [x] 🤖 3. The front end at 200%: menu buttons' room, "Play" over the tagline, Continue's "Turn 7 · 5 min ago", room's 32 px "Play online" — ui-kit/kit/blocks/frontend.tsx
-- [ ] 🤖 4. Toasts and tooltips at 200% don't sit on words — ui-kit/kit/blocks/dialogs.tsx
+- [x] 🤖 4. Toasts and tooltips at 200% don't sit on words — ui-kit/kit/blocks/dialogs.tsx
 - [ ] 🤖 5. Whatever else F144's list holds; the shoot 0 problems; the touched screens looked at at 100% and 200% — ui-kit/kit/blocks/flow.tsx
 Check: ui-kit tests; the shoot 0 problems; shots looked at.
 
@@ -66,3 +66,4 @@ Notes:
   - Checker gap, not fixed: a bar squeezed to a sliver and wholly covered by the next corner's chip isn't reported ("Coins covers part of" only fires on PART cover). I saw it in a 1.5-cap try upright; it isn't in the final state.
 - Merged 2026-10-25 8:10 AM (Claude): both F145 parts on the work branch at 1979198. Read both diffs: no bugs, 1 stale comment fixed (blocks.css said hud-text-max defaults to 1.5; it is 1.25). Root check:fast 20/20 ✓. Looked at hud 200% on the upright and sideways phones: nothing overlaps, Roll on screen. Tasks 4 + 5 stay open: the shoot is 15 problems, all feedback ×2 + talk sideways — waiting on the two Ask Muzzy above.
 - Muzzy 2026-10-25 (morning): talk sideways at 200% → **a, accept** (the kit warns, the game makes room). HUD words → **1.25** (as built). Feedback toasts: asked again with pictures (the gallery calls them "toasts", on the Feedback screen — he looked for "notifications").
+- Muzzy 2026-10-25 3:30 PM: "all approved" → toasts **a**: the page check leaves a toast / tooltip in the top layer alone (two over each other still count; test in uiProblems.test.mjs); talk sideways **a** → the shoot's `knownShots` prints that one shot as known, not counted. UI kit 0.35.3 (3c382da). Task 4 ticked; task 5 waits for the full shoot.
