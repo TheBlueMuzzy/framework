@@ -21,11 +21,11 @@ Checked: 2026-10-25 — red first (d922c3f: 2 failed | 15 passed); ui-kit 730/73
 
 ## F143 ✨ What's new after an update
 Done when: a game can show a What's new panel that appears once on the first launch after its version changes (not on a first install, not for a build-only bump, not mid-game), with 3–5 highlight lines, an optional full-notes link and one tap to close; tested, in the gallery, the shoot clean.
-- [ ] 🤖 1. Design note first: where the highlight lines live (a content file the game edits), where "last version seen" is stored (and the saves module's storage consent), the rules (once · never first install · skip build-only · the game says when it's safe to show) — .planning/design/ui-kit.md
-- [ ] 🤖 2. The "should it show?" logic + the last-seen record, with tests for every rule — version/kit/index.ts
-- [ ] 🤖 3. The WhatsNew panel (kit parts only: a Modal, the lines, a link, one close button) + a gallery screen — ui-kit/kit/blocks/dialogs.tsx
+- [x] 🤖 1. Design note first: where the highlight lines live (a content file the game edits), where "last version seen" is stored (and the saves module's storage consent), the rules (once · never first install · skip build-only · the game says when it's safe to show) — .planning/design/ui-kit.md
+- [ ] 🤖 2. The "should it show?" logic + the last-seen record, with tests for every rule — ui-kit/kit/blocks/whatsNew.ts (moved from version/kit/index.ts: see design §4c)
+- [ ] 🤖 3. The WhatsNew panel (kit parts only: a Modal, the lines, a link, one close button) + a gallery screen — ui-kit/kit/blocks/whatsNew.tsx
 - [ ] 🤖 4. The shoot covers it at every size; 0 problems; desktop + phone shots looked at — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 5. CATALOG + README + the game-ui skill name it; versions bumped (UI kit, version) — ui-kit/CATALOG.md
+- [ ] 🤖 5. CATALOG + README + the game-ui skill name it; versions bumped (UI kit; version unchanged — nothing in it changed) — ui-kit/CATALOG.md
 Check: version + ui-kit tests; the shoot; the shots looked at.
 
 Notes:
