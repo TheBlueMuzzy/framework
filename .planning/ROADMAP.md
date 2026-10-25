@@ -362,6 +362,18 @@ flowchart LR
   F138[F138 Which take] --> F139[F139 Looks in the kit] --> F140[F140 Lists know 7]
 ```
 
+## v0.21 — The kit meets every player  ← current · planned 2026-10-25
+Goal (Muzzy 2026-10-25, "go auto" after v0.20): three things players notice — big text never splits a word, a gamepad player sees where they are from the first screen, and a game can say "what's new" once after an update. Old ideas checked against the code first: 4 of 7 were already done (toasts under the gallery bar, MainMenu extras counted, machine to-do at session start; the persist-to guard stays in Later).
+- 🔨 F141 🐞 Big text never splits a word: the ◀ option ▶ picker breaks "Accessibility" mid-word at 200% (kit.css overflow-wrap: anywhere), and the page check has no rule for it — should · sprint 38
+- 🔨 F142 🐞 A gamepad player sees the focus ring from the first screen: ScreenStack shows it only after a key press, so a pad-only game hides where you are — should · sprint 38
+- 🔨 F143 ✨ What's new after an update: once, on the first launch after the version changes — 3–5 highlights, a full-notes link, one tap to close; never on a first install or mid-game (research: research/patch-notes-and-dependencies.md) — should · sprint 38
+```mermaid
+flowchart LR
+  F141[F141 Words stay whole]
+  F142[F142 Gamepad focus ring]
+  F143[F143 What's new]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
