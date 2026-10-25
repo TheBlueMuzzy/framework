@@ -93,7 +93,7 @@
 
   /* HUD words at big text (0.35.2, F145): in the HUD and on every HUD piece (in a Hud or a plain Screen, pinned to the
      table), the text sizes are the style's HUD ones — the same as everywhere else until Text size passes the style's
-     hud-text-max (1.5 = 150%), then they stop growing. At 200% a phone's HUD was words over words with Roll off the
+     hud-text-max (default 1.25 = 125%), then they stop growing. At 200% a phone's HUD was words over words with Roll off the
      screen; menus and dialogs keep growing all the way. The pieces set their own size so a plain Screen's 200% body
      text doesn't reach them by inheritance. */
   :is(.kit-screen:has(> [data-slot] > .kit-hud-slot), .kit-hud-dock, .kit-hud-text, .kit-hud-chip, .kit-timer, .kit-seats, .kit-pinned) {
