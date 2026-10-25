@@ -28,6 +28,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Default branch `main`. Remote: public GitHub TheBlueMuzzy/framework (public 2026-10-23 — Actions minutes free).
 - Security reviewed: 9ae33f7 (2026-10-24, v0.20.0..9ae33f7 read whole by a Claude helper: tuningFiles paths through isAllowedContentPath before any read, the virtual module built with JSON.stringify of parsed data, formatJson gaps are whitespace only; 1 real fixed — check-ui's url() pattern could hang on a broken url( (86 s at 24 "" pairs), now 0 ms + a test; symlinks under content/ need repo write access — not exploitable, noted)
 - Release: none (library) — games copy modules in with install-module.mjs; a release = merge, version, tag, push.
+- **Planner (PPP):** https://claude.ai/artifact/RUwyMzciaLdgin2Vs4ySPM (first published 2026-10-25, with sketch S1)
 - Dev: npm run dev in ui-kit/ → http://localhost:5180 (--host for phones)
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
