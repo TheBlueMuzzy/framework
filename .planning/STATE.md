@@ -11,7 +11,7 @@ Reviewed through: framework f40a4e8 (F138–F140 + the crashes test read whole b
 
 ## Where we are
 Stage: deliver   Milestone: v0.20 Two new looks ✅   Sprint: 37 (done)
-Doing: — (released v0.22.0)   Branch: main   Version: 0.21.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: — (released v0.22.0)   Branch: main   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.21.0
 
 ## Key facts

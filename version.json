@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.21.0",
-  "build": 1,
+  "version": "0.22.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -152,6 +152,11 @@
       "version": "0.21.0",
       "date": "2026-10-24",
       "summary": "Smoother tools"
+    },
+    {
+      "version": "0.22.0",
+      "date": "2026-10-25",
+      "summary": "Two new looks"
     }
   ]
 }
