@@ -3,7 +3,7 @@ Started 2026-10-25 · Milestone v0.21 The kit meets every player · Features: F1
 Muzzy 2026-10-25: "go auto" — running unattended. Claude plans, one helper per feature builds, Claude merges, reviews and saves; taste calls go to Notes as `Ask Muzzy:`.
 What changes: big text wraps whole words; a gamepad player sees the focus ring from the first screen; a new What's new panel games can use. What stays the same: every look, every screen's layout, every game — a game only gets What's new when it adds it.
 
-## F141 🐞 Big text never splits a word
+## F141 ✅ Big text never splits a word
 Done when: at 200% text no kit word breaks mid-word (the ◀ option ▶ picker above all), the page check flags a mid-word break, and the shoot is 0 problems.
 - [x] 🤖 1. Measure today first: shoot Settings on a phone at 200% text and list every mid-word break (and anything else the new shot finds) before fixing — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. uiProblems flags a word split across lines (a test for the picker case + one that a long single word in a narrow box may still wrap) — ui-kit/kit/uiProblems.mjs
@@ -11,7 +11,7 @@ Done when: at 200% text no kit word breaks mid-word (the ◀ option ▶ picker a
 Check: ui-kit tests; the shoot (0 problems, with the 200% Settings shot); that shot looked at.
 Checked: 2026-10-25 (helper) — `npm run check:fast` at the root: all 20 checks passed (ui-kit 728 tests, incl. 2 new split tests, each proven to fail with the rule broken); `npm run check-ui` pass (160 files); `SHOOT_PORT=6141 npm run shoot`: 640 screenshots, 0 problems (before the fix: 2, both on the new shot). Looked at `screens/settings-clean-phone-text-200.png`: "Accessibility" whole on one line between 44 px arrows, nothing touching an edge. Ask Muzzy: at 200% the header's ‹ stays tap-sized (44 px) so it looks small beside the huge "Settings" title — fine, or should it grow a bit more?
 
-## F142 🐞 A gamepad player sees where they are from the first screen
+## F142 ✅ A gamepad player sees where they are from the first screen
 Done when: a game played only with a pad shows the focus ring on the first screen it opens after a pad press, the same as after a key press; mouse and touch players still see no ring.
 - [x] 🤖 1. A failing test first: a pad press (gamepadconnected / the d-pad's arrow key path) before any keydown → the next screen focuses with the ring — ui-kit/kit/ScreenStack.test.tsx
 - [x] 🤖 2. ScreenStack counts a pad as keyboard use; TalkingBubble and Teach use the same flag (they copy the focusVisible pattern) — ui-kit/kit/ScreenStack.tsx
@@ -19,7 +19,7 @@ Done when: a game played only with a pad shows the focus ring on the first scree
 Check: ui-kit tests; the gallery with a fake pad event shows the ring, with a mouse click it doesn't.
 Checked: 2026-10-25 — red first (d922c3f: 2 failed | 15 passed); ui-kit 730/730 tests (5 new F142 tests); ui-kit tsc + check-ui clean; root `npm run check:fast` "✓ all 20 checks passed". Real gallery on :6142 (Chromium, Playwright): gamepadconnected → Settings opened by code → the ‹ button `:focus-visible`, solid outline, ring in the shot; a real mouse click → same button focused, no ring; a click on the page THEN a pad press → ring (Chromium honours focusVisible: true). Shots looked at: ~/Documents/dev/.scratch/framework-f142/a-pad.png (blue ring round ‹) · b-mouse.png (no ring).
 
-## F143 ✨ What's new after an update
+## F143 ✅ What's new after an update
 Done when: a game can show a What's new panel that appears once on the first launch after its version changes (not on a first install, not for a build-only bump, not mid-game), with 3–5 highlight lines, an optional full-notes link and one tap to close; tested, in the gallery, the shoot clean.
 - [x] 🤖 1. Design note first: where the highlight lines live (a content file the game edits), where "last version seen" is stored (and the saves module's storage consent), the rules (once · never first install · skip build-only · the game says when it's safe to show) — .planning/design/ui-kit.md
 - [x] 🤖 2. The "should it show?" logic + the last-seen record, with tests for every rule — ui-kit/kit/blocks/whatsNew.ts (moved from version/kit/index.ts: see design §4c)

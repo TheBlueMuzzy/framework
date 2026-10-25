@@ -364,9 +364,9 @@ flowchart LR
 
 ## v0.21 — The kit meets every player  ← current · planned 2026-10-25
 Goal (Muzzy 2026-10-25, "go auto" after v0.20): three things players notice — big text never splits a word, a gamepad player sees where they are from the first screen, and a game can say "what's new" once after an update. Old ideas checked against the code first: 4 of 7 were already done (toasts under the gallery bar, MainMenu extras counted, machine to-do at session start; the persist-to guard stays in Later).
-- 🔨 F141 🐞 Big text never splits a word: the ◀ option ▶ picker breaks "Accessibility" mid-word at 200% (kit.css overflow-wrap: anywhere), and the page check has no rule for it — should · sprint 38
-- 🔨 F142 🐞 A gamepad player sees the focus ring from the first screen: ScreenStack shows it only after a key press, so a pad-only game hides where you are — should · sprint 38
-- 🔨 F143 ✨ What's new after an update: once, on the first launch after the version changes — 3–5 highlights, a full-notes link, one tap to close; never on a first install or mid-game (research: research/patch-notes-and-dependencies.md) — should · sprint 38
+- ✅ F141 🐞 Big text never splits a word: the ◀ option ▶ picker breaks "Accessibility" mid-word at 200% (kit.css overflow-wrap: anywhere), and the page check has no rule for it — should · sprint 38
+- ✅ F142 🐞 A gamepad player sees the focus ring from the first screen: ScreenStack shows it only after a key press, so a pad-only game hides where you are — should · sprint 38
+- ✅ F143 ✨ What's new after an update: once, on the first launch after the version changes — 3–5 highlights, a full-notes link, one tap to close; never on a first install or mid-game (research: research/patch-notes-and-dependencies.md) — should · sprint 38
 ```mermaid
 flowchart LR
   F141[F141 Words stay whole]

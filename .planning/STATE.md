@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-25 — **Sprint 38 built (unattended, Muzzy: "go auto") — F141 · F142 · F143 checked + reviewed, waiting on Muzzy's OK** (UI kit 0.35.0: big text wraps whole words + a `split:` page check; a gamepad press shows the focus ring, `markPadUsed()`; What's new after an update, `showWhatsNew()` + content/text/whats-new.json). Shoot 656 shots 0 problems · check:fast green. Muzzy: try the gallery (What's new · Settings at 200% text) → approve → `Fnn: done`, retro, /deliver v0.21. Ask Muzzy: the Settings header's ‹ now stays tap-sized at 200% text — small beside the huge title; OK?
+2026-10-25 — **Sprint 38 done: F141 · F142 · F143 ✅ (Muzzy approved 2026-10-25)** — UI kit 0.35.0: big text wraps whole words + a `split:` page check; a gamepad press shows the focus ring (`markPadUsed()`); What's new after an update (`showWhatsNew()` + content/text/whats-new.json). The small ‹ at 200% text kept (approved as built). Muzzy then: "go auto. i'm going to bed" → sprint 38 archived with Claude's retro draft, sprint 39 next; /deliver v0.21 waits for Muzzy.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 62b66f0 (F143 5bd6ccd..62b66f0 read whole by Claude:
 
 ## Where we are
 Stage: develop   Milestone: v0.21 The kit meets every player   Sprint: 38
-Doing: F141 · F142 · F143 — waiting for Muzzy's OK   Branch: dev/v0-21-every-player   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: sprint 38 archive, then plan sprint 39   Branch: dev/v0-21-every-player   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.34.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.21.0
 
 ## Key facts
