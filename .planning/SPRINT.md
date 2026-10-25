@@ -14,9 +14,9 @@ Check: devkit tests; the proof's screenshot looked at by Claude; `git diff` of t
 
 ## F133 🔧 Save keeps a hand-wrapped list wrapped
 Done when: a list written over a few lines by hand (Glyphtender drag.json "_sections": 2 lines) comes back from a Save exactly as it was when nothing in it changed, and with the same line breaks when a value in it changed; lists on one line or one value per line behave as before.
-- [ ] 🤖 1. readLayout notes where a hand-wrapped list breaks its lines — devkit/vite/formatJson.ts
-- [ ] 🤖 2. Writing keeps those breaks (same items → same lines; items added or removed → the nearest sensible layout, said in a comment) — devkit/vite/formatJson.ts
-- [ ] 🤖 3. Tests: Glyphtender's real drag.json saves with an empty diff; a changed value keeps the breaks; one-line and one-per-line lists unchanged — devkit/vite/formatJson.test.ts
+- [x] 🤖 1. readLayout notes where a hand-wrapped list breaks its lines — devkit/vite/formatJson.ts
+- [x] 🤖 2. Writing keeps those breaks (same items → same lines; items added or removed → the nearest sensible layout, said in a comment) — devkit/vite/formatJson.ts
+- [x] 🤖 3. Tests: Glyphtender's real drag.json saves with an empty diff; a changed value keeps the breaks; one-line and one-per-line lists unchanged — devkit/vite/formatJson.test.ts
 - [ ] 🤖 4. README line (lands in Dev Kit 0.28.0) — devkit/README.md
 Check: devkit tests; a save of a copy of Glyphtender's drag.json with nothing changed leaves `git diff` empty.
 
