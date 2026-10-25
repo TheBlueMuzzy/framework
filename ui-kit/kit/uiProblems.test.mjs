@@ -110,6 +110,19 @@ describe('findProblems — a solid piece covering text', () => {
       <script>document.getElementById('tip').showPopover()</script>`)
     expect(only('overlap', found)).toEqual([])
   })
+
+  // 0.35.3 (F145, Muzzy 2026-10-25): toasts at 200% text stacked over the card's words and buttons — on top by design
+  it('words in the top layer (a toast) over the page are not an overlap; two toasts over each other still are', async () => {
+    const toast = 'position:fixed;inset:auto;margin:0;border:0;padding:4px;background:#fff'
+    const found = await problemsOn(`
+      <p style="position:absolute;left:20px;top:20px;margin:0">Win a round to earn trophies</p>
+      <button style="position:absolute;left:20px;top:60px">More</button>
+      <div id="a" popover="manual" style="${toast};left:10px;top:14px;width:300px">Sam joined the room</div>
+      <div id="b" popover="manual" style="${toast};left:10px;top:200px;width:200px">Connection lost</div>
+      <div id="c" popover="manual" style="${toast};left:30px;top:204px;width:200px">Tap to close me</div>
+      <script>for (const id of 'abc') document.getElementById(id).showPopover()</script>`)
+    expect(only('overlap', found)).toEqual(['overlap: "Connection lost" × "Tap to close me"'])
+  })
 })
 
 // 0.21.0 — the quality bars: faint text, things touching their box's edge, cards that grow
