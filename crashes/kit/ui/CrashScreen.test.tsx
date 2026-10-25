@@ -49,10 +49,10 @@ describe('crashRootOptions', () => {
     const actBefore = (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = false
     createRoot(place, crashRootOptions()).render(<Broken />)
-    await new Promise((resolve) => setTimeout(resolve, 50))
+    // wait for the crash screen to draw, not a fixed 50 ms (a busy computer can take longer — 2026-10-25 look-back)
+    await vi.waitFor(() => expect(document.body.textContent).toContain('The problem was reported.'), { timeout: 2000 })
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = actBefore
     expect(document.body.textContent).toContain('Something broke')
-    expect(document.body.textContent).toContain('The problem was reported.')
     // the report goes out after its SHA-256 fingerprint (crypto.subtle, async): wait for it, not a fixed time — on a
     // busy computer (check:fast beside a screenshot run) 50 ms wasn't always enough (2026-10-25)
     await vi.waitFor(() => expect(sent).toHaveLength(1), { timeout: 2000 })

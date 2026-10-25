@@ -11,6 +11,7 @@ import words from '../../templates/content/words.json'
 
 afterEach(() => { cleanup(); vi.useRealTimers() })
 // The UI kit's one live region (0.32.0), on the page past its first moment — as it is once EmoteBubbles has mounted
+// eslint-disable-next-line no-restricted-syntax -- lets the live region's own shorter first-moment timer run first (timers keep their order)
 beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) })
 const make = () => createEmotes({ settings: template, words: words.emotes, banter: { bully: { won: 'Too easy.' } }, mine: ['me'], warn: () => {} })
 const bubbles = () => [...document.querySelectorAll('.kit-speech-text')].map((el) => el.textContent)

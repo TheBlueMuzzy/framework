@@ -37,6 +37,7 @@ function start(client: Partial<ClientConfig> = {}, more: { dev?: boolean; versio
 // The fingerprint is made with crypto.subtle, which answers a moment later — later still on a busy machine (sprint 31:
 // a fixed 20 ms wait lost reports while check:fast ran 20 checks side by side). So: wait until the transport has had
 // no new call for three 20 ms turns in a row (at most 2 s).
+// eslint-disable-next-line no-restricted-syntax -- one step of settle()'s polling loop below, which waits for the result itself
 const tick = () => new Promise((resolve) => setTimeout(resolve, 20))
 async function settle() {
   let quiet = 0

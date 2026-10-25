@@ -56,6 +56,7 @@ describe('thinking in the background', () => {
     thinker.stop()
     let settled = false
     late.then(() => (settled = true), () => (settled = true))
+    // eslint-disable-next-line no-restricted-syntax -- a set time on purpose: proves NOTHING arrives in it
     await new Promise((r) => setTimeout(r, 10))
     expect(settled).toBe(false)
     await expect(thinker.think(2)).rejects.toThrow(/stopped/)

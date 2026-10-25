@@ -170,6 +170,7 @@ describe('the spikes and the outline', () => {
 
 describe('<TalkingBubble>', () => {
   // The page's one live region, already on the page past its first moment (as it is after a game's first line)
+  // eslint-disable-next-line no-restricted-syntax -- lets the live region's own shorter first-moment timer run first (timers keep their order)
   beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) })
   // Frames by hand: each tick moves the clock 1/60 s and runs the queued frames
   let now = 0

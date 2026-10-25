@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screens } from './screens'
 
 // Browser history moves a moment later (like a real browser), so wait for it.
+// eslint-disable-next-line no-restricted-syntax -- the history steps are the test browser's own 0 ms timers, one trip at a time, with nothing to wait on; 100 ms covers them (hasn't failed under load so far)
 const historySettles = () => new Promise((resolve) => setTimeout(resolve, 100))
 
 beforeEach(async () => {

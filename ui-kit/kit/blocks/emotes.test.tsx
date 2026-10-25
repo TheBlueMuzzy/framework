@@ -102,6 +102,7 @@ describe('MuteMenu + MutedMark', () => {
 // The page's one live region (0.32.0, F116): made once, before its first line, and only its text changes after
 describe('the live region (announce)', () => {
   const statuses = () => document.querySelectorAll('[role="status"]')
+  // eslint-disable-next-line no-restricted-syntax -- lets the live region's own shorter first-moment timer run first (timers keep their order)
   beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) }) // past its first moment
 
   it('a new page: the region goes on the page EMPTY, and its first line arrives a moment later (never made with it)', () => {
@@ -153,6 +154,7 @@ describe('the live region (announce)', () => {
 })
 
 describe('LiveAnnouncer', () => {
+  // eslint-disable-next-line no-restricted-syntax -- lets the live region's own shorter first-moment timer run first (timers keep their order)
   beforeAll(async () => { liveRegion(); await new Promise((done) => setTimeout(done, 150)) })
   it('says each new line once, at most one a second (the rest skipped)', () => {
     vi.useFakeTimers()
