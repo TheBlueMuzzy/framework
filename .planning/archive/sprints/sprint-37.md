@@ -36,3 +36,8 @@ Notes:
 - "Dark console" is ambiguous on its own (a living-room console's dashboard, a handheld, a terminal) — the sketch's three console takes are those three readings.
 - Version (Claude's call): new looks are a new feature → UI kit 0.34.0; 0.34.0 was "reserved" for dropping OLD_MODULE_ROWS, which still waits on Glyphtender reinstalling crashes / emotes / ai — that drop moves to 0.35.0 (its comment in kit/conformance.mjs says so).
 - No open P0/P1 bugs in this repo.
+
+Retro: (Claude's draft, kept by Muzzy 2026-10-25 by going straight to /deliver)
+- Went well: sketch first, then the kit — Muzzy picked from 6 playable takes, and the kit looks came straight from the picks with nothing to redo.
+- Went wrong: Fantasy's numbers came out old-style ("vO.1.O.12"); a crashes test failed only under load — a missed copy of the sprint-31 fix.
+- Change: when a fix lands, grep for other copies of the same pattern straight away (the rule exists; this copy slipped past it).
