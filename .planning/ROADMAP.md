@@ -335,13 +335,13 @@ flowchart LR
 ```
 
 ## v0.19 — Smoother tools  ← current · planned 2026-10-24
-Goal (Muzzy 2026-10-24, "a then b. C later i think"): the Dev Kit edits every file a designer tunes and keeps hand-made layouts on Save (sprint 36), then the kit's small known bugs go (sprint 37).
+Goal (Muzzy 2026-10-24, "a then b. C later i think"): the Dev Kit edits every file a designer tunes and keeps hand-made layouts on Save (sprint 36), then the kit's small known bugs go (added to sprint 36 on "auto").
 - 🔨 F132 🔧 The Tuning tab edits more than content/tuning/: files a game lists in content/devkit.json "tuningFiles" (content/rooms.json — idle warn / takeover times) get the same sliders and Save — should · sprint 36
 - 🔨 F133 🔧 Save keeps a hand-wrapped list wrapped: a list laid out over a few lines (Glyphtender drag.json "_sections") no longer comes back one value per line — should · sprint 36
-- 🟢 F134 🐞 No stray "0" under a part: MainMenu `children && …` (frontend.tsx), and the same pattern in layout.tsx and PullHandle.tsx, render 0 when given 0 — could
-- 🟢 F135 🐞 check-ui reads CSS with a data: URL: `--css` splits on every ";" and ":" (check-ui.mjs), so a data:…;base64 value gives a false warning — could
-- 🟢 F136 🐞 Mode select fills its row on desktop: `.kit-grid` uses auto-fill, leaving an empty 4th column with 3 modes — could
-- 🟢 F137 🐞 A part-way save code tells the player to reload: SaveCodePanel shows a danger toast and stops, so the game keeps showing the old values — could
+- 🔨 F134 🐞 No stray "0" under a part: MainMenu `children && …` (frontend.tsx), and the same pattern in layout.tsx and PullHandle.tsx, render 0 when given 0 — could · sprint 36
+- 🔨 F135 🐞 check-ui reads CSS with a data: URL: `--css` splits on every ";" and ":" (check-ui.mjs), so a data:…;base64 value gives a false warning — could · sprint 36
+- 🔨 F136 🐞 Mode select fills its row on desktop: `.kit-grid` uses auto-fill, leaving an empty 4th column with 3 modes — could · sprint 36
+- 🔨 F137 🐞 A part-way save code tells the player to reload: SaveCodePanel shows a danger toast and stops, so the game keeps showing the old values — could · sprint 36
 ```mermaid
 flowchart LR
   F132[F132 Tuning tab: more files]

@@ -1,6 +1,6 @@
-# Sprint 36 — The Dev Kit edits every file it should
-Started 2026-10-24 · Milestone v0.19 Smoother tools · Features: F132, F133
-Muzzy 2026-10-24: "a then b. C later i think" — this sprint is option A; option B (the kit's small bugs, F134–F137) is sprint 37; C (new looks) stays in Later.
+# Sprint 36 — Smoother tools: the Dev Kit edits every file it should, then the kit's small bugs
+Started 2026-10-24 · Milestone v0.19 Smoother tools · Features: F132, F133, F134, F135, F136, F137
+Muzzy 2026-10-24: "a then b. C later i think" — option A (F132, F133), then option B (F134–F137) added to this same sprint when Muzzy said "auto" (Claude's call: a new sprint would need F132/F133 approved and a retro first); C (new looks) stays in Later.
 What changes: the Dev Kit's Tuning tab can show content files outside content/tuning/ (a game lists them), and Save keeps a list laid out by hand the way it was. What stays the same: every game's screens; tuning files already shown look and save as before; games get it only when they reinstall the Dev Kit.
 
 ## F132 🔧 The Tuning tab edits more than content/tuning/
@@ -22,7 +22,36 @@ Done when: a list written over a few lines by hand (Glyphtender drag.json "_sect
 Check: devkit tests; a save of a copy of Glyphtender's drag.json with nothing changed leaves `git diff` empty.
 Checked: 2026-10-24 (Claude) — 5 tests on Glyphtender's drag.json from before Muzzy's first Save (its 4ff82b5): unchanged → exactly the same text · a change elsewhere → only that line · a changed / added / removed item keeps the breaks · one-line and one-per-line lists as before · Windows line endings. Scratch Glyphtender (drag.json "_sections" wrapped over 2 lines): ghostOpacity 0.45 → 0.55 through the Dev Kit's Save → `git diff` = that one line, the wrapped list untouched. Review: diff read whole by Claude, no bugs.
 
+## F134 🐞 No stray "0" under a part
+Done when: a 0 handed to a kit part (children, a badge, a detail, an icon, a slot) shows as "0" inside its place — never loose on the page and never lost; ui-kit tests and the shoot unchanged otherwise.
+- [x] 🤖 1. One small `shown()` helper; every `x && <…>` whose x can be a number (React-node props and children — 12 lines) and the HUD / Screen slots use it — ui-kit/kit/shown.ts
+- [x] 🤖 2. Tests: MainMenu children 0 · PlayerChip badge 0 with the name hidden · ListRow detail 0 · Screen and Hud slots 0 (they fail on the old code) — ui-kit/kit/shown.test.tsx
+Check: ui-kit tests; the tests fail on the old code.
+
+## F135 🐞 check-ui reads CSS with a data: URL
+Done when: `check-ui --css` reads `background: url(data:image/png;base64,…)` as ONE declaration (no false warning from the ";" or ":" inside it), and still warns on the real cases.
+- [ ] 🤖 1. Split declarations on ";" and ":" only outside quotes and brackets — ui-kit/kit/check-ui.mjs
+- [ ] 🤖 2. Tests: a data: URL and a quoted ";" give no warning; real breaks still warn — ui-kit/kit/check-ui.test.mjs
+Check: ui-kit tests; check-ui on the kit's own CSS unchanged.
+
+## F136 🐞 Mode select fills its row
+Done when: Mode select with fewer modes than fit on a row (2 on desktop) spreads them over the row instead of leaving empty columns; 3+ modes and the phone look the same as today.
+- [ ] 🤖 1. Measure today: 3 modes fill 3 columns at 1440 / 1100 (no empty 4th — the 2026-09-28 note is out of date); 2 modes → an empty column? — ui-kit/kit/blocks/frontend.tsx
+- [ ] 🤖 2. If so: Grid gets `fill` (auto-fit) and ModeSelect uses it — ui-kit/kit/layout.tsx
+- [ ] 🤖 3. Test in a real browser with the kit's CSS: 2 cards fill the row, 3 cards as before — ui-kit/kit/blocks/modeSelectFit.test.tsx
+Check: ui-kit tests; a desktop shot of the gallery's Mode select looked at by Claude.
+
+## F137 🐞 A part-way save code tells the player to reload
+Done when: after a save code that only partly loads, the panel says what came back AND that the game needs a reload to show it, with a Reload button; a code that fully loads behaves as before.
+- [ ] 🤖 1. Read what SaveCodePanel does on `partly` and what a game passes it — saves/kit/ui/SaveCodePanel.tsx
+- [ ] 🤖 2. The part-way message offers Reload (the same reload a full load uses) — saves/kit/ui/SaveCodePanel.tsx
+- [ ] 🤖 3. Tests: part-way → the message + a Reload that reloads; full → as before — saves/kit/ui/SaveCodePanel.test.tsx
+- [ ] 🤖 4. READMEs + versions (UI kit 0.33.3 for F134–F136, saves 0.6.3) — saves/kit/VERSION
+Check: saves + ui-kit tests; the shoot 0 problems.
+
 Notes:
+- F134: a lint rule (react/jsx-no-leaked-render) was the first idea, but without types it flags all 62 `x && <…>` lines — most are true/false values that can never draw a 0 — so only the 12 whose value can be a number got the `shown()` helper (Claude's call; the full list was sorted by each prop's type).
+- F136 task 1 so far: the gallery's 3 modes fill 3 columns at 1440×900 and 1100×800 (cards 165 px, grid 526 px) and 2 columns on a phone — the 2026-09-28 "empty 4th column" doesn't happen today; whether 2 modes leave an empty column is checked next.
 - F132 spike (Glyphtender, read only): content/rooms.json is read by the room server (party/server.ts, glyphtenderRules.ts) once when it starts — its own _help says "restart npm run party:dev after a change"; the client never imports it. Other knob files beside tuning/: content/ai/*.json (pace, skills…), content/data/*.json. So a listed file needs (a) live in the browser like tuning files (for client-read ones) and (b) an "after" note for server-read ones.
 - F132 design (Claude's calls): the Dev Kit's Vite plugin reads the list and builds a small virtual module with only the listed files' data (first try imported them with ?devkit-file — Vite didn't treat that as JSON outside a glob; reading the files in the plugin is simpler and watches each file). The list's problems (outside content/, a tuning file, style.json, missing, a name clash with a tuning file, broken JSON) are shown at the top of the tab. Listed files' settings join the Select tab's list too, so a game's "every setting is on an object" test names their knobs until they're placed — Muzzy's rule that a click shows everything.
 - Ideas checked against the code before planning (sprint 35 retro): Theme Tuner, the tappable seat row and the shoot's Pause wait were already built → marked done in ROADMAP (f5359bf). F132's and F133's gaps confirmed in devkit/kit/tuning/tuningFiles.ts:9 and devkit/vite/formatJson.ts:21.

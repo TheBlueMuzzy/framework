@@ -2,6 +2,7 @@
 // They only arrange things. Spacing is always a gap name (xs, s, m, l, xl) — never a size.
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from 'react'
 import { reduceMotion } from './blocks/motion'
+import { shown } from './shown'
 
 export type Gap = 'xs' | 's' | 'm' | 'l' | 'xl'
 type BoxProps = HTMLAttributes<HTMLDivElement> & { gap?: Gap }
@@ -72,9 +73,9 @@ export function Screen({ children, label, dialog, scroll, grow, backdrop, backdr
       style={{ '--kit-backdrop': backdrop ? `url("${encodeURI(backdrop)}")` : undefined } as CSSProperties}>
       {Object.entries(slotNames).map(([prop, slot]) => {
         const content = slots[prop as keyof typeof slots]
-        return content ? <div key={slot} data-slot={slot}>{content}</div> : null
+        return shown(content) ? <div key={slot} data-slot={slot}>{content}</div> : null
       })}
-      {children && <div data-slot="center" ref={centre}>{children}</div>}
+      {shown(children) && <div data-slot="center" ref={centre}>{children}</div>}
     </section>
   )
 }

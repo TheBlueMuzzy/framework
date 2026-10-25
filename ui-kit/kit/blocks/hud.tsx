@@ -8,6 +8,7 @@ import { askConfirm, Modal } from './dialogs'
 import { useFixedSize } from '../fixedSize'
 import { useCountUp } from './motion'
 import { fill } from './words'
+import { shown } from '../shown'
 
 // PAUSE — a dialog over the game. Resume closes it; Quit asks first (turn off with confirmQuit={false}).
 // note: one quiet caption line under the title, above the buttons (e.g. this game's settings: "Small garden · 2-letter words off").
@@ -26,7 +27,7 @@ export function Pause({ onResume = () => screens.pop(), onSettings, onHowToPlay,
     : onQuit?.()
   return (
     <Modal title={w.title} className="kit-pause">
-      {note && <Text kind="caption">{note}</Text>}
+      {shown(note) && <Text kind="caption">{note}</Text>}
       <Stack gap="s" className="kit-menu">
         <Button sound="back" onClick={onResume}>{w.resume}</Button>
         {onSettings && <Button variant="secondary" onClick={onSettings}>{w.settings}</Button>}
@@ -60,11 +61,11 @@ type HudProps = {
 export function Hud({ vitals, status, currency, onPause, actions, banner, bottomLeft, bottomRight, oneRow, dock, dockSide = 'bottom', dockTight, words }: HudProps) {
   const w = { ...hudWords, ...words }
   // Each slot's contents sit in kit-hud-slot, which lets taps through to the game (blocks.css)
-  const slot = (content: ReactNode, one?: boolean) => content && <div className="kit-hud-slot" data-one-row={one || undefined}>{content}</div>
+  const slot = (content: ReactNode, one?: boolean) => (shown(content) ? <div className="kit-hud-slot" data-one-row={one || undefined}>{content}</div> : null)
   const pause = onPause && <Button variant="secondary" icon aria-label={w.pause} onClick={onPause}>❚❚</Button>
   const screen = (
     <Screen label={w.label} topLeft={slot(vitals)} top={slot(status, oneRow)}
-      topRight={slot((currency || pause) && <Row gap="s">{currency}{pause}</Row>)}
+      topRight={slot((shown(currency) || pause) && <Row gap="s">{currency}{pause}</Row>)}
       bottomLeft={slot(bottomLeft)} bottom={slot(actions)} bottomRight={slot(bottomRight)}>
       {slot(banner)}
     </Screen>
@@ -127,7 +128,7 @@ export function Bar({ label, value, max = 100, variant = 'primary', pips, icon, 
   }
   const parts = (
     <>
-      {icon && <span aria-hidden="true">{icon}</span>}
+      {shown(icon) && <span aria-hidden="true">{icon}</span>}
       {labelAt === 'beside' && <span className="kit-bar-label" aria-hidden="true">{label}</span>}
       {labelAt === 'above' && <span className="kit-bar-label-above" aria-hidden="true">{label}</span>}
       {bar}
@@ -159,7 +160,7 @@ function useFloatUps(value: number) {
 export function Counter({ label, value, icon }: { label: string; value: number; icon?: ReactNode }) {
   return (
     <Chip role="group" aria-label={label}>
-      {icon && <span aria-hidden="true">{icon}</span>}
+      {shown(icon) && <span aria-hidden="true">{icon}</span>}
       <span className="kit-float-anchor"><Text kind="label">{value}</Text>{useFloatUps(value)}</span>
     </Chip>
   )
@@ -341,24 +342,24 @@ export function PlayerChip({
   const shownScore = useCountUp(score ?? 0)
   const floats = useFloatUps(score ?? 0)
   const oneLine = size === 'xs' // the detail sits beside the name and badge instead of on a line below
-  const hasNameLine = showName || badge || (oneLine && detail)
+  const hasNameLine = showName || shown(badge) || (oneLine && shown(detail))
   const fixed = useFixedSize()
   return (
     // (a plain kit-row div, not <Row>: React 18 hands a ref only to real elements)
     <div ref={fixed} className="kit-row kit-hud-chip kit-player-chip kit-nowrap" data-gap={size === 'm' ? 's' : 'xs'} role="group" aria-label={name}
       data-state={active ? 'active' : undefined} data-dim={dim || undefined} data-size={size}>
-      {icon && <span className="kit-player-chip-icon" aria-hidden="true">{icon}</span>}
+      {shown(icon) && <span className="kit-player-chip-icon" aria-hidden="true">{icon}</span>}
       {!icon && avatar !== false && <Avatar name={name} src={avatar || undefined} color={color} active={active} />}
-      {(showName || detail || badge) && (
+      {(showName || shown(detail) || shown(badge)) && (
         <Stack gap="xs" className="kit-player-chip-text">
           {hasNameLine && (
             <Row gap="xs" className="kit-nowrap">
               {showName && <Text kind="label">{name}</Text>}
-              {badge && <Badge>{badge}</Badge>}
-              {oneLine && detail && <Text kind="caption">{detail}</Text>}
+              {shown(badge) && <Badge>{badge}</Badge>}
+              {oneLine && shown(detail) && <Text kind="caption">{detail}</Text>}
             </Row>
           )}
-          {!oneLine && detail && <Text kind="caption">{detail}</Text>}
+          {!oneLine && shown(detail) && <Text kind="caption">{detail}</Text>}
         </Stack>
       )}
       {score !== undefined && (
