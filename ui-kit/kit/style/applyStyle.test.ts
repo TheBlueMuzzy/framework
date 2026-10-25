@@ -21,6 +21,15 @@ describe('style engine', () => {
     expect(resolveStyle({ preset: 'clean', tweaks: { 'text-size': 0.5 } })['text-body']).toBe('1.125rem')
   })
 
+  // F145: HUD words grow with Text size only up to hud-text-max × their normal size (default 1.25)
+  it('caps HUD text at hud-text-max × its normal size', () => {
+    const vars = resolveStyle({ preset: 'clean' })
+    expect(vars['hud-text-body']).toBe('min(1.125rem, 22.5px)') // 18px × 1.25
+    expect(vars['hud-rem']).toBe('min(1rem, 20px)')
+    expect(resolveStyle({ preset: 'clean', tweaks: { 'hud-text-max': 2 } })['hud-text-body']).toBe('min(1.125rem, 36px)')
+    expect(resolveStyle({ preset: 'clean', tweaks: { 'hud-text-max': 0.5 } })['hud-text-body']).toBe('min(1.125rem, 18px)') // never below 1
+  })
+
   it('falls back to clean for an unknown preset', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     expect(resolveStyle({ preset: 'nope' }).primary).toBe('#2f5bd3')
