@@ -28,6 +28,7 @@ Done when: a 0 handed to a kit part (children, a badge, a detail, an icon, a slo
 - [x] 🤖 2. Tests: MainMenu children 0 · PlayerChip badge 0 with the name hidden · ListRow detail 0 · Screen and Hud slots 0 (they fail on the old code) — ui-kit/kit/shown.test.tsx
 - [x] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; the tests fail on the old code.
+Checked: 2026-10-24 (Claude) — 4 tests in shown.test.tsx (shown() itself · MainMenu children 0 inside its extras box · a PlayerChip badge 0 with the name hidden · ListRow detail, Screen slot and Hud slot 0) — they fail on the old code (run with the fix set aside, the helper kept); ui-kit 650 tests green; shoot 475 shots, 0 problems. Review: 14 changed lines read by Claude, each the same swap; no bugs.
 
 ## F135 🐞 check-ui reads CSS with a data: URL
 Done when: `check-ui --css` reads `background: url(data:image/png;base64,…)` as ONE declaration (no false warning from the ";" or ":" inside it), and still warns on the real cases.
@@ -35,6 +36,7 @@ Done when: `check-ui --css` reads `background: url(data:image/png;base64,…)` a
 - [x] 🤖 2. Tests: a data: URL and a quoted ";" give no warning; real breaks still warn — ui-kit/scripts/check-ui.test.mjs
 - [x] 🤖 3. README line (0.33.3) — ui-kit/README.md
 Check: ui-kit tests; check-ui on the kit's own CSS unchanged.
+Checked: 2026-10-24 (Claude) — 2 new tests (an inline SVG data: URL, a base64 PNG and a quoted ";" give no warning; a real px next to a data: URL is still caught on its own line) — the first failed on the old code with the 2 false warnings; my first fix also blanked quoted text in TSX inline styles (2 old tests caught it) → the blanking now runs on CSS values only. npm run check-ui on the kit: 155 files pass, as before. Review: no bugs.
 
 ## F136 🐞 Mode select fills its row
 Done when: Mode select with fewer modes than fit on a row (2 on desktop) spreads them over the row instead of leaving empty columns; 3+ modes and the phone look the same as today.
@@ -42,6 +44,7 @@ Done when: Mode select with fewer modes than fit on a row (2 on desktop) spreads
 - [x] 🤖 2. If so: Grid gets `fill` (auto-fit) and ModeSelect uses it — ui-kit/kit/layout.tsx
 - [x] 🤖 3. Test in a real browser with the kit's CSS: 2 cards fill the row, 3 cards as before — ui-kit/kit/blocks/modeSelectFit.test.tsx
 Check: ui-kit tests; a desktop shot of the gallery's Mode select looked at by Claude.
+Checked: 2026-10-24 (Claude) — measured first: 3 modes fill 3 columns at 1440 and 1100 (the old note was out of date), but 2 modes on the 526 px panel ended at 361 of 542 px (an empty column). Real-browser test (kit CSS): 2 modes reach the row's end, 3 as before, phone 2 per row — the 2-mode case failed before `fill`. Gallery Mode select desktop shot looked at: unchanged (3 modes). Review: no bugs.
 
 ## F137 🐞 A part-way save code tells the player to reload
 Done when: after a save code that only partly loads, the panel says what came back AND that the game needs a reload to show it, with a Reload button; a code that fully loads behaves as before.
@@ -50,6 +53,7 @@ Done when: after a save code that only partly loads, the panel says what came ba
 - [x] 🤖 3. Tests: part-way → the message + a Reload that reloads; full → as before (the decision is `partlyLoaded()`, tested; the panel has no test of its own here — the saves module tests without a page) — saves/kit/saveCode.test.ts
 - [x] 🤖 4. READMEs + versions (UI kit 0.33.3 for F134–F136, saves 0.6.3) — saves/kit/VERSION
 Check: saves + ui-kit tests; the shoot 0 problems.
+Checked: 2026-10-24 (Claude) — saves 247 tests (partlyLoaded: full load no · nothing written no · nothing came in no · part yes; the existing part-way test now also checks it). The panel's dialog itself has no test here (the saves module tests without a page) — it's the kit's askConfirm with the game's own onLoaded reload, as the full load uses. Shoot 475 shots, 0 problems; check:fast all 20 green. Review: no bugs. UI kit 0.33.3 · saves 0.6.3.
 
 Notes:
 - F134: a lint rule (react/jsx-no-leaked-render) was the first idea, but without types it flags all 62 `x && <…>` lines — most are true/false values that can never draw a 0 — so only the 12 whose value can be a number got the `shown()` helper (Claude's call; the full list was sorted by each prop's type).
