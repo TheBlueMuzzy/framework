@@ -256,9 +256,11 @@
   .kit-place { min-inline-size: 3.5ch; }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
      the list on the right, so the list keeps its height instead of shrinking to one row */
+  /* (0.35.1, F145) The buttons' row never shrinks below its buttons (a plain 1fr, like the Lobby room's below): at 200%
+     text Quit / Rematch slid up over the message; too little height → the card scrolls instead */
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-results { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
-      grid-template-rows: auto auto minmax(0, 1fr); align-content: start; }
+      grid-template-rows: auto auto 1fr; align-content: start; }
     .kit-results > :not(.kit-scroll) { grid-column: 1; }
     .kit-results > .kit-scroll { grid-column: 2; grid-row: 1 / -1; }
     .kit-results > .kit-row:last-child { align-self: end; justify-content: start; }
