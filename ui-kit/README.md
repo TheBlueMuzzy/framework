@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.35.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -309,6 +309,26 @@ gallery's `npm run shoot` uses the same one.
   `kit-whats-new:<game folder>`, remembered when the panel opens. The rule is a pure function (`whatsNewDecision`,
   a test per rule). Design: `.planning/design/ui-kit.md` §4c. The shoot adds it (656 shots, 0 problems). The
   old-module-rows fallback now goes in 0.36.0.
+- 0.35.1 (F145, framework sprint 39): **every screen holds up at 200% text.** Two helpers in parallel — the in-game
+  screens (HUD, dock, chips, pinned, emotes: lines below) and every other screen (this part). Nothing changes at 100%:
+  the 100% shots are pixel-for-pixel the same, except the main menu's words (anti-aliased a hair differently now that
+  it can scroll). Every other screen:
+  - **Titles never split a word.** MenuHeader's fit (0.27.0) now runs on a title alone too — at full size it still
+    wraps between words; a word wider than its line drops it a step (heading size, then body) instead of
+    "Reconnecti / ng…". The end screens' titles (Victory, Game over, Results) fit the same way (`useTitleFit`, shared).
+    On a short screen (30rem tall or less) a title is at most a tenth of its height and a display title a seventh
+    (`--kit-short-title` 10dvh / `--kit-short-display` 14dvh), never under body size — above every style's 100% sizes.
+  - **A card's list keeps a floor.** A ScrollArea straight in a card gives up height only down to `--kit-scroll-min`
+    (4rem) or its whole contents if shorter; past that the card scrolls as one (the Room's player list was a 16 px
+    sliver). Victory / Game over's report joins the card's rows when upright, so its list keeps the floor too.
+    The scroll box's edge room is at most half the card's side gap (it grew to the whole gap at 200%).
+  - **The main menu scrolls as one** (`<Screen scroll>`) when it's taller than the window — buttons slid over the tagline
+    and the version line. A scrolling screen re-centres once its pictures load (the art menu's logo).
+  - Results on a phone on its side keeps its buttons' row whole (Quit slid over the message; now the card scrolls).
+  - An avatar's initials stop at 45% of its 44 px circle ("SM" overflowed it). An art frame (`Panel frame`) no longer
+    grows with the text size, like the style's gaps — its rem are counted at 16 px; the same at 100%.
+  - The page check's `split:` also flags a TITLE word broken across lines when it's wider than its box (a title can
+    drop a size; body words still may wrap) — no new finding on any gallery screen at 100% or 200%.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
