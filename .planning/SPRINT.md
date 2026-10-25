@@ -16,6 +16,7 @@ Done when: a game played only with a pad shows the focus ring on the first scree
 - [x] 🤖 2. ScreenStack counts a pad as keyboard use; TalkingBubble and Teach use the same flag (they copy the focusVisible pattern) — ui-kit/kit/ScreenStack.tsx
 - [x] 🤖 3. README + CATALOG say how a game's own pad code tells the kit (if it needs to) — ui-kit/README.md
 Check: ui-kit tests; the gallery with a fake pad event shows the ring, with a mouse click it doesn't.
+Checked: 2026-10-25 — red first (d922c3f: 2 failed | 15 passed); ui-kit 730/730 tests (5 new F142 tests); ui-kit tsc + check-ui clean; root `npm run check:fast` "✓ all 20 checks passed". Real gallery on :6142 (Chromium, Playwright): gamepadconnected → Settings opened by code → the ‹ button `:focus-visible`, solid outline, ring in the shot; a real mouse click → same button focused, no ring; a click on the page THEN a pad press → ring (Chromium honours focusVisible: true). Shots looked at: ~/Documents/dev/.scratch/framework-f142/a-pad.png (blue ring round ‹) · b-mouse.png (no ring).
 
 ## F143 ✨ What's new after an update
 Done when: a game can show a What's new panel that appears once on the first launch after its version changes (not on a first install, not for a build-only bump, not mid-game), with 3–5 highlight lines, an optional full-notes link and one tap to close; tested, in the gallery, the shoot clean.
