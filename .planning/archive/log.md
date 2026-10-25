@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-24 — Released v0.16.0 (v0.14 Story pieces made solid): the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
+- 2026-10-24 — F115 + F116 + F117 approved: the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
 - 2026-10-24 — Sprint 31 planned: make the new story pieces solid (F115 reveal replays, F116 bubble for every player, F117 log trims itself).
 - 2026-10-24 — Released v0.15.0 (v0.13 Games feed the framework): games can hand finished pieces to the framework and swap the module back in one step.
 - 2026-10-24 — F114 approved: a game session can hand a finished piece to the framework window, which builds it as a module and swaps it back in with the game's own checks as the contract.
