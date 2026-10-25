@@ -212,6 +212,8 @@ export function Row({ gap = 'm', justify = 'start', className = '', ...rest }: B
 }
 
 // Equal tiles that fit as many per line as there's room for. min = smallest tile: s, m or l.
-export function Grid({ gap = 'm', min = 'm', className = '', ...rest }: BoxProps & { min?: 's' | 'm' | 'l' }) {
-  return <div className={`kit-grid ${className}`} data-gap={gap} data-min={min} {...rest} />
+// fill (0.33.3, F136): fewer tiles than fit on a row spread over it instead of leaving empty columns (Mode select's
+// 2 cards on a desktop panel); without it the tiles keep their size and line up with the rows below
+export function Grid({ gap = 'm', min = 'm', fill, className = '', ...rest }: BoxProps & { min?: 's' | 'm' | 'l'; fill?: boolean }) {
+  return <div className={`kit-grid ${className}`} data-gap={gap} data-min={min} data-fill={fill || undefined} {...rest} />
 }

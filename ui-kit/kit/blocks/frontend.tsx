@@ -81,7 +81,7 @@ export function ModeSelect({ modes, value, onChange, onStart, onBack = () => scr
       <Panel depth={2} gap="m" className="kit-wide">
         <MenuHeader title={w.title} onBack={onBack} backLabel={w.back} />
         <ScrollArea label={w.title}>
-          <Grid gap="m" min="s">
+          <Grid gap="m" min="s" fill>
             {modes.map((mode) => (
               <Card key={mode.id} title={mode.name} selected={mode.id === value} onClick={() => onChange(mode.id)}>
                 {mode.description && <Text kind="caption">{mode.description}</Text>}

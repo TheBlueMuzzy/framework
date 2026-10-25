@@ -118,6 +118,7 @@
   .kit-row[data-justify="end"] { justify-content: flex-end; }
   .kit-row[data-justify="between"] { justify-content: space-between; }
   .kit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-tile)), 1fr)); }
+  .kit-grid[data-fill] { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--kit-tile)), 1fr)); } /* Grid fill (0.33.3) */
   .kit-grid[data-min="s"] { --kit-tile: 8rem; }
   .kit-grid[data-min="m"] { --kit-tile: 12rem; }
   .kit-grid[data-min="l"] { --kit-tile: 18rem; }

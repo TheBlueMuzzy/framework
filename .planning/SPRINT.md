@@ -38,9 +38,9 @@ Check: ui-kit tests; check-ui on the kit's own CSS unchanged.
 
 ## F136 🐞 Mode select fills its row
 Done when: Mode select with fewer modes than fit on a row (2 on desktop) spreads them over the row instead of leaving empty columns; 3+ modes and the phone look the same as today.
-- [ ] 🤖 1. Measure today: 3 modes fill 3 columns at 1440 / 1100 (no empty 4th — the 2026-09-28 note is out of date); 2 modes → an empty column? — ui-kit/kit/blocks/frontend.tsx
-- [ ] 🤖 2. If so: Grid gets `fill` (auto-fit) and ModeSelect uses it — ui-kit/kit/layout.tsx
-- [ ] 🤖 3. Test in a real browser with the kit's CSS: 2 cards fill the row, 3 cards as before — ui-kit/kit/blocks/modeSelectFit.test.tsx
+- [x] 🤖 1. Measure today: 3 modes fill 3 columns at 1440 / 1100 (no empty 4th — the 2026-09-28 note is out of date); 2 modes → an empty column? — ui-kit/kit/blocks/frontend.tsx
+- [x] 🤖 2. If so: Grid gets `fill` (auto-fit) and ModeSelect uses it — ui-kit/kit/layout.tsx
+- [x] 🤖 3. Test in a real browser with the kit's CSS: 2 cards fill the row, 3 cards as before — ui-kit/kit/blocks/modeSelectFit.test.tsx
 Check: ui-kit tests; a desktop shot of the gallery's Mode select looked at by Claude.
 
 ## F137 🐞 A part-way save code tells the player to reload
