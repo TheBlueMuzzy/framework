@@ -1,9 +1,9 @@
 // Toast timing, and Confirm opened through the screen stack.
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Button, ScreenStack, screens } from '..'
-import { askConfirm, kitScreens, MAX_TOASTS, Modal, toast, toasts, ToastStack } from './dialogs'
+import { askConfirm, kitScreens, MAX_TOASTS, Modal, showWhatsNew, toast, toasts, ToastStack, WhatsNew } from './dialogs'
 
 afterEach(() => {
   cleanup()
@@ -160,6 +160,60 @@ describe('Confirm cancel', () => {
     await act(async () => { fireEvent.click(screen.getByText('OK')) })
     expect(onConfirm).toHaveBeenCalledOnce()
     expect(onCancel).not.toHaveBeenCalled()
+  })
+})
+
+describe('showWhatsNew + WhatsNew (0.35.0)', () => {
+  const versions = { '0.4.0': ['Two new boards', 'Faster dice', 'A calmer Settings'] }
+  const key = 'test-whats-new'
+  afterEach(() => localStorage.removeItem(key))
+
+  it('first install: nothing opens, this version is remembered', () => {
+    render(<ScreenStack screens={kitScreens} />)
+    act(() => { expect(showWhatsNew({ version: '0.4.0.3', versions, storageKey: key })).toBe(false) })
+    expect(screens.current).toEqual([])
+    expect(localStorage.getItem(key)).toBe('0.4.0')
+  })
+
+  it('after an update: opens once with the lines; remembered as it opens, so the next launch shows nothing', () => {
+    localStorage.setItem(key, '0.3.0')
+    render(<ScreenStack screens={kitScreens} />)
+    act(() => { expect(showWhatsNew({ version: '0.4.0.3', versions, storageKey: key })).toBe(true) })
+    expect(screen.getByRole('dialog', { name: 'What’s new in v0.4' })).toBeTruthy()
+    for (const line of versions['0.4.0']) expect(screen.getByText(line)).toBeTruthy()
+    expect(localStorage.getItem(key)).toBe('0.4.0')
+    fireEvent.click(screen.getByText('Got it'))
+    expect(screens.current).toEqual([])
+    act(() => { expect(showWhatsNew({ version: '0.4.0.4', versions, storageKey: key })).toBe(false) })
+  })
+
+  it('React StrictMode (an effect run twice while developing) still opens it once', async () => {
+    localStorage.setItem(key, '0.3.0')
+    const Menu = () => { useEffect(() => { showWhatsNew({ version: '0.4.0', versions, storageKey: key }) }, []); return null }
+    render(<StrictMode><ScreenStack screens={kitScreens} /><Menu /></StrictMode>)
+    await act(async () => {})
+    expect(screens.current).toEqual(['whats-new'])
+  })
+
+  it('a Full notes button only for a web address; the game words replace the defaults', () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const { rerender } = render(<WhatsNew version="0.4.1" lines={['One']} />)
+    expect(screen.queryByText('Full notes')).toBeNull()
+    expect(screen.getByRole('dialog', { name: 'What’s new in v0.4.1' })).toBeTruthy()
+    rerender(<WhatsNew version="0.4.1" lines={['One']} notesUrl="javascript:alert(1)" />)
+    expect(screen.queryByText('Full notes')).toBeNull()
+    rerender(<WhatsNew version="0.4.1" lines={['One']} notesUrl="https://example.com/devlog"
+      words={{ title: 'New in {version}', notes: 'Devlog', close: 'Nice' }} />)
+    fireEvent.click(screen.getByText('Devlog'))
+    expect(open).toHaveBeenCalledWith('https://example.com/devlog', '_blank', 'noopener')
+    expect(screen.getByRole('dialog', { name: 'New in 0.4.1' })).toBeTruthy()
+    expect(screen.getByText('Nice')).toBeTruthy()
+  })
+
+  it('never more than 5 lines on the panel', () => {
+    render(<WhatsNew version="0.4.0" lines={['1', '2', '3', '4', '5', '6']} />)
+    expect(screen.queryByText('6')).toBeNull()
+    expect(screen.getByText('5')).toBeTruthy()
   })
 })
 

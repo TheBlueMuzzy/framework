@@ -3,7 +3,7 @@
 //     <GameHud />            ← the always-there bottom layer
 //   </ScreenStack>
 // Each screen is a component that returns a <Screen>. A dialog is just <Screen dialog> pushed on top.
-// The kit's own screens (kitScreens: confirm) are always added under yours — no need to list them (0.25.0).
+// The kit's own screens (kitScreens: confirm, whats-new) are always added under yours — no need to list them (0.25.0).
 // A name pushed that has no screen warns in the console and closes again.
 // Everything under the top screen is inert: it can't be clicked, tapped or focused. Open screens under the top one
 // are also hidden (so a Pause panel never peeks out from behind the Rules opened from it): only the top screen shows,
