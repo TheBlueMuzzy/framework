@@ -53,3 +53,8 @@ Notes:
   - With 44 px arrows the picker is only as tall as its words at 200%, and they touched its border (1 px) → `.kit-picker-value` got padding-block: var(--gap-xs) (invisible at 100%: the arrows are taller).
   - Still splitting at 200%, not in the shoot (left for the 200% sweep, see task 1's list): Reconnecting's title "Reconnecti / ng…" (the word is wider than the whole card — the page check allows that by its rule; the cure is a title that shrinks to fit, like MenuHeader's), and the art Game over ("Game" / "over" in a fixed art frame — the whole screen breaks at 200%).
 - Surprise: conformance.mjs (games' check:framework) only reports kinds listed in its KINDS table — a new kind there would have been silently dropped. Added "no word is broken in the middle" with its fix line.
+
+Retro: (Claude's draft, 2026-10-25 — Muzzy said "go auto. i'm going to bed"; his words win when he reads it)
+- Went well: checking old ideas against the code first cut 7 candidates to the 3 real ones; helpers ran side by side on separate files and merged with only note conflicts.
+- Went wrong: the F141 measurement found big-text problems on 6 more screens that the shoot never shot at 200% — the check only looked where we pointed it.
+- Change: when a sprint adds a check, run it on EVERY screen first, not only the one the bug was seen on (sprint 39 does that for 200% text).
