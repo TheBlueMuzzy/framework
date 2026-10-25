@@ -4,6 +4,7 @@ import { isValidElement, useEffect, useRef, useState, type CSSProperties, type R
 import { Panel, Row, Screen, Stack, type PanelFrame } from '../layout'
 import { Avatar, Badge, Button, ListRow, ProgressBar, ScrollArea, Text, type ButtonArt } from '../controls'
 import { Spinner } from './dialogs'
+import { useTitleFit } from './MenuHeader'
 import { ordinal, TurnBanner } from './hud'
 import { reduceMotion } from './motion'
 import { fill } from './words'
@@ -76,10 +77,12 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
   const heading = title ?? w.title
   const stagger = reduceMotion() ? 0 : 1 // 1: each row waits a little longer than the one above it; 0: all at once
   const hasButtons = actions || onQuit || onRematch || onContinue
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, heading) // like the end screens' (0.35.1)
   return (
     <Screen label={heading} dialog={dim} grow="down">
       <Panel depth={2} gap="m" className="kit-modal kit-results">
-        <span className="kit-end-title"><Text kind="title">{heading}</Text></span>
+        <span ref={titleBox} className="kit-end-title"><Text kind="title">{heading}</Text></span>
         {message && <Text>{message}</Text>}
         <ScrollArea label={heading} max="l">
           {rankPlayers(players, lowestWins).map((p, i) => (
@@ -229,11 +232,13 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
 type EndArt = { frame?: PanelFrame; backdrop?: string; onSwipeUp?: () => void }
 type EndScreenProps = EndArt & RevealProps & { title: string; message?: string; stats?: Stat[]; swipeHint?: string; children: ReactNode }
 function EndScreen({ title, message, stats = [], reveal, onRevealed, children, frame, backdrop, onSwipeUp, swipeHint }: EndScreenProps) {
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, title) // a word wider than its line drops a step, never splits (0.35.1, F145)
   return (
     <Screen label={title} backdrop={backdrop} swipe={onSwipeUp ? { up: onSwipeUp } : undefined}>
       <Panel depth={2} gap="m" className="kit-modal kit-centred kit-end" frame={frame}>
         <Stack gap="m" className="kit-end-info">
-          <span className="kit-end-title"><Text kind="display">{title}</Text></span>
+          <span ref={titleBox} className="kit-end-title"><Text kind="display">{title}</Text></span>
           {message && <Text>{message}</Text>}
           {stats.length > 0
             ? <ScrollArea label={title}><StatList stats={stats} reveal={reveal} onRevealed={onRevealed} /></ScrollArea>

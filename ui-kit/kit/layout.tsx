@@ -195,14 +195,18 @@ export function Panel({ gap = 'm', depth = 1, frame, className = '', style, ...r
 // ink = which style colour the words inside take, to read on the frame's own window: 'on-surface' (default, like any
 // panel), 'on-bg' or 'on-game' (light words over a dark game in most styles).
 export type PanelFrame = { src: string; slice: [number, number, number, number]; scale?: number; ink?: 'on-surface' | 'on-bg' | 'on-game' }
+// The frame's thickness doesn't grow with the player's text size (0.35.1, F145), like the style's gaps: at 200% text
+// the wood ate twice the room and left the report a 126 px strip ("Ga / me / ove / r") — so its rem are counted at the
+// usual 16 px. Same size as before at 100%.
+const REM_PX = 16
 export function frameVariables({ src, slice, scale = 0.0625, ink = 'on-surface' }: PanelFrame): CSSProperties {
   return {
     '--kit-art-frame-ink': `var(--${ink})`,
     '--kit-art-frame': `url("${encodeURI(src)}")`,
     '--kit-art-frame-slice': slice.join(' '),
-    '--kit-art-frame-width': slice.map((n) => `${+(n * scale).toFixed(4)}rem`).join(' '),
+    '--kit-art-frame-width': slice.map((n) => `${+(n * scale * REM_PX).toFixed(3)}px`).join(' '),
     // short windows (a phone on its side): the frame drawn at 60%, so the report keeps the room
-    '--kit-art-frame-width-short': slice.map((n) => `${+(n * scale * 0.6).toFixed(4)}rem`).join(' '),
+    '--kit-art-frame-width-short': slice.map((n) => `${+(n * scale * 0.6 * REM_PX).toFixed(3)}px`).join(' '),
   } as CSSProperties
 }
 

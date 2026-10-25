@@ -12,7 +12,7 @@
 // (a wide pixel font), the action moves under the title instead (fitMenuTitle).
 // Without an action (0.35.1, F145: "Reconnecti / ng…" at 200% text on a phone): the title keeps its size and wraps
 // between words as before — it only drops the same steps when ONE word is wider than its whole line.
-import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react'
 import { Button, Text } from '../controls'
 import { shown } from '../shown'
 
@@ -20,20 +20,9 @@ type MenuHeaderProps = { title: ReactNode; onBack?: () => void; backLabel?: stri
 
 export function MenuHeader({ title, onBack, backLabel = 'Back', action }: MenuHeaderProps) {
   const titleBox = useRef<HTMLDivElement>(null)
-  const fits = typeof title === 'string'
-  const oneLine = Boolean(action) // beside an action: one line if it can; alone: whole words
-  useLayoutEffect(() => {
-    const box = titleBox.current
-    if (!box) return
-    if (!fits) { delete box.dataset.fit; return } // (not plain words: shown as given)
-    fitMenuTitle(box, oneLine) // the action going away refits it alone: back to the full title size (F108 review)
-    if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
-    const refit = new ResizeObserver(() => fitMenuTitle(box, oneLine)) // a turned phone, the text size setting, a restyle
-    refit.observe(box)
-    let on = true
-    void document.fonts?.ready.then(() => { if (on) fitMenuTitle(box, oneLine) }) // a font arriving changes the words' width
-    return () => { on = false; refit.disconnect() }
-  }, [fits, oneLine, title])
+  // beside an action: one line if it can; alone: whole words. The action going away refits it alone: back to the full
+  // title size (F108 review). A title that isn't plain words is shown as given.
+  useTitleFit(titleBox, typeof title === 'string', Boolean(action), title)
   return (
     <div className="kit-menu-header" data-action={action ? '' : undefined}>
       {onBack && <Button variant="secondary" icon sound="back" aria-label={backLabel} onClick={onBack}>‹</Button>}
@@ -41,6 +30,24 @@ export function MenuHeader({ title, onBack, backLabel = 'Back', action }: MenuHe
       {shown(action) && <div className="kit-menu-header-action">{action}</div>}
     </div>
   )
+}
+
+/** Keeps a title's box fitted (fitMenuTitle below) as the box changes size (a turned phone, the text size setting, a
+ *  restyle), its words change, or a font arrives (it changes the words' width). on = false: no fit, the title's own size.
+ *  Shared by MenuHeader and the end screens' titles (0.35.1, F145), so every title shrinks the same way. */
+export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean, oneLine: boolean, words: ReactNode) {
+  useLayoutEffect(() => {
+    const box = titleBox.current
+    if (!box) return
+    if (!on) { box.removeAttribute('data-fit'); return }
+    fitMenuTitle(box, oneLine)
+    if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
+    const refit = new ResizeObserver(() => fitMenuTitle(box, oneLine))
+    refit.observe(box)
+    let live = true
+    void document.fonts?.ready.then(() => { if (live) fitMenuTitle(box, oneLine) })
+    return () => { live = false; refit.disconnect() }
+  }, [titleBox, on, oneLine, words])
 }
 
 /** Picks the title's size for the room it has (.kit-menu-header-title → data-fit): "" = title size, it fits on one

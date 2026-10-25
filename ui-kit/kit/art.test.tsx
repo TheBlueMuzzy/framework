@@ -64,13 +64,14 @@ describe('Screen backdrop + Panel frame', () => {
     expect((container.querySelector('.kit-screen') as HTMLElement).dataset.backdrop).toBeUndefined()
   })
 
-  it('frame: cut lines in the picture units, border widths in rem (scale = rem per unit)', () => {
+  // 0.35.1 (F145): the widths are the rem counted at the usual 16 px, so the frame doesn't grow with the text size
+  it('frame: cut lines in the picture units, border widths from rem at 16 px (scale = rem per unit)', () => {
     expect(frameVariables({ src: '/f.svg', slice: [104, 66, 66, 66], scale: 0.0375, ink: 'on-game' })).toEqual({
-      '--kit-art-frame-ink': 'var(--on-game)', '--kit-art-frame': 'url("/f.svg")', '--kit-art-frame-slice': '104 66 66 66', '--kit-art-frame-width': '3.9rem 2.475rem 2.475rem 2.475rem',
-      '--kit-art-frame-width-short': '2.34rem 1.485rem 1.485rem 1.485rem',
+      '--kit-art-frame-ink': 'var(--on-game)', '--kit-art-frame': 'url("/f.svg")', '--kit-art-frame-slice': '104 66 66 66', '--kit-art-frame-width': '62.4px 39.6px 39.6px 39.6px',
+      '--kit-art-frame-width-short': '37.44px 23.76px 23.76px 23.76px',
     })
     const plain = frameVariables({ src: '/f.svg', slice: [16, 32, 16, 32] }) as Record<string, string>
-    expect(plain['--kit-art-frame-width']).toBe('1rem 2rem 1rem 2rem') // default scale: 16 units = 1rem
+    expect(plain['--kit-art-frame-width']).toBe('16px 32px 16px 32px') // default scale: 16 units = 1rem (16 px)
     expect(plain['--kit-art-frame-ink']).toBe('var(--on-surface)') // default: words like any panel's
     const { container } = render(<Panel frame={{ src: '/f.svg', slice: [10, 10, 10, 10] }}>x</Panel>)
     const panel = container.querySelector('.kit-panel') as HTMLElement

@@ -309,11 +309,26 @@
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   .kit-end-title { display: inline-block; }
+  /* End-screen titles fit like MenuHeader's (0.35.1, F145; useTitleFit): a word wider than its line drops the title a
+     step, then another — never split ("Ga / me / ove / r" inside the art Game over's frame at 200% text). Only "split"
+     (too wide even at body size) lets that one word break. */
+  .kit-end-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
+  .kit-end-title[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
+  .kit-end-title[data-fit="small"] > .kit-text[data-kind="title"],
+  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
+  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="title"], .kit-end-title[data-fit="split"] > .kit-text { font-size: var(--text-body); }
   .kit-end-swipe { display: block; text-align: center; padding-block-start: var(--gap-xs); } /* "⇧ Swipe up…": words, not a button */
   /* Victory / Game over with a long list (0.31.0): only the stats' ScrollArea gives up height — the title, message
      and buttons keep theirs, so they stay in sight and the rows scroll under the edge fade */
   .kit-screen > [data-slot="center"] > .kit-panel > .kit-end-info { flex-shrink: 1; }
   .kit-end-info > :not(.kit-scroll) { flex-shrink: 0; }
+  /* (0.35.1, F145) Except on a short, wide screen (below), the report's parts are the card's own rows — the same gaps —
+     so its list keeps the card's list floor (kit.css) and, with too little height, the card scrolls as one. At 200% text
+     the list was squeezed to 16 px inside the art Game over's frame and the report spilled over the buttons. */
+  @media (height > 30rem), (width < 40rem) {
+    .kit-end > .kit-end-info { display: contents; }
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+  }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
   /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);
