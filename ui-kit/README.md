@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.34.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.34.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -27,6 +27,10 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
   themselves; a game's own card: `const fixed = useFixedSize()` → `<div ref={fixed}>`).
 - **Comfort rows in Settings** (0.21.0): `reduceMotion` switched on in `content/ui/settings.json` — always; and
   `masterVolume` too when the audio module is installed. The kit's default settings file has both.
+- **A gamepad** (0.34.1): the kit doesn't read pads itself. The game sends the d-pad as arrow keys, calls
+  `screens.pop()` on B — and calls **`markPadUsed()`** (from the kit) on any pad press, so the screen the kit opens
+  next shows the focus ring, like after a key. The browser's own `gamepadconnected` (fired only after a first press)
+  already counts, so a game that skips it still rings from the first screen — until the player clicks or taps.
 
 ## How it's checked — `npm run check:framework`
 The Dev Kit's runner (`src/devkit/check-framework.mjs`) runs this kit's `kit/conformance.mjs` on the game:
@@ -278,6 +282,13 @@ gallery's `npm run shoot` uses the same one.
   kit's text; a player chip's score keeps its equal-width digits too) — Alegreya draws old-style numbers by default, so
   "v0.1.0" read "vO.1.O"; fonts that already draw lining numbers look the same. `scripts/pick-sheet.mjs` takes
   `SHOOT_PORT` like the shoot.
+- 0.34.1 (F142, framework sprint 38): **a gamepad player sees the focus ring from the first screen.** New
+  `kit/keysOrPad.ts`: one "is the player on keys or a pad?" flag that ScreenStack, TalkingBubble and Callout's pause
+  all ask. A key press or the browser's `gamepadconnected` (Chrome and Firefox only report a pad after a button press)
+  → focus moved by the kit shows the ring; a click or tap → it doesn't. The latest kind of input wins (before, one
+  key press ever was enough, and a pad never counted). New export **`markPadUsed()`** for a game's own pad code.
+  Also: a TalkingBubble with `onConfirm` and a pausing Callout's button now show the ring for key players too (before,
+  never).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
