@@ -35,3 +35,10 @@ describe('blocks.css 0.33.0 (F121)', () => {
       '.kit-talk-more > .kit-text[data-kind] { color: var(--kit-talk-more, var(--muted)); }']) expect(css).toContain(exact)
   })
 })
+
+describe('blocks.css 0.35.4 (F147)', () => {
+  it('HUD top-middle status row stays on one row; only its words give way', () => {
+    expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row {')).toContain('flex-wrap: nowrap')
+    expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row > :not(.kit-hud-text)')).toContain('flex-shrink: 0')
+  })
+})
