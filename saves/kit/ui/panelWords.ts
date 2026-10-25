@@ -15,6 +15,11 @@ export const SAVE_PANEL_WORDS = {
   askTitle: 'Load this save?',
   askMessage: 'Progress is combined with what\'s on this device (nothing is lost); other saved choices are replaced. The save on this device is kept as a backup.',
   loaded: 'Save loaded.',
+  // F137: part of a code came in — the game shows it after a reload
+  partlyTitle: 'Part of your save came back',
+  partlyReload: 'Reload the game to see what came back.',
+  reload: 'Reload',
+  later: 'Later',
   close: 'Close',
   // Link code (F96) — only shown when the game has a cloud (the panel's `cloud` prop). The server's own sentences
   // (offline, wrong code, too many tries, the privacy line…) are CLOUD_WORDS in ../cloud.ts.

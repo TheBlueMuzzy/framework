@@ -93,6 +93,68 @@ export function liveJsonModule(name: string, jsonText: string, liveTuningPath: s
   return `import { liveFile } from ${from}\nexport default liveFile(${JSON.stringify(name)}, JSON.parse(${JSON.stringify(jsonText)}))\n`
 }
 
+// ---- 6. More files in the Tuning tab (0.28.0, F132) ----
+// content/devkit.json "tuningFiles" lists other content files a designer tunes, beside content/tuning/:
+//   "tuningFiles": ["content/rooms.json", { "file": "content/ai/pace.json", "after": "a bot's next turn" }]
+// "after" = when a saved change reaches the game, if not at once (rooms.json: "the room server reads it when it
+// starts — restart npm run party:dev"). Each is named by its path without content/ and .json ("rooms", "ai/pace") —
+// the name its live edits travel under, like a tuning file's. Only the listed files are loaded (never all of content/:
+// a game's word lists are megabytes). The tab gets them from this virtual module; the game's own imports of them are
+// made live like tuning files (step 5).
+export const TUNING_FILES_MODULE = 'virtual:devkit-tuning-files'
+const RESOLVED_TUNING_FILES = `\0${TUNING_FILES_MODULE}`
+
+export type ExtraTuningFile = { name: string; path: string; after?: string }
+
+/** content/devkit.json "tuningFiles", checked: the files to show, and what's wrong with the rest in plain words. */
+export function readTuningFileList(root: string): { files: ExtraTuningFile[]; problems: string[] } {
+  const file = join(root, 'content', 'devkit.json')
+  if (!existsSync(file)) return { files: [], problems: [] }
+  let list: unknown
+  try { list = JSON.parse(readFileSync(file, 'utf8')).tuningFiles } catch {
+    return { files: [], problems: ['content/devkit.json isn’t valid JSON, so its "tuningFiles" can’t be read'] }
+  }
+  if (list === undefined) return { files: [], problems: [] }
+  if (!Array.isArray(list)) return { files: [], problems: ['content/devkit.json "tuningFiles" should be a list of paths, e.g. ["content/rooms.json"]'] }
+  const files: ExtraTuningFile[] = []
+  const problems: string[] = []
+  for (const entry of list) {
+    const path = typeof entry === 'string' ? entry : (entry as { file?: unknown } | null)?.file
+    const after = typeof entry === 'object' && entry && typeof (entry as { after?: unknown }).after === 'string' ? (entry as { after: string }).after : undefined
+    const said = JSON.stringify(path ?? entry)
+    if (!isAllowedContentPath(path)) { problems.push(`"tuningFiles": ${said} isn’t a .json file inside content/ (like "content/rooms.json") — left out`); continue }
+    if (path.startsWith('content/tuning/')) { problems.push(`"tuningFiles": ${path} is already in the Tuning tab (every content/tuning/ file is) — left out`); continue }
+    if (path === 'content/ui/style.json') { problems.push('"tuningFiles": content/ui/style.json is the Color tab’s — left out'); continue }
+    if (!existsSync(join(root, ...path.split('/')))) { problems.push(`"tuningFiles": ${path} doesn’t exist — left out`); continue }
+    const name = path.slice('content/'.length, -'.json'.length)
+    if (existsSync(join(root, 'content', 'tuning', `${name}.json`))) { problems.push(`"tuningFiles": ${path} has the same name as content/tuning/${name}.json, so their live edits would mix — left out`); continue }
+    if (files.some((f) => f.path === path)) continue // listed twice: once is enough
+    files.push(after ? { name, path, after } : { name, path })
+  }
+  return { files, problems }
+}
+
+/** The virtual module's code: each listed file's data as it is on disk now, with its name and note
+ *  (`read` = the file's text; a broken file is said as a problem, not a crash). */
+export function tuningFilesModule(list: { files: ExtraTuningFile[]; problems: string[] }, read: (path: string) => string): string {
+  const files: string[] = []
+  const problems = [...list.problems]
+  for (const f of list.files) {
+    try { files.push(JSON.stringify({ ...f, data: JSON.parse(read(f.path)) })) } catch (e) {
+      problems.push(`"tuningFiles": ${f.path} isn’t valid JSON (${String((e as Error).message).split('\n')[0]}) — left out`)
+    }
+  }
+  return `export default { files: [${files.join(', ')}], problems: ${JSON.stringify(problems)} }\n`
+}
+
+/** A listed file's live name ("rooms") when `id` is that file, imported plainly; else null. */
+export function liveExtraName(id: string, root: string, files: ExtraTuningFile[]): string | null {
+  if (id.includes('?') || id.startsWith('\0')) return null
+  const path = id.replace(/\\/g, '/').toLowerCase()
+  const base = `${root.replace(/\\/g, '/').replace(/\/$/, '')}/`.toLowerCase()
+  return files.find((f) => path === `${base}${f.path}`.toLowerCase())?.name ?? null
+}
+
 /** Both jobs in one plugin — see the top of this file. */
 export function devkit(): Plugin {
   let root = process.cwd()
@@ -281,10 +343,23 @@ export function devkit(): Plugin {
     //    game's tuning follows the sliders with no wrapping. In every build and in vitest (with nothing sending edits it
     //    is just the file). Imports with a query (?raw, the Dev Kit's own ?devkit-file) are left alone. Runs after
     //    Vite's own JSON step ('post'), replacing its output.
+    // 6. The Tuning tab's extra files (F132): `import extra from 'virtual:devkit-tuning-files'` (kit/tuning/tuningFiles.ts)
+    resolveId(id) {
+      return id === TUNING_FILES_MODULE ? RESOLVED_TUNING_FILES : null
+    },
+    load(id) {
+      if (id !== RESOLVED_TUNING_FILES) return null
+      // the list and each listed file are watched: a change → the tab gets it on the next page load
+      this.addWatchFile(join(root, 'content', 'devkit.json'))
+      const list = readTuningFileList(root)
+      for (const f of list.files) this.addWatchFile(join(root, ...f.path.split('/')))
+      return tuningFilesModule(list, (path) => readFileSync(join(root, ...path.split('/')), 'utf8'))
+    },
     transform: {
       order: 'post',
       handler(_code, id) {
-        const name = liveTuningName(id, root)
+        // (a listed extra file is live too — read the list only for .json files, so other files cost nothing)
+        const name = liveTuningName(id, root) ?? (/\.json$/i.test(id) ? liveExtraName(id, root, readTuningFileList(root).files) : null)
         const live = join(root, ...LIVE_TUNING_MODULE.split('/'))
         if (!name || !existsSync(live)) return null
         const file = id.replace(/[?#].*$/, '')

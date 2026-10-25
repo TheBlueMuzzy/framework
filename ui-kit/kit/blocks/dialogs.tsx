@@ -9,6 +9,7 @@ import { Grid, Panel, Row, Screen, Stack } from '../layout'
 import { Button, Card, Text } from '../controls'
 import { screens } from '../screens'
 import { MenuHeader } from './MenuHeader'
+import { shown } from '../shown'
 
 // MODAL — a dialog box on top of whatever is open. actions = its buttons (bottom right).
 // className: added to the box (kit-modal), for a block's own layout (Pause: kit-pause; Confirm: kit-ask, narrower).
@@ -28,7 +29,7 @@ export function Modal({ title, children, actions, headerAction, className, onBac
       <Panel depth={2} gap="m" className={className ? `kit-modal ${className}` : 'kit-modal'}>
         <MenuHeader title={title} onBack={onBack} backLabel={backLabel} action={headerAction} />
         {children}
-        {actions && <Row gap="s" justify="end">{actions}</Row>}
+        {shown(actions) && <Row gap="s" justify="end">{actions}</Row>}
       </Panel>
     </Screen>
   )
@@ -176,7 +177,7 @@ type EmptyProps = { title: string; message?: string; icon?: ReactNode; actionLab
 export function EmptyState({ title, message, icon, actionLabel, onAction }: EmptyProps) {
   return (
     <Stack gap="s" className="kit-empty">
-      {icon && <Text kind="display">{icon}</Text>}
+      {shown(icon) && <Text kind="display">{icon}</Text>}
       <Text kind="heading">{title}</Text>
       {message && <Text kind="caption">{message}</Text>}
       {actionLabel && onAction && <Button variant="secondary" onClick={onAction}>{actionLabel}</Button>}

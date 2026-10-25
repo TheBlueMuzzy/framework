@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveTuningName } from './devkitVite'
+import { TUNING_FILES_MODULE, devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveExtraName, liveTuningName, readTuningFileList, tuningFilesModule } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -302,5 +302,93 @@ describe('live tuning by default — content/tuning imports come back live (0.18
     expect(mod.tank.speed).toBe(5)
     expect(mod.tank.look.glow).toBe(0.9)
     expect({ ...mod.tank }).toEqual({ speed: 5, look: { glow: 0.9 } })
+  })
+})
+
+describe('more files in the Tuning tab — content/devkit.json "tuningFiles" (0.28.0, F132)', () => {
+  let game: string
+  const write = (path: string, text: string) => { mkdirSync(join(game, ...path.split('/').slice(0, -1)), { recursive: true }); writeFileSync(join(game, ...path.split('/')), text) }
+  const list = (tuningFiles: unknown) => write('content/devkit.json', JSON.stringify({ inReleaseBuilds: false, tuningFiles }))
+  beforeEach(() => {
+    game = mkdtempSync(join(tmpdir(), 'devkit-extra-'))
+    write('content/rooms.json', '{ "idleWarnAfterMs": 30000 }')
+    write('content/ai/pace.json', '{ "thinkMs": 800 }')
+    write('content/tuning/tank.json', '{ "speed": 2 }')
+  })
+  afterEach(() => { rmSync(game, { recursive: true, force: true, ...STILL_LETTING_GO }) })
+
+  it('nothing listed (or no devkit.json) = no extra files and nothing to say', () => {
+    expect(readTuningFileList(game)).toEqual({ files: [], problems: [] })
+    list(undefined)
+    expect(readTuningFileList(game)).toEqual({ files: [], problems: [] })
+  })
+
+  it('a listed file is named by its path without content/ and .json, with its "after" note', () => {
+    list(['content/rooms.json', { file: 'content/ai/pace.json', after: 'a bot’s next turn' }, 'content/rooms.json'])
+    expect(readTuningFileList(game)).toEqual({
+      files: [{ name: 'rooms', path: 'content/rooms.json' }, { name: 'ai/pace', path: 'content/ai/pace.json', after: 'a bot’s next turn' }],
+      problems: [],
+    })
+  })
+
+  it('refuses in plain words: outside content/, a tuning file, style.json, a missing file, a name a tuning file has', () => {
+    write('content/tank.json', '{}')
+    list(['src/App.json', '../secrets.json', 'content/tuning/tank.json', 'content/ui/style.json', 'content/nope.json', 'content/tank.json', 42])
+    const { files, problems } = readTuningFileList(game)
+    expect(files).toEqual([])
+    expect(problems).toEqual([
+      '"tuningFiles": "src/App.json" isn’t a .json file inside content/ (like "content/rooms.json") — left out',
+      '"tuningFiles": "../secrets.json" isn’t a .json file inside content/ (like "content/rooms.json") — left out',
+      '"tuningFiles": content/tuning/tank.json is already in the Tuning tab (every content/tuning/ file is) — left out',
+      '"tuningFiles": content/ui/style.json is the Color tab’s — left out',
+      '"tuningFiles": content/nope.json doesn’t exist — left out',
+      '"tuningFiles": content/tank.json has the same name as content/tuning/tank.json, so their live edits would mix — left out',
+      '"tuningFiles": 42 isn’t a .json file inside content/ (like "content/rooms.json") — left out',
+    ])
+  })
+
+  it('not a list, or a broken devkit.json: said, nothing shown', () => {
+    list('content/rooms.json')
+    expect(readTuningFileList(game).problems).toEqual(['content/devkit.json "tuningFiles" should be a list of paths, e.g. ["content/rooms.json"]'])
+    write('content/devkit.json', '{ nope')
+    expect(readTuningFileList(game).problems).toEqual(['content/devkit.json isn’t valid JSON, so its "tuningFiles" can’t be read'])
+  })
+
+  it('a listed file\'s live name: that file only, plainly imported, any slashes or drive-letter case', () => {
+    const files = [{ name: 'rooms', path: 'content/rooms.json' }]
+    expect(liveExtraName('C:/game/content/rooms.json', 'C:/game', files)).toBe('rooms')
+    expect(liveExtraName('c:/game/content/rooms.json', 'C:\\game', files)).toBe('rooms')
+    expect(liveExtraName('C:/game/content/rooms.json?raw', 'C:/game', files)).toBeNull()
+    expect(liveExtraName('C:/game/content/other.json', 'C:/game', files)).toBeNull()
+  })
+
+  it('in a real dev server: the tab gets each listed file\'s data, and the game\'s import of it is live', async () => {
+    list(['content/rooms.json', 'content/nope.json'])
+    mkdirSync(join(game, 'src', 'devkit', 'tuning'), { recursive: true })
+    writeFileSync(join(game, 'src', 'devkit', 'tuning', 'liveTuning.ts'), readFileSync(new URL('../kit/tuning/liveTuning.ts', import.meta.url), 'utf8')
+      .replace("import { useEffect, useRef } from 'react'", 'const useEffect = (..._: unknown[]) => {}; const useRef = <T>(current: T) => ({ current })'))
+    write('src/game.ts', "import rooms from '../content/rooms.json'\nexport { rooms }")
+    const server = await createServer({ root: game, configFile: false, logLevel: 'silent', plugins: [devkit()], server: { port: 0, host: '127.0.0.1' } })
+    try {
+      const extra = (await server.ssrLoadModule(TUNING_FILES_MODULE)).default as { files: { name: string; path: string; data: unknown }[]; problems: string[] }
+      expect(extra.files).toEqual([{ name: 'rooms', path: 'content/rooms.json', data: { idleWarnAfterMs: 30000 } }])
+      expect(extra.problems).toEqual(['"tuningFiles": content/nope.json doesn’t exist — left out'])
+      const mod = await server.ssrLoadModule('/src/game.ts') as { rooms: { idleWarnAfterMs: number } }
+      const live = await server.ssrLoadModule('/src/devkit/tuning/liveTuning.ts') as { sendTuning: (f: string, d: unknown) => void }
+      expect(mod.rooms.idleWarnAfterMs).toBe(30000)
+      ;(globalThis as { window?: unknown }).window = new EventTarget()
+      try { live.sendTuning('rooms', { idleWarnAfterMs: 5000 }) } finally { delete (globalThis as { window?: unknown }).window }
+      expect(mod.rooms.idleWarnAfterMs).toBe(5000)
+    } finally {
+      await server.close()
+    }
+  })
+
+  it('the virtual module holds only the listed files, as on disk; a broken one is said, not a crash', () => {
+    const read = (path: string) => (path === 'content/rooms.json' ? '{ "idleWarnAfterMs": 30000 }' : '{ nope')
+    const code = tuningFilesModule({ files: [{ name: 'rooms', path: 'content/rooms.json', after: 'later' }, { name: 'bad', path: 'content/bad.json' }], problems: [] }, read)
+    expect(code).toContain('{"name":"rooms","path":"content/rooms.json","after":"later","data":{"idleWarnAfterMs":30000}}')
+    expect(code).not.toContain('"name":"bad"')
+    expect(code).toContain('content/bad.json isn’t valid JSON (')
   })
 })

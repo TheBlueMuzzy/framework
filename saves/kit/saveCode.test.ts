@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CODE_WORDS, MAX_CODE_CHARS, MAX_UNPACKED_BYTES, gameLabel, makeSaveCode, readSaveCode, saveFileName } from './saveCode'
+import { CODE_WORDS, MAX_CODE_CHARS, MAX_UNPACKED_BYTES, gameLabel, makeSaveCode, partlyLoaded, readSaveCode, saveFileName } from './saveCode'
 import { createSave } from './saves'
 import { memoryStorage } from './storage'
 
@@ -122,6 +122,14 @@ describe('save code', () => {
     expect(result).toMatchObject({ ok: false, restored: ['goops-progress'], notRestored: ['goops:settings'] })
     expect(!result.ok && result.message).toContain('Part of the save code was loaded')
     expect(b.progress.load().totalXp).toBe(10)
+    expect(partlyLoaded(result)).toBe(true) // F137: the panel offers the reload
+  })
+
+  it('partlyLoaded: only when some saves came in and others didn\'t (F137)', () => {
+    expect(partlyLoaded({ ok: true, restored: ['a'], skipped: [] })).toBe(false) // a full load
+    expect(partlyLoaded({ ok: false, message: 'damaged' })).toBe(false) // nothing written
+    expect(partlyLoaded({ ok: false, message: 'full', restored: [], notRestored: ['a'] })).toBe(false) // nothing came in
+    expect(partlyLoaded({ ok: false, message: 'part', restored: ['a'], notRestored: ['b'] })).toBe(true)
   })
 
   // security review (2026-10-19): a code is untrusted text anyone can post

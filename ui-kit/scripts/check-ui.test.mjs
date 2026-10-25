@@ -16,6 +16,26 @@ describe('check-ui', () => {
     expect(found.some((m) => m.startsWith('font name'))).toBe(true)
   })
 
+  // F135 (0.33.3): a picture written into the CSS (a data: URL) is one value — its own ";" and ":" don't split it,
+  // and what's inside it (an SVG's fill="#fff", width="12px") is the picture's, not a style value
+  it('reads a data: URL picture as one value: no false warnings from inside it', () => {
+    const svg = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='#fff' width='12px'/>")`
+    expect(messages('kit/a.css', `.x { background: ${svg}; color: var(--primary); }`)).toEqual([])
+    expect(messages('kit/a.css', '.x { background: url(data:image/png;base64,iVBORw0KGgo=); gap: var(--gap-m); }')).toEqual([])
+    expect(messages('kit/a.css', `.x { content: "a; b: #fff"; }`)).toEqual([]) // a ";" or colour in quoted text too
+  })
+
+  it('a broken url( full of quotes is checked at once, not after minutes (security review)', () => {
+    const started = Date.now()
+    messages('kit/a.css', `.x { background: url(${'""'.repeat(5000)} }`)
+    expect(Date.now() - started).toBeLessThan(1000)
+  })
+
+  it('still catches a real problem next to a data: URL, on its own line', () => {
+    const found = checkSource('kit/a.css', `.x {\n  background: url(data:image/png;base64,AAAA);\n  padding: 4px;\n}`)
+    expect(found.map((p) => [p.line, p.message])).toEqual([[3, 'px size — use a gap name or rem']])
+  })
+
   it('allows position:absolute only in Screen', () => {
     expect(messages('kit/a.css', '.kit-screen { position: absolute; }')).toEqual([])
     expect(messages('gallery/a.css', '.popup { position: absolute; }')[0]).toMatch(/only Screen/)

@@ -15,7 +15,7 @@ import { savesConfig } from '../config'
 import { HEALTH_WORDS, type SaveHealth } from '../health'
 import type { BackupNudge } from '../nudge'
 import type { Save, SlotSaves } from '../saves'
-import { copyText, downloadSaveFile, makeSaveCode, readSaveCode, readSaveFile, saveFileName, type CodeResult } from '../saveCode'
+import { copyText, downloadSaveFile, makeSaveCode, partlyLoaded, readSaveCode, readSaveFile, saveFileName, type CodeResult } from '../saveCode'
 import { SAVE_PANEL_WORDS } from './panelWords'
 
 type AnySave = Save<any> | SlotSaves<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
@@ -70,6 +70,14 @@ export function SaveCodePanel({ saves, health, nudge, cloud, onLoaded, words: wo
         if (fromLink) setBusy('get') // the server can take a moment: Get my save shows it's working
         const result = await read()
         if (fromLink) { setBusy(null); if (cloud) setLink(linkCodeHere(saves, cloud)) }
+        // Part of it came in (F137): the game shows the old values until it reloads — ask, with the same reload a
+        // full load uses (no onLoaded from the game: say so, as before)
+        if (partlyLoaded(result) && !result.ok && onLoaded) {
+          setPasted('')
+          setTypedLink('')
+          askConfirm({ title: words.partlyTitle, message: `${result.message} ${words.partlyReload}`, words: { yes: words.reload, no: words.later }, onConfirm: onLoaded })
+          return
+        }
         if (!result.ok) { toast(result.message, { variant: 'danger', seconds: 6 }); return }
         toast(words.loaded)
         setPasted('')

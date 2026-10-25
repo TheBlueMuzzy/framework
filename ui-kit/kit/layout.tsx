@@ -2,6 +2,7 @@
 // They only arrange things. Spacing is always a gap name (xs, s, m, l, xl) — never a size.
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from 'react'
 import { reduceMotion } from './blocks/motion'
+import { shown } from './shown'
 
 export type Gap = 'xs' | 's' | 'm' | 'l' | 'xl'
 type BoxProps = HTMLAttributes<HTMLDivElement> & { gap?: Gap }
@@ -72,9 +73,9 @@ export function Screen({ children, label, dialog, scroll, grow, backdrop, backdr
       style={{ '--kit-backdrop': backdrop ? `url("${encodeURI(backdrop)}")` : undefined } as CSSProperties}>
       {Object.entries(slotNames).map(([prop, slot]) => {
         const content = slots[prop as keyof typeof slots]
-        return content ? <div key={slot} data-slot={slot}>{content}</div> : null
+        return shown(content) ? <div key={slot} data-slot={slot}>{content}</div> : null
       })}
-      {children && <div data-slot="center" ref={centre}>{children}</div>}
+      {shown(children) && <div data-slot="center" ref={centre}>{children}</div>}
     </section>
   )
 }
@@ -211,6 +212,8 @@ export function Row({ gap = 'm', justify = 'start', className = '', ...rest }: B
 }
 
 // Equal tiles that fit as many per line as there's room for. min = smallest tile: s, m or l.
-export function Grid({ gap = 'm', min = 'm', className = '', ...rest }: BoxProps & { min?: 's' | 'm' | 'l' }) {
-  return <div className={`kit-grid ${className}`} data-gap={gap} data-min={min} {...rest} />
+// fill (0.33.3, F136): fewer tiles than fit on a row spread over it instead of leaving empty columns (Mode select's
+// 2 cards on a desktop panel); without it the tiles keep their size and line up with the rows below
+export function Grid({ gap = 'm', min = 'm', fill, className = '', ...rest }: BoxProps & { min?: 's' | 'm' | 'l'; fill?: boolean }) {
+  return <div className={`kit-grid ${className}`} data-gap={gap} data-min={min} data-fill={fill || undefined} {...rest} />
 }

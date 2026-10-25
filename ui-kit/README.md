@@ -258,6 +258,14 @@ gallery's `npm run shoot` uses the same one.
   without a word when no side had room; now it prints one dev-console warning naming the bubble, what it points at and
   what it covers (once until it's clear again; never in a production build). Placement is unchanged. The shoot counts
   `[ui-kit]` warnings as problems; today's gallery has none.
+  And F134 — `kit/shown.ts`: **a 0 handed to a part shows in its place.** `{badge && <Badge>…}` drew a stray "0" on the
+  page when the badge was 0 (React draws the number 0); the parts that take a node — MainMenu's extras, MenuHeader's
+  action, dialog actions and icons, the HUD's note / icons / slots, a PlayerChip's badge and detail, ListRow's detail,
+  PullHandle's look, Screen's slots — now draw it inside its place ("0" in the badge). F135 — `kit/check-ui.mjs`:
+  **a picture written into the CSS is one value** — `url("data:image/svg+xml;…")` is no longer cut at its own `;` and
+  `:` (an inline SVG's `fill='#fff'` read as a raw colour); what's inside `url(…)` and quotes isn't checked as a style
+  value. F136 — `Grid fill` (`kit/layout.tsx`, `kit.css`): **Mode select spreads fewer modes over its row** — 2 modes
+  on a desktop panel left an empty column; 3+ modes and phones look the same.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

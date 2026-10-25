@@ -12,6 +12,7 @@
 // (a wide pixel font), the action moves under the title instead (fitMenuTitle).
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { Button, Text } from '../controls'
+import { shown } from '../shown'
 
 type MenuHeaderProps = { title: ReactNode; onBack?: () => void; backLabel?: string; action?: ReactNode }
 
@@ -34,7 +35,7 @@ export function MenuHeader({ title, onBack, backLabel = 'Back', action }: MenuHe
     <div className="kit-menu-header" data-action={action ? '' : undefined}>
       {onBack && <Button variant="secondary" icon sound="back" aria-label={backLabel} onClick={onBack}>‹</Button>}
       <div ref={titleBox} className="kit-menu-header-title">{typeof title === 'string' ? <Text kind="title">{title}</Text> : title}</div>
-      {action && <div className="kit-menu-header-action">{action}</div>}
+      {shown(action) && <div className="kit-menu-header-action">{action}</div>}
     </div>
   )
 }

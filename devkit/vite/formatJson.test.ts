@@ -98,3 +98,56 @@ describe('formatJson — saving over a hand-written file keeps its layout', () =
     expect(formatJson({ a: [1] }, '{ "a": ')).toBe('{\n  "a": [1]\n}\n')
   })
 })
+
+// F133 (0.28.0): Glyphtender's content/tuning/drag.json as it was before Muzzy's first Save (its commit 4ff82b5) —
+// "_sections" wrapped by hand over 2 lines; that Save made it 18 lines, one name per line
+const DRAG = `{
+  "ghostOpacity": 0.5,
+  "_sections": {
+    "Dragging": ["styles", "ghostOpacity", "liftScale", "liftShadow", "liftTime", "landTime", "flyTime", "fadeTime",
+      "targets", "snap", "snapRadius", "makeRoom", "roomTime", "tetherBend", "arrowSize", "ghostGlow"]
+  },
+  "_ranges": {
+    "ghostOpacity": [0.1, 1, 0.05]
+  },
+  "spread": [
+    1,
+    2
+  ]
+}
+`
+
+describe('a list wrapped by hand keeps its line breaks (F133)', () => {
+  it('saving with nothing changed gives the file back exactly', () => {
+    expect(roundTrip(DRAG)).toBe(DRAG)
+  })
+
+  it('a change elsewhere leaves the wrapped list as it was', () => {
+    const data = JSON.parse(DRAG)
+    data.ghostOpacity = 0.6
+    expect(formatJson(data, DRAG)).toBe(DRAG.replace('"ghostOpacity": 0.5', '"ghostOpacity": 0.6'))
+  })
+
+  it('a changed item keeps the breaks; an added one joins the last line; a removed one takes its place with it', () => {
+    const data = JSON.parse(DRAG)
+    data._sections.Dragging[8] = 'aim' // "targets" (first on the second line) → "aim"
+    expect(formatJson(data, DRAG)).toContain('"fadeTime",\n      "aim", "snap",')
+    data._sections.Dragging.push('trail')
+    expect(formatJson(data, DRAG)).toContain('"arrowSize", "ghostGlow", "trail"]')
+    data._sections.Dragging.splice(0, 1) // "styles" gone: "ghostOpacity" now opens the list
+    expect(formatJson(data, DRAG)).toContain('"Dragging": ["ghostOpacity", "liftScale"')
+  })
+
+  it('one-line lists and one-per-line lists are written as before', () => {
+    const data = JSON.parse(DRAG)
+    data._ranges.ghostOpacity = [0.2, 1, 0.05]
+    data.spread = [1, 2, 3]
+    const out = formatJson(data, DRAG)
+    expect(out).toContain('"ghostOpacity": [0.2, 1, 0.05]')
+    expect(out).toContain('"spread": [\n    1,\n    2,\n    3\n  ]')
+  })
+
+  it('Windows line endings in the old file don\'t come back as stray \\r', () => {
+    expect(roundTrip(DRAG.replace(/\n/g, '\r\n'))).toBe(DRAG)
+  })
+})
