@@ -33,9 +33,12 @@
   /* Beside an action (0.27.0): words never split; MenuHeader's fitMenuTitle first drops the title a step (heading size)
      when it won't fit on one line ("measure" = how it's measured: title size, one line) */
   .kit-menu-header[data-action] > .kit-menu-header-title > .kit-text { overflow-wrap: normal; }
+  /* …and alone too (0.35.1, F145: "Reconnecti / ng…" at 200% text): a word wider than its line drops the title the
+     same steps; only "split" (too wide even at body size) lets that one word break */
+  .kit-menu-header-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
   .kit-menu-header-title[data-fit="measure"] > .kit-text { white-space: nowrap; }
   .kit-menu-header-title:is([data-fit="small"], [data-fit="tight"]) > .kit-text { font-size: var(--text-heading); }
-  .kit-menu-header-title[data-fit="smaller"] > .kit-text { font-size: var(--text-body); }
+  .kit-menu-header-title:is([data-fit="smaller"], [data-fit="split"]) > .kit-text { font-size: var(--text-body); }
   /* tight: a word too wide even at body size — the action moves under the title (right-aligned), so the word gets the
      row instead of splitting */
   .kit-menu-header:has(> .kit-menu-header-title[data-fit="tight"]) { flex-wrap: wrap; }
