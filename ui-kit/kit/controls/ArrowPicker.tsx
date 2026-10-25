@@ -22,8 +22,8 @@ export function ArrowPicker({ label, display, onStep, canPrev, canNext, prevIcon
   useLayoutEffect(() => {
     const box = picker.current
     if (!box) return
+    if (typeof ResizeObserver === 'undefined') return // (tests without a browser: no layout to measure)
     fitPicker(box)
-    if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
     const refit = new ResizeObserver(() => fitPicker(box))
     refit.observe(box) // (the text size setting: its words grow, so it does)
     if (box.parentElement) refit.observe(box.parentElement) // (its room)

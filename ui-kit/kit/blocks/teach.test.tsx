@@ -4,7 +4,7 @@
 // and still working when the browser refuses to save.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react'
-import { Callout, stuckLine, stuckTeller } from './teach'
+import { Callout, STUCK_SETTLE_MS, stuckLine, stuckTeller } from './teach'
 import { placeCallout } from './callout'
 import { tipsMemory, tipsStorageKey, useTips } from './tips'
 
@@ -132,7 +132,7 @@ describe('a bubble stuck on what it avoids', () => {
 
   it('says once when it gets stuck, not on every frame after', () => {
     const said: string[] = []
-    const tell = stuckTeller((line) => said.push(line))
+    const tell = stuckTeller((line) => said.push(line), 0)
     tell(true, () => 'stuck')
     tell(true, () => 'stuck') // the next frames: still stuck
     tell(true, () => 'stuck')
@@ -142,7 +142,7 @@ describe('a bubble stuck on what it avoids', () => {
   it('stays quiet while it is clear (without making the line), and says it again after a clear spell', () => {
     const said: string[] = []
     const line = vi.fn(() => 'stuck')
-    const tell = stuckTeller((l) => said.push(l))
+    const tell = stuckTeller((l) => said.push(l), 0)
     tell(false, line)
     expect(line).not.toHaveBeenCalled()
     tell(true, line)
@@ -154,8 +154,21 @@ describe('a bubble stuck on what it avoids', () => {
   it('says nothing in a production build', () => {
     vi.stubEnv('DEV', false)
     const said: string[] = []
-    stuckTeller((line) => said.push(line))(true, () => 'stuck')
+    stuckTeller((line) => said.push(line), 0)(true, () => 'stuck')
     expect(said).toEqual([])
+  })
+
+  // F147 (0.35.4): the Cozy emotes at 200% text said it 26 ms after the text size changed, then sat clear
+  it('a moment stuck while things move is not said; stuck for STUCK_SETTLE_MS is', () => {
+    let at = 0
+    const said: string[] = []
+    const tell = stuckTeller((l) => said.push(l), STUCK_SETTLE_MS, () => at)
+    tell(true, () => 'stuck'); at += 16; tell(true, () => 'stuck'); at += 16
+    tell(false, () => 'stuck') // clear again: the moment was only re-placing
+    at += 16; tell(true, () => 'stuck')
+    expect(said).toEqual([])
+    at += STUCK_SETTLE_MS; tell(true, () => 'stuck')
+    expect(said).toEqual(['stuck'])
   })
 
   it('names the bubble and every piece it covers', () => {

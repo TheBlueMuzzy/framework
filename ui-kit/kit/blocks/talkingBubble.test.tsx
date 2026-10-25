@@ -6,7 +6,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { liveRegion } from './emotes'
 import {
   DEFAULT_TALK_FEEL, TALK_FEEL_RANGES, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk,
-  stepTalk, squelchGap, talkFeel, talkOutline, waveOffsets, type TalkFeel, type TalkState,
+  stepTalk, squelchGap, talkFeel, talkOutline, waveOffsets, keepWaveInside, type TalkFeel, type TalkState,
   TALK_MIN_CONTRAST, colourRgb, contrastRatio, isColour, talkColours,
 } from './talkingBubble'
 
@@ -165,6 +165,21 @@ describe('the spikes and the outline', () => {
   it('bevel corners are cut straight (Neon, Pixel)', () => {
     const round = talkOutline(box).points.length, bevel = talkOutline({ ...box, bevel: true }).points.length
     expect(bevel).toBeLessThan(round) // a 12 px corner: an arc of ~19 px vs a cut of ~17 px
+  })
+  // F147 (0.35.4): at 200% text a bubble as wide as the phone had its right-hand spikes past the screen's edge
+  it('the wave never leaves the room: each push-out is cut where it would cross it, the swell counted', () => {
+    const points = [
+      { x: 100, y: 50, nx: 1, ny: 0, keep: 1 }, // right edge, 300 + 100 = 400 on screen: 10 px to the room's 410
+      { x: 0, y: 50, nx: -1, ny: 0, keep: 1 }, // left edge at 300: 290 px of room
+      { x: 50, y: 0, nx: 0, ny: -1, keep: 1 }, // top edge at 20: 10 px to the room's top
+    ]
+    const room = { left: 10, top: 10, right: 410, bottom: 800 }
+    const out = keepWaveInside(points, new Float32Array([40, 40, 40]), { x: 300, y: 20 }, room, { x: 50, y: 50 })
+    expect([...out]).toEqual([10, 40, 10])
+    // swollen 10% round the middle (350, 70): the right point may only reach (410 − 350) / 1.1 + 350 ≈ 404.5
+    const swollen = keepWaveInside(points, new Float32Array([40, 40, 40]), { x: 300, y: 20 }, room, { x: 50, y: 50 }, 1.1)
+    expect(swollen[0]).toBeCloseTo(4.545, 2)
+    expect(swollen[1]).toBe(40)
   })
 })
 
