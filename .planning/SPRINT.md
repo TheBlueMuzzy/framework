@@ -1,0 +1,27 @@
+# Sprint 36 — The Dev Kit edits every file it should
+Started 2026-10-24 · Milestone v0.19 Smoother tools · Features: F132, F133
+Muzzy 2026-10-24: "a then b. C later i think" — this sprint is option A; option B (the kit's small bugs, F134–F137) is sprint 37; C (new looks) stays in Later.
+What changes: the Dev Kit's Tuning tab can show content files outside content/tuning/ (a game lists them), and Save keeps a list laid out by hand the way it was. What stays the same: every game's screens; tuning files already shown look and save as before; games get it only when they reinstall the Dev Kit.
+
+## F132 🔧 The Tuning tab edits more than content/tuning/
+Done when: a game lists extra content files in content/devkit.json ("tuningFiles": ["content/rooms.json"]) and each shows in the Tuning tab as its own section(s) with the same sliders, search, Select-tab and Save as tuning files; Save writes it back to its own path; a file only the room server reads says its changes arrive when the server reloads; no listed files → the tab is as before.
+- [ ] 🤖 1. Spike: in a scratch copy of Glyphtender, list the content files with numbers a designer tunes (besides tuning/) and how rooms.json reaches the room server (live, on reload, or neither) — Notes — devkit/kit/tuning/tuningFiles.ts
+- [ ] 🤖 2. content/devkit.json "tuningFiles": the listed files are found and shown, each named by its path — devkit/kit/tuning/tuningFiles.ts
+- [ ] 🤖 3. Save writes each file to its own path; a server-read file says when its changes arrive — devkit/kit/tuning/TuningTab.tsx
+- [ ] 🤖 4. Tests: a listed file shows + saves to its path · a missing or non-content path is refused in plain words · same name as a tuning file doesn't clash · nothing listed = as before — devkit/kit/tuning/TuningTab.test.tsx
+- [ ] 🤖 5. Proof in the scratch Glyphtender: rooms.json in the Tuning tab, a slider → Save → only that value changed in the file (screenshot); README + Dev Kit 0.28.0 — devkit/kit/VERSION
+Check: devkit tests; the proof's screenshot looked at by Claude; `git diff` of the saved file shows only the moved value.
+
+## F133 🔧 Save keeps a hand-wrapped list wrapped
+Done when: a list written over a few lines by hand (Glyphtender drag.json "_sections": 2 lines) comes back from a Save exactly as it was when nothing in it changed, and with the same line breaks when a value in it changed; lists on one line or one value per line behave as before.
+- [ ] 🤖 1. readLayout notes where a hand-wrapped list breaks its lines — devkit/vite/formatJson.ts
+- [ ] 🤖 2. Writing keeps those breaks (same items → same lines; items added or removed → the nearest sensible layout, said in a comment) — devkit/vite/formatJson.ts
+- [ ] 🤖 3. Tests: Glyphtender's real drag.json saves with an empty diff; a changed value keeps the breaks; one-line and one-per-line lists unchanged — devkit/vite/formatJson.test.ts
+- [ ] 🤖 4. README line (lands in Dev Kit 0.28.0) — devkit/README.md
+Check: devkit tests; a save of a copy of Glyphtender's drag.json with nothing changed leaves `git diff` empty.
+
+Notes:
+- Ideas checked against the code before planning (sprint 35 retro): Theme Tuner, the tappable seat row and the shoot's Pause wait were already built → marked done in ROADMAP (f5359bf). F132's and F133's gaps confirmed in devkit/kit/tuning/tuningFiles.ts:9 and devkit/vite/formatJson.ts:21.
+- No open P0/P1 bugs in this repo.
+- Opt-in list in content/devkit.json, not every content file: style.json has the Color tab, text/ is words, credits/levels aren't knobs — a game names what it tunes (Claude's call).
+- Built by Claude in this chat (two small Dev Kit features, different files); the game is never edited — proofs run in `.scratch/framework-f132/`.
