@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.34.0** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.34.1** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -278,6 +278,15 @@ gallery's `npm run shoot` uses the same one.
   kit's text; a player chip's score keeps its equal-width digits too) — Alegreya draws old-style numbers by default, so
   "v0.1.0" read "vO.1.O"; fonts that already draw lining numbers look the same. `scripts/pick-sheet.mjs` takes
   `SHOOT_PORT` like the shoot.
+  0.34.1 (F141 — `kit/kit.css`, `kit/blocks/blocks.css`, `kit/uiProblems.mjs`): **big text never splits a word.** At
+  200% text Settings' ◀ tab ▶ picker showed "Accessibil / ity" and a row's label could be squeezed to "Lock / down".
+  Kit text and the picker now wrap whole words (`overflow-wrap: break-word`, was `anywhere` — a word only breaks when
+  it's wider than its whole line); an icon button's glyph stops growing at ¾ of its 44 px button (the Settings header's
+  ‹ at 44 px), so at big text the WORDS get the room, not the arrows — nothing changes at 100% in any look; the picker's
+  value has a little room above and below. The page check has a new kind, **`split:`** — a word broken in the middle
+  although it would fit on one line of the box it's drawn in (a word wider than its card may still wrap); games'
+  `check:framework` reports it as "no word is broken in the middle". The shoot adds Settings at 200% on a phone, on its
+  Accessibility tab (640 shots, 0 problems).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
