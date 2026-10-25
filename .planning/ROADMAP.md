@@ -367,8 +367,8 @@ Goal (Muzzy 2026-10-25, "go auto" after v0.20): three things players notice — 
 - ✅ F141 🐞 Big text never splits a word: the ◀ option ▶ picker breaks "Accessibility" mid-word at 200% (kit.css overflow-wrap: anywhere), and the page check has no rule for it — should · sprint 38
 - ✅ F142 🐞 A gamepad player sees the focus ring from the first screen: ScreenStack shows it only after a key press, so a pad-only game hides where you are — should · sprint 38
 - ✅ F143 ✨ What's new after an update: once, on the first launch after the version changes — 3–5 highlights, a full-notes link, one tap to close; never on a first install or mid-game (research: research/patch-notes-and-dependencies.md) — should · sprint 38
-- 🔨 F144 🔧 The shoot sees every screen at 200% text: one upright and one sideways phone, every gallery screen — so big-text problems are found by the check, not by hand (F141's scan found 6 screens it never shot) — should · sprint 39
-- 🔨 F145 🐞 Every screen holds up at 200% text: what F144 finds — Reconnecting's title, the art Game over, the HUD overlaps, the menu buttons, Continue's line, the toast/tooltip, room's short button — should · needs: F144 · sprint 39
+- ✅ F144 🔧 The shoot sees every screen at 200% text: one upright and one sideways phone, every gallery screen — so big-text problems are found by the check, not by hand (F141's scan found 6 screens it never shot) — should · sprint 39
+- ✅ F145 🐞 Every screen holds up at 200% text: what F144 finds — Reconnecting's title, the art Game over, the HUD overlaps, the menu buttons, Continue's line, the toast/tooltip, room's short button — should · needs: F144 · sprint 39
 ```mermaid
 flowchart LR
   F141[F141 Words stay whole]

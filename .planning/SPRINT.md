@@ -17,8 +17,9 @@ Done when: the shoot is 0 problems with every 200% shot from F144, and nothing c
 - [x] 🤖 2. The HUD at 200%: no overlaps, nothing past the screen edge ("Roll") — ui-kit/kit/blocks/hud.tsx
 - [x] 🤖 3. The front end at 200%: menu buttons' room, "Play" over the tagline, Continue's "Turn 7 · 5 min ago", room's 32 px "Play online" — ui-kit/kit/blocks/frontend.tsx
 - [x] 🤖 4. Toasts and tooltips at 200% don't sit on words — ui-kit/kit/blocks/dialogs.tsx
-- [ ] 🤖 5. Whatever else F144's list holds; the shoot 0 problems; the touched screens looked at at 100% and 200% — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 5. Whatever else F144's list holds; the shoot 0 problems; the touched screens looked at at 100% and 200% — ui-kit/kit/blocks/flow.tsx
 Check: ui-kit tests; the shoot 0 problems; shots looked at.
+Checked: 2026-10-25 3:55 PM (Claude) — `SHOOT_PORT=6150 npm run shoot` on 5eebf09: 745 screenshots in 697 s, **exit 0, 0 problems** (+ 2 known on the one accepted shot, talk sideways at 200%: knownShots). Every 100% shot 0. Looked at hud 200% upright + sideways and feedback 200% myself. ui-kit uiProblems tests 21 ✓, root check:fast 20/20 ✓. Muzzy approved 2026-10-25 ("all approved").
 
 Notes:
 - From F141's word-by-word scan (sprint 38): Reconnecting's title, the art Game over screen, hud (11 overlaps) + huddock (2), "Roll" past the edge, menu buttons 1 px from their edge + "Play" over the tagline, continuemenu's line on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall.
@@ -67,3 +68,8 @@ Notes:
 - Merged 2026-10-25 8:10 AM (Claude): both F145 parts on the work branch at 1979198. Read both diffs: no bugs, 1 stale comment fixed (blocks.css said hud-text-max defaults to 1.5; it is 1.25). Root check:fast 20/20 ✓. Looked at hud 200% on the upright and sideways phones: nothing overlaps, Roll on screen. Tasks 4 + 5 stay open: the shoot is 15 problems, all feedback ×2 + talk sideways — waiting on the two Ask Muzzy above.
 - Muzzy 2026-10-25 (morning): talk sideways at 200% → **a, accept** (the kit warns, the game makes room). HUD words → **1.25** (as built). Feedback toasts: asked again with pictures (the gallery calls them "toasts", on the Feedback screen — he looked for "notifications").
 - Muzzy 2026-10-25 3:30 PM: "all approved" → toasts **a**: the page check leaves a toast / tooltip in the top layer alone (two over each other still count; test in uiProblems.test.mjs); talk sideways **a** → the shoot's `knownShots` prints that one shot as known, not counted. UI kit 0.35.3 (3c382da). Task 4 ticked; task 5 waits for the full shoot.
+
+Retro: (Claude's draft, 2026-10-25 — Muzzy approved the sprint; his words win when he reads it)
+- Went well: measuring first (F144) turned "a few screens look off" into a list of 89, and two helpers on separate file groups took it to 0 overnight.
+- Went wrong: the questions said "toasts" and "feedback", names only the code uses — Muzzy looked for "notifications" in the gallery and found nothing, and had no picture to judge by.
+- Change: an Ask Muzzy on something you see names it as a player would and comes with the screenshot (path or link), not a description. → landed: ~/.claude/config/bmuz/templates/handoff.md (Questions).
