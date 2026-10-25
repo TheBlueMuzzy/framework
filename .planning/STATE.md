@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-25 — **Sprint 38 done: F141 · F142 · F143 ✅ (Muzzy approved 2026-10-25)** — UI kit 0.35.0: big text wraps whole words + a `split:` page check; a gamepad press shows the focus ring (`markPadUsed()`); What's new after an update (`showWhatsNew()` + content/text/whats-new.json). The small ‹ at 200% text kept (approved as built). Muzzy then: "go auto. i'm going to bed" → sprint 38 archived with Claude's retro draft; **sprint 39 built unattended: every screen holds up at 200% text — F144 ✅-ticked (the shoot takes all 45 screens at 200% on both phones), F145 built (UI kit 0.35.2): the shoot went 89 → 15 problems, all 15 on two screens waiting on Muzzy (feedback toasts, talk sideways); HUD words stop growing at 1.25× (his call: 1.25 / 1.5 / 2). Muzzy: answer the 3 Ask Muzzy in SPRINT Notes, then approve → retro → archive → /deliver v0.21.**; /deliver v0.21 waits for Muzzy.
+2026-10-25 — **Sprint 38 done: F141 · F142 · F143 ✅ (Muzzy approved 2026-10-25)** — UI kit 0.35.0: big text wraps whole words + a `split:` page check; a gamepad press shows the focus ring (`markPadUsed()`); What's new after an update (`showWhatsNew()` + content/text/whats-new.json). The small ‹ at 200% text kept (approved as built). Muzzy then: "go auto. i'm going to bed" → sprint 38 archived with Claude's retro draft; **Sprint 39 done: F144 · F145 ✅ (Muzzy approved 2026-10-25, "all approved")** — UI kit 0.35.3: the shoot takes every screen at 200% text on both phones (745 shots, 0 problems); titles shrink to fit, menus scroll, card lists keep room, HUD words stop at 1.25× (hud-text-max), toasts / tooltips over the page are on top by design (page check), talk sideways at 200% accepted (the shoot's knownShots). Sprint 39 archived with Claude's retro draft. **v0.21 The kit meets every player: every feature ✅ → next: /deliver (milestone) — waits for Muzzy.** /deliver v0.21 waits for Muzzy.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 1979198 (F145 d870fa3..1979198 — screens part read
 
 ## Where we are
 Stage: develop   Milestone: v0.21 The kit meets every player   Sprint: 39
-Doing: F144 · F145 — waiting on Muzzy (OK + 3 Ask Muzzy)   Branch: dev/v0-21-every-player   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.2 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: — (v0.21 ready to deliver)   Branch: dev/v0-21-every-player   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.3 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.21.0
 
 ## Key facts
