@@ -11,7 +11,7 @@ Reviewed through: framework 894b8d6 (e57f61b..894b8d6 read whole by Claude: no b
 
 ## Where we are
 Stage: deliver   Milestone: v0.21 The kit meets every player ✅   Sprint: 39 (done)
-Doing: — (released)   Branch: dev/v0-21-every-player   Version: 0.22.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.3 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: — (released)   Branch: dev/v0-21-every-player   Version: 0.23.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.3 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.23.0
 
 ## Key facts

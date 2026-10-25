@@ -1,0 +1,17 @@
+v0.23.0 — 2026-10-25
+
+Every screen in the UI kit now holds up when a player sets text to 200%: titles shrink to fit instead of breaking mid-word, menus scroll instead of piling up, and in-game words stay readable without covering the game. A game also gets a "What's new" panel after an update, and a gamepad press now shows where focus is.
+
+NEW
+• UI kit 0.35.0: a "What's new" panel — showWhatsNew() shows the newest version's lines once after an update (up to 5 lines, a link to the full notes), remembered per game.
+• UI kit 0.34.1: a gamepad press shows the focus ring, like a key does; a game's own pad code calls markPadUsed().
+• UI kit 0.35.2: in-game (HUD) words stop growing at 1.25× their normal size, so a phone at 200% text still has room for the game; menus and dialogs keep growing all the way. A game can change it with "hud-text-max" in content/ui/style.json tweaks.
+• The screenshot run checks every gallery screen at 200% text on an upright and a sideways phone (745 shots).
+
+FIXED
+• UI kit 0.34.1: words are never broken in the middle ("Accessibil / ity") when they fit on a line; icons stop growing past their button.
+• UI kit 0.35.1: titles too long for a big-text screen drop a size instead of breaking ("Reconnecti / ng…" now reads whole), on menus, dialogs and the end screens.
+• UI kit 0.35.1: the main menu and Continue scroll when taller than the screen ("Play" no longer sits on the tagline); lists in cards keep room instead of shrinking to a sliver; the art frame no longer grows with text.
+• UI kit 0.35.2: on a phone at 200% text, the HUD's words no longer overlap and Roll stays on screen; "Weak connection" can take two lines.
+• UI kit 0.35.3: the page check no longer counts a toast or tooltip sitting over the page as a problem (they're on top on purpose).
+• Tests no longer wait a fixed time (a lint rule now refuses it), and the title tests pass with any computer's fonts.
