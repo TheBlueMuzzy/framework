@@ -317,7 +317,7 @@ flowchart LR
 Goal (Muzzy 2026-10-24, /develop on sprint option A): the kit's screenshot run comes back with 0 problems, the page check also sees a chip covering a card's text, and no installer test can time out under load.
 - ✅ F127 🔧 uiProblems sees a chip covering text: F124's covered-piece rule also counts a solid chip crossing another card's words (coins over "Score 120"), with the same on-purpose exemptions — should · sprint 34
 - ✅ F126 🐞 The shoot's 16 left-over finds → 0: the parts page's HUD demo at 200% text, the talking bubble over the Colours picker on a phone on its side, pinned Pixel 1 px edges — should · needs: F127 · sprint 34
-- 🔨 F128 🔧 Every installer asks git once per run: the 9 other installers cache their git answer like saves 0.6.2 — could · sprint 34
+- ✅ F128 🔧 Every installer asks git once per run: the 9 other installers cache their git answer like saves 0.6.2 — could · sprint 34
 ```mermaid
 flowchart LR
   F127[F127 Chip over text check] --> F126[F126 Shoot finds to 0]
