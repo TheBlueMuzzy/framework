@@ -248,4 +248,16 @@ describe('findProblems — words split in the middle', () => {
       <p style="width:90px;margin:8px">Red-green colour-blind mode for players</p>`)
     expect(only('split', found)).toEqual([])
   })
+
+  // 0.35.1 (F145): Reconnecting's "Reconnecti / ng…" — a title word wider than its whole card at 200% text. Not a squeeze
+  // (the word fits nowhere at that size), but a title can drop a size, so a broken title word is flagged too
+  it('a TITLE word wider than its box is flagged; the same word as plain text is not', async () => {
+    const found = await problemsOn(`
+      <div style="width:120px;padding:4px;border:1px solid #888">
+        <h2 class="kit-text" data-kind="title" style="font-size:32px;margin:0;overflow-wrap:break-word">Reconnecting…</h2>
+        <p class="kit-text" style="font-size:32px;margin:0;overflow-wrap:break-word">Reconnecting…</p></div>`)
+    const split = only('split', found)
+    expect(split).toHaveLength(1) // the title only
+    expect(split[0]).toMatch(/^split: "Reconnecting…" is broken in the middle across \d lines — a title word wider than its box \(<div>\)/)
+  })
 })

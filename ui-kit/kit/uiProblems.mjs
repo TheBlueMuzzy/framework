@@ -17,7 +17,8 @@
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 //   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
-//              box it's drawn in; a word wider than that box may still wrap — 0.34.1
+//              box it's drawn in; a word wider than that box may still wrap — 0.34.1 — unless it's in a title (0.35.1:
+//              a title can drop a size instead — "Reconnecti / ng…")
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
 // (a game's on-purpose overlap, e.g. a title drawn over its own shadow copy), and things covered by something else
@@ -282,6 +283,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
         }
         const wide = lines.reduce((sum, r) => sum + r.width, 0)
         if (wide <= room + 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
+        // …and a TITLE's word even when it's wider than its box (0.35.1, F145: "Reconnecti / ng…" at 200% text): a title
+        // has a smaller size to go to (MenuHeader and the end screens drop a step), so a split one was never fitted
+        else if (el.matches('.kit-text:is([data-kind="title"], [data-kind="display"])')) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines — a title word wider than its box (${what}): drop the title a size instead (MenuHeader / useTitleFit)`)
       }
     }
     return out
