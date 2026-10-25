@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-24 — **Released v0.19.0 (v0.17 A clean screenshot run)** — UI kit 0.33.2 (Goops' ArtLayer tap-floor fix · the page check sees a chip on another piece's words · shoot 0 problems) · every installer asks git once per run. Next: tell Goops "done, UI kit 0.33.2" · then /sprint (or /roadmap).
+2026-10-24 — **Released v0.19.0 (v0.17 A clean screenshot run)** — UI kit 0.33.2 (Goops' ArtLayer tap-floor fix · the page check sees a chip on another piece's words · shoot 0 problems) · every installer asks git once per run. Goops told "done, UI kit 0.33.2" (2026-10-24). Next: /sprint (or /roadmap).
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -42,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-24 — Released v0.16.0 (v0.14 Story pieces made solid): the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
 - 2026-10-24 — F115 + F116 + F117 approved: the reveal replays by itself, screen readers hear every bubble line, and the planner trims its own Log.
 - 2026-10-24 — Sprint 31 planned: make the new story pieces solid (F115 reveal replays, F116 bubble for every player, F117 log trims itself).
-- 2026-10-24 — Released v0.15.0 (v0.13 Games feed the framework): games can hand finished pieces to the framework and swap the module back in one step.
