@@ -235,8 +235,10 @@
   /* No scroll bar (0.10.0, Muzzy: "remove all scroll bars"): drag, swipe, wheel and keys still scroll it, and its edges
      fade while there's more that way (kit-style below). It only keeps swipes to itself (overscroll contain) while it
      really can scroll (data-scrolls, set by ScrollArea.tsx): one that fits must never eat a swipe (B027). */
+  /* (0.36.0, F145: that room never reaches past a Screen's own padding — at 200% text 0.5rem was the whole 16 px, so a
+     ScrollArea straight in a Screen, Player chips', ran into the screen's edge and was cut off there) */
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: auto;
-    scrollbar-width: none; padding: 0.5rem; margin: -0.5rem; }
+    scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) - 3px); padding: var(--kit-scroll-room); margin: calc(var(--kit-scroll-room) * -1); }
   .kit-scroll::-webkit-scrollbar { display: none; }
   .kit-scroll[data-scrolls] { overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
