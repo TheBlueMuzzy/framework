@@ -166,3 +166,69 @@ describe('ScreenStack kit screens (0.25.0)', () => {
     warn.mockRestore()
   })
 })
+
+// F142: until a key is pressed, a screen opened by code focuses without the ring (browsers would show it at load).
+// A gamepad press counts like a key — a pad-only player sees where they are from the first screen. Mouse and touch don't.
+// Each test loads a fresh copy of the kit (vi.resetModules), so "was a key or pad used?" starts as no.
+describe('ScreenStack focus ring for keys and pads (F142)', () => {
+  async function freshKit() {
+    vi.resetModules()
+    return await import('.')
+  }
+  // The options each focus() call got
+  function watchFocus() {
+    const spy = vi.spyOn(HTMLElement.prototype, 'focus')
+    return { calls: () => spy.mock.calls.map((call) => call[0] as FocusOptions | undefined), done: () => spy.mockRestore() }
+  }
+  const quiet = (options: FocusOptions | undefined) => options?.focusVisible === false
+
+  afterEach(async () => {
+    cleanup()
+    const kit = await import('.')
+    while (kit.screens.current.length) kit.screens.pop()
+  })
+
+  it('a pad connecting (browsers only report one after a button press) → the next screen focuses WITH the ring', async () => {
+    const kit = await freshKit()
+    render(<kit.ScreenStack screens={testScreens}><button>Game button</button></kit.ScreenStack>)
+    window.dispatchEvent(new Event('gamepadconnected'))
+    const focus = watchFocus()
+    act(() => kit.screens.push('menu'))
+    expect(document.activeElement).toBe(screen.getByText('Menu button'))
+    expect(focus.calls().some(quiet)).toBe(false)
+    focus.done()
+  })
+
+  it("a game's own pad code tells the kit with markPadUsed() → the next screen focuses WITH the ring", async () => {
+    const kit = await freshKit()
+    render(<kit.ScreenStack screens={testScreens}><button>Game button</button></kit.ScreenStack>)
+    ;(kit as { markPadUsed?: () => void }).markPadUsed?.()
+    const focus = watchFocus()
+    act(() => kit.screens.push('menu'))
+    expect(focus.calls().some(quiet)).toBe(false)
+    focus.done()
+  })
+
+  it('a key press still counts (the d-pad sent as arrow keys is a key press too)', async () => {
+    const kit = await freshKit()
+    render(<kit.ScreenStack screens={testScreens}><button>Game button</button></kit.ScreenStack>)
+    fireEvent.keyDown(window, { key: 'ArrowDown' })
+    const focus = watchFocus()
+    act(() => kit.screens.push('menu'))
+    expect(focus.calls().some(quiet)).toBe(false)
+    focus.done()
+  })
+
+  it('a mouse or touch start (no key, no pad) → the screen focuses without the ring', async () => {
+    const kit = await freshKit()
+    render(<kit.ScreenStack screens={testScreens}><button>Game button</button></kit.ScreenStack>)
+    fireEvent.pointerDown(screen.getByText('Game button'), { pointerType: 'touch' })
+    fireEvent.click(screen.getByText('Game button'))
+    const focus = watchFocus()
+    act(() => kit.screens.push('menu'))
+    expect(document.activeElement).toBe(screen.getByText('Menu button'))
+    expect(focus.calls().length).toBeGreaterThan(0)
+    expect(focus.calls().every(quiet)).toBe(true)
+    focus.done()
+  })
+})

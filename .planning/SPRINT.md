@@ -12,7 +12,7 @@ Check: ui-kit tests; the shoot (0 problems, with the 200% Settings shot); that s
 
 ## F142 🐞 A gamepad player sees where they are from the first screen
 Done when: a game played only with a pad shows the focus ring on the first screen it opens after a pad press, the same as after a key press; mouse and touch players still see no ring.
-- [ ] 🤖 1. A failing test first: a pad press (gamepadconnected / the d-pad's arrow key path) before any keydown → the next screen focuses with the ring — ui-kit/kit/ScreenStack.test.tsx
+- [x] 🤖 1. A failing test first: a pad press (gamepadconnected / the d-pad's arrow key path) before any keydown → the next screen focuses with the ring — ui-kit/kit/ScreenStack.test.tsx
 - [ ] 🤖 2. ScreenStack counts a pad as keyboard use; TalkingBubble and Teach use the same flag (they copy the focusVisible pattern) — ui-kit/kit/ScreenStack.tsx
 - [ ] 🤖 3. README + CATALOG say how a game's own pad code tells the kit (if it needs to) — ui-kit/README.md
 Check: ui-kit tests; the gallery with a fake pad event shows the ring, with a mouse click it doesn't.
