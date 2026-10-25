@@ -4,7 +4,8 @@
 //   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop (and at 200% text on a
 //                                                    phone + a phone on its side: …-text-200, F144),
 //                                                  and the key screens in every style (also on a 360×780
-//                                                    phone; the landscape ones also on a 667×375 phone on its side)
+//                                                    phone; the landscape ones also on a 667×375 phone on its side;
+//                                                    and at 200% text on both phones, F146)
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
@@ -207,6 +208,13 @@ try {
   }
   for (const size of [sizes.phone, sizes.landscape]) {
     for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
+  }
+  // …and the key screens at 200% in every OTHER look, both phones (F146): a look's own font can be wider than Clean's
+  // (Cozy and Pixel's HUD sideways overlapped where Clean's fit)
+  for (const preset of presetNames.filter((p) => p !== 'clean')) {
+    for (const size of [sizes.phone, sizes.landscape]) {
+      for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${size.name}-text-200`, size, `?screen=${id}&preset=${preset}`, openers[id] || text200)
+    }
   }
   // Live restyle: change a tweak with the dev switcher and check it repaints
   await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {

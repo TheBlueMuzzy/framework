@@ -5,7 +5,7 @@ What changes: the screenshot run checks the key screens at 200% text in all 7 lo
 
 ## F146 🔧 The shoot sees the key screens at 200% text in every look
 Done when: npm run shoot takes the 18 key screens at 200% text in the 6 other looks on an upright phone (390×844) and a sideways one (844×390), and lists what it finds — before anything is fixed.
-- [ ] 🤖 1. The key screens at 200% in every other look on both phones — ui-kit/scripts/shoot.mjs
+- [x] 🤖 1. The key screens at 200% in every other look on both phones — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 2. Run it on today's code and list every problem by look + screen in Notes, before any fix — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 3. Say what it costs (shots added, new run time) in the README; if too slow, only the 5 in-game screens — ui-kit/README.md
 Check: the shoot runs the new shots; the list is in Notes.
