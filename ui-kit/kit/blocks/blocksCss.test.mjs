@@ -37,9 +37,12 @@ describe('blocks.css 0.33.0 (F121)', () => {
 })
 
 describe('blocks.css 0.35.4 (F147)', () => {
-  it('HUD top-middle status row stays on one row; only its words give way', () => {
-    expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row {')).toContain('flex-wrap: nowrap')
-    expect(rule('.kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row > :not(.kit-hud-text)')).toContain('flex-shrink: 0')
+  it('a menu\'s buttons keep their line of words and border when squeezed (target-min still the floor)', () => {
+    expect(rule('.kit-menu > .kit-button {')).toContain('min-block-size: max(var(--target-min), calc(1lh + 2 * var(--border-width)))')
+  })
+
+  it('HUD past its text cap: the top-left corner gives way to the middle (only then)', () => {
+    expect(rule('.kit-hud-slot[data-big-text]) > [data-slot="top-left"]')).toContain('min-inline-size: 0')
   })
 
   it('MenuHeader ‹ stops growing inside its border, not at the button\'s outside', () => {

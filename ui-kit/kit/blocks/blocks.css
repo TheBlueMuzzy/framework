@@ -25,6 +25,10 @@
     .kit-screen:not([data-scroll]) > [data-slot="center"] > :is(.kit-modal, .kit-menu, .kit-wide) { max-block-size: var(--kit-menu-max-h-wide, 52rem); }
   }
   .kit-menu .kit-button { inline-size: 100%; }
+  /* …and never squeezed past its line of words (0.35.4, F147): Pause on a phone on its side at 200% text pressed its
+     four buttons to 52 px for a 50 px line inside a 4 px border — Pixel's Q tail sat on the border. Its padding may go;
+     its line and border stay (at 100% text that's under target-min, so nothing changes there). */
+  .kit-menu > .kit-button { min-block-size: max(var(--target-min), calc(1lh + 2 * var(--border-width))); }
 
   /* MenuHeader: ‹ · title · action on one line. The title takes what's left (and wraps on a narrow phone); the ‹ and
      the action never shrink. Its gaps are inside the card's padding, so nothing touches the card's edge. */
@@ -108,11 +112,6 @@
      No room for a wide score beside the other corner? Put it in the status row (`status`) instead — a corner that wraps
      grows taller than the HUD's room and covers the game (tried in 0.15.0, taken out in 0.15.2). */
   .kit-screen > :is([data-slot="top-right"], [data-slot="bottom-right"]) > .kit-hud-slot > .kit-row { flex-wrap: nowrap; justify-content: flex-end; }
-  /* …and the top-middle status row too (0.35.4, F147): squeezed, its words go onto two lines between words ("Round / 1")
-     instead of a whole piece dropping below. A dropped score chip made the top row a line taller and the turn banner
-     landed on the seats and Roll (Cozy and Pixel on a phone on its side at 200% text — their fonts are wider than Clean's). */
-  .kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row { flex-wrap: nowrap; }
-  .kit-screen > [data-slot="top"] > .kit-hud-slot > .kit-row > :not(.kit-hud-text) { flex-shrink: 0; } /* (only words give way: a squeezed score chip had its number on its edge) */
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
@@ -162,6 +161,11 @@
   }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="top-right"], [data-slot="bottom-left"], [data-slot="bottom-right"]) { min-inline-size: min-content; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { max-inline-size: 100%; }
+  /* …except past the HUD's text cap (0.35.4, F147: data-big-text, Hud's useBigText): then the top-left's bars give way
+     to the middle, as on a phone. On a phone on its side at 200% text the middle didn't fit on one line in Cozy and Pixel
+     (wider fonts than Clean's): the score dropped below, the top row grew a line, and the turn banner landed on the seats
+     and Roll. At normal text sizes nothing changes (a middle that wraps there still has the height for it). */
+  .kit-screen:has(> [data-slot="top-left"] > .kit-hud-slot[data-big-text]) > [data-slot="top-left"] { min-inline-size: 0; max-inline-size: 100%; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="top-left"], [data-slot="top-right"]))) > [data-slot="top"],
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="bottom-left"], [data-slot="bottom-right"]))) > [data-slot="bottom"] { grid-column: 1 / -1; }
   /* Phones: the corners share the first row and the top-centre piece gets its own row below,

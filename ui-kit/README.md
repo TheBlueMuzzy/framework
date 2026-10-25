@@ -336,9 +336,10 @@ gallery's `npm run shoot` uses the same one.
 - 0.35.3 (F145, Muzzy 2026-10-25): the page check's `overlap:` leaves a toast or tooltip (anything in the top layer)
   over the page alone — on top by design; two of them over each other still count. `hud-text-max` 1.25 approved.
   The shoot's `knownShots` lists shots Muzzy accepted as they are (talk sideways at 200%), printed as "known".
-- 0.35.4 (F147): **every look holds up at 200% text** (the shoot's 200% shots in the 6 other looks, F146). The HUD's
-  top-middle row keeps its pieces side by side (its words wrap, "Round / 1"; a dropped score chip pushed the turn banner
-  onto the seats in Cozy and Pixel sideways). The Seat picker's and the Lobby room's titles drop a size like the end
+- 0.35.4 (F147): **every look holds up at 200% text** (the shoot's 200% shots in the 6 other looks, F146). Past the HUD's
+  text cap (`data-big-text` from Hud), its top-left bars give way to the middle row as on a phone (a dropped score chip
+  pushed the turn banner onto the seats in Cozy and Pixel sideways). A menu's buttons keep their line of words and border
+  when squeezed (Pause sideways: the card scrolls a little instead — Quit shows cut at its edge). The Seat picker's and the Lobby room's titles drop a size like the end
   screens' (`.kit-fit-title`). A name (Results, Lobby, Seat picker) keeps its longest word — the points move under it.
   A ◀ value ▶ picker whose value won't fit between its arrows puts it on its own line, the arrows under it at the two
   ends (`fitPicker`; "Accessibility" at 200%). MenuHeader's ‹ stops growing inside a thick border (Pixel). The

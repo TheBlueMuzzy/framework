@@ -60,11 +60,15 @@ type HudProps = {
 }
 export function Hud({ vitals, status, currency, onPause, actions, banner, bottomLeft, bottomRight, oneRow, dock, dockSide = 'bottom', dockTight, words }: HudProps) {
   const w = { ...hudWords, ...words }
+  const vitalsBox = useRef<HTMLDivElement>(null)
+  const bigText = useBigText(vitalsBox, shown(vitals))
   // Each slot's contents sit in kit-hud-slot, which lets taps through to the game (blocks.css)
   const slot = (content: ReactNode, one?: boolean) => (shown(content) ? <div className="kit-hud-slot" data-one-row={one || undefined}>{content}</div> : null)
   const pause = onPause && <Button variant="secondary" icon aria-label={w.pause} onClick={onPause}>❚❚</Button>
+  // (the vitals' slot says when the page's text is past the HUD's cap — blocks.css lets its bars give way then)
+  const vitalsSlot = shown(vitals) ? <div ref={vitalsBox} className="kit-hud-slot" data-big-text={bigText || undefined}>{vitals}</div> : null
   const screen = (
-    <Screen label={w.label} topLeft={slot(vitals)} top={slot(status, oneRow)}
+    <Screen label={w.label} topLeft={vitalsSlot} top={slot(status, oneRow)}
       topRight={slot((shown(currency) || pause) && <Row gap="s">{currency}{pause}</Row>)}
       bottomLeft={slot(bottomLeft)} bottom={slot(actions)} bottomRight={slot(bottomRight)}>
       {slot(banner)}
@@ -77,6 +81,31 @@ export function Hud({ vitals, status, currency, onPause, actions, banner, bottom
       <div className="kit-hud-dock kit-scope" data-side={dockSide} data-tight={dockTight || undefined}><Panel gap="s">{dock}</Panel></div>
     </>
   )
+}
+
+/** Is the page's text bigger than the HUD's words go (Text size past the style's hud-text-max: a HUD rem is then
+ *  smaller than the page's rem)? Rechecked when the page's style changes (the Text size setting, a restyle).
+ *  0.35.4 (F147): on a phone on its side at 200% text the HUD's top row has no room for its middle on one line. */
+function useBigText(box: RefObject<HTMLElement | null>, on: boolean) {
+  const [big, setBig] = useState(false)
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!on || !el || typeof MutationObserver === 'undefined') return
+    const check = () => {
+      const probe = document.createElement('span')
+      probe.style.cssText = 'position: absolute; visibility: hidden; inline-size: var(--hud-rem, 1rem)'
+      el.append(probe)
+      const hudRem = probe.getBoundingClientRect().width
+      probe.remove()
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+      setBig(hudRem > 0 && rem > hudRem + 0.5)
+    }
+    check()
+    const watch = new MutationObserver(check)
+    watch.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class', 'data-theme'] })
+    return () => watch.disconnect()
+  }, [box, on])
+  return big
 }
 
 // A small readable plate behind a HUD piece, so it shows up over any game art.
