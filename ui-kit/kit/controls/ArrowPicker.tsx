@@ -24,12 +24,15 @@ export function ArrowPicker({ label, display, onStep, canPrev, canNext, prevIcon
     if (!box) return
     if (typeof ResizeObserver === 'undefined') return // (tests without a browser: no layout to measure)
     fitPicker(box)
-    const refit = new ResizeObserver(() => fitPicker(box))
+    // (refit on the next frame, not inside the observer: stacking changes the picker's own size, and doing it right
+    // there made the browser say "ResizeObserver loop completed with undelivered notifications")
+    let pending = 0
+    const refit = new ResizeObserver(() => { if (!pending) pending = requestAnimationFrame(() => { pending = 0; fitPicker(box) }) })
     refit.observe(box) // (the text size setting: its words grow, so it does)
     if (box.parentElement) refit.observe(box.parentElement) // (its room)
     let live = true
     void document.fonts?.ready.then(() => { if (live) fitPicker(box) })
-    return () => { live = false; refit.disconnect() }
+    return () => { live = false; refit.disconnect(); cancelAnimationFrame(pending) }
   }, [display, sizes])
   // (At an end the key still belongs to the picker: nothing happens, rather than the page scrolling sideways)
   function onKeyDown(e: KeyboardEvent) {

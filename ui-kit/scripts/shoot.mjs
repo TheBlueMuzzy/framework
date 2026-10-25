@@ -60,6 +60,9 @@ async function pageFor(size) {
   })
   page.errors = []
   page.on('pageerror', (e) => page.errors.push(e.message))
+  // …and the page's error events that aren't a thrown error (F147: "ResizeObserver loop completed with undelivered
+  // notifications" reached only Vite's terminal, never the list) — said as console errors, so the line below hears them
+  await page.addInitScript(() => addEventListener('error', (e) => { if (!e.error) console.error(`page error: ${e.message}`) }))
   // console errors, and the kit's own dev warnings (a bubble stuck on what it avoids, F130) — the gallery has none
   page.on('console', (m) => (m.type() === 'error' || (m.type() === 'warning' && m.text().startsWith('[ui-kit]'))) && page.errors.push(m.text()))
   return (pages[size.name] = page)
