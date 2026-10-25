@@ -352,6 +352,16 @@ flowchart LR
   F137[F137 Part-way save code reload]
 ```
 
+## v0.20 — Two new looks  ← current · planned 2026-10-24
+Goal (Muzzy 2026-10-24, "go auto" on option A): the UI kit gets "Dark console" and "Fantasy" — picked from a sketch of 3 takes each — so a game can choose from 7 looks.
+- 🔨 F138 ❓ Which take is each look: the sketch (3 console takes, 3 fantasy takes, knobs) — Claude's draft picks until Muzzy confirms or swaps — must · sprint 37
+- 🔨 F139 🎨 The two looks in the UI kit: console.json + fantasy.json, their fonts bundled and credited, the style tests and the shoot clean — must · needs: F138 · sprint 37
+- 🔨 F140 🔧 Everything that lists the looks knows all 7: pick sheet, CATALOG, README, the game-ui skill — should · needs: F139 · sprint 37
+```mermaid
+flowchart LR
+  F138[F138 Which take] --> F139[F139 Looks in the kit] --> F140[F140 Lists know 7]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -359,7 +369,7 @@ flowchart LR
 - ✅ done (noticed 2026-10-24: the Dev Kit Color tab — every UI kit colour + "UI shape & feel" sliders, live, saved to content/ui/style.json; devkit/kit/color/). 🔧 Theme Tuner sliders in the Dev Kit (playground-style) — should
 - Unity twin: sinanata UI Toolkit design system + same layout classes, screen stack, catalog names, style.json — should (when a Unity game needs UI)
 - Textured extras (Kenney CC0 9-slice panels) — could
-- Dark console + Fantasy presets — could (Muzzy 2026-10-24: "C later" — after v0.19; /sketch samples to pick from first)
+- → v0.20 F138–F140. Dark console + Fantasy presets — could (Muzzy 2026-10-24: "C later" — after v0.19; /sketch samples to pick from first)
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- /sketch starter (BMUZ). The planner's Sketches tab uses the title as the tab name and the description as its blurb. -->
+<title>S1: Two new UI looks</title>
+<meta name="description" content="Six takes on the UI kit's two new looks — three 'Dark console', three 'Fantasy' — on a sample menu, HUD and dialog: pick one per look, tune its colour, corners, edges and glow, then Copy values for Claude.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Cinzel:wght@500;700&family=Exo+2:wght@400;700&family=IM+Fell+English&family=Nunito:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #05070d; --panel: #0b1224f0; --line: #1e293b; --ink: #e2e8f0; --dim: #64748b; --accent: #a855f7; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: #cbd5e1;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif; user-select: none; -webkit-user-select: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .bar { position: fixed; left: 0; right: 0; margin: 0 auto; max-width: 560px; box-sizing: border-box;
+    display: flex; gap: 8px; align-items: center; padding: 10px 16px; z-index: 2; }
+  #top { top: 0; padding-top: max(10px, env(safe-area-inset-top)); }
+  #bottom { bottom: 0; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+  button { flex: 1; min-height: 40px; padding: 0 6px; border-radius: 12px; border: 1px solid var(--line);
+    background: #0b1224d9; color: var(--ink); font: 600 14px system-ui, sans-serif; touch-action: manipulation; cursor: pointer; }
+  button:active { background: var(--line); }
+  button.on { border-color: var(--accent); color: #e9d5ff; }
+  #bottom button { min-height: 56px; font-size: 15px; }
+  #fps { flex: 0 0 64px; font: 700 13px ui-monospace, monospace; color: #4ade80; }
+  /* Knobs: beside the view on a wide screen (Muzzy tunes on the PC), a bottom sheet on a phone. Never over the view. */
+  #panel { position: fixed; z-index: 3; display: none; box-sizing: border-box; background: var(--panel); overflow-y: auto; }
+  #panel.open { display: block; }
+  body.side #panel { top: 0; bottom: 0; right: 0; width: 300px; border-left: 1px solid var(--line); padding: max(16px, env(safe-area-inset-top)) 16px 16px; }
+  body.side .bar { right: 300px; }
+  body.sheet #panel { left: 0; right: 0; bottom: 0; max-height: 40vh; border-top: 1px solid var(--line); border-radius: 14px 14px 0 0;
+    padding: 12px 16px max(12px, env(safe-area-inset-bottom)); }
+  body.sheet #bottom { bottom: var(--sheet, 0px); padding-bottom: 8px; }
+  #panel h4 { margin: 6px 0 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  #panel label { display: flex; align-items: center; gap: 10px; font-size: 13px; margin: 6px 0; }
+  #panel label span { flex: 0 0 84px; }
+  #panel input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  /* the value box: type any number, even past the slider's ends (the slider then sits at its end, the box turns amber) */
+  #panel input.num { flex: 0 0 52px; width: 52px; box-sizing: border-box; padding: 3px 4px; text-align: right; font: 600 12px ui-monospace, monospace;
+    color: #94a3b8; background: #0b1224; border: 1px solid var(--line); border-radius: 6px; -moz-appearance: textfield; }
+  #panel input.num::-webkit-inner-spin-button, #panel input.num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  #panel input.num:focus { outline: none; border-color: var(--accent); color: var(--ink); }
+  #panel input.num.over { color: #fbbf24; border-color: #fbbf2480; }
+  #panel .help { margin: -4px 0 8px; font-size: 11px; line-height: 1.35; color: var(--dim); }
+  #presets { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+  #presets button, #bCopy { flex: 0 0 auto; min-height: 32px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
+  #presets .pw { display: inline-flex; }
+  #presets .pw button { border-radius: 10px 0 0 10px; }
+  #presets .pw i { display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--line); border-left: 0;
+    border-radius: 0 10px 10px 0; color: var(--dim); font-style: normal; cursor: pointer; }
+  #presets .pw i:hover { color: #fca5a5; }
+  #presets .add { border-style: dashed; color: #94a3b8; }
+  #bCopy { display: block; margin-top: 10px; width: 100%; }
+
+  /* ===== The sample screen, drawn with the UI kit's own setting names (--bg, --surface, --primary, --radius-panel…) ===== */
+  #view { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; z-index: 1;
+    padding: max(64px, calc(env(safe-area-inset-top) + 56px)) 16px 96px; box-sizing: border-box;
+    background: var(--k-bg); color: var(--k-on-bg); font-family: var(--k-font-body); font-size: 16px; }
+  body.side #view { right: 300px; }
+  body.sheet #view { bottom: var(--sheet, 0px); }
+  #view * { box-sizing: border-box; }
+  .scene { max-width: 980px; margin: 0 auto; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; }
+  .k-panel { background: var(--k-surface); color: var(--k-on-surface); border: var(--k-border-width) solid var(--k-border);
+    border-radius: var(--k-radius-panel); box-shadow: var(--k-depth); padding: 20px; position: relative; overflow: hidden; }
+  .k-panel::before { content: ''; position: absolute; inset: 0; background: var(--k-texture); pointer-events: none; }
+  .k-panel > * { position: relative; }
+  .k-bevel { clip-path: polygon(var(--k-cut) 0, calc(100% - var(--k-cut)) 0, 100% var(--k-cut), 100% calc(100% - var(--k-cut)), calc(100% - var(--k-cut)) 100%, var(--k-cut) 100%, 0 calc(100% - var(--k-cut)), 0 var(--k-cut)); }
+  .k-title { font-family: var(--k-font-display); font-size: calc(2rem * var(--k-font-scale)); margin: 0 0 4px; text-transform: var(--k-case); line-height: 1.05; text-shadow: var(--k-title-glow); }
+  .k-sub { color: var(--k-muted); margin: 0 0 18px; }
+  .k-h2 { font-family: var(--k-font-display); font-size: calc(1.35rem * var(--k-font-scale)); margin: 0 0 8px; text-transform: var(--k-case); }
+  .k-btn { display: block; width: 100%; min-height: 48px; margin: 10px 0 0; padding: 0 16px; font: 700 17px var(--k-font-body);
+    border-radius: var(--k-radius-control); border: var(--k-border-width) solid var(--k-border); background: var(--k-surface-2); color: var(--k-on-surface);
+    text-transform: var(--k-case); cursor: pointer; box-shadow: var(--k-depth-0); }
+  .k-btn.primary { background: var(--k-primary); color: var(--k-on-primary); border-color: var(--k-primary); box-shadow: var(--k-glow); }
+  .k-btn.danger { background: var(--k-danger); color: var(--k-on-danger); border-color: var(--k-danger); }
+  .k-btn.focus { outline: 3px solid var(--k-focus); outline-offset: 3px; }
+  .k-row { display: flex; gap: 10px; }
+  .k-row .k-btn { flex: 1; }
+  .k-hud { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .k-bar { flex: 1 1 140px; }
+  .k-bar b { display: block; font: 700 13px var(--k-font-body); color: var(--k-muted); margin-bottom: 4px; text-transform: var(--k-case); }
+  .k-track { height: 14px; border-radius: var(--k-radius-control); background: var(--k-bg); border: var(--k-border-width) solid var(--k-border); overflow: hidden; }
+  .k-fill { height: 100%; width: 70%; background: var(--k-success); box-shadow: var(--k-glow-fill); }
+  .k-fill.mana { width: 45%; background: var(--k-accent); }
+  .k-chip { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; background: var(--k-surface-2);
+    border: var(--k-border-width) solid var(--k-border); font: 700 16px var(--k-font-numbers); }
+  .k-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--k-accent); color: var(--k-on-accent); font: 700 12px var(--k-font-body); text-transform: var(--k-case); }
+  .k-game { min-height: 120px; border-radius: var(--k-radius-panel); margin-top: 14px;
+    background: linear-gradient(135deg, var(--k-game-a), var(--k-game-b)); display: grid; place-items: center; color: var(--k-on-game); font: 700 14px var(--k-font-body); }
+  .label { font: 700 11px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--k-muted); margin: 0 0 8px; opacity: .8; }
+  #takeName { flex: 1; text-align: center; font: 700 13px system-ui, sans-serif; color: var(--ink);
+    background: #0b1224d9; border: 1px solid var(--line); border-radius: 12px; padding: 6px 8px; } /* readable over a light take too */
+</style>
+</head>
+<body>
+<canvas id="c" style="display:none"></canvas>
+<div id="view">
+  <div class="scene">
+    <section>
+      <p class="label">Main menu</p>
+      <div class="k-panel k-shape">
+        <h1 class="k-title">Moonfall</h1>
+        <p class="k-sub">The last lantern is yours to keep.</p>
+        <button class="k-btn primary focus">Play</button>
+        <button class="k-btn">Continue <span class="k-badge">Day 3</span></button>
+        <button class="k-btn">Settings</button>
+      </div>
+    </section>
+    <section>
+      <p class="label">In the game (HUD)</p>
+      <div class="k-panel k-shape">
+        <div class="k-hud">
+          <div class="k-bar"><b>Health</b><div class="k-track"><div class="k-fill"></div></div></div>
+          <div class="k-bar"><b>Mana</b><div class="k-track"><div class="k-fill mana"></div></div></div>
+          <span class="k-chip">◆ 1,250</span>
+        </div>
+        <div class="k-game">the game picture</div>
+      </div>
+    </section>
+    <section>
+      <p class="label">A dialog</p>
+      <div class="k-panel k-shape">
+        <h2 class="k-h2">Leave the dungeon?</h2>
+        <p class="k-sub">What you found this run stays in your bag.</p>
+        <div class="k-row"><button class="k-btn">Stay</button><button class="k-btn danger">Leave</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="bar" id="top">
+  <div id="fps">-- fps</div>
+  <div id="takeName"></div>
+  <button id="bReset">Reset</button><button id="bKnobs">Knobs</button>
+</div>
+<div id="panel"></div>
+<div class="bar" id="bottom">
+  <button data-take="0">C1</button><button data-take="1">C2</button><button data-take="2">C3</button>
+  <button data-take="3">F1</button><button data-take="4">F2</button><button data-take="5">F3</button>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ===== The six takes: everything a kit look sets that the knobs don't (fonts, letter case, corner shape, how
+// panels appear, the hue of each colour), plus each take's own starting knobs. Hues are 0–360. =====
+const TAKES = [
+  { name: 'Console 1 · Living-room dashboard', look: 'Dark console', display: "'Exo 2', sans-serif", body: "'Nunito', sans-serif", numbers: "'Exo 2', sans-serif",
+    caps: 'none', bevel: false, enter: 'kit-fade', bgHue: 222, bgSat: 30, primaryHue: 212, accentHue: 190, sat: 92, ink: 96,
+    knobs: { take: 0, shift: 0, lightness: 9, lift: 7, corners: 1.1, edge: 0, glow: 0.55, titleSize: 1.15 } },
+  { name: 'Console 2 · Handheld', look: 'Dark console', display: "'Nunito', sans-serif", body: "'Nunito', sans-serif", numbers: "'Nunito', sans-serif",
+    caps: 'none', bevel: false, enter: 'kit-pop', bgHue: 230, bgSat: 8, primaryHue: 352, accentHue: 200, sat: 85, ink: 94,
+    knobs: { take: 1, shift: 0, lightness: 14, lift: 8, corners: 1.6, edge: 3, glow: 0.15, titleSize: 1.2 } },
+  { name: 'Console 3 · Terminal', look: 'Dark console', display: "'Share Tech Mono', monospace", body: "'Share Tech Mono', monospace", numbers: "'Share Tech Mono', monospace",
+    caps: 'uppercase', bevel: false, enter: 'kit-blink', bgHue: 140, bgSat: 30, primaryHue: 128, accentHue: 48, sat: 80, ink: 82,
+    knobs: { take: 2, shift: 0, lightness: 4, lift: 3, corners: 0, edge: 1, glow: 0.7, titleSize: 1.1 } },
+  { name: 'Fantasy 1 · Parchment & gold', look: 'Fantasy', display: "'IM Fell English', serif", body: "'Alegreya', serif", numbers: "'Alegreya', serif",
+    caps: 'none', bevel: false, enter: 'kit-float', bgHue: 38, bgSat: 45, primaryHue: 28, accentHue: 145, sat: 62, ink: 14,
+    knobs: { take: 3, shift: 0, lightness: 80, lift: 8, corners: 0.35, edge: 2, glow: 0.2, titleSize: 1.25 } },
+  { name: 'Fantasy 2 · Tavern (wood & gold)', look: 'Fantasy', display: "'Cinzel', serif", body: "'Alegreya', serif", numbers: "'Cinzel', serif",
+    caps: 'none', bevel: false, enter: 'kit-float', bgHue: 24, bgSat: 35, primaryHue: 43, accentHue: 4, sat: 78, ink: 92,
+    knobs: { take: 4, shift: 0, lightness: 10, lift: 6, corners: 0.5, edge: 2, glow: 0.45, titleSize: 1.2 } },
+  { name: 'Fantasy 3 · Arcane', look: 'Fantasy', display: "'Cinzel', serif", body: "'Alegreya', serif", numbers: "'Cinzel', serif",
+    caps: 'uppercase', bevel: true, enter: 'kit-flicker', bgHue: 262, bgSat: 40, primaryHue: 174, accentHue: 312, sat: 80, ink: 94,
+    knobs: { take: 5, shift: 0, lightness: 9, lift: 7, corners: 0.9, edge: 1, glow: 0.8, titleSize: 1.15 } },
+];
+
+// ===== Tweakable values (the sketch's "content/*.json"). Every knob lives here. =====
+const GOO = { ...TAKES[0].knobs };
+// [name, min, max, step] rows; a one-item row is a group heading. 5–8 sliders max.
+const KNOBS = [['Take'], ['take', 0, 5, 1],
+  ['Colour'], ['shift', -60, 60, 1], ['lightness', 0, 92, 1], ['lift', 0, 20, 1],
+  ['Shape'], ['corners', 0, 2, 0.05], ['edge', 0, 4, 0.5], ['glow', 0, 1, 0.05], ['titleSize', 0.9, 1.5, 0.01]];
+// One line per knob: what it does IN THIS SKETCH, and when you'd notice it. A knob Muzzy can't see working gets fixed or cut.
+const KNOB_HELP = {
+  take: 'Which of the six takes (0–2 console, 3–5 fantasy) — the same as the buttons along the bottom. Picking one resets the knobs to its own.',
+  shift: 'Turns every colour round the colour wheel together: −60 to +60 degrees. Watch the Play button and the bars.',
+  lightness: 'How light the background is: 0 = black, ~10 = a dark look, ~80 = parchment. The text flips dark/light to stay readable.',
+  lift: 'How far the panels stand out from the background — 0 = the same shade, 20 = clearly lighter (darker on a light look).',
+  corners: 'Corner roundness in rem: 0 = square, 1 = soft, 2 = very round. Look at the panels and buttons.',
+  edge: 'Border thickness in px: 0 = none (the dashboard), 3 = a chunky outline (the handheld).',
+  glow: 'How much the Play button, the bars and the panels glow (dark looks) or cast a shadow (light ones).',
+  titleSize: 'How big titles are next to body text (the kit’s font-scale). Look at "Moonfall".',
+};
+
+// ===== The sketch itself: the take + knobs → the kit's style values on the sample screen =====
+const hsl = (h, s, l, a = 1) => `hsl(${((h % 360) + 360) % 360} ${s}% ${Math.max(0, Math.min(100, l))}% / ${a})`;
+function lookValues() {
+  const t = TAKES[Math.round(Math.max(0, Math.min(5, GOO.take)))], k = GOO, light = k.lightness > 50;
+  const up = light ? -1 : 1; // panels lift lighter on a dark look, darker on a light one
+  const ink = light ? Math.min(t.ink, 20) : Math.max(t.ink, 85);
+  const p = t.primaryHue + k.shift, a = t.accentHue + k.shift, bg = t.bgHue + k.shift;
+  const glowCol = light ? 'hsl(0 0% 0% / ' : hsl(p, t.sat, 60, 1).replace('/ 1)', '/ ');
+  return {
+    bg: hsl(bg, t.bgSat, k.lightness), 'on-bg': hsl(bg, 15, ink),
+    surface: hsl(bg, t.bgSat, k.lightness + up * k.lift), 'surface-2': hsl(bg, t.bgSat, k.lightness + up * k.lift * 1.8), 'on-surface': hsl(bg, 15, ink),
+    primary: hsl(p, t.sat, light ? 38 : 58), 'on-primary': light ? hsl(p, 30, 97) : hsl(p, 60, 8),
+    accent: hsl(a, t.sat * 0.85, light ? 36 : 60), 'on-accent': light ? hsl(a, 30, 97) : hsl(a, 60, 8),
+    success: hsl(130 + k.shift * 0.3, 60, light ? 34 : 52), danger: hsl(356, 70, light ? 42 : 58), 'on-danger': light ? '#fff' : hsl(356, 60, 8),
+    muted: hsl(bg, 12, light ? 34 : 68), border: hsl(light ? bg : p, light ? 35 : 45, light ? k.lightness - 30 : 32), focus: hsl(a, 90, light ? 35 : 65),
+    'font-display': t.display, 'font-body': t.body, 'font-numbers': t.numbers, 'font-scale': k.titleSize, 'text-case': t.caps,
+    'radius-control': `${(k.corners * 0.6).toFixed(2)}rem`, 'radius-panel': `${k.corners.toFixed(2)}rem`, 'corner-shape': t.bevel ? 'bevel' : 'round',
+    'border-width': `${k.edge}px`, enter: t.enter,
+    'depth-1': `0 ${4 + 14 * k.glow}px ${10 + 30 * k.glow}px ${glowCol}${light ? 0.12 + 0.2 * k.glow : 0.08 + 0.3 * k.glow})`,
+    glow: k.glow > 0 ? `0 0 ${18 * k.glow}px ${glowCol}${light ? 0.2 * k.glow : 0.75 * k.glow})` : 'none',
+    'game-a': hsl(bg + 40, 30, light ? 60 : 22), 'game-b': hsl(bg - 30, 35, light ? 45 : 14), 'on-game': light ? '#1b1206' : '#f3f4f6',
+  };
+}
+function paint() {
+  const v = lookValues(), s = $('view').style, t = TAKES[Math.round(Math.max(0, Math.min(5, GOO.take)))];
+  for (const [name, val] of Object.entries(v)) s.setProperty('--k-' + name, String(val));
+  s.setProperty('--k-case', v['text-case']);
+  s.setProperty('--k-depth', v['depth-1']); s.setProperty('--k-depth-0', GOO.glow > 0.3 && GOO.lightness < 50 ? `0 0 ${8 * GOO.glow}px ${v.border}` : 'none');
+  s.setProperty('--k-glow-fill', GOO.lightness < 50 ? v.glow : 'none');
+  s.setProperty('--k-title-glow', GOO.lightness < 50 && GOO.glow > 0.4 ? `0 0 ${14 * GOO.glow}px ${v.primary}` : 'none');
+  s.setProperty('--k-texture', t.name.includes('Terminal') ? 'repeating-linear-gradient(0deg, hsl(0 0% 100% / 0.04) 0 1px, transparent 1px 3px)'
+    : t.name.includes('Parchment') ? 'radial-gradient(circle at 30% 20%, hsl(40 60% 98% / 0.35), transparent 60%)' : 'none');
+  s.setProperty('--k-cut', `${GOO.corners * 0.7}rem`);
+  for (const el of document.querySelectorAll('.k-shape')) el.classList.toggle('k-bevel', t.bevel);
+  $('takeName').textContent = t.name;
+  for (const b of document.querySelectorAll('#bottom button')) b.classList.toggle('on', +b.dataset.take === t.knobs.take);
+}
+let painted = '';
+function update() {}
+function draw() { const key = JSON.stringify(GOO); if (key !== painted) { painted = key; paint(); } }
+function layout() { dockKnobs(); }
+function pickTake(i) { setKnobs(TAKES[i].knobs); activePreset = null; drawPresets(); }
+$('bReset').onclick = () => pickTake(Math.round(GOO.take));
+$('bottom').onclick = e => { const i = e.target.dataset.take; if (i !== undefined) pickTake(+i); };
+
+// ===== Sketch kit (keep as is): docked knobs, presets, copy values, help lines, fps =====
+const SIDE = 300;
+function dockKnobs() {
+  const p = $('panel'), open = p.classList.contains('open'), wide = innerWidth >= 700;
+  document.body.classList.toggle('side', open && wide);
+  document.body.classList.toggle('sheet', open && !wide);
+  document.body.style.setProperty('--sheet', open && !wide ? p.offsetHeight + 'px' : '0px');
+}
+function playW() { return document.body.classList.contains('side') ? innerWidth - SIDE : innerWidth; }
+$('panel').innerHTML = '<div id="presets"></div>' + KNOBS.map(([k, lo, hi, st]) => lo === undefined ? `<h4>${k}</h4>` :
+  `<label><span>${k}</span><input type="range" id="k_${k}" min="${lo}" max="${hi}" step="${st}" value="${GOO[k]}"><input class="num" type="number" inputmode="decimal" id="v_${k}" step="${st}" value="${GOO[k]}" title="Type any value, even past the slider's ends"></label>`
+  + (KNOB_HELP[k] ? `<div class="help">${KNOB_HELP[k]}</div>` : '')).join('')
+  + '<button id="bCopy">Copy values for Claude</button>';
+// show a value in both the slider (pinned at its end when past it) and the box (amber when past the slider's ends)
+function showKnob(k) {
+  const row = KNOBS.find(r => r[0] === k), v = GOO[k], box = $('v_' + k);
+  $('k_' + k).value = v; if (document.activeElement !== box) box.value = v;
+  box.classList.toggle('over', v < row[1] || v > row[2]);
+}
+// typing in the box updates the sketch live; Enter or leaving the box applies, Escape puts back what was there
+for (const [k, lo] of KNOBS) if (lo !== undefined) {
+  const box = $('v_' + k); let before = GOO[k];
+  $('k_' + k).oninput = e => { GOO[k] = +e.target.value; showKnob(k); };
+  box.onfocus = () => { before = GOO[k]; };
+  box.oninput = () => { const v = parseFloat(box.value); if (Number.isFinite(v)) { GOO[k] = v; showKnob(k); } };
+  box.onkeydown = e => {
+    if (e.key === 'Enter') box.blur();
+    if (e.key === 'Escape') { GOO[k] = before; box.value = before; showKnob(k); box.blur(); }
+  };
+  box.onblur = () => { box.value = GOO[k]; showKnob(k); };
+}
+$('bKnobs').onclick = () => {
+  $('panel').classList.toggle('open'); $('bKnobs').classList.toggle('on'); layout();
+  try { localStorage.setItem('sketch-knobs-open', $('panel').classList.contains('open') ? '1' : '0'); } catch (e) {}
+};
+// Presets: + Preset saves the current knobs (up to 3); tap one to load it; × deletes. Stored in this browser only.
+const PKEY = 'sketch-presets:' + location.pathname.split('/').pop();
+function readKnobs() { const v = {}; for (const [k, lo] of KNOBS) if (lo !== undefined) v[k] = GOO[k]; return v; }
+function setKnobs(v) { for (const [k, lo] of KNOBS) if (lo !== undefined && k in v) { GOO[k] = v[k]; showKnob(k); } }
+const DEFAULTS = readKnobs();
+let presets = [], activePreset = 'd';
+try { presets = JSON.parse(localStorage.getItem(PKEY)) || []; } catch (e) {}
+function savePresets() { try { localStorage.setItem(PKEY, JSON.stringify(presets)); } catch (e) {} }
+function drawPresets() {
+  $('presets').innerHTML = `<button data-i="d" class="${activePreset === 'd' ? 'on' : ''}">Default</button>`
+    + presets.map((p, i) => `<span class="pw"><button data-i="${i}" class="${activePreset === i ? 'on' : ''}">${p.name}</button><i data-x="${i}" title="Delete">&times;</i></span>`).join('')
+    + (presets.length < 3 ? '<button data-i="+" class="add">+ Preset</button>' : '');
+}
+$('presets').onclick = e => {
+  const x = e.target.dataset.x, i = e.target.dataset.i;
+  if (x !== undefined) { presets.splice(+x, 1); activePreset = null; savePresets(); }
+  else if (i === 'd') { setKnobs(DEFAULTS); activePreset = 'd'; }
+  else if (i === '+') {
+    let n = 1; while (presets.some(p => p.name === 'Preset ' + n)) n++;
+    presets.push({ name: 'Preset ' + n, values: readKnobs() }); activePreset = presets.length - 1; savePresets();
+  }
+  else if (i !== undefined) { setKnobs(presets[+i].values); activePreset = +i; }
+  drawPresets();
+};
+drawPresets();
+$('bCopy').onclick = () => {
+  const text = document.title + String.fromCharCode(10) + JSON.stringify({ now: readKnobs(), presets }, null, 1);
+  const done = ok => { $('bCopy').textContent = ok ? 'Copied! Paste it in the chat' : 'Copy blocked: open full screen and try again';
+    setTimeout(() => $('bCopy').textContent = 'Copy values for Claude', 2500); };
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => done(true), () => done(false));
+};
+try { if (innerWidth >= 700 && localStorage.getItem('sketch-knobs-open') !== '0') { $('panel').classList.add('open'); $('bKnobs').classList.add('on'); } } catch (e) {}
+addEventListener('resize', layout);
+layout();
+// fixed-step loop + fps (one-second average)
+let last = performance.now(), acc = 0, frames = 0, fpsT = 0;
+const STEP = 1 / 120;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  acc += dt; while (acc >= STEP) { update(STEP); acc -= STEP; }
+  draw();
+  frames++; fpsT += dt; if (fpsT >= 1) { $('fps').textContent = Math.round(frames / fpsT) + ' fps'; frames = 0; fpsT = 0; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.sketch = { GOO, readKnobs, setKnobs, lookValues, TAKES }; // for Playwright checks
+</script>
+</body>
+</html>
