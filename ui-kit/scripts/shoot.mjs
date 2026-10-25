@@ -182,6 +182,11 @@ try {
   }
   // Accessibility floor: browser text size at 200%
   await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' }))
+  // …and Settings at 200% on its Accessibility tab (0.34.1, F141): the ◀ tab ▶ picker shows its longest word there
+  await shoot('screens/settings-clean-phone-text-200', sizes.phone, '?screen=settings', async (page) => {
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+    while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+  })
   // Live restyle: change a tweak with the dev switcher and check it repaints
   await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
     await page.getByLabel('Next Corners').click()

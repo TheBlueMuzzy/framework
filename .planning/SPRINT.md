@@ -5,7 +5,7 @@ What changes: big text wraps whole words; a gamepad player sees the focus ring f
 
 ## F141 🐞 Big text never splits a word
 Done when: at 200% text no kit word breaks mid-word (the ◀ option ▶ picker above all), the page check flags a mid-word break, and the shoot is 0 problems.
-- [ ] 🤖 1. Measure today first: shoot Settings on a phone at 200% text and list every mid-word break (and anything else the new shot finds) before fixing — ui-kit/scripts/shoot.mjs
+- [x] 🤖 1. Measure today first: shoot Settings on a phone at 200% text and list every mid-word break (and anything else the new shot finds) before fixing — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 2. uiProblems flags a word split across lines (a test for the picker case + one that a long single word in a narrow box may still wrap) — ui-kit/kit/uiProblems.mjs
 - [ ] 🤖 3. The picker's value and sizer wrap whole words (kit.css overflow-wrap) and anything task 1 found; shoot 0 problems — ui-kit/kit/kit.css
 Check: ui-kit tests; the shoot (0 problems, with the 200% Settings shot); that shot looked at.
@@ -30,3 +30,9 @@ Notes:
 - Ideas checked against the code before planning (Explore helper, 2026-10-25): already done — toasts under the gallery bar (UI kit 0.33.0, blocks.css:350), MainMenu counts extra buttons (0.24.0, frontend.tsx:46), HUB machine to-do at session start (F80, session-start.sh:25). Still open, left in Later: a guard for a second dev server / wrangler without --persist-to.
 - No open P0/P1 bugs in this repo.
 - Goops is running in another window: no game is touched this sprint (framework only).
+- F141 task 1 — measured before fixing (2026-10-25). New shot `screens/settings-clean-phone-text-200` (Settings, 390×844 phone, 200% text, on the Accessibility tab so the ◀ tab ▶ picker shows its longest word). Shoot: 640 shots, 2 problems, both on the new shot. Mid-word breaks found with a one-off word-by-word scan of every gallery screen at 200% on a phone:
+  - Settings: "Accessibility" in the tab picker → "Accessibil / ity". Cause: the ◀ ▶ arrows are title-sized glyphs, so at 200% each is 67 px wide and the word (199 px) gets only 163 px. (The page check also said: "Accessibility" touches the edge of .kit-picker — 1 px.)
+  - Settings (every tab): edge: "Back" ‹ touches its own button — 0 px. Cause: the header's ‹ is 1.4× title size (78 px at 200%) in a 51 px button.
+  - Parts page (already in the shoot, `parts-phone-text-200`): "Lockdown" in the Carousel's label + caption row → "Lock / down" (`.kit-text` has overflow-wrap: anywhere, so a flex row squeezes a label below its word).
+  - Not in the shoot at 200% (seen by the scan only): Art end screen "Game over" (both words split), Reconnecting "Reconnecting…".
+  - Surprise, out of F141's scope (only seen by the scan, no shoot covers these at 200%): the HUD screens at 200% have many overlaps (hud: 11, e.g. "Muzzy" × "Hold to Roll"; huddock: 2), "Roll" past the screen edge, chips clipped; menu: kit buttons 1 px from their edge + "Play" × the tagline; continuemenu, feedback (tooltip/toast over words), room ("Play online" 32 px tall), artend overlaps. → Ask Muzzy / plan: a "200% text on every screen" sweep as its own feature.
