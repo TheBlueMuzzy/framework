@@ -33,6 +33,7 @@ import { type CalloutPlacement, type CalloutSide, type CalloutTarget } from './c
 import { announce, liveRegion } from './emotes'
 import { reduceMotion } from './motion'
 import { useCalloutPlace, useShownPopover, type CalloutPlaceInput } from './teach'
+import { focusRing } from '../keysOrPad'
 
 // ─── The numbers ────────────────────────────────────────────────────
 
@@ -503,7 +504,7 @@ export function TalkingBubble({ target, text, lineId, speaker, outline = 'wave',
     if (!button) return
     const before = document.activeElement as HTMLElement | null
     const el = bubble.current
-    const frame = schedule(() => { if (!typingIn(document.activeElement)) el?.focus({ preventScroll: true, focusVisible: false } as FocusOptions) })
+    const frame = schedule(() => { if (!typingIn(document.activeElement)) el?.focus(focusRing({ preventScroll: true })) })
     return () => {
       cancel(frame)
       if (before?.isConnected && before !== el && el?.contains(document.activeElement)) before.focus({ preventScroll: true })
