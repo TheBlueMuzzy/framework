@@ -1,0 +1,13 @@
+v0.21.0 — 2026-10-24
+
+The Dev Kit's Tuning tab can now edit the other content files a game lists — like the room settings — with the same sliders and Save, and Save keeps a list you laid out by hand the way you wrote it. Four small kit bugs are gone: a stray "0", a false CSS warning, an empty column in Mode select, and a part-loaded save code that never said to reload.
+
+NEW
+• Dev Kit 0.28.0: list content files in content/devkit.json → "tuningFiles" (e.g. content/rooms.json) and each shows in the Tuning tab with sliders, search, Select and Save, written back to its own file and live in the game like a tuning file. An "after" note says when a saved change arrives ("restart npm run party:dev"); a path that can't be used is said at the top of the tab. Their settings join the Select list, so the game's select test names any not yet placed on an object.
+
+FIXED
+• Dev Kit 0.28.0: Save no longer spreads a list you wrapped over a few lines into one value per line — its line breaks stay where they were.
+• UI kit 0.33.3: a 0 handed to a part (a badge, a detail, an icon, a menu's extras, a HUD slot) shows as "0" in its place, instead of a loose "0" on the page or nothing.
+• UI kit 0.33.3: the UI rules check reads a picture written into CSS (url("data:image/svg+xml;…")) as one value — no more false raw-colour or px warnings from inside it.
+• UI kit 0.33.3: Mode select with 2 modes spreads them over the row instead of leaving an empty column; 3 or more modes and phones look the same.
+• Saves 0.6.3: when a save code only partly loads, the Save code screen says so and offers to reload the game so what came back shows.

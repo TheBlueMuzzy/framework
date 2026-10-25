@@ -334,7 +334,7 @@ flowchart LR
   F130[F130 Bubble avoid warning]
 ```
 
-## v0.19 — Smoother tools  ← current · planned 2026-10-24
+## v0.19 — Smoother tools  ✅ released 2026-10-24 (v0.21.0) · planned 2026-10-24
 Goal (Muzzy 2026-10-24, "a then b. C later i think"): the Dev Kit edits every file a designer tunes and keeps hand-made layouts on Save (sprint 36), then the kit's small known bugs go (added to sprint 36 on "auto").
 - ✅ F132 🔧 The Tuning tab edits more than content/tuning/: files a game lists in content/devkit.json "tuningFiles" (content/rooms.json — idle warn / takeover times) get the same sliders and Save — should · sprint 36
 - ✅ F133 🔧 Save keeps a hand-wrapped list wrapped: a list laid out over a few lines (Glyphtender drag.json "_sections") no longer comes back one value per line — should · sprint 36
