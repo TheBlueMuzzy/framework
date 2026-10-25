@@ -5,9 +5,9 @@ What changes: the screenshot run stops when a file changes mid-run; a bubble tha
 
 ## F129 🔧 The shoot stops on a file change mid-run
 Done when: an edit to a gallery or kit file while `npm run shoot` runs ends the run with a plain-English line naming the file ("… changed during the run — the shots mix two versions of the code; run it again"), and a non-zero exit; a run with no edits is unchanged.
-- [ ] 🤖 1. Watch the Vite server's files during the run; a change stops it with the file's name — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. Test: a file touched mid-run ends it red with the file named; an untouched run passes — ui-kit/scripts/shoot.test.mjs
-- [ ] 🤖 3. README line + UI kit 0.33.3 — ui-kit/kit/VERSION
+- [x] 🤖 1. Watch the Vite server's files during the run; a change stops it with the file's name — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. Test: a file touched mid-run ends it red with the file named; an untouched run passes (the watch is in codeChanges.mjs) — ui-kit/scripts/codeChanges.test.mjs
+- [x] 🤖 3. README line + UI kit 0.33.3 — ui-kit/kit/VERSION
 Check: ui-kit tests; a real shoot run with a file touched part-way stops; a full shoot with no edits still 0 problems.
 
 ## F130 🔧 A bubble that can't stay clear says so
