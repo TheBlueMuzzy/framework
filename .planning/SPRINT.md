@@ -35,3 +35,8 @@ Notes:
 - Order: F127 before F126 (its new finds become F126's fixes); F128 any time (different files) — 2 helpers in parallel.
 - Each installer gets its own small cache, not a shared helper: modules stay self-contained (Claude's call).
 - UI kit 0.33.2 (fixes + a stricter check); 0.34.0 stays reserved for dropping OLD_MODULE_ROWS.
+
+Retro:
+- went well: the first task ran the new rule on today's code, so nothing surprised us at the end (shoot 16 → 0); Goops' mid-sprint ArtLayer bug became a task with a real-browser test that fails on the old rule
+- went wrong: a helper's shoot ran while files changed and Vite reloaded some screens mid-run; the devkit Vite tests failed once in 3 on Windows deleting their folder
+- change: (Muzzy 2026-10-24) keep doing it — new checks run on today's code first (already a /sprint skill line); a shoot that sees a file change mid-run should stop (ROADMAP Ideas)
