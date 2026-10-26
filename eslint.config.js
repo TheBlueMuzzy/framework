@@ -29,6 +29,11 @@ export default defineConfig([
     '.claude', // helpers' worktrees
     '.planning',
     '**/spike', // throwaway experiments (like a game's sketches/) — not shipped code
+    '**/.wrangler', // wrangler dev's bundles and local storage (a starter's room server)
+    // The starters' module copies (installed by install-module.mjs) are game copies — linted here in their own module
+    // folders; the starter's own code is still linted (F151)
+    'starters/*/src/{table,devkit,ui/kit,version,saves,crashes,audio,ai/kit,emotes,rooms}',
+    'starters/*/vite-plugins/devkit',
   ]),
   {
     // Kit, gallery, templates, vite plugins — TypeScript + React

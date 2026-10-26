@@ -103,9 +103,10 @@
       "public/audio/"
     ],
     "source": "Placeholder sounds made in code (npm run sounds — content/audio-placeholders.json) with ZzFX, a dev tool that doesn't ship in the game",
-    "author": "own work (ZzFX by Frank Force, MIT — https://github.com/KilledByAPixel/ZzFX)",
+    "author": "own work, made with ZzFX by Frank Force (MIT licence)",
     "licence": "own work",
     "light": "🟢",
-    "url": "https://killedbyapixel.github.io/ZzFX/"
+    "url": "https://killedbyapixel.github.io/ZzFX/",
+    "credit": "Placeholder sounds: our own, made with ZzFX by Frank Force"
   }
 ]

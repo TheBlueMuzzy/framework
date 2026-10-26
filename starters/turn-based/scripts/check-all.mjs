@@ -32,7 +32,8 @@ const FAST = [
 const E2E = [
   ['framework', 'src/devkit/check-framework.mjs', '--port 6409'], // every module's promises in the running game (= npm run check:framework)
   ['online', 'e2e/online.mjs', 'e2e-shots 6403 6499'], // two browser tabs play each other through wrangler dev
-  ['devkit-live', 'e2e/devkit-live.mjs', 'e2e-shots 6402'], // a Tuning edit changes the running game; a pause stops the bot
+  ['screens', 'e2e/screens.mjs', 'e2e-shots 6404'], // every screen at the 7 sizes, the UI kit's page check on each
+  ['devkit-live','e2e/devkit-live.mjs', 'e2e-shots 6402'], // a Tuning edit changes the running game; a pause stops the bot
   ['smoke', 'e2e/smoke.mjs', 'e2e-shots 6401'], // loads, plays one round vs the computer, console clean
 ]
 
