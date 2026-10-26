@@ -17,7 +17,7 @@ Done when: F148's differences A–C are fixed in the kit (a part's size no longe
 - [x] 🤖 2. B: `text-wrap: pretty` wraps more in WebKit (Safari 26 too) — the room card's "I'M READY" sits on its bottom edge sideways in Pixel: the card keeps room for its last button however its words wrap — ui-kit/kit/kit.css
 - [x] 🤖 3. C: a label that fits by a fraction of a pixel ("HOW TO PLAY" in Neon sideways, "Debt to the company") wraps in WebKit — give labels the room to not depend on the engine's rounding — ui-kit/kit/blocks/blocks.css
 - [x] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
-- [ ] 🤖 5. Both runs and the compare: Chromium 0 problems and its 100% shots unchanged; WebKit 0 problems; the compare lists no wrap difference left (or each accepted in Notes); touched screens looked at — ui-kit/scripts/shoot.mjs
+- [x] 🤖 5. Both runs and the compare: Chromium 0 problems and its 100% shots unchanged; WebKit 0 problems; the compare lists no wrap difference left (or each accepted in Notes); touched screens looked at — ui-kit/scripts/shoot.mjs
 - [ ] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially)
 Check: both runs + the compare; shots looked at; Muzzy's phone look.
 
@@ -91,7 +91,52 @@ Notes:
     victoryreveal-pixel-phone, payslip-pixel-phone, menu-neon-phone-landscape, room-pixel-phone-landscape,
     results-neon-phone-landscape-text-200, endgame-pixel-phone-text-200; WebKit alone: settings-cozy-phone-text-200,
     menu-fantasy-phone, lobby-cartoon-phone-landscape-text-200.
-- Ask Muzzy: the gallery's ⚙ ❤ ▼ ▲ are typed characters, so every phone draws its own (Windows a colour gear, iPhone
-  Apple's emoji). Should the kit carry its own drawn icons for these, so every phone shows the same picture? (F149 can
-  make the boxes stop growing either way.)
+- (F148's "drawn icons?" question → updated in F149's notes below.)
 - Merged 2026-10-26 1:05 AM (Claude): F148 read whole — no bugs (one script, an engine switch; a stalled screen is a listed problem with a picture, not the end of the run). F149 re-planned from its A–C list (above). "1ST touches the avatar ring" (both engines) → ROADMAP Ideas.
+- **F149 (helper, 2026-10-26) — kit 0.35.5.** Before any fix, the new compare on today's code: 455 shared shots,
+  4 wraps differ (menu-neon sideways "How to play", room-pixel sideways "Share this code…", 2 victoryreveal-cozy
+  rows), 832 part sizes differ. After: **0 open wraps (1 accepted, below)**.
+  - A — cause: the 0.34.1 icon cap held the glyph's font SIZE, but the button was `aspect-ratio: 1` + min 44 px, so it
+    took the glyph's WIDTH; an emoji is ~1.37 em wide (a text symbol 0.85), so 44 → 55–61. Fix: an icon Button is
+    exactly `max(target-min, size)` square; Button wraps a typed symbol in `.kit-button-glyph` and measures it
+    (`useGlyphFit` / `fitGlyph` → `--kit-glyph-em`), and the CSS caps the font at (box − borders) ÷ (em + 0.3) — text
+    symbols already fit, so they keep their size. Bar / Counter string icons: a 1.375 em box (`.kit-hud-icon[data-symbol]`).
+    StatList ▼ / ▲: `.kit-tone-mark` max 0.875 em (a fixed width widened Pixel's own narrow ▼ by 6 px in Chromium and
+    wrapped a victoryreveal row — so a cap, not a size).
+  - Tested: U+FE0E (text look) and `font-variant-emoji: text` — WebKit on Windows ignores both (its only ⚙ / ❤ is
+    Segoe UI Emoji), and Playwright's WebKit 26.6 doesn't know `font-variant-emoji`. The gallery's ⚙ carries U+FE0E
+    anyway (gallery/symbols.ts) for a real iPhone; README tells games the same.
+  - B — cause: Safari's `text-wrap: pretty` evens out the whole paragraph and can take a line more (Chromium's only moves
+    a last lonely word); no CSS value asks for "orphans only" in either engine (`avoid-orphans` unsupported in both). The
+    Lobby room sideways had 6 px to spare in Chromium, so 17 px over in WebKit. Fix (kit.css): a centre card that has to
+    scroll keeps its last row of buttons (a row of buttons only) sticky at its bottom with its padding below, painted in
+    `--surface` by a scroll-driven animation that only runs while the card can scroll (`@supports animation-timeline`;
+    older browsers unchanged). Accepted wrap (compareEngines `acceptedWraps`): room-pixel sideways "Share this code…" 2 → 3
+    lines — the kit can't choose how an engine balances a paragraph; the buttons now stay in sight.
+  - C — cause: the main menu's 2-column sideways buttons are half the column, "HOW TO PLAY" (Neon, uppercase Exo 2) was
+    113.36 px in a 113.39 px content box (WebKit 113.77). Fix (blocks.css): those buttons keep gap-m each side (like
+    `compact`) — same button size. "Debt to the company" (Pixel victoryreveal) was A's ▼ tag, gone with A.
+  - Shoot (F148 E): a reveal's shot now waits until its list's smooth scroll has stopped. `SHOOT_ONLY=<pattern>` added
+    for quick runs. Layout files: `<shots>/layout/<shot>.json`; Chromium run 931 s before → ~939 s after (same).
+  - **Chromium changes at 100% text (all the fix itself):** the HUD's ❤ chip is ~7 px wider (1.375 em icon box), its
+    Health bar that much shorter (hud, all looks/sizes); Fantasy's payslip / victoryreveal ▼ tags 2 px narrower (Cinzel's
+    ▼ is wider than the 0.875 em cap); the Lobby room on the small phone sideways (667×375, Cozy + Pixel) already
+    scrolled in Chromium — its Leave / I'm ready now sit whole above the card's padding instead of on its edge. At 200%:
+    "How to play" / "Play online" on one line in 4 looks' main menu sideways (were 2); Pixel's ⚙ / ❚❚ buttons 45–46 →
+    44 px. Other pixel differences between the before / after runs are animation timing (the talk bubble's wave, alert
+    pulses, spinners, typewriter) — no layout change there (compared by layout, not only by picture).
+  - The sticky foot first caught Teach's last row ("Tips" + a picker) on Clean sideways at 200% — the painted row read
+    as a box "Tips" touched (the shoot's 1 problem): now only a row made of buttons alone sticks.
+  - **Final runs (2026-10-26 ~2:30 AM, last code):** Chromium `npm run shoot` 961 shots in 934 s, **0 problems** (8
+    known). `npm run shoot:webkit` 504 shots in 667 s — 1 "stalled" (endgamedim-clean-phone-landscape-text-200, F148's
+    F flake, while check:fast loaded the PC); re-shot alone: 14/14 ✓, **0 problems**. `npm run compare:engines`: 455
+    shots, ✓ no wrap differs (1 accepted), 194 sizes differ by > 1 px — the symbols inside their fixed boxes (56), Pixel's
+    ▼ tag 1.8 px wider in WebKit (under its cap; no wrap from it), Player chips' list 1–2 px at 200%. Chromium layout
+    before → after: only the changes named above. `npm run check:fast` ✓ all 20 checks passed.
+- Ask Muzzy: the HUD's typed icons (❤ 🪙) now sit in a fixed 1.375 em box — on Windows' Chrome the text ❤ gets a little
+  room each side and the Health bar is ~7 px shorter; on an iPhone the box is what Apple's emoji needs. OK, or a tighter
+  box (1.25 em: the coin emoji shrinks a touch)?
+- Ask Muzzy (F148's, updated): ⚙ ❤ ▼ ▲ are typed characters, so every phone draws its own picture (Windows WebKit a
+  lilac 3D gear, an iPhone Apple's gear, Chrome on Windows a black outline gear). Since 0.35.5 the boxes no longer grow
+  either way and a too-wide emoji is drawn smaller. Should the kit still carry its own drawn icons (gear, heart, ▼ ▲)
+  so every phone shows the SAME picture? It's a look choice now, not a layout bug.

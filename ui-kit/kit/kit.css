@@ -68,7 +68,8 @@
      colour (and the strip of room around it) only while the card can scroll: a scroll timeline only runs then. Older
      browsers without scroll timelines keep the plain last-resort scroll. Not on a <Screen scroll> (the screen scrolls). */
   @supports (animation-timeline: scroll()) {
-    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button) {
+    /* (a row of buttons only: a row of words + a picker is content, not the card's way out) */
+    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button):not(:has(> :not(.kit-button))) {
       position: sticky; inset-block-end: 0; z-index: 1;
       animation: kit-card-foot linear both; animation-timeline: scroll(nearest block); }
   }
