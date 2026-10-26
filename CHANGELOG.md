@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.26.0 — 2026-10-26
+
+The framework now has a tiny tic-tac-toe game with every module wired in, and it plays that game on every change, so a module update that would break a game turns the checks red before any game takes it. New games can start from the same game instead of from nothing.
+
+### New
+- A turn-based starter (`starters/turn-based`): tic-tac-toe against two computer players (Careful Cleo always blocks, Careless Cass misses blocks and chats), online play with room codes, saves, settings, sounds, emotes, the Dev Kit working live, and every check green from day one. Its README lists what a new game replaces first.
+- The framework's quick check and GitHub's checks copy the starter, put in every module as it is right now, and run the starter's own checks there. Proven: a module broken on purpose passed its own tests but turned the starter red, locally and on GitHub.
+- The page check spots words or a badge touching an avatar's ring (the outline a winner or "you" wears), measured as it's drawn, round shapes included.
+
+### Fixed
+- UI kit 0.35.8: on Results, End game and the Lobby room, "1st", the player's name and its ★ / You badges no longer touch the winner's ring. At 200% text the ring used to cross into them. Avatars in a list now keep room for the ring, so nothing moves when it comes or goes.
+
+### Known issues
+- A realtime starter (from Goops' wiring) is not built yet; it waits in Later.
+- In the starter, the results read "You ★ You" (the seat is named "You" and the kit adds a "You" badge), and the computer player's chat bubble can show behind the results card. Left as is.
+
 ## v0.25.0 — 2026-10-26
 
 The UI kit and saves now hold up in WebKit, the engine every iPhone browser uses, not only in Chrome. Symbols like ⚙ and ❤ keep their button's size however a phone draws them, a card too tall for a sideways phone keeps its last buttons in sight, and saves are proven in Chrome, Safari's engine and Firefox.

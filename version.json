@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.25.0",
-  "build": 7,
+  "version": "0.26.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -172,6 +172,11 @@
       "version": "0.25.0",
       "date": "2026-10-26",
       "summary": "Works on iPhone's browser"
+    },
+    {
+      "version": "0.26.0",
+      "date": "2026-10-26",
+      "summary": "A test game guards every update"
     }
   ]
 }
