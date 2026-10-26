@@ -383,6 +383,16 @@ gallery's `npm run shoot` uses the same one.
   **`ring:`** — words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring included
   and its round shape (a circle, not its box); something laid ON the avatar (a seat's badge) is left alone, and a chip
   shrunk onto the table has its room shrunk with it.
+- 0.35.9 (F153): **Light words on a light page are caught.** HudText ("Your turn", "Game over"), plain toasts and a
+  bar's inside label are light on-game words with a dark halo, made for the game's own picture; in the turn-based
+  starter they sat on the plain light page and "Game over" all but vanished while every check was green (the faint
+  check skips words with a halo). The page check has a new kind, **`contrast:`** — on-game words under 3:1 against
+  what's behind their letters, the halo not counted. A plain colour is judged, and so is a CSS gradient (by its stop
+  that reads best); a picture, canvas or video can't be and is left alone, and so are words under a dialog's dim or
+  inside a dialog. White on light grey fails; white on a mid-to-dark table passes (the starter's felt: 7.9:1). Nothing
+  in the kit looks different. Fix a find by putting the game's picture or table colour behind the words. (The gallery:
+  the hand and round demos now sit on the dark stand-in game, and the HUD demos no longer wear the light dim a pushed
+  screen brings — in a game the HUD is the stack's bottom layer, never under it.)
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
