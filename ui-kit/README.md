@@ -382,4 +382,29 @@ gallery's `npm run shoot` uses the same one.
   200% in the 6 other looks (F146)**, both phones (`screens/<id>-<look>-phone[-landscape]-text-200`): 216 shots more,
   961 in 918 s (about 3½ minutes more). The looks share one layout, but not one font — a wider font (Cozy, Pixel,
   Fantasy, Neon) broke words and buttons at 200% where Clean's fit, so every look is shot.
+- `npm run shoot:webkit` (F148) — the same check in **WebKit, the engine every iPhone browser uses** (Safari, and Chrome
+  on iPhone too). Playwright's own WebKit, never your Safari. Only the 18 key screens, in all 7 looks, on a 390×844
+  phone upright and an 844×390 phone on its side, at 100% and 200% text, plus the screen-stack and menu checks on the
+  phone: **504 shots in about 11 minutes** (669 s on the PC). Saved to `screenshots-webkit/` (git-ignored) with the
+  same names as the Chromium shots, so a pair can be opened side by side. Same problem list, same `knownShots`.
+  - Run it after a change to the kit's CSS, fonts or anything that measures or places things (fit, bubbles, pickers),
+    and before a release that will be played on iPhones. `SHOOT_PORT=6160 npm run shoot:webkit` when 5180 is busy.
+  - It doesn't replace `npm run shoot` (Chromium: every screen, desktop, the small phones), and the Chromium run is
+    unchanged by it.
+  - A screen that never shows in 30 s is a problem on the list ("stalled", with a `…-stalled.png` picture of what the
+    page showed) instead of ending the run — this happened once in WebKit after ~145 shots and didn't happen again.
+  - The checker itself (`kit/uiProblems.mjs`) works in WebKit: `UI_ENGINE=webkit npx vitest run kit/uiProblems.test.mjs`
+    runs its tests there (all pass).
+  - **What WebKit on Windows can't tell you about a real iPhone** — still a look on a real phone:
+    - **Font weights.** Windows WebKit lays text out at the right weight but DRAWS variable fonts (Nunito, Fredoka,
+      Exo 2, Orbitron, Cinzel, Alegreya) at their thinnest default — bold labels look thin in these shots. Widths and
+      wrapping are right; how heavy the text looks isn't. An iPhone draws them properly.
+    - **Emoji and symbol characters** (⚙ ❤ 🪙…) come from Windows' emoji font, not Apple's: different pictures and a
+      different line height, so a button holding one can be a few px taller or shorter than on an iPhone.
+    - **Text widths are a hair different** (a fraction of a px per word): Apple's fonts and text drawing aren't on
+      Windows, so a label that fits "by 0.03 px" may wrap on one and not the other — a sign the layout has no slack.
+    - **No safe areas** (the notch, the home bar, rounded corners), no Safari address bar sliding in and out, no
+      on-screen keyboard pushing the page up, no real touch scrolling or bounce, and no iOS "Larger Text" setting
+      (the 200% shots set the page's text size, the closest stand-in).
+    - Speed: animations and smooth scrolls run at the PC's pace — a shot can catch a reveal's scroll still moving.
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).
