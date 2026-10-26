@@ -287,6 +287,11 @@
   .kit-listrow-text:has(.kit-result-name) { min-inline-size: auto; max-inline-size: 100%; }
   .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
   .kit-place { min-inline-size: 3.5ch; }
+  /* An avatar in a list row (Results, the Lobby room) keeps room for the ring the winner / you wear (kit.css: an outline
+     0.1875rem + 0.125rem outside its box — not part of the box, so the row's gap never counted it: "1ST", the name and
+     its ★ had 3 px at 100% text and the ring crossed them at 200%, 0.35.8, F152). Every row's avatar, ringed or not, so
+     the avatars stay in one straight column and nothing moves when the ring comes or goes. */
+  .kit-listrow .kit-avatar { margin: calc(0.1875rem + 0.125rem); }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
      the list on the right, so the list keeps its height instead of shrinking to one row */
   /* (0.35.1, F145) The buttons' row never shrinks below its buttons (a plain 1fr, like the Lobby room's below): at 200%
