@@ -21,10 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       list: ${{ steps.find.outputs.list }}
+      starters: ${{ steps.find.outputs.starters }}
     steps:
       - uses: actions/checkout@v4
       - id: find
-        run: echo "list=$(ls -d */kit/VERSION | cut -d/ -f1 | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "list=$(ls -d */kit/VERSION | cut -d/ -f1 | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
+          echo "starters=$(ls -d starters/*/package.json | cut -d/ -f2 | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
 
   module:
     needs: modules
@@ -76,3 +79,51 @@ jobs:
               echo "::endgroup::"
             fi
           done
+
+  # The starters play today's modules (F65 — Framework test game): a starter holds COPIES of the modules made when they
+  # were installed, so scripts/starter-check.mjs copies it, installs every module fresh from this push into the copy and
+  # runs the starter's check:full there (unit tests, lint, build, UI rules, then two tabs online through a local room server,
+  # the Dev Kit live, a smoke round, every module's promises, every screen at 7 sizes). A module change whose own tests
+  # pass but that breaks a game turns this red — before any game takes the update.
+  starter:
+    needs: modules
+    name: starter ${{ matrix.starter }} (fresh modules)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        starter: ${{ fromJSON(needs.modules.outputs.starters) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            starters/${{ matrix.starter }}/package-lock.json
+            */package-lock.json
+
+      # The copy borrows these (one link per package), so they're installed once, here
+      - name: Install the starter's packages
+        working-directory: starters/${{ matrix.starter }}
+        run: npm ci
+
+      # A module's installer may use the module's own packages (crashes' reads source maps with 'source-map')
+      - name: Install every module's packages (their installers run)
+        run: |
+          for module in $(ls -d */kit/VERSION | cut -d/ -f1); do
+            echo "::group::npm ci in $module"
+            (cd "$module" && npm ci)
+            echo "::endgroup::"
+          done
+
+      # The starter pins playwright-core (1.63.0) — its own CLI installs the Chromium that version needs
+      # (`npx playwright` would fetch the newest Playwright and a browser the pinned one can't use)
+      - name: Chromium for the starter's browser checks
+        timeout-minutes: 15
+        working-directory: starters/${{ matrix.starter }}
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Starter checks with fresh modules
+        run: node scripts/starter-check.mjs ${{ matrix.starter }} full
