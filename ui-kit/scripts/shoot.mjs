@@ -72,6 +72,9 @@ async function pageFor(size) {
 // never a whole screen: the same screen at other sizes and looks is still checked.
 const knownShots = {
   'screens/talk-clean-phone-landscape-text-200.png': 'Muzzy 2026-10-25 (F145): a 3-line bubble at 200% has no room on a short screen — the kit warns, the game makes room',
+  // Muzzy 2026-10-25 (F147): the same in every look — and Pixel's wide letters wrap the line to 6 lines upright
+  ...Object.fromEntries(['cartoon', 'console', 'cozy', 'fantasy', 'neon', 'pixel'].map((look) => [`screens/talk-${look}-phone-landscape-text-200.png`, 'Muzzy 2026-10-25 (F147): same as Clean — the game makes room for a long line at 200%'])),
+  'screens/talk-pixel-phone-text-200.png': "Muzzy 2026-10-25 (F147): Pixel's wide letters wrap the demo line to 6 lines at 200% — the kit warns, the game makes room",
 }
 let knownCount = 0
 
