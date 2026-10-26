@@ -17,7 +17,7 @@ Check: in starters/turn-based — `npm run check:fast`, `npm run check:framework
 ## F65 🔧 Framework test game
 Done when: the framework's check:fast and GitHub's checks run the starter's checks on every module change, and a module broken on purpose turns them red in both places.
 - [x] 🤖 1. check:fast runs the starter's own checks against the framework's current modules — scripts/check-modules.mjs
-- [ ] 🤖 2. GitHub runs them on every push — .github/workflows/checks.yml
+- [x] 🤖 2. GitHub runs them on every push — .github/workflows/checks.yml
 - [ ] 🤖 3. Proof: break a module on purpose → the starter goes red locally and on GitHub; put it back → green — scripts/check-modules.mjs
 Check: the broken-on-purpose run red in check:fast and on GitHub (run links in Notes), then green.
 
