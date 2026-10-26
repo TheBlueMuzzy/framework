@@ -80,7 +80,8 @@ for (const module of modules) {
 // 3. the starter's own checks, in the copy
 console.log(`\nnpm run check:${tier} (starters/${name}, fresh modules):`)
 const output = await runShowing(`npm run -s check:${tier}`, copy)
-const failedNames = [...output.text.matchAll(/^FAIL\s+(\S+)/gm)].map((match) => match[1])
+// check-all prints one line per check, e.g. "FAIL  framework (code)   12 s" — its log is e2e-shots/logs/<name>.log
+const failedNames = [...output.text.matchAll(/^FAIL\s+(.+?)\s+\d+ s\s*$/gm)].map((match) => match[1])
 for (const failed of failedNames) {
   const log = join(copy, 'e2e-shots', 'logs', `${failed}.log`)
   if (existsSync(log)) console.log(`\n── ${failed} (last 60 lines) ──\n${readFileSync(log, 'utf8').trim().split('\n').slice(-60).join('\n')}`)
