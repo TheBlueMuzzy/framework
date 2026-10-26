@@ -72,6 +72,14 @@
     .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button):not(:has(> :not(.kit-button))) {
       position: sticky; inset-block-end: 0; z-index: 1;
       animation: kit-card-foot linear both; animation-timeline: scroll(nearest block); }
+    /* (0.35.7, Muzzy 2026-10-26) A soft fade above it, like a ScrollArea's "more below" edge, so a line cut where it
+       scrolls under the row reads as "scroll". It thins out as the card scrolls and is gone at the end (nothing's left
+       under the row). Same scroll timeline: only while the card can scroll. */
+    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button):not(:has(> :not(.kit-button)))::before {
+      content: ""; position: absolute; inset-inline: 0; inset-block-end: calc(100% + var(--gap-s));
+      block-size: var(--kit-scroll-fade, 2rem); pointer-events: none; opacity: 0;
+      background: linear-gradient(to bottom, transparent, var(--surface));
+      animation: kit-card-foot-fade linear both; animation-timeline: scroll(nearest block); }
   }
   /* <Screen grow="down"> (0.10.0, every kit menu): the card OPENS in the middle, then its top stays put and it only grows
      or shrinks DOWNWARD, so a control just tapped stays under the finger (Muzzy 2026-10-10: "it should start in the
@@ -442,6 +450,7 @@
    bottom room below, so words scrolling under it never show round it (only while the card can scroll) */
 @keyframes kit-card-foot { from, to { background-color: var(--surface);
   box-shadow: 0 var(--gap-l) var(--surface), 0 calc(-1 * var(--gap-s)) var(--surface); } }
+@keyframes kit-card-foot-fade { from { opacity: 1; } to { opacity: 0; } }
 @keyframes kit-flicker { 0% { opacity: 0; } 10% { opacity: 0.8; } 20% { opacity: 0.1; } 35% { opacity: 1; } 45% { opacity: 0.3; } 60%, 100% { opacity: 1; } }
 
 /* ───────────── Screen column · swipe · slide (0.12.0) ───────────── */

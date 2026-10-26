@@ -18,7 +18,8 @@ Done when: F148's differences A–C are fixed in the kit (a part's size no longe
 - [x] 🤖 3. C: a label that fits by a fraction of a pixel ("HOW TO PLAY" in Neon sideways, "Debt to the company") wraps in WebKit — give labels the room to not depend on the engine's rounding — ui-kit/kit/blocks/blocks.css
 - [x] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
 - [x] 🤖 5. Both runs and the compare: Chromium 0 problems and its 100% shots unchanged; WebKit 0 problems; the compare lists no wrap difference left (or each accepted in Notes); touched screens looked at — ui-kit/scripts/shoot.mjs
-- [ ] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially)
+- [x] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially) — Muzzy approved F149 2026-10-26 without the phone look ("all approved")
+- [x] 🤖 7. (Muzzy's pick, 2026-10-26) A soft fade above a scrolling card's stuck button row, so a cut line reads as "scroll" (UI kit 0.35.7) — ui-kit/kit/kit.css
 Check: both runs + the compare; shots looked at; Muzzy's phone look.
 
 ## F150 🔧 Saves work in every browser engine
@@ -133,10 +134,10 @@ Notes:
     shots, ✓ no wrap differs (1 accepted), 194 sizes differ by > 1 px — the symbols inside their fixed boxes (56), Pixel's
     ▼ tag 1.8 px wider in WebKit (under its cap; no wrap from it), Player chips' list 1–2 px at 200%. Chromium layout
     before → after: only the changes named above. `npm run check:fast` ✓ all 20 checks passed.
-- Ask Muzzy: the HUD's typed icons (❤ 🪙) now sit in a fixed 1.375 em box — on Windows' Chrome the text ❤ gets a little
+- Answered (Muzzy 2026-10-26: keep 1.375 em): the HUD's typed icons (❤ 🪙) now sit in a fixed 1.375 em box — on Windows' Chrome the text ❤ gets a little
   room each side and the Health bar is ~7 px shorter; on an iPhone the box is what Apple's emoji needs. OK, or a tighter
   box (1.25 em: the coin emoji shrinks a touch)?
-- Ask Muzzy (F148's, updated): ⚙ ❤ ▼ ▲ are typed characters, so every phone draws its own picture (Windows WebKit a
+- Answered (Muzzy 2026-10-26: keep the typed characters for now; drawn icons not needed) (F148's): ⚙ ❤ ▼ ▲ are typed characters, so every phone draws its own picture (Windows WebKit a
   lilac 3D gear, an iPhone Apple's gear, Chrome on Windows a black outline gear). Since 0.35.5 the boxes no longer grow
   either way and a too-wide emoji is drawn smaller. Should the kit still carry its own drawn icons (gear, heart, ▼ ▲)
   so every phone shows the SAME picture? It's a look choice now, not a layout bug.
@@ -154,4 +155,9 @@ Notes:
   kept as a nameFit case. ui-kit tests 833 ✓; check:fast ✓ all 20; Chromium SHOOT_ONLY of hud/huddock/chips/pause/
   settings/room/roomauto/payslip/teach/menu: 373 shots, 0 problems, layout vs 0.35.5: no wrap, 0 sizes > 1 px.
 - 2026-10-26 2:50 AM (Claude): F149 fix merged (UI kit 0.35.6: the page check knows a sticky row over words its card can scroll away; the icon fit re-measures until it holds) — read whole, no bugs. GitHub green (run 40280979311); check:fast 20/20. Lesson → hook: guard-edits rule 9 refuses npm ci / install while a running process uses that folder's node_modules (I broke ui-kit's packages twice tonight against the gallery on 5180) — HOOKS.md row 31, 5 tests, live-checked against the gallery.
-- Ask Muzzy (Claude, 2026-10-26 2:55 AM): the room card on a phone on its side in Pixel (WebKit) — "Waiting for everyone / to be ready" shows its last line half cut where it scrolls under the stuck LEAVE / I'M READY row (~/Documents/dev/.scratch/framework-f149-show/room-pixel-sideways-webkit.png). My pick: as built, plus a soft fade above the row so a cut line reads as "scroll" (the kit's lists already use one). Other: no sticky row (the old cut-off button), or a smaller text size there.
+- Answered (Muzzy 2026-10-26: as built + the soft fade — task 7, UI kit 0.35.7) (Claude, 2:55 AM): the room card on a phone on its side in Pixel (WebKit) — "Waiting for everyone / to be ready" shows its last line half cut where it scrolls under the stuck LEAVE / I'M READY row (~/Documents/dev/.scratch/framework-f149-show/room-pixel-sideways-webkit.png). My pick: as built, plus a soft fade above the row so a cut line reads as "scroll" (the kit's lists already use one). Other: no sticky row (the old cut-off button), or a smaller text size there.
+
+Retro: (Muzzy 2026-10-26: "retro ok" on Claude's draft)
+- Went well: the overnight run found real differences in iPhone's engine (emoji sizes, line wrapping) and fixed them in the kit.
+- Went wrong: two tests that passed on the PC failed on GitHub's Linux (text rounded to whole pixels) — the fix went back to a helper at 2 AM.
+- Change: run the tests that measure text in pixels the way Linux would before merging, not only after GitHub does.

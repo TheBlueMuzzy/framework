@@ -372,6 +372,9 @@ gallery's `npm run shoot` uses the same one.
   pixel wider than its share once drawn smaller, leaving 1 px of room. The page check's `overlap:` leaves words alone
   when a sticky row (a scrolling card's buttons) sits over them and scrolling that same box moves them out from under
   it (tried at both ends, then put back); a sticky row over words no scroll uncovers is still an overlap.
+- 0.35.7 (Muzzy 2026-10-26): a scrolling card's stuck row of buttons has a soft fade above it (`--kit-scroll-fade`,
+  2rem — the ScrollArea's "more below" cue), so a line cut where it scrolls under the row reads as "scroll". It thins
+  out as the card scrolls and is gone at the end. A card that fits shows nothing new.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
