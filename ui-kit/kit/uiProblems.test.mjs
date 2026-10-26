@@ -1,6 +1,7 @@
 // @vitest-environment node
 // findProblems in a real browser (Playwright's own Chromium) on small hand-made pages: what must be caught, and what a
 // correct page must NOT be blamed for.
+import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { findProblems } from './uiProblems.mjs'
@@ -176,11 +177,20 @@ describe('findProblems — quality bars', () => {
   })
 
   it('edge: words with lining-nums (the kit sets it everywhere) are measured in their own font — 0.35.4, F147', async () => {
-    // The font shorthand reads "" with lining-nums: the words were measured in the canvas's last font instead
-    const squeezed = (variant) => `<button style="display:inline-flex;align-items:center;justify-content:center;width:300px;height:42px;padding:0 26px;
-      border:2px solid #333;background:#fff;font:600 36px/50.4px 'Courier New', monospace;font-variant-numeric:${variant}">Settings</button>`
-    const plain = only('edge', await problemsOn(`<div style="margin:20px">${squeezed('normal')}</div>`))
-    const lining = only('edge', await problemsOn(`<div style="margin:20px">${squeezed('lining-nums')}</div>`))
+    // The font shorthand reads "" with lining-nums: the words were measured in the canvas's last font instead.
+    // The kit's own Nunito file, not a system font: GitHub's Linux has no Courier New, and its stand-in drew taller.
+    // 48 px tall: 44–50 all work — the right font finds room, the old line's leftover font a false "touches".
+    const nunito = readFileSync(new URL('./fonts/nunito.woff2', import.meta.url)).toString('base64')
+    const squeezed = (variant) => `<style>@font-face{font-family:Proof;src:url(data:font/woff2;base64,${nunito})}</style>
+      <button style="display:inline-flex;align-items:center;justify-content:center;width:300px;height:48px;padding:0 26px;
+      border:2px solid #333;background:#fff;font:600 36px/50.4px Proof;font-variant-numeric:${variant}">Settings</button>`
+    const edgesOn = async (variant) => {
+      await page.setContent(`<!doctype html><body style="margin:20px">${squeezed(variant)}</body>`)
+      await page.evaluate(() => document.fonts.load('600 36px Proof'))
+      return only('edge', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))
+    }
+    const plain = await edgesOn('normal')
+    const lining = await edgesOn('lining-nums')
     expect(lining).toEqual(plain)
     expect(plain).toEqual([])
   })
