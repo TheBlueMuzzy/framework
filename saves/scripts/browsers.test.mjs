@@ -121,7 +121,14 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
 
   afterAll(async () => {
     await context?.close()
-    if (profile) rmSync(profile, { recursive: true, force: true })
+    // Windows: a closed Chromium can hold its profile files for seconds under load (EPERM in check:fast, even after
+    // 2 s of retries) — a temp folder left behind is not a saves problem, so say so instead of failing the module
+    if (!profile) return
+    try {
+      rmSync(profile, { recursive: true, force: true, maxRetries: 20, retryDelay: 100 })
+    } catch (error) {
+      console.warn(`saves browser test: left ${profile} behind (${error.code}) — the closed ${name} still held it`)
+    }
   })
 
   it('saves, and keeps it through a reload and a browser restart', async () => {
