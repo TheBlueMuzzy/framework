@@ -97,5 +97,15 @@
     "light": "🟡",
     "url": "https://fonts.google.com/specimen/Alegreya",
     "credit": "Alegreya by Juan Pablo del Peral (Huerta Tipográfica), SIL Open Font License 1.1"
+  },
+  {
+    "paths": [
+      "public/audio/"
+    ],
+    "source": "Placeholder sounds made in code (npm run sounds — content/audio-placeholders.json) with ZzFX, a dev tool that doesn't ship in the game",
+    "author": "own work (ZzFX by Frank Force, MIT — https://github.com/KilledByAPixel/ZzFX)",
+    "licence": "own work",
+    "light": "🟢",
+    "url": "https://killedbyapixel.github.io/ZzFX/"
   }
 ]

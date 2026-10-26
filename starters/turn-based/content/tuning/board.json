@@ -1,0 +1,29 @@
+{
+  "_help": {
+    "_file": "How the board looks and how a round flows. Live in the Dev Kit's Tuning tab: move a slider and the running game changes.",
+    "cellSize": "How big one square is, in px, at most. The board still shrinks to fit a small window.",
+    "boardShare": "How much of the window's shorter side the board may take (0-1), so the seats and the HUD keep their room.",
+    "resultsDelayMs": "After the last move, how long (ms) the finished board stays in view before the results open. On the rules clock: a pause holds it.",
+    "winPulseMs": "How long one pulse of the winning line takes (ms). On the looks clock: a half pause keeps it pulsing."
+  },
+  "_labels": {
+    "cellSize": "Board: square size (px)",
+    "boardShare": "Board: share of the window",
+    "resultsDelayMs": "Round end: wait before results (ms)",
+    "winPulseMs": "Winning line: pulse time (ms)"
+  },
+  "_ranges": {
+    "cellSize": [48, 160, 1],
+    "boardShare": [0.3, 0.9, 0.01],
+    "resultsDelayMs": [0, 4000, 50],
+    "winPulseMs": [200, 3000, 50]
+  },
+  "_sections": {
+    "Board look": ["cellSize", "boardShare", "winPulseMs"],
+    "Round flow": ["resultsDelayMs"]
+  },
+  "cellSize": 96,
+  "boardShare": 0.62,
+  "resultsDelayMs": 1200,
+  "winPulseMs": 900
+}

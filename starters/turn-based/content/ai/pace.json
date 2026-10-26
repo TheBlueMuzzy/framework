@@ -1,0 +1,16 @@
+{
+  "_help": {
+    "_file": "How long a bot 'thinks' before it moves (the AI module's pace). On the rules clock: a pause holds a bot mid-think.",
+    "think.move.min": "Shortest think before a move (seconds).",
+    "think.move.max": "Longest think before a move (seconds).",
+    "speeds": "Settings → Bot speed: how much faster than Normal (0 = Instant, no wait).",
+    "timeBudgetMs": "The most real thinking time one decision should take (ms)."
+  },
+  "_ranges": {
+    "think.move.min": [0, 5, 0.05],
+    "think.move.max": [0, 5, 0.05]
+  },
+  "think": { "move": { "min": 0.6, "max": 1.2 } },
+  "speeds": { "Slow": 0.5, "Normal": 1, "Fast": 2, "Instant": 0 },
+  "timeBudgetMs": 50
+}

@@ -1,0 +1,11 @@
+{
+  "_help": {
+    "_file": "The opponents the main menu offers: which personality (content/ai/personalities.json) plays at which skill (content/ai/skills.json). Their names and bios are in content/text/en.json \"ai\".",
+    "online": "The personality that plays for an online player who went idle or dropped out (on the room's server)."
+  },
+  "opponents": [
+    { "personality": "careful", "skill": "sharp" },
+    { "personality": "careless", "skill": "casual" }
+  ],
+  "online": { "personality": "careful", "skill": "sharp" }
+}

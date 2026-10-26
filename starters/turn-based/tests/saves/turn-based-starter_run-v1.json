@@ -1,0 +1,62 @@
+{
+  "about": "A game vs Careless Cass, two moves in. Made with makeGoldenSave (F151).",
+  "stored": {
+    "save": "turn-based-starter:run",
+    "version": 1,
+    "savedAt": "2026-10-26T18:48:46.486Z",
+    "data": {
+      "opponent": {
+        "personality": "careless",
+        "skill": "casual"
+      },
+      "record": {
+        "setup": {
+          "firstSeat": 0
+        },
+        "moves": [
+          {
+            "seat": 0,
+            "action": {
+              "cell": 4
+            },
+            "by": "seat"
+          },
+          {
+            "seat": 1,
+            "action": {
+              "cell": 0
+            },
+            "by": "bot"
+          }
+        ]
+      }
+    }
+  },
+  "expect": {
+    "opponent": {
+      "personality": "careless",
+      "skill": "casual"
+    },
+    "record": {
+      "setup": {
+        "firstSeat": 0
+      },
+      "moves": [
+        {
+          "seat": 0,
+          "action": {
+            "cell": 4
+          },
+          "by": "seat"
+        },
+        {
+          "seat": 1,
+          "action": {
+            "cell": 0
+          },
+          "by": "bot"
+        }
+      ]
+    }
+  }
+}

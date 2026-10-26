@@ -13,15 +13,17 @@ import {
   checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenSavesFor, missingGoldenVersions,
   type RunUnderTest, type SaveUnderTest,
 } from '../../src/saves/oldSaves'
-// import { progressSave } from '../../src/progress/save'
-// import { matchRun } from '../../src/game/run'
+import { banterSave, emoteSave, matchRun, progressSave, settingsSave } from '../../src/game/saves'
 
 const SAVES: SaveUnderTest[] = [
-  // { save: progressSave, sample: { totalXp: 1200, unlocks: ['hat'] } },
+  { save: settingsSave, sample: { textSize: '150%', botSpeed: 'Slow', sound: false } },
+  { save: progressSave, sample: { wins: 5, losses: 1, draws: 2 } },
+  { save: emoteSave, sample: { hideAll: false, match: '', seats: ['seat-1'] } },
+  { save: banterSave, sample: { chatter: 'off' } },
 ]
 
 const RUNS: RunUnderTest[] = [
-  // { run: matchRun, sample: { turn: 7, scores: [12, 9] } },
+  { run: matchRun, sample: { opponent: { personality: 'careful', skill: 'sharp' }, record: { setup: { firstSeat: 1 }, moves: [{ seat: 1, action: { cell: 4 }, by: 'bot' }] } } },
 ]
 
 const golden = import.meta.glob('./*.json', { eager: true, import: 'default' })

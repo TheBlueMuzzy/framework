@@ -10,3 +10,7 @@ e2e-shots/
 
 # each computer's own Dev Kit settings (Dev Kit 0.17+)
 devkit.local.json
+
+# wrangler dev state + the crash server test token (never committed)
+.wrangler/
+.dev.vars

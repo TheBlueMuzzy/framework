@@ -1,4 +1,5 @@
 {
-  "_help": "Dev Kit (the ` panel) in RELEASE builds. true = friends testing the live link can open it (prototype/alpha/beta). /deliver sets this to false at the 1.0 full release — then the live game has no Dev Kit at all. Local dev always has it.",
-  "inReleaseBuilds": true
+  "_help": "Dev Kit (the ` panel) in RELEASE builds. true = friends testing the live link can open it (prototype/alpha/beta). /deliver sets this to false at the 1.0 full release — then the live game has no Dev Kit at all. Local dev always has it. tuningFiles = more content files the Tuning tab edits live (the bots' think time).",
+  "inReleaseBuilds": true,
+  "tuningFiles": ["content/ai/pace.json"]
 }

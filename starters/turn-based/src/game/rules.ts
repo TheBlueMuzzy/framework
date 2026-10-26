@@ -28,8 +28,10 @@ export interface Action {
   cell: number
 }
 
+// placed: `threat` = the mover now has two in a row with the third square free · `blocked` = it stopped the other
+// seat's two in a row. (The sounds and the bots' banter use them.)
 export type Event =
-  | { type: 'placed'; seen: 'all'; seat: Seat; cell: number }
+  | { type: 'placed'; seen: 'all'; seat: Seat; cell: number; threat: boolean; blocked: boolean }
   | { type: 'won'; seen: 'all'; seat: Seat; line: number[] }
   | { type: 'draw'; seen: 'all' }
 
@@ -53,6 +55,15 @@ export function lineFor(board: Cell[], seat: Seat): number[] | null {
 }
 
 export const emptyCells = (board: Cell[]): number[] => board.flatMap((cell, i) => (cell === null ? [i] : []))
+
+/** The squares where this seat would complete three in a row right now. */
+export function winningCells(board: Cell[], seat: Seat): number[] {
+  return emptyCells(board).filter((cell) => {
+    const next = [...board]
+    next[cell] = seat
+    return lineFor(next, seat) !== null
+  })
+}
 
 export const ticTacToe: Rules<State, Action, Event, Setup, View> = {
   setup: ({ firstSeat }) => ({
@@ -79,7 +90,9 @@ export const ticTacToe: Rules<State, Action, Event, Setup, View> = {
     if (reason) throw new Error(reason)
     const board = [...state.board]
     board[action.cell] = seat
-    const events: Event[] = [{ type: 'placed', seen: 'all', seat, cell: action.cell }]
+    const blocked = winningCells(state.board, otherSeat(seat)).includes(action.cell)
+    const threat = winningCells(board, seat).length > 0
+    const events: Event[] = [{ type: 'placed', seen: 'all', seat, cell: action.cell, threat, blocked }]
     const line = lineFor(board, seat)
     if (line) {
       events.push({ type: 'won', seen: 'all', seat, line })

@@ -14,7 +14,19 @@
     "check:fast": "node scripts/check-all.mjs fast",
     "check:full": "node scripts/check-all.mjs full",
     "check:framework": "node src/devkit/check-framework.mjs",
-    "audio:check": "node src/audio/audio-check.mjs"
+    "check:ui": "node src/ui/kit/check-ui.mjs src/ui --css src",
+    "check:devkit": "node src/devkit/check-devkit.mjs",
+    "smoke": "node e2e/smoke.mjs",
+    "e2e:devkit-live": "node e2e/devkit-live.mjs",
+    "e2e:online": "node e2e/online.mjs",
+    "sounds": "node scripts/make-sounds.mjs",
+    "audio:check": "node src/audio/audio-check.mjs",
+    "ai:arena": "node src/ai/kit/ai-arena.mjs",
+    "party:dev": "wrangler dev --persist-to .wrangler/state-dev",
+    "party:deploy": "wrangler deploy",
+    "crashes": "node src/crashes/crash-report.mjs",
+    "crashes:dev": "wrangler dev -c crashes/wrangler.json",
+    "crashes:deploy": "wrangler deploy -c crashes/wrangler.json"
   },
   "dependencies": {
     "partyserver": "^0.5.10",
@@ -33,12 +45,13 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^16.5.0",
-    "playwright-core": "^1.63.0",
+    "playwright-core": "1.63.0",
     "source-map": "^0.8.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.0",
     "vite": "^7.3.6",
     "vitest": "^4.1.11",
-    "wrangler": "^4.151.2"
+    "wrangler": "^4.151.2",
+    "zzfx": "^1.4.0"
   }
 }

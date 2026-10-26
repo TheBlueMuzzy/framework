@@ -25,9 +25,15 @@ const FAST = [
   ['unit tests', 'npx vitest run'],
   ['build', 'npm run -s build'],
   ['lint', 'npm run -s lint'],
+  ['ui rules', 'npm run -s check:ui'], // the UI kit's rule checker: screens built only from kit parts and style names
+  ['framework (code)', 'node src/devkit/check-framework.mjs --static'], // every module's promises, code-reading part
 ]
 // e2e: [name, script, args] — every one on its own ports (see each script's header for what it checks)
 const E2E = [
+  ['framework', 'src/devkit/check-framework.mjs', '--port 6409'], // every module's promises in the running game (= npm run check:framework)
+  ['online', 'e2e/online.mjs', 'e2e-shots 6403 6499'], // two browser tabs play each other through wrangler dev
+  ['devkit-live', 'e2e/devkit-live.mjs', 'e2e-shots 6402'], // a Tuning edit changes the running game; a pause stops the bot
+  ['smoke', 'e2e/smoke.mjs', 'e2e-shots 6401'], // loads, plays one round vs the computer, console clean
 ]
 
 const args = process.argv.slice(2)

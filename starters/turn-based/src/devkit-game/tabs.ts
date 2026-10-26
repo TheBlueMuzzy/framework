@@ -1,21 +1,31 @@
-// THE GAME'S OWN DEV KIT TOOLS — one tab each, shown after the kit's own tabs (Color, …).
-// This file (and everything in src/devkit-game/) belongs to the game: installing or updating the
-// Dev Kit never touches it. It only loads with the Dev Kit, so nothing here ships once the Dev Kit is off (1.0).
-//
-// To add a tool:
-//   1. make a component in src/devkit-game/, e.g. TableTab.tsx — it edits a content/ JSON file,
-//      with Save (saveContentFile) and Copy for Claude (copyText) from '../devkit/saveContent'
-//   2. list it below:  { id: 'table', label: 'Table', Panel: TableTab }
-//
-// Framework tabs a game can list here: aiTab(…) (../devkit/ai/aiTabEntry), soundTab(getAudio, { file: audioJson })
-// (../devkit/sound/soundTabEntry), reviewTab({ id, label, load, save }) (../devkit/review/reviewTabEntry) and
-// textTab({ file: 'content/text/en.json', data: en }) (../devkit/text/textTabEntry) — see the Dev Kit README.
-//
-// To plug the game into Snapshots + Bug capture: write its adapter in src/devkit-game/ (see ../devkit/devkitGame.ts)
-// and register it here, once:
-//   import { registerDevKitGame } from '../devkit/devkitGame'
-//   import { myGameAdapter } from './myGameAdapter'
-//   registerDevKitGame(myGameAdapter)
-import type { ComponentType } from 'react'
+// THE GAME'S OWN DEV KIT TOOLS — shown after the kit's own tabs. Only loads with the Dev Kit, so nothing here ships
+// once the Dev Kit is off (1.0). The adapter plugs the game into Snapshots, Bug capture, Pause and check:framework.
+import personalitiesFile from '../../content/ai/personalities.json'
+import skillsFile from '../../content/ai/skills.json'
+import banterJson from '../../content/ai/banter.json'
+import audioJson from '../../content/audio.json'
+import en from '../../content/text/en.json'
+import { registerDevKitGame } from '../devkit/devkitGame'
+import type { DevKitTab } from '../devkit/DevKit'
+import { aiTab } from '../devkit/ai/aiTabEntry'
+import { soundTab } from '../devkit/sound/soundTabEntry'
+import { textTab } from '../devkit/text/textTabEntry'
+import { personalityProblems } from '../ai/kit/brain'
+import { getAudio } from '../audio'
+import { plug } from '../ai/plug'
+import { ticTacToeAdapter } from './adapter'
 
-export const gameTabs: { id: string; label: string; Panel: ComponentType }[] = []
+registerDevKitGame(ticTacToeAdapter)
+
+export const gameTabs: DevKitTab[] = [
+  aiTab({
+    personalities: { path: 'content/ai/personalities.json', data: personalitiesFile, listKey: 'personalities' },
+    skills: { path: 'content/ai/skills.json', data: skillsFile, listKey: 'skills' },
+    bios: { path: 'content/text/en.json', data: en, at: (id) => ['ai', 'personality', id, 'bio'], nameAt: (id) => ['ai', 'personality', id, 'name'] },
+    banter: { path: 'content/text/en.json', data: en, moments: Object.keys(banterJson.chance) },
+    readings: ['myDanger', 'myChance'],
+    validate: (p) => personalityProblems(p as Parameters<typeof personalityProblems>[0], plug),
+  }),
+  soundTab(getAudio, { file: audioJson }),
+  textTab({ file: 'content/text/en.json', data: en }),
+]
