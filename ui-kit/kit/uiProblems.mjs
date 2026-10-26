@@ -430,8 +430,10 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // round avatar is a circle — a badge by its box's corner can be clear of it, or not, whatever the boxes say), the
   // avatar's grown by its outline. Something laid ON the avatar's body (a seat's badge on its portrait's corner) is
   // there on purpose and left alone.
+  // (style lengths are before any transform: a chip pinned to the table at 0.25 draws its 16 px corners at 4 px — `k`)
+  const shrunk = (el) => (el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : 1)
   const rounded = (box, el, grow = 0) => { // a box with round corners: its inner box + the corner radius (≤ half a side)
-    const r = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, (box.right - box.left) / 2, (box.bottom - box.top) / 2)
+    const r = Math.min((parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) * shrunk(el), (box.right - box.left) / 2, (box.bottom - box.top) / 2)
     const R = r > 0 ? r + grow : 0 // (an outline follows the rounding; around square corners it stays square)
     return { left: box.left - grow + R, right: box.right + grow - R, top: box.top - grow + R, bottom: box.bottom + grow - R, R }
   }
@@ -441,7 +443,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   }
   for (const av of [...document.querySelectorAll('.kit-avatar')].filter((el) => shown(el) && !moving(el))) {
     const s = getComputedStyle(av)
-    const reach = s.outlineStyle === 'none' ? 0 : Math.max(0, parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset))
+    const reach = s.outlineStyle === 'none' ? 0 : Math.max(0, parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset)) * shrunk(av)
     const b = av.getBoundingClientRect()
     const body = rounded(b, av), ring = rounded(b, av, reach)
     const near = [
@@ -453,7 +455,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       const piece = shape ? rounded(box, shape) : { ...box, R: 0 } // (words: the box of their letters)
       if (apart(piece, body) <= 0) continue // ON the avatar: on purpose
       const room = apart(piece, ring)
-      if (room < 1.5) problems.push(`ring: "${name(el)}" touches the ring around "${name(av)}" — ${Math.max(0, Math.round(room))} px of room`)
+      // (a chip shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it — the gallery's
+      // pinned chips at 200% text: "Bot" 1 px from its 10 px portrait)
+      if (room < 1.5 * Math.min(1, shrunk(av))) problems.push(`ring: "${name(el)}" touches the ring around "${name(av)}" — ${Math.max(0, Math.round(room))} px of room`)
     }
   }
 

@@ -341,6 +341,12 @@ describe('findProblems — a ring around an avatar', () => {
     expect(only('ring', await problemsOn(avatar(true) + badge))).toEqual(['ring: "<span>" touches the ring around "Muzzy" — 0 px of room'])
   })
 
+  it('a chip shrunk onto the table keeps its room shrunk too: 4 px drawn at a quarter is fine; touching still counts', async () => {
+    const shrunk = (html) => `<div style="position:absolute;left:0;top:0;width:400px;height:100px;transform:scale(0.25);transform-origin:0 0">${html}</div>`
+    expect(only('ring', await problemsOn(shrunk(avatar(false) + place(96))))).toEqual([]) // 1 px on screen
+    expect(only('ring', await problemsOn(shrunk(avatar(false) + place(99))))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 0 px of room'])
+  })
+
   it('a badge laid ON the avatar on purpose (a seat\'s badge on its portrait\'s corner) is not "touching" it', async () => {
     const found = await problemsOn(`<div style="position:absolute;left:80px;top:0;width:100px;height:90px;border:2px solid #333">${avatar(true)
       .replace('left:100px', 'left:18px')}<span class="kit-badge" style="position:absolute;left:46px;top:46px;width:20px;height:20px;border-radius:50%;background:#2a6"></span></div>`)
