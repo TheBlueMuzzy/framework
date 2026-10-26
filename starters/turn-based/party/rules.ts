@@ -7,6 +7,8 @@ import { mustBeObject, mustBeWholeNumber } from '../src/rooms/server/checks'
 import type { GameRules, RoomTools } from '../src/rooms/server/gameRules'
 import { ticTacToe, type Event as GameEvent, type State as Game } from '../src/game/rules'
 import { botMove, onlineOpponent } from '../src/ai/bots'
+import { thinkDelay } from '../src/ai/kit/pace'
+import paceFile from '../content/ai/pace.json'
 
 export type Options = Record<string, never>
 export interface Action { cell: number }
@@ -16,7 +18,9 @@ export interface State { game: Game; order: string[]; rng: number }
 export interface View { game: Game; order: string[]; mySeat: number | null }
 export type Event = GameEvent
 
-const BOT_PAUSE_MS = 900 // a bot playing for someone waits this long before it moves
+// A bot playing for someone "thinks" like the offline bot does (content/ai/pace.json), at Normal speed — a room has
+// no one player's Bot speed setting. Same move, same feel, online or not.
+const ONLINE_BOT_SPEED = 'Normal'
 
 export const rules: GameRules<State, Options, Action, View, Event> = {
   checkOptions: () => ({}),
@@ -75,7 +79,8 @@ function startTurn(state: State, room: RoomTools<State, Event>) {
   const seatId = state.order[state.game.turn]
   room.onTheClock([seatId])
   if (room.seats().find((seat) => seat.id === seatId)?.kind !== 'bot') return
-  room.timers.start('turn', BOT_PAUSE_MS, () => {
+  const pause = thinkDelay(paceFile, 'move', ONLINE_BOT_SPEED, state.rng)
+  room.timers.start('turn', pause.ms, () => {
     room.update((current) => {
       if (current.game.over || current.order[current.game.turn] !== seatId) return current
       const mark = current.game.turn

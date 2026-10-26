@@ -8,6 +8,7 @@ import { MainMenuScreen } from './ui/MainMenuScreen'
 import { TableScreen } from './ui/TableScreen'
 import { OnlineScreen, type OnlineStart } from './ui/OnlineScreen'
 import { CreditsScreen, PauseScreen, ResultsScreen, SettingsScreen } from './ui/menus'
+import { TableWorld } from './world/TableWorld'
 
 const SCREENS = { pause: PauseScreen, results: ResultsScreen, settings: SettingsScreen, credits: CreditsScreen }
 
@@ -26,6 +27,7 @@ export default function App() {
     : <MainMenuScreen onOnline={(start) => setOnline(start)} />
   return (
     <>
+      {(online || match) && <TableWorld />}
       <ScreenStack screens={SCREENS}>{base}</ScreenStack>
       <ToastStack />
     </>

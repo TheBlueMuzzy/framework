@@ -11,7 +11,7 @@ Done when: `starters/turn-based` is a playable tic-tac-toe with every module ins
 - [x] 🤖 4. AI opponent (ai module, 2 personalities) + placeholder sounds (audio module, ZzFX) + emotes — starters/turn-based
 - [x] 🤖 5. Online play with the rooms module (wrangler dev on a 6xxx port, nothing deployed) — starters/turn-based
 - [x] 🤖 6. All green: check:fast, check:framework, a `smoke` script that plays one round; phone + desktop shots looked at — starters/turn-based
-- [ ] 🤖 7. README (what it is, what a new game replaces first) + /define copies the closest starter for a new game — ~/.claude/skills/define/SKILL.md  (README done — starters/turn-based/README.md; the /define part is the main session's)
+- [x] 🤖 7. README (what it is, what a new game replaces first) + /define copies the closest starter for a new game — ~/.claude/skills/define/SKILL.md (README: helper; /define build-plan + /sprint's first task copy the starter: Claude)
 Check: in starters/turn-based — `npm run check:fast`, `npm run check:framework`, `npm run smoke` all green; a round played against the AI and one online (two tabs); shots at 390×844 and 1440×900 looked at.
 
 ## F65 🔧 Framework test game
@@ -33,3 +33,4 @@ Notes:
 - Tic-tac-toe (Muzzy 2026-10-26): the simplest rules to swap out for a real game; the AI personalities still show (a careless one misses blocks).
 - The starter's kit copies are game copies: the framework's lint must ignore them (installers add the game's own ignore lines; the root eslint.config.js too).
 - Servers this sprint start on 6xxx ports and are stopped with stop-servers.mjs.
+- F151 — Turn-based starter merged 2026-10-26 3:10 PM (Claude): check:full ALL PASS 10/10 from a clean npm ci in the main folder. Read rules.ts, party/rules.ts, match.ts whole — no bugs. Looked at the shots: the HUD's light words vanished on the light page ("Game over" nearly invisible) — the kit's on-game words are made for the game's own picture, and the starter had none → src/world/TableWorld.tsx paints the table (content/tuning/board.json tableColour #235b45, a colour picker in the Dev Kit, live); outside src/ui because the world is the game's drawing. The online stand-in bot waited a fixed 900 ms → it now thinks like the offline bot (content/ai/pace.json, Normal speed). Left as is (cosmetic): results read "You ★ You" (the seat's name + the kit's badge); a banter bubble can show behind the results dim.

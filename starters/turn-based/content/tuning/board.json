@@ -5,14 +5,16 @@
     "boardShare": "How much of the window's shorter side the board may take (0-1), so the seats and the HUD keep their room.",
     "hudRoomRem": "Room kept for the HUD rows above and below the board (whose turn + the seats), in rem — so on a short window the board never runs into them. The Text size setting scales it.",
     "resultsDelayMs": "After the last move, how long (ms) the finished board stays in view before the results open. On the rules clock: a pause holds it.",
-    "winPulseMs": "How long one pulse of the winning line takes (ms). On the looks clock: a half pause keeps it pulsing."
+    "winPulseMs": "How long one pulse of the winning line takes (ms). On the looks clock: a half pause keeps it pulsing.",
+    "tableColour": "The table behind the board (the game's own world). The HUD's words are light with a dark halo, so keep it mid to dark."
   },
   "_labels": {
     "cellSize": "Board: square size (px)",
     "boardShare": "Board: share of the window",
     "hudRoomRem": "Board: room for the HUD rows (rem)",
     "resultsDelayMs": "Round end: wait before results (ms)",
-    "winPulseMs": "Winning line: pulse time (ms)"
+    "winPulseMs": "Winning line: pulse time (ms)",
+    "tableColour": "Table colour"
   },
   "_ranges": {
     "cellSize": [48, 160, 1],
@@ -22,12 +24,13 @@
     "winPulseMs": [200, 3000, 50]
   },
   "_sections": {
-    "Board look": ["cellSize", "boardShare", "hudRoomRem", "winPulseMs"],
+    "Board look": ["tableColour", "cellSize", "boardShare", "hudRoomRem", "winPulseMs"],
     "Round flow": ["resultsDelayMs"]
   },
   "cellSize": 96,
   "boardShare": 0.62,
   "hudRoomRem": 11,
   "resultsDelayMs": 1200,
-  "winPulseMs": 900
+  "winPulseMs": 900,
+  "tableColour": "#235b45"
 }
