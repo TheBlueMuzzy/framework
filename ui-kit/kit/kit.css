@@ -155,7 +155,15 @@
      stops growing at three quarters of the 44px button, so even a wide one (◀) and its side room stay 44px wide — at
      200% text an icon stays tap-sized and the WORDS get the room (◀ ▶ had grown to 67px each and squeezed
      "Accessibility" in Settings' tab picker into two pieces). Every style's title size is under that at 100%. */
-  .kit-button[data-icon] { padding: 0 0.15em; aspect-ratio: 1; font-size: min(var(--text-title), var(--target-min) * 0.75); line-height: 1; }
+  /* 0.35.5 (F149): the cap held the glyph's SIZE, but the button still took the glyph's WIDTH — and the same ⚙ is a
+     0.85 em text symbol in one font and a 1.37 em colour emoji in another (WebKit, an iPhone): the button grew 44 → 55
+     (61 at 200%). Now the button is exactly its size (44 px, or size="…") whatever draws its symbol, and a symbol too
+     wide for it is drawn smaller: Button measures it (--kit-glyph-em = its width ÷ its font size, useGlyphFit) and the
+     size stops where symbol + side room fill the inside of the border. Text symbols fit already: no change for them. */
+  .kit-button[data-icon] { --kit-icon-box: max(var(--target-min), var(--kit-button-size, 0rem));
+    padding: 0 0.15em; inline-size: var(--kit-icon-box); block-size: var(--kit-icon-box); line-height: 1;
+    font-size: min(var(--text-title), var(--target-min) * 0.75, (var(--kit-icon-box) - 2 * var(--border-width)) / (var(--kit-glyph-em, 0) + 0.3)); }
+  .kit-button-glyph { flex: none; }
   /* size="…px": as tall as the game asks (e.g. a board hex), and at least that wide — never below target-min */
   .kit-button[data-sized] { min-block-size: max(var(--target-min), var(--kit-button-size)); min-inline-size: max(var(--target-min), var(--kit-button-size)); }
   /* compact: a gap-m each side of the label instead of gap-l (a row of big buttons on one line on a narrow phone) */

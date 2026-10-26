@@ -115,6 +115,10 @@
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
+  /* A Bar's or Counter's typed symbol (❤ 🪙, 0.35.5, F149) has a box of its own, as wide as a colour emoji (1.375 em),
+     the symbol centred in it: the same ❤ is a 0.97 em text heart in one font and a 1.37 em emoji in another (WebKit,
+     every iPhone), and the chip and its bar used to follow it. A picture (an <img>, an svg) keeps its own size. */
+  .kit-hud-icon[data-symbol] { display: inline-flex; justify-content: center; flex: none; inline-size: 1.375em; }
   /* …but a chip's sentence (ConnectionDot's "Weak connection", 0.35.2, F145) may go onto two lines between its words in
      a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
      Only there: in a right corner it would narrow the corner's other pieces' row too. */
@@ -362,6 +366,9 @@
   }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
+  /* A row's ▼ / ▲ tag is always 7/8 em wide, the triangle centred (0.35.5, F149): one font's ▼ is 0.86 em, another's
+     0.99 (WebKit) — the tag grew 2–5 px and the row's words lost that room and took a line more. */
+  .kit-tone-mark { display: inline-flex; justify-content: center; inline-size: 0.875em; }
   /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);
      the report's column is never taller than the card, so a long list scrolls there too (0.31.0) */
   @media (max-height: 30rem) and (min-width: 40rem) {

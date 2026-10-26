@@ -13,7 +13,7 @@ Check: `npm run shoot:webkit` runs; the list is in Notes.
 ## F149 🐞 The kit holds up in WebKit
 Done when: F148's differences A–C are fixed in the kit (a part's size no longer follows a symbol's font, no card's last button sits on its edge, no label wraps by a hair), a compare of both engines' layouts lists no wrap that differs (or each is accepted with a reason), and the Chromium shoot is unchanged (0 problems, 100% shots the same).
 (Re-planned 2026-10-26 1:05 AM by Claude after F148: the checker sees 0 problems in WebKit — every real difference is a wrap or a size it doesn't measure, so "WebKit 0 problems" was already true and proved nothing.)
-- [ ] 🤖 1. A: the ⚙ icon Button and the ❤ / ▼ ▲ chips keep their box whatever font draws the symbol (WebKit's colour emoji, an iPhone's Apple emoji) — ui-kit/kit/kit.css
+- [x] 🤖 1. A: the ⚙ icon Button and the ❤ / ▼ ▲ chips keep their box whatever font draws the symbol (WebKit's colour emoji, an iPhone's Apple emoji) — ui-kit/kit/kit.css
 - [ ] 🤖 2. B: `text-wrap: pretty` wraps more in WebKit (Safari 26 too) — the room card's "I'M READY" sits on its bottom edge sideways in Pixel: the card keeps room for its last button however its words wrap — ui-kit/kit/kit.css
 - [ ] 🤖 3. C: a label that fits by a fraction of a pixel ("HOW TO PLAY" in Neon sideways, "Debt to the company") wraps in WebKit — give labels the room to not depend on the engine's rounding — ui-kit/kit/blocks/blocks.css
 - [ ] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
