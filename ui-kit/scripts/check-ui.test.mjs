@@ -10,6 +10,7 @@ describe('check-ui', () => {
   })
 
   it('catches raw colours, px sizes and font names in CSS', () => {
+    // eslint-disable-next-line no-restricted-syntax -- CSS text for the checker to read, never drawn
     const found = messages('kit/a.css', '.x { color: #ff0000; padding: 4px; font-family: Arial; background: rgb(0 0 0); }')
     expect(found.filter((m) => m.startsWith('raw colour'))).toHaveLength(2)
     expect(found.some((m) => m.startsWith('px size'))).toBe(true)

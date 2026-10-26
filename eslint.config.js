@@ -57,6 +57,22 @@ export default defineConfig([
     },
   },
   {
+    // UI kit tests: no Windows-only font by name. GitHub's Linux has none of them, so its stand-in draws wider or
+    // taller and a word that had 2 px of room has 1 — three tests went red only on GitHub in v0.21–v0.22. Load a kit
+    // font file (@font-face from ui-kit/kit/fonts) or test the rule, not the pixels. (Repeats the fixed-wait rule:
+    // a later block's no-restricted-syntax replaces the earlier one for the same files.)
+    files: ['ui-kit/**/*.test.{ts,tsx,mjs}'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.name='setTimeout'][arguments.1.type='Literal'][arguments.1.value>0]",
+        message: 'A fixed wait in a test fails on a busy computer — wait for the result with vi.waitFor(() => expect(...)) instead (or say why on an eslint-disable-next-line).',
+      }, {
+        selector: 'Literal[value=/Courier New|Segoe UI|Consolas|Arial|Calibri|Tahoma|Verdana|Times New Roman/], TemplateElement[value.raw=/Courier New|Segoe UI|Consolas|Arial|Calibri|Tahoma|Verdana|Times New Roman/]',
+        message: 'A Windows-only font in a test draws differently on GitHub (Linux) — load a kit font file (@font-face from ui-kit/kit/fonts/*.woff2) or test the rule, not the pixels.',
+      }],
+    },
+  },
+  {
     // Installers and helper scripts — plain Node JavaScript
     files: ['**/*.{js,mjs}'],
     extends: [js.configs.recommended],
