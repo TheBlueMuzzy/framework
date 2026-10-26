@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.23.0, 2026-10-25)
+Release target: none — a library; each milestone releases on its own (latest v0.24.0, 2026-10-25)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -386,6 +386,17 @@ flowchart LR
   F146[F146 Shoot every look at 200%] --> F147[F147 Every look at 200%]
 ```
 
+## v0.23 — Works on iPhone's browser  ✅ released 2026-10-26 (v0.25.0) · planned 2026-10-25
+Goal (Muzzy 2026-10-25: "go auto", option A): every iPhone browser is WebKit, and the kit and saves were only ever checked in Chromium — check and fix them in WebKit (and saves in Firefox too).
+- ✅ F148 🔧 The shoot runs in WebKit too: the 18 key screens, all 7 looks, both phones, 100% + 200% text, in Playwright's WebKit — should · needs: F146 · sprint 41
+- ✅ F149 🐞 The kit holds up in WebKit: what F148 finds — should · needs: F148, F147 · sprint 41
+- ✅ F150 🔧 Saves work in every browser engine: real Chromium, WebKit and Firefox — save, load, upgrade, save code, full disk, private window — should · needs: F86 · sprint 41
+```mermaid
+flowchart LR
+  F148[F148 Shoot in WebKit] --> F149[F149 Kit holds up in WebKit]
+  F150[F150 Saves in every engine]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -397,6 +408,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-26 — **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
 - 2026-10-25 — → v0.22 F146 + F147. **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
 - 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.
 - 2026-10-24 — → v0.18 F129. **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.

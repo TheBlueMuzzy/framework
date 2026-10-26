@@ -157,7 +157,7 @@ export function Bar({ label, value, max = 100, variant = 'primary', pips, icon, 
   }
   const parts = (
     <>
-      {shown(icon) && <span aria-hidden="true">{icon}</span>}
+      {shown(icon) && <span className="kit-hud-icon" data-symbol={typeof icon === 'string' || undefined} aria-hidden="true">{icon}</span>}
       {labelAt === 'beside' && <span className="kit-bar-label" aria-hidden="true">{label}</span>}
       {labelAt === 'above' && <span className="kit-bar-label-above" aria-hidden="true">{label}</span>}
       {bar}
@@ -189,7 +189,7 @@ function useFloatUps(value: number) {
 export function Counter({ label, value, icon }: { label: string; value: number; icon?: ReactNode }) {
   return (
     <Chip role="group" aria-label={label}>
-      {shown(icon) && <span aria-hidden="true">{icon}</span>}
+      {shown(icon) && <span className="kit-hud-icon" data-symbol={typeof icon === 'string' || undefined} aria-hidden="true">{icon}</span>}
       <span className="kit-float-anchor"><Text kind="label">{value}</Text>{useFloatUps(value)}</span>
     </Chip>
   )

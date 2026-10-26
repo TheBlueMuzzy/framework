@@ -201,6 +201,14 @@ describe('createSave — safe writes and backups', () => {
     expect(none.save({ a: 2 })).toMatchObject({ ok: false, reason: 'blocked' })
   })
 
+  it('"quota exceeded" on an EMPTY storage = blocked (Safari\'s old private window), not full (F150)', () => {
+    const quota = () => { throw Object.assign(new Error('The quota has been exceeded.'), { name: 'QuotaExceededError', code: 22 }) }
+    const empty = Object.assign(memoryStorage(), { length: 0, setItem: quota }) // like localStorage: it can say how many keys it holds
+    expect(progressSave(empty).save(fresh)).toMatchObject({ ok: false, reason: 'blocked' })
+    const holdsSomething = Object.assign(memoryStorage(), { length: 3, setItem: quota })
+    expect(progressSave(holdsSomething).save(fresh)).toMatchObject({ ok: false, reason: 'full' })
+  })
+
   it('a write that doesn\'t read back the same keeps the old copy', () => {
     const storage = memoryStorage()
     const save = progressSave(storage)

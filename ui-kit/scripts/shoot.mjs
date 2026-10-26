@@ -10,12 +10,19 @@
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
 // Usage: npm run shoot
-import { mkdirSync, readdirSync } from 'node:fs'
+// WEBKIT (F148): npm run shoot:webkit (= node scripts/shoot.mjs --webkit, or SHOOT_ENGINE=webkit) — iPhone's engine,
+// Playwright's own WebKit. Only the 18 key screens, in all 7 looks, on a 390×844 phone upright and an 844×390 one on
+// its side, at 100% and 200% text (504 shots, ~11 min), plus the screen stack and menu checks on the phone — saved to
+// screenshots-webkit/ with the same names as the Chromium shots.
+// LAYOUTS (F149): every shot also writes <shots folder>/layout/<shot>.json — each text's line count and each part's
+// size — so npm run compare:engines lists what wraps or sizes differently between the two runs.
+import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { createServer } from 'vite'
-import { chromium } from 'playwright'
+import { chromium, webkit } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
+import { recordLayout } from './compareEngines.mjs'
 
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
@@ -37,7 +44,11 @@ const sizes = {
 // keyboard use) — the same check a game's npm run check:framework runs on the real game (kit/uiProblems.mjs).
 // (Phones quietly zoom out to fit wide pages, so it compares against the real screen width.)
 
-mkdirSync('screenshots/screens', { recursive: true })
+// (--webkit, not only the env var: npm scripts on Windows can't set one inline)
+const WEBKIT = process.env.SHOOT_ENGINE === 'webkit' || process.argv.includes('--webkit')
+const OUT = WEBKIT ? 'screenshots-webkit' : 'screenshots' // (both git-ignored; codeChanges.mjs skips both)
+mkdirSync(`${OUT}/screens`, { recursive: true })
+mkdirSync(`${OUT}/layout/screens`, { recursive: true }) // (F149: one small layout file per shot — compareEngines.mjs)
 // SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)
 const PORT = Number(process.env.SHOOT_PORT) || 5180
 const server = await createServer({ server: { port: PORT, strictPort: true } })
@@ -46,7 +57,7 @@ await server.listen()
 // (named from ui-kit/, not the server's root, which is gallery/ — a kit file would read ../kit/…)
 const codeChanges = watchCodeChanges(server.watcher, process.cwd())
 class CodeChanged extends Error {}
-const browser = await chromium.launch()
+const browser = await (WEBKIT ? webkit : chromium).launch()
 let problemCount = 0
 let shotCount = 0
 
@@ -89,14 +100,31 @@ function report(name, problems) {
 }
 
 // query: the gallery link, e.g. '?screen=settings&preset=neon'. prepare: clicks etc. before the shot.
+// SHOOT_ONLY=<pattern> (F149): only the shots whose name matches it, e.g. SHOOT_ONLY="hud-|room-pixel" — a quick look
+// at a few screens while fixing; the full run is still the check
+const ONLY = process.env.SHOOT_ONLY ? new RegExp(process.env.SHOOT_ONLY) : null
 async function shoot(file, size, query, prepare) {
+  if (ONLY && !ONLY.test(file)) return
   if (codeChanges().length) throw new CodeChanged()
   const page = await pageFor(size)
   page.errors = []
   await page.goto(`http://localhost:${PORT}/${query}`)
   const isScreen = query.includes('screen=') && !query.includes('screen=parts')
   // (a VISIBLE screen: Pause opens over the HUD, which then hides — the first .kit-screen on the page)
-  await page.waitForSelector(isScreen ? '.gallery-game .kit-screen >> visible=true' : '.gallery')
+  // A page that never shows its screen is a problem on the list, not the end of the run (F148: WebKit stalled once
+  // after ~145 shots on one page): a picture of what it showed instead, and the next shot gets a fresh page
+  const opened = await page.waitForSelector(isScreen ? '.gallery-game .kit-screen >> visible=true' : '.gallery').then(() => true, (e) => {
+    if (e.name !== 'TimeoutError') throw e
+    return false
+  })
+  if (!opened) {
+    await page.screenshot({ path: `${OUT}/${file}-stalled.png` }).catch(() => {})
+    await page.close().catch(() => {})
+    delete pages[size.name]
+    shotCount++
+    report(`${file}.png`, [...page.errors, 'stalled: the screen never showed (30 s) — see the …-stalled.png shot'])
+    return
+  }
   await page.evaluate(() => document.fonts.ready)
   if (prepare) await prepare(page)
   // let entrances and transitions finish (Results rows arrive one after another, so they take longer)
@@ -107,8 +135,19 @@ async function shoot(file, size, query, prepare) {
     for (const row of rows) for (const a of row.getAnimations()) a.finish()
     return rows.length
   })
-  if (revealing) await page.waitForTimeout(100) // (onRevealed's answer drawn: the payslip's Continue)
-  await page.screenshot({ path: `screenshots/${file}.png`, fullPage: true })
+  if (revealing) {
+    await page.waitForTimeout(100) // (onRevealed's answer drawn: the payslip's Continue)
+    // …and its list's smooth scroll to the newest row has stopped (F149, F148 E: the shot caught it part-way, at a
+    // different spot in each run and engine): no scroll box moved over two frames
+    await page.waitForFunction(() => new Promise((done) => {
+      const at = () => [...document.querySelectorAll('.kit-scroll')].map((el) => el.scrollTop).join()
+      const before = at()
+      requestAnimationFrame(() => requestAnimationFrame(() => done(at() === before)))
+    }))
+  }
+  await page.screenshot({ path: `${OUT}/${file}.png`, fullPage: true })
+  // …and its layout (F149): each text's line count + each part's size, for npm run compare:engines
+  writeFileSync(`${OUT}/layout/${file}.json`, JSON.stringify(await page.evaluate(recordLayout)))
   shotCount++
   report(`${file}.png`, [...page.errors, ...(await page.evaluate(findProblems, { screenWidth: size.width, checkFocus: !prepare }))])
 }
@@ -144,7 +183,7 @@ async function checkScreens(size) {
     // The dialog sits right over the settings panel, so its buttons are checked by focus only
     if (await button('Back').evaluate((el) => { el.focus(); return document.activeElement === el })) problems.push('covered "Back" took focus')
     await page.waitForTimeout(600)
-    await page.locator('.gallery-screens').screenshot({ path: `screenshots/screens-dialog-${size.name}.png` })
+    await page.locator('.gallery-screens').screenshot({ path: `${OUT}/screens-dialog-${size.name}.png` })
     await page.keyboard.press('Escape')
     await expectLayers(2, 'first Esc')
     await page.keyboard.press('Escape')
@@ -190,67 +229,83 @@ async function checkMenu(size) {
   await page.close()
 }
 
+// Accessibility floor: browser text size at 200%
+const text200 = (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+// Settings opens on its Accessibility tab at 200% (0.34.1, F141): the ◀ tab ▶ picker shows its longest word there.
+const openers = {
+  settings: async (page) => {
+    await text200(page)
+    while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+  },
+}
+
 const started = Date.now()
 try {
-  await checkScreens(sizes.phone)
-  await checkScreens(sizes.desktop)
-  await checkMenu(sizes.phone)
-  // The gallery's own pages
-  for (const size of Object.values(sizes)) {
-    await shoot(`menu-${size.name}`, size, '')
-    await shoot(`parts-${size.name}`, size, '?screen=parts')
-  }
-  // Accessibility floor: browser text size at 200%
-  const text200 = (page) => page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
-  await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', text200)
-  // …and EVERY screen at 200%, in Clean, on a phone upright and on its side (F144) — every screen both ways,
-  // whatever a game's own orientation. Settings opens on its Accessibility tab (0.34.1, F141): the ◀ tab ▶ picker
-  // shows its longest word there.
-  const openers = {
-    settings: async (page) => {
-      await text200(page)
-      while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
-    },
-  }
-  for (const size of [sizes.phone, sizes.landscape]) {
-    for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
-  }
-  // …and the key screens at 200% in every OTHER look, both phones (F146): a look's own font can be wider than Clean's
-  // (Cozy and Pixel's HUD sideways overlapped where Clean's fit)
-  for (const preset of presetNames.filter((p) => p !== 'clean')) {
-    for (const size of [sizes.phone, sizes.landscape]) {
-      for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${size.name}-text-200`, size, `?screen=${id}&preset=${preset}`, openers[id] || text200)
+  if (WEBKIT) {
+    // iPhone's engine (F148): the screen stack and the menu on a phone, then the key screens in every look, both
+    // phones, at 100% and 200% text — the same names as the Chromium shots, so a pair can be looked at side by side
+    await checkScreens(sizes.phone)
+    await checkMenu(sizes.phone)
+    for (const preset of presetNames) {
+      for (const size of [sizes.phone, sizes.landscape]) {
+        for (const id of keyScreens) {
+          await shoot(`screens/${id}-${preset}-${size.name}`, size, `?screen=${id}&preset=${preset}`)
+          await shoot(`screens/${id}-${preset}-${size.name}-text-200`, size, `?screen=${id}&preset=${preset}`, openers[id] || text200)
+        }
+      }
     }
+  } else {
+    await checkScreens(sizes.phone)
+    await checkScreens(sizes.desktop)
+    await checkMenu(sizes.phone)
+    // The gallery's own pages
+    for (const size of Object.values(sizes)) {
+      await shoot(`menu-${size.name}`, size, '')
+      await shoot(`parts-${size.name}`, size, '?screen=parts')
+    }
+    await shoot('parts-phone-text-200', sizes.phone, '?screen=parts', text200)
+    // …and EVERY screen at 200%, in Clean, on a phone upright and on its side (F144) — every screen both ways,
+    // whatever a game's own orientation (Settings on its Accessibility tab: openers, above)
+    for (const size of [sizes.phone, sizes.landscape]) {
+      for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
+    }
+    // …and the key screens at 200% in every OTHER look, both phones (F146): a look's own font can be wider than Clean's
+    // (Cozy and Pixel's HUD sideways overlapped where Clean's fit)
+    for (const preset of presetNames.filter((p) => p !== 'clean')) {
+      for (const size of [sizes.phone, sizes.landscape]) {
+        for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${size.name}-text-200`, size, `?screen=${id}&preset=${preset}`, openers[id] || text200)
+      }
+    }
+    // Live restyle: change a tweak with the dev switcher and check it repaints
+    await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
+      await page.getByLabel('Next Corners').click()
+      await page.getByLabel('Next Spacing').click()
+      await page.locator('.gallery-colour').fill('#b0306a')
+    })
+    for (const preset of presetNames) {
+      await shoot(`parts-${preset}-phone`, sizes.phone, `?screen=parts&preset=${preset}`)
+      await shoot(`parts-${preset}-desktop`, sizes.desktop, `?screen=parts&preset=${preset}`)
+    }
+    // Every screen in Clean, then the key screens in the other styles
+    const shots = [
+      ...screenIds.map((id) => [id, 'clean']),
+      ...presetNames.filter((p) => p !== 'clean').flatMap((preset) => keyScreens.map((id) => [id, preset])),
+    ]
+    for (const [id, preset] of shots) {
+      for (const size of [sizes.phone, sizes.desktop]) await shoot(`screens/${id}-${preset}-${size.name}`, size, `?screen=${id}&preset=${preset}`)
+    }
+    for (const preset of presetNames) {
+      for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.landscape.name}`, sizes.landscape, `?screen=${id}&preset=${preset}`)
+    }
+    // The small phone (key screens) and the small phone on its side (the landscape screens), in every style
+    for (const preset of presetNames) {
+      for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${sizes.small.name}`, sizes.small, `?screen=${id}&preset=${preset}`)
+      for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.smallLandscape.name}`, sizes.smallLandscape, `?screen=${id}&preset=${preset}`)
+    }
+    // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
+    await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
+      (page) => page.getByRole('button', { name: 'Copy' }).click())
   }
-  // Live restyle: change a tweak with the dev switcher and check it repaints
-  await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
-    await page.getByLabel('Next Corners').click()
-    await page.getByLabel('Next Spacing').click()
-    await page.locator('.gallery-colour').fill('#b0306a')
-  })
-  for (const preset of presetNames) {
-    await shoot(`parts-${preset}-phone`, sizes.phone, `?screen=parts&preset=${preset}`)
-    await shoot(`parts-${preset}-desktop`, sizes.desktop, `?screen=parts&preset=${preset}`)
-  }
-  // Every screen in Clean, then the key screens in the other styles
-  const shots = [
-    ...screenIds.map((id) => [id, 'clean']),
-    ...presetNames.filter((p) => p !== 'clean').flatMap((preset) => keyScreens.map((id) => [id, preset])),
-  ]
-  for (const [id, preset] of shots) {
-    for (const size of [sizes.phone, sizes.desktop]) await shoot(`screens/${id}-${preset}-${size.name}`, size, `?screen=${id}&preset=${preset}`)
-  }
-  for (const preset of presetNames) {
-    for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.landscape.name}`, sizes.landscape, `?screen=${id}&preset=${preset}`)
-  }
-  // The small phone (key screens) and the small phone on its side (the landscape screens), in every style
-  for (const preset of presetNames) {
-    for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${sizes.small.name}`, sizes.small, `?screen=${id}&preset=${preset}`)
-    for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.smallLandscape.name}`, sizes.smallLandscape, `?screen=${id}&preset=${preset}`)
-  }
-  // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
-  await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
-    (page) => page.getByRole('button', { name: 'Copy' }).click())
 } catch (e) {
   if (!(e instanceof CodeChanged)) throw e
 } finally {

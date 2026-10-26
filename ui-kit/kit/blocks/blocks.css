@@ -115,6 +115,10 @@
   .kit-hud-slot :is(button, input, [tabindex="0"]) { pointer-events: auto; }
   .kit-hud-chip { display: inline-flex; flex-wrap: nowrap; padding: var(--gap-xs) var(--gap-s); }
   .kit-hud-chip .kit-text { white-space: nowrap; overflow-wrap: normal; } /* short HUD words never break letter by letter */
+  /* A Bar's or Counter's typed symbol (❤ 🪙, 0.35.5, F149) has a box of its own, as wide as a colour emoji (1.375 em),
+     the symbol centred in it: the same ❤ is a 0.97 em text heart in one font and a 1.37 em emoji in another (WebKit,
+     every iPhone), and the chip and its bar used to follow it. A picture (an <img>, an svg) keeps its own size. */
+  .kit-hud-icon[data-symbol] { display: inline-flex; justify-content: center; flex: none; inline-size: 1.375em; }
   /* …but a chip's sentence (ConnectionDot's "Weak connection", 0.35.2, F145) may go onto two lines between its words in
      a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
      Only there: in a right corner it would narrow the corner's other pieces' row too. */
@@ -335,6 +339,10 @@
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; }
     .kit-main-menu-buttons[data-many] { display: grid; grid-template-columns: 1fr 1fr; } /* 6+ buttons, extras counted (0.24.0) */
+    /* …each half-width button keeps a gap-m each side of its words, not gap-l (like `compact`; 0.35.5, F149): "HOW TO
+       PLAY" in Neon fit its 113.39 px by 0.03 px in Chromium and wrapped in WebKit (113.77 px) — a label shouldn't fit
+       by a hair that one engine's rounding takes away. The buttons keep their size; only the words get the room. */
+    .kit-main-menu-buttons[data-many] > .kit-button { padding-inline: var(--gap-m); }
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   :is(.kit-end-title, .kit-fit-title) { display: inline-block; }
@@ -362,6 +370,10 @@
   }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
+  /* A row's ▼ / ▲ tag is never wider than 7/8 em, the triangle centred (0.35.5, F149): the same ▼ is 0.86 em in one
+     fallback font and 0.99 in another (WebKit) — the tag grew 2–5 px and the row's words lost that room and took a line
+     more. A look whose own font draws a narrower one (Pixel) keeps it. */
+  .kit-tone-mark { display: inline-flex; justify-content: center; max-inline-size: 0.875em; }
   /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);
      the report's column is never taller than the card, so a long list scrolls there too (0.31.0) */
   @media (max-height: 30rem) and (min-width: 40rem) {

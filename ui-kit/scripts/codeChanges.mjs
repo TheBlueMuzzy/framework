@@ -4,7 +4,7 @@
 import { relative, sep } from 'node:path'
 
 // What the run itself writes (its own screenshots) — never counted as a code change
-export const RUN_OUTPUT = ['screenshots']
+export const RUN_OUTPUT = ['screenshots', 'screenshots-webkit']
 
 /** Listen to a Vite server's file watcher; returns () => the changed files so far (relative to root, / separators). */
 export function watchCodeChanges(watcher, root, { ignore = RUN_OUTPUT } = {}) {

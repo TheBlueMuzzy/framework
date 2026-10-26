@@ -61,6 +61,26 @@
   .kit-screen > [data-slot="center"] > .kit-panel { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
   .kit-screen > [data-slot="center"] > .kit-panel::-webkit-scrollbar { display: none; }
   .kit-screen > [data-slot="center"] > .kit-panel > :not(.kit-scroll) { flex-shrink: 0; }
+  /* …and while it scrolls, its last row of buttons stays in sight at its bottom, with the card's room below it
+     (0.35.5, F149): the words scroll under it. Safari's text-wrap: pretty wraps more than Chromium's (it evens out the
+     whole paragraph), so the Lobby room on a Pixel phone on its side was 17 px too tall and "I'M READY" sat cut on the
+     card's bottom edge — and a game's longer words would do the same in any browser. The row is painted with the card's
+     colour (and the strip of room around it) only while the card can scroll: a scroll timeline only runs then. Older
+     browsers without scroll timelines keep the plain last-resort scroll. Not on a <Screen scroll> (the screen scrolls). */
+  @supports (animation-timeline: scroll()) {
+    /* (a row of buttons only: a row of words + a picker is content, not the card's way out) */
+    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button):not(:has(> :not(.kit-button))) {
+      position: sticky; inset-block-end: 0; z-index: 1;
+      animation: kit-card-foot linear both; animation-timeline: scroll(nearest block); }
+    /* (0.35.7, Muzzy 2026-10-26) A soft fade above it, like a ScrollArea's "more below" edge, so a line cut where it
+       scrolls under the row reads as "scroll". It thins out as the card scrolls and is gone at the end (nothing's left
+       under the row). Same scroll timeline: only while the card can scroll. */
+    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button):not(:has(> :not(.kit-button)))::before {
+      content: ""; position: absolute; inset-inline: 0; inset-block-end: calc(100% + var(--gap-s));
+      block-size: var(--kit-scroll-fade, 2rem); pointer-events: none; opacity: 0;
+      background: linear-gradient(to bottom, transparent, var(--surface));
+      animation: kit-card-foot-fade linear both; animation-timeline: scroll(nearest block); }
+  }
   /* <Screen grow="down"> (0.10.0, every kit menu): the card OPENS in the middle, then its top stays put and it only grows
      or shrinks DOWNWARD, so a control just tapped stays under the finger (Muzzy 2026-10-10: "it should start in the
      center and only expand downwards"). layout.tsx measures where the middle is when it opens (and again only on a
@@ -155,7 +175,18 @@
      stops growing at three quarters of the 44px button, so even a wide one (◀) and its side room stay 44px wide — at
      200% text an icon stays tap-sized and the WORDS get the room (◀ ▶ had grown to 67px each and squeezed
      "Accessibility" in Settings' tab picker into two pieces). Every style's title size is under that at 100%. */
-  .kit-button[data-icon] { padding: 0 0.15em; aspect-ratio: 1; font-size: min(var(--text-title), var(--target-min) * 0.75); line-height: 1; }
+  /* 0.35.5 (F149): the cap held the glyph's SIZE, but the button still took the glyph's WIDTH — and the same ⚙ is a
+     0.85 em text symbol in one font and a 1.37 em colour emoji in another (WebKit, an iPhone): the button grew 44 → 55
+     (61 at 200%). Now the button is exactly its size (44 px, or size="…") whatever draws its symbol, and a symbol too
+     wide for it is drawn smaller: Button measures it (--kit-glyph-em = its width ÷ its font size, useGlyphFit) and the
+     size stops where symbol + side room fill the inside of the border. Text symbols fit already: no change for them. */
+  /* (F149 fix) The side room is at least 0.125rem (2 px) whatever the symbol's size: 0.15 em of a symbol drawn small
+     to fit was under the page check's 1.5 px — so the size also stops where symbol + 2 × 0.125rem fill the inside. */
+  .kit-button[data-icon] { --kit-icon-box: max(var(--target-min), var(--kit-button-size, 0rem));
+    padding: 0 max(0.15em, 0.125rem); inline-size: var(--kit-icon-box); block-size: var(--kit-icon-box); line-height: 1;
+    font-size: min(var(--text-title), var(--target-min) * 0.75, (var(--kit-icon-box) - 2 * var(--border-width)) / (var(--kit-glyph-em, 0) + 0.3),
+      (var(--kit-icon-box) - 2 * var(--border-width) - 0.25rem) / max(var(--kit-glyph-em, 0), 0.01)); }
+  .kit-button-glyph { flex: none; }
   /* size="…px": as tall as the game asks (e.g. a board hex), and at least that wide — never below target-min */
   .kit-button[data-sized] { min-block-size: max(var(--target-min), var(--kit-button-size)); min-inline-size: max(var(--target-min), var(--kit-button-size)); }
   /* compact: a gap-m each side of the label instead of gap-l (a row of big buttons on one line on a narrow phone) */
@@ -415,6 +446,11 @@
 @keyframes kit-pop { from { opacity: 0; transform: scale(0.85); } }
 @keyframes kit-attention { 0% { transform: scale(1); } 35% { transform: scale(1.35); } 100% { transform: scale(1); } }
 @keyframes kit-blink { 0%, 24%, 50%, 74% { opacity: 0; } 25%, 49%, 75%, 100% { opacity: 1; } }
+/* A scrolling card's last row of buttons (above): the card's colour behind it, a gap-s strip above and the card's
+   bottom room below, so words scrolling under it never show round it (only while the card can scroll) */
+@keyframes kit-card-foot { from, to { background-color: var(--surface);
+  box-shadow: 0 var(--gap-l) var(--surface), 0 calc(-1 * var(--gap-s)) var(--surface); } }
+@keyframes kit-card-foot-fade { from { opacity: 1; } to { opacity: 0; } }
 @keyframes kit-flicker { 0% { opacity: 0; } 10% { opacity: 0.8; } 20% { opacity: 0.1; } 35% { opacity: 1; } 45% { opacity: 0.3; } 60%, 100% { opacity: 1; } }
 
 /* ───────────── Screen column · swipe · slide (0.12.0) ───────────── */

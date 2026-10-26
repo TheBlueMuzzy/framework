@@ -6,6 +6,7 @@ import {
   Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle,
 } from '../kit'
 import { ScreensDemo } from './ScreensDemo'
+import { gear } from './symbols'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -71,7 +72,7 @@ function Buttons() {
         <Button variant="secondary">Secondary</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="danger">Delete save</Button>
-        <Button variant="secondary" icon aria-label="Settings">⚙</Button>
+        <Button variant="secondary" icon aria-label="Settings">{gear}</Button>
         <Button loading>Joining</Button>
         <Button disabled>Disabled</Button>
         <Button variant="secondary" size={72}>Piece-sized</Button>

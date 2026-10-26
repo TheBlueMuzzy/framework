@@ -25,6 +25,8 @@ describe('a code change during the shoot (F129)', () => {
     const { watcher, changes } = setup()
     watcher.emit('add', join(root, 'screenshots', 'screens', 'hud-clean-phone.png'))
     watcher.emit('change', join(root, 'screenshots', 'menu-desktop.png'))
+    // …nor the WebKit run's (F148)
+    watcher.emit('add', join(root, 'screenshots-webkit', 'screens', 'hud-clean-phone.png'))
     expect(changes()).toEqual([])
   })
 

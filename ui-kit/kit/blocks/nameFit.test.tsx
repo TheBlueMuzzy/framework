@@ -49,7 +49,9 @@ describe.each(Object.keys(presets))('names in %s', (preset) => {
     expect(await check(390, 844, preset, room)).toEqual({ problems: [], cut: [] })
   })
   // 667×375: a small phone on its side; 844×335: a big one under a bar (the gallery's) — Leave sat on the waiting line
-  it.each([[667, 375], [844, 335]])('the Lobby room on a phone on its side (%i×%i): nothing cut off or overlapping', async (width, height) => {
+  // 844×260 (F149): short enough that the card scrolls on every machine — its Leave / I'm ready row stays at its bottom
+  // (kit.css) and the waiting line scrolls under it: words a scroll uncovers are not an overlap (uiProblems.mjs)
+  it.each([[667, 375], [844, 335], [844, 260]])('the Lobby room on a phone on its side (%i×%i): nothing cut off or overlapping', async (width, height) => {
     expect(await check(width, height, preset, room)).toEqual({ problems: [], cut: [] })
   })
 })
