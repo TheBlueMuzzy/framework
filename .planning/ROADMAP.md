@@ -394,18 +394,17 @@ flowchart LR
 
 ## v0.24 — A test game guards every update  ← current · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "you focus on the framework and bmuz" — Goops' own Claude takes F59/F60/F62): a tiny turn-based game in the framework with every module wired, that runs the framework's checks on every module change — so a broken update is caught before any game takes it (this week: three GitHub-only failures in two milestones, one found only after the merge). Plus the results badge the WebKit run found.
-- 🔨 F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63 · sprint 42
-- 🔨 F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built · sprint 42
-- 🟢 F64 🧱 Realtime starter — `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62
-- 🔨 F152 🐞 Results badge room — "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149 · sprint 42
+- ✅ F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63 · sprint 42
+- ✅ F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built · sprint 42
+- ✅ F152 🐞 Results badge room — "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149 · sprint 42
 ```mermaid
 flowchart LR
   F151[F151 Turn-based starter] --> F65[F65 Framework test game]
   F152[F152 Results badge room]
-  F64[F64 Realtime starter]
 ```
 
 ## Later
+- 💤 F64 🧱 Realtime starter — `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62 · moved to Later 2026-10-26 (Muzzy: "good to go": the turn-based starter already guards every update)
 - **Dev Kit Time tool extras: slow motion + step one frame** on the rules clock (F60's should-part, moved 2026-10-26 — nobody has asked yet) — should
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches

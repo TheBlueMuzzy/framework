@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-26 4:40 PM — **Sprint 42 built, waiting on Muzzy: F151 — Turn-based starter (starters/turn-based: tic-tac-toe, all 10 modules wired, AI Careful Cleo / Careless Cass, online through the rooms module, a felt table behind the HUD — content/tuning/board.json tableColour), F65 — Framework test game (check:fast + GitHub play the starter with fresh modules; proven red with emotes broken on purpose), F152 — Results badge room (UI kit 0.35.8: avatars keep room for their ring; the page check's new ring: kind). Next: Muzzy plays the starter + approves → retro → /deliver v0.24 (F64 — Realtime starter is the milestone's last feature: its own sprint, or Later).** BMUZ today: feature numbers always named, questions numbered, /define + /sprint copy the starter, live-push skips comments. Released v0.25.0 earlier today (v0.23 Works on iPhone's browser ✅); v0.9 closed; Goops' own Claude handles Goops.
+2026-10-26 5:05 PM — **Sprint 42 approved (Muzzy: "good to go" — keep the felt table #235b45; F64 — Realtime starter to Later). Next: retro → archive → /deliver v0.24 (all its features ✅).** Built: F151 — Turn-based starter (starters/turn-based: tic-tac-toe, all 10 modules wired, AI Careful Cleo / Careless Cass, online through the rooms module, a felt table behind the HUD — content/tuning/board.json tableColour), F65 — Framework test game (check:fast + GitHub play the starter with fresh modules; proven red with emotes broken on purpose), F152 — Results badge room (UI kit 0.35.8: avatars keep room for their ring; the page check's new ring: kind). GitHub green on the whole sprint (run 40397632580). BMUZ today: feature numbers always named, questions numbered, /define + /sprint copy the starter, live-push skips comments. Released v0.25.0 earlier today (v0.23 Works on iPhone's browser ✅); v0.9 closed; Goops' own Claude handles Goops.
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 3160722 (sprint 42 by Claude: F151 starter — rules
 
 ## Where we are
 Stage: develop   Milestone: v0.24 A test game guards every update   Sprint: 42
-Doing: F151, F65, F152 — waiting on Muzzy's approval   Branch: dev/v0-24-test-game   Version: 0.25.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.8 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
+Doing: Sprint 42 approved — retro, then /deliver v0.24   Branch: dev/v0-24-test-game   Version: 0.25.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.8 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.25.0
 
 ## Key facts
