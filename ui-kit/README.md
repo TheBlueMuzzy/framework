@@ -367,6 +367,11 @@ gallery's `npm run shoot` uses the same one.
   - Symbols a game types: `'⚙︎'` asks for the plain-text look (an iPhone otherwise draws Apple's colour emoji; the
     gallery's ⚙ does). WebKit on Windows ignores it — its only font with ⚙ is the emoji one — so only a real iPhone
     shows the difference. The button's size holds either way.
+- 0.35.6 (F149, GitHub's Linux): an icon Button's symbol keeps at least 0.125rem (2 px) each side, and `fitGlyph`
+  measures again at the size it just gave until the symbol fits — text snapped to whole pixels (Linux) came out a
+  pixel wider than its share once drawn smaller, leaving 1 px of room. The page check's `overlap:` leaves words alone
+  when a sticky row (a scrolling card's buttons) sits over them and scrolling that same box moves them out from under
+  it (tried at both ends, then put back); a sticky row over words no scroll uncovers is still an overlap.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

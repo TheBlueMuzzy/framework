@@ -110,12 +110,30 @@ function useGlyphFit(on: boolean) {
 }
 
 /** An icon button's symbol (.kit-button-glyph) → its button's --kit-glyph-em: the symbol's width ÷ its font size. */
+// A symbol's width doesn't shrink exactly with its size (F149 fix, GitHub's Linux: text drawn there snaps to whole
+// pixels, so the smaller symbol came out up to ~1 px wider than its share and left 1 px of room, not 1.5): measured
+// again at the size it was just given, until it holds — a few rounds at most. It only takes a SMALLER width-per-size
+// when that's clearly another font (5 % less: a restyle), never a pixel's rounding back and forth, so the observer
+// that calls it settles instead of flipping between two sizes every frame.
 export function fitGlyph(glyph: HTMLElement) {
   const button = glyph.parentElement
-  const fontSize = parseFloat(getComputedStyle(glyph).fontSize)
-  if (!button || !fontSize || !button.offsetWidth) return
-  // (its width before any transform: a pressed button is scaled down)
-  const scale = button.getBoundingClientRect().width / button.offsetWidth || 1
-  const value = (glyph.getBoundingClientRect().width / scale / fontSize).toFixed(3)
-  if (button.style.getPropertyValue('--kit-glyph-em') !== value) button.style.setProperty('--kit-glyph-em', value)
+  if (!button || !button.offsetWidth) return
+  const current = parseFloat(button.style.getPropertyValue('--kit-glyph-em')) || 0
+  let em = 0
+  for (let round = 0; round < 4; round++) {
+    const fontSize = parseFloat(getComputedStyle(glyph).fontSize)
+    if (!fontSize) return
+    // (its width before any transform: a pressed button is scaled down)
+    const scale = button.getBoundingClientRect().width / button.offsetWidth || 1
+    const measured = glyph.getBoundingClientRect().width / scale / fontSize
+    let next: number
+    if (round > 0) next = Math.max(em, measured) // measured at the size just given: only ever wider
+    else if (measured < current * 0.95) next = measured // a clearly narrower symbol (another font): start again from it
+    else next = Math.max(measured, current) // the same symbol: a pixel's rounding never makes it bigger again
+    if (round > 0 && next - em < 0.0005) break
+    em = next
+    const value = em.toFixed(3)
+    if (button.style.getPropertyValue('--kit-glyph-em') === value) break
+    button.style.setProperty('--kit-glyph-em', value)
+  }
 }

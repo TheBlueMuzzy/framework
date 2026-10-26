@@ -116,6 +116,27 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     return s.backgroundColor !== 'rgba(0, 0, 0, 0)' || s.backgroundImage !== 'none' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
   }
   const part = (el, x) => el === x || x.contains(el) // x itself or something inside it
+  // A sticky piece over words of its own scroll box (F149: a card that has to scroll keeps its last row of buttons at
+  // its bottom, kit.css, and the words scroll under it): not an overlap when scrolling the box moves the words out
+  // from under it — tried at both ends of the box's scroll, then put back. A sticky piece over words that no scroll
+  // ever uncovers is still an overlap.
+  const scrollsOutFromUnder = (a, b) => {
+    const stickyOf = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) if (getComputedStyle(e).position === 'sticky') return e; return null }
+    const sticky = stickyOf(a) ?? stickyOf(b)
+    if (!sticky || (sticky.contains(a) && sticky.contains(b))) return false
+    const words = sticky.contains(a) ? b : a
+    let box = sticky.parentElement
+    for (; box && box !== document.documentElement; box = box.parentElement) if (/(auto|scroll)/.test(getComputedStyle(box).overflowY)) break
+    if (!box || box === document.documentElement || !box.contains(words) || box.scrollHeight <= box.clientHeight + 1) return false
+    const was = box.scrollTop
+    let uncovered = false
+    for (const top of [0, box.scrollHeight - box.clientHeight]) {
+      box.scrollTo({ top, behavior: 'instant' })
+      if (!crossing(visibleBox(sticky), visibleBox(words))) uncovered = true
+    }
+    box.scrollTo({ top: was, behavior: 'instant' })
+    return uncovered
+  }
 
   // ---- colours (0.21.0) ----
   // A colour as [r, g, b, alpha] whatever way CSS wrote it (rgb(), color-mix(), oklch()…): the browser paints it on
@@ -330,7 +351,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
           else if (paints(el)) break // something else — or one's own card / dialog — covers the other there
           if (seenA && seenB) break
         }
-        if (seenA && seenB) { problems.push(`overlap: "${name(a)}" × "${name(b)}"`); crossed.push([a, b]) }
+        if (seenA && seenB && !scrollsOutFromUnder(a, b)) { problems.push(`overlap: "${name(a)}" × "${name(b)}"`); crossed.push([a, b]) }
       }
     }
     // Covered bars and pictures (0.33.1): a solid piece (a chip, badge, button or panel — its own background, not
@@ -391,7 +412,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
           else if (paints(el)) break // something else covers them there
           if (seenT && seenP) break
         }
-        if (!seenT || !seenP) continue
+        if (!seenT || !seenP || scrollsOutFromUnder(piece, target)) continue
         found.push(piece)
         problems.push(`overlap: "${name(piece)}" covers part of "${name(target)}"`)
       }

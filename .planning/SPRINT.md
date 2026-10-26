@@ -141,3 +141,15 @@ Notes:
   either way and a too-wide emoji is drawn smaller. Should the kit still carry its own drawn icons (gear, heart, ▼ ▲)
   so every phone shows the SAME picture? It's a look choice now, not a layout bug.
 - Merged 2026-10-26 2:20 AM (Claude): F149 read whole — no bugs (glyph fit + its rAF refit, the HUD symbol box, the ▼ ▲ cap, the menu's gap-m, the sticky card foot). Probed the foot with reduce motion on (the kit sets animation-duration 0s): still painted in Chromium and WebKit. check:fast 20/20 (after the gallery's own vite held ui-kit's node_modules: TaskStop on `cd … && npx vite` left vite running — stopped with stop-servers.mjs 5180, reinstalled, restarted). GitHub red (run 40279344615, Linux only): iconFit room 1 px < 1.5 (Linux's emoji font), nameFit Lobby 844×335 Clean — the card scrolls there, the sticky foot sits over scrolling words and the page check calls it an overlap → back to the F149 helper: the page check learns sticky rows; the icon room fixed at its root.
+- F149 fix after GitHub red (run 40279344615, Linux; kit 0.35.6): (1) iconFit — not emoji at all (the test's symbols are
+  kit-font "+" / "WWW"): fitGlyph measured the symbol's width-per-size once, at its old size; text drawn on Linux snaps
+  to whole pixels, so once drawn smaller it came out ~1 px wider than its share → 1 px of room. Now fitGlyph measures
+  again at the size it just gave until it holds (≤ 4 rounds; only a clearly narrower symbol, 5 %, lowers it — no
+  frame-to-frame flipping), and the side room is at least 0.125rem. New test: a symbol with 6 px that don't shrink
+  (a stand-in for the rounding) — failed with one round (0.09–0.3 px of room), passes now. (2) nameFit 844×335 — Linux's
+  wider fonts made the Lobby card scroll, so the sticky button row sat over the waiting line, which the page check
+  called an overlap. uiProblems now skips a sticky row over words that a scroll of the same box moves out from under
+  it (tried at both ends, put back), in both overlap checks; a sticky row over words no scroll uncovers still counts
+  (tests in uiProblems.test.mjs, Chromium + WebKit). Reproduced here at 844×260 (fails in 4 looks without the rule) —
+  kept as a nameFit case. ui-kit tests 833 ✓; check:fast ✓ all 20; Chromium SHOOT_ONLY of hud/huddock/chips/pause/
+  settings/room/roomauto/payslip/teach/menu: 373 shots, 0 problems, layout vs 0.35.5: no wrap, 0 sizes > 1 px.
