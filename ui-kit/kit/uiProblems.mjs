@@ -17,6 +17,8 @@
 //              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
+//   "ring:"    words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring (an outline)
+//              included and its round shape (a circle, not its box) — 0.35.8
 //   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
 //              box it's drawn in; a word wider than that box may still wrap — 0.34.1 — unless it's in a title (0.35.1:
 //              a title can drop a size instead — "Reconnecti / ng…")
@@ -419,6 +421,44 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     }
   } finally {
     hitAll.remove()
+  }
+
+  // ---- an avatar's ring (0.35.8, F152) ----
+  // Words or a badge closer than ~2 px to an avatar's VISIBLE edge — its ring included: Results' 1st place wears an accent
+  // outline 5 px out (10 px at 200% text) that isn't part of its box, so every box check saw the 8 px gap and never the
+  // ring crossing "1ST", the name and its ★. Both shapes are measured as drawn: a box rounded by its border-radius (a
+  // round avatar is a circle — a badge by its box's corner can be clear of it, or not, whatever the boxes say), the
+  // avatar's grown by its outline. Something laid ON the avatar's body (a seat's badge on its portrait's corner) is
+  // there on purpose and left alone.
+  // (style lengths are before any transform: a chip pinned to the table at 0.25 draws its 16 px corners at 4 px — `k`)
+  const shrunk = (el) => (el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : 1)
+  const rounded = (box, el, grow = 0) => { // a box with round corners: its inner box + the corner radius (≤ half a side)
+    const r = Math.min((parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) * shrunk(el), (box.right - box.left) / 2, (box.bottom - box.top) / 2)
+    const R = r > 0 ? r + grow : 0 // (an outline follows the rounding; around square corners it stays square)
+    return { left: box.left - grow + R, right: box.right + grow - R, top: box.top - grow + R, bottom: box.bottom + grow - R, R }
+  }
+  const apart = (a, b) => { // px between two rounded shapes, below 0 when they cross
+    const dx = Math.max(a.left - b.right, b.left - a.right), dy = Math.max(a.top - b.bottom, b.top - a.bottom)
+    return (dx > 0 || dy > 0 ? Math.hypot(Math.max(dx, 0), Math.max(dy, 0)) : Math.max(dx, dy)) - a.R - b.R
+  }
+  for (const av of [...document.querySelectorAll('.kit-avatar')].filter((el) => shown(el) && !moving(el))) {
+    const s = getComputedStyle(av)
+    const reach = s.outlineStyle === 'none' ? 0 : Math.max(0, parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset)) * shrunk(av)
+    const b = av.getBoundingClientRect()
+    const body = rounded(b, av), ring = rounded(b, av, reach)
+    const near = [
+      ...texts.filter((el) => !el.closest('.kit-badge')).map((el) => [el, wordsBox(wordsIn(el, false)), null]),
+      ...[...document.querySelectorAll('.kit-badge')].filter((el) => shown(el)).map((el) => [el, el.getBoundingClientRect(), el]),
+    ]
+    for (const [el, box, shape] of near) {
+      if (!box || av.contains(el) || el.contains(av) || moving(el)) continue
+      const piece = shape ? rounded(box, shape) : { ...box, R: 0 } // (words: the box of their letters)
+      if (apart(piece, body) <= 0) continue // ON the avatar: on purpose
+      const room = apart(piece, ring)
+      // (a chip shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it — the gallery's
+      // pinned chips at 200% text: "Bot" 1 px from its 10 px portrait)
+      if (room < 1.5 * Math.min(1, shrunk(av))) problems.push(`ring: "${name(el)}" touches the ring around "${name(av)}" — ${Math.max(0, Math.round(room))} px of room`)
+    }
   }
 
   // Cards that grew after they appeared — noted as it happens by the kit's useFixedSize (fixedSize.ts, dev builds)

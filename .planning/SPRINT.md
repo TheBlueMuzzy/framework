@@ -23,9 +23,9 @@ Check: the broken-on-purpose run red in check:fast and on GitHub (run links in N
 
 ## F152 🐞 Results badge room
 Done when: the "1ST" badge never touches the avatar's ring on Results / End game in any look, size or engine, and the page check flags a badge touching a round avatar.
-- [ ] 🤖 1. Measure it on today's code: which looks, sizes and engines, by how much (shots) — ui-kit/kit/blocks/flow.tsx
-- [ ] 🤖 2. The page check sees a badge touching a round avatar's ring (a test that fails on today's code) — ui-kit/kit/uiProblems.mjs
-- [ ] 🤖 3. Give the badge room; Chromium + WebKit shoots 0 problems — ui-kit/kit/blocks/blocks.css
+- [x] 🤖 1. Measure it on today's code: which looks, sizes and engines, by how much (shots) — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 2. The page check sees a badge touching a round avatar's ring (a test that fails on today's code) — ui-kit/kit/uiProblems.mjs
+- [x] 🤖 3. Give the badge room; Chromium + WebKit shoots 0 problems — ui-kit/kit/blocks/blocks.css
 Check: `npm run shoot` + `npm run shoot:webkit` 0 problems; the new uiProblems test fails on the old code.
 
 Notes:
@@ -38,3 +38,14 @@ Notes:
 - F65 proof: broke emotes on purpose — `EMOTE_SAVE` renamed to `EMOTE_SAVE_SLOT` in emotes/kit/index.ts (the module's front door). Emotes' own tests, type check and lint stayed green; the starter's build failed (`src/game/saves.ts: Module '"../emotes"' has no exported member 'EMOTE_SAVE'`), its unit tests and framework (code) check too. Red locally (check:fast ✗ 1 of 22: the starter) and on GitHub: https://github.com/TheBlueMuzzy/framework/actions/runs/40390583484 (every module job green, the starter job red). Reverted → green locally (✓ all 22) and on GitHub: https://github.com/TheBlueMuzzy/framework/actions/runs/40391055576.
 - F65 found: the crashes installer imports the 'source-map' package, so installers are not all "no packages needed" — the starter job installs every module's packages. The starter pins playwright-core, so GitHub installs its browser with `npx playwright-core install` (`npx playwright` would fetch the newest Playwright and a Chromium the pinned one can't drive). The live-push hook reads any workflow that mentions "wrangler" or "deploy" as a deploy workflow (checks.yml runs on every push → every push blocked), so checks.yml's comments don't name them.
 - F65 — Framework test game merged 2026-10-26 4:15 PM (Claude): starter-check.mjs + checks.yml diff read whole — no bugs; a real run kept the starter's 1,267 package entries (the copy's links are removed, never their targets), no copies left in temp. Part of task 1 (34f77f5): check:fast plays the starter AFTER the module checks — side by side its load timed out crashes' 300-fingerprints test and ai's arena once (helper's find). The helper's push was refused by live-push.mjs reading "wrangler" in a checks.yml COMMENT as a deploy → fixed in ~/.claude (comments are skipped; test-hooks live-push 28/28).
+- F152 — Results badge room, task 1 measured (2026-10-26, Chromium + WebKit, all 7 looks, 5 sizes, 100% + 200% text on phones; script + close-ups in `dev/.scratch/framework-f152/`):
+  - What really happens: "1ST" is the place words (`.kit-place`), not a badge. The "ring" is the 1st-place avatar's accent OUTLINE (`.kit-avatar[data-state="active"]`, kit.css: 3 px line + 2 px offset = reaches 5 px out at 100%, 10 px at 200% — it grows with text size).
+  - Everything beside the avatar sits `gap-s` (8 px, does not grow with text size) from the avatar's BOX — so the ring eats 5–10 px of an 8 px gap. Other rows (no ring): 8 px, fine.
+  - Not only "1ST": the name and its ★ / You badges on the ring's right side too (phones, where the name sits next to the avatar).
+  - Room between the words / badge and the ring's visible edge (same in both engines, ±1 px):
+    - 100% text, every look: name + badges 3 px (Cozy 4); "1ST" 3 px in Neon + Pixel (uppercase fills the place column), 5–13 px in the others
+    - 200% text (phones), every look: the ring crosses INTO the name and badges by 1–2 px; into "1ST" by 2 px in Neon + Pixel (Clean 2.7 px of room)
+  - Why the page check misses it: an outline is not part of an element's box (getBoundingClientRect), so every box-based check sees 8 px. The round shape matters for a badge beside a round avatar (Cartoon, Cozy at 200%): its box corner can be near the ring's box while the circle is further — so the check has to measure the ring as drawn (box + outline, rounded by border-radius).
+  - Also found by the new check: the Lobby room (you wear the ring there) — "Muzzy" 0 px from it at 200% text on a phone on its side.
+- F152 task 2: new page-check kind `ring:` (uiProblems.mjs) — words or a badge < ~2 px from an avatar's visible edge (outline + rounding; a badge laid ON the avatar is left alone; a chip shrunk onto the table has its room shrunk too — else the pinned chips' "Bot" read 1 px at 200%). Test red first on the old check (80c3fe0: 2 failed, 1 passed), green after; 28/28 in Chromium and WebKit.
+- F152 task 3: `.kit-listrow .kit-avatar { margin: calc(0.1875rem + 0.125rem) }` (blocks.css) — every list-row avatar keeps the ring's room, so the column stays straight. After: 8 px from the ring to "1ST" / name / badges in every look, size and engine (Clean/Cozy/… 1st more). `npm run shoot` 961 shots, `shoot:webkit` 504 shots: 0 problems each (8 known, accepted); compare:engines: no wrap differs (1 accepted). UI kit 0.35.8.
