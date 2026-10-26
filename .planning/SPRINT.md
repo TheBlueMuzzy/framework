@@ -9,6 +9,7 @@ Done when: `npm run shoot:webkit` takes the 18 key screens in all 7 looks on an 
 - [x] 🤖 2. Run it on today's code and list every problem by look + screen in Notes, before any fix (look at a few shots beside Chromium's) — ui-kit/scripts/shoot.mjs
 - [x] 🤖 3. Say what it costs (shots, minutes), how to run it, and what WebKit on Windows can't tell you about a real iPhone — ui-kit/README.md
 Check: `npm run shoot:webkit` runs; the list is in Notes.
+Checked: 2026-10-26 10:18 AM–10:50 AM — `npm run shoot:webkit` on 8b46ced: 504 shots, 0 problems (8 known on accepted shots); the list is in Notes (F148, 12:50 AM).
 
 ## F149 🐞 The kit holds up in WebKit
 Done when: F148's differences A–C are fixed in the kit (a part's size no longer follows a symbol's font, no card's last button sits on its edge, no label wraps by a hair), a compare of both engines' layouts lists no wrap that differs (or each is accepted with a reason), and the Chromium shoot is unchanged (0 problems, 100% shots the same).
@@ -21,6 +22,7 @@ Done when: F148's differences A–C are fixed in the kit (a part's size no longe
 - [x] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially) — Muzzy approved F149 2026-10-26 without the phone look ("all approved")
 - [x] 🤖 7. (Muzzy's pick, 2026-10-26) A soft fade above a scrolling card's stuck button row, so a cut line reads as "scroll" (UI kit 0.35.7) — ui-kit/kit/kit.css
 Check: both runs + the compare; shots looked at; Muzzy's phone look.
+Checked: 2026-10-26 on 8b46ced — `npm run shoot` 961 shots + `npm run shoot:webkit` 504 shots, 0 problems each; `npm run compare:engines` 455 shots, no wrap differs (1 accepted); room in Pixel sideways looked at in both engines (fade on in WebKit while it scrolls, gone at the end; Chromium's card fits, unchanged). Phone look: Muzzy approved without it.
 
 ## F150 🔧 Saves work in every browser engine
 Done when: a test runs the saves module in real Chromium, WebKit and Firefox (Playwright) — save, load, an upgrade step, a save code, a full disk — and all three pass; anything that differs is fixed or written down.
@@ -29,6 +31,7 @@ Done when: a test runs the saves module in real Chromium, WebKit and Firefox (Pl
 - [x] 🤖 3. Fix what differs between engines (or write it down where nothing can fix it) — saves/kit/platform.ts
 - [x] 🤖 4. README: which engines are proven, how to run it, what's still only real-device — saves/README.md
 Check: the browsers test green in all three engines; saves `npm test` green.
+Checked: 2026-10-26 10:25 AM on 8d269f8 — saves `npm test` 276/276 (browsers test in Chromium, WebKit, Firefox inside it); the platform test's fixed waits now wait for the result.
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md). Goops runs in its own window: framework only.

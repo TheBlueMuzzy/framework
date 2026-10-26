@@ -388,9 +388,9 @@ flowchart LR
 
 ## v0.23 — Works on iPhone's browser  ← current · planned 2026-10-25
 Goal (Muzzy 2026-10-25: "go auto", option A): every iPhone browser is WebKit, and the kit and saves were only ever checked in Chromium — check and fix them in WebKit (and saves in Firefox too).
-- 🔨 F148 🔧 The shoot runs in WebKit too: the 18 key screens, all 7 looks, both phones, 100% + 200% text, in Playwright's WebKit — should · needs: F146 · sprint 41
-- 🔨 F149 🐞 The kit holds up in WebKit: what F148 finds — should · needs: F148, F147 · sprint 41
-- 🔨 F150 🔧 Saves work in every browser engine: real Chromium, WebKit and Firefox — save, load, upgrade, save code, full disk, private window — should · needs: F86 · sprint 41
+- ✅ F148 🔧 The shoot runs in WebKit too: the 18 key screens, all 7 looks, both phones, 100% + 200% text, in Playwright's WebKit — should · needs: F146 · sprint 41
+- ✅ F149 🐞 The kit holds up in WebKit: what F148 finds — should · needs: F148, F147 · sprint 41
+- ✅ F150 🔧 Saves work in every browser engine: real Chromium, WebKit and Firefox — save, load, upgrade, save code, full disk, private window — should · needs: F86 · sprint 41
 ```mermaid
 flowchart LR
   F148[F148 Shoot in WebKit] --> F149[F149 Kit holds up in WebKit]
