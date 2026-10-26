@@ -53,10 +53,12 @@ describe.each(Object.keys(presets))('icon buttons in %s', (preset) => {
 })
 
 // A Bar's / Counter's typed symbol and a stat row's ▼ / ▲ tag: a box of their own size, whatever their symbol's width
-it('a HUD symbol is 1.375 em wide and a ▼ / ▲ tag 0.875 em, narrow symbol or wide', async () => {
+it('a HUD symbol is 1.375 em wide, narrow symbol or wide; a ▼ / ▲ tag never wider than 0.875 em', async () => {
   const slot = (s: string) => `<span class="kit-hud-icon" data-symbol="true" style="font-size: 20px">${s}</span>`
   const tag = (s: string) => `<span class="kit-tone-mark" role="img" aria-label="Loss" style="font-size: 20px">${s}</span>`
-  await showInStyle(page, 'clean', `<div class="kit-hud-chip">${slot('+')}${slot('WWW')}</div>${tag('+')}${tag('WW')}`)
+  await showInStyle(page, 'clean', `<div class="kit-hud-chip">${slot('+')}${slot('WWW')}</div>${tag('.')}${tag('WW')}`)
   const widths = await page.$$eval('.kit-hud-icon, .kit-tone-mark', (els) => els.map((el) => el.getBoundingClientRect().width))
-  expect(widths).toEqual([27.5, 27.5, 17.5, 17.5])
+  expect(widths.slice(0, 2)).toEqual([27.5, 27.5])
+  expect(widths[2]).toBeLessThan(17.5) // a narrow one keeps its own width (Pixel's own ▼)
+  expect(widths[3]).toBe(17.5)
 })

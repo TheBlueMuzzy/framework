@@ -339,6 +339,10 @@
   @media (max-height: 30rem) and (min-width: 40rem) {
     .kit-main-menu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; }
     .kit-main-menu-buttons[data-many] { display: grid; grid-template-columns: 1fr 1fr; } /* 6+ buttons, extras counted (0.24.0) */
+    /* …each half-width button keeps a gap-m each side of its words, not gap-l (like `compact`; 0.35.5, F149): "HOW TO
+       PLAY" in Neon fit its 113.39 px by 0.03 px in Chromium and wrapped in WebKit (113.77 px) — a label shouldn't fit
+       by a hair that one engine's rounding takes away. The buttons keep their size; only the words get the room. */
+    .kit-main-menu-buttons[data-many] > .kit-button { padding-inline: var(--gap-m); }
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
   :is(.kit-end-title, .kit-fit-title) { display: inline-block; }
@@ -366,9 +370,10 @@
   }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
-  /* A row's ▼ / ▲ tag is always 7/8 em wide, the triangle centred (0.35.5, F149): one font's ▼ is 0.86 em, another's
-     0.99 (WebKit) — the tag grew 2–5 px and the row's words lost that room and took a line more. */
-  .kit-tone-mark { display: inline-flex; justify-content: center; inline-size: 0.875em; }
+  /* A row's ▼ / ▲ tag is never wider than 7/8 em, the triangle centred (0.35.5, F149): the same ▼ is 0.86 em in one
+     fallback font and 0.99 in another (WebKit) — the tag grew 2–5 px and the row's words lost that room and took a line
+     more. A look whose own font draws a narrower one (Pixel) keeps it. */
+  .kit-tone-mark { display: inline-flex; justify-content: center; max-inline-size: 0.875em; }
   /* Victory / Game over on a short, wide screen (a phone on its side): the report on the left, its buttons on the right (0.11.0);
      the report's column is never taller than the card, so a long list scrolls there too (0.31.0) */
   @media (max-height: 30rem) and (min-width: 40rem) {

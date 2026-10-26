@@ -61,6 +61,17 @@
   .kit-screen > [data-slot="center"] > .kit-panel { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
   .kit-screen > [data-slot="center"] > .kit-panel::-webkit-scrollbar { display: none; }
   .kit-screen > [data-slot="center"] > .kit-panel > :not(.kit-scroll) { flex-shrink: 0; }
+  /* …and while it scrolls, its last row of buttons stays in sight at its bottom, with the card's room below it
+     (0.35.5, F149): the words scroll under it. Safari's text-wrap: pretty wraps more than Chromium's (it evens out the
+     whole paragraph), so the Lobby room on a Pixel phone on its side was 17 px too tall and "I'M READY" sat cut on the
+     card's bottom edge — and a game's longer words would do the same in any browser. The row is painted with the card's
+     colour (and the strip of room around it) only while the card can scroll: a scroll timeline only runs then. Older
+     browsers without scroll timelines keep the plain last-resort scroll. Not on a <Screen scroll> (the screen scrolls). */
+  @supports (animation-timeline: scroll()) {
+    .kit-screen:not([data-scroll]) > [data-slot="center"] > .kit-panel > .kit-row:last-child:has(> .kit-button) {
+      position: sticky; inset-block-end: 0; z-index: 1;
+      animation: kit-card-foot linear both; animation-timeline: scroll(nearest block); }
+  }
   /* <Screen grow="down"> (0.10.0, every kit menu): the card OPENS in the middle, then its top stays put and it only grows
      or shrinks DOWNWARD, so a control just tapped stays under the finger (Muzzy 2026-10-10: "it should start in the
      center and only expand downwards"). layout.tsx measures where the middle is when it opens (and again only on a
@@ -423,6 +434,10 @@
 @keyframes kit-pop { from { opacity: 0; transform: scale(0.85); } }
 @keyframes kit-attention { 0% { transform: scale(1); } 35% { transform: scale(1.35); } 100% { transform: scale(1); } }
 @keyframes kit-blink { 0%, 24%, 50%, 74% { opacity: 0; } 25%, 49%, 75%, 100% { opacity: 1; } }
+/* A scrolling card's last row of buttons (above): the card's colour behind it, a gap-s strip above and the card's
+   bottom room below, so words scrolling under it never show round it (only while the card can scroll) */
+@keyframes kit-card-foot { from, to { background-color: var(--surface);
+  box-shadow: 0 var(--gap-l) var(--surface), 0 calc(-1 * var(--gap-s)) var(--surface); } }
 @keyframes kit-flicker { 0% { opacity: 0; } 10% { opacity: 0.8; } 20% { opacity: 0.1; } 35% { opacity: 1; } 45% { opacity: 0.3; } 60%, 100% { opacity: 1; } }
 
 /* ───────────── Screen column · swipe · slide (0.12.0) ───────────── */
