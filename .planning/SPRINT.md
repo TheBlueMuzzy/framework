@@ -25,7 +25,7 @@ Check: the broken-on-purpose run red in check:fast and on GitHub (run links in N
 Done when: the "1ST" badge never touches the avatar's ring on Results / End game in any look, size or engine, and the page check flags a badge touching a round avatar.
 - [x] 🤖 1. Measure it on today's code: which looks, sizes and engines, by how much (shots) — ui-kit/kit/blocks/flow.tsx
 - [x] 🤖 2. The page check sees a badge touching a round avatar's ring (a test that fails on today's code) — ui-kit/kit/uiProblems.mjs
-- [ ] 🤖 3. Give the badge room; Chromium + WebKit shoots 0 problems — ui-kit/kit/blocks/blocks.css
+- [x] 🤖 3. Give the badge room; Chromium + WebKit shoots 0 problems — ui-kit/kit/blocks/blocks.css
 Check: `npm run shoot` + `npm run shoot:webkit` 0 problems; the new uiProblems test fails on the old code.
 
 Notes:
@@ -41,3 +41,6 @@ Notes:
     - 100% text, every look: name + badges 3 px (Cozy 4); "1ST" 3 px in Neon + Pixel (uppercase fills the place column), 5–13 px in the others
     - 200% text (phones), every look: the ring crosses INTO the name and badges by 1–2 px; into "1ST" by 2 px in Neon + Pixel (Clean 2.7 px of room)
   - Why the page check misses it: an outline is not part of an element's box (getBoundingClientRect), so every box-based check sees 8 px. The round shape matters for a badge beside a round avatar (Cartoon, Cozy at 200%): its box corner can be near the ring's box while the circle is further — so the check has to measure the ring as drawn (box + outline, rounded by border-radius).
+  - Also found by the new check: the Lobby room (you wear the ring there) — "Muzzy" 0 px from it at 200% text on a phone on its side.
+- F152 task 2: new page-check kind `ring:` (uiProblems.mjs) — words or a badge < ~2 px from an avatar's visible edge (outline + rounding; a badge laid ON the avatar is left alone; a chip shrunk onto the table has its room shrunk too — else the pinned chips' "Bot" read 1 px at 200%). Test red first on the old check (80c3fe0: 2 failed, 1 passed), green after; 28/28 in Chromium and WebKit.
+- F152 task 3: `.kit-listrow .kit-avatar { margin: calc(0.1875rem + 0.125rem) }` (blocks.css) — every list-row avatar keeps the ring's room, so the column stays straight. After: 8 px from the ring to "1ST" / name / badges in every look, size and engine (Clean/Cozy/… 1st more). `npm run shoot` 961 shots, `shoot:webkit` 504 shots: 0 problems each (8 known, accepted); compare:engines: no wrap differs (1 accepted). UI kit 0.35.8.
