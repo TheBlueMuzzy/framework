@@ -375,6 +375,14 @@ gallery's `npm run shoot` uses the same one.
 - 0.35.7 (Muzzy 2026-10-26): a scrolling card's stuck row of buttons has a soft fade above it (`--kit-scroll-fade`,
   2rem — the ScrollArea's "more below" cue), so a line cut where it scrolls under the row reads as "scroll". It thins
   out as the card scrolls and is gone at the end. A card that fits shows nothing new.
+- 0.35.8 (F152): **Results' winner ring has room.** The 1st-place avatar's accent ring (and yours in the Lobby room) is
+  an outline drawn 0.3125rem outside the avatar's box, and the row's gap counted only the box: "1ST", the name and its
+  ★ / You had 3 px at 100% text, and at 200% the ring crossed them (every look, both engines). An avatar in a list row
+  now keeps that much room on every side (`.kit-listrow .kit-avatar`), ringed or not, so the column stays straight —
+  the rows are a little taller and the names start 0.3125rem further right. The page check has a new kind,
+  **`ring:`** — words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring included
+  and its round shape (a circle, not its box); something laid ON the avatar (a seat's badge) is left alone, and a chip
+  shrunk onto the table has its room shrunk with it.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

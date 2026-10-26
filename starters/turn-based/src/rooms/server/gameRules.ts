@@ -1,0 +1,119 @@
+// GAME RULES — what a game plugs into its room server. This file is the whole contract.  (Server.)
+//
+// The room server runs rooms (seats, host, joining, rejoining, bots taking over idle seats).
+// The game only says how ITS game works:
+//   start a game → check a move → apply it → what each player may see → is it over?
+// The game state lives on the server. After every change each connected player is sent
+// viewFor(state, theirSeat) — so hidden things (hands, bags, scores) stay hidden in the data,
+// not just on screen.
+// Since 0.10.0 a match being played is also saved on the server (savedRoom.ts), so it survives a restart and waits
+// keepMatchDays for its players — the game only has to start its own timers again (onRestore).
+import type { Seat } from '../protocol'
+import type { PlayedBy } from './seats'
+export type { PlayedBy } from './seats'
+import type { RoomSettings } from './settings'
+import type { Timers } from './timers'
+
+/** Why a seat changed mid-game (for onSeatChange). */
+export type SeatChange =
+  | 'dropped' // the player's connection dropped — their seat waits for them
+  | 'back' // the player is back (reconnected, or took their seat back from a bot with a tap or a move)
+  | 'bot' // a bot plays this seat now (the player left, was kicked, idled, ran out of turn time or stayed away too long)
+
+/** What the room server hands to the game's rules. */
+export interface RoomTools<State, Event> {
+  /** The room code. */
+  readonly code: string
+  readonly settings: RoomSettings
+  /** The room's one timers table — use it for turn clocks and hard time limits. */
+  readonly timers: Timers
+  /** Every seat, in seat order. */
+  seats(): Seat[]
+  /**
+   * Change the game state from OUTSIDE onAction (a timer ran out, a bot's move). Everyone gets their
+   * new view. Ignored if no game is on. Don't call it inside onStart/onAction/onSeatChange — return the state there.
+   */
+  update(change: (state: State) => State): void
+  /** Tell one seat something (e.g. an animation cue). Sent before the views of the same change. */
+  sendEvent(seatId: string, event: Event): void
+  /** Tell every connected player something (except one seat, if given). Only for things EVERY player may know —
+   *  for anything secret from some seats use sendEventPerSeat. */
+  broadcastEvent(event: Event, exceptSeatId?: string): void
+  /**
+   * Per-seat events: for each connected seat, `eventFor(seat, seatIndex)` returns that seat's event — or null to send
+   * it nothing. Use it whenever an event is secret from some players (e.g. "you drew E" to one seat, "Ada drew 1" to
+   * the others) — the secret never reaches a seat that may not see it. Sent before the views of the same change.
+   */
+  sendEventPerSeat(eventFor: (seat: Seat, seatIndex: number) => Event | null): void
+  /**
+   * Whose move the game is waiting for — call it whenever that changes (e.g. after every turn), [] when nobody's.
+   * Each human seat on the clock gets an idle clock: nothing from them for settings.idleWarnAfterMs → their screen is
+   * warned (idle_warning); for settings.idleTakeoverAfterMs → a bot takes their seat, mid-turn ('bot' in onSeatChange).
+   * Any tap or move of theirs restarts it — and gives the seat back if the bot has it. Bot seats are skipped (until a
+   * player takes theirs back). A seat that stays on the clock keeps its running clock (calling again doesn't reset it).
+   */
+  onTheClock(seatIds: string[]): void
+  /** The game's own turn timer ran out for this seat: a bot takes it now, the same way as idling (a tap gives it back). */
+  timedOut(seatId: string): void
+  /**
+   * Who plays this seat right now: 'seat' (its person) · 'bot-for-seat' (a bot holding a person's seat — idle, out of
+   * time, left, kicked, away too long) · 'bot' (a bot the host added). null = no such seat. Ask it when a move is
+   * played (e.g. in the game's bot step) and keep the answer with the move — the seat can change back later, and at
+   * game over idle-held seats go back to their people. In onAction it's always 'seat' (a move from a person whose
+   * seat a bot held gives the seat back first). (Rooms 0.5.0.)
+   */
+  playedBy(seatId: string): PlayedBy | null
+  /** A line in the server log (npm run party:dev shows it), marked with the room code. */
+  log(message: string): void
+  /** A seat says a preset phrase or a bot's banter line (banter.<who>.<moment>) to every seat — through the same
+   *  gate as a player's emote (the server's count; dropped when over it). → true if it went out. Needs the game's
+   *  content/emotes.json passed to RoomServer. (Rooms 0.12.0, for F22 Banter.) */
+  emote(seatId: string, id: string): boolean
+}
+
+/**
+ * The game's side of the room server.
+ * - Every function that says no THROWS an Error with a plain-English reason — the player is told
+ *   the reason and the room carries on. (Glyphtender's engine already throws like this.)
+ * - Types: State = the full game (server only) · Options = the host's new-game choices ·
+ *   Action = one player move · View = what one player sees · Event = one-off messages.
+ */
+export interface GameRules<State, Options, Action, View, Event = never> {
+  /** Raw new-game options from the host → Options, or throw. (Use the helpers in checks.ts.) */
+  checkOptions(raw: unknown): Options
+  /** Raw action from a player → Action, or throw. Runs before onAction, on every action. */
+  checkAction(raw: unknown): Action
+  /** Make a new game for these seats (in seat order). Shared random setup (bags, seeds, goals) is made HERE, on the server. */
+  onStart(options: Options, seats: Seat[], room: RoomTools<State, Event>): State
+  /**
+   * A player's move → the new state. Throw to refuse it. `seat` is who sent it (never trust an id inside the action).
+   * Return the SAME state object when nothing changed (e.g. "send me my view again"): then only the sender gets their view.
+   */
+  onAction(state: State, seat: Seat, action: Action, room: RoomTools<State, Event>): State
+  /** What this seat may see. Leave out anything that's secret from them. */
+  viewFor(state: State, seat: Seat): View
+  /** Is the game finished? (The room then goes to "over": rematch or back to the lobby.) */
+  isOver(state: State): boolean
+  /**
+   * Optional: the host asks for a particular bot (add_bot's `profile`, e.g. "Survivor/FirstClass") → the profile to keep
+   * on the seat and the bot's name (the room numbers repeats: "Ada", "Ada 2"). Throw to refuse it. Without this,
+   * profiles are ignored and bots are "Bot 1", "Bot 2"…
+   */
+  botProfile?(profile: string): { profile: string; name: string }
+  /** Optional: a seat changed mid-game (see SeatChange) → the new state. E.g. start a bot's turn. */
+  onSeatChange?(state: State, seat: Seat, change: SeatChange, room: RoomTools<State, Event>): State
+  /**
+   * Optional (0.10.0): the match was loaded back from the server's storage (the server restarted, or the room woke up
+   * after everyone had gone) → the state, with the game's own timers started again. A timer is a piece of code, so it
+   * can't be saved — only when it ends: `timersEndAt` = each game timer that was running (name → end time, ms since
+   * 1970). Start each again for what's left, e.g.
+   *   room.timers.start('turn', Math.max(0, timersEndAt.turn - Date.now()), () => room.timedOut(seatId))
+   * (already past → 0: it fires at once). A game with no timers of its own doesn't need this. The room starts its own
+   * timers itself, and every player's connection is gone at this point (they come back with a rejoin).
+   *
+   * The saved state is plain JSON: numbers, text, true/false, null, lists and plain objects. A Map, Set, Date, class
+   * or `undefined` inside State can't be saved — the room logs where it is and keeps that match in memory only.
+   * Check it in the game's tests with jsonProblem(state) (src/rooms/server/savedRoom.ts) → null when it can be saved.
+   */
+  onRestore?(state: State, room: RoomTools<State, Event>, timersEndAt: Record<string, number>): State
+}

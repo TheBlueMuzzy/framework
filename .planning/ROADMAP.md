@@ -392,20 +392,19 @@ flowchart LR
   F150[F150 Saves in every engine]
 ```
 
-## v0.24 — A test game guards every update  ← current · planned 2026-10-26
+## v0.24 — A test game guards every update  ✅ released 2026-10-26 (v0.26.0) · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "you focus on the framework and bmuz" — Goops' own Claude takes F59/F60/F62): a tiny turn-based game in the framework with every module wired, that runs the framework's checks on every module change — so a broken update is caught before any game takes it (this week: three GitHub-only failures in two milestones, one found only after the merge). Plus the results badge the WebKit run found.
-- 🟢 F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63
-- ⏳ F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built
-- 🟢 F64 🧱 Realtime starter — `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62
-- 🟢 F152 🐞 Results badge room — "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149
+- ✅ F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63 · sprint 42
+- ✅ F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built · sprint 42
+- ✅ F152 🐞 Results badge room — "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149 · sprint 42
 ```mermaid
 flowchart LR
   F151[F151 Turn-based starter] --> F65[F65 Framework test game]
   F152[F152 Results badge room]
-  F64[F64 Realtime starter]
 ```
 
 ## Later
+- 💤 F64 🧱 Realtime starter — `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62 · moved to Later 2026-10-26 (Muzzy: "good to go": the turn-based starter already guards every update)
 - **Dev Kit Time tool extras: slow motion + step one frame** on the rules clock (F60's should-part, moved 2026-10-26 — nobody has asked yet) — should
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -417,6 +416,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-26 — **AI module: `GamePlug.moments` refuses `{ moment, by }`** (found building F151 — Turn-based starter): ai/kit/types.ts only allows a string or a list, but botBanter's MomentMap and the README allow `{ moment, by }` — the starter exports its moments separately to get round it. Widen the type.
+- 2026-10-26 — **Rooms module: the local room server port is fixed at 1999** (found building F151 — Turn-based starter): roomClient.ts uses 1999 unless VITE_PARTY_HOST is set — two games (or a game and the starter) can't run online locally side by side without it. Read the port from the game's wrangler.json / ports.mjs.
 - 2026-10-26 — → v0.24 F152. **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
 - 2026-10-25 — → v0.22 F146 + F147. **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
 - 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.

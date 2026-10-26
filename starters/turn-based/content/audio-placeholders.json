@@ -1,0 +1,17 @@
+{
+  "_help": {
+    "_file": "PLACEHOLDER sounds, made in code with ZzFX (MIT, Frank Force — killedbyapixel.github.io/ZzFX). Each line = one file in public/audio/: its ZzFX numbers (volume, randomness, frequency, attack, sustain, release, shape, shapeCurve, slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise, modulation, bitCrush, delay, sustainVolume, decay, tremolo). Tweak one in the ZzFX designer, paste its numbers here, then run npm run sounds. Swap in a real recording by dropping its file in the Dev Kit's Sound tab — content/audio.json says which file each sound plays, so no code changes."
+  },
+  "sfx/sfx_mark_x_01.wav": [1, 0, 620, 0, 0.02, 0.09, 1, 1.8, -9],
+  "sfx/sfx_mark_x_02.wav": [1, 0, 660, 0, 0.02, 0.09, 1, 1.8, -10],
+  "sfx/sfx_mark_o_01.wav": [1, 0, 330, 0.01, 0.03, 0.12, 0, 1, 5],
+  "sfx/sfx_mark_o_02.wav": [1, 0, 350, 0.01, 0.03, 0.12, 0, 1, 5],
+  "sfx/sfx_emote_pop_01.wav": [1, 0, 880, 0, 0.01, 0.06, 0, 1, 20],
+  "stg/stg_game_win_01.wav": [1, 0, 523, 0.02, 0.25, 0.4, 1, 1, 0, 0, 262, 0.1],
+  "stg/stg_game_lose_01.wav": [1, 0, 330, 0.02, 0.2, 0.5, 1, 1, -3, 0, -110, 0.12],
+  "stg/stg_game_draw_01.wav": [1, 0, 392, 0.02, 0.15, 0.3, 0, 1],
+  "ui/ui_button_tap_01.wav": [1, 0, 1500, 0, 0.004, 0.025, 0],
+  "ui/ui_button_back_01.wav": [1, 0, 900, 0, 0.006, 0.04, 0, 1, -20],
+  "ui/ui_toggle_on_01.wav": [1, 0, 700, 0, 0.01, 0.06, 0, 1, 30],
+  "ui/ui_toggle_off_01.wav": [1, 0, 900, 0, 0.01, 0.06, 0, 1, -30]
+}

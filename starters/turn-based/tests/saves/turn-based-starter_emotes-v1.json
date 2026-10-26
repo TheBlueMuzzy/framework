@@ -1,0 +1,22 @@
+{
+  "about": "The emotes module's save (turn-based-starter:emotes), version 1: the Hide emotes switch on, seat-2 muted in room BAKU. Written by the emotes installer.",
+  "stored": {
+    "save": "turn-based-starter:emotes",
+    "version": 1,
+    "savedAt": "2026-10-23T00:00:00.000Z",
+    "data": {
+      "hideAll": true,
+      "match": "BAKU",
+      "seats": [
+        "seat-2"
+      ]
+    }
+  },
+  "expect": {
+    "hideAll": true,
+    "match": "BAKU",
+    "seats": [
+      "seat-2"
+    ]
+  }
+}

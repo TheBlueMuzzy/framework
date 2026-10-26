@@ -1,0 +1,29 @@
+{
+  "about": "Progress v1: 3 wins, 2 losses, 1 draw. Made with makeGoldenSave (F151).",
+  "stored": {
+    "save": "turn-based-starter:progress",
+    "version": 1,
+    "savedAt": "2026-10-26T18:48:46.486Z",
+    "data": {
+      "wins": 3,
+      "losses": 2,
+      "draws": 1
+    },
+    "counts": {
+      "wins": {
+        "6fukjxaf": 3
+      },
+      "losses": {
+        "6fukjxaf": 2
+      },
+      "draws": {
+        "6fukjxaf": 1
+      }
+    }
+  },
+  "expect": {
+    "wins": 3,
+    "losses": 2,
+    "draws": 1
+  }
+}

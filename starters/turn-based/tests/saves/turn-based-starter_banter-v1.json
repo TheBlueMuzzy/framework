@@ -1,0 +1,14 @@
+{
+  "about": "Bot chatter: Lots. Made with makeGoldenSave (F151).",
+  "stored": {
+    "save": "turn-based-starter:banter",
+    "version": 1,
+    "savedAt": "2026-10-26T18:48:46.487Z",
+    "data": {
+      "chatter": "lots"
+    }
+  },
+  "expect": {
+    "chatter": "lots"
+  }
+}
