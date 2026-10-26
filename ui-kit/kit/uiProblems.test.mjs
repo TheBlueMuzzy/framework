@@ -316,6 +316,50 @@ describe('findProblems — words split in the middle', () => {
   })
 })
 
+// 0.35.9 (F153) — light on-game words over a plain light page. HudText draws "Your turn" / "Game over" in the light
+// on-game colour with a dark halo, made for the GAME's picture; in the turn-based starter (Sprint 42) they sat on the
+// plain light page and "Game over" all but vanished — the faint check skips words with a halo (text-shadow), so every
+// check was green. Now: what's behind the letters, if it's a plain colour, against the words' colour (halo ignored).
+// (Placed by position and colours only — no font needed.)
+describe('findProblems — light words on a light background', () => {
+  const halo = 'text-shadow:0 1px 2px #1b1e24,0 0 6px #1b1e24,0 0 12px #1b1e24'
+  const hud = (words, extra = '') => `<div class="kit-hud-text" style="position:absolute;left:20px;top:20px;color:#fff;${halo};pointer-events:none${extra}"><span>${words}</span></div>`
+  const on = (background, html) => `<div style="position:absolute;inset:0;background:${background}">${html}</div>`
+
+  it('white HUD words on the plain light page or a light grey are flagged; on a mid-to-dark table they pass', async () => {
+    expect(only('contrast', await problemsOn(hud('Game over')))).toEqual([
+      'contrast: "Game over" is light on-game words on a plain light background — 1.0:1 (needs 3:1; their halo is for busy game art, not a plain page: put the game\'s picture or table colour behind them)',
+    ])
+    expect(only('contrast', await problemsOn(on('#d4d7dd', hud('Your turn'))))).toHaveLength(1)
+    expect(only('contrast', await problemsOn(on('#235b45', hud('Your turn'))))).toEqual([]) // the starter's felt
+    expect(only('contrast', await problemsOn(on('#808080', hud('Your turn'))))).toEqual([]) // a mid grey: 4.0:1
+  })
+
+  // A CSS gradient is plain colours (the gallery's striped stand-in game): judged by its stop that reads best
+  it('a gradient of light colours only is flagged; one with a dark stop is not', async () => {
+    expect(only('contrast', await problemsOn(on('repeating-linear-gradient(45deg, #f4f5f7 0 24px, #fff 0 48px)', hud('Tap a piece')))))
+      .toEqual([expect.stringMatching(/^contrast: "Tap a piece" is light on-game words on a plain light background — 1\.\d:1/)])
+    expect(only('contrast', await problemsOn(on('repeating-linear-gradient(45deg, #f4f5f7 0 24px, #1b1e24 0 48px)', hud('Tap a piece'))))).toEqual([])
+  })
+
+  it('words over a picture, a canvas or a video are left alone (can\'t be judged)', async () => {
+    expect(only('contrast', await problemsOn(on('url(data:image/gif;base64,R0lGODlhAQABAAAAACw=), #fff', hud('Round 1'))))).toEqual([])
+    expect(only('contrast', await problemsOn(`<canvas width="400" height="400" style="position:absolute;inset:0"></canvas>${hud('Round 1')}`))).toEqual([])
+    expect(only('contrast', await problemsOn(`<img alt="" style="position:absolute;inset:0;width:400px;height:400px">${hud('Round 1')}`))).toEqual([])
+  })
+
+  it('words under a dialog\'s dim or inside a dialog are not judged — only what\'s really on show', async () => {
+    const dim = '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.6)"></div>'
+    expect(only('contrast', await problemsOn(hud('Game over') + dim))).toEqual([])
+    expect(only('contrast', await problemsOn(`<div role="dialog" style="position:absolute;inset:0">${hud('Paused')}</div>`))).toEqual([])
+  })
+
+  it('dark words on the light page are not "light words" (the faint check judges those)', async () => {
+    expect(only('contrast', await problemsOn(hud('Round 1', ';color:#222;text-shadow:none')))).toEqual([])
+    expect(only('contrast', await problemsOn('<p style="color:#fff;background:#fff;margin:0">Not on-game</p>'))).toEqual([])
+  })
+})
+
 // 0.35.8 (F152) — words or a badge touching an avatar's ring. Results' 1st-place avatar wears an accent ring (an outline:
 // 3 px line, 2 px off its edge) that its neighbours' 8 px gap never counted — an outline isn't part of the box, so
 // every box check saw 8 px; at 200% text the ring crossed "1ST", the name and its badges. On a ROUND avatar the ring is
