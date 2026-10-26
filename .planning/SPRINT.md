@@ -153,3 +153,4 @@ Notes:
   (tests in uiProblems.test.mjs, Chromium + WebKit). Reproduced here at 844×260 (fails in 4 looks without the rule) —
   kept as a nameFit case. ui-kit tests 833 ✓; check:fast ✓ all 20; Chromium SHOOT_ONLY of hud/huddock/chips/pause/
   settings/room/roomauto/payslip/teach/menu: 373 shots, 0 problems, layout vs 0.35.5: no wrap, 0 sizes > 1 px.
+- 2026-10-26 2:50 AM (Claude): F149 fix merged (UI kit 0.35.6: the page check knows a sticky row over words its card can scroll away; the icon fit re-measures until it holds) — read whole, no bugs. GitHub green (run 40280979311); check:fast 20/20. Lesson → hook: guard-edits rule 9 refuses npm ci / install while a running process uses that folder's node_modules (I broke ui-kit's packages twice tonight against the gallery on 5180) — HOOKS.md row 31, 5 tests, live-checked against the gallery.
