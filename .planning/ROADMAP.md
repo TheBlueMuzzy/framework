@@ -139,13 +139,12 @@ flowchart LR
 ## v0.9 — Every game wired the same  (proving ground: Goops, then Glyphtender) · planned 2026-10-18
 Also covers the 2026-10-18 reliability review (`~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md` — hooks, scripts, CI, evals, session hygiene: F68–F72).
 Goal (Muzzy 2026-10-18): "BMUZ architects games in a consistent way that allows for the Framework and all of our tools to function without regression." Why: Goops got the Dev Kit installed with none of its hooks — nothing live, no pause — and no test noticed; the catalog already said "live via liveTuning". Rules on paper drift; this milestone makes the right wiring automatic, tested and inherited. Spec: `~/.claude/config/bmuz/MODULE-CONTRACTS.md`.
-- 🔨 F59 🧱 Game core: live content by default (the Dev Kit's Vite plugin makes every content/tuning import live), rules clock + looks clock (`gameClock`: game timers on the rules clock), seeded mode, adapter base, error catcher — thin: no rules, no rendering — must · building in Goops (Dev Kit 0.18.0), then pulled out as its own small module
-- 🔨 F60 🔧 Dev Kit Time tool: ⏸ Full pause (rAF + CSS/Web animations + audio held, game timers via the adapter) · ◐ Half pause (rules clock stopped, looks running; shown only when the game supports it) · greyed out online — then slow motion + step one frame on the same clock (should) — must · needs: F59 · building in Goops
+- 🔨 F59 🧱 Game core: live content by default (the Dev Kit's Vite plugin makes every content/tuning import live), rules clock + looks clock (`gameClock`: game timers on the rules clock), seeded mode, adapter base, error catcher — thin: no rules, no rendering — must · building in Goops (Dev Kit 0.18.0), then pulled out as its own small module · **Goops' session** (Muzzy 2026-10-26: a Goops Claude builds F59/F60/F62 and re-installs the framework there; the framework session only takes the pull-out when Goops queues it with extract.mjs)
+- 🔨 F60 🔧 Dev Kit Time tool: ⏸ Full pause (rAF + CSS/Web animations + audio held, game timers via the adapter) · ◐ Half pause (rules clock stopped, looks running; shown only when the game supports it) · greyed out online — then slow motion + step one frame on the same clock (should) — must · needs: F59 · building in Goops · **Goops' session**
 - ✅ F61 🧱 Conformance pack: each module ships tests of its own promises (Dev Kit: every tuning file live, both pauses, snapshot round-trip, hotkeys skip text boxes · UI kit: no overlap / clipping / 44 px targets at every size · Audio: quiet on full pause · Table/AI: replay + bot stops on half pause); one command `check:framework` in every game's check:full and /deliver; each module README gets "What a game must provide" — must · needs: F59, F60 · sprint 5
-- 🟢 F62 🔧 Goops passes the pack — must · needs: F61 · includes: Goops gets `check:framework` (it has neither the script nor the checks yet) and the GitHub checks workflow (F70); its Settings `version` row shows the placeholder (no `info` text, found by F76)
+- 🟢 F62 🔧 Goops passes the pack — must · needs: F61 · **Goops' session** · includes: Goops gets `check:framework` (it has neither the script nor the checks yet) and the GitHub checks workflow (F70); its Settings `version` row shows the placeholder (no `info` text, found by F76)
 - ✅ F63 🔧 Glyphtender passes the pack (its gaps become a list → its roadmap) — must · needs: F61 · sprint 09 (all 6 pieces newest on Glyphtender dev/framework-checks, ships at its /deliver; half pause = its F89, a known gap; Dev Kit 0.20.2) · Roll Better when it comes off the shelf
-- ⏳ F64 🧱 Starters: `starters/realtime` (from Goops) + `starters/turn-based` (from Glyphtender) — tiny playable games with every module wired and the pack green on day one; /define copies one, the TDD only describes what's different — should · needs: F62, F63
-- ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change, BEFORE an update reaches a game — should · needs: F64
+- ⏳ F64 🧱 Realtime starter: `starters/realtime` (from Goops) — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62
 - ✅ F67 🔧 Lesson audit (BMUZ side) — first pass done 2026-10-18: ~45 candidates in `~/.claude/config/bmuz/reviews/2026-10-18-reliability/HOOK-CANDIDATES.md` (⭐ = best value; build `plan-lint.mjs` first): every checklist line in the BMUZ skills (develop ~40 lessons, game-ui, PROJECT-FILES) sorted → now automatic (delete) · becomes a pack check · becomes a default/installer step · stays prose (judgement only); skills get shorter, not longer — must · needs: F61
 - ✅ F68 🔧 BMUZ hooks (do FIRST — touches only ~/.claude, no clash with the Goops helper): Muzzy's "never" rules as hard blocks (deny rules / PreToolUse: reset --hard, force-push, branch delete, his Chrome, Gmail) · /develop's skill registers a Stop gate (check:fast when code changed since the last green run; fast, timeout, stop_hook_active guard) · git commit refused when the typecheck fails · push/deploy to a live branch refused unless /deliver's smoke pass file exists · edits in src/ui → check-ui on that file. Show Muzzy each hook in plain words; prove each one blocks — must · needs: — · plan: ~/.claude/config/bmuz/reviews/2026-10-18-reliability/PLAN.md · sprint 5
 - ✅ F69 🔧 Scripts for fragile procedures: module install/update (runs the module's contract check), version bump, /save, /deliver → scripts (or saved Workflows); the skills shrink to "run it; if it fails, read the message" — must · needs: F61
@@ -175,9 +174,7 @@ flowchart LR
   F67 --> F74[F74 Self-improving loop]
   F61 --> F69[F69 Scripts] --> F71
   F61 --> F70[F70 CI backstop]
-  F62 --> F64[F64 Starters]
-  F63 --> F64
-  F64 --> F65[F65 Framework test game]
+  F62 --> F64[F64 Realtime starter]
   F72[F72 Session hygiene] --> F75[F75 Done = reviewed + checked]
   F61 --> F76[F76 Settings-row check]
   F68 --> F78[F78 Safety guards]
@@ -397,6 +394,17 @@ flowchart LR
   F150[F150 Saves in every engine]
 ```
 
+## v0.24 — A test game guards every update  ← current · planned 2026-10-26
+Goal (Muzzy 2026-10-26: "you focus on the framework and bmuz" — Goops' own Claude takes F59/F60/F62): a tiny turn-based game in the framework with every module wired, that runs the framework's checks on every module change — so a broken update is caught before any game takes it (this week: three GitHub-only failures in two milestones, one found only after the merge). Plus the results badge the WebKit run found.
+- 🟢 F151 🧱 Turn-based starter: `starters/turn-based` — a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63
+- ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when Goops' session has it
+- 🟢 F152 🐞 "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149
+```mermaid
+flowchart LR
+  F151[F151 Turn-based starter] --> F65[F65 Framework test game]
+  F152[F152 Rank badge room]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -408,7 +416,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-26 — **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
+- 2026-10-26 — → v0.24 F152. **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
 - 2026-10-25 — → v0.22 F146 + F147. **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
 - 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.
 - 2026-10-24 — → v0.18 F129. **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
