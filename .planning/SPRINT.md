@@ -14,7 +14,7 @@ Check: the new test red on the old check, then green; both shoots 0 problems; th
 Done when: `GamePlug.moments` accepts what botBanter's MomentMap and the AI README already allow (`{ moment, by }`), with a type test, and the starter uses it directly (its separate `moments` export gone).
 - [x] 🤖 1. Widen the type to match MomentMap and the README; a type test that fails on the old type — ai/kit/types.ts
 - [x] 🤖 2. The starter takes the new AI module (install-module) and drops its workaround — starters/turn-based
-- [ ] 🤖 3. AI module VERSION + README note; ai tests + the starter's checks green — ai/kit/VERSION
+- [x] 🤖 3. AI module VERSION + README note; ai tests + the starter's checks green — ai/kit/VERSION
 Check: ai `npm test` + typecheck green; the type test fails on the old type; the starter's check:fast green.
 
 ## F155 🐞 Rooms local port
@@ -28,3 +28,4 @@ Check: rooms `npm test` green; the starter's check:full green; the starter's roo
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
 - Unattended (Muzzy 2026-10-26: "go with your picks"): one helper per feature. F153 touches ui-kit only; F154 ai + the starter's src/ai; F155 rooms + the starter's online parts — F154 and F155 both reinstall into the starter, so they merge one after the other.
+- F154 — AI moments type fix (done, AI 0.8.2): `GamePlug.moments` is still a method, typed `ReturnType<MomentMap<Event>>`. When it was a plain `moments?: MomentMap<Event>` property, the starter's `makeBrain(plug)` broke: the brain takes `GamePlug<…, Event = unknown>`, and only a method is loose enough for a plug with its own Event to fit. ai/kit/plugMoments.test.ts guards both: red on the old type (2 tsc errors, kept in .scratch/framework-f154/red-old-type.txt — a hook won't commit a red typecheck), and it fails again if moments ever turns into a property. Installing into the starter needs `BMUZ_FRAMEWORK=<worktree>` from a worktree, or install-module reads the main checkout. The installer also added `ai:tune` to the starter's package.json, which it does by design when `ai:arena` is there. Checks: ai test 162/162 · starter check:fast + check:full ALL PASS (10) · root check:fast 22/22.
