@@ -14,12 +14,15 @@
 // Playwright's own WebKit. Only the 18 key screens, in all 7 looks, on a 390×844 phone upright and an 844×390 one on
 // its side, at 100% and 200% text (504 shots, ~11 min), plus the screen stack and menu checks on the phone — saved to
 // screenshots-webkit/ with the same names as the Chromium shots.
-import { mkdirSync, readdirSync } from 'node:fs'
+// LAYOUTS (F149): every shot also writes <shots folder>/layout/<shot>.json — each text's line count and each part's
+// size — so npm run compare:engines lists what wraps or sizes differently between the two runs.
+import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium, webkit } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
+import { recordLayout } from './compareEngines.mjs'
 
 // Preset names = the JSON files in kit/styles/
 const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
@@ -45,6 +48,7 @@ const sizes = {
 const WEBKIT = process.env.SHOOT_ENGINE === 'webkit' || process.argv.includes('--webkit')
 const OUT = WEBKIT ? 'screenshots-webkit' : 'screenshots' // (both git-ignored; codeChanges.mjs skips both)
 mkdirSync(`${OUT}/screens`, { recursive: true })
+mkdirSync(`${OUT}/layout/screens`, { recursive: true }) // (F149: one small layout file per shot — compareEngines.mjs)
 // SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)
 const PORT = Number(process.env.SHOOT_PORT) || 5180
 const server = await createServer({ server: { port: PORT, strictPort: true } })
@@ -96,7 +100,11 @@ function report(name, problems) {
 }
 
 // query: the gallery link, e.g. '?screen=settings&preset=neon'. prepare: clicks etc. before the shot.
+// SHOOT_ONLY=<pattern> (F149): only the shots whose name matches it, e.g. SHOOT_ONLY="hud-|room-pixel" — a quick look
+// at a few screens while fixing; the full run is still the check
+const ONLY = process.env.SHOOT_ONLY ? new RegExp(process.env.SHOOT_ONLY) : null
 async function shoot(file, size, query, prepare) {
+  if (ONLY && !ONLY.test(file)) return
   if (codeChanges().length) throw new CodeChanged()
   const page = await pageFor(size)
   page.errors = []
@@ -127,8 +135,19 @@ async function shoot(file, size, query, prepare) {
     for (const row of rows) for (const a of row.getAnimations()) a.finish()
     return rows.length
   })
-  if (revealing) await page.waitForTimeout(100) // (onRevealed's answer drawn: the payslip's Continue)
+  if (revealing) {
+    await page.waitForTimeout(100) // (onRevealed's answer drawn: the payslip's Continue)
+    // …and its list's smooth scroll to the newest row has stopped (F149, F148 E: the shot caught it part-way, at a
+    // different spot in each run and engine): no scroll box moved over two frames
+    await page.waitForFunction(() => new Promise((done) => {
+      const at = () => [...document.querySelectorAll('.kit-scroll')].map((el) => el.scrollTop).join()
+      const before = at()
+      requestAnimationFrame(() => requestAnimationFrame(() => done(at() === before)))
+    }))
+  }
   await page.screenshot({ path: `${OUT}/${file}.png`, fullPage: true })
+  // …and its layout (F149): each text's line count + each part's size, for npm run compare:engines
+  writeFileSync(`${OUT}/layout/${file}.json`, JSON.stringify(await page.evaluate(recordLayout)))
   shotCount++
   report(`${file}.png`, [...page.errors, ...(await page.evaluate(findProblems, { screenWidth: size.width, checkFocus: !prepare }))])
 }

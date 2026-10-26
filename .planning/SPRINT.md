@@ -16,7 +16,7 @@ Done when: F148's differences A–C are fixed in the kit (a part's size no longe
 - [x] 🤖 1. A: the ⚙ icon Button and the ❤ / ▼ ▲ chips keep their box whatever font draws the symbol (WebKit's colour emoji, an iPhone's Apple emoji) — ui-kit/kit/kit.css
 - [x] 🤖 2. B: `text-wrap: pretty` wraps more in WebKit (Safari 26 too) — the room card's "I'M READY" sits on its bottom edge sideways in Pixel: the card keeps room for its last button however its words wrap — ui-kit/kit/kit.css
 - [x] 🤖 3. C: a label that fits by a fraction of a pixel ("HOW TO PLAY" in Neon sideways, "Debt to the company") wraps in WebKit — give labels the room to not depend on the engine's rounding — ui-kit/kit/blocks/blocks.css
-- [ ] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
+- [x] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
 - [ ] 🤖 5. Both runs and the compare: Chromium 0 problems and its 100% shots unchanged; WebKit 0 problems; the compare lists no wrap difference left (or each accepted in Notes); touched screens looked at — ui-kit/scripts/shoot.mjs
 - [ ] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially)
 Check: both runs + the compare; shots looked at; Muzzy's phone look.
