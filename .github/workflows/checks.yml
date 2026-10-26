@@ -55,7 +55,10 @@ jobs:
       # Some module tests open a real browser (ui-kit's layout checks; saves in all three engines, F150): Playwright's
       # own browsers, never a system Chrome. A module names the engines it needs in package.json "testBrowsers"
       # (default: Chromium only) — saves: "chromium webkit firefox"
+      # (v0.23 look-back: this hung 35 min on GitHub's side and held up the release — a stuck download now fails fast;
+      #  a normal install takes 1–4 min. Re-run the job.)
       - name: Browsers for tests that need them
+        timeout-minutes: 15
         working-directory: ${{ matrix.module }}
         run: |
           if [ -d node_modules/playwright ] || [ -d node_modules/playwright-core ]; then

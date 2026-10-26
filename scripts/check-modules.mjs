@@ -34,8 +34,26 @@ function run([label, cwd, script]) {
   })
 }
 
+// A module whose README keeps version notes ("- 0.35.7 (…)") ships the newest one in kit/VERSION — that's what
+// install-module reads (v0.23 look-back: UI kit 0.35.7 got its README note, VERSION stayed 0.35.6, nothing noticed)
+function versionNotesMatch() {
+  const wrong = []
+  for (const name of modules) {
+    const readme = join(root, name, 'README.md')
+    if (!existsSync(readme)) continue
+    const noted = [...readFileSync(readme, 'utf8').matchAll(/^- \**(\d+)\.(\d+)\.(\d+)\b/gm)].map((m) => m.slice(1, 4).map(Number))
+    if (!noted.length) continue
+    const newest = noted.sort((a, b) => b[0] - a[0] || b[1] - a[1] || b[2] - a[2])[0].join('.')
+    const version = readFileSync(join(root, name, 'kit', 'VERSION'), 'utf8').trim()
+    if (version !== newest) wrong.push(`${name}: README's newest note is ${newest}, kit/VERSION says ${version} → make them agree`)
+  }
+  return { label: 'version notes = kit/VERSION', ok: !wrong.length, log: wrong.join('\n') }
+}
+
 console.log(`Checking ${modules.length} modules: ${modules.join(', ')}`)
-const results = await Promise.all(checks.map(run))
+const versions = versionNotesMatch()
+console.log(`${versions.ok ? '✓' : '✗'} ${versions.label}`)
+const results = [versions, ...await Promise.all(checks.map(run))]
 const failed = results.filter((result) => !result.ok)
 for (const result of failed) console.log(`\n── ${result.label} ──\n${result.log.trim().split('\n').slice(-40).join('\n')}`)
 console.log(failed.length ? `\n✗ ${failed.length} of ${results.length} checks failed` : `\n✓ all ${results.length} checks passed`)
