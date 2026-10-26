@@ -315,3 +315,35 @@ describe('findProblems — words split in the middle', () => {
     expect(split[0]).toMatch(/^split: "Reconnecting…" is broken in the middle across \d lines — a title word wider than its box \(<div>\)/)
   })
 })
+
+// 0.35.8 (F152) — words or a badge touching an avatar's ring. Results' 1st-place avatar wears an accent ring (an outline:
+// 3 px line, 2 px off its edge) that its neighbours' 8 px gap never counted — an outline isn't part of the box, so
+// every box check saw 8 px; at 200% text the ring crossed "1ST", the name and its badges. On a ROUND avatar the ring is
+// a circle: a badge by its box's corner can be clear of it, or not, whatever the boxes say.
+// (Placed by position, not by the words' width, so the font doesn't matter: each piece's edge is where the style says.)
+describe('findProblems — a ring around an avatar', () => {
+  // A 44 px round avatar at x 100–144, y 20–64 (centre 122, 42); ring: its outline reaches 5 px out → a 27 px circle
+  const avatar = (ring) => `<span class="kit-avatar" role="img" aria-label="Muzzy" style="position:absolute;left:100px;top:20px;width:44px;height:44px;border-radius:50%;background:#84c${ring ? ';outline:3px solid #f90;outline-offset:2px' : ''}"></span>`
+  // words whose right end is at x = `right` (the page is 400 px wide), centred on the avatar
+  const place = (right) => `<span style="position:absolute;right:${400 - right}px;top:32px;line-height:20px">1ST</span>`
+
+  it('words 8 px from the avatar but 1 px from its ring are flagged — and so are words the ring crosses', async () => {
+    expect(only('ring', await problemsOn(avatar(true) + place(92)))).toEqual([]) // 3 px from the ring: room
+    expect(only('ring', await problemsOn(avatar(true) + place(94)))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 1 px of room'])
+    expect(only('ring', await problemsOn(avatar(true) + place(97)))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 0 px of room'])
+  })
+
+  // A badge up by the avatar's top-right corner: its box touches the avatar's box, but the circle is ~4 px away from the
+  // badge's corner — fine with no ring, and touching once the ring adds 5 px
+  const badge = '<span class="kit-badge" style="position:absolute;left:136px;top:6px;width:30px;height:14px;background:#2a6"></span>'
+  it('a badge by a round avatar is measured to the circle, not the box: clear without the ring, touching with it', async () => {
+    expect(only('ring', await problemsOn(avatar(false) + badge))).toEqual([])
+    expect(only('ring', await problemsOn(avatar(true) + badge))).toEqual(['ring: "<span>" touches the ring around "Muzzy" — 0 px of room'])
+  })
+
+  it('a badge laid ON the avatar on purpose (a seat\'s badge on its portrait\'s corner) is not "touching" it', async () => {
+    const found = await problemsOn(`<div style="position:absolute;left:80px;top:0;width:100px;height:90px;border:2px solid #333">${avatar(true)
+      .replace('left:100px', 'left:18px')}<span class="kit-badge" style="position:absolute;left:46px;top:46px;width:20px;height:20px;border-radius:50%;background:#2a6"></span></div>`)
+    expect(only('ring', found)).toEqual([])
+  })
+})
