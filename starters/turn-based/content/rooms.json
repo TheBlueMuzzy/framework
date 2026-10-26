@@ -12,7 +12,7 @@
     "maxMessagesPerSecond": "Messages one player's connection may send per second; more are dropped unread (flooding). 0 = no limit."
   },
   "minSeats": 2,
-  "maxSeats": 4,
+  "maxSeats": 2,
   "idleWarnAfterMs": 30000,
   "idleTakeoverAfterMs": 60000,
   "botTakesOverAfterMs": 60000,

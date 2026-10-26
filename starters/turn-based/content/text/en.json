@@ -46,6 +46,16 @@
   },
   "online": {
     "opponent": "Your friend",
+    "defaultName": "Player",
+    "badCode": "A room code is 4 letters, like BAKU",
+    "closed": {
+      "no_room": "There's no room with that code",
+      "room_full": "That room is full",
+      "game_started": "That game has already started",
+      "kicked": "The host removed you from the room",
+      "connected_elsewhere": "You joined this room in another tab",
+      "other": "The room closed"
+    },
     "leftTitle": "Your friend left",
     "rematch": "Play again",
     "leave": "Leave"

@@ -8,6 +8,7 @@ import { BOT, YOU, getMatch, leaveMatch, startMatch, useMatch } from '../game/ma
 import { applySettings, settingsSchema } from '../game/settings'
 import { progressSave, settingsSave } from '../game/saves'
 import { seatId } from '../game/table'
+import { isOnline, leaveOnline } from '../game/online'
 import { personalityName } from './names'
 
 export function PauseScreen() {
@@ -15,7 +16,7 @@ export function PauseScreen() {
     <Pause
       words={text.pause}
       onSettings={() => screens.push('settings')}
-      onQuit={() => { screens.pop(); leaveMatch() }}
+      onQuit={() => { screens.pop(); if (isOnline()) leaveOnline(); else leaveMatch() }}
     />
   )
 }
