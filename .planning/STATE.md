@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-25 11:58 PM — **Sprint 41 running UNATTENDED ("go auto"): the kit and saves work in iPhone's engine (F148 the shoot in WebKit, F149 fix what it finds, F150 saves in Chromium + WebKit + Firefox). Next: F148 task 1 (ui-kit/scripts/shoot.mjs) by a helper; F150 by a second helper alongside.** Released v0.24.0 just before (v0.22 Big text in every look ✅, look-back archive/lookbacks/v0.22.md). Muzzy: one thing to keep doing, or stop doing, next time? Before that: released v0.23.0 (v0.21 The kit meets every player ✅) — UI kit 0.35.4: every screen holds up at 200% text (the shoot checks all 45 screens at 200% on both phones, 0 problems), What's new after an update (`showWhatsNew()`), a gamepad press shows the focus ring (`markPadUsed()`), HUD words stop at 1.25× (`hud-text-max`). Look-back: archive/lookbacks/v0.21.md — /save now warns when the branch's last GitHub Checks run is red (it was red 8 h unseen this milestone). Muzzy: one thing to keep doing, or stop doing, next time? (asked at the release hand-off)
+2026-10-26 2:55 AM — **Sprint 41 built (unattended), waiting on Muzzy: F148 the shoot in WebKit (`npm run shoot:webkit`, 504 shots, ~11 min) · F149 the kit in WebKit (UI kit 0.35.6: symbols keep their box, a scrolling card keeps its last buttons in sight, labels never fit by a hair, the page check knows sticky rows, `npm run compare:engines`) · F150 saves proven in Chromium + WebKit + Firefox (saves 0.6.4). GitHub green. Next: Muzzy — F149 task 6 (look on his iPhone), the Ask Muzzy lines in SPRINT Notes (HUD icon box 1.375 vs 1.25 em, drawn icons, the room card's cut line), approve F148–F150 → retro → /deliver v0.23.** Released v0.24.0 just before (v0.22 Big text in every look ✅, look-back archive/lookbacks/v0.22.md). Muzzy: one thing to keep doing, or stop doing, next time? Before that: released v0.23.0 (v0.21 The kit meets every player ✅) — UI kit 0.35.4: every screen holds up at 200% text (the shoot checks all 45 screens at 200% on both phones, 0 problems), What's new after an update (`showWhatsNew()`), a gamepad press shows the focus ring (`markPadUsed()`), HUD words stop at 1.25× (`hud-text-max`). Look-back: archive/lookbacks/v0.21.md — /save now warns when the branch's last GitHub Checks run is red (it was red 8 h unseen this milestone). Muzzy: one thing to keep doing, or stop doing, next time? (asked at the release hand-off)
 - Plan-lint flags F61 ✅ while F59/F60 are still 🔨 (v0.9, built in Goops) — for Goops' session, not this sprint.
 - Also open: v0.9 still has **F62 Goops** (its own session), F64/F65 starters. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -11,7 +11,7 @@ Reviewed through: framework 6b3c86e (143ad14..6b3c86e by Claude: test only — t
 
 ## Where we are
 Stage: develop   Milestone: v0.23 Works on iPhone's browser   Sprint: 41
-Doing: F148 — building   Branch: dev/v0-23-iphone-engine   Version: 0.24.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.4 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
+Doing: F148–F150 — waiting on Muzzy (iPhone look + approval)   Branch: dev/v0-23-iphone-engine   Version: 0.24.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.4 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.3 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.24.0
 
 ## Key facts
@@ -43,4 +43,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-24 — Released v0.21.0 (v0.19 Smoother tools): the Dev Kit's Tuning tab edits the content files a game lists and Save keeps hand-wrapped lists; a stray 0, a false CSS warning, Mode select's empty column and the silent part-way save code are fixed.
 - 2026-10-24 — Sprint 36 planned: the Dev Kit edits every file it should (F132 more files in the Tuning tab, F133 Save keeps hand-wrapped lists); v0.19 also holds F134–F137 for sprint 37.
 - 2026-10-24 — Released v0.20.0 (v0.18 The kit speaks up): a bubble stuck on what it avoids says so in the dev console, and the screenshot run stops when a file changes mid-run.
-- 2026-10-24 — Sprint 35 planned: the kit speaks up (F129 shoot stops on a file change, F130 bubble avoid warning).
