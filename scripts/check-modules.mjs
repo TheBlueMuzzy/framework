@@ -61,6 +61,10 @@ const versions = versionNotesMatch()
 console.log(`${versions.ok ? '✓' : '✗'} ${versions.label}`)
 const results = [versions, ...await Promise.all(checks.map(run))]
 const failed = results.filter((result) => !result.ok)
-for (const result of failed) console.log(`\n── ${result.label} ──\n${result.log.trim().split('\n').slice(-40).join('\n')}`)
+// the end of each failed log — a starter's longer: it holds the log of every starter check that failed
+for (const result of failed) {
+  const lines = result.label.startsWith('starter ') ? 200 : 40
+  console.log(`\n── ${result.label} ──\n${result.log.trim().split('\n').slice(-lines).join('\n')}`)
+}
 console.log(failed.length ? `\n✗ ${failed.length} of ${results.length} checks failed` : `\n✓ all ${results.length} checks passed`)
 process.exit(failed.length ? 1 : 0)
