@@ -395,8 +395,19 @@ flowchart LR
   F152[F152 Results badge room]
 ```
 
+## v0.25 — What the starter showed  ← current · planned 2026-10-26
+Goal (Muzzy 2026-10-26: "go with your picks"): fix what building the turn-based starter showed — the page check misses light in-game words on a light page, the AI module's moments type is narrower than its README, the rooms module's local port is fixed.
+- 🔨 F153 🔧 Light-words contrast check — the page check flags the HUD's light on-game words when nothing dark sits behind them (only a plain light page): the starter's "Game over" all but vanished with all 10 checks green (v0.24 look-back, Sprint 42 retro) — should · sprint 43
+- 🔨 F154 🐞 AI moments type fix — the AI module's GamePlug.moments takes { moment, by } the way botBanter's MomentMap and the README already do; the starter drops its workaround — should · sprint 43
+- 🔨 F155 🐞 Rooms local port — the local room server's port comes from the game's own settings, not a fixed 1999, so two games (or a game and the starter) run online side by side — should · sprint 43
+```mermaid
+flowchart LR
+  F153[F153 Light-words contrast check]
+  F154[F154 AI moments type fix]
+  F155[F155 Rooms local port]
+```
+
 ## Later
-- 🟢 F153 🔧 Light-words contrast check — the page check flags the HUD's light on-game words when nothing dark sits behind them (only a plain light page): the starter's "Game over" all but vanished with all 10 checks green (v0.24 look-back, Sprint 42 retro) — should
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
@@ -417,8 +428,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-26 — **AI module: `GamePlug.moments` refuses `{ moment, by }`** (found building F151 — Turn-based starter): ai/kit/types.ts only allows a string or a list, but botBanter's MomentMap and the README allow `{ moment, by }` — the starter exports its moments separately to get round it. Widen the type.
-- 2026-10-26 — **Rooms module: the local room server port is fixed at 1999** (found building F151 — Turn-based starter): roomClient.ts uses 1999 unless VITE_PARTY_HOST is set — two games (or a game and the starter) can't run online locally side by side without it. Read the port from the game's wrangler.json / ports.mjs.
+- 2026-10-26 — → v0.25 F154. **AI module: `GamePlug.moments` refuses `{ moment, by }`** (found building F151 — Turn-based starter): ai/kit/types.ts only allows a string or a list, but botBanter's MomentMap and the README allow `{ moment, by }` — the starter exports its moments separately to get round it. Widen the type.
+- 2026-10-26 — → v0.25 F155. **Rooms module: the local room server port is fixed at 1999** (found building F151 — Turn-based starter): roomClient.ts uses 1999 unless VITE_PARTY_HOST is set — two games (or a game and the starter) can't run online locally side by side without it. Read the port from the game's wrangler.json / ports.mjs.
 - 2026-10-26 — → v0.24 F152. **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
 - 2026-10-25 — → v0.22 F146 + F147. **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
 - 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.
