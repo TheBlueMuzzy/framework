@@ -11,7 +11,7 @@ Reviewed through: framework 6149735 (6149735 = ui-kit/kit/VERSION 0.35.6 → 0.3
 
 ## Where we are
 Stage: deliver   Milestone: v0.23 Works on iPhone's browser ✅ released   Sprint: 41 (done)
-Doing: released v0.25.0 — next /sprint   Branch: main   Version: 0.24.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.7 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
+Doing: released v0.25.0 — next /sprint   Branch: main   Version: 0.25.0 (emotes 0.4.1 · ai 0.8.1 · rooms 0.12.1 · table 0.8.1 · UI kit 0.35.7 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.25.0
 
 ## Key facts
