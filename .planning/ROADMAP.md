@@ -392,7 +392,7 @@ flowchart LR
   F150[F150 Saves in every engine]
 ```
 
-## v0.24 — A test game guards every update  ← current · planned 2026-10-26
+## v0.24 — A test game guards every update  ✅ released 2026-10-26 (v0.26.0) · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "you focus on the framework and bmuz" — Goops' own Claude takes F59/F60/F62): a tiny turn-based game in the framework with every module wired, that runs the framework's checks on every module change — so a broken update is caught before any game takes it (this week: three GitHub-only failures in two milestones, one found only after the merge). Plus the results badge the WebKit run found.
 - ✅ F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63 · sprint 42
 - ✅ F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built · sprint 42

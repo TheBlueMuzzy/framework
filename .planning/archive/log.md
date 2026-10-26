@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — Sprint 36 planned: the Dev Kit edits every file it should (F132 more files in the Tuning tab, F133 Save keeps hand-wrapped lists); v0.19 also holds F134–F137 for sprint 37.
 - 2026-10-24 — Released v0.20.0 (v0.18 The kit speaks up): a bubble stuck on what it avoids says so in the dev console, and the screenshot run stops when a file changes mid-run.
 - 2026-10-24 — Sprint 35 planned: the kit speaks up (F129 shoot stops on a file change, F130 bubble avoid warning).
 - 2026-10-24 — Released v0.19.0 (v0.17 A clean screenshot run): a kit button in an art layer keeps its 44 px tap size, the screenshot run is clean (475 shots, 0 problems), the page check sees a chip on another piece's words, and every installer asks git once per run.
