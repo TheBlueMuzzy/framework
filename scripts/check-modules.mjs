@@ -23,7 +23,9 @@ for (const name of modules) {
 }
 const startersDir = join(root, 'starters')
 const starters = existsSync(startersDir) ? readdirSync(startersDir).filter((name) => existsSync(join(startersDir, name, 'package.json'))) : []
-for (const name of starters) checks.push([`starter ${name} (fresh modules)`, root, `node scripts/starter-check.mjs ${name} fast`])
+// The starters run AFTER the modules' own checks, not beside them: side by side the extra load made two timing-limited
+// module tests run out of time (crashes' 300 fingerprints, ai's arena — sprint 42). It adds ~10 s.
+const starterChecks = starters.map((name) => [`starter ${name} (fresh modules)`, root, `node scripts/starter-check.mjs ${name} fast`])
 
 function run([label, cwd, command]) {
   return new Promise((done) => {
@@ -60,6 +62,7 @@ console.log(`Checking ${modules.length} modules: ${modules.join(', ')}${starters
 const versions = versionNotesMatch()
 console.log(`${versions.ok ? '✓' : '✗'} ${versions.label}`)
 const results = [versions, ...await Promise.all(checks.map(run))]
+for (const check of starterChecks) results.push(await run(check))
 const failed = results.filter((result) => !result.ok)
 // the end of each failed log — a starter's longer: it holds the log of every starter check that failed
 for (const result of failed) {
