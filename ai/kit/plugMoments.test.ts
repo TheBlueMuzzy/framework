@@ -20,10 +20,13 @@ const plug: Pick<GamePlug<unknown, unknown, unknown, Ev>, 'moments'> = {
 const asMap: MomentMap<Ev> | undefined = plug.moments
 const someMap: MomentMap<Ev> = () => null
 const fromMap: Pick<GamePlug<unknown, unknown, unknown, Ev>, 'moments'> = { moments: someMap }
+// …and a plug with its own Event still fits where the brain takes any plug (makeBrain: Event = unknown).
+const anyPlug: Pick<GamePlug<unknown, unknown, unknown>, 'moments'> = plug
 
 describe('GamePlug.moments (F154)', () => {
   it('names who caused a moment, and botBanter reads it straight off the plug', () => {
     expect(asMap).toBe(plug.moments)
+    expect(anyPlug.moments).toBe(plug.moments)
     expect(fromMap.moments?.({ type: 'won', seat: 0 }, 0)).toBeNull()
     expect(momentsWithCause(plug.moments!, [{ type: 'placed', seat: 1, threat: true }], 0)).toEqual([{ moment: 'rivalBigMove', by: 1 }])
   })

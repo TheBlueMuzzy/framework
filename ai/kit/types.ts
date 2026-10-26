@@ -152,9 +152,10 @@ export interface GamePlug<View, Action, World = View, Event = unknown> {
   /** Banter (F22): the game's moment map — what one of its events means to this seat ("hitRival" for the one who did
    *  it, "gotHit" for the one it happened to): one moment, a few (most important first) or nothing. The names are the
    *  keys of content/ai/banter.json "chance"; the lines are content/text/en.json banter.<personality>.<moment>.
-   *  A moment may name who caused it: `{ moment, by }` (0.5.0). The type IS botBanter's MomentMap (0.8.2, F154), so
-   *  `botBanter({ moments: plug.moments! })` takes it as it is. */
-  moments?: MomentMap<Event>
+   *  A moment may name who caused it: `{ moment, by }` (0.5.0). It answers what botBanter's MomentMap answers (0.8.2,
+   *  F154), so `botBanter({ moments: plug.moments! })` takes it as it is. A method (not `moments?: MomentMap<Event>`)
+   *  on purpose: a plug with its own Event still fits where the brain takes any plug (makeBrain's Event = unknown). */
+  moments?(event: Event, seat: number): ReturnType<MomentMap<Event>>
 }
 
 /** Why it did what it did — for the Dev Kit and bug reports, never shown to players. */
