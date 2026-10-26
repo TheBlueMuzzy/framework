@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.23.0, 2026-10-25)
+Release target: none — a library; each milestone releases on its own (latest v0.24.0, 2026-10-25)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -384,6 +384,17 @@ Goal (Muzzy 2026-10-25, after v0.23.0: "sure"): the 200% text work in every look
 ```mermaid
 flowchart LR
   F146[F146 Shoot every look at 200%] --> F147[F147 Every look at 200%]
+```
+
+## v0.23 — Works on iPhone's browser  ← current · planned 2026-10-25
+Goal (Muzzy 2026-10-25: "go auto", option A): every iPhone browser is WebKit, and the kit and saves were only ever checked in Chromium — check and fix them in WebKit (and saves in Firefox too).
+- 🔨 F148 🔧 The shoot runs in WebKit too: the 18 key screens, all 7 looks, both phones, 100% + 200% text, in Playwright's WebKit — should · needs: F146 · sprint 41
+- 🔨 F149 🐞 The kit holds up in WebKit: what F148 finds — should · needs: F148, F147 · sprint 41
+- 🔨 F150 🔧 Saves work in every browser engine: real Chromium, WebKit and Firefox — save, load, upgrade, save code, full disk, private window — should · needs: F86 · sprint 41
+```mermaid
+flowchart LR
+  F148[F148 Shoot in WebKit] --> F149[F149 Kit holds up in WebKit]
+  F150[F150 Saves in every engine]
 ```
 
 ## Later
