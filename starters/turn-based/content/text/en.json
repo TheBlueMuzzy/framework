@@ -1,0 +1,88 @@
+{
+  "_help": "Every word a player reads. The Dev Kit's Text tab edits this file live. {name}-style holes are filled in by the game.",
+  "game": {
+    "title": "Tic-tac-toe",
+    "subtitle": "Three in a row wins"
+  },
+  "mainMenu": {
+    "play": "Play {name}",
+    "online": "Play online",
+    "settings": "Settings",
+    "credits": "Credits",
+    "continue": "Continue",
+    "continueLine": "Move {n} vs {name}"
+  },
+  "table": {
+    "you": "You",
+    "yourTurn": "Your turn",
+    "theirTurn": "{name} is thinking…",
+    "waiting": "Waiting for {name}",
+    "over": "Game over",
+    "board": "The board",
+    "square": "Square {n}",
+    "squareTaken": "Square {n}: {mark}",
+    "marks": { "x": "✕", "o": "◯" },
+    "markNames": { "x": "X", "o": "O" },
+    "pause": "Pause"
+  },
+  "results": {
+    "win": "You win!",
+    "lose": "{name} wins",
+    "draw": "It's a draw",
+    "record": "Wins {wins} · Losses {losses} · Draws {draws}",
+    "points": "Won {n}",
+    "rematch": "Play again",
+    "quit": "Main menu",
+    "winner": "Winner",
+    "you": "You"
+  },
+  "pause": {
+    "title": "Paused",
+    "resume": "Resume",
+    "settings": "Settings",
+    "quit": "Leave game",
+    "quitTitle": "Leave this game?",
+    "quitMessage": "This round won't count."
+  },
+  "online": {
+    "opponent": "Your friend",
+    "defaultName": "Player",
+    "badCode": "A room code is 4 letters, like BAKU",
+    "closed": {
+      "no_room": "There's no room with that code",
+      "room_full": "That room is full",
+      "game_started": "That game has already started",
+      "kicked": "The host removed you from the room",
+      "connected_elsewhere": "You joined this room in another tab",
+      "other": "The room closed"
+    },
+    "leftTitle": "Your friend left",
+    "rematch": "Play again",
+    "leave": "Leave"
+  },
+  "ai": {
+    "personality": {
+      "careful": { "name": "Careful Cleo", "bio": "Never misses a block. Never misses a win." },
+      "careless": { "name": "Careless Cass", "bio": "Loves the middle square. Forgets to look at yours." }
+    }
+  },
+  "banter": {
+    "careless": {
+      "won": "Ha! Didn't see that coming, did you?",
+      "lost": "Wait, where did that come from?",
+      "bigMove": "Two in a row! Watch out.",
+      "rivalBigMove": "Ooh, nice one.",
+      "gotHit": "Hey, I wanted that square!",
+      "closeCall": "Phew. Nobody wins."
+    }
+  },
+  "emotes": {
+    "hello": "Hello!",
+    "wellPlayed": "Well played!",
+    "thanks": "Thanks!",
+    "wow": "Wow!",
+    "oops": "Oops!",
+    "thinking": "Thinking…",
+    "goodGame": "Good game!"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "_help": "phrases = ids in picker order (their words: content/text/en.json \"emotes\"). limits = this device: up to burst in a row, one back every refillSeconds, never two closer than minGapMs. server = the room's own count (never looser than limits) + perMatch, the most one seat may send in a match. bubble = how long one shows: showMs, or readMsPerWord x its words if longer. mutedByDefault = the \"Hide everyone's emotes\" switch's starting value.",
+  "phrases": ["hello", "wellPlayed", "thanks", "wow", "oops", "thinking", "goodGame"],
+  "limits": { "burst": 3, "refillSeconds": 4, "minGapMs": 800 },
+  "server": { "burst": 3, "refillSeconds": 4, "perMatch": 200 },
+  "bubble": { "showMs": 2500, "readMsPerWord": 250 },
+  "picker": { "closeAfterSend": true },
+  "mutedByDefault": false
+}

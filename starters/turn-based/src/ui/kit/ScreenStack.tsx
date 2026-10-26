@@ -1,0 +1,147 @@
+// SCREEN STACK (React) — draws the open screens on top of the game, newest on top.
+//   <ScreenStack screens={{ settings: SettingsScreen, quit: QuitDialog }}>
+//     <GameHud />            ← the always-there bottom layer
+//   </ScreenStack>
+// Each screen is a component that returns a <Screen>. A dialog is just <Screen dialog> pushed on top.
+// The kit's own screens (kitScreens: confirm, whats-new) are always added under yours — no need to list them (0.25.0).
+// A name pushed that has no screen warns in the console and closes again.
+// Everything under the top screen is inert: it can't be clicked, tapped or focused. Open screens under the top one
+// are also hidden (so a Pause panel never peeks out from behind the Rules opened from it): only the top screen shows,
+// over one dim (a screen opened over another always dims, dialog or not — and so does the first screen opened over the
+// game's own layer, children: Settings over a main menu dims the menu like Pause dims the game); the one under it comes
+// back when it closes. The game (children) stays visible under the dim.
+//
+// overlay: for a game whose own view isn't built from kit Screens (a letterboxed canvas, its own HUD
+// with z-indexes). Put <ScreenStack overlay screens={…} /> next to the game, with no children:
+// open screens then cover the whole window above the game (at --kit-overlay-z, default 100), dim it
+// and block taps to it. Tapping the dim closes the top screen, like Esc and Back
+// (on a <Screen scroll>, which catches taps on its own empty space, tapping that space does the same).
+//
+// Arrow keys: ↑ / ↓ jump from control to control on the top open screen, skipping words (arrowKeys.ts).
+// With no screen open, they do it inside the Panel the focus is in (a main menu), and leave the game's own keys alone.
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
+import { screens as store } from './screens'
+import { moveFocus } from './arrowKeys'
+import { kitScreens } from './blocks/dialogs'
+import { focusRing } from './keysOrPad'
+
+type ScreenStackProps = { screens: Record<string, ComponentType>; children?: ReactNode; overlay?: boolean }
+
+export function useScreens() {
+  return useSyncExternalStore(store.subscribe, () => store.current, () => store.current)
+}
+
+export function ScreenStack({ screens, children, overlay }: ScreenStackProps) {
+  const stack = useScreens()
+  const layers = useRef<(HTMLDivElement | null)[]>([])
+  const openers = useRef<(Element | null)[]>([]) // what had focus when each screen opened
+  const depth = stack.length
+  const top = depth ? `${depth}-${stack[depth - 1]}` : '' // which screen is on top, e.g. "2-shop"
+  const last = useRef({ depth, top }) // the stack as the focus code last saw it
+  const recentFocus = useRef<Element[]>([]) // the last few focused things, newest last
+
+  // A screen that focuses its own field as it opens (autoFocus, or its own effect) does so BEFORE the effect below
+  // notes the opener — so remember recent focus and take the newest one outside the new screen (review, 0.19.2).
+  useEffect(() => {
+    const note = (event: FocusEvent) => {
+      if (!(event.target instanceof Element)) return
+      recentFocus.current = [...recentFocus.current.filter(el => el !== event.target), event.target].slice(-8)
+    }
+    document.addEventListener('focusin', note)
+    return () => document.removeEventListener('focusin', note)
+  }, [])
+
+  // Everything under the top screen is inert. Set straight on the page (not as an inert={…} prop,
+  // which only React 19 understands), and before the focus code below runs, so a closing screen's
+  // opener is clickable again by the time focus goes back to it.
+  // Layer 0 is the game (children); layer 1 is the first open screen, and so on.
+  // Open screens under the top one (layers 1 … depth-1) are hidden too: data-covered → visibility hidden (kit.css),
+  // which keeps their scroll position and state for when they come back.
+  useLayoutEffect(() => {
+    // A screen just opened: note what had focus, before the screen below turns inert and drops it.
+    // (Here, not while drawing: React's rules say refs are read and written only in effects and handlers.)
+    if (depth > last.current.depth) {
+      const opened = layers.current[depth]
+      const outside = (el: Element | null) => !!el && !opened?.contains(el)
+      openers.current[depth - 1] = outside(document.activeElement)
+        ? document.activeElement
+        : [...recentFocus.current].reverse().find(el => outside(el) && el.isConnected) ?? null
+    }
+    layers.current.forEach((layer, i) => {
+      layer?.toggleAttribute('inert', i < depth)
+      layer?.toggleAttribute('data-covered', i > 0 && i < depth)
+    })
+  }, [depth, top])
+
+  // Keyboard/gamepad focus: into a screen when it opens (or is swapped in by replace),
+  // back to its opener when it closes.
+  useEffect(() => {
+    if (depth < last.current.depth) {
+      (openers.current[depth] as HTMLElement | null)?.focus?.()
+    } else if (top !== last.current.top) {
+      // A new top screen: opened, or swapped in by replace (same depth, so it keeps the old opener).
+      // The first button or input; a scroll box only if there's nothing else (it would wear the focus ring)
+      const layer = layers.current[depth]
+      const first = layer?.querySelector<HTMLElement>('button:not(:disabled), input') ?? layer?.querySelector<HTMLElement>('[tabindex="0"]')
+      // With the focus ring only for key and pad players (keysOrPad.ts — a pad press counts, F142)
+      first?.focus(focusRing())
+    }
+    last.current = { depth, top }
+  }, [depth, top])
+
+  // ↑ / ↓ on the top screen. After the controls' own key handlers (they can claim a key with preventDefault).
+  // Only when the focus is on that screen (or nowhere yet): a tool beside the stack (the Dev Kit's sliders) keeps its arrows
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const focused = document.activeElement
+      const scope = depth > 0
+        ? layers.current[depth]
+        : focused?.closest('.kit-panel') // no screen open: only inside a menu Panel in the game
+      if (depth > 0 && scope && focused && focused !== document.body && !scope.contains(focused)) return
+      if (scope && (depth > 0 || layers.current[0]?.contains(scope))) moveFocus(e, scope)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [depth])
+
+  // The kit's own screens (confirm, for askConfirm in Settings and Pause) are always there, under the game's:
+  // a game's own screen with the same name still wins (0.25.0 — before, a game that left out ...kitScreens got an
+  // empty layer on top, so a confirm button in Settings seemed to do nothing).
+  const all: Record<string, ComponentType> = { ...kitScreens, ...screens }
+
+  // A screen pushed with no component under that name: say so (naming it) and close it again, instead of leaving an
+  // invisible layer on top that makes everything under it inert. (Checked whenever it's the top screen.)
+  const missingTop = depth && !all[stack[depth - 1]] ? top : ''
+  useEffect(() => {
+    const name = store.current[store.current.length - 1]
+    // still that screen on top (React's StrictMode runs this twice while developing — close it once, not Settings too)
+    if (!missingTop || `${store.current.length}-${name}` !== missingTop) return
+    console.warn(`ScreenStack: no screen named "${name}" was given — add it to <ScreenStack screens={{ ${name}: … }}>. Closed it.`)
+    store.pop()
+  }, [missingTop])
+
+  // overlay mode dims the game with the overlay itself; without children there's nothing under the first screen to dim
+  const dimsGame = !overlay && children != null && children !== false
+  const open = stack.map((name, i) => {
+    const Screen = all[name]
+    return (
+      // data-over: opened on top of another screen — it carries the dim (the one under it is hidden), there at once.
+      // data-dim: the first screen, opened over the game's own layer (a main menu, a lobby, the game) — dims it too,
+      // fading in like a dialog's, so every screen over another wears the same dim (0.7.0; before, only dialogs did)
+      <div key={`${i}-${name}`} className="kit-layer" data-over={i > 0 || undefined} data-dim={(i === 0 && dimsGame) || undefined}
+        ref={(el) => { layers.current[i + 1] = el }}>
+        {Screen ? <Screen /> : null}
+      </div>
+    )
+  })
+
+  return (
+    <>
+      <div className="kit-layer" data-framed={overlay || undefined} ref={(el) => { layers.current[0] = el }}>{children}</div>
+      {overlay
+        ? <div className="kit-overlay" data-open={depth > 0 || undefined}
+            onClick={(e) => { if (e.target === e.currentTarget) store.pop() }}>{open}</div>
+        : open}
+    </>
+  )
+}

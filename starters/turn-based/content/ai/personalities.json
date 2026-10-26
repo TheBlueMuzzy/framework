@@ -1,0 +1,31 @@
+{
+  "_help": {
+    "_file": "The computer opponents' characters (the AI module, src/ai/kit). Each turn a bot rolls its goals in order: a goal wins when a d100 roll is under its trait's value (picked inside the range). The Dev Kit's AI tab edits these.",
+    "traits.aggression": "How often it goes for a win (the WIN goal).",
+    "traits.caution": "How often it stops your three in a row (the BLOCK goal).",
+    "traits.planning": "How often it plays for a good square (the BUILD goal: centre, corners, two in a row).",
+    "nudge": "How much the goals it didn't roll still count (0-1).",
+    "focus": "At a big moment (a win is there) how single-minded it is (0-1). 1 = it never misses a win it can see.",
+    "chattiness": "0-100: how likely it is to say something (lines in content/text/en.json \"banter\")."
+  },
+  "personalities": [
+    {
+      "id": "careful",
+      "traits": { "aggression": { "min": 100, "max": 100 }, "caution": { "min": 100, "max": 100 }, "planning": { "min": 60, "max": 80 } },
+      "goals": ["WIN", "BLOCK", "BUILD"],
+      "nudge": 1,
+      "focus": 1,
+      "shifts": [],
+      "chattiness": 0
+    },
+    {
+      "id": "careless",
+      "traits": { "aggression": { "min": 55, "max": 75 }, "caution": { "min": 10, "max": 30 }, "planning": { "min": 70, "max": 90 } },
+      "goals": ["BUILD", "WIN", "BLOCK"],
+      "nudge": 0.4,
+      "focus": 0,
+      "shifts": [],
+      "chattiness": 70
+    }
+  ]
+}

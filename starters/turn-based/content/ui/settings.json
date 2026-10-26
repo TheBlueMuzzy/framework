@@ -1,0 +1,47 @@
+{
+  "tabs": [
+    {
+      "id": "audio",
+      "label": "Audio",
+      "rows": [
+        { "id": "secVolume", "type": "heading", "label": "Volume" },
+        { "id": "masterVolume", "type": "slider", "label": "Master volume", "default": 80 },
+        { "id": "sfxVolume", "type": "slider", "label": "Sound effects", "default": 80 },
+        { "id": "uiVolume", "type": "slider", "label": "Menus & buttons", "default": 70 },
+        { "id": "secSoundOptions", "type": "heading", "label": "Options" },
+        { "id": "sound", "type": "toggle", "label": "Sound", "default": true },
+        { "id": "muteInBackground", "type": "toggle", "label": "Mute when in the background", "default": true },
+        { "id": "mono", "type": "toggle", "label": "Mono audio", "detail": "Same sound in both ears", "default": false }
+      ]
+    },
+    {
+      "id": "gameplay",
+      "label": "Gameplay",
+      "rows": [
+        { "id": "secBots", "type": "heading", "label": "Computer players" },
+        { "id": "botSpeed", "type": "selector", "label": "Bot speed", "options": ["Slow", "Normal", "Fast", "Instant"], "default": "Normal", "detail": "How long the computer thinks before it moves." },
+        { "id": "botChatter", "type": "selector", "label": "Bot chatter", "options": ["Off", "Some", "Lots"], "default": "Some", "detail": "How often the computer players talk." },
+        { "id": "secEmotes", "type": "heading", "label": "Emotes" },
+        { "id": "hideEmotes", "type": "toggle", "label": "Hide everyone's emotes", "default": false, "detail": "Opponents' phrases and bot chatter won't show." },
+        { "id": "secCrashes", "type": "heading", "label": "Privacy" },
+        { "id": "crashReports", "type": "toggle", "label": "Send crash reports", "default": true, "detail": "If the game breaks, it sends an anonymous report so it can be fixed. No name or IP is kept." }
+      ]
+    },
+    {
+      "id": "accessibility",
+      "label": "Accessibility",
+      "rows": [
+        { "id": "textSize", "type": "selector", "label": "Text size", "options": ["100%", "125%", "150%", "200%"], "default": "100%" },
+        { "id": "reduceMotion", "type": "toggle", "label": "Reduce motion", "default": false }
+      ]
+    },
+    {
+      "id": "about",
+      "label": "About",
+      "rows": [
+        { "id": "version", "type": "info", "label": "Version" },
+        { "id": "credits", "type": "button", "label": "Credits" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_help": {
+    "_file": "How well a bot sees and picks (the AI module). Lowest skill first.",
+    "candidates": "The most squares it looks at in one move (9 = every one).",
+    "spread": "0-1: keep moves within this share of the best (1 = only the best).",
+    "topN": "…and pick among at most this many of them.",
+    "wobble": "0-1: how much its traits wander from turn to turn."
+  },
+  "skills": [
+    { "id": "casual", "candidates": 9, "worlds": 1, "spread": 0.6, "topN": 3, "wobble": 0.2, "beliefNoise": 0 },
+    { "id": "sharp", "candidates": 9, "worlds": 1, "spread": 1, "topN": 1, "wobble": 0, "beliefNoise": 0 }
+  ]
+}

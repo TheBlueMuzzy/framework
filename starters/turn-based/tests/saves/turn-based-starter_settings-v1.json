@@ -1,0 +1,18 @@
+{
+  "about": "Settings v1: text 125%, bots Fast, emotes hidden. Made with makeGoldenSave (F151).",
+  "stored": {
+    "save": "turn-based-starter:settings",
+    "version": 1,
+    "savedAt": "2026-10-26T18:48:46.485Z",
+    "data": {
+      "textSize": "125%",
+      "botSpeed": "Fast",
+      "hideEmotes": true
+    }
+  },
+  "expect": {
+    "textSize": "125%",
+    "botSpeed": "Fast",
+    "hideEmotes": true
+  }
+}

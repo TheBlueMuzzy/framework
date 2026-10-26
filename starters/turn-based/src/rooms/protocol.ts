@@ -1,0 +1,192 @@
+// ROOM PROTOCOL — every message between a player's browser and the room server.
+// Shared by BOTH sides: the game (src/rooms/) and the server (party/server.ts → src/rooms/server/).
+// No React, no Dev Kit, no browser-only code in here — the server imports it.
+//
+// The room part (join, seats, host, ready, start…) is the same for every game.
+// The game's own part is opaque here: an `action` (player → server) and a `view` / `event`
+// (server → player). Each game says what's inside with its own types.
+
+// ─── Seats and the room ─────────────────────────────────────────────
+
+export type SeatKind = 'human' | 'bot'
+
+/** One chair at the table, as every player sees it. */
+export interface Seat {
+  /** Stable for the whole room ("seat-1", "seat-2"…) — use it to tell seats apart. */
+  id: string
+  name: string
+  /** 'bot' = a bot plays this seat (added by the host, or the player left / went idle / stayed away).
+   *  A bot seat that is still `connected` = its player went idle and is still watching: any tap gives it back. */
+  kind: SeatKind
+  isHost: boolean
+  /** false = the player's connection dropped; their seat waits for them. */
+  connected: boolean
+  /** Lobby only: the player pressed Ready. */
+  ready: boolean
+  /** A bot the host added: who plays it, in the game's own words (e.g. "Survivor/FirstClass") — the game's
+   *  botProfile() checked it. Missing for players and for bots the game didn't describe. */
+  profile?: string
+}
+// Note: the player's persistentId (the thing that owns a seat) is NEVER sent to other players —
+// anyone who knew it could take that seat and see that player's hand. It stays on the server.
+
+/** lobby = gathering players · playing = a game is on · over = game finished (rematch or back to lobby) */
+export type RoomPhase = 'lobby' | 'playing' | 'over'
+
+export interface RoomState {
+  code: string
+  phase: RoomPhase
+  /** In seat order. */
+  seats: Seat[]
+  minSeats: number
+  maxSeats: number
+}
+
+// ─── Player → server ────────────────────────────────────────────────
+
+export type ClientMessage =
+  /** Sent every time the socket opens (first time AND every reconnect). A known persistentId gets its seat back. */
+  | { type: 'join'; name: string; persistentId: string; create: boolean; rejoin?: boolean }
+  // rejoin (0.9.0): "Rejoin match" from the menu — only take back MY seat. No seat of mine in that room (it was cleared
+  // and the code reused, or I lost my lobby seat) → no_room, never a stranger's lobby and never a new room.
+  /** On purpose: gives up the seat (a bot takes it mid-game). */
+  | { type: 'leave' }
+  | { type: 'ready'; ready: boolean }
+  /** Host only. `options` are the game's new-game options (checked by the game). Works in the lobby and after a game (rematch). */
+  | { type: 'start'; options: unknown }
+  /** Host only. Removes a player (or a bot) — a kicked player can't come back to this room. */
+  | { type: 'kick'; seatId: string }
+  /** Host only, lobby only, if the game allows bots. `profile` = which bot (the game's own words, checked by its botProfile()). */
+  | { type: 'add_bot'; profile?: string }
+  /** Host only, after a game: everyone back to the lobby. */
+  | { type: 'back_to_lobby' }
+  /** The game's own move. The server's game rules check it. */
+  | { type: 'action'; action: unknown }
+  /** "I'm here" — the player tapped or pressed a key. Resets their idle clock; if a bot holds their seat because they
+   *  went idle, it's theirs again at once. (useRoom's active() sends it at most every few seconds.) */
+  | { type: 'active' }
+  /** A preset phrase for every seat (Rooms 0.12.0, the emotes module). Only its id travels — never words, never a
+   *  seat: the server knows whose connection it is, checks the id against content/emotes.json and keeps its own count. */
+  | { type: 'emote'; id: string }
+
+// ─── Server → player ────────────────────────────────────────────────
+
+/** Why the server shut you out. After this the game should stop trying (useRoom does). */
+export type CloseReason =
+  | 'left' // you pressed Leave
+  | 'kicked' // the host removed you
+  | 'connected_elsewhere' // you opened the game in another tab — that tab has your seat now
+  | 'no_room' // nobody is in a room with that code
+  | 'code_taken' // (creating) someone is already using that code — make another
+  | 'room_full'
+  | 'game_started' // a game is on and you don't have a seat in it
+  | 'name_needed'
+  | 'room_closed' // everyone left
+
+/** Something you asked for didn't happen, but you're still in the room. */
+export type ErrorCode =
+  | 'bad_message' // not a message the server understands
+  | 'not_host'
+  | 'not_now' // wrong moment (e.g. start while playing, action in the lobby)
+  | 'cant_start' // not enough seats / not everyone ready / the game refused the options
+  | 'bad_action' // the action wasn't the right shape
+  | 'action_refused' // the game's rules said no (message says why, in plain English)
+
+export type ServerMessage =
+  /** The room changed. `you` = your seat id (null if you have no seat). */
+  | { type: 'room'; room: RoomState; you: string | null }
+  /** Your own view of the game — only what YOU may see. Sent after every change and when you come back. */
+  | { type: 'view'; view: unknown }
+  /** A one-off game message (e.g. "Sam played MOSS" for an animation). */
+  | { type: 'event'; event: unknown }
+  | { type: 'error'; code: ErrorCode; message: string }
+  | { type: 'closed'; reason: CloseReason; message: string }
+  /** Only to the idle player: you've done nothing on your turn for a while — a bot takes your seat in `msLeft` unless you do something. */
+  | { type: 'idle_warning'; msLeft: number }
+  /** Only to that player: the warning is over (they did something, their turn moved on, or the bot took over). */
+  | { type: 'idle_warning_off' }
+  /** Only to a player who came back into a game after being away (closed the tab, lost the connection, left the
+   *  screen idle): `botTurns` = how many of their turns a bot played meanwhile (0 = none). (Rooms 0.9.0.) */
+  | { type: 'back'; botTurns: number }
+  /** A seat said a preset phrase (or a server bot its banter line) — to every seat, the sender's too. Each device drops
+   *  the senders its player muted (the emotes module's receive). (Rooms 0.12.0.) */
+  | { type: 'emote'; seat: string; id: string }
+
+// ─── Checking what arrives ──────────────────────────────────────────
+
+export const MAX_NAME_LENGTH = 16
+/** A bot's profile is a short tag (the game checks what it means). */
+export const MAX_PROFILE_LENGTH = 40
+/** An emote id is a short code name (a phrase id, or banter.<who>.<moment> from a server bot). */
+export const EMOTE_ID = /^[A-Za-z][A-Za-z0-9_.-]{0,79}$/
+/** Bigger messages than this are refused unread (a real one is far smaller). */
+export const MAX_MESSAGE_LENGTH = 16_000
+
+/** A player name as the room shows it: trimmed, single spaces, at most 16 characters. "" = no name. */
+export function cleanName(name: unknown): string {
+  if (typeof name !== 'string') return ''
+  return name.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH).trim()
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Server side: raw text from a player → a ClientMessage, or null if it isn't one.
+ * Checks every field's type, so the rest of the server can trust it. (The game's `action`
+ * and `options` are checked later by the game's own checkAction / checkOptions.)
+ */
+export function parseClientMessage(raw: unknown): ClientMessage | null {
+  if (typeof raw !== 'string' || raw.length > MAX_MESSAGE_LENGTH) return null
+  let data: unknown
+  try {
+    data = JSON.parse(raw)
+  } catch {
+    return null
+  }
+  if (!isObject(data)) return null
+
+  switch (data.type) {
+    case 'join':
+      if (typeof data.name !== 'string' || typeof data.persistentId !== 'string' || typeof data.create !== 'boolean') return null
+      if (data.persistentId.length < 8 || data.persistentId.length > 64) return null
+      if (data.rejoin !== undefined && typeof data.rejoin !== 'boolean') return null
+      if (data.rejoin === true) return { type: 'join', name: data.name, persistentId: data.persistentId, create: false, rejoin: true }
+      return { type: 'join', name: data.name, persistentId: data.persistentId, create: data.create }
+    case 'leave':
+      return { type: 'leave' }
+    case 'ready':
+      return typeof data.ready === 'boolean' ? { type: 'ready', ready: data.ready } : null
+    case 'start':
+      return { type: 'start', options: data.options }
+    case 'kick':
+      return typeof data.seatId === 'string' ? { type: 'kick', seatId: data.seatId } : null
+    case 'add_bot':
+      if (data.profile === undefined) return { type: 'add_bot' }
+      if (typeof data.profile !== 'string' || data.profile.length > MAX_PROFILE_LENGTH) return null
+      return { type: 'add_bot', profile: data.profile }
+    case 'back_to_lobby':
+      return { type: 'back_to_lobby' }
+    case 'action':
+      return { type: 'action', action: data.action }
+    case 'active':
+      return { type: 'active' }
+    case 'emote':
+      return typeof data.id === 'string' && EMOTE_ID.test(data.id) ? { type: 'emote', id: data.id } : null
+    default:
+      return null
+  }
+}
+
+/** Player side: raw text from the server → a ServerMessage, or null if it isn't one. */
+export function parseServerMessage(raw: unknown): ServerMessage | null {
+  if (typeof raw !== 'string') return null
+  try {
+    const data: unknown = JSON.parse(raw)
+    if (!isObject(data) || typeof data.type !== 'string') return null
+    return data as unknown as ServerMessage
+  } catch {
+    return null
+  }
+}
