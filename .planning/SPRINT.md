@@ -16,6 +16,7 @@ Done when: `GamePlug.moments` accepts what botBanter's MomentMap and the AI READ
 - [x] 🤖 2. The starter takes the new AI module (install-module) and drops its workaround — starters/turn-based
 - [x] 🤖 3. AI module VERSION + README note; ai tests + the starter's checks green — ai/kit/VERSION
 Check: ai `npm test` + typecheck green; the type test fails on the old type; the starter's check:fast green.
+Checked: 2026-10-26 (helper) ai 162/162 + typecheck + lint; the type test red on the old type (2 tsc errors, .scratch/framework-f154/red-old-type.txt); starter check:fast + check:full ALL PASS. Claude after merging: types.ts + plug.ts + table.ts read whole — no bugs; root check:fast 22/22.
 
 ## F155 🐞 Rooms local port
 Done when: a game says which port its local room server uses (one place, read by both the room server's dev settings and the game page), the rooms module's client reads it instead of a fixed 1999, and the starter + another game can run online locally at the same time.
@@ -24,6 +25,7 @@ Done when: a game says which port its local room server uses (one place, read by
 - [x] 🤖 3. The starter takes the new rooms module on its own port; its online e2e green; two local servers side by side proven — starters/turn-based
 - [x] 🤖 4. Rooms VERSION + README note (how a game picks its port) — rooms/kit/VERSION
 Check: rooms `npm test` green; the starter's check:full green; the starter's room server and a second one on another port both answer at once.
+Checked: 2026-10-26 (helper) rooms 205/205 + typecheck + lint; /health from 6499 (the starter) and 6511 (a second installer-made game) at once, on 127.0.0.1 and 192.168.1.152; the starter's check:full green while 6511 ran. Claude after merging: roomClient.ts + vitePlugin.mjs read whole — no bugs; the starter's check:full ALL PASS 10/10 (1.1 min); root check:fast 21/22 — saves' real-Firefox tests lost their browser ("Target page, context or browser has been closed") while the F153 helper's shoots ran 12 test browsers; saves alone right after: 276/276.
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
