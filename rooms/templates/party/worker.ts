@@ -1,6 +1,6 @@
 // THE ONLINE SERVER'S FRONT DOOR — Cloudflare runs this file (wrangler.json "main") on Muzzy's own account.
 // It hands every room to GameServer (./server.ts), which knows nothing about Cloudflare.
-//   Local:  npm run party:dev   (port 1999)   ·   Live: npm run party:deploy (Muzzy's call — it's public)
+//   Local:  npm run party:dev   (port: wrangler.json dev.port)   ·   Live: npm run party:deploy (Muzzy's call — it's public)
 //
 // PartyServer (the open-source successor of PartyKit) gives us rooms on plain Cloudflare (Workers free plan):
 // one room code = one Durable Object = one copy of the server, at /parties/main/<room code> —

@@ -4,28 +4,36 @@
 // Tab A: Play online → Create a room. Tab B: Play online → types A's code → Join. A starts the game. Each tab taps a
 // free square on its own turn until both show the result; A sends an emote and B sees its bubble. Screenshots of
 // both tabs (lobby, mid-game, results). Any console error or page error fails it.
-// Starts its OWN dev server (6403) and room server (6499, its storage in a folder of its own — PERSIST_TO, default
-// .wrangler/state-e2e) and stops both at the end.
+// Starts its OWN dev server (6403) and room server and stops both at the end. The room server runs on the game's own
+// room port — wrangler.json dev.port (6499), the line the page reads too (rooms 0.13.0: roomsPort() in vite.config) —
+// so this also proves the page finds its server with nothing pointed by hand (no VITE_PARTY_HOST). Its storage is a
+// folder of its own (PERSIST_TO, default .wrangler/state-e2e). `npm run party:dev` uses the same port: stop it first
+// (check:full's port check says so). serverPort, if given, must be that same port (check-all passes it for that check).
 import { mkdirSync } from 'node:fs'
 import { createServer } from 'vite'
 import { unstable_dev } from 'wrangler'
 import { chromium } from 'playwright-core'
 import { checkVersion } from '../src/version/e2e.mjs'
+import { readPartyPort } from '../src/rooms/vitePlugin.mjs'
 
 const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6403)
-const SERVER_PORT = Number(process.argv[4] ?? 6499)
+const { port: SERVER_PORT } = readPartyPort()
+if (process.argv[4] && Number(process.argv[4]) !== SERVER_PORT) {
+  console.log(`ONLINE NOT STARTED — asked for room port ${process.argv[4]}, but wrangler.json dev.port (what the page reads) is ${SERVER_PORT}. Make them agree (scripts/check-all.mjs).`)
+  process.exit(1)
+}
 mkdirSync(OUT, { recursive: true })
 let failures = 0
 let a, b // the two tabs
 const fail = (why) => { failures++; console.log(`  FAIL ${why}`) }
 
-// The room server first; the game's pages connect to it (VITE_PARTY_HOST — the rooms client's address)
+// The room server first, on the game's room port; the game's pages find it there by themselves
 const roomServer = await unstable_dev('party/worker.ts', {
   config: 'wrangler.json', port: SERVER_PORT, ip: '127.0.0.1', persistTo: process.env.PERSIST_TO ?? '.wrangler/state-e2e',
   logLevel: 'warn', experimental: { disableExperimentalWarning: true },
 })
-process.env.VITE_PARTY_HOST = `127.0.0.1:${SERVER_PORT}`
+delete process.env.VITE_PARTY_HOST // a shell's leftover live address must not point the pages elsewhere
 const server = await createServer({ server: { port: PORT, strictPort: true, host: '127.0.0.1' }, logLevel: 'warn' })
 await server.listen()
 const browser = await chromium.launch()
