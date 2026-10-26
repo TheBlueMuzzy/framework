@@ -12,7 +12,8 @@
 //   3. runs the starter's `npm run check:<fast|full>` in the copy, and prints the logs of any check that failed
 //   4. deletes the copy. The real starters/<name> is never written to.
 // Exit code 0 = the starter passed with today's modules.
-// Needs: `npm ci` in starters/<name> once (its node_modules is the one borrowed). A full run also needs Playwright's
+// Needs: `npm ci` in starters/<name> once (its node_modules is the one borrowed) and in every module (an installer
+// may use its module's packages — check:fast's module tests need them anyway). A full run also needs Playwright's
 // Chromium, and only one full run of a starter at a time (its e2e scripts use fixed ports) — a lock file says so.
 import { spawn, spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
@@ -68,6 +69,8 @@ for (const module of modules) {
   const scripts = join(framework, module, 'scripts')
   const installer = existsSync(scripts) && readdirSync(scripts).find((file) => /^install-.*\.mjs$/.test(file) && !file.includes('.test.'))
   if (!installer) stop(`${module} has no scripts/install-*.mjs, so it can't be put in the starter`)
+  // an installer may use its module's own packages (crashes' reads source maps with 'source-map')
+  if (!existsSync(join(framework, module, 'node_modules'))) stop(`${module} has no node_modules — run \`npm ci\` in ${module} once (its installer may need its packages)`)
   const result = spawnSync(process.execPath, [join(scripts, installer), copy], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   const version = readFileSync(join(framework, module, 'kit', 'VERSION'), 'utf8').trim()
   if (result.status !== 0) stop(`${module}'s installer failed on the copy:\n${`${result.stdout}${result.stderr}`.trim()}`)

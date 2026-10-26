@@ -100,12 +100,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: starters/${{ matrix.starter }}/package-lock.json
+          cache-dependency-path: |
+            starters/${{ matrix.starter }}/package-lock.json
+            */package-lock.json
 
       # The copy borrows these (one link per package), so they're installed once, here
       - name: Install the starter's packages
         working-directory: starters/${{ matrix.starter }}
         run: npm ci
+
+      # A module's installer may use the module's own packages (crashes' reads source maps with 'source-map')
+      - name: Install every module's packages (their installers run)
+        run: |
+          for module in $(ls -d */kit/VERSION | cut -d/ -f1); do
+            echo "::group::npm ci in $module"
+            (cd "$module" && npm ci)
+            echo "::endgroup::"
+          done
 
       # The starter pins playwright-core (1.63.0) — its own CLI installs the Chromium that version needs
       # (`npx playwright` would fetch the newest Playwright and a browser the pinned one can't use)
