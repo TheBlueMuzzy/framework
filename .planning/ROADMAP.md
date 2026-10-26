@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.24.0, 2026-10-25)
+Release target: none — a library; each milestone releases on its own (latest v0.25.0, 2026-10-26)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
