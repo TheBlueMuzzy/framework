@@ -7,7 +7,7 @@ import text from '../../content/text/en.json'
 import { Button, Row, Stack, fill } from './kit'
 import { looksClock } from '../devkit/gameClock'
 import type { Cell } from '../game/rules'
-import { useShortSide, useTuningEdits } from './hooks'
+import { useTuningEdits, useWindowSize } from './hooks'
 
 type BoardProps = {
   board: Cell[]
@@ -23,9 +23,12 @@ const markName = (cell: Cell) => (cell === 0 ? text.table.markNames.x : text.tab
 
 export function Board({ board, winLine, canPlay, onPlay }: BoardProps) {
   useTuningEdits('board')
-  const shortSide = useShortSide()
-  // One square: the tuned size, but never more than the board's share of the window (3 squares + the gaps between)
-  const cellPx = Math.max(44, Math.min(boardTuning.cellSize, Math.floor((shortSide * boardTuning.boardShare) / 3.4)))
+  const { width, height, rem } = useWindowSize()
+  // One square: the tuned size, but never more than the board's share of the window, and never into the HUD's rows
+  // above and below it (3 squares + the gaps between ≈ 3.4 squares). Never under 44 px (a finger).
+  const byShare = (Math.min(width, height) * boardTuning.boardShare) / 3.4
+  const byHeight = (height - boardTuning.hudRoomRem * rem) / 3.4
+  const cellPx = Math.floor(Math.max(44, Math.min(boardTuning.cellSize, byShare, byHeight)))
   const lit = useWinPulse(winLine !== null)
 
   return (

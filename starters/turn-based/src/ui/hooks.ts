@@ -12,7 +12,11 @@ const subscribeResize = (listener: () => void) => {
   addEventListener('resize', listener)
   return () => removeEventListener('resize', listener)
 }
-const shortSide = () => Math.min(innerWidth, innerHeight)
+const windowSize = () => `${innerWidth}x${innerHeight}`
 
-/** The window's shorter side, in CSS px (redraws on resize / rotate). */
-export const useShortSide = () => useSyncExternalStore(subscribeResize, shortSide)
+/** The window's size in CSS px, and the page's rem in px (the Text size setting changes it). Redraws on resize / rotate. */
+export function useWindowSize() {
+  const [width, height] = useSyncExternalStore(subscribeResize, windowSize).split('x').map(Number)
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+  return { width, height, rem }
+}
