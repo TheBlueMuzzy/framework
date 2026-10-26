@@ -20,7 +20,7 @@ Check: ai `npm test` + typecheck green; the type test fails on the old type; the
 ## F155 🐞 Rooms local port
 Done when: a game says which port its local room server uses (one place, read by both the room server's dev settings and the game page), the rooms module's client reads it instead of a fixed 1999, and the starter + another game can run online locally at the same time.
 - [x] 🤖 1. Measure first: where 1999 is written today (rooms client, installer, templates, the starter, Glyphtender read-only) and what a game's dev server already knows — rooms/kit/roomClient.ts
-- [ ] 🤖 2. The client reads the game's own port (default 1999 for games that set nothing — nothing changes for them); the installer writes it where the game's wrangler dev reads it too — rooms/scripts/install-rooms.mjs
+- [x] 🤖 2. The client reads the game's own port (default 1999 for games that set nothing — nothing changes for them); the installer writes it where the game's wrangler dev reads it too — rooms/scripts/install-rooms.mjs
 - [ ] 🤖 3. The starter takes the new rooms module on its own port; its online e2e green; two local servers side by side proven — starters/turn-based
 - [ ] 🤖 4. Rooms VERSION + README note (how a game picks its port) — rooms/kit/VERSION
 Check: rooms `npm test` green; the starter's check:full green; the starter's room server and a second one on another port both answer at once.
