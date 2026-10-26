@@ -13,6 +13,7 @@ Done when: `starters/turn-based` is a playable tic-tac-toe with every module ins
 - [x] 🤖 6. All green: check:fast, check:framework, a `smoke` script that plays one round; phone + desktop shots looked at — starters/turn-based
 - [x] 🤖 7. README (what it is, what a new game replaces first) + /define copies the closest starter for a new game — ~/.claude/skills/define/SKILL.md (README: helper; /define build-plan + /sprint's first task copy the starter: Claude)
 Check: in starters/turn-based — `npm run check:fast`, `npm run check:framework`, `npm run smoke` all green; a round played against the AI and one online (two tabs); shots at 390×844 and 1440×900 looked at.
+Checked: 2026-10-26 4:35 PM (Claude, main folder, clean npm ci, UI kit 0.35.8) — starter `npm run check:full` ALL PASS 10/10 (ui rules, unit tests, lint, framework code, build, online two tabs, devkit-live, smoke vs the AI, framework 57 kept, screens 7×7); looked at board 390×844 + 768×343, results 390×844 + 1440×900 — the table colour makes the HUD words read, the ring has room.
 
 ## F65 🔧 Framework test game
 Done when: the framework's check:fast and GitHub's checks run the starter's checks on every module change, and a module broken on purpose turns them red in both places.
@@ -20,6 +21,7 @@ Done when: the framework's check:fast and GitHub's checks run the starter's chec
 - [x] 🤖 2. GitHub runs them on every push — .github/workflows/checks.yml
 - [x] 🤖 3. Proof: break a module on purpose → the starter goes red locally and on GitHub; put it back → green — scripts/check-modules.mjs
 Check: the broken-on-purpose run red in check:fast and on GitHub (run links in Notes), then green.
+Checked: 2026-10-26 — red with emotes broken on purpose: local check:fast 1 of 22 (the starter), GitHub run 40390583484 (starter job red, every module green); after the revert green: local 22/22, GitHub run 40391055576. Claude re-ran the framework check:fast after every merge: 22/22, the starter last (9 s).
 
 ## F152 🐞 Results badge room
 Done when: the "1ST" badge never touches the avatar's ring on Results / End game in any look, size or engine, and the page check flags a badge touching a round avatar.
@@ -27,6 +29,7 @@ Done when: the "1ST" badge never touches the avatar's ring on Results / End game
 - [x] 🤖 2. The page check sees a badge touching a round avatar's ring (a test that fails on today's code) — ui-kit/kit/uiProblems.mjs
 - [x] 🤖 3. Give the badge room; Chromium + WebKit shoots 0 problems — ui-kit/kit/blocks/blocks.css
 Check: `npm run shoot` + `npm run shoot:webkit` 0 problems; the new uiProblems test fails on the old code.
+Checked: 2026-10-26 (helper) shoot 961 shots 0 problems, shoot:webkit 504 shots 0 problems, compare:engines no new wrap difference; the ring: tests red on the old check (80c3fe0: 2 failed) then 28/28 in Chromium + WebKit; GitHub run 40392485076 green. Claude looked at the starter's results at 390×844 + 1440×900 on 0.35.8: "1st", the name and ★ clear of the ring.
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
