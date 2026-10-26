@@ -14,3 +14,7 @@ devkit.local.json
 # wrangler dev state + the crash server test token (never committed)
 .wrangler/
 .dev.vars
+
+# the crashes module's source maps (src/crashes, vite crashesMaps()): a starter never releases, and every build rewrites
+# them — a real game DELETES this line before its first release and commits releases/<version>/maps/ (crashes README)
+releases/
