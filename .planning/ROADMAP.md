@@ -128,7 +128,7 @@ Goal: click a thing in the game — or a menu button, switch, tab… — → its
 - ✅ F56 🔧 ~~+ Add a knob / ✕ remove~~ (taken out in 0.16.0 — Muzzy 2026-10-14: a click should simply show everything; the game's test checks every setting is on some object: unlistedSettings), pick forgotten when the Dev Kit closes, desktop panel tucks to a bar while selecting (0.15.1), checkSelectMap (unknown keys shown red + a game test), Copy for Claude of a pick — should · needs: F55 · Glyphtender sprint 29
   why: the object → knobs list grows while playing → it gets right over time without anyone planning it perfectly
 - ✅ F58 🔧 UI kit parts in Select: a "style" knob kind (style.json token names, shared by every part of that kind) shown by the Color tab under a pick; the Color tab also edits the non-colour values (corners, outline, shadows, press feel, timings, menu sizes — styleValues.ts, slider / dropdown / box); things in an [inert] screen never picked; outlines never drawn over the Dev Kit panel; phone pick waits for the tap to finish — Dev Kit 0.15.0 · should · needs: F55 · Glyphtender sprint 29 (its F88), Muzzy 2026-10-14: "click on a button, or a toggle and update the settings for it"
-- ⏳ F57 🔧 3D picker (raycast + 3D outline, same tab) — could · needs: F55 · when a 3D game needs it
+- ⏳ F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 ```mermaid
 flowchart LR
   F55[F55 Select tab + picker] --> F56[F56 Add knob + check]
@@ -193,18 +193,18 @@ Goal (Muzzy 2026-10-19): "If a real indie studio would do something, we should t
 - ✅ F87 🔧 QA routine: plan-lint requires a `Check:` line under every sprint feature and a `Checked:` note before `Fnn: done`; an open P1 older than the sprint start that isn't a sprint task is flagged; /play's watch mode writes a playtest log (`.planning/research/playtests/<date>.md`) a stage release asks for — should · QA lead rows · sprint 13
 - ✅ F88 🔧 Quality bars in check:framework: text contrast, a reduce-motion setting, a volume setting when the audio module is in, nothing touching a card's edge, cards that don't grow mid-sequence (CLAUDE.md's "breathing room" rule, now checked) — should · gap rank 12 + art/audio rows · sprint 14
 - ✅ F89 🧱 Crash reports from players: a crashes module — errors caught in the game, sent once per kind per session to a small worker of its own on the game's Cloudflare that groups them; hidden source maps + a local command for real file lines; session start says "3 new errors from players since last time"; on by default with a Settings switch (Muzzy 2026-10-22). Research layer 1 (`.planning/design/crashes.md`) — could · gap rank 6 (large) · sprint 25
-- 💤 F105 🧱 Crash reports, layer 2: reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
-- 💤 F106 🧱 Crash reports, layer 3: charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
-- 💤 F90 🔧 Coding standards as lint rules: no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · gap rank 14
-- 💤 F91 🔧 Localization readiness: player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
-- 💤 F92 🔧 Tech lead's routine: a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
+- 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
+- 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
+- 💤 F90 🔧 Coding-standard lint rules — no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · gap rank 14
+- 💤 F91 🔧 Translation readiness — player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
+- 💤 F92 🔧 Tech-lead checks — a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
 - ✅ F93 🧱 Saves: run resume — autosave at natural break points (end of turn / wave), "Continue?" on launch, the run deleted when it ends (research layer 2) — should · needs: F86 · sprint 18
 - ✅ F94 🧱 Saves: seed + move log — a run saved as its seed + moves and rebuilt by replaying them; gives replays and daily challenges; needs rules with no hidden randomness (research layer 3) — could · needs: F86 · sprint 20
 - ✅ F95 🧱 Saves: online rejoin — room id + seat token kept so a player who closed the tab gets back into the match, with the rooms kit (research layer 4) — should · needs: F86 · sprint 18
 - ✅ F96 🧱 Saves: cloud via link code — a short code copies the save to another device, on our own Cloudflare (KV/D1), no accounts; progress merged by each field's rule (F86), offline first; privacy note + delete my data (research layer 5) — should · needs: F86 · sprint 19
-- 💤 F97 🧱 Saves: app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
+- 💤 F97 🧱 Saves on app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
 - ✅ F98 🧱 Saves: checked leaderboards — the server replays seed + moves to verify a score, never trusts a sent one (research layer 7) — could · needs: F94, F96 · sprint 20
-- 💤 F99 🧱 Saves: Unity port — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
+- 💤 F99 🧱 Saves in Unity — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
 - ✅ F100 🧱 Rooms: a match waits until it ends — the room's seats + game state kept in the Durable Object's storage, so a player can rejoin hours later and a server restart doesn't lose the match (Muzzy 2026-10-20: "until the match ends") — should · needs: F95 · sprint 19
 - ✅ F101 🧱 Saves: ready for any platform — one storage switch for the whole kit, saves opened from a slow (async) storage at start-up then read instantly, writes in the background and forced out on hide/quit, the save format written down for any language (FORMAT.md); the seams F97 / F99 plug into later — should · needs: F86 · sprint 21
 - ✅ F102 🧱 Version module (Muzzy 2026-10-20: "version number visibility is important in all games… should be a built in process, possibly a 'version' framework module that gets added to every game"): one source (version.json, /save bumps it) → a Vite plugin (define + `<meta name="app-version">`), one "vX.Y.Z.B" label on the main menu, the bottom of Settings and the Dev Kit's bug files, an e2e helper that refuses a stale build / cached service worker, check:framework checks the wiring (from Goops' own copy) — should · sprint 22
@@ -394,14 +394,14 @@ flowchart LR
 
 ## v0.24 — A test game guards every update  ← current · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "you focus on the framework and bmuz" — Goops' own Claude takes F59/F60/F62): a tiny turn-based game in the framework with every module wired, that runs the framework's checks on every module change — so a broken update is caught before any game takes it (this week: three GitHub-only failures in two milestones, one found only after the merge). Plus the results badge the WebKit run found.
-- 🟢 F151 🧱 Turn-based starter: `starters/turn-based` — a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63
-- ⏳ F65 🔧 Framework test game: the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built
-- 🟢 F64 🧱 Realtime starter: `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62
-- 🟢 F152 🐞 "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149
+- 🟢 F151 🧱 Turn-based starter — `starters/turn-based`: a tiny turn-based game (from Glyphtender's wiring, not its code) with every module installed by install-module.mjs and wired per MODULE-CONTRACTS, `check:framework` + a smoke round green on day one; /define copies it — should · needs: F63
+- ⏳ F65 🔧 Framework test game — the starters run the pack in the framework on every module change (check:fast + GitHub), BEFORE an update reaches a game — should · needs: F151 · F64's realtime starter joins when it's built
+- 🟢 F64 🧱 Realtime starter — `starters/realtime` (from Goops' wiring, built in the framework — framework work, not Goops') — a tiny playable realtime game with every module wired and the pack green on day one; /define copies it, the TDD only describes what's different (split 2026-10-26: the turn-based one is F151, v0.24) — should · needs: F62
+- 🟢 F152 🐞 Results badge room — "1ST" touches the avatar's ring on Results / End game (both engines), and the page check misses a badge on a round avatar — should · needs: F149
 ```mermaid
 flowchart LR
   F151[F151 Turn-based starter] --> F65[F65 Framework test game]
-  F152[F152 Rank badge room]
+  F152[F152 Results badge room]
   F64[F64 Realtime starter]
 ```
 
