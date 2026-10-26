@@ -379,8 +379,8 @@ flowchart LR
 
 ## v0.22 — Big text in every look  ← current · planned 2026-10-25
 Goal (Muzzy 2026-10-25, after v0.23.0: "sure"): the 200% text work in every look, not only Clean — the HUD sample sideways at 200% overlaps in Cozy and Pixel (F145's HUD helper), and the shoot only shoots Clean at 200%.
-- 🔨 F146 🔧 The shoot sees the key screens at 200% text in every look: the 18 key screens, the 6 other looks, an upright and a sideways phone — so a look's wider font is checked, not found by hand — should · needs: F144 · sprint 40
-- 🔨 F147 🐞 Every look holds up at 200% text: what F146 finds — first the Cozy / Pixel HUD sideways ("Hold to Roll" on the seats row) — should · needs: F146, F145 · sprint 40
+- ✅ F146 🔧 The shoot sees the key screens at 200% text in every look: the 18 key screens, the 6 other looks, an upright and a sideways phone — so a look's wider font is checked, not found by hand — should · needs: F144 · sprint 40
+- ✅ F147 🐞 Every look holds up at 200% text: what F146 finds — first the Cozy / Pixel HUD sideways ("Hold to Roll" on the seats row) — should · needs: F146, F145 · sprint 40
 ```mermaid
 flowchart LR
   F146[F146 Shoot every look at 200%] --> F147[F147 Every look at 200%]
