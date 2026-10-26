@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.23.0",
-  "build": 2,
+  "version": "0.24.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -162,6 +162,11 @@
       "version": "0.23.0",
       "date": "2026-10-25",
       "summary": "The kit meets every player"
+    },
+    {
+      "version": "0.24.0",
+      "date": "2026-10-25",
+      "summary": "Big text in every look"
     }
   ]
 }

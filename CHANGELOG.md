@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.24.0 — 2026-10-25
+
+Every look in the UI kit — Cozy, Cartoon, Pixel, Neon, Dark console and Fantasy, not only Clean — now holds up when a player sets text to 200%. In-game words no longer sit on the seats or the Roll button on a sideways phone, picker words stay whole, and names and titles never break mid-word. Nothing changes at normal text size.
+
+### New
+- The screenshot run checks the 18 main screens at 200% text in all 7 looks, on an upright and a sideways phone (961 shots, about 16 minutes).
+- UI kit 0.35.4: a picker word too wide for the space between its arrows ("Accessibility" at 200%) gets its own line, with ◀ ▶ underneath at the two ends.
+
+### Fixed
+- UI kit 0.35.4: on a sideways phone at 200% text, "Hold to Roll" no longer covers the seats and Roll in Cozy and Pixel — the health bars at the top make room, only when text is big.
+- UI kit 0.35.4: player names on the results, lobby and seat screens keep their longest word whole ("Zippy", not "Zipp / y"); the seat and lobby room titles drop a size instead of breaking ("progress", "Room").
+- UI kit 0.35.4: the story bubble never runs past the edge of the screen at 200% text, in any look.
+- UI kit 0.35.4: Pause on a sideways phone at 200% keeps full-height buttons and scrolls a little, instead of squeezing the words against their borders.
+- UI kit 0.35.4: Pixel's ‹ Back arrow stays inside its button's border.
+- UI kit 0.35.4: the emote bubble no longer warns about covering a word during the split second after the text size changes.
+- The page check now measures words in their own font: since UI kit 0.34.0 it had measured them in a stand-in font, so some "touches its edge" results were wrong.
+
+### Known issues
+- A long talking-bubble line on a phone at 200% text can cover the game's pickers on a short screen (sideways, and Pixel upright): the kit warns, and the game is expected to make room. Accepted 2026-10-25.
+
 ## v0.23.0 — 2026-10-25
 
 Every screen in the UI kit now holds up when a player sets text to 200%: titles shrink to fit instead of breaking mid-word, menus scroll instead of piling up, and in-game words stay readable without covering the game. A game also gets a "What's new" panel after an update, and a gamepad press now shows where focus is.
