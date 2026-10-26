@@ -12,7 +12,7 @@ Check: the new test red on the old check, then green; both shoots 0 problems; th
 
 ## F154 🐞 AI moments type fix
 Done when: `GamePlug.moments` accepts what botBanter's MomentMap and the AI README already allow (`{ moment, by }`), with a type test, and the starter uses it directly (its separate `moments` export gone).
-- [ ] 🤖 1. Widen the type to match MomentMap and the README; a type test that fails on the old type — ai/kit/types.ts
+- [x] 🤖 1. Widen the type to match MomentMap and the README; a type test that fails on the old type — ai/kit/types.ts
 - [ ] 🤖 2. The starter takes the new AI module (install-module) and drops its workaround — starters/turn-based
 - [ ] 🤖 3. AI module VERSION + README note; ai tests + the starter's checks green — ai/kit/VERSION
 Check: ai `npm test` + typecheck green; the type test fails on the old type; the starter's check:fast green.

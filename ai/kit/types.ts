@@ -8,6 +8,7 @@
 //     which moves to look at, and any decisions that sit outside the goal roll (Glyphtender: draft, refresh, "call it").
 // Personalities and skills are plain JSON (a game's content/ai/); the plug is code.
 // Design: framework .planning/design/ai.md.
+import type { MomentMap } from './banter'
 
 /** A trait's range, 0–100. Each turn the AI picks a value inside it, so a personality leans the same way but never
  *  plays exactly the same twice. */
@@ -150,8 +151,10 @@ export interface GamePlug<View, Action, World = View, Event = unknown> {
   special?(ctx: Context<View, World>, rng: number): { special: Special<Action> | null; rng: number }
   /** Banter (F22): the game's moment map — what one of its events means to this seat ("hitRival" for the one who did
    *  it, "gotHit" for the one it happened to): one moment, a few (most important first) or nothing. The names are the
-   *  keys of content/ai/banter.json "chance"; the lines are content/text/en.json banter.<personality>.<moment>. */
-  moments?(event: Event, seat: number): string | readonly string[] | null | undefined
+   *  keys of content/ai/banter.json "chance"; the lines are content/text/en.json banter.<personality>.<moment>.
+   *  A moment may name who caused it: `{ moment, by }` (0.5.0). The type IS botBanter's MomentMap (0.8.2, F154), so
+   *  `botBanter({ moments: plug.moments! })` takes it as it is. */
+  moments?: MomentMap<Event>
 }
 
 /** Why it did what it did — for the Dev Kit and bug reports, never shown to players. */
