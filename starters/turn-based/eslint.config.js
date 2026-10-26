@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'e2e-shots', '.claude', '.wrangler', 'src/table']), // install-module adds each framework module's folders here (they're linted in the framework)
+  globalIgnores(['dist', 'e2e-shots', '.claude', '.wrangler', 'src/table', 'src/devkit', 'vite-plugins/devkit', 'src/ui/kit', 'src/version', 'src/saves', 'src/crashes', 'src/audio', 'src/ai/kit', 'src/emotes', 'src/rooms']), // install-module adds each framework module's folders here (they're linted in the framework)
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
