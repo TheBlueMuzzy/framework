@@ -27,7 +27,8 @@
     "party:deploy": "wrangler deploy",
     "crashes": "node src/crashes/crash-report.mjs",
     "crashes:dev": "wrangler dev -c crashes/wrangler.json",
-    "crashes:deploy": "wrangler deploy -c crashes/wrangler.json"
+    "crashes:deploy": "wrangler deploy -c crashes/wrangler.json",
+    "ai:tune": "node src/ai/kit/ai-arena.mjs --tune"
   },
   "dependencies": {
     "partyserver": "^0.5.10",

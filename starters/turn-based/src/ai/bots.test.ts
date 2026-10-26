@@ -1,6 +1,8 @@
 // The two personalities feel different: Careful never misses a win or a block, Careless often misses a block.
 import { describe, expect, it } from 'vitest'
 import { botMove } from './bots'
+import { plug } from './plug'
+import { momentsWithCause } from './kit/banter'
 import { ticTacToe, type State } from '../game/rules'
 
 /** A board from a picture: X = seat 0, O = seat 1, . = empty. `turn` = who moves next. */
@@ -42,5 +44,12 @@ describe('the computer opponents', () => {
       expect(ticTacToe.check(state, state.turn, move.action)).toBeNull()
       state = ticTacToe.apply(state, state.turn, move.action).state
     }
+  })
+
+  it("the plug names its banter moments, and who made a rival's threat (F154)", () => {
+    // X takes the second top square: two in a row with the third free — a threat by seat 0
+    const { events } = ticTacToe.apply(boardOf('X.. .O. ...', 0), 0, { cell: 1 })
+    expect(momentsWithCause(plug.moments!, events, 0)).toEqual([{ moment: 'bigMove' }])
+    expect(momentsWithCause(plug.moments!, events, 1)).toEqual([{ moment: 'rivalBigMove', by: 0 }])
   })
 })
