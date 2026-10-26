@@ -4,7 +4,8 @@
 //   screenshots/screens/<screen>-<style>-<size>.png  every screen in Clean at phone + desktop (and at 200% text on a
 //                                                    phone + a phone on its side: …-text-200, F144),
 //                                                  and the key screens in every style (also on a 360×780
-//                                                    phone; the landscape ones also on a 667×375 phone on its side)
+//                                                    phone; the landscape ones also on a 667×375 phone on its side;
+//                                                    and at 200% text on both phones, F146)
 // Starts its own Vite server on port 5180 and uses Playwright's own Chromium (never your Chrome).
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
@@ -59,6 +60,9 @@ async function pageFor(size) {
   })
   page.errors = []
   page.on('pageerror', (e) => page.errors.push(e.message))
+  // …and the page's error events that aren't a thrown error (F147: "ResizeObserver loop completed with undelivered
+  // notifications" reached only Vite's terminal, never the list) — said as console errors, so the line below hears them
+  await page.addInitScript(() => addEventListener('error', (e) => { if (!e.error) console.error(`page error: ${e.message}`) }))
   // console errors, and the kit's own dev warnings (a bubble stuck on what it avoids, F130) — the gallery has none
   page.on('console', (m) => (m.type() === 'error' || (m.type() === 'warning' && m.text().startsWith('[ui-kit]'))) && page.errors.push(m.text()))
   return (pages[size.name] = page)
@@ -68,6 +72,9 @@ async function pageFor(size) {
 // never a whole screen: the same screen at other sizes and looks is still checked.
 const knownShots = {
   'screens/talk-clean-phone-landscape-text-200.png': 'Muzzy 2026-10-25 (F145): a 3-line bubble at 200% has no room on a short screen — the kit warns, the game makes room',
+  // Muzzy 2026-10-25 (F147): the same in every look — and Pixel's wide letters wrap the line to 6 lines upright
+  ...Object.fromEntries(['cartoon', 'console', 'cozy', 'fantasy', 'neon', 'pixel'].map((look) => [`screens/talk-${look}-phone-landscape-text-200.png`, 'Muzzy 2026-10-25 (F147): same as Clean — the game makes room for a long line at 200%'])),
+  'screens/talk-pixel-phone-text-200.png': "Muzzy 2026-10-25 (F147): Pixel's wide letters wrap the demo line to 6 lines at 200% — the kit warns, the game makes room",
 }
 let knownCount = 0
 
@@ -207,6 +214,13 @@ try {
   }
   for (const size of [sizes.phone, sizes.landscape]) {
     for (const id of screenIds) await shoot(`screens/${id}-clean-${size.name}-text-200`, size, `?screen=${id}&preset=clean`, openers[id] || text200)
+  }
+  // …and the key screens at 200% in every OTHER look, both phones (F146): a look's own font can be wider than Clean's
+  // (Cozy and Pixel's HUD sideways overlapped where Clean's fit)
+  for (const preset of presetNames.filter((p) => p !== 'clean')) {
+    for (const size of [sizes.phone, sizes.landscape]) {
+      for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${size.name}-text-200`, size, `?screen=${id}&preset=${preset}`, openers[id] || text200)
+    }
   }
   // Live restyle: change a tweak with the dev switcher and check it repaints
   await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {

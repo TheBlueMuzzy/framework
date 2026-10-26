@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screens } from './screens'
 
-// Browser history moves a moment later (like a real browser), so wait for it.
-// eslint-disable-next-line no-restricted-syntax -- the history steps are the test browser's own 0 ms timers, one trip at a time, with nothing to wait on; 100 ms covers them (hasn't failed under load so far)
-const historySettles = () => new Promise((resolve) => setTimeout(resolve, 100))
+// Browser history moves a moment later (like a real browser), so wait for what it should show — never a fixed time
+// (a 100 ms wait failed under load in sprint 40: "closing two screens at once" read the state mid-trip)
+const waitFor = (check: () => void) => vi.waitFor(check, { timeout: 2000 })
 
 beforeEach(async () => {
   while (screens.current.length) screens.pop()
-  await historySettles()
+  await waitFor(() => expect(history.state).toBeNull())
 })
 
 describe('screen stack', () => {
@@ -50,19 +50,16 @@ describe('screen stack', () => {
     screens.push('settings')
     screens.push('quit')
     history.back()
-    await historySettles()
-    expect(screens.current).toEqual(['settings'])
+    await waitFor(() => expect(screens.current).toEqual(['settings']))
     history.back()
-    await historySettles()
-    expect(screens.current).toEqual([])
+    await waitFor(() => expect(screens.current).toEqual([]))
   })
 
   it('closing screens steps history back too, so Back is not wasted later', async () => {
     screens.push('settings')
     expect(history.state).toEqual({ kitScreens: 1 })
     screens.pop()
-    await historySettles()
-    expect(history.state).toBeNull()
+    await waitFor(() => expect(history.state).toBeNull())
   })
 
   it('closing two screens at once steps history back twice', async () => {
@@ -70,9 +67,8 @@ describe('screen stack', () => {
     screens.push('quit')
     screens.pop()
     screens.pop()
-    await historySettles()
+    await waitFor(() => expect(history.state).toBeNull())
     expect(screens.current).toEqual([])
-    expect(history.state).toBeNull()
   })
 
   it('Esc closes the top screen', () => {

@@ -25,6 +25,10 @@
     .kit-screen:not([data-scroll]) > [data-slot="center"] > :is(.kit-modal, .kit-menu, .kit-wide) { max-block-size: var(--kit-menu-max-h-wide, 52rem); }
   }
   .kit-menu .kit-button { inline-size: 100%; }
+  /* …and never squeezed past its line of words (0.35.4, F147): Pause on a phone on its side at 200% text pressed its
+     four buttons to 52 px for a 50 px line inside a 4 px border — Pixel's Q tail sat on the border. Its padding may go;
+     its line and border stay (at 100% text that's under target-min, so nothing changes there). */
+  .kit-menu > .kit-button { min-block-size: max(var(--target-min), calc(1lh + 2 * var(--border-width))); }
 
   /* MenuHeader: ‹ · title · action on one line. The title takes what's left (and wraps on a narrow phone); the ‹ and
      the action never shrink. Its gaps are inside the card's padding, so nothing touches the card's edge. */
@@ -47,7 +51,7 @@
   .kit-menu-header > .kit-button, .kit-menu-header-action { flex: none; }
   /* ‹ is a small, low glyph in most fonts: drawn bigger, so it reads as an arrow and not a speck (the button stays
      square and at least 44px) */
-  .kit-menu-header > .kit-button[data-icon] { font-size: min(calc(var(--text-title) * 1.4), var(--target-min)); } /* (never past its 44px button: at 200% text it touched the edge, 0.34.1) */
+  .kit-menu-header > .kit-button[data-icon] { font-size: min(calc(var(--text-title) * 1.4), calc(var(--target-min) - var(--border-width))); } /* (never past its 44px button: at 200% text it touched the edge, 0.34.1 — nor past the inside of a thick border: Pixel's 4px one left VT323's low ‹ 1px from the bottom, 0.35.4) */
   .kit-menu-header-action { display: flex; align-items: center; gap: var(--gap-s); }
   /* A menu inside a dialog (Pause) fills the dialog's width, so the room left and right of the buttons is the
      dialog's own padding on both sides — even all round (it used to keep its 22rem and leave a wide gap on the right) */
@@ -157,6 +161,11 @@
   }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="top-right"], [data-slot="bottom-left"], [data-slot="bottom-right"]) { min-inline-size: min-content; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { max-inline-size: 100%; }
+  /* …except past the HUD's text cap (0.35.4, F147: data-big-text, Hud's useBigText): then the top-left's bars give way
+     to the middle, as on a phone. On a phone on its side at 200% text the middle didn't fit on one line in Cozy and Pixel
+     (wider fonts than Clean's): the score dropped below, the top row grew a line, and the turn banner landed on the seats
+     and Roll. At normal text sizes nothing changes (a middle that wraps there still has the height for it). */
+  .kit-screen:has(> [data-slot="top-left"] > .kit-hud-slot[data-big-text]) > [data-slot="top-left"] { min-inline-size: 0; max-inline-size: 100%; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="top-left"], [data-slot="top-right"]))) > [data-slot="top"],
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="bottom-left"], [data-slot="bottom-right"]))) > [data-slot="bottom"] { grid-column: 1 / -1; }
   /* Phones: the corners share the first row and the top-centre piece gets its own row below,
@@ -267,7 +276,11 @@
   .kit-countdown .kit-text { font-size: calc(var(--text-display) * 2.75); line-height: 1; }
   /* A name (Results, Lobby room, Seat picker) is never cut short: it wraps at its spaces (a single over-long word breaks
      too), and its badges (★, You, Host) move under it when the row is too narrow — never "Sherman Mere…" (0.33.0) */
-  .kit-result-name { flex: 1 1 0; min-inline-size: 0; }
+  /* …and never narrower than its longest word or badge (0.35.4, F147: "Sa / m", "Zipp / y" in Fantasy at 200% text — the
+     points beside it took the room): its row's label keeps that much, so the points move under the name instead. A word
+     wider than the whole row still breaks (max 100%: a flex item's own minimum never passes its max). */
+  .kit-result-name { flex: 1 1 0; max-inline-size: 100%; }
+  .kit-listrow-text:has(.kit-result-name) { min-inline-size: auto; max-inline-size: 100%; }
   .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
   .kit-place { min-inline-size: 3.5ch; }
   /* Results on a short, wide screen (a phone on its side): title, message and buttons on the left,
@@ -324,15 +337,17 @@
     .kit-main-menu-buttons[data-many] { display: grid; grid-template-columns: 1fr 1fr; } /* 6+ buttons, extras counted (0.24.0) */
     .kit-main-menu-buttons > .kit-button[data-variant="primary"], .kit-main-menu-extra > * { grid-column: 1 / -1; }
   }
-  .kit-end-title { display: inline-block; }
+  :is(.kit-end-title, .kit-fit-title) { display: inline-block; }
   /* End-screen titles fit like MenuHeader's (0.35.1, F145; useTitleFit): a word wider than its line drops the title a
      step, then another — never split ("Ga / me / ove / r" inside the art Game over's frame at 200% text). Only "split"
-     (too wide even at body size) lets that one word break. */
-  .kit-end-title[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
-  .kit-end-title[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
-  .kit-end-title[data-fit="small"] > .kit-text[data-kind="title"],
-  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
-  .kit-end-title[data-fit="smaller"] > .kit-text[data-kind="title"], .kit-end-title[data-fit="split"] > .kit-text { font-size: var(--text-body); }
+     (too wide even at body size) lets that one word break. The Seat picker's and the Lobby room's titles fit the same
+     way (.kit-fit-title: no pop as it opens — 0.35.4, F147: "Game in progr / ess" in Neon and Pixel, "Roo / m" in Cozy
+     at 200% text). */
+  :is(.kit-end-title, .kit-fit-title)[data-fit]:not([data-fit="split"]) > .kit-text { overflow-wrap: normal; }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="small"] > .kit-text[data-kind="display"] { font-size: var(--text-title); }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="small"] > .kit-text[data-kind="title"],
+  :is(.kit-end-title, .kit-fit-title)[data-fit="smaller"] > .kit-text[data-kind="display"] { font-size: var(--text-heading); }
+  :is(.kit-end-title, .kit-fit-title)[data-fit="smaller"] > .kit-text[data-kind="title"], :is(.kit-end-title, .kit-fit-title)[data-fit="split"] > .kit-text { font-size: var(--text-body); }
   .kit-end-swipe { display: block; text-align: center; padding-block-start: var(--gap-xs); } /* "⇧ Swipe up…": words, not a button */
   /* Victory / Game over with a long list (0.31.0): only the stats' ScrollArea gives up height — the title, message
      and buttons keep theirs, so they stay in sight and the rows scroll under the edge fade */

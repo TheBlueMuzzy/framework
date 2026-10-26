@@ -2,7 +2,7 @@
 
 Every screen a game needs (menus, HUD, pause, settings, results, lobby…) built from one set of parts, in seven styles —
 Clean · Cozy · Cartoon · Pixel · Neon · Dark console · Fantasy — picked per game in `content/ui/style.json`. React, no runtime dependencies.
-Kit **0.35.3** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
+Kit **0.35.4** (unreleased). What's in it, part by part and screen by screen: **`CATALOG.md`**. The game-ui skill builds games'
 screens from it.
 
 ## Install or update
@@ -336,6 +336,17 @@ gallery's `npm run shoot` uses the same one.
 - 0.35.3 (F145, Muzzy 2026-10-25): the page check's `overlap:` leaves a toast or tooltip (anything in the top layer)
   over the page alone — on top by design; two of them over each other still count. `hud-text-max` 1.25 approved.
   The shoot's `knownShots` lists shots Muzzy accepted as they are (talk sideways at 200%), printed as "known".
+- 0.35.4 (F147): **every look holds up at 200% text** (the shoot's 200% shots in the 6 other looks, F146). Past the HUD's
+  text cap (`data-big-text` from Hud), its top-left bars give way to the middle row as on a phone (a dropped score chip
+  pushed the turn banner onto the seats in Cozy and Pixel sideways). A menu's buttons keep their line of words and border
+  when squeezed (Pause sideways: the card scrolls a little instead — Quit shows cut at its edge). The Seat picker's and the Lobby room's titles drop a size like the end
+  screens' (`.kit-fit-title`). A name (Results, Lobby, Seat picker) keeps its longest word — the points move under it.
+  A ◀ value ▶ picker whose value won't fit between its arrows puts it on its own line, the arrows under it at the two
+  ends (`fitPicker`; "Accessibility" at 200%). MenuHeader's ‹ stops growing inside a thick border (Pixel). The
+  TalkingBubble's wave never leaves the screen (`keepWaveInside`), and a bubble wider than its room stays on the window.
+  A bubble is "stuck" on what it avoids only after 300 ms (`STUCK_SETTLE_MS`: a frame or two while things re-place is
+  not). The page check measures words in their own font (the kit's lining-nums emptied the `font` shorthand, so every
+  word was measured in 10px sans-serif — Back and Pause's buttons read as touching their edge). Same at 100%.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
@@ -367,6 +378,8 @@ gallery's `npm run shoot` uses the same one.
   (`SHOOT_PORT=5281` when 5180 is busy; it stops if a file changes while it runs — 0.33.3). **200% text (F144):** every
   gallery screen in Clean at 200% text, on a 390×844 phone and an 844×390 phone on its side
   (`screens/<id>-clean-phone-text-200`, `…-clean-phone-landscape-text-200`; Settings opens on its Accessibility tab) —
-  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). Clean only: the looks share
-  one layout, so a 200% problem shows in Clean first.
+  90 shots added (it was 656 shots in 615 s, now 745 in 695 s, about 1½ minutes more). **And the 18 key screens at
+  200% in the 6 other looks (F146)**, both phones (`screens/<id>-<look>-phone[-landscape]-text-200`): 216 shots more,
+  961 in 918 s (about 3½ minutes more). The looks share one layout, but not one font — a wider font (Cozy, Pixel,
+  Fantasy, Neon) broke words and buttons at 200% where Clean's fit, so every look is shot.
 - A change to `kit/` → bump `kit/VERSION` (and CATALOG.md when a part or screen changes).

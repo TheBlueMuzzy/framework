@@ -189,6 +189,13 @@
   .kit-picker-sized { display: grid; flex: 0 1 auto; min-inline-size: 0; }
   .kit-picker-sized > * { grid-area: 1 / 1; min-inline-size: 0; }
   .kit-picker-sizer { visibility: hidden; text-align: center; font-weight: 600; overflow-wrap: break-word; } /* (sized like the value) */
+  /* A value word too wide for the room between the arrows (0.35.4, F147 — fitPicker, ArrowPicker.tsx): measured with
+     words that never break; then the value takes the whole first line and ◀ ▶ sit under it at the two ends */
+  .kit-picker[data-fit="measure"] :is(.kit-picker-value, .kit-picker-sizer) { overflow-wrap: normal; }
+  .kit-picker[data-fit="stack"] { display: inline-grid; grid-template-columns: auto 1fr auto; grid-template-areas: "value value value" "prev . next"; row-gap: 0; }
+  .kit-picker[data-fit="stack"] > .kit-button:first-child { grid-area: prev; }
+  .kit-picker[data-fit="stack"] > .kit-button:last-child { grid-area: next; }
+  .kit-picker[data-fit="stack"] > :not(.kit-button) { grid-area: value; padding-inline: var(--gap-s); }
 
   .kit-tabs { display: flex; flex-wrap: wrap; gap: var(--gap-xs); padding: var(--gap-xs); }
 

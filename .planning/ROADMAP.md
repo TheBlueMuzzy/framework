@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: v0.5 The AI (defined 2026-10-04, proven by Glyphtender beta) — musts 2/6 · v0.4.0 The Table released 2026-10-04
+Release target: none — a library; each milestone releases on its own (latest v0.23.0, 2026-10-25)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -377,6 +377,15 @@ flowchart LR
   F144[F144 Shoot at 200%] --> F145[F145 Every screen at 200%]
 ```
 
+## v0.22 — Big text in every look  ← current · planned 2026-10-25
+Goal (Muzzy 2026-10-25, after v0.23.0: "sure"): the 200% text work in every look, not only Clean — the HUD sample sideways at 200% overlaps in Cozy and Pixel (F145's HUD helper), and the shoot only shoots Clean at 200%.
+- ✅ F146 🔧 The shoot sees the key screens at 200% text in every look: the 18 key screens, the 6 other looks, an upright and a sideways phone — so a look's wider font is checked, not found by hand — should · needs: F144 · sprint 40
+- ✅ F147 🐞 Every look holds up at 200% text: what F146 finds — first the Cozy / Pixel HUD sideways ("Hold to Roll" on the seats row) — should · needs: F146, F145 · sprint 40
+```mermaid
+flowchart LR
+  F146[F146 Shoot every look at 200%] --> F147[F147 Every look at 200%]
+```
+
 ## Later
 - **Roll Better gets the safety kit when it comes off the shelf** (F79 checkup, 2026-10-19): reinstall its pieces with install-module (→ check:framework), GitHub checks, check-run lock; its privacy link still points to example.com (F76 check). Kept here, not in its repo: its master publishes the live site on any push
 - **Oct 18 list, lower value** (audit 2026-10-19): a guard for wrangler `--persist-to` / a second dev server · new content/*.json → nudge to list it in the TDD · HUB.md machine to-do read at session start · plan-lint checks that a task's named files exist · a lint for raw numbers in game logic (large, noisy) · a knob sweep for sketches
@@ -388,7 +397,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-25 — **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
+- 2026-10-25 — → v0.22 F146 + F147. **🐞 The HUD sample sideways at 200% text overlaps in Cozy and Pixel** (F145 HUD helper): "Hold to Roll" sits on the seats row. The shoot only takes Clean at 200%, so it never sees it. Fix the room, or add the other looks' HUD at 200% to the shoot.
 - 2026-10-25 — → v0.21 F144 + F145. **200% text on every screen** (found by F141's word-by-word scan; the shoot only checks Settings + parts at 200%): Reconnecting's title splits ("Reconnecti / ng…" — the word is wider than its card: a title that shrinks to fit, like MenuHeader's), the art Game over screen breaks entirely, the HUD screens overlap (hud 11, huddock 2; "Roll" past the screen edge), menu's buttons 1 px from their edge and "Play" over the tagline, continuemenu's "Turn 7 · 5 min ago" on its edge, feedback's tooltip + toast over words, room's "Play online" 32 px tall. Next step: the shoot takes every screen at 200% on one phone size, then fix what it finds.
 - 2026-10-24 — → v0.18 F129. **The shoot ignores a hot reload mid-run** (F126 helper): an edit to a gallery or kit file while `npm run shoot` runs makes Vite reload some screens on new code — the run should fail on Vite's hmr line so its result is about one version of the code.
 - 2026-10-24 — → v0.18 F130. **TalkingBubble / Callout `avoid` says nothing when it finds no clear side** (F126): it then covers the element it was told to avoid; a dev-console warning would tell games.

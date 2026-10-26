@@ -10,7 +10,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { Panel, Row, Screen, Stack } from '../layout'
 import { Avatar, Badge, Button, ListRow, RoomCodeInput, ScrollArea, Text, TextInput } from '../controls'
 import { Modal, Spinner, toast } from './dialogs'
-import { MenuHeader } from './MenuHeader'
+import { MenuHeader, useTitleFit } from './MenuHeader'
 import { reduceMotion } from './motion'
 import { fill } from './words'
 
@@ -97,6 +97,8 @@ export async function copyText(text: string, shown?: HTMLElement | null): Promis
 
 function Room({ w, roomCode, players = [], meId, hostId, minPlayers = 2, onReady, onStart, onLeave, onRemove, children }: LobbyProps & { w: typeof lobbyWords; roomCode: string }) {
   const codeBox = useRef<HTMLSpanElement>(null)
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, `${w.room}${roomCode}`) // beside Copy: a word wider than its line drops a step (0.35.4, F147)
   const me = players.find((p) => p.id === meId)
   const iAmHost = meId !== undefined && meId === hostId
   const enough = players.length >= minPlayers
@@ -109,7 +111,7 @@ function Room({ w, roomCode, players = [], meId, hostId, minPlayers = 2, onReady
     <>
       <Row gap="s" className="kit-nowrap">
         <Stack gap="xs" className="kit-result-name">
-          <Text kind="title">{beforeCode}<span ref={codeBox}>{roomCode}</span>{afterCode}</Text>
+          <span ref={titleBox} className="kit-fit-title"><Text kind="title">{beforeCode}<span ref={codeBox}>{roomCode}</span>{afterCode}</Text></span>
           <Text kind="caption">{w.share}</Text>
         </Stack>
         <Button variant="secondary" onClick={copy}>{w.copy}</Button>
@@ -204,11 +206,13 @@ type SeatPickerProps = {
 
 export function SeatPicker({ seats, onPick, onCancel, waiting, error, words }: SeatPickerProps) {
   const w = { ...seatPickerWords, ...words }
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, w.title) // a word wider than its line drops a step, never splits (0.35.4, F147)
   return (
     <Screen label={w.title} grow="down">
       <Panel depth={2} gap="m" className="kit-modal">
         <Stack gap="xs">
-          <Text kind="title">{w.title}</Text>
+          <span ref={titleBox} className="kit-fit-title"><Text kind="title">{w.title}</Text></span>
           {!waiting && seats.length > 0 && <Text kind="caption">{w.caption}</Text>}
         </Stack>
         {error && <Text kind="caption"><span className="kit-error">{error}</span></Text>}

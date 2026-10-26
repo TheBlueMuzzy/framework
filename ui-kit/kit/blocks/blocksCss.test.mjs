@@ -35,3 +35,17 @@ describe('blocks.css 0.33.0 (F121)', () => {
       '.kit-talk-more > .kit-text[data-kind] { color: var(--kit-talk-more, var(--muted)); }']) expect(css).toContain(exact)
   })
 })
+
+describe('blocks.css 0.35.4 (F147)', () => {
+  it('a menu\'s buttons keep their line of words and border when squeezed (target-min still the floor)', () => {
+    expect(rule('.kit-menu > .kit-button {')).toContain('min-block-size: max(var(--target-min), calc(1lh + 2 * var(--border-width)))')
+  })
+
+  it('HUD past its text cap: the top-left corner gives way to the middle (only then)', () => {
+    expect(rule('.kit-hud-slot[data-big-text]) > [data-slot="top-left"]')).toContain('min-inline-size: 0')
+  })
+
+  it('MenuHeader ‹ stops growing inside its border, not at the button\'s outside', () => {
+    expect(rule('.kit-menu-header > .kit-button[data-icon] {')).toContain('calc(var(--target-min) - var(--border-width))')
+  })
+})

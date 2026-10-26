@@ -97,6 +97,15 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
           .find((s, i) => s.side === tries[i].side && !covers(s))
         if (clear) spot = clear
       }
+      // Never off the window or game picture itself (0.35.4, F147): a bubble wider than its room (a TalkingBubble's room
+      // shrinks by its waves' reach) was pinned at the room's left and ran past the right edge — it uses the edge room
+      // (down to the spotlight's gap) instead, the pointer still aimed at the target
+      const hard = { left: r.left + space, right: r.right - space }
+      if (size.width > frameBox.right - frameBox.left && hard.right - hard.left >= size.width) {
+        const x = Math.min(Math.max(spot.x, hard.left), hard.right - size.width)
+        const vertical = spot.side === 'top' || spot.side === 'bottom'
+        spot = { ...spot, x, tipX: vertical ? Math.min(Math.max(spot.tipX - (x - spot.x), tipInset), size.width - tipInset) : spot.tipX }
+      }
       // No side kept it clear (F130): it covers what it was told to avoid — said once in dev, so it gets fixed on purpose
       const covered = avoid.filter((a) => overlaps(spotBox(spot), a.box))
       tellStuck(covered.length > 0, () => stuckLine(bubbleName(box, now.current.target), covered.map((a) => nameOf(a.el))))
@@ -151,15 +160,23 @@ function bubbleName(box: Element, target: CalloutTarget): string {
 /** A bubble that can't stay clear of its `avoid` says so in the dev console (F130, 0.33.3): once when it gets stuck,
  *  and again only after it was clear in between — never every frame. Nothing in a production build.
  *  `line` is made only when it's said (naming the pieces reads the page). */
-export function stuckTeller(warn: (line: string) => void = (line) => console.warn(line)) {
-  let stuck = false
+export function stuckTeller(warn: (line: string) => void = (line) => console.warn(line), settle = STUCK_SETTLE_MS, clock = () => performance.now()) {
+  let stuck = false, since = -1
   return (now: boolean, line: () => string) => {
-    if (!now) { stuck = false; return }
+    if (!now) { stuck = false; since = -1; return }
     if (stuck) return
+    // Only when it STAYS stuck (0.35.4, F147): for a frame or two while things move (the text size just changed, another
+    // bubble still popping in bigger) every bubble is re-placed — the Cozy emotes at 200% said so 26 ms after the switch,
+    // then sat clear. `settle` ms covering it, then it's said.
+    const at = clock()
+    if (since < 0) since = at
+    if (at - since < settle) return
     stuck = true
     if (import.meta.env?.DEV) warn(line())
   }
 }
+/** How long a bubble must stay stuck on what it avoids before it says so (ms). */
+export const STUCK_SETTLE_MS = 300
 
 /** The warning's words: which bubble, and what it covers. */
 export const stuckLine = (bubble: string, covered: string[]) =>
