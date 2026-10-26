@@ -12,7 +12,7 @@
 // reaches the storage. Research: .planning/research/saves.md
 // "Layers 6 + 8". The phone / desktop backends themselves come with the store run-through (ROADMAP F97).
 
-import { browserStorage, setSavesStorage, type StorageLike, type WriteProblem } from './storage'
+import { browserStorage, isFullError, setSavesStorage, type StorageLike, type WriteProblem } from './storage'
 
 /** A platform's storage, the slow way round: everything at start-up, then a batch of changes at a time. */
 export interface SavesBackend {
@@ -64,7 +64,9 @@ export interface OpenSavesOptions {
 /** Written once the browser saves were copied over, so a later launch never copies older ones on top. */
 export const COPIED_MARKER = '__saves-copied__'
 
-const isFull = (error: unknown) => (error as { name?: string } | null)?.name === 'QuotaExceededError'
+// "Full" is told the same way here as for the browser's own storage (storage.ts): every engine's name and code for it
+// (F150 — this used to know only today's QuotaExceededError name, so an older Firefox's full disk read as "blocked").
+const isFull = isFullError
 
 export async function openSaves(backend: SavesBackend, options: OpenSavesOptions): Promise<OpenedSaves> {
   const { game, delayMs = 250, useForKit = true, now = () => performance.now() } = options

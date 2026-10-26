@@ -192,6 +192,17 @@ describe('openSaves — nothing is lost when the storage fails', () => {
     expect(JSON.parse(disk.data['mygame:progress']).data).toEqual({ stars: 3 })
   })
 
+  it('a full disk is "full" by any engine\'s name for it — an older Firefox\'s NS_ERROR_DOM_QUOTA_REACHED, or only code 22 (F150)', async () => {
+    for (const thrown of [{ name: 'NS_ERROR_DOM_QUOTA_REACHED', code: 1014 }, { name: 'Error', code: 22 }]) {
+      const disk = slowBackend({}, { waitMs: 1 })
+      await open(disk, { game: 'mygame', retryMs: 60_000 })
+      disk.write = async () => { throw Object.assign(new Error('full'), thrown) }
+      progress().save({ stars: 1 })
+      expect(await opened!.flush()).toBe('full')
+      await opened!.close()
+    }
+  })
+
   it("the kit's \"make room\" step while the disk is full never deletes backups on the disk (review finding)", async () => {
     const disk = slowBackend({}, { waitMs: 1 })
     await open(disk, { game: 'mygame' })
