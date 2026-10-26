@@ -24,7 +24,7 @@ Done when: a test runs the saves module in real Chromium, WebKit and Firefox (Pl
 - [x] 🤖 1. A real-browser test: the saves module on a page in Chromium, WebKit and Firefox — save, reload, load, upgrade, save code — saves/scripts/browsers.test.mjs
 - [x] 🤖 2. A full disk and a private window in each engine: what the module says and keeps — saves/kit/storage.ts
 - [x] 🤖 3. Fix what differs between engines (or write it down where nothing can fix it) — saves/kit/platform.ts
-- [ ] 🤖 4. README: which engines are proven, how to run it, what's still only real-device — saves/README.md
+- [x] 🤖 4. README: which engines are proven, how to run it, what's still only real-device — saves/README.md
 Check: the browsers test green in all three engines; saves `npm test` green.
 
 Notes:
@@ -39,3 +39,4 @@ Notes:
 - F150 private window: Playwright's fresh context keeps nothing after it closes (proven: the next one starts empty). Only WebKit's looks private to the health check (it refuses the private file storage, as Safari's private window does) → "looks like a private window". Chromium's and Firefox's test contexts aren't real Incognito / Private Browsing (full-size quota, file storage works), so the "private" guess can't be proven there — real-device only.
 - F150 what differs between engines today: nothing in what the module does or says — save, reload, browser restart, backup fallback, upgrade, newer-save guard, save codes (packed by each browser's own CompressionStream; codes cross between the page and Node both ways), full disk, blocked storage (SecurityError, Chrome's "block all cookies" where even looking at localStorage throws), openSaves writing a waiting change on pagehide — all identical. The health check differs on purpose: WebKit adds Safari's 7-day warning; Chromium and Firefox say "not kept" (persist not granted).
 - F150 fixed (platform.ts): openSaves knew "full" only by today's name (QuotaExceededError); an older Firefox's NS_ERROR_DOM_QUOTA_REACHED or an error with only code 22 read as "blocked". It now uses the same isFullError as the browser's storage (Node test for both).
+- F150 done: saves kit 0.6.4 (README → "Proven in which browsers": the table, how to run it, what's still real-device only). Check: browsers test 27/27 (9 checks × 3 engines); saves `npm test` 17 files / 276 tests green; `npm run check:fast` ✓ all 20 checks passed (2026-10-26). CHANGELOG line left for /deliver.
