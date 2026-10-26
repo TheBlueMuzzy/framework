@@ -12,6 +12,7 @@
     "check-ui": "node scripts/check-ui.mjs kit gallery --css gallery",
     "install-kit": "node scripts/install-kit.mjs",
     "shoot": "node scripts/shoot.mjs",
+    "shoot:webkit": "node scripts/shoot.mjs --webkit",
     "pick-sheet": "node scripts/pick-sheet.mjs"
   },
   "dependencies": {
