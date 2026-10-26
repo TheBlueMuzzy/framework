@@ -33,6 +33,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-10-26 — Sprint 41 done: the kit and saves hold up in iPhone's engine; a scrolling card's buttons get a soft fade above them (UI kit 0.35.7). v0.23 ready to /deliver.
 - 2026-10-25 — Sprint 41 planned (unattended): the kit and saves work in iPhone's engine (F148 shoot in WebKit, F149 fixes, F150 saves in every engine).
 - 2026-10-25 — Released v0.24.0 (v0.22 Big text in every look): every look holds up at 200% text — HUD sideways, pickers, names and titles, the story bubble; the page check measures in the right font.
 - 2026-10-25 — Released v0.23.0 (v0.21 The kit meets every player): every UI kit screen holds up at 200% text, What's new after an update, gamepad focus ring.
@@ -42,4 +43,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-24 — Sprint 37 planned: two new looks (F138 the sketch + picks, F139 the looks in the kit, F140 everything lists 7).
 - 2026-10-24 — Released v0.21.0 (v0.19 Smoother tools): the Dev Kit's Tuning tab edits the content files a game lists and Save keeps hand-wrapped lists; a stray 0, a false CSS warning, Mode select's empty column and the silent part-way save code are fixed.
 - 2026-10-24 — Sprint 36 planned: the Dev Kit edits every file it should (F132 more files in the Tuning tab, F133 Save keeps hand-wrapped lists); v0.19 also holds F134–F137 for sprint 37.
-- 2026-10-24 — Released v0.20.0 (v0.18 The kit speaks up): a bubble stuck on what it avoids says so in the dev console, and the screenshot run stops when a file changes mid-run.
