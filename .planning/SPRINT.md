@@ -11,13 +11,15 @@ Done when: `npm run shoot:webkit` takes the 18 key screens in all 7 looks on an 
 Check: `npm run shoot:webkit` runs; the list is in Notes.
 
 ## F149 🐞 The kit holds up in WebKit
-Done when: `npm run shoot:webkit` is 0 problems (or each left-over accepted in `knownShots` with Muzzy's word), and the Chromium shoot is unchanged (0 problems, 100% shots the same).
-- [ ] 🤖 1. Sort F148's list by kit part and find each cause (WebKit vs Chromium: fonts, `lh` units, popover, scrollbars…) — ui-kit/kit/kit.css
-- [ ] 🤖 2. Fix the kit's CSS for what WebKit draws differently — ui-kit/kit/kit.css
-- [ ] 🤖 3. Fix the kit's parts that measure or place things (fit, bubbles, pickers) where WebKit differs — ui-kit/kit/blocks/blocks.css
-- [ ] 🤖 4. Both shoots green: WebKit 0 problems, Chromium 0 problems and its 100% shots unchanged; touched screens looked at — ui-kit/scripts/shoot.mjs
-- [ ] 🙋 5. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD at 200% text — say if anything looks off
-Check: both shoots; shots looked at; Muzzy's phone look.
+Done when: F148's differences A–C are fixed in the kit (a part's size no longer follows a symbol's font, no card's last button sits on its edge, no label wraps by a hair), a compare of both engines' layouts lists no wrap that differs (or each is accepted with a reason), and the Chromium shoot is unchanged (0 problems, 100% shots the same).
+(Re-planned 2026-10-26 1:05 AM by Claude after F148: the checker sees 0 problems in WebKit — every real difference is a wrap or a size it doesn't measure, so "WebKit 0 problems" was already true and proved nothing.)
+- [ ] 🤖 1. A: the ⚙ icon Button and the ❤ / ▼ ▲ chips keep their box whatever font draws the symbol (WebKit's colour emoji, an iPhone's Apple emoji) — ui-kit/kit/kit.css
+- [ ] 🤖 2. B: `text-wrap: pretty` wraps more in WebKit (Safari 26 too) — the room card's "I'M READY" sits on its bottom edge sideways in Pixel: the card keeps room for its last button however its words wrap — ui-kit/kit/kit.css
+- [ ] 🤖 3. C: a label that fits by a fraction of a pixel ("HOW TO PLAY" in Neon sideways, "Debt to the company") wraps in WebKit — give labels the room to not depend on the engine's rounding — ui-kit/kit/blocks/blocks.css
+- [ ] 🤖 4. The engines compare as a script: both runs' layouts (each text's line count + each part's size) side by side, listing what wraps differently — so the next WebKit difference is found by the run, not by eye — ui-kit/scripts/compareEngines.mjs
+- [ ] 🤖 5. Both runs and the compare: Chromium 0 problems and its 100% shots unchanged; WebKit 0 problems; the compare lists no wrap difference left (or each accepted in Notes); touched screens looked at — ui-kit/scripts/shoot.mjs
+- [ ] 🙋 6. Open the gallery on your iPhone (the phone link from the session) and look at Settings + the HUD + Pause at 200% text — say if anything looks off (the ⚙ button especially)
+Check: both runs + the compare; shots looked at; Muzzy's phone look.
 
 ## F150 🔧 Saves work in every browser engine
 Done when: a test runs the saves module in real Chromium, WebKit and Firefox (Playwright) — save, load, an upgrade step, a save code, a full disk — and all three pass; anything that differs is fixed or written down.
@@ -92,3 +94,4 @@ Notes:
 - Ask Muzzy: the gallery's ⚙ ❤ ▼ ▲ are typed characters, so every phone draws its own (Windows a colour gear, iPhone
   Apple's emoji). Should the kit carry its own drawn icons for these, so every phone shows the same picture? (F149 can
   make the boxes stop growing either way.)
+- Merged 2026-10-26 1:05 AM (Claude): F148 read whole — no bugs (one script, an engine switch; a stalled screen is a listed problem with a picture, not the end of the run). F149 re-planned from its A–C list (above). "1ST touches the avatar ring" (both engines) → ROADMAP Ideas.
