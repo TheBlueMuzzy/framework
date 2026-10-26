@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — Released v0.19.0 (v0.17 A clean screenshot run): a kit button in an art layer keeps its 44 px tap size, the screenshot run is clean (475 shots, 0 problems), the page check sees a chip on another piece's words, and every installer asks git once per run.
 - 2026-10-24 — Released v0.18.0 (v0.16 The kit holds up on a phone): HUD corners keep their width on small phones, the page check sees a chip covering a bar, and the saves test stays fast under load.
 - 2026-10-24 — Sprint 33 planned: the kit holds up on a phone (F124 covered-bar check, F123 HUD corner slots, F125 slow saves test).
 - 2026-10-24 — Released v0.17.1: a game that draws its own main menu (Goops' console) can show the version there and pass the check.
