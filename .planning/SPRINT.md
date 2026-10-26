@@ -6,7 +6,7 @@ What changes: the page check flags light in-game words with nothing dark behind 
 ## F153 🔧 Light-words contrast check
 Done when: the UI kit's page check (uiProblems) flags HUD on-game words whose letters sit over a plain light background (too little contrast with the on-game colour, ignoring the words' own halo), the test for it fails on the old check, and the gallery's + the starter's shots have no such problem left (each real find fixed or accepted with a reason in Notes).
 - [x] 🤖 1. Measure first: run a draft of the check over today's gallery (every look, both phones) and the starter; list every find by screen + look in Notes before changing anything — ui-kit/kit/uiProblems.mjs
-- [ ] 🤖 2. The check: a new kind in uiProblems, with a test that fails on the old check (kit fonts only) — ui-kit/kit/uiProblems.test.mjs
+- [x] 🤖 2. The check: a new kind in uiProblems, with a test that fails on the old check (kit fonts only) — ui-kit/kit/uiProblems.test.mjs
 - [ ] 🤖 3. Fix or accept each find (a demo HUD with nothing behind it gets the gallery's own game picture or table colour, never a kit colour change); `npm run shoot` + `npm run shoot:webkit` 0 problems; UI kit VERSION + README note — ui-kit/kit/VERSION
 Check: the new test red on the old check, then green; both shoots 0 problems; the starter's `npm run check:full` green with the new kit.
 

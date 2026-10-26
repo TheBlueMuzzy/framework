@@ -19,6 +19,8 @@
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 //   "ring:"    words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring (an outline)
 //              included and its round shape (a circle, not its box) — 0.35.8
+//   "contrast:" light on-game words (HudText, a plain toast, a bar's inside label) on a plain light background: under
+//              3:1 against what's behind their letters, their halo not counted (it's for busy game art) — 0.35.9
 //   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
 //              box it's drawn in; a word wider than that box may still wrap — 0.34.1 — unless it's in a title (0.35.1:
 //              a title can drop a size instead — "Reconnecti / ng…")
@@ -170,6 +172,50 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // the text: each background colour until a solid one; see-through ones mixed in; the page itself is white).
   // Fading by opacity counts on the text and its holders up to its background — a faded whole card (dim) fades its
   // background too, so it's left alone. Returns the plain-words problem, or '' (fine, or can't be judged).
+  // The solid colour you see behind text `el` at point x, y: going down from the text, each background colour until a
+  // solid one (see-through ones mixed in; the page itself is white). null when it can't be judged: off the screen,
+  // something else covers the text there, or a picture / gradient / canvas / video is behind it.
+  const colourBehind = (el, x, y) => coloursBehind(el, x, y)?.[0] ?? null
+  // …and every colour that can be behind it there, when `gradients`: a CSS gradient is made of plain colours (its
+  // stops), so each stop is one of them (the gallery's striped stand-in game, F153). A picture (url()), canvas or video
+  // still can't be judged: null.
+  const gradientStops = (el) => {
+    const image = getComputedStyle(el).backgroundImage
+    if (['IMG', 'CANVAS', 'VIDEO', 'svg', 'PICTURE'].includes(el.tagName) || /url\(/.test(image) || !/gradient\(/.test(image)) return null
+    const stops = image.match(/(?:rgba?|hsla?|color|oklch|oklab|lab|lch)\([^()]*\)|#[0-9a-f]{3,8}\b/gi)
+    return stops?.length ? stops.map(rgba) : null
+  }
+  const coloursBehind = (el, x, y, { gradients = false } = {}) => {
+    if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return null
+    const layers = [] // top to bottom; each is the colours it can be there (one, or a gradient's stops)
+    let reached = false
+    for (const below of document.elementsFromPoint(x, y)) {
+      if (!reached) {
+        if (below === el) reached = true
+        else if (el.contains(below)) continue // a word inside the text (a <strong>)
+        else if (paints(below)) return null // something covers the text here
+        else continue
+      }
+      if (pictureLike(below)) {
+        const stops = gradients && gradientStops(below)
+        if (!stops) return null
+        layers.push(stops.filter((c) => c[3] > 0.01))
+        if (stops.every((c) => c[3] > 0.99)) break
+      }
+      const bg = rgba(getComputedStyle(below).backgroundColor) // (painted under its own picture or gradient)
+      if (bg[3] > 0.01) layers.push([bg])
+      if (bg[3] > 0.99) break
+    }
+    if (!reached) return null
+    return layers.reduceRight((unders, tops) => tops.length ? tops.flatMap((top) => unders.map((under) => over(top, under))) : unders, [[255, 255, 255, 1]])
+  }
+  // The text's colour as [r, g, b, alpha], faded by opacity on the text and its holders up to its background (a faded
+  // whole card fades its background too, so that doesn't count) — null when it's invisible
+  const inkOf = (el) => {
+    let alpha = rgba(getComputedStyle(el).color)[3]
+    for (let e = el; e && e !== document.documentElement && seeThrough(getComputedStyle(e).backgroundColor); e = e.parentElement) alpha *= Number(getComputedStyle(e).opacity)
+    return alpha < 0.05 ? null : [...rgba(getComputedStyle(el).color).slice(0, 3), alpha]
+  }
   const faintText = (el) => {
     if (el.closest('svg, [disabled], [aria-disabled="true"]')) return ''
     const s = getComputedStyle(el)
@@ -180,31 +226,45 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const line = range.getClientRects()[0]
     if (!line) return ''
     const x = line.left + line.width / 2, y = line.top + line.height / 2
-    if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return ''
-    const layers = []
-    let reached = false
-    for (const below of document.elementsFromPoint(x, y)) {
-      if (!reached) {
-        if (below === el) reached = true
-        else if (el.contains(below)) continue // a word inside the text (a <strong>)
-        else if (paints(below)) return '' // something covers the text here
-        else continue
-      }
-      if (pictureLike(below)) return ''
-      const bg = rgba(getComputedStyle(below).backgroundColor)
-      if (bg[3] > 0.01) layers.push(bg)
-      if (bg[3] > 0.99) break
-    }
-    if (!reached) return ''
-    const behind = layers.reduceRight((under, top) => over(top, under), [255, 255, 255, 1])
-    let alpha = rgba(s.color)[3]
-    for (let e = el; e && e !== document.documentElement && seeThrough(getComputedStyle(e).backgroundColor); e = e.parentElement) alpha *= Number(getComputedStyle(e).opacity)
-    if (alpha < 0.05) return '' // invisible text (e.g. a gradient painted through it): not "faint"
-    const ratio = contrast(over([...rgba(s.color).slice(0, 3), alpha], behind), behind)
+    const behind = colourBehind(el, x, y)
+    if (!behind) return ''
+    const ink = inkOf(el)
+    if (!ink) return '' // invisible text (e.g. a gradient painted through it): not "faint"
+    const ratio = contrast(over(ink, behind), behind)
     const size = parseFloat(s.fontSize)
     const big = size >= 24 || (size >= 18.66 && Number(s.fontWeight) >= 700)
     const needs = big ? 3 : 4.5
     return ratio < needs ? `${ratio.toFixed(1)}:1 against its background (needs ${needs}:1${big ? ' for big text' : ''})` : ''
+  }
+
+  // ---- light words on a light background (0.35.9, F153) ----
+  // On-game words — HudText ("Your turn", "Game over"), a plain toast, a bar's inside label — are drawn in the light
+  // on-game colour with a dark halo, made for the GAME's own picture. On a plain light page they all but vanish (the
+  // turn-based starter, Sprint 42) and the faint check never saw it: it skips words with a halo. So here the halo
+  // doesn't count (it's for busy game art, not a plain page): what's behind the letters, at 5 points along each line,
+  // against the words' own colour. A plain colour, or a gradient's best stop, must give 3:1 (white on light grey fails,
+  // white on a mid-to-dark table passes: the starter's felt #235b45 is 7.9:1). A picture, canvas or video behind them
+  // can't be judged and is left alone; so are words under a dialog's dim or inside a dialog (not really on show).
+  const lightWords = (el) => {
+    if (!el.closest('.kit-hud-text, .kit-bar-label-inside')) return ''
+    if (el.closest('dialog, [role="dialog"], [role="alertdialog"], [aria-modal="true"]')) return ''
+    const ink = inkOf(el)
+    if (!ink) return ''
+    const range = document.createRange()
+    let worst = null
+    for (const n of wordsIn(el, false)) {
+      range.selectNodeContents(n)
+      for (const line of range.getClientRects()) {
+        for (const f of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+          const behinds = coloursBehind(el, line.left + line.width * f, line.top + line.height / 2, { gradients: true })
+          if (!behinds) continue
+          // (a gradient: the stop that reads best — words across a light and a dark stripe are fine)
+          const ratio = Math.max(...behinds.map((b) => contrast(over(ink, b), b)))
+          if (worst === null || ratio < worst) worst = ratio
+        }
+      }
+    }
+    return worst !== null && worst < 3 ? `is light on-game words on a plain light background — ${worst.toFixed(1)}:1 (needs 3:1; their halo is for busy game art, not a plain page: put the game's picture or table colour behind them)` : ''
   }
 
   // ---- breathing room (0.21.0) ----
@@ -327,6 +387,10 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     for (const el of texts) {
       const faint = faintText(el)
       if (faint) problems.push(`faint: "${name(el)}" is hard to read — ${faint}`)
+    }
+    for (const el of texts) {
+      const light = lightWords(el)
+      if (light) problems.push(`contrast: "${name(el)}" ${light}`)
     }
     const items = [...texts.map((el) => [el, true]), ...[...document.querySelectorAll('img, svg, canvas, video, .kit-avatar, .kit-badge, [role="img"]')].map((el) => [el, false])]
     for (const [el, isText] of items) {
