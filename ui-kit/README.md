@@ -347,6 +347,26 @@ gallery's `npm run shoot` uses the same one.
   A bubble is "stuck" on what it avoids only after 300 ms (`STUCK_SETTLE_MS`: a frame or two while things re-place is
   not). The page check measures words in their own font (the kit's lining-nums emptied the `font` shorthand, so every
   word was measured in 10px sans-serif — Back and Pause's buttons read as touching their edge). Same at 100%.
+- 0.35.5 (F149): **the kit holds up in WebKit (every iPhone browser).** What `npm run shoot:webkit` + `npm run
+  compare:engines` found against Chromium, fixed in the kit:
+  - **A part's size no longer follows a symbol's font.** WebKit (and an iPhone) draws ⚙ ❤ as colour emoji ~1.37 em wide
+    where Windows Chromium draws 0.85 em text symbols: the icon Button grew 44 → 55–61 px, the HUD's ❤ chip 7 px, the
+    ▼ / ▲ tags 2–5 px (a payslip row's words then took a line more). An icon Button is now exactly 44 px (or `size`)
+    and a symbol too wide for it is drawn smaller to fit with room each side (`useGlyphFit` measures it,
+    `--kit-glyph-em`; text symbols already fit and keep their size). A Bar's / Counter's typed `icon` sits in a
+    1.375 em box (an emoji's width — **in Chromium the ❤ chip is ~7 px wider than before, its bar that much
+    shorter**); a StatList ▼ / ▲ tag is never wider than 0.875 em. Pictures (`<img>`, svg) keep their own size.
+  - **A card that has to scroll keeps its last row of buttons in sight** (the last resort on a short screen): Safari's
+    `text-wrap: pretty` evens out a whole paragraph and can take a line more than Chromium's (the Lobby room on a Pixel
+    phone on its side: "I'M READY" sat cut on the card's bottom edge). The row sticks to the card's bottom with the
+    card's room below it, painted in the card's colour only while it scrolls (a scroll timeline — Safari 26, Chrome
+    115; older browsers scroll as before). A card that fits looks exactly as before.
+  - **A label doesn't fit "by a hair":** the main menu's two-column buttons (a phone on its side, 6+ buttons) keep a
+    gap-m each side of their words, like `compact` — "HOW TO PLAY" in Neon fit by 0.03 px in Chromium and wrapped in
+    WebKit. Same buttons, same size.
+  - Symbols a game types: `'⚙︎'` asks for the plain-text look (an iPhone otherwise draws Apple's colour emoji; the
+    gallery's ⚙ does). WebKit on Windows ignores it — its only font with ⚙ is the emoji one — so only a real iPhone
+    shows the difference. The button's size holds either way.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
@@ -393,14 +413,25 @@ gallery's `npm run shoot` uses the same one.
     unchanged by it.
   - A screen that never shows in 30 s is a problem on the list ("stalled", with a `…-stalled.png` picture of what the
     page showed) instead of ending the run — this happened once in WebKit after ~145 shots and didn't happen again.
+  - **`npm run compare:engines` (F149)** — the checker can't see an engine difference (it judges each shot alone), so
+    every shot of both runs also writes a small layout file (`<shots folder>/layout/<shot>.json`: each text's line
+    count, each kit part's size — one page read per shot, the Chromium run takes the same time). The compare lists, for
+    every shot both runs took, each text on a different number of lines (**WRAP** — fix it or accept it in
+    `acceptedWraps` with its reason) and how many parts differ in size by more than 1 px (`--sizes` lists each). It
+    ends with 1 while a wrap differs that isn't accepted. Run both shoots first. `npm run compare:engines -- <folder A>
+    <folder B>` compares any two runs instead (a copy of `screenshots/` from before a kit change and `screenshots/`
+    after it: what the change did to Chromium's own layout).
+  - `SHOOT_ONLY="<pattern>"` (either run) takes only the shots whose name matches, e.g. `SHOOT_ONLY="room-pixel"` — a
+    quick look while fixing; the full run is still the check. A reveal's list (payslip, victory) is shot once its
+    smooth scroll to the last row has stopped (F149: it was caught part-way, at a different spot each run).
   - The checker itself (`kit/uiProblems.mjs`) works in WebKit: `UI_ENGINE=webkit npx vitest run kit/uiProblems.test.mjs`
     runs its tests there (all pass).
   - **What WebKit on Windows can't tell you about a real iPhone** — still a look on a real phone:
     - **Font weights.** Windows WebKit lays text out at the right weight but DRAWS variable fonts (Nunito, Fredoka,
       Exo 2, Orbitron, Cinzel, Alegreya) at their thinnest default — bold labels look thin in these shots. Widths and
       wrapping are right; how heavy the text looks isn't. An iPhone draws them properly.
-    - **Emoji and symbol characters** (⚙ ❤ 🪙…) come from Windows' emoji font, not Apple's: different pictures and a
-      different line height, so a button holding one can be a few px taller or shorter than on an iPhone.
+    - **Emoji and symbol characters** (⚙ ❤ 🪙…) come from Windows' emoji font, not Apple's: different pictures, and
+      `U+FE0E` (text look) is ignored. Since 0.35.5 the kit's boxes keep their size whatever draws them.
     - **Text widths are a hair different** (a fraction of a px per word): Apple's fonts and text drawing aren't on
       Windows, so a label that fits "by 0.03 px" may wrap on one and not the other — a sign the layout has no slack.
     - **No safe areas** (the notch, the home bar, rounded corners), no Safari address bar sliding in and out, no

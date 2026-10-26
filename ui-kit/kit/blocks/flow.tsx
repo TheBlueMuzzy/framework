@@ -221,7 +221,7 @@ export function StatList({ stats, reveal, onRevealed, words }: StatListProps) {
           style={{ '--kit-i': waits(i), '--kit-step': step } as CSSProperties}>
           <ListRow label={s.label}>
             {s.tone
-              ? <Row gap="xs" className="kit-nowrap"><Badge variant={s.tone}><span role="img" aria-label={w[s.tone]}>{toneMark[s.tone]}</span></Badge><Text kind="label">{s.value}</Text></Row>
+              ? <Row gap="xs" className="kit-nowrap"><Badge variant={s.tone}><span className="kit-tone-mark" role="img" aria-label={w[s.tone]}>{toneMark[s.tone]}</span></Badge><Text kind="label">{s.value}</Text></Row>
               : <Text kind="label">{s.value}</Text>}
           </ListRow>
         </div>

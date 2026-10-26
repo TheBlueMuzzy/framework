@@ -13,6 +13,7 @@
     "install-kit": "node scripts/install-kit.mjs",
     "shoot": "node scripts/shoot.mjs",
     "shoot:webkit": "node scripts/shoot.mjs --webkit",
+    "compare:engines": "node scripts/compareEngines.mjs",
     "pick-sheet": "node scripts/pick-sheet.mjs"
   },
   "dependencies": {

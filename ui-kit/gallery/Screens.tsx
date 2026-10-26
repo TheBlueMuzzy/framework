@@ -5,6 +5,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
+import { gear } from './symbols'
 import { EmotesSample } from './Emotes'
 import { TalkSample } from './Talk'
 import { PayslipSample, VictoryRevealSample } from './Report'
@@ -158,7 +159,7 @@ function HudSample() {
         {!short && <Bar label="Lives" pips value={2} max={3} />}</Stack>}
       status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
-        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>{byCoins && connection}</Row>}
+        <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>{gear}</Button>{byCoins && connection}</Row>}
       onPause={() => screens.push('pause')}
       banner={<Stack gap="xs"><TurnBanner variant="plain" text={`${turn.name}'s turn`} />
         {tick % 2 ? <HudText tone="accent">Locked 1!</HudText> : <HudText detail={short ? undefined : 'Up to 3 times'}>Hold to Roll</HudText>}</Stack>}
@@ -208,7 +209,7 @@ function PlayerChips() {
   const pinned = (key: string, chip: ReactNode) => <div key={key} className="gallery-outside"><div className="kit-scope">{chip}</div></div>
   return (
     <Screen label="Player chips" top={<HudText>Round 1</HudText>}
-      topRight={<Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>⚙</Button>}>
+      topRight={<Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>{gear}</Button>}>
       <Stack gap="s" className="kit-wide">
         <ScrollArea label="Player chips" max="l">
           <Grid gap="m" min="l">
