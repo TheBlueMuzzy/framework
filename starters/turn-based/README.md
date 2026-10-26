@@ -14,7 +14,7 @@ room codes, crash catching, and the version on the menu and in Settings — all 
 ```
 npm install
 npm run dev              → http://localhost:6173  (press ` for the Dev Kit)
-npm run party:dev        → the room server for online play, on this computer (port 1999) — nothing is deployed
+npm run party:dev        → the room server for online play, on this computer (port 6499: wrangler.json dev.port — the page reads the same line) — nothing is deployed
 ```
 Online on this computer: `npm run party:dev` and `npm run dev`, open two browser windows, Play online → Create a room in
 one, type its code in the other. (A phone on the same Wi-Fi reaches it too: open the Network link Vite prints.)
@@ -27,7 +27,7 @@ one, type its code in the other. (A phone on the same Wi-Fi reaches it too: open
 | `npm run smoke` | loads, plays one round against the computer at phone + desktop size, console clean |
 | `npm run e2e:devkit-live` | the Dev Kit's main promise: a Tuning edit changes the running board; ⏸ / ◐ / the game's own Pause hold the bot |
 | `npm run e2e:screens` | every screen (menu, board, Pause, Settings, Credits, results, lobby) at 7 sizes, checked with the UI kit's page check |
-| `npm run e2e:online` | two browser tabs play a whole game through `wrangler dev` (its own port 6499 + storage folder) |
+| `npm run e2e:online` | two browser tabs play a whole game through `wrangler dev` (on the game's room port, wrangler.json dev.port = 6499, with its own storage folder) |
 | `npm run check:full` | all of the above, side by side → `e2e-shots/checks.html` |
 
 Every script starts its own servers on 6xxx ports and stops them. Playwright: `playwright-core` is pinned to 1.63.0
