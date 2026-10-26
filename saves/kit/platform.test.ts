@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { checkSaveHealth } from './health'
 import { COPIED_MARKER, openSaves, slowBackend, type OpenedSaves } from './platform'
 import { createSave } from './saves'
@@ -7,7 +7,6 @@ import { createRun } from './run'
 import { memoryStorage, savesOnNativeStorage, savesStorage, setSavesStorage } from './storage'
 
 const SAFARI = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /** A browser storage to copy from (localStorage's length + key(i) too). */
 function oldBrowser(start: Record<string, string>) {
@@ -84,9 +83,8 @@ describe('openSaves — the same kit on a slow storage', () => {
     for (let i = 0; i < 5; i++) opened!.setItem('mygame:a', String(i))
     opened!.setItem('mygame:b', 'x')
     expect(opened!.waiting()).toBe(2)
-    await wait(60)
+    await vi.waitFor(() => expect(disk.calls.keysWritten).toBe(2))
     expect(disk.calls.write).toBe(1)
-    expect(disk.calls.keysWritten).toBe(2)
     expect(disk.data).toMatchObject({ 'mygame:a': '4', 'mygame:b': 'x' })
     opened!.removeItem('mygame:b')
     await opened!.flush()
@@ -99,12 +97,10 @@ describe('openSaves — the same kit on a slow storage', () => {
     await open(disk, { game: 'mygame', delayMs: 60_000, page: page.page })
     opened!.setItem('mygame:run', 'turn 4')
     page.fire('visibilitychange')
-    await wait(10)
-    expect(disk.data['mygame:run']).toBe('turn 4')
+    await vi.waitFor(() => expect(disk.data['mygame:run']).toBe('turn 4'), { timeout: 500 }) // well short of the 60 s timer
     opened!.setItem('mygame:run', 'turn 5')
     page.fire('pagehide')
-    await wait(10)
-    expect(disk.data['mygame:run']).toBe('turn 5')
+    await vi.waitFor(() => expect(disk.data['mygame:run']).toBe('turn 5'), { timeout: 500 })
     expect(page.listening()).toBe(2)
     await opened!.close()
     expect(page.listening()).toBe(0) // deaf to the page now
@@ -116,8 +112,7 @@ describe('openSaves — the same kit on a slow storage', () => {
     await open(disk, { game: 'mygame', delayMs: 60_000, page: page.page })
     page.page.document.addEventListener('visibilitychange', () => { opened!.setItem('mygame:run', 'what the game has now') })
     page.fire('visibilitychange')
-    await wait(10)
-    expect(disk.data['mygame:run']).toBe('what the game has now')
+    await vi.waitFor(() => expect(disk.data['mygame:run']).toBe('what the game has now'), { timeout: 500 })
     expect(opened!.waiting()).toBe(0)
   })
 
@@ -184,8 +179,7 @@ describe('openSaves — nothing is lost when the storage fails', () => {
     expect(save.save({ stars: 2 })).toMatchObject({ ok: false, reason: 'full' }) // told, like a full browser storage…
     expect(save.load()).toEqual({ stars: 1 }) // …and true: nothing changed
     disk.failWrites = null
-    await wait(80) // the retry timer, nobody calls flush
-    expect(opened!.problem()).toBeNull()
+    await vi.waitFor(() => expect(opened!.problem()).toBeNull()) // the retry timer, nobody calls flush
     expect(JSON.parse(disk.data['mygame:progress']).data).toEqual({ stars: 1 }) // the change that was waiting, not lost
     expect(save.save({ stars: 3 }).ok).toBe(true)
     await opened!.flush()

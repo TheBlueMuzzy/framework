@@ -53,6 +53,10 @@ export default defineConfig([
       'no-restricted-syntax': ['error', {
         selector: "CallExpression[callee.name='setTimeout'][arguments.1.type='Literal'][arguments.1.value>0]",
         message: 'A fixed wait in a test fails on a busy computer — wait for the result with vi.waitFor(() => expect(...)) instead (or say why on an eslint-disable-next-line).',
+      }, {
+        // (sprint 41: saves wrapped it — const wait = (ms) => new Promise((r) => setTimeout(r, ms)) — and wait(60) slipped past)
+        selector: "NewExpression[callee.name='Promise'] CallExpression[callee.name='setTimeout'][arguments.1.type='Identifier']",
+        message: 'A real-time wait helper in a test fails on a busy computer — wait for the result with vi.waitFor(() => expect(...)) instead (or say why on an eslint-disable-next-line).',
       }],
     },
   },
@@ -66,6 +70,10 @@ export default defineConfig([
       'no-restricted-syntax': ['error', {
         selector: "CallExpression[callee.name='setTimeout'][arguments.1.type='Literal'][arguments.1.value>0]",
         message: 'A fixed wait in a test fails on a busy computer — wait for the result with vi.waitFor(() => expect(...)) instead (or say why on an eslint-disable-next-line).',
+      }, {
+        // (sprint 41: saves wrapped it — const wait = (ms) => new Promise((r) => setTimeout(r, ms)) — and wait(60) slipped past)
+        selector: "NewExpression[callee.name='Promise'] CallExpression[callee.name='setTimeout'][arguments.1.type='Identifier']",
+        message: 'A real-time wait helper in a test fails on a busy computer — wait for the result with vi.waitFor(() => expect(...)) instead (or say why on an eslint-disable-next-line).',
       }, {
         selector: 'Literal[value=/Courier New|Segoe UI|Consolas|Arial|Calibri|Tahoma|Verdana|Times New Roman/], TemplateElement[value.raw=/Courier New|Segoe UI|Consolas|Arial|Calibri|Tahoma|Verdana|Times New Roman/]',
         message: 'A Windows-only font in a test draws differently on GitHub (Linux) — load a kit font file (@font-face from ui-kit/kit/fonts/*.woff2) or test the rule, not the pixels.',
