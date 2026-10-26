@@ -39,13 +39,17 @@ Every script starts its own servers on 6xxx ports and stops them. Playwright: `p
    same rules on the room server.
 2. **The AI's goals** — `src/ai/plug.ts` (WIN · BLOCK · BUILD here), the characters in `content/ai/personalities.json`,
    who's on the menu in `content/ai/opponents.json`.
-3. **The board** — `src/ui/Board.tsx` (kit Buttons here; a real game draws its own board) and `content/tuning/board.json`.
+3. **The board and the table** — `src/ui/Board.tsx` (kit Buttons here; a real game draws its own board),
+   `src/world/TableWorld.tsx` (the game's own world behind the HUD: a felt colour here, `tableColour` — the HUD's words
+   are light with a dark halo, so they need a picture or a mid-to-dark colour behind them) and `content/tuning/board.json`.
 4. **The words** — `content/text/en.json` (every word a player reads, the bots' banter, the emotes).
 5. **Art and sound** — `content/ui/style.json` (the UI kit's look: Clean), the sounds in `content/audio.json` (the
    placeholders are made by `npm run sounds` from `content/audio-placeholders.json` with ZzFX — swap in real recordings
    with the Dev Kit's Sound tab), `content/credits.json` for anything not made by us.
 6. **The names** — `package.json` name, the save keys in `src/game/saves.ts` (they start with the game's name), the
    title in `index.html`, `wrangler.json` / `crashes/wrangler.json` names.
+7. **Before the first release** — delete the `releases/` line in `.gitignore`: a released game commits its crash maps
+   (`releases/<version>/maps/`, the crashes module's README); the starter never releases, so it doesn't keep them.
 
 Then the game's TDD says what's different and keeps the module contracts below true.
 
