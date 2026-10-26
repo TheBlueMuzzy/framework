@@ -52,12 +52,14 @@ jobs:
         working-directory: ${{ matrix.module }}
         run: npm ci
 
-      # Some module tests open a real browser (ui-kit's layout checks): Playwright's own Chromium, never a system Chrome
-      - name: Browser for tests that need one
+      # Some module tests open a real browser (ui-kit's layout checks; saves in all three engines, F150): Playwright's
+      # own browsers, never a system Chrome. A module names the engines it needs in package.json "testBrowsers"
+      # (default: Chromium only) — saves: "chromium webkit firefox"
+      - name: Browsers for tests that need them
         working-directory: ${{ matrix.module }}
         run: |
           if [ -d node_modules/playwright ] || [ -d node_modules/playwright-core ]; then
-            npx playwright install --with-deps chromium
+            npx playwright install --with-deps $(node -p "require('./package.json').testBrowsers || 'chromium'")
           fi
 
       # Only the checks this module has (the same list install-module.mjs runs)
