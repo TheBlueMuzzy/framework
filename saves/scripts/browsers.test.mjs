@@ -298,7 +298,7 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
       const tab = await open(fresh)
       const health = await tab.evaluate(() => window.kit.checkSaveHealth())
       expect(health.canSave).toBe(true)
-      expect(health.warnings.map((w) => w.id)).toEqual(PRIVATE_WARNINGS[name])
+      expect(PRIVATE_WARNINGS[name]).toContainEqual(health.warnings.map((w) => w.id))
       expect(await tab.evaluate(() => window.progress(2).save({ xp: 5, unlocks: [], stars: 0 }))).toEqual({ ok: true })
       await reload(tab)
       expect(await tab.evaluate(() => window.progress(2).load().xp)).toBe(5)
@@ -317,4 +317,7 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
 
 // What the health check says in each engine (see README → "Proven in which browsers" for why)
 const NORMAL_WARNINGS = { chromium: ['not-kept'], webkit: ['safari'], firefox: ['not-kept'] }
-const PRIVATE_WARNINGS = { chromium: ['not-kept'], webkit: ['private', 'safari'], firefox: ['not-kept'] }
+// A test window that keeps nothing — each engine's accepted answers. Chromium's private guess compares the room it
+// gets with its memory limit, and that room follows the machine's free disk: this PC says "not kept", GitHub's small
+// Linux disk says "private" (both fine for a window that keeps nothing — the real guess is real-device only).
+const PRIVATE_WARNINGS = { chromium: [['not-kept'], ['private']], webkit: [['private', 'safari']], firefox: [['not-kept']] }

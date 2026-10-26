@@ -242,7 +242,7 @@ UI kit 0.23.0 + saves 0.2.0 installed with install-module; `src/game/run.ts` (a 
 | Storage refused (SecurityError on write · "block all cookies", where even looking throws · Safari's old private window, "quota exceeded" on an empty storage) → "blocked", same words, the game runs on | ✓ | ✓ | ✓ |
 | A private window (Playwright's fresh context): saves last while open, the next one starts empty | ✓ | ✓ | ✓ |
 | Health check, normal window | "not kept" note | Safari's 7 days | "not kept" note |
-| Health check, private window | not spotted (see below) | "looks like a private window" + 7 days | not spotted (see below) |
+| Health check, private window | not spotted on a big disk, "looks like a private window" on a small one (its guess follows the room it gets — see below) | "looks like a private window" + 7 days | not spotted (see below) |
 
 What each engine throws when storage is full: the same today — a DOMException named `QuotaExceededError`, code 22, at 5 MiB (5,242,880 characters, key names included). `isFullError` also knows the older names (Firefox's `NS_ERROR_DOM_QUOTA_REACHED`, code 1014) for older browsers.
 
