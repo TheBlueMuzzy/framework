@@ -40,7 +40,12 @@ export function savesStorage(): StorageLike | null {
 
 /** A storage that asks savesStorage() on every read and write — what a save made without its own `storage` keeps.
  *  So a save created when the game's files load (before openSaves has finished) still uses the switched storage. */
-export const switchedStorage: StorageLike = {
+export const switchedStorage: StorageLike & { readonly length?: number } = {
+  /** How many keys the storage behind holds (undefined when it can't say) — writeKey's "empty storage" check. */
+  get length() {
+    const length = (savesStorage() as { length?: unknown } | null)?.length
+    return typeof length === 'number' ? length : undefined
+  },
   getItem: (key) => savesStorage()?.getItem(key) ?? null,
   setItem: (key, value) => {
     const storage = savesStorage()
@@ -77,7 +82,20 @@ export function writeKey(storage: StorageLike | null, key: string, value: string
     storage.setItem(key, value)
     return null
   } catch (error) {
-    return isFullError(error) ? 'full' : 'blocked'
+    if (!isFullError(error)) return 'blocked'
+    // "Quota exceeded" on a storage holding NOTHING isn't a full storage: it's one with no room at all — Safari's
+    // private window up to Safari 10 threw exactly this on every write. The player hears "blocked" (a private window),
+    // not "full" (F150; proven in the real-browser test, scripts/browsers.test.mjs). Storages without a `length`
+    // (memoryStorage, a platform's storage) can't tell, so they keep "full".
+    return holdsNothing(storage) ? 'blocked' : 'full'
+  }
+}
+
+function holdsNothing(storage: StorageLike): boolean {
+  try {
+    return (storage as { length?: unknown }).length === 0
+  } catch {
+    return false
   }
 }
 
