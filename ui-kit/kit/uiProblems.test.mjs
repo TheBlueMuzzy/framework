@@ -36,6 +36,26 @@ describe('findProblems — overlap', () => {
     expect(found.filter((p) => p.startsWith('overlap'))).toEqual([])
   })
 
+  // F149: a card that has to scroll keeps its last row of buttons stuck at its bottom (kit.css); its words scroll under
+  // it. Words a scroll of that same box moves out from under the row are not an overlap — and the scroll is put back.
+  // Words that no scroll uncovers (the box can't scroll, or the row sticks over them at both ends) still are.
+  const stickyCard = (boxHeight, words) => `
+    <div id="card" style="position:absolute;left:0;top:0;width:300px;height:${boxHeight}px;overflow-y:auto">
+      ${words}
+      <div style="position:sticky;bottom:0;display:flex;gap:8px"><button>Leave</button><button>Ready</button></div>
+    </div>`
+  it('a sticky row of buttons over words its scroll box can scroll out from under it is not an overlap', async () => {
+    const found = await problemsOn(stickyCard(150, '<div style="height:120px">Title</div><div style="height:60px">Waiting for everyone</div>'))
+    expect(found.filter((p) => p.startsWith('overlap'))).toEqual([])
+    expect(await page.$eval('#card', (el) => el.scrollTop)).toBe(0) // (put back)
+  })
+
+  it('a sticky row over words no scroll uncovers is still an overlap', async () => {
+    // pulled up over the last words by a negative margin: at either end of the scroll they stay under it
+    const found = await problemsOn(stickyCard(150, '<div style="height:120px">Title</div><div style="height:60px;margin-bottom:-48px;display:flex;align-items:end">Waiting for everyone</div>'))
+    expect(found).toContain('overlap: "Leave" × "Waiting for everyone"')
+  })
+
   it('a dialog over the HUD does not make the HUD words "overlap" the dialog', async () => {
     const found = await problemsOn(`
       <div style="position:absolute;left:10px;top:10px">Score 120</div>

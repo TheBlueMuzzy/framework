@@ -140,3 +140,15 @@ Notes:
   lilac 3D gear, an iPhone Apple's gear, Chrome on Windows a black outline gear). Since 0.35.5 the boxes no longer grow
   either way and a too-wide emoji is drawn smaller. Should the kit still carry its own drawn icons (gear, heart, ▼ ▲)
   so every phone shows the SAME picture? It's a look choice now, not a layout bug.
+- F149 fix after GitHub red (run 40279344615, Linux; kit 0.35.6): (1) iconFit — not emoji at all (the test's symbols are
+  kit-font "+" / "WWW"): fitGlyph measured the symbol's width-per-size once, at its old size; text drawn on Linux snaps
+  to whole pixels, so once drawn smaller it came out ~1 px wider than its share → 1 px of room. Now fitGlyph measures
+  again at the size it just gave until it holds (≤ 4 rounds; only a clearly narrower symbol, 5 %, lowers it — no
+  frame-to-frame flipping), and the side room is at least 0.125rem. New test: a symbol with 6 px that don't shrink
+  (a stand-in for the rounding) — failed with one round (0.09–0.3 px of room), passes now. (2) nameFit 844×335 — Linux's
+  wider fonts made the Lobby card scroll, so the sticky button row sat over the waiting line, which the page check
+  called an overlap. uiProblems now skips a sticky row over words that a scroll of the same box moves out from under
+  it (tried at both ends, put back), in both overlap checks; a sticky row over words no scroll uncovers still counts
+  (tests in uiProblems.test.mjs, Chromium + WebKit). Reproduced here at 844×260 (fails in 4 looks without the rule) —
+  kept as a nameFit case. ui-kit tests 833 ✓; check:fast ✓ all 20; Chromium SHOOT_ONLY of hud/huddock/chips/pause/
+  settings/room/roomauto/payslip/teach/menu: 373 shots, 0 problems, layout vs 0.35.5: no wrap, 0 sizes > 1 px.

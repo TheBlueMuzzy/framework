@@ -172,9 +172,12 @@
      (61 at 200%). Now the button is exactly its size (44 px, or size="…") whatever draws its symbol, and a symbol too
      wide for it is drawn smaller: Button measures it (--kit-glyph-em = its width ÷ its font size, useGlyphFit) and the
      size stops where symbol + side room fill the inside of the border. Text symbols fit already: no change for them. */
+  /* (F149 fix) The side room is at least 0.125rem (2 px) whatever the symbol's size: 0.15 em of a symbol drawn small
+     to fit was under the page check's 1.5 px — so the size also stops where symbol + 2 × 0.125rem fill the inside. */
   .kit-button[data-icon] { --kit-icon-box: max(var(--target-min), var(--kit-button-size, 0rem));
-    padding: 0 0.15em; inline-size: var(--kit-icon-box); block-size: var(--kit-icon-box); line-height: 1;
-    font-size: min(var(--text-title), var(--target-min) * 0.75, (var(--kit-icon-box) - 2 * var(--border-width)) / (var(--kit-glyph-em, 0) + 0.3)); }
+    padding: 0 max(0.15em, 0.125rem); inline-size: var(--kit-icon-box); block-size: var(--kit-icon-box); line-height: 1;
+    font-size: min(var(--text-title), var(--target-min) * 0.75, (var(--kit-icon-box) - 2 * var(--border-width)) / (var(--kit-glyph-em, 0) + 0.3),
+      (var(--kit-icon-box) - 2 * var(--border-width) - 0.25rem) / max(var(--kit-glyph-em, 0), 0.01)); }
   .kit-button-glyph { flex: none; }
   /* size="…px": as tall as the game asks (e.g. a board hex), and at least that wide — never below target-min */
   .kit-button[data-sized] { min-block-size: max(var(--target-min), var(--kit-button-size)); min-inline-size: max(var(--target-min), var(--kit-button-size)); }

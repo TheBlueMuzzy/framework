@@ -26,8 +26,13 @@ const buttons = renderToStaticMarkup(<>
 
 // Each button's size, its symbol's font size, and the room between the symbol and the inside of its border (the
 // smallest of its two sides) — before and after fitGlyph (what Button's useGlyphFit runs in a browser)
-const measure = (textSize: string) => page.evaluate(`(() => {
+// rounding: each wide symbol gets a fixed 6 px more (an inline box that doesn't shrink with the size) — a symbol whose
+// width isn't its size × a fixed share, as text snapped to whole pixels is (GitHub's Linux: 1 px of room was left)
+const measure = (textSize: string, rounding = false) => page.evaluate(`(() => {
   document.documentElement.style.fontSize = '${textSize}'
+  if (${rounding}) document.querySelectorAll('.kit-button-glyph').forEach((g) => {
+    if (g.textContent === 'WWW') g.insertAdjacentHTML('beforeend', '<i style="display: inline-block; inline-size: 6px"></i>')
+  })
   const read = () => [...document.querySelectorAll('.kit-button')].map((b) => {
     const g = b.querySelector('.kit-button-glyph'), s = getComputedStyle(b), box = b.getBoundingClientRect(), r = g.getBoundingClientRect()
     const room = Math.min(r.left - box.left - parseFloat(s.borderLeftWidth), box.right - parseFloat(s.borderRightWidth) - r.right)
@@ -48,6 +53,13 @@ describe.each(Object.keys(presets))('icon buttons in %s', (preset) => {
     expect(after[0].font).toBe(before[0].font)
     // a wide one shrinks until it's inside the border with room (the page check's 1.5 px)
     expect(after[1].font).toBeLessThan(before[1].font)
+    for (const b of after) expect(b.room).toBeGreaterThanOrEqual(1.5)
+  })
+
+  it.each(['100%', '200%'])('at %s text, a symbol whose width doesn’t shrink in step with its size still ends inside with room', async (textSize) => {
+    await showInStyle(page, preset, buttons)
+    const { after } = await measure(textSize, true)
+    expect(after.map((x) => x.size)).toEqual(['44×44', '44×44', '64×64'])
     for (const b of after) expect(b.room).toBeGreaterThanOrEqual(1.5)
   })
 })
