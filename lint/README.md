@@ -1,6 +1,6 @@
 # Lint — coding standards every game checks itself (F90)
 
-Two ESLint rules in the game's own lint, so the quick check (`npm run check:fast`, which runs `npm run lint`) refuses
+The ESLint rules in the game's own lint, so the quick check (`npm run check:fast`, which runs `npm run lint`) refuses
 two mistakes that used to depend on Claude remembering:
 
 | Rule | Refuses | Instead |
@@ -8,6 +8,7 @@ two mistakes that used to depend on Claude remembering:
 | `bmuz/no-tuning-numbers` | a **setting written into the code**: a top-level `const POP_DURATION = 0.15`, a top-level object of numbers (`const TRAP_WEIGHTS = { near: 5, far: 3 }`), a `setTimeout` / `setInterval` with a fixed delay | put it in `content/` (the Dev Kit and Obsidian edit it there) |
 | `bmuz/no-state-in-frame` | a React state setter (useState / useReducer) or a store's `setState` called **every frame** inside `useFrame` | keep the value in a ref (`ref.current = …`); set state only when it really changes, inside an `if` |
 | `bmuz/no-player-text` (0.2.0, F91) | **words a player reads written into the code**: JSX text (`<p>Your turn</p>`), a player prop (`title`, `label`, `aria-label`, `placeholder`, `alt`…), a sentence in a plain string (`setError('Room not found')`) — on only in a game with `content/text/en.json` | put them in `content/text/en.json` (the Dev Kit's Text tab edits them; a translation replaces them) |
+| `bmuz/own-clock` (0.3.0, F157) | **a stray `Date.now()` in a file that takes a clock option** (a `{ now }` option, or a read of `options.now`) — a test pins `now` to a fixed date, the stray keeps reading today, and the test goes red on its own a week later (saves 0.6.4's link codes) | use the clock it was given. Fine as is: the fallback (`now = () => Date.now()`, `options.now?.() ?? Date.now()`), the clock's own definition (`now: () => …`, `realNow`), a plain `now` parameter (a time handed in). A real one says why: `// clock-ok: <why>` |
 
 Not player words, never flagged: imports, object keys, `console.*`, `Error` messages, anything thrown, what a rules
 `check` returns (the Table's refusal reasons). Anything else that isn't for players says why: `// text-ok: <why>`.
@@ -59,3 +60,8 @@ New games start from a starter that already has it, as errors.
 - 0.2.0 (F91, sprint 45): `bmuz/no-player-text`. The installer turns it on where `content/text/en.json` exists — as an
   error with no finds, a warning with the list otherwise — and adds it to a game already on 0.1.0's block (its other
   rules keep their strictness). The promise checks want it whenever en.json exists. The starter has it as an error.
+- 0.3.0 (F157, sprint 47): `bmuz/own-clock`, in every game — an error with no finds, a warning with the list otherwise —
+  and added beside the rules of a game already on 0.1.0 / 0.2.0's block. The promise checks want it (an older block is
+  told to run the installer again). The framework's own lint runs it on every module too (root eslint.config.js).
+  Measured first (sprint 47): 0 finds in the framework and three games today; saves 0.6.4's link-code bug is caught
+  at its line.

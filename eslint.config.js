@@ -19,6 +19,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import bmuz from './lint/kit/rules.mjs'
 
 export default defineConfig([
   globalIgnores([
@@ -94,5 +95,13 @@ export default defineConfig([
       sourceType: 'module',
       globals: { ...globals.node, ...globals.browser },
     },
+  },
+  {
+    // Code that takes a clock option (`now`) uses it — no stray Date.now() beside it (lint 0.3.0, F157: saves'
+    // link-code test went red on its own once its fixed date was a week old). The lint module's own rule, the same
+    // one games get from install-module.
+    files: ['**/*.{ts,tsx,js,mjs}'],
+    plugins: { bmuz },
+    rules: { 'bmuz/own-clock': 'error' },
   },
 ])

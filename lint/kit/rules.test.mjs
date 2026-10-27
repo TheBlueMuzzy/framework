@@ -1,4 +1,4 @@
-// The two rules on small pieces of game code: what they must catch, and what they must leave alone (the shapes
+// The rules on small pieces of game code: what they must catch, and what they must leave alone (the shapes
 // measured in four games, sprint 44 — SPRINT Notes).
 import { describe, it } from 'vitest'
 import { RuleTester } from 'eslint'
@@ -91,4 +91,56 @@ tester.run('no-state-in-frame', rules['no-state-in-frame'], {
     { code: 'function C() { const [n, setN] = React.useState(0); useFrame(() => setN((v) => v + 1)) }', errors: [{ messageId: 'setter' }] },
     { code: 'function C() { useFrame(() => { useGameStore.setState({ t: performance.now() }) }) }', errors: [{ messageId: 'store' }] },
   ],
+})
+
+// F157: saves 0.6.4's loadLinkCode, cut down — the file takes a clock (linkCodeHere's `now` option), but one check
+// read the real clock, and its test went red a week after its fixed date
+const savesBefore = `
+export function linkCodeHere(saves, { storage, now = () => Date.now() } = {}) {
+  const { link, expiresAt } = memory(saves, storage).load()
+  return link && expiresAt > now() ? { link, expiresAt } : null
+}
+export async function loadLinkCode(typed, saves, options) {
+  const own = memory(saves, options.storage).load()
+  if (!(own.link && own.expiresAt > Date.now())) remember(typed)
+}`
+
+tester.run('own-clock', rules['own-clock'], {
+  valid: [
+    'const stamp = () => Date.now()',                                         // no clock option in the file
+    'function f({ now = () => Date.now() }) { return now() }',                 // the default is the fallback itself
+    'function f(options) { return (options.now?.() ?? Date.now()) + 1 }',      // …and so is ?? Date.now()
+    'function f(when = Date.now(), { now }) { return now() - when }',          // a default value
+    'const clock = { now: () => (typeof performance !== "undefined" ? performance.now() : Date.now()) }; clock.now()', // the clock's own definition (ai pace.ts)
+    'const realNow = () => Date.now(); export const tick = (o) => o.now()',   // devkit gameClock.ts
+    'const tidy = (now) => drop(now); alarm(() => tidy(Date.now()))',         // a plain now parameter is a time handed in (the cloud worker)
+    'setOrder((now) => now.map(f)); const ends = Date.now() + 30000',         // …and a list called now isn't a clock (the gallery)
+    'function f(o) { o.now() }\n// clock-ok: a log line stamps the real time\nlog(Date.now())',
+    'const t = performance.now(); const u = Date.now()',                       // performance.now / Date.now aren't options
+    savesBefore.replace('own.expiresAt > Date.now()', 'own.expiresAt > (options.now?.() ?? Date.now())'), // the fix (bbb0988)
+  ],
+  invalid: [
+    { code: savesBefore, errors: [{ messageId: 'stray', line: 8 }] },                                      // the saves bug
+    { code: 'function f({ now }) { return now() }\nfunction g() { return Date.now() - 5 }', errors: [{ messageId: 'stray' }] },
+    { code: 'const age = (o) => Date.now() - o.now()', errors: [{ messageId: 'stray' }] },
+    { code: 'function f(o) { o.now() }\n// clock-ok:\nlog(Date.now())', errors: [{ messageId: 'stray' }] }, // the why is needed
+    // the review (sprint 47): a ?? / || is a fallback only when Date.now() IS its right side
+    { code: 'function f({ now }) { now() }\nconst label = name || `at ${Date.now()}`', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nconst r = cache ?? fetchFresh(Date.now())', errors: [{ messageId: 'stray' }] },
+    // …a clock's name is exact (not "know", "snow"), and only the function that holds the call counts
+    { code: 'function f({ now }) { now() }\nconst know = () => Date.now()', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nfunction snow() { return Date.now() }', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nfunction startClock() { setInterval(() => save(Date.now()), 1) }', errors: [{ messageId: 'stray' }] },
+  ],
+})
+
+tester.run('own-clock (the review, sprint 47: what must still pass)', rules['own-clock'], {
+  valid: [
+    'const t = window.performance.now()\nconst s = Date.now()',      // the browser's clocks aren't a clock option
+    'const t = globalThis.performance.now()\nconst s = Date.now()',
+    'const t = DateTime.now()\nconst s = Date.now()',                // luxon
+    'class C { now = () => Date.now() }\nnew C().now()',              // a class field defining the clock
+    'function f({ now = () => (ok ? Date.now() : 0) }) { now() }',    // anywhere inside a default value
+  ],
+  invalid: [],
 })

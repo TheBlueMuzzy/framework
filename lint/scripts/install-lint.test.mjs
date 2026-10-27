@@ -137,6 +137,27 @@ describe('installLint', () => {
     expect((await installLint(game, { log: quiet })).configChanged).toBe(false)
     expect(readFileSync(join(game, 'eslint.config.js'), 'utf8')).toBe(config)
   })
+  // F157: the clock rule (lint 0.3.0) — on in every game, as strict as its own finds allow
+  it('a game with a stray Date.now() beside a clock option gets the clock rule as a warning, and the list', async () => {
+    const game = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'src/game/timer.ts': 'export function left(o: { now: () => number }, end: number) { return end - o.now() }\nexport const age = (t: number) => Date.now() - t\n' })
+    const result = await installLint(game, { log: quiet })
+    expect(result.level).toBe('error') // no setting found: the coding rules are errors
+    expect(result.clockLevel).toBe('warn')
+    expect(result.finds.map((f) => `${f.rule} ${f.file}:${f.line}`)).toEqual(['bmuz/own-clock src/game/timer.ts:2'])
+    const config = readFileSync(join(game, 'eslint.config.js'), 'utf8')
+    expect(config).toContain("'bmuz/own-clock': 'warn'")
+    expect(syntaxOk(config)).toBe(true)
+  })
+  it('a game on the lint 0.2.0 block gets the clock rule added beside its rules, once', async () => {
+    const older = addRules(STARTER_CONFIG, 'warn', 'error').text // the block lint 0.2.0 wrote: no clock rule
+    const game = makeGame({ 'eslint.config.js': older, 'content/text/en.json': '{}', 'src/a.ts': 'export {}\n' })
+    const result = await installLint(game, { log: quiet })
+    expect(result.configChanged).toBe(true)
+    const config = readFileSync(join(game, 'eslint.config.js'), 'utf8')
+    expect(config).toContain("'bmuz/no-tuning-numbers': 'warn', 'bmuz/own-clock': 'error', 'bmuz/no-player-text': 'error'") // old levels kept
+    expect(syntaxOk(config)).toBe(true)
+    expect((await installLint(game, { log: quiet })).configChanged).toBe(false)
+  })
   it('--errors makes them errors even with finds', async () => {
     const game = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'src/a.ts': 'export const SPEED = 3\n' })
     expect((await installLint(game, { errors: true, log: quiet })).level).toBe('error')

@@ -193,5 +193,85 @@ const noPlayerText = {
   },
 }
 
-export const rules = { 'no-state-in-frame': noStateInFrame, 'no-tuning-numbers': noTuningNumbers, 'no-player-text': noPlayerText }
+// bmuz/own-clock (lint 0.3.0, F157) — code that takes a clock option (`now`) and still reads the real clock with
+//   Date.now() somewhere else in the same file. Tests pin `now` to a fixed date; the stray Date.now() keeps reading
+//   today, so the test passes the day it's written and goes red on its own once the fixed date is old enough (saves
+//   0.6.4's loadLinkCode: a 7-day link code "expired" a week after its test's 2026-10-20 clock).
+//   A file takes a clock when it has a `{ now }` option or reads `something.now` (a plain parameter named now is just
+//   a time it was handed — the alarm that calls tidy(Date.now()) is where the real time belongs; measured, sprint 47).
+//   Fine: the fallback itself — a default value (`now = () => Date.now()`) or `options.now?.() ?? Date.now()` — and
+//   the clock's own definition (`now: () => …`, `const realNow = () => …`, a name ending in now/Now or with "clock").
+//   A real one (a log line's own time stamp) says why on its line or the line above: `// clock-ok: <why>`.
+const isDateNow = (node) => node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && !node.callee.computed
+  && node.callee.object.type === 'Identifier' && node.callee.object.name === 'Date' && node.callee.property.name === 'now'
+// a `{ now }` option among a function's parameters (also `{ now = … }`, `{ clock: { now } }`, `opts = { now }`)
+const optionsHaveNow = (pattern) => {
+  if (!pattern) return false
+  if (pattern.type === 'AssignmentPattern') return optionsHaveNow(pattern.left)
+  if (pattern.type === 'ObjectPattern') return pattern.properties.some((p) => p.type === 'Property' && ((p.key.type === 'Identifier' && p.key.name === 'now') || optionsHaveNow(p.value)))
+  return false
+}
+// a clock's own name, exactly: now, clock, or …Now (realNow, clockNow) — not "know" or "snow" (review, sprint 47)
+const CLOCK_NAME = /^(now|clock)$|Now$/
+const nameOf = (node) => (node?.type === 'Identifier' ? node.name : null)
+const FUNCTION = /^(FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/
+// a function's name: its own, or what it's assigned to (a variable, an object key, a method, a class field)
+const clockHolderName = (fn) => {
+  const parent = fn.parent
+  if (fn.id) return fn.id.name
+  if (parent.type === 'VariableDeclarator') return nameOf(parent.id)
+  if (/^(Property|MethodDefinition|PropertyDefinition)$/.test(parent.type)) return nameOf(parent.key)
+  return null
+}
+// Date.now() as the fallback, or inside the clock's own definition:
+//   - anywhere inside a default value (`now = () => Date.now()`, `{ now = () => (ok ? Date.now() : 0) }`)
+//   - the right side of ?? / ||, itself (`options.now?.() ?? Date.now()` — not `name || \`at ${Date.now()}\``)
+//   - in a function named as a clock — the one that holds the call, not one further out (a callback inside
+//     startClock is not the clock)
+const isFallback = (node) => {
+  const parent = node.parent
+  if (parent.type === 'LogicalExpression' && (parent.operator === '??' || parent.operator === '||') && parent.right === node) return true
+  let holder = null
+  for (let child = node, up = node.parent; up; child = up, up = up.parent) {
+    if (up.type === 'AssignmentPattern' && up.right === child) return true
+    if (!holder && FUNCTION.test(up.type)) holder = up
+    if (up.type === 'Program') break
+  }
+  const named = holder && clockHolderName(holder)
+  return !!named && CLOCK_NAME.test(named)
+}
+// `x.now` that is one of the browser's / a library's own clocks, not a clock option: Date.now, performance.now,
+// window.performance.now, globalThis.performance.now, luxon's DateTime.now, Temporal.Now
+const BUILT_IN_CLOCK = /^(Date|performance|DateTime|Temporal)$/
+const isBuiltInClock = (object) => (object.type === 'Identifier' && BUILT_IN_CLOCK.test(object.name))
+  || (object.type === 'MemberExpression' && !object.computed && object.property.type === 'Identifier' && object.property.name === 'performance')
+const ownClock = {
+  meta: {
+    type: 'problem',
+    docs: { description: 'Code that takes a clock option (now) never reads the real clock with Date.now() beside it' },
+    schema: [],
+    messages: {
+      stray: 'Date.now() in a file that takes a clock option (now) — use the clock it was given, so a test with a fixed date stays right next week; or say why it must be the real clock: // clock-ok: <why>',
+    },
+  },
+  create(context) {
+    const sourceCode = context.sourceCode
+    let takesClock = false
+    const calls = []
+    const params = (node) => { if (node.params.some(optionsHaveNow)) takesClock = true }
+    return {
+      FunctionDeclaration: params, FunctionExpression: params, ArrowFunctionExpression: params,
+      MemberExpression(node) {
+        if (!node.computed && node.property.type === 'Identifier' && node.property.name === 'now' && !isBuiltInClock(node.object)) takesClock = true
+      },
+      CallExpression(node) { if (isDateNow(node)) calls.push(node) },
+      'Program:exit'() {
+        if (!takesClock) return
+        for (const call of calls) if (!isFallback(call) && !markedOk(sourceCode, call, 'clock-ok')) context.report({ node: call, messageId: 'stray' })
+      },
+    }
+  },
+}
+
+export const rules = { 'no-state-in-frame': noStateInFrame, 'no-tuning-numbers': noTuningNumbers, 'no-player-text': noPlayerText, 'own-clock': ownClock }
 export default { meta: { name: 'bmuz' }, rules }
