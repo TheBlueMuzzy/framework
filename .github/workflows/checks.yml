@@ -58,15 +58,24 @@ jobs:
       # Some module tests open a real browser (ui-kit's layout checks; saves in all three engines, F150): Playwright's
       # own browsers, never a system Chrome. A module names the engines it needs in package.json "testBrowsers"
       # (default: Chromium only) — saves: "chromium webkit firefox"
-      # (v0.23 look-back: this hung 35 min on GitHub's side and held up the release — a stuck download now fails fast;
-      #  a normal install takes 1–4 min. Re-run the job.)
-      - name: Browsers for tests that need them
-        timeout-minutes: 15
+      - id: browsers
+        name: Which test browsers
         working-directory: ${{ matrix.module }}
         run: |
-          if [ -d node_modules/playwright ] || [ -d node_modules/playwright-core ]; then
-            npx playwright install --with-deps $(node -p "require('./package.json').testBrowsers || 'chromium'")
+          if [ -d node_modules/playwright-core ]; then
+            echo "needed=yes" >> "$GITHUB_OUTPUT"
+            echo "list=$(node -p "require('./package.json').testBrowsers || 'chromium'")" >> "$GITHUB_OUTPUT"
           fi
+
+      # Browsers + their Linux packages are kept between runs (.github/actions/test-browsers, F158). Two timeouts on
+      # 2026-10-27 were Ubuntu's mirror at 26 kB/s, not the browsers. A normal install takes 1–4 min; kept, under 1.
+      - name: Browsers for tests that need them
+        if: steps.browsers.outputs.needed == 'yes'
+        timeout-minutes: 15
+        uses: ./.github/actions/test-browsers
+        with:
+          folder: ${{ matrix.module }}
+          browsers: ${{ steps.browsers.outputs.list }}
 
       # Only the checks this module has (the same list install-module.mjs runs)
       - name: Module checks
@@ -119,11 +128,13 @@ jobs:
           done
 
       # The starter pins playwright-core (1.63.0) — its own CLI installs the Chromium that version needs
-      # (`npx playwright` would fetch the newest Playwright and a browser the pinned one can't use)
+      # (`npx playwright` would fetch the newest Playwright and a browser the pinned one can't use). Kept between runs.
       - name: Chromium for the starter's browser checks
         timeout-minutes: 15
-        working-directory: starters/${{ matrix.starter }}
-        run: npx playwright-core install --with-deps chromium
+        uses: ./.github/actions/test-browsers
+        with:
+          folder: starters/${{ matrix.starter }}
+          cli: playwright-core
 
       - name: Starter checks with fresh modules
         run: node scripts/starter-check.mjs ${{ matrix.starter }} full
