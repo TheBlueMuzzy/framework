@@ -1,0 +1,22 @@
+v0.29.0 — 2026-10-27
+
+Games can now be translated without surprises. The lint module flags player words that are typed into game code instead of content/text/en.json, and the UI kit can show a game in a long fake language, so words that won't fit once translated show up before any translator sees them.
+
+NEW
+• Lint 0.2.0 adds the player-text rule (bmuz/no-player-text) in games that keep their words in content/text/en.json:
+• It flags words written straight into code: text inside JSX, the title, label, aria-label, placeholder and alt props, and sentence-like strings.
+• It leaves out console lines, error messages, anything thrown and what a rules check returns. A real exception passes when it says why: // text-ok: <why>.
+• A game already on lint 0.1.0 gets the new rule beside its existing ones when it reinstalls, and keeps its old strictness.
+• UI kit 0.36.0 adds the fake language. Add ?pseudo to the game's address while developing:
+• Every word on screen becomes accented and about 40% longer, in [brackets]. The game's own words, the kit's built-in words and module words are all rewritten.
+• {slots} are kept, and the Dev Kit stays in English. It never runs in a released build.
+• The Dev Kit's framework check plays the game in the fake language and warns at each screen size where "words still fit when they're ~40% longer" fails: cut off, split mid-word, overlapping, or running past their button.
+• npm run shoot:pseudo takes the whole screenshot gallery in the fake language.
+• The turn-based starter has both, and its first screen fits at all 7 screen sizes.
+
+FIXED
+• The fake language no longer freezes a page whose words have no accents to rewrite (such as 日本語) or that splits words into single letters.
+• A real word with an accent, like "Café" or a German "ö", is no longer mistaken for one that's already been rewritten.
+
+KNOWN ISSUES
+• Many kit screens don't yet have room for longer words: 427 of the gallery's 961 fake-language shots have a find, mostly in the room, HUD, pinned, results and end-game screens. Status: the next milestone (v0.28 Room for longer words).
