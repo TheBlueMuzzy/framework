@@ -20,7 +20,7 @@ const pkg = JSON.stringify({ scripts: { lint: 'eslint .' } })
 
 describe('ruleLevels', () => {
   it('reads string, array and number levels', () => {
-    expect(ruleLevels(`'bmuz/no-state-in-frame': ['warn'], "bmuz/no-tuning-numbers": 2`)).toEqual({ 'bmuz/no-state-in-frame': 'warn', 'bmuz/no-tuning-numbers': 'error' })
+    expect(ruleLevels(`'bmuz/no-state-in-frame': ['warn'], "bmuz/no-tuning-numbers": 2`)).toEqual({ 'bmuz/no-state-in-frame': 'warn', 'bmuz/no-tuning-numbers': 'error', 'bmuz/no-player-text': null })
   })
   it('a rule only in a comment is not on', () => {
     expect(ruleLevels(`// 'bmuz/no-tuning-numbers': 'error'`)['bmuz/no-tuning-numbers']).toBe(null)
@@ -32,6 +32,14 @@ describe('check', () => {
     const { t, results } = tester({ 'eslint.config.js': config('error'), 'package.json': pkg })
     await check(t)
     expect(results).toEqual({ [CHECKS.rules]: 'pass', [CHECKS.script]: 'pass', [CHECKS.strict]: 'pass' })
+  })
+  it('a game with content/text/en.json needs the player-text rule too', async () => {
+    const without = tester({ 'eslint.config.js': config('error'), 'package.json': pkg, 'content/text/en.json': '{}' })
+    await check(without.t)
+    expect(without.results[CHECKS.rules]).toBe('fail')
+    const withRule = tester({ 'eslint.config.js': config('error').replace("'bmuz/no-tuning-numbers': 'error'", "'bmuz/no-tuning-numbers': 'error', 'bmuz/no-player-text': 'error'"), 'package.json': pkg, 'content/text/en.json': '{}' })
+    await check(withRule.t)
+    expect(withRule.results).toEqual({ [CHECKS.rules]: 'pass', [CHECKS.script]: 'pass', [CHECKS.strict]: 'pass' })
   })
   it('warns while the rules are warnings', async () => {
     const { t, results } = tester({ 'eslint.config.js': config('warn'), 'package.json': pkg })

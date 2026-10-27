@@ -9,19 +9,20 @@
 export const title = 'Lint'
 
 export const CHECKS = {
-  rules: 'the game\'s lint has the two coding rules (bmuz/no-state-in-frame, bmuz/no-tuning-numbers)',
+  rules: 'the game\'s lint has the coding rules (bmuz/no-state-in-frame, bmuz/no-tuning-numbers; bmuz/no-player-text when its words live in content/text/en.json)',
   script: 'the game\'s checks run its lint (a "lint" script)',
   strict: 'the coding rules are errors, not warnings',
 }
 
 const ESLINT_CONFIGS = ['eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.mts']
 const RULES = ['bmuz/no-state-in-frame', 'bmuz/no-tuning-numbers']
+const TEXT_RULE = 'bmuz/no-player-text' // F91: on when the game keeps its words in content/text/en.json
 const withoutComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"])\/\/[^\n]*/g, '$1')
 
 /** How strict each rule is in a config's text: { 'bmuz/no-tuning-numbers': 'error' | 'warn' | 'off' | null } */
 export function ruleLevels(text) {
   const code = withoutComments(text)
-  return Object.fromEntries(RULES.map((rule) => {
+  return Object.fromEntries([...RULES, TEXT_RULE].map((rule) => {
     const found = code.match(new RegExp(`['"]${rule}['"]\\s*:\\s*(?:\\[\\s*)?(['"]?)(error|warn|off|0|1|2)\\1`))
     const level = found ? { 0: 'off', 1: 'warn', 2: 'error' }[found[2]] ?? found[2] : null
     return [rule, level]
@@ -33,7 +34,8 @@ export async function check(t) {
   const text = config ? t.read(config) : ''
   const imports = /from\s*['"]\.\/src\/lint\/rules\.mjs['"]/.test(withoutComments(text))
   const levels = ruleLevels(text)
-  const missing = RULES.filter((rule) => !levels[rule] || levels[rule] === 'off')
+  const wanted = t.exists('content/text/en.json') ? [...RULES, TEXT_RULE] : RULES
+  const missing = wanted.filter((rule) => !levels[rule] || levels[rule] === 'off')
   {
     const name = CHECKS.rules
     const problems = []
@@ -43,7 +45,7 @@ export async function check(t) {
       if (missing.length) problems.push(`${config} doesn't switch on ${missing.join(' and ')}.`)
     }
     if (problems.length) t.fail(name, problems, 'Run the installer again: node ~/.claude/config/bmuz/scripts/install-module.mjs lint . (it adds the import and the rules block).')
-    else t.pass(name, `${config}: ${RULES.map((rule) => `${rule.slice(5)} ${levels[rule]}`).join(' · ')}`)
+    else t.pass(name, `${config}: ${wanted.map((rule) => `${rule.slice(5)} ${levels[rule]}`).join(' · ')}`)
   }
   {
     const name = CHECKS.script
@@ -53,9 +55,9 @@ export async function check(t) {
   }
   {
     const name = CHECKS.strict
-    const warned = RULES.filter((rule) => levels[rule] === 'warn')
+    const warned = wanted.filter((rule) => levels[rule] === 'warn')
     if (!config || missing.length) t.skip(name, 'the rules aren\'t on yet (above)')
-    else if (warned.length) t.warn(name, [`${warned.join(' and ')} ${warned.length > 1 ? 'are' : 'is'} still a warning — a find doesn't stop the checks.`], `Move each find's setting to content/ (or mark a real constant // tuning-ok: <why>), then switch to 'error' in ${config}.`)
-    else t.pass(name, 'both errors')
+    else if (warned.length) t.warn(name, [`${warned.join(' and ')} ${warned.length > 1 ? 'are' : 'is'} still a warning — a find doesn't stop the checks.`], `Move each find's setting to content/ (or // tuning-ok: <why>) and its player words to content/text/en.json (or // text-ok: <why>), then switch to 'error' in ${config}.`)
+    else t.pass(name, `all ${wanted.length} errors`)
   }
 }

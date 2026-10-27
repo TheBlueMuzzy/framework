@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.28.0, 2026-10-26)
+Release target: none — a library; each milestone releases on its own (latest v0.29.0, 2026-10-27)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -415,11 +415,26 @@ flowchart LR
   F90[F90 Coding-standard lint rules]
 ```
 
+## v0.27 — Ready to translate  ✅ released 2026-10-27 (v0.29.0) · planned 2026-10-27
+Goal (Muzzy 2026-10-27: "Ready to translate"): a game's words can be translated without surprises — words typed into code are flagged, and a long fake language shows which ones won't fit.
+- ✅ F91 🔧 Translation readiness — the lint module flags player words typed into game code (games with content/text/en.json); a dev-only fake language (accented, ~40% longer) and check:framework's cut-off check run in it — should · sprint 45
+```mermaid
+flowchart LR
+  F91[F91 Translation readiness]
+```
+
+## v0.28 — Room for longer words  ← next · planned 2026-10-27
+Goal (Muzzy 2026-10-27: "yes next"): every kit screen holds words ~40% longer — `npm run shoot:pseudo` finds 0 cut-off, split or overlapping words.
+- 🟢 F156 🔧 Room for longer words — the kit's room, HUD, pinned, results and end-game screens wrap or fit words ~40% longer (427 of 961 gallery shots had a find in the fake language: names cut off, "friends" split, HUD corners overlapping; the parts page's avatar name touches its circle); `shoot:pseudo` 0 clipped / split / overlap is the bar — should · needs: F91
+```mermaid
+flowchart LR
+  F91[✅ F91 Translation readiness] --> F156[F156 Room for longer words]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
-- 💤 F91 🔧 Translation readiness — player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
 - 💤 F92 🔧 Tech-lead checks — a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
 - 💤 F97 🧱 Saves on app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
 - 💤 F99 🧱 Saves in Unity — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
@@ -435,6 +450,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-27 — **Hand to the game sessions (found by F91 — Translation readiness, read-only measure):** each takes lint 0.2.0 and UI kit 0.36.0 with install-module (the player-text rule goes in as warnings with the list), then moves player words to content/text/en.json or marks `// text-ok: <why>`, and looks at the game with `?pseudo`. Roll Better 7 (src/hooks/useRoom.ts room errors: "Room not found", "Connection lost"… — real) · Goops 3 (Spotlight aria-label "Tip" real; "Shunt piece", "Goo failed:" dev words) · Glyphtender 31 (4 label + 2 aria-label real; ~20 move reasons from its own turn / draft / refresh helpers — real if the game shows them; AI report labels and rails-check notes → text-ok).
 - 2026-10-26 — **One shared `kitVersion()` for every installer** (v0.26 look-back): each module's installer carries its own copy (read kit/VERSION + git rev-parse + git status), and the "asks git on every install → slow under check:fast" problem has now been fixed twice (version F128, lint F90). One helper in a shared framework script, imported by every installer, so the next module can't copy the slow version.
 - 2026-10-26 — **Hand to the game sessions (found by F90 — Coding-standard lint rules, read-only measure):** each takes the lint module with `install-module.mjs lint .` — it goes in as warnings with the list — then moves each setting to `content/` or marks a real constant `// tuning-ok: <why>`, and switches the rules to errors. Roll Better 53 finds (pop/shrink timings, die + wall sizes, row spacing, haptics, 13 game timers) · Goops 31 (goo particle physics R0/RSEP/KREP/SEP/DROP_R, OUCH_SHARE, GAZE_FOLLOW; SAVE_VERSION, EPSILON, ONE_DAY_S, slot indices are real constants) · Glyphtender 25 (8 AI *_WEIGHTS groups — likely content/ai, SCORE_BEAT_MS, WAIT_FOR_VIEW_MS; FAR, MAX_PLAYERS are constants). All three have the Dev Kit's idle-load `setTimeout(mount, 1000)` in main.tsx → `// tuning-ok:` like the starter. No `useFrame` state finds (Roll Better's RowChips only sets state when the chip changes — allowed).
 - 2026-10-26 — **Saves: the real-Firefox test can lose its browser under heavy load** (Sprint 43: "Target page, context or browser has been closed", 8 tests, while 12 test browsers ran; alone 276/276 at once) — if it comes back, give that test its own browser launch retry or run it apart from the shoots.

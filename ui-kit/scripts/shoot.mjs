@@ -21,6 +21,7 @@ import { createServer } from 'vite'
 import { chromium, webkit } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
+import { pseudo } from '../kit/blocks/words.ts'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 import { recordLayout } from './compareEngines.mjs'
 
@@ -46,7 +47,13 @@ const sizes = {
 
 // (--webkit, not only the env var: npm scripts on Windows can't set one inline)
 const WEBKIT = process.env.SHOOT_ENGINE === 'webkit' || process.argv.includes('--webkit')
-const OUT = WEBKIT ? 'screenshots-webkit' : 'screenshots' // (both git-ignored; codeChanges.mjs skips both)
+// PSEUDO (F91): npm run shoot:pseudo — every shot in the long fake language (accented, ~40% longer words, the page
+// opened with ?pseudo), saved to screenshots-pseudo/: what a cut-off looks like once the words are translated
+const PSEUDO = process.argv.includes('--pseudo')
+const OUT = PSEUDO ? 'screenshots-pseudo' : WEBKIT ? 'screenshots-webkit' : 'screenshots' // (all git-ignored; codeChanges.mjs skips them)
+const withPseudo = (query) => (PSEUDO ? `${query}${query.includes('?') ? '&' : '?'}pseudo` : query)
+// A label the shoot clicks by name, as the page says it (the fake language rewrites labels too)
+const said = (words) => (PSEUDO ? pseudo(words) : words)
 mkdirSync(`${OUT}/screens`, { recursive: true })
 mkdirSync(`${OUT}/layout/screens`, { recursive: true }) // (F149: one small layout file per shot — compareEngines.mjs)
 // SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)
@@ -108,7 +115,7 @@ async function shoot(file, size, query, prepare) {
   if (codeChanges().length) throw new CodeChanged()
   const page = await pageFor(size)
   page.errors = []
-  await page.goto(`http://localhost:${PORT}/${query}`)
+  await page.goto(`http://localhost:${PORT}/${withPseudo(query)}`)
   const isScreen = query.includes('screen=') && !query.includes('screen=parts')
   // (a VISIBLE screen: Pause opens over the HUD, which then hides — the first .kit-screen on the page)
   // A page that never shows its screen is a problem on the list, not the end of the run (F148: WebKit stalled once
@@ -235,7 +242,7 @@ const text200 = (page) => page.evaluate(() => { document.documentElement.style.f
 const openers = {
   settings: async (page) => {
     await text200(page)
-    while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+    while (await page.getByRole('group', { name: said('Settings') }).locator('output').innerText() !== said('Accessibility')) await page.getByLabel(said('Next Settings')).click()
   },
 }
 
@@ -278,8 +285,8 @@ try {
     }
     // Live restyle: change a tweak with the dev switcher and check it repaints
     await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
-      await page.getByLabel('Next Corners').click()
-      await page.getByLabel('Next Spacing').click()
+      await page.getByLabel(said('Next Corners')).click()
+      await page.getByLabel(said('Next Spacing')).click()
       await page.locator('.gallery-colour').fill('#b0306a')
     })
     for (const preset of presetNames) {
@@ -304,7 +311,7 @@ try {
     }
     // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
     await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
-      (page) => page.getByRole('button', { name: 'Copy' }).click())
+      (page) => page.getByRole('button', { name: said('Copy') }).click())
   }
 } catch (e) {
   if (!(e instanceof CodeChanged)) throw e

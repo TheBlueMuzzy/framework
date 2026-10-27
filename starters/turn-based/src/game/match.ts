@@ -113,11 +113,11 @@ function hear(events: Event[]) {
     }
     if (event.type === 'won') {
       playSound(event.seat === YOU ? 'game.win' : 'game.lose')
-      log(`${event.seat === YOU ? 'You' : 'The bot'} won`)
+      log(`${event.seat === YOU ? 'You' : 'The bot'} won`) // text-ok: the Dev Kit's event log, not a player screen
     }
     if (event.type === 'draw') {
       playSound('game.draw')
-      log('A draw')
+      log('A draw') // text-ok: the Dev Kit's event log, not a player screen
     }
   }
   banter.hear(events)

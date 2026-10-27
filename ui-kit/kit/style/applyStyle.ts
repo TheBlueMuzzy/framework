@@ -2,6 +2,7 @@
 // style.json looks like: { "preset": "clean", "tweaks": { "accent": "#e07a5f" } }
 // Tweaks win over the preset. Call applyStyle again any time to restyle live.
 import { presets } from '../styles'
+import { pseudoFromAddress } from '../pseudoPage'
 import { allVariableNames, fontRoleTokens, hudTokens, optionalTokens, type StylePreset, type StyleTweaks } from './tokens'
 
 export type StyleFile = { preset: string; tweaks?: StyleTweaks }
@@ -57,4 +58,5 @@ export function resolveStyle(file: StyleFile): Record<string, string> {
 
 export function applyStyle(file: StyleFile, target: HTMLElement = document.documentElement) {
   for (const [name, value] of Object.entries(resolveStyle(file))) target.style.setProperty(`--${name}`, value)
+  pseudoFromAddress() // dev only: ?pseudo → the page in the long fake language (F91 — every kit game calls applyStyle at start-up)
 }

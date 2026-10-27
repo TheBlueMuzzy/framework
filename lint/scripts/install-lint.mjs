@@ -50,7 +50,7 @@ function readKitVersion() {
 }
 
 /** The rules' finds in a game's own code today, with the framework's ESLint: [{ file, line, rule, message }]. */
-export async function countFinds(gameDir) {
+export async function countFinds(gameDir, { playerText = keepsWordsInContent(gameDir) } = {}) {
   // the game's own ESLint first (a game with a lint has it), else the framework's — GitHub's starter job installs the
   // game's packages but not the framework root's
   const load = (name) => {
@@ -72,7 +72,7 @@ export async function countFinds(gameDir) {
         files: ['src/**/*.{ts,tsx}'],
         languageOptions: { parser: tseslint.parser, parserOptions: { ecmaFeatures: { jsx: true } } },
         plugins: { bmuz },
-        rules: { 'bmuz/no-state-in-frame': 'error', 'bmuz/no-tuning-numbers': 'error' },
+        rules: { 'bmuz/no-state-in-frame': 'error', 'bmuz/no-tuning-numbers': 'error', ...(playerText ? { 'bmuz/no-player-text': 'error' } : {}) },
       },
     ],
   })
@@ -82,9 +82,23 @@ export async function countFinds(gameDir) {
   })))
 }
 
-/** The game's eslint.config with the rules added at `level`, or { refuse } when its shape isn't one we can edit safely. */
-export function addRules(text, level) {
-  if (text.includes(MARK)) return { text, already: true }
+/** A game keeps its words in content/text/en.json → the player-text rule is on for it (F91). */
+export const keepsWordsInContent = (gameDir) => existsSync(join(resolve(gameDir), 'content', 'text', 'en.json'))
+
+const TUNING_RULE = /('bmuz\/no-tuning-numbers'\s*:\s*(?:\[\s*)?'(?:error|warn|off)'(?:\s*\])?)/
+
+/**
+ * The game's eslint.config with the rules added, or { refuse } when its shape isn't one we can edit safely.
+ * level: the two F90 rules · textLevel: the player-text rule (F91), null = not on (no content/text/en.json).
+ * A config that already has the block keeps it as it is (how strict is the game's call) — except that the player-text
+ * rule is added beside the tuning rule when it's new to the game: { already: true, textAdded: true }.
+ */
+export function addRules(text, level, textLevel = null) {
+  if (text.includes(MARK)) {
+    if (!textLevel || text.includes("'bmuz/no-player-text'")) return { text, already: true }
+    if (!TUNING_RULE.test(text)) return { text, already: true, textRefuse: "its lint block has no 'bmuz/no-tuning-numbers' line to add the player-text rule beside" }
+    return { text: text.replace(TUNING_RULE, `$1, 'bmuz/no-player-text': '${textLevel}'`), already: true, textAdded: true }
+  }
   const imports = [...text.matchAll(/^import [^\n]*$/gm)]
   // the config list's end: defineConfig([ … ]) / tseslint.config( … ) / export default [ … ] — the last line that closes it
   const end = text.match(/\n(\]\)|\)|\])\s*;?\s*$/)
@@ -100,10 +114,11 @@ export function addRules(text, level) {
     '  {',
     `    // ${MARK}, install-lint): settings live in content/ (the Dev Kit and Obsidian edit them there), and React state`,
     '    // is never set every frame in useFrame. A real constant says why on its line: // tuning-ok: <why>',
+    ...(textLevel ? ['    // Player words live in content/text/en.json; anything else says why: // text-ok: <why>'] : []),
     "    files: ['src/**/*.{ts,tsx}'],",
     "    ignores: ['src/devkit-game/**', '**/*.test.*'],",
     '    plugins: { bmuz },',
-    `    rules: { 'bmuz/no-state-in-frame': '${level}', 'bmuz/no-tuning-numbers': '${level}' },`,
+    `    rules: { 'bmuz/no-state-in-frame': '${level}', 'bmuz/no-tuning-numbers': '${level}'${textLevel ? `, 'bmuz/no-player-text': '${textLevel}'` : ''} },`,
     '  },',
   ].join('\n')
   const out = `${text.slice(0, importAt)}\nimport bmuz from './src/lint/rules.mjs' // ${MARK})${before}\n${block}${text.slice(end.index)}`
@@ -125,9 +140,13 @@ export async function installLint(gameDir, { dryRun = false, errors = false, log
     return { refused }
   }
   const config = readFileSync(join(game, configFile), 'utf8')
-  const finds = await countFinds(game)
-  const level = errors || !finds.length ? 'error' : 'warn'
-  const added = addRules(config, level)
+  const playerText = keepsWordsInContent(game)
+  const finds = await countFinds(game, { playerText })
+  // each rule as strict as the game's code allows today: errors when it has no finds, else warnings
+  const textFinds = finds.filter((f) => f.rule === 'bmuz/no-player-text')
+  const level = errors || finds.length === textFinds.length ? 'error' : 'warn'
+  const textLevel = !playerText ? null : errors || !textFinds.length ? 'error' : 'warn'
+  const added = addRules(config, level, textLevel)
   if (added.refuse) {
     const refused = `${configFile} can't be edited safely (${added.refuse}) — nothing was installed. Add the import + block by hand (lint/README.md), then run this again.`
     log(`Lint module: ${refused}`)
@@ -142,15 +161,20 @@ export async function installLint(gameDir, { dryRun = false, errors = false, log
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))
   if (!changed.length && !removed.length) log('  already up to date')
+  const plural = (level) => (level === 'error' ? 'errors' : 'warnings')
   if (added.already) log(`  ${configFile}: already has the rules (how strict they are is the game's call)`)
-  else log(`  ${configFile}: ${dryRun ? 'would add' : 'added'} the two rules as ${level === 'error' ? 'errors' : 'warnings'}`)
+  else log(`  ${configFile}: ${dryRun ? 'would add' : 'added'} the coding rules as ${plural(level)}${textLevel ? `, the player-text rule as ${plural(textLevel)}` : ''}`)
+  if (added.textAdded) log(`  ${configFile}: ${dryRun ? 'would add' : 'added'} the new player-text rule as ${plural(textLevel)} (words a player reads live in content/text/en.json)`)
+  if (added.textRefuse) log(`  ${configFile}: the player-text rule wasn't added — ${added.textRefuse}. Add 'bmuz/no-player-text': 'warn' to the block's rules by hand.`)
+  if (!playerText) log('  no content/text/en.json — the player-text rule stays off (the externalize-text skill moves a game\'s words there)')
   if (finds.length) {
-    log(`  ${finds.length} find(s) in the game's code today — move each setting to content/, or mark a real constant // tuning-ok: <why>:`)
+    log(`  ${finds.length} find(s) in the game's code today — a setting goes to content/ (or // tuning-ok: <why>), player words to content/text/en.json (or // text-ok: <why>):`)
     finds.slice(0, 20).forEach((f) => log(`    ${f.file}:${f.line} ${f.message}`))
     if (finds.length > 20) log(`    … and ${finds.length - 20} more (npm run lint lists them all)`)
-    if (!added.already && level === 'warn') log(`  Once they're gone, switch both rules to 'error' in ${configFile} (or run this again with --errors).`)
+    if (!added.already && (level === 'warn' || textLevel === 'warn')) log(`  Once they're gone, switch the warnings to 'error' in ${configFile} (or run this again with --errors).`)
   } else log('  0 finds in the game\'s code today')
-  if (dryRun) return { changed, removed, level, finds, configChanged: !added.already }
+  const configChanged = !added.already || !!added.textAdded
+  if (dryRun) return { changed, removed, level, textLevel, finds, configChanged }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
     copyFileSync(join(moduleDir, 'kit', f), join(target, f))
@@ -158,8 +182,8 @@ export async function installLint(gameDir, { dryRun = false, errors = false, log
   for (const f of removed) rmSync(join(target, f))
   mkdirSync(target, { recursive: true })
   writeFileSync(join(target, 'VERSION'), `${version} (framework ${commit})\n`)
-  if (!added.already) writeFileSync(join(game, configFile), added.text)
-  return { changed, removed, level, finds, configChanged: !added.already }
+  if (configChanged) writeFileSync(join(game, configFile), added.text)
+  return { changed, removed, level, textLevel, finds, configChanged }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

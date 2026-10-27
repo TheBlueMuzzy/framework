@@ -26,10 +26,11 @@ const numberOf = (node) => {
 const unwrap = (node) => (node && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression') ? unwrap(node.expression) : node)
 const isSetting = (node) => { const value = numberOf(unwrap(node)); return value !== null && !HARMLESS.has(value) }
 
-// `// tuning-ok: <why>` on the statement's own line or the line above it
-function markedOk(sourceCode, node) {
+// `// tuning-ok: <why>` (or `// text-ok: <why>`) on the statement's own line or the line above it
+function markedOk(sourceCode, node, tag = 'tuning-ok') {
   const line = node.loc.start.line
-  return sourceCode.getAllComments().some((comment) => /^\s*tuning-ok:\s*\S/.test(comment.value) && (comment.loc.end.line === line || comment.loc.end.line === line - 1 || comment.loc.start.line === node.loc.end.line))
+  const note = new RegExp(`^\\s*${tag}:\\s*\\S`)
+  return sourceCode.getAllComments().some((comment) => note.test(comment.value) && (comment.loc.end.line === line || comment.loc.end.line === line - 1 || comment.loc.start.line === node.loc.end.line))
 }
 
 const timerName = (callee) => (callee.type === 'Identifier' ? callee.name : callee.type === 'MemberExpression' && !callee.computed ? callee.property.name : null)
@@ -112,5 +113,85 @@ const noStateInFrame = {
   },
 }
 
-export const rules = { 'no-state-in-frame': noStateInFrame, 'no-tuning-numbers': noTuningNumbers }
+// bmuz/no-player-text (F91) — words a player reads, written into game code instead of content/text/en.json, where
+//   the Dev Kit's Text tab edits them and a translation would replace them. On only in a game that keeps its words in
+//   en.json (the installer decides). It finds three shapes, measured on four games (sprint 45):
+//     - JSX text with letters: <p>Your turn</p>, {'Your turn'}
+//     - a string in a prop the player reads: title, label, aria-label (a screen reader says it), placeholder, alt, …
+//     - a sentence in a plain string — a capital, a space, words: setError('Room not found') (Roll Better's room
+//       errors were the real gap: the screens' words had already moved)
+//   Not player words, so never flagged: imports, object keys, console.*, Error messages, anything thrown, what a
+//   rules `check` returns (the Table's refusal reasons — a game that shows one gives the player en.json words for it).
+//   Anything else that isn't for players (a Dev Kit report's label) says why: `// text-ok: <why>`.
+const PLAYER_PROPS = new Set(['title', 'label', 'aria-label', 'aria-description', 'aria-roledescription', 'placeholder', 'alt',
+  'text', 'message', 'heading', 'subtitle', 'caption', 'tooltip', 'hint', 'description', 'detail', 'confirmLabel', 'cancelLabel'])
+const hasWords = (text) => /\p{L}{2,}/u.test(text)
+const SENTENCE = /^\p{Lu}[\p{L}'’]*( [\p{L}\p{N}'’,.!?…—:;()-]+)+[.!?…]?$/u
+const stringOf = (node) => (node?.type === 'Literal' && typeof node.value === 'string' ? node.value
+  : node?.type === 'TemplateLiteral' ? node.quasis.map((quasi) => quasi.value.cooked ?? '').join(' ') : null)
+const calleeName = (callee) => (callee?.type === 'Identifier' ? callee.name : callee?.type === 'MemberExpression' && !callee.computed ? callee.property.name : null)
+const functionName = (fn) => {
+  const p = fn.parent
+  if (fn.id?.name) return fn.id.name
+  if ((p?.type === 'Property' || p?.type === 'MethodDefinition') && p.key.type === 'Identifier') return p.key.name
+  if (p?.type === 'VariableDeclarator' && p.id.type === 'Identifier') return p.id.name
+  return null
+}
+
+const noPlayerText = {
+  meta: {
+    type: 'suggestion',
+    docs: { description: 'Words a player reads live in content/text/en.json, not in game code' },
+    schema: [],
+    messages: {
+      jsx: '"{{text}}" is player text written into the code — put it in content/text/en.json and read it from there (the Dev Kit\'s Text tab edits it, a translation replaces it), or say why it isn\'t: // text-ok: <why>',
+      prop: '{{prop}}="{{text}}" is player text written into the code — put it in content/text/en.json (a screen reader says aria-labels too), or say why it isn\'t: // text-ok: <why>',
+      sentence: '"{{text}}" looks like words a player reads — put them in content/text/en.json, or say why they aren\'t: // text-ok: <why>',
+    },
+  },
+  create(context) {
+    const sourceCode = context.sourceCode
+    const short = (text) => (text.length > 40 ? `${text.slice(0, 40)}…` : text).replace(/\s+/g, ' ').trim()
+    const report = (node, messageId, data) => { if (!markedOk(sourceCode, node, 'text-ok')) context.report({ node, messageId, data }) }
+    // a string that isn't for players because of where it sits
+    const notForPlayers = (node) => {
+      for (let n = node.parent, child = node; n; child = n, n = n.parent) {
+        if (n.type === 'ImportDeclaration' || n.type === 'ExportAllDeclaration' || n.type === 'ExportNamedDeclaration' && n.source === child) return true
+        if (n.type === 'ImportExpression' || n.type === 'ThrowStatement' || n.type.startsWith('TS')) return true
+        if (n.type === 'Property' && n.key === child) return true
+        if ((n.type === 'CallExpression' || n.type === 'NewExpression') && n.callee !== child) {
+          const name = calleeName(n.callee)
+          if (n.callee.type === 'MemberExpression' && n.callee.object.type === 'Identifier' && n.callee.object.name === 'console') return true
+          // Error / TypeError / RoomError messages — capitalised, so a game's own setError('Room not found') still counts
+          if (/^[A-Z]\w*Error$/.test(name ?? '') || name === 'require') return true
+        }
+        if (n.type === 'JSXAttribute') return true // props are judged by name, below
+        if (n.type.endsWith('FunctionExpression') || n.type === 'FunctionDeclaration') return functionName(n) === 'check'
+      }
+      return false
+    }
+    return {
+      JSXText(node) {
+        if (hasWords(node.value)) report(node, 'jsx', { text: short(node.value) })
+      },
+      JSXExpressionContainer(node) {
+        const text = stringOf(node.expression)
+        if (node.parent.type !== 'JSXAttribute' && text && hasWords(text)) report(node, 'jsx', { text: short(text) })
+      },
+      JSXAttribute(node) {
+        const prop = node.name.type === 'JSXIdentifier' ? node.name.name : null
+        if (!prop || !PLAYER_PROPS.has(prop)) return
+        const value = node.value?.type === 'JSXExpressionContainer' ? node.value.expression : node.value
+        const text = stringOf(value)
+        if (text && hasWords(text)) report(node, 'prop', { prop, text: short(text) })
+      },
+      Literal(node) {
+        if (typeof node.value !== 'string' || !SENTENCE.test(node.value.trim()) || node.parent.type === 'JSXExpressionContainer') return
+        if (!notForPlayers(node)) report(node, 'sentence', { text: short(node.value) })
+      },
+    }
+  },
+}
+
+export const rules = { 'no-state-in-frame': noStateInFrame, 'no-tuning-numbers': noTuningNumbers, 'no-player-text': noPlayerText }
 export default { meta: { name: 'bmuz' }, rules }

@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-24 — Sprint 37 planned: two new looks (F138 the sketch + picks, F139 the looks in the kit, F140 everything lists 7).
 - 2026-10-24 — Released v0.21.0 (v0.19 Smoother tools): the Dev Kit's Tuning tab edits the content files a game lists and Save keeps hand-wrapped lists; a stray 0, a false CSS warning, Mode select's empty column and the silent part-way save code are fixed.
 - 2026-10-24 — Sprint 36 planned: the Dev Kit edits every file it should (F132 more files in the Tuning tab, F133 Save keeps hand-wrapped lists); v0.19 also holds F134–F137 for sprint 37.
 - 2026-10-24 — Released v0.20.0 (v0.18 The kit speaks up): a bubble stuck on what it avoids says so in the dev console, and the screenshot run stops when a file changes mid-run.

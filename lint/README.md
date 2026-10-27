@@ -7,6 +7,12 @@ two mistakes that used to depend on Claude remembering:
 |---|---|---|
 | `bmuz/no-tuning-numbers` | a **setting written into the code**: a top-level `const POP_DURATION = 0.15`, a top-level object of numbers (`const TRAP_WEIGHTS = { near: 5, far: 3 }`), a `setTimeout` / `setInterval` with a fixed delay | put it in `content/` (the Dev Kit and Obsidian edit it there) |
 | `bmuz/no-state-in-frame` | a React state setter (useState / useReducer) or a store's `setState` called **every frame** inside `useFrame` | keep the value in a ref (`ref.current = …`); set state only when it really changes, inside an `if` |
+| `bmuz/no-player-text` (0.2.0, F91) | **words a player reads written into the code**: JSX text (`<p>Your turn</p>`), a player prop (`title`, `label`, `aria-label`, `placeholder`, `alt`…), a sentence in a plain string (`setError('Room not found')`) — on only in a game with `content/text/en.json` | put them in `content/text/en.json` (the Dev Kit's Text tab edits them; a translation replaces them) |
+
+Not player words, never flagged: imports, object keys, `console.*`, `Error` messages, anything thrown, what a rules
+`check` returns (the Table's refusal reasons). Anything else that isn't for players says why: `// text-ok: <why>`.
+Measured on four games (sprint 45): the screens' words had already moved to en.json; the real gap was messages in
+plain strings (Roll Better's room errors).
 
 What never counts: plain maths numbers (0, 1, 2, −1, 0.5, 10, 100, 1000, 60, 180, 360, 255), numbers inside functions,
 lists of numbers (data: winning lines, pip layouts), `let`s, `setTimeout(fn, 0)`, a delay read from somewhere.
@@ -50,3 +56,6 @@ New games start from a starter that already has it, as errors.
 ## Versions
 
 - 0.1.0 (F90, sprint 44): the two rules, the installer, the promise checks; the turn-based starter takes it as errors.
+- 0.2.0 (F91, sprint 45): `bmuz/no-player-text`. The installer turns it on where `content/text/en.json` exists — as an
+  error with no finds, a warning with the list otherwise — and adds it to a game already on 0.1.0's block (its other
+  rules keep their strictness). The promise checks want it whenever en.json exists. The starter has it as an error.
