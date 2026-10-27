@@ -40,6 +40,39 @@ tester.run('no-tuning-numbers', rules['no-tuning-numbers'], {
   ],
 })
 
+tester.run('no-player-text', rules['no-player-text'], {
+  valid: [
+    'const t = <p>{text.mainMenu.play}</p>',                                  // read from en.json
+    '<Button label={words.play} title={text.help} />',
+    'const a = <div className="kit-row wide">{n}</div>',                      // not a player prop
+    'const b = <span> · </span>',                                             // no letters
+    "import Board from './Board'",
+    "const m = { 'Your turn': 1 }",                                           // an object key
+    "console.log('Room not found')",
+    "throw new Error('Room not found')",
+    "function f() { if (bad) throw `Goo shader: ${log}` }",
+    "const rules = { check(state) { if (state.over) return 'The game is over.'; return null } }", // the Table's refusal reasons
+    "function check(s) { return 'That square is taken.' }",
+    "setMode('online')",                                                      // one word, lower case: an id
+    "const KEY = 'turn-based-starter:settings'",
+    "// text-ok: the Dev Kit's arena report, not a player screen\nconst label = 'Rival glyphlings it tangled'",
+    "const t = <p>{'Hi there'}</p> // text-ok: a test fixture",
+    "type Mode = 'Hello world'",
+  ],
+  invalid: [
+    { code: 'const t = <p>Your turn</p>', errors: [{ messageId: 'jsx' }] },
+    { code: "const t = <p>{'Your turn'}</p>", errors: [{ messageId: 'jsx' }] },
+    { code: '<Button aria-label="Close" />', errors: [{ messageId: 'prop', data: { prop: 'aria-label', text: 'Close' } }] },
+    { code: "<Seat label={'Player 2'} />", errors: [{ messageId: 'prop' }] },
+    { code: '<img alt={`Avatar of ${name}`} />', errors: [{ messageId: 'prop' }] },
+    { code: "setErrorWithAutoClear('Room not found')", errors: [{ messageId: 'sentence' }] },  // Roll Better's room errors
+    { code: "setError('Connection lost')", errors: [{ messageId: 'sentence' }] },             // …a game's setError isn't an Error
+    { code: "const why = closed ? 'Room closed' : null", errors: [{ messageId: 'sentence' }] },
+    { code: "function play() { return 'It is not time to move' }", errors: [{ messageId: 'sentence' }] }, // not a rules check
+    { code: "// text-ok:\nsetError('Room not found')", errors: [{ messageId: 'sentence' }] },              // the why is needed
+  ],
+})
+
 tester.run('no-state-in-frame', rules['no-state-in-frame'], {
   valid: [
     // the ref pattern

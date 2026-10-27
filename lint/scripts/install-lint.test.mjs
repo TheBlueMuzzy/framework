@@ -109,6 +109,34 @@ describe('installLint', () => {
     expect(lines.join('\n')).toMatch(/2 find\(s\)/)
     expect(readFileSync(join(game, 'eslint.config.js'), 'utf8')).toContain("'bmuz/no-tuning-numbers': 'warn'")
   })
+  it('a game with content/text/en.json gets the player-text rule, as strict as its own finds allow', async () => {
+    const game = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'content/text/en.json': '{}', 'src/ui/Hud.tsx': 'export const Hud = () => <p>Your turn</p>\n' })
+    const result = await installLint(game, { log: quiet })
+    expect(result.level).toBe('error') // no setting found: the coding rules are errors
+    expect(result.textLevel).toBe('warn') // one player word found: that rule starts as a warning
+    expect(result.finds.map((f) => f.rule)).toEqual(['bmuz/no-player-text'])
+    const config = readFileSync(join(game, 'eslint.config.js'), 'utf8')
+    expect(config).toContain("'bmuz/no-tuning-numbers': 'error', 'bmuz/no-player-text': 'warn'")
+    expect(syntaxOk(config)).toBe(true)
+  })
+  it('no content/text/en.json → the player-text rule stays off', async () => {
+    const game = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'src/ui/Hud.tsx': 'export const Hud = () => <p>Your turn</p>\n' })
+    const result = await installLint(game, { log: quiet })
+    expect(result.textLevel).toBe(null)
+    expect(result.finds).toEqual([])
+    expect(readFileSync(join(game, 'eslint.config.js'), 'utf8')).not.toContain('no-player-text')
+  })
+  it('a game on the older block (lint 0.1.0) gets the player-text rule added beside its rules, once', async () => {
+    const older = addRules(STARTER_CONFIG, 'warn').text // the block lint 0.1.0 wrote: no player-text rule
+    const game = makeGame({ 'eslint.config.js': older, 'content/text/en.json': '{}', 'src/a.ts': 'export {}\n' })
+    const result = await installLint(game, { log: quiet })
+    expect(result.configChanged).toBe(true)
+    const config = readFileSync(join(game, 'eslint.config.js'), 'utf8')
+    expect(config).toContain("'bmuz/no-tuning-numbers': 'warn', 'bmuz/no-player-text': 'error'") // the old rules keep their 'warn'
+    expect(syntaxOk(config)).toBe(true)
+    expect((await installLint(game, { log: quiet })).configChanged).toBe(false)
+    expect(readFileSync(join(game, 'eslint.config.js'), 'utf8')).toBe(config)
+  })
   it('--errors makes them errors even with finds', async () => {
     const game = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'src/a.ts': 'export const SPEED = 3\n' })
     expect((await installLint(game, { errors: true, log: quiet })).level).toBe('error')
