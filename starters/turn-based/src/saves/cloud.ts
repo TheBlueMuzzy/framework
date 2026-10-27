@@ -147,10 +147,12 @@ export async function loadLinkCode(typed: string, saves: AnySave[], options: Clo
   if (!answer.ok) return { ok: false, message: message(answer.code) }
   const result = await readSaveCode(String(answer.body.code), saves)
   // remembered here too, so "Delete my data" works from this device as well — but never over this device's OWN live
-  // code: that one would be forgotten and "Delete my data" could no longer reach it (review F96)
+  // code: that one would be forgotten and "Delete my data" could no longer reach it (review F96). "Live" by the game's
+  // own clock, like linkCodeHere (2026-10-27: the real clock here turned the test red once its fixed date was 7 days old)
   const memory = linkMemory(saves, options.storage)
   const own = memory.load()
-  if (result.ok && !(own.link && own.expiresAt > Date.now())) memory.save({ link, expiresAt: Number(answer.body.expiresAt) })
+  const now = options.now?.() ?? Date.now()
+  if (result.ok && !(own.link && own.expiresAt > now)) memory.save({ link, expiresAt: Number(answer.body.expiresAt) })
   return result
 }
 

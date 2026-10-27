@@ -48,6 +48,10 @@
   .kit-menu-header:has(> .kit-menu-header-title[data-fit="tight"]) { flex-wrap: wrap; }
   .kit-menu-header-title[data-fit="tight"] { min-inline-size: min-content; }
   .kit-menu-header-title[data-fit="tight"] ~ .kit-menu-header-action { margin-inline-start: auto; }
+  /* …and the same with only a ‹ (0.37.0, F156: "Play online" in a long language at 200% text broke beside it): the
+     title gets its own line under the ‹; only a word wider than the whole row still breaks */
+  .kit-menu-header:has(> .kit-button + .kit-menu-header-title[data-fit="split"]) { flex-wrap: wrap; }
+  .kit-menu-header > .kit-button + .kit-menu-header-title[data-fit="split"] { flex-basis: min-content; min-inline-size: min(min-content, 100%); }
   .kit-menu-header > .kit-button, .kit-menu-header-action { flex: none; }
   /* ‹ is a small, low glyph in most fonts: drawn bigger, so it reads as an arrow and not a speck (the button stays
      square and at least 44px) */
@@ -123,6 +127,9 @@
      a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
      Only there: in a right corner it would narrow the corner's other pieces' row too. */
   .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { white-space: normal; }
+  /* …and a word wider than the whole corner breaks there, the last resort Results' names and titles take (0.37.0, F156:
+     a long "connection" at 200% text ran out of its chip onto the 40% beside it) — a word that fits never breaks */
+  .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { overflow-wrap: break-word; min-inline-size: 0; }
   /* a bar in a HUD corner gives way when the other corner grows (a 5-digit score pushed the Score chip over the bars on
      a 390px phone — Goops 2026-10-17): it shrinks to 2rem instead of holding its 6rem minimum. Bars with a width keep it. */
   .kit-hud-chip:not([data-width]) { max-inline-size: 100%; min-inline-size: 0; }
@@ -165,11 +172,11 @@
   }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top-left"], [data-slot="top-right"], [data-slot="bottom-left"], [data-slot="bottom-right"]) { min-inline-size: min-content; }
   .kit-screen:has(> [data-slot] > .kit-hud-slot) > :is([data-slot="top"], [data-slot="bottom"]) { max-inline-size: 100%; }
-  /* …except past the HUD's text cap (0.35.4, F147: data-big-text, Hud's useBigText): then the top-left's bars give way
-     to the middle, as on a phone. On a phone on its side at 200% text the middle didn't fit on one line in Cozy and Pixel
-     (wider fonts than Clean's): the score dropped below, the top row grew a line, and the turn banner landed on the seats
-     and Roll. At normal text sizes nothing changes (a middle that wraps there still has the height for it). */
-  .kit-screen:has(> [data-slot="top-left"] > .kit-hud-slot[data-big-text]) > [data-slot="top-left"] { min-inline-size: 0; max-inline-size: 100%; }
+  /* A corner's content width is its pieces at their least: a bar 2rem long, a name whole (0.37.0, F156 — a Bar's plate
+     hugs it with fit-content, below). So a corner gives way to the middle, its bars getting shorter, at every text size.
+     (0.35.4, F147 let the top-left shrink to nothing past the HUD's text cap instead, because a bar's plate was as wide
+     as its full-length bar at least: with a longer word in the middle the corner went to a sliver, its bars over the
+     middle, and a translated "Energy" was covered by the timer and the score.) */
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="top-left"], [data-slot="top-right"]))) > [data-slot="top"],
   .kit-screen:has(> [data-slot] > .kit-hud-slot):not(:has(> :is([data-slot="bottom-left"], [data-slot="bottom-right"]))) > [data-slot="bottom"] { grid-column: 1 / -1; }
   /* Phones: the corners share the first row and the top-centre piece gets its own row below,
@@ -198,9 +205,17 @@
   }
   /* Bar width (s / m / l): the bar keeps that length and its plate hugs it. Unset = it fills the room it's given.
      Squeezed (a phone's left corner giving way, 0.33.1): the bar gets shorter inside its plate, down to 2rem, like a
-     bar without a width — before, it held its length and stuck out of the plate. */
-  .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
+     bar without a width — before, it held its length and stuck out of the plate.
+     fit-content (0.37.0, F156; was max-content): as long as its bar wherever there's room, but its least is the bar at
+     2rem — what a corner keeps room for (above). */
+  .kit-hud-chip[data-width] { inline-size: fit-content; max-inline-size: 100%; }
   .kit-hud-chip[data-width] > .kit-progress { flex: 0 1 auto; min-inline-size: 2rem; inline-size: var(--kit-bar-w); }
+  /* …and a bar with its name beside it (showLabel) keeps room for the name: the bar gets shorter first, down to 2rem,
+     then moves under the name (the results-row rule) — before, the name never shrank and the bar stuck out of its plate
+     past the corner (0.37.0, F156: a longer "Energy" at 200% text and on a 360px phone). The bar still asks for its full
+     length (inline-size), so the plate is as long as before wherever there's room. */
+  .kit-hud-chip:is([data-width="s"], [data-width="m"], [data-width="l"])[data-label-at="beside"] { flex-wrap: wrap; }
+  .kit-hud-chip:is([data-width="s"], [data-width="m"], [data-width="l"])[data-label-at="beside"] > .kit-progress { flex: 1 1 2rem; max-inline-size: var(--kit-bar-w); }
   /* (in hud-rem, 0.35.2: they stop growing with the HUD's words) */
   .kit-hud-chip[data-width="s"] { --kit-bar-w: calc(4 * var(--hud-rem)); }
   .kit-hud-chip[data-width="m"] { --kit-bar-w: calc(8 * var(--hud-rem)); }
@@ -286,7 +301,14 @@
   .kit-result-name { flex: 1 1 0; max-inline-size: 100%; }
   .kit-listrow-text:has(.kit-result-name) { min-inline-size: auto; max-inline-size: 100%; }
   .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
-  .kit-place { min-inline-size: 3.5ch; }
+  /* the place column lines up at 3.5ch, and never narrower than its own word (0.37.0, F156: a longer "1st" at 200% text
+     broke mid-word — the fixed 3.5ch replaced the flex item's own "as wide as my longest word" minimum) */
+  .kit-place { min-inline-size: max(3.5ch, min-content); }
+  /* The Lobby room's head (0.37.0, F156): the same rule — "Room QX2T" and its share line keep room for their longest word,
+     and Copy moves under them when they'd be narrower (long words at 200% text squeezed them to a few letters a line) */
+  .kit-room-head { flex-wrap: wrap; }
+  .kit-room-head > .kit-result-name { min-inline-size: auto; }
+  .kit-room-head > .kit-button { margin-inline-start: auto; }
   /* An avatar in a list row (Results, the Lobby room) keeps room for the ring the winner / you wear (kit.css: an outline
      0.1875rem + 0.125rem outside its box — not part of the box, so the row's gap never counted it: "1ST", the name and
      its ★ had 3 px at 100% text and the ring crossed them at 200%, 0.35.8, F152). Every row's avatar, ringed or not, so

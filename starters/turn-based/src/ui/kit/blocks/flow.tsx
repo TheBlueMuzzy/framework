@@ -13,10 +13,12 @@ import { fill } from './words'
 export const loadingWords = { title: 'Loading…' }
 export function Loading({ progress, tip, words }: { progress?: number; tip?: string; words?: Partial<typeof loadingWords> }) {
   const w = { ...loadingWords, ...words }
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, w.title) // a word wider than its line drops a step, like every title (0.37.0, F156)
   return (
     <Screen label={w.title}>
       <Panel depth={2} gap="m" className="kit-menu kit-centred">
-        <Text kind="title">{w.title}</Text>
+        <span ref={titleBox} className="kit-fit-title"><Text kind="title">{w.title}</Text></span>
         {progress === undefined ? <Row justify="center"><Spinner label={w.title} /></Row> : <ProgressBar label={w.title} value={progress} />}
         {tip && <Text kind="caption">{tip}</Text>}
       </Panel>
@@ -93,7 +95,7 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
                   <span className="kit-place"><Text kind="heading">{format(p.place)}</Text></span>
                   <Avatar name={p.name} src={p.avatar} color={p.color} active={p.place === 1} />
                   <Row gap="xs" className="kit-result-name">
-                    <Text kind="label">{p.name}</Text>
+                    <Text kind="label" translate="no">{p.name}</Text>
                     {p.place === 1 && <Badge variant="primary"><span role="img" aria-label={w.winner}>★</span></Badge>}
                     {p.id === meId && <Badge variant="primary">{w.you}</Badge>}
                   </Row>
