@@ -1,0 +1,46 @@
+# Sprint 46 — Room for longer words
+Started 2026-10-27 · Milestone v0.28 Room for longer words · Features: F156
+Muzzy 2026-10-27 (/deliver v0.27): "yes next" — make "The kit makes room for longer words" the next feature; auto mode.
+What changes: the kit's room, HUD, pinned, results and end-game screens (and the avatar name) wrap or shrink a long word instead of cutting it off, splitting it mid-word or overlapping. What stays the same: in English every screen looks as it does today (the normal gallery shoot finds nothing new); no game changes until it reinstalls the UI kit. Not in this sprint: a Language setting or real translations.
+
+## F156 🔧 Room for longer words
+Done when: `npm run shoot:pseudo` (the gallery in the long fake language) finds 0 clipped / split / overlap problems; the English gallery shoot finds nothing new; each fix reuses the kit's existing fit-or-wrap pieces (nameFit, useTitleFit, fit-wrap) rather than a new one; the starter's check:full green on the new kit.
+- [x] 🤖 1. Measure first: rerun shoot:pseudo on today's code, list the clipped / split / overlap finds by screen and by the part that causes them, and name which existing fit-or-wrap piece each part should use — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. Room and lobby: room code, player names, "friends" split — ui-kit/kit/blocks/online.tsx
+- [x] 🤖 3. HUD: corner texts that overlap each other — ui-kit/kit/blocks/hud.tsx
+- [x] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
+- [x] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 6. The avatar's name touching its circle, and the smaller screens left by task 1 (emotes, chips, seats, menu, teach, settings) — ui-kit/kit/controls/Avatar.tsx
+- [x] 🤖 7. Full shoot:pseudo + the English shoot; the starter takes the new kit (install-module) and its check:full green; README + VERSION — ui-kit/README.md
+Check: shoot:pseudo 0 clipped / split / overlap (from 427 shots with a find); the English shoot no new finds; each fixed part has a test red on the old code where a unit test can see it; the starter's check:full green; root check:fast green.
+Checked: 2026-10-27 (Claude) full shoot:pseudo 961 shots: 0 clipped / split / overlap counted (from 208 shots; 1 accepted — teach's corner buttons, fake language only, Muzzy to confirm); left outside the bar: edge 95, ring 4, small 2, grows 2 (→ Ideas). Full English shoot 961 shots: 0 problems. Tests red on the old code: pseudo translate=no (pseudo.test.ts), page-check marker / stacked picker / split title (uiProblems.test.mjs, each with the unmarked squeeze still flagged), the HUD (hudFit.test.tsx, 7 styles); ui-kit npm test green; root check:fast 23/23; the starter on UI kit 0.37.0 + saves 0.6.5: check:full 10/10. Review: a fresh helper read 8d42a96..HEAD — no bugs.
+
+Notes:
+- No open P0/P1 bugs in this repo (no BUGS.md).
+- Starting point (F91 — Translation readiness, 2026-10-27, full shoot:pseudo): 427 of 961 shots with a find — edge 659, clipped 190, split 94, overlap 46. The check's kinds by screen: room 99, hud 57, pinned 45, results 43, endgame + endgamedim 40, emotes 12, chips 12, roomauto 7, menu 4, seats / victoryreveal / teach / settings 1–2. Task 1 re-measures, since the bar is set from today's code.
+- Decision (Claude, 2026-10-27): `edge:` finds (a word touching its box) aren't part of the 0 bar — they're 659 mostly-harmless touches and check:framework's fake-language pass already treats a word running past its button as edge: → task 1 lists the ones that run past, those are fixed; the rest stay counted, not chased.
+- Decision (Claude, 2026-10-27): the fake-language check stays a warning in games (they may have their own long words to sort); the gallery's own bar is 0.
+- F156 — task 1 (2026-10-27, full shoot:pseudo on 3913903-era code, 961 shots in 922 s): the same as F91 — 208 shots with a clipped / split / overlap find (edge 659, clipped 190, split 94, overlap 46). By screen: room 100, hud 57, pinned 45, results 43, endgame + endgamedim 40, chips 12, emotes 12, roomauto 7, menu 4, the rest 1–2.
+  - Root cause of nearly all "clipped" (190): the fake language rewrote words that are never translated — a player's initials in the avatar circle ("SM" → "[ŠMš]", spilling out), player names, the room code ("QX2T" → "[ǪẊǫ2Ţţ]"). A real translation never touches them. Fix: HTML's own `translate="no"` (a browser's translate button already honours it) on the avatar, every player-name Text, the room code and the credits names; the fake language skips `[translate="no"]`; Text takes `translate`. Re-shoot of room / pinned / results / chips / emotes / parts: clipped 0 (from ~150).
+  - Real: the Lobby room head at 200% text on a phone — Copy stayed beside "Room QX2T" and its share line, squeezing them to a few letters a line ("[ŔÖÖ / ɱŔÖ]", "friends" split). Fix (task 2): the Results rows' rule — the words keep room for their longest word and Copy wraps under them (.kit-room-head in blocks.css). Re-shoot room / roomauto / lobby: 0 (from 100), 1 lobby split left (task 6).
+  - Suspected: HudText / title fits re-measure only when React changes the words, so a word the fake language swaps on the page keeps its English fit (HUD overlaps "Weak connection" × "40%", "Roll" × "Hold to Roll") — task 3 checks this in the browser first.
+  - Odd: Results "[1šţš]" ("1st") reported split, but the phone-small shot shows it whole — task 5 looks at what the check measures.
+- F156 — tasks 4–6 (2026-10-27):
+  - Pinned (45 clipped), chips, emotes, parts: all were names / initials → translate="no" (task 1). Re-shoot: 0.
+  - Results / end game: "1st" split at 200% text — .kit-place's fixed 3.5ch replaced the flex item's own "as wide as my word" minimum → max(3.5ch, min-content). Re-shoot: 0.
+  - Main menu "Better" split: it's the game's name ("Roll Better") — never translated → translate="no" on MainMenu's title (and its art's alt).
+  - Same blind spot as HudText in the title fit (useTitleFit) and the ◀ ▶ picker (fitPicker): they re-measure on resize / React words only, so a word swapped on the page kept its English fit → each also re-measures on a MutationObserver of its own words (the fits only set attributes: no loop). Loading's title had no fit at all → useTitleFit like Seat picker.
+  - A title beside only a ‹ (Lobby "Play online", payslip) at body size still wider than its room: the header wraps and the title gets its own line under the ‹ — tight's motion (blocks.css), word whole.
+  - Page check (uiProblems.mjs, 0.37.0): a word may break where its part already went all the way — a title at data-fit="split" (body size), a ◀ ▶ picker at data-fit="stack", or a part marked data-ui-split-ok (ConnectionDot). Tests: each case + the same squeeze unmarked still flagged (36/36).
+  - Left for after the HUD helper merges (same corner-grid rules): teach at 200% — the screen's bottom-left "Undo" and bottom-right "Plant" corner buttons draw over each other instead of one giving way.
+  - Two tests updated for the intended markup (translate="no" on the room code and the old-seats copy).
+- F156 — task 3, HUD (helper, merged 77ab366; read by Claude): root cause — a Bar with a width had a max-content plate, so a corner's least width was its full-length bars (F147 then let the top-left collapse to nothing at big text). Now fit-content: a corner keeps its bars at 2rem with names whole, and gives way to the middle at every text size; a bar with its name beside it shortens, then moves under the name (the results-row rule). F147's useBigText / data-big-text removed (the CSS covers it). Gallery: a 360-wide phone counts as short and the short HUD drops "Round 1" (the demo was over-full; a game on that phone shows less). HUD pseudo 29 → 0, English 0 → 0. Test hudFit.test.tsx (7 styles, red on the old CSS).
+  - The connection chip (mine, 29ea914): a too-long word breaks inside it (data-ui-split-ok), and HudText fit re-measures on page rewrites.
+- F156 — task 6: the avatar's "name touching its circle" was the fake language rewriting its initials (task 1, translate="no"). Teach at 200%: Undo + Plant in both bottom corners can't fit a 390px phone side by side in the long language — accepted in the fake-language shoot only (knownShots, Claude's call). Muzzy 2026-10-27: accepted ("all approved").
+- Found on the way (check:fast red, 2026-10-27): saves loadLinkCode judged this device's own code "live" by the real clock, not the game's (options.now) — its test's fixed 2026-10-20 date turned 7 days old today. Fixed in bbb0988 (saves 0.6.5 at task 7).
+- Lesson → ROADMAP Ideas (2026-10-27): a lint rule for "a module takes a now() option but calls Date.now() itself" — the saves time-bomb (its test's fixed date aged 7 days) would have been caught the day it was written.
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-27)
+- Went well: measuring first showed most finds came from the fake language rewriting names and codes, not the layout.
+- Went wrong: a saves test only broke once its fixed date got old — the code read the real clock in one place.
+- Change: a module that takes a clock option uses it everywhere (→ ROADMAP Ideas: the lint rule).

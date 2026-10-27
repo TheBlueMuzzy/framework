@@ -406,6 +406,23 @@ gallery's `npm run shoot` uses the same one.
   the game in it and WARNS about anything cut off, wider than the screen, broken mid-word, overlapping or running out
   past its box ("words still fit when they're ~40% longer"). A word with real accents (Café, möglich) is rewritten too;
   the pass remembers its own writes, so a word with no accentable letters (日本語) never grows. The gallery: `npm run shoot:pseudo` → screenshots-pseudo/.
+- 0.37.0 (F156): **Room for longer words.** The whole gallery in the fake language: 0 words cut off, broken mid-word or
+  overlapping (from 208 shots with one); English unchanged (0).
+  - **Never translated:** a player's name, initials, a room code, the game's name and the credits' names carry
+    `translate="no"` (HTML's own — a browser's translate button honours it, and so does the fake language). `Text` takes
+    `translate="no"` for a game's own (a score name, a code). Most "cut off" finds were the fake language rewriting these.
+  - **Fits re-measure when their words change on the page** (HudText `fit`, titles, the ◀ ▶ picker) — not only on a
+    resize or a React change, so a browser's translate button gets a fitted title too.
+  - **Lobby room:** "Room QX2T" and its share line keep room for their longest word; Copy moves under them.
+  - **A title beside only a ‹** that's still too wide at body size gets its own line under the ‹ (like an action does).
+  - **Results / end game:** the place column ("1st") is never narrower than its word. **Loading**'s title fits like the
+    others.
+  - **HUD:** a Bar with a width keeps its plate `fit-content` — a corner's least is its bars at 2rem with names whole,
+    so it gives way to the middle at every text size (F147's `data-big-text` is gone: this covers it). A bar with its
+    name beside it shortens, then moves under the name. ConnectionDot: a word too long for the room beside the dot
+    breaks inside the chip.
+  - **The page check** accepts a word that breaks where its part already went all the way: a title at body size
+    (`data-fit="split"`), a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

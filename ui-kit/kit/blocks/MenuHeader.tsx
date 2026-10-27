@@ -44,9 +44,13 @@ export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean
     if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
     const refit = new ResizeObserver(() => fitMenuTitle(box, oneLine))
     refit.observe(box)
+    // …and when its words change on the page without React (a browser's translate button, the fake language: 0.37.0,
+    // F156 — "Reconnecting…" kept the fit of the English word). The fit only sets data-fit, so it never loops.
+    const rewritten = typeof MutationObserver === 'undefined' ? null : new MutationObserver(() => fitMenuTitle(box, oneLine))
+    rewritten?.observe(box, { characterData: true, childList: true, subtree: true })
     let live = true
     void document.fonts?.ready.then(() => { if (live) fitMenuTitle(box, oneLine) })
-    return () => { live = false; refit.disconnect() }
+    return () => { live = false; refit.disconnect(); rewritten?.disconnect() }
   }, [titleBox, on, oneLine, words])
 }
 

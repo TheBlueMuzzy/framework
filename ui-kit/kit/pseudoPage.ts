@@ -5,10 +5,12 @@
 //   - dev only: add ?pseudo to the game's address (applyStyle starts it), or call startPseudoPage() yourself
 //   - also the words a screen reader says or a tooltip shows: title, aria-label, placeholder, alt
 //   - never the Dev Kit (it's a tool, not the game) or code / style elements
+//   - never what says translate="no" (0.37.0, F156): a player's name, initials, a room code stay the same in every
+//     language — a browser's translate button leaves them too
 import { pseudo } from './blocks/words'
 
 const ATTRIBUTES = ['title', 'aria-label', 'placeholder', 'alt']
-const SKIP = 'script, style, noscript, code, pre, textarea, [data-devkit], #devkit-root'
+const SKIP = 'script, style, noscript, code, pre, textarea, [data-devkit], #devkit-root, [translate="no"]'
 
 const skipped = (node: Node) => {
   const element = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement

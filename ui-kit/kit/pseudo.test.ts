@@ -52,6 +52,14 @@ describe('startPseudoPage', () => {
     expect(document.querySelector('aside p')!.textContent).toBe('Tuning')
     expect(document.documentElement.hasAttribute('data-pseudo')).toBe(true)
   })
+  it('never rewrites what says translate="no" — a name, initials, a room code (F156: "SM" spilled out of its circle)', () => {
+    document.body.innerHTML = '<p>Room <span translate="no">QX2T</span></p><span translate="no" role="img" aria-label="Sherman Meredith">SM</span>'
+    stop = startPseudoPage()
+    expect(document.querySelector('p span')!.textContent).toBe('QX2T')
+    expect(document.querySelector('[role="img"]')!.textContent).toBe('SM')
+    expect(document.querySelector('[role="img"]')!.getAttribute('aria-label')).toBe('Sherman Meredith')
+    expect(isPseudo(document.querySelector('p')!.firstChild!.textContent!)).toBe(true) // "Room" itself is a word
+  })
   it('keeps rewriting as the game changes its words', async () => {
     document.body.innerHTML = '<p id="w">Your turn</p>'
     stop = startPseudoPage()

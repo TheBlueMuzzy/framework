@@ -60,15 +60,11 @@ type HudProps = {
 }
 export function Hud({ vitals, status, currency, onPause, actions, banner, bottomLeft, bottomRight, oneRow, dock, dockSide = 'bottom', dockTight, words }: HudProps) {
   const w = { ...hudWords, ...words }
-  const vitalsBox = useRef<HTMLDivElement>(null)
-  const bigText = useBigText(vitalsBox, shown(vitals))
   // Each slot's contents sit in kit-hud-slot, which lets taps through to the game (blocks.css)
   const slot = (content: ReactNode, one?: boolean) => (shown(content) ? <div className="kit-hud-slot" data-one-row={one || undefined}>{content}</div> : null)
   const pause = onPause && <Button variant="secondary" icon aria-label={w.pause} onClick={onPause}>❚❚</Button>
-  // (the vitals' slot says when the page's text is past the HUD's cap — blocks.css lets its bars give way then)
-  const vitalsSlot = shown(vitals) ? <div ref={vitalsBox} className="kit-hud-slot" data-big-text={bigText || undefined}>{vitals}</div> : null
   const screen = (
-    <Screen label={w.label} topLeft={vitalsSlot} top={slot(status, oneRow)}
+    <Screen label={w.label} topLeft={slot(vitals)} top={slot(status, oneRow)}
       topRight={slot((shown(currency) || pause) && <Row gap="s">{currency}{pause}</Row>)}
       bottomLeft={slot(bottomLeft)} bottom={slot(actions)} bottomRight={slot(bottomRight)}>
       {slot(banner)}
@@ -81,31 +77,6 @@ export function Hud({ vitals, status, currency, onPause, actions, banner, bottom
       <div className="kit-hud-dock kit-scope" data-side={dockSide} data-tight={dockTight || undefined}><Panel gap="s">{dock}</Panel></div>
     </>
   )
-}
-
-/** Is the page's text bigger than the HUD's words go (Text size past the style's hud-text-max: a HUD rem is then
- *  smaller than the page's rem)? Rechecked when the page's style changes (the Text size setting, a restyle).
- *  0.35.4 (F147): on a phone on its side at 200% text the HUD's top row has no room for its middle on one line. */
-function useBigText(box: RefObject<HTMLElement | null>, on: boolean) {
-  const [big, setBig] = useState(false)
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!on || !el || typeof MutationObserver === 'undefined') return
-    const check = () => {
-      const probe = document.createElement('span')
-      probe.style.cssText = 'position: absolute; visibility: hidden; inline-size: var(--hud-rem, 1rem)'
-      el.append(probe)
-      const hudRem = probe.getBoundingClientRect().width
-      probe.remove()
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-      setBig(hudRem > 0 && rem > hudRem + 0.5)
-    }
-    check()
-    const watch = new MutationObserver(check)
-    watch.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class', 'data-theme'] })
-    return () => watch.disconnect()
-  }, [box, on])
-  return big
 }
 
 // A small readable plate behind a HUD piece, so it shows up over any game art.
@@ -286,8 +257,12 @@ function useFitText(box: RefObject<HTMLDivElement | null>, text: string | null) 
     fitNow(true)
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => fitNow())
     observer?.observe(el)
+    // …and when its words change on the page without React (a browser's translate button, the fake language: 0.37.0,
+    // F156 — the fit stayed measured on the English word). The fit itself only sets attributes, so it never loops.
+    const rewritten = typeof MutationObserver === 'undefined' ? null : new MutationObserver(() => fitNow(true))
+    rewritten?.observe(el, { characterData: true, childList: true, subtree: true })
     document.fonts?.ready.then(() => fitNow(true))
-    return () => { open = false; observer?.disconnect() }
+    return () => { open = false; observer?.disconnect(); rewritten?.disconnect() }
   }, [box, text])
 }
 
@@ -330,7 +305,7 @@ export function PlayerSeats({ players, activeId, onSeatTap, showNames = true }: 
               : avatar}
             {showNames && (
               <Stack gap="xs">
-                <Text kind="label">{p.name}</Text>
+                <Text kind="label" translate="no">{p.name}</Text>
                 {p.score !== undefined && <Text kind="caption">{p.score}</Text>}
               </Stack>
             )}
@@ -387,7 +362,7 @@ export function PlayerChip({
         <Stack gap="xs" className="kit-player-chip-text">
           {hasNameLine && (
             <Row gap="xs" className="kit-nowrap">
-              {showName && <Text kind="label">{name}</Text>}
+              {showName && <Text kind="label" translate="no">{name}</Text>}
               {shown(badge) && <Badge>{badge}</Badge>}
               {oneLine && shown(detail) && <Text kind="caption">{detail}</Text>}
             </Row>
@@ -423,11 +398,13 @@ export function Rank({ place, of, format = ordinal, label = 'Place' }: RankProps
 
 // CONNECTION DOT — online status. Says it in words too when something's wrong.
 // Its words may take two lines (between words) when its HUD corner gives way — big text on an upright phone (0.35.2).
+// A word too long for the room beside the dot breaks there as the last resort (0.37.0, F156: a translated "connection"
+// ran out of the chip) — data-ui-split-ok tells the page check that's on purpose.
 export const connectionWords = { good: 'Connected', weak: 'Weak connection', lost: 'Offline' }
 export function ConnectionDot({ status, words }: { status: 'good' | 'weak' | 'lost'; words?: Partial<typeof connectionWords> }) {
   const w = { ...connectionWords, ...words }
   return (
-    <Chip role="status" aria-label={w[status]} data-wrap>
+    <Chip role="status" aria-label={w[status]} data-wrap data-ui-split-ok>
       <span className="kit-dot" data-status={status} />
       {status !== 'good' && <Text kind="caption">{w[status]}</Text>}
     </Chip>

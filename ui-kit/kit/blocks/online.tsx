@@ -109,9 +109,9 @@ function Room({ w, roomCode, players = [], meId, hostId, minPlayers = 2, onReady
   const waiting = !enough ? fill(w.needPlayers, { n: minPlayers }) : !allReady ? w.waitingReady : !iAmHost ? w.waitingHost : ''
   return (
     <>
-      <Row gap="s" className="kit-nowrap">
+      <Row gap="s" className="kit-room-head">
         <Stack gap="xs" className="kit-result-name">
-          <span ref={titleBox} className="kit-fit-title"><Text kind="title">{beforeCode}<span ref={codeBox}>{roomCode}</span>{afterCode}</Text></span>
+          <span ref={titleBox} className="kit-fit-title"><Text kind="title">{beforeCode}<span ref={codeBox} translate="no">{roomCode}</span>{afterCode}</Text></span>
           <Text kind="caption">{w.share}</Text>
         </Stack>
         <Button variant="secondary" onClick={copy}>{w.copy}</Button>
@@ -124,7 +124,7 @@ function Room({ w, roomCode, players = [], meId, hostId, minPlayers = 2, onReady
             <Row gap="s" className="kit-nowrap">
               <Avatar name={p.name} src={p.avatar} color={p.color} active={p.id === meId} />
               <Stack gap="xs" className="kit-result-name">
-                <Row gap="xs"><Text kind="label">{p.name}</Text>{p.id === hostId && <Badge>{w.host}</Badge>}</Row>
+                <Row gap="xs"><Text kind="label" translate="no">{p.name}</Text>{p.id === hostId && <Badge>{w.host}</Badge>}</Row>
                 {p.detail && <Text kind="caption">{p.detail}</Text>}
               </Stack>
             </Row>
@@ -230,7 +230,7 @@ export function SeatPicker({ seats, onPick, onCancel, waiting, error, words }: S
                 <Row gap="s" className="kit-nowrap">
                   <Avatar name={seat.name} color={seat.color} />
                   <Stack gap="xs" className="kit-result-name">
-                    <Row gap="xs"><Text kind="label">{seat.name}</Text>{seat.badge && <Badge>{seat.badge}</Badge>}</Row>
+                    <Row gap="xs"><Text kind="label" translate="no">{seat.name}</Text>{seat.badge && <Badge>{seat.badge}</Badge>}</Row>
                     {seat.detail && <Text kind="caption">{seat.detail}</Text>}
                   </Stack>
                   <Text kind="label">›</Text>

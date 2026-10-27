@@ -30,9 +30,13 @@ export function ArrowPicker({ label, display, onStep, canPrev, canNext, prevIcon
     const refit = new ResizeObserver(() => { if (!pending) pending = requestAnimationFrame(() => { pending = 0; fitPicker(box) }) })
     refit.observe(box) // (the text size setting: its words grow, so it does)
     if (box.parentElement) refit.observe(box.parentElement) // (its room)
+    // (its words changed on the page without React — a browser's translate button, the fake language: 0.37.0, F156.
+    // fitPicker only sets data-fit, so this never loops)
+    const rewritten = new MutationObserver(() => { if (!pending) pending = requestAnimationFrame(() => { pending = 0; fitPicker(box) }) })
+    rewritten.observe(box, { characterData: true, childList: true, subtree: true })
     let live = true
     void document.fonts?.ready.then(() => { if (live) fitPicker(box) })
-    return () => { live = false; refit.disconnect(); cancelAnimationFrame(pending) }
+    return () => { live = false; refit.disconnect(); rewritten.disconnect(); cancelAnimationFrame(pending) }
   }, [display, sizes])
   // (At an end the key still belongs to the picker: nothing happens, rather than the page scrolling sideways)
   function onKeyDown(e: KeyboardEvent) {

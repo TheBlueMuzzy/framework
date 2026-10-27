@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.29.0, 2026-10-27)
+Release target: none — a library; each milestone releases on its own (latest v0.30.0, 2026-10-27)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -423,12 +423,12 @@ flowchart LR
   F91[F91 Translation readiness]
 ```
 
-## v0.28 — Room for longer words  ← current · planned 2026-10-27
+## v0.28 — Room for longer words  ✅ released 2026-10-27 (v0.30.0) · planned 2026-10-27
 Goal (Muzzy 2026-10-27: "yes next"): every kit screen holds words ~40% longer — `npm run shoot:pseudo` finds 0 cut-off, split or overlapping words.
-- 🔨 F156 🔧 Room for longer words — the kit's room, HUD, pinned, results and end-game screens wrap or fit words ~40% longer (427 of 961 gallery shots had a find in the fake language: names cut off, "friends" split, HUD corners overlapping; the parts page's avatar name touches its circle); `shoot:pseudo` 0 clipped / split / overlap is the bar — should · needs: F91 · sprint 46
+- ✅ F156 🔧 Room for longer words — the kit's room, HUD, pinned, results and end-game screens wrap or fit words ~40% longer (427 of 961 gallery shots had a find in the fake language: names cut off, "friends" split, HUD corners overlapping; the parts page's avatar name touches its circle); `shoot:pseudo` 0 clipped / split / overlap is the bar — should · needs: F91 · sprint 46
 ```mermaid
 flowchart LR
-  F91[✅ F91 Translation readiness] --> F156[F156 Room for longer words]
+  F91[✅ F91 Translation readiness] --> F156[✅ F156 Room for longer words]
 ```
 
 ## Later
@@ -450,6 +450,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-27 — **Lint: a module that takes a `now()` option never calls `Date.now()` itself** (found by F156 — Room for longer words: saves' loadLinkCode judged its own link code by the real clock, and its test's fixed 2026-10-20 date turned check:fast red 7 days later). A rule in the framework's root eslint: in a function whose options / parameters carry `now`, a bare `Date.now()` (not a default value or a `?? Date.now()` fallback) is refused.
+- 2026-10-27 — **Fake-language leftovers outside F156 — Room for longer words' bar** (full shoot:pseudo, 2026-10-27): edge 95 (words touching their box), ring 4, small 2 (an invisible 16px-tall element named after the Game over / Victory title, landscape at 200% — not a control a player taps), grows 2 (a Neon player chip 3px wider after it appeared, on a 360 phone — the fake language rewrites after first measure). And a PlayerChip's / seat button's aria-label is the player's name, which the fake language still rewrites (only drawn words are translate="no").
 - 2026-10-27 — **GitHub's test-browser download keeps the browsers between runs** (v0.27 look-back: the saves job's `playwright install --with-deps` timed out at 15 min and held up the merge — the second time after v0.23's 35-min hang; a re-run passed): keep `~/.cache/ms-playwright` with actions/cache keyed on the Playwright version in .github/workflows/checks.yml, so only the system packages are fetched each run; also in templates/checks.yml for the games.
 - 2026-10-27 — **Hand to the game sessions (found by F91 — Translation readiness, read-only measure):** each takes lint 0.2.0 and UI kit 0.36.0 with install-module (the player-text rule goes in as warnings with the list), then moves player words to content/text/en.json or marks `// text-ok: <why>`, and looks at the game with `?pseudo`. Roll Better 7 (src/hooks/useRoom.ts room errors: "Room not found", "Connection lost"… — real) · Goops 3 (Spotlight aria-label "Tip" real; "Shunt piece", "Goo failed:" dev words) · Glyphtender 31 (4 label + 2 aria-label real; ~20 move reasons from its own turn / draft / refresh helpers — real if the game shows them; AI report labels and rails-check notes → text-ok).
 - 2026-10-26 — **One shared `kitVersion()` for every installer** (v0.26 look-back): each module's installer carries its own copy (read kit/VERSION + git rev-parse + git status), and the "asks git on every install → slow under check:fast" problem has now been fixed twice (version F128, lint F90). One helper in a shared framework script, imported by every installer, so the next module can't copy the slow version.
