@@ -407,11 +407,18 @@ flowchart LR
   F155[F155 Rooms local port]
 ```
 
+## v0.26 — Rules check themselves  ← current · planned 2026-10-26
+Goal (Muzzy 2026-10-26: "Rules check themselves"): two coding rules Claude only remembers today become lint errors in every game — no React state set inside useFrame, no tuning numbers in game logic.
+- 🔨 F90 🔧 Coding-standard lint rules — a framework lint module: no React state set inside useFrame, no hard-coded tuning numbers in game logic (`// tuning-ok: <why>` for real constants); install-module adds them to a game's lint — should · sprint 44
+```mermaid
+flowchart LR
+  F90[F90 Coding-standard lint rules]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
-- 💤 F90 🔧 Coding-standard lint rules — no hard-coded tuning numbers in game logic, no React state set inside useFrame — could · gap rank 14
 - 💤 F91 🔧 Translation readiness — player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
 - 💤 F92 🔧 Tech-lead checks — a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
 - 💤 F97 🧱 Saves on app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
