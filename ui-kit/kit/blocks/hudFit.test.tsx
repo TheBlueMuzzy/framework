@@ -49,7 +49,7 @@ const topRow = renderToStaticMarkup(
       onPause={() => {}} />
   </div>)
 
-describe.each(Object.keys(presets))('a HUD on a phone on its side at 200%% text, in %s', (preset) => {
+describe.each(Object.keys(presets))('a HUD on a phone on its side at double text size, in %s', (preset) => {
   it('the vitals corner gives way to the middle but keeps its bars and their name: nothing covers them', async () => {
     const findProblems = ((await import(/* @vite-ignore */ uiProblems)) as { findProblems: FindProblems }).findProblems
     const page = await browser.newPage({ viewport: { width: 844, height: 390 } })
