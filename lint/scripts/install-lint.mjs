@@ -181,7 +181,7 @@ export async function installLint(gameDir, { dryRun = false, errors = false, log
     log(`  ${finds.length} find(s) in the game's code today — a setting goes to content/ (or // tuning-ok: <why>), player words to content/text/en.json (or // text-ok: <why>), a stray Date.now() uses the clock option (or // clock-ok: <why>):`)
     finds.slice(0, 20).forEach((f) => log(`    ${f.file}:${f.line} ${f.message}`))
     if (finds.length > 20) log(`    … and ${finds.length - 20} more (npm run lint lists them all)`)
-    if (!added.already && (level === 'warn' || textLevel === 'warn')) log(`  Once they're gone, switch the warnings to 'error' in ${configFile} (or run this again with --errors).`)
+    if (!added.already && (level === 'warn' || textLevel === 'warn' || clockLevel === 'warn')) log(`  Once they're gone, switch the warnings to 'error' in ${configFile} (or run this again with --errors).`)
   } else log('  0 finds in the game\'s code today')
   const configChanged = !added.already || !!added.textAdded || !!added.clockAdded
   if (dryRun) return { changed, removed, level, textLevel, clockLevel, finds, configChanged }

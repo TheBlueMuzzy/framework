@@ -211,23 +211,40 @@ const optionsHaveNow = (pattern) => {
   if (pattern.type === 'ObjectPattern') return pattern.properties.some((p) => p.type === 'Property' && ((p.key.type === 'Identifier' && p.key.name === 'now') || optionsHaveNow(p.value)))
   return false
 }
-const CLOCK_NAME = /(^now$|Now$|now$|clock)/i
+// a clock's own name, exactly: now, clock, or …Now (realNow, clockNow) — not "know" or "snow" (review, sprint 47)
+const CLOCK_NAME = /^(now|clock)$|Now$/
 const nameOf = (node) => (node?.type === 'Identifier' ? node.name : null)
-// Date.now() as the fallback (inside a default value, on the right of ?? / ||) or inside the clock's own definition
-const isFallback = (node) => {
-  for (let child = node, parent = node.parent; parent; child = parent, parent = parent.parent) {
-    if (parent.type === 'AssignmentPattern' && parent.right === child) return true
-    if (parent.type === 'LogicalExpression' && (parent.operator === '??' || parent.operator === '||') && parent.right === child) return true
-    if (/Function/.test(child.type)) {
-      const named = parent.type === 'Property' ? nameOf(parent.key) : parent.type === 'VariableDeclarator' ? nameOf(parent.id)
-        : parent.type === 'MethodDefinition' ? nameOf(parent.key) : child.id ? child.id.name : null
-      if (named && CLOCK_NAME.test(named)) return true
-      if (child.type !== 'ArrowFunctionExpression') return false
-    }
-    if (parent.type === 'Program' || parent.type === 'ClassBody') return false
-  }
-  return false
+const FUNCTION = /^(FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/
+// a function's name: its own, or what it's assigned to (a variable, an object key, a method, a class field)
+const clockHolderName = (fn) => {
+  const parent = fn.parent
+  if (fn.id) return fn.id.name
+  if (parent.type === 'VariableDeclarator') return nameOf(parent.id)
+  if (/^(Property|MethodDefinition|PropertyDefinition)$/.test(parent.type)) return nameOf(parent.key)
+  return null
 }
+// Date.now() as the fallback, or inside the clock's own definition:
+//   - anywhere inside a default value (`now = () => Date.now()`, `{ now = () => (ok ? Date.now() : 0) }`)
+//   - the right side of ?? / ||, itself (`options.now?.() ?? Date.now()` — not `name || \`at ${Date.now()}\``)
+//   - in a function named as a clock — the one that holds the call, not one further out (a callback inside
+//     startClock is not the clock)
+const isFallback = (node) => {
+  const parent = node.parent
+  if (parent.type === 'LogicalExpression' && (parent.operator === '??' || parent.operator === '||') && parent.right === node) return true
+  let holder = null
+  for (let child = node, up = node.parent; up; child = up, up = up.parent) {
+    if (up.type === 'AssignmentPattern' && up.right === child) return true
+    if (!holder && FUNCTION.test(up.type)) holder = up
+    if (up.type === 'Program') break
+  }
+  const named = holder && clockHolderName(holder)
+  return !!named && CLOCK_NAME.test(named)
+}
+// `x.now` that is one of the browser's / a library's own clocks, not a clock option: Date.now, performance.now,
+// window.performance.now, globalThis.performance.now, luxon's DateTime.now, Temporal.Now
+const BUILT_IN_CLOCK = /^(Date|performance|DateTime|Temporal)$/
+const isBuiltInClock = (object) => (object.type === 'Identifier' && BUILT_IN_CLOCK.test(object.name))
+  || (object.type === 'MemberExpression' && !object.computed && object.property.type === 'Identifier' && object.property.name === 'performance')
 const ownClock = {
   meta: {
     type: 'problem',
@@ -245,8 +262,7 @@ const ownClock = {
     return {
       FunctionDeclaration: params, FunctionExpression: params, ArrowFunctionExpression: params,
       MemberExpression(node) {
-        if (!node.computed && node.property.type === 'Identifier' && node.property.name === 'now'
-          && !(node.object.type === 'Identifier' && (node.object.name === 'Date' || node.object.name === 'performance'))) takesClock = true
+        if (!node.computed && node.property.type === 'Identifier' && node.property.name === 'now' && !isBuiltInClock(node.object)) takesClock = true
       },
       CallExpression(node) { if (isDateNow(node)) calls.push(node) },
       'Program:exit'() {
