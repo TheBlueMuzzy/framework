@@ -10,7 +10,7 @@ Reviewed through: framework 6b90da8 (UI kit 0.35.10 — Screen shade, RoundIntro
 
 ## Where we are
 Stage: deliver   Milestone: v0.25 What the starter showed ✅   Sprint: 43 (archived)
-Doing: nothing — released   Branch: main   Version: 0.26.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.35.10 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
+Doing: nothing — released   Branch: main   Version: 0.27.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.35.10 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.27.0
 
 ## Key facts

@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.27.0 — 2026-10-26
+
+Light in-game words like "Your turn" or "Game over" can no longer vanish on a light page unnoticed: the page check now flags them. The round intro reads clearly in every look, and two games can now run online side by side on one computer.
+
+### New
+- The page check flags light in-game words (the HUD's "Your turn", plain toasts, a bar's inside label) when what's behind their letters is too light to read, at less than 3:1. Their glow doesn't count. A game fixes a find by putting its own picture or table colour behind the words.
+- Screens have a new `shade` option: the game behind them darkens instead of washing out light. It's for screens that are only in-game words over the game.
+- Each game picks its own local room server port in `wrangler.json` (`dev.port`), and the game's page finds it there. Games that set nothing keep port 1999, so nothing changes for them. The turn-based starter uses 6499.
+
+### Fixed
+- The round intro ("Round 2 of 5") darkens the game behind it in every look. In the light looks it sat on a pale wash and was hard to read.
+- The AI module accepts banter moments written as `{ moment, by }` in a game's plug, the way its README already showed. The turn-based starter keeps its moments in its plug again.
+
 ## v0.26.0 — 2026-10-26
 
 The framework now has a tiny tic-tac-toe game with every module wired in, and it plays that game on every change, so a module update that would break a game turns the checks red before any game takes it. New games can start from the same game instead of from nothing.

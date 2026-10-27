@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.26.0",
-  "build": 3,
+  "version": "0.27.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -177,6 +177,11 @@
       "version": "0.26.0",
       "date": "2026-10-26",
       "summary": "A test game guards every update"
+    },
+    {
+      "version": "0.27.0",
+      "date": "2026-10-26",
+      "summary": "v0.25 What the starter showed: light in-game words caught, the round intro dims dark, each game's own room port"
     }
   ]
 }
