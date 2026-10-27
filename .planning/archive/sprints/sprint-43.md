@@ -63,3 +63,9 @@ Notes:
   - Glyphtender (read only) keeps its own session.ts (port 1997 from wrangler.json + VITE_PARTY_PORT for its e2e) — when it takes rooms 0.13.0 it can drop that copy for roomsPort(); its e2e override would then need a port override the kit doesn't have (Ideas candidate if it wants it).
 - F154 — AI moments type fix merged 2026-10-26 7:25 PM (Claude): types.ts + the starter's plug/table read whole — no bugs; root check:fast 22/22 on the merge. Its find fixed in ~/.claude: scripts/lib.mjs FRAMEWORK = the framework copy the script runs inside (a helper's worktree) before the usual folder, so install-module into a worktree's starter takes that worktree's modules (test-scripts framework-around 2/2; all 340 script tests green).
 - Ask Muzzy (F153 — Light-words contrast check, 2026-10-26): the round intro (RoundIntro) is a screen pushed over the game, so in the light looks the game behind it wears the kit's light veil and "Round 2 of 5" reads ~2:1, held up by its halo. My pick: the round intro skips the veil (its words sit on the game like the HUD's — same intention, same look). Other: a dark veil for it in every look; or leave it.
+  - Muzzy 2026-10-26 (/deliver): "Dark veil, every look". Done in UI kit 0.35.10: Screen's new `shade` option dims with --game-shade 70% (overlay mode too); RoundIntro uses it; the round-clean accept is gone from shoot.mjs knownShots. Muzzy approved F153–F155 the same moment.
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-26)
+- Went well: all three fixes built unattended with helpers, each proven red on the old code first.
+- Went wrong: the round intro's weak words were only accepted (knownShots), so the look call waited for Muzzy at /deliver.
+- Change: when a check finds a look call, ask Muzzy during the sprint, not at release.
