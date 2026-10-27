@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.31.0 — 2026-10-27
+
+A new lint rule keeps clocks honest: code that takes a clock option (`now`) can no longer read the computer's clock with `Date.now()` somewhere else in the same file. A test with a fixed date now stays right next week instead of failing on its own.
+
+### New
+- Lint 0.3.0 adds `bmuz/own-clock`:
+  - A stray `Date.now()` in a file that takes a `{ now }` option, or reads `options.now`, is an error.
+  - Still fine: the fallback itself (`now = () => Date.now()`, `options.now?.() ?? Date.now()`), the clock's own definition (`now: () => …`, `realNow`, a class field `now = …`), a plain `now` parameter (a time handed in), and the browser's own clocks (`performance.now()`, `window.performance.now()`).
+  - A real reason to read the computer's clock says why: `// clock-ok: <why>`.
+- Games get it with `install-module.mjs lint .`: as an error when the game has no finds, as a warning with the list when it has some. A game already on lint 0.1.0 or 0.2.0 gets it added beside its rules, which keep their strictness. The framework check wants it.
+- The framework's own lint runs it on every module. Today it finds nothing there or in Roll Better, Goops and Glyphtender.
+- The turn-based starter takes lint 0.3.0, with the rule as an error.
+
 ## v0.30.0 — 2026-10-27
 
 The UI kit now makes room for longer words: in the long fake language, the whole gallery has no words cut off, broken mid-word or overlapping, and English looks the same as before. Player names, initials, room codes and the game's name are marked as never translated, so a browser's translate button and the fake language both leave them alone.

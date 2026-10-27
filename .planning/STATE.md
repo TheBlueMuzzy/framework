@@ -10,7 +10,7 @@ Reviewed through: framework cbe4d7f (3fa0834..: plan files only, read by Claude)
 
 ## Where we are
 Stage: deliver   Milestone: v0.29 Clocks you can trust ✅   Sprint: — (47 archived)
-Doing: released v0.31.0 — next /roadmap   Branch: main   Version: 0.30.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.3.0)
+Doing: released v0.31.0 — next /roadmap   Branch: main   Version: 0.31.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.3.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
