@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.27.0, 2026-10-26)
+Release target: none — a library; each milestone releases on its own (latest v0.28.0, 2026-10-26)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -407,9 +407,9 @@ flowchart LR
   F155[F155 Rooms local port]
 ```
 
-## v0.26 — Rules check themselves  ← current · planned 2026-10-26
+## v0.26 — Rules check themselves  ✅ released 2026-10-26 (v0.28.0) · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "Rules check themselves"): two coding rules Claude only remembers today become lint errors in every game — no React state set inside useFrame, no tuning numbers in game logic.
-- 🔨 F90 🔧 Coding-standard lint rules — a framework lint module: no React state set inside useFrame, no hard-coded tuning numbers in game logic (`// tuning-ok: <why>` for real constants); install-module adds them to a game's lint — should · sprint 44
+- ✅ F90 🔧 Coding-standard lint rules — a framework lint module: no React state set inside useFrame, no hard-coded tuning numbers in game logic (`// tuning-ok: <why>` for real constants); install-module adds them to a game's lint — should · sprint 44
 ```mermaid
 flowchart LR
   F90[F90 Coding-standard lint rules]
