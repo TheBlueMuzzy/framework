@@ -36,3 +36,8 @@ Notes:
   - first it PASSED: the "ö" made the word look already rewritten (isPseudo counted é/ö/ñ as fake letters), so it stayed plain German; fixed — only the marker letters real languages almost never use (ƀ ƒ ŕ ţ ļ ŵ …) count, test with "Spieleinstellungsmöglichkeiten" and "Café"; the own-write memory is what stops loops.
   - then the screenshot (dev/.scratch/framework-f91/planted-small.png) showed the word running past BOTH sides of its button on a 360-wide phone, but the check still passed: the page check calls that `edge:` (0 px of room), and the pass only listed clipped / wider / split / overlap → edge: added. Now: "! words still fit when they're ~40% longer — WARNING … [phone 390×844, small phone 360×780, phone on its side 844×390, short landscape 768×343]". Word removed → passes at 7 sizes.
   - Starter check:full ALL PASS 10/10; root check:fast 23/23 (quiet machine).
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-27)
+- Went well: the real gallery run in the fake language found bugs unit tests couldn't (日本語 grown to 5M characters, a real ö looking done).
+- Went wrong: my first fix guessed the cause instead of reproducing it.
+- Change: reproduce a crash in the browser before fixing it.
