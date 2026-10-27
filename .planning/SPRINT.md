@@ -11,8 +11,9 @@ Done when: `npm run shoot:pseudo` (the gallery in the long fake language) finds 
 - [x] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
 - [x] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
 - [x] 🤖 6. The avatar's name touching its circle, and the smaller screens left by task 1 (emotes, chips, seats, menu, teach, settings) — ui-kit/kit/controls/Avatar.tsx
-- [ ] 🤖 7. Full shoot:pseudo + the English shoot; the starter takes the new kit (install-module) and its check:full green; README + VERSION — ui-kit/README.md
+- [x] 🤖 7. Full shoot:pseudo + the English shoot; the starter takes the new kit (install-module) and its check:full green; README + VERSION — ui-kit/README.md
 Check: shoot:pseudo 0 clipped / split / overlap (from 427 shots with a find); the English shoot no new finds; each fixed part has a test red on the old code where a unit test can see it; the starter's check:full green; root check:fast green.
+Checked: 2026-10-27 (Claude) full shoot:pseudo 961 shots: 0 clipped / split / overlap counted (from 208 shots; 1 accepted — teach's corner buttons, fake language only, Muzzy to confirm); left outside the bar: edge 95, ring 4, small 2, grows 2 (→ Ideas). Full English shoot 961 shots: 0 problems. Tests red on the old code: pseudo translate=no (pseudo.test.ts), page-check marker / stacked picker / split title (uiProblems.test.mjs, each with the unmarked squeeze still flagged), the HUD (hudFit.test.tsx, 7 styles); ui-kit npm test green; root check:fast 23/23; the starter on UI kit 0.37.0 + saves 0.6.5: check:full 10/10. Review: a fresh helper read 8d42a96..HEAD — no bugs.
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
@@ -37,3 +38,4 @@ Notes:
   - The connection chip (mine, 29ea914): a too-long word breaks inside it (data-ui-split-ok), and HudText fit re-measures on page rewrites.
 - F156 — task 6: the avatar's "name touching its circle" was the fake language rewriting its initials (task 1, translate="no"). Teach at 200%: Undo + Plant in both bottom corners can't fit a 390px phone side by side in the long language — accepted in the fake-language shoot only (knownShots, Claude's call). Ask Muzzy: OK to accept, like the talk bubble at 200%?
 - Found on the way (check:fast red, 2026-10-27): saves loadLinkCode judged this device's own code "live" by the real clock, not the game's (options.now) — its test's fixed 2026-10-20 date turned 7 days old today. Fixed in bbb0988 (saves 0.6.5 at task 7).
+- Lesson → ROADMAP Ideas (2026-10-27): a lint rule for "a module takes a now() option but calls Date.now() itself" — the saves time-bomb (its test's fixed date aged 7 days) would have been caught the day it was written.
