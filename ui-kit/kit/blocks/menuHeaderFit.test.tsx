@@ -130,7 +130,7 @@ describe('Seat picker and Lobby room titles fit like the end screens\'', () => {
     expect(renderToStaticMarkup(<SeatPicker seats={[{ id: 'z', name: 'Zippy' }]} onPick={noop} onCancel={noop} />))
       .toContain('<span class="kit-fit-title"><h2 class="kit-text" data-kind="title">Game in progress</h2></span>')
     expect(renderToStaticMarkup(<Lobby roomCode="QX2T" onCreate={noop} onJoin={noop} onStart={noop} onLeave={noop} />))
-      .toContain('<span class="kit-fit-title"><h2 class="kit-text" data-kind="title">Room <span>QX2T</span></h2></span>')
+      .toContain('<span class="kit-fit-title"><h2 class="kit-text" data-kind="title">Room <span translate="no">QX2T</span></h2></span>') // (F156: the code is never translated)
   })
 
   it.each(['neon', 'pixel'])('in %s at 200% text, "progress" stays whole: the title drops a step', async (preset) => {
