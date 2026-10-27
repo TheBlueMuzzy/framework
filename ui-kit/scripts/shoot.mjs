@@ -86,6 +86,10 @@ const knownShots = {
   // Muzzy 2026-10-25 (F147): the same in every look — and Pixel's wide letters wrap the line to 6 lines upright
   ...Object.fromEntries(['cartoon', 'console', 'cozy', 'fantasy', 'neon', 'pixel'].map((look) => [`screens/talk-${look}-phone-landscape-text-200.png`, 'Muzzy 2026-10-25 (F147): same as Clean — the game makes room for a long line at 200%'])),
   'screens/talk-pixel-phone-text-200.png': "Muzzy 2026-10-25 (F147): Pixel's wide letters wrap the demo line to 6 lines at 200% — the kit warns, the game makes room",
+  // F153 (unattended pick — Ask Muzzy): RoundIntro is a screen pushed over the game, so the game wears the kit's dim —
+  // light (--bg 70%) in Clean — and "Round 2 of 5" reads 2.1:1 on the washed dark stand-in, carried by its halo. That's
+  // the kit's own look in a game whose game is the stack's children; changing it isn't F153's (the kit's look stays)
+  ...Object.fromEntries(['phone', 'desktop', 'phone-text-200', 'phone-landscape-text-200'].map((size) => [`screens/round-clean-${size}.png`, 'F153 (Ask Muzzy): RoundIntro over the light Clean dim — 2.1:1, carried by its halo; the kit\'s own look, not changed here'])),
 }
 let knownCount = 0
 
