@@ -397,6 +397,14 @@ gallery's `npm run shoot` uses the same one.
   light looks' veil (the background colour at 70%) it read ~2:1, held up only by its halo. RoundIntro now asks for
   the game's dark shade (`--game-shade` at 70%) instead — a new `shade` option on `Screen` for any screen of only
   on-game words over the game (overlay mode too). Muzzy 2026-10-26: "Dark veil, every look".
+- 0.36.0 (F91): **The long fake language — see which words won't fit once translated.** Add `?pseudo` to a game's
+  address in dev and every word on the page is rewritten: each letter accented, each word ~40% longer (no new spaces —
+  translations are longer words, not more of them), the whole text in [brackets] (a missing `]` = cut off), `{slots}`
+  kept. It rewrites words where they're drawn, so en.json words, the kit's English defaults and module words are all
+  caught, and React keeps working (a changed word is rewritten too). The Dev Kit is left alone. `applyStyle` starts
+  it, so a game needs no wiring; `startPseudoPage()` and `pseudo()` are exported too. `npm run check:framework` reopens
+  the game in it and WARNS about anything cut off, wider than the screen, broken mid-word or overlapping ("words still
+  fit when they're ~40% longer"). The gallery: `npm run shoot:pseudo` → screenshots-pseudo/.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
