@@ -84,8 +84,11 @@ export function addRules(text, level) {
   if (!imports.length || !end) return { refuse: 'no import lines, or its list doesn\'t end the file with ]) or ]' }
   const lastImport = imports.at(-1)
   const importAt = lastImport.index + lastImport[0].length
-  const before = text.slice(importAt, end.index).trimEnd()
-  const comma = before.endsWith(',') || before.endsWith('[') || before.endsWith('(') ? '' : ','
+  let before = text.slice(importAt, end.index).trimEnd()
+  // the list's last real code, past any comment lines after it — a comma added after a `// note` would be inside it
+  const lastCode = before.split('\n').map((line) => line.replace(/\s*\/\/.*$/, '')).join('\n').trimEnd().length
+  const lastChar = before[lastCode - 1]
+  if (lastChar !== ',' && lastChar !== '[' && lastChar !== '(') before = `${before.slice(0, lastCode)},${before.slice(lastCode)}`
   const block = [
     '  {',
     `    // ${MARK}, install-lint): settings live in content/ (the Dev Kit and Obsidian edit them there), and React state`,
@@ -96,7 +99,7 @@ export function addRules(text, level) {
     `    rules: { 'bmuz/no-state-in-frame': '${level}', 'bmuz/no-tuning-numbers': '${level}' },`,
     '  },',
   ].join('\n')
-  const out = `${text.slice(0, importAt)}\nimport bmuz from './src/lint/rules.mjs' // ${MARK})${before}${comma}\n${block}${text.slice(end.index)}`
+  const out = `${text.slice(0, importAt)}\nimport bmuz from './src/lint/rules.mjs' // ${MARK})${before}\n${block}${text.slice(end.index)}`
   return { text: out, already: false }
 }
 

@@ -58,6 +58,12 @@ describe('addRules', () => {
     expect(text).toContain("'bmuz/no-state-in-frame': 'warn'")
     expect(syntaxOk(text)).toBe(true)
   })
+  it('puts the comma after the last element, not inside a comment that follows it', () => {
+    const commented = PLAIN_CONFIG.replace("{ ignores: ['dist'] }\n", "{ ignores: ['dist'] } // build output\n  // more rules later\n")
+    const { text } = addRules(commented, 'error')
+    expect(text).toContain("{ ignores: ['dist'] }, // build output\n  // more rules later\n  {")
+    expect(syntaxOk(text)).toBe(true)
+  })
   it('leaves a config that already has the rules alone', () => {
     const once = addRules(STARTER_CONFIG, 'warn').text
     expect(addRules(once, 'error')).toEqual({ text: once, already: true })
