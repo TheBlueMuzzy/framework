@@ -53,7 +53,8 @@ export function MainMenu({ title, subtitle, version, children, items, words, tit
     <Screen scroll label={title} bottom={version && <span className="kit-menu-version"><Text kind="caption">{version}</Text></span>} backdrop={backdrop}>
       <Stack gap="xl" className="kit-menu kit-main-menu kit-centred">
         <Stack gap="xs">
-          {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} /> : <Text kind="display">{title}</Text>}
+          {/* the game's name stays the same in every language (0.37.0, F156: translate="no") */}
+          {titleArt ? <img className="kit-title-art" src={titleArt} alt={title} draggable={false} translate="no" /> : <Text kind="display" translate="no">{title}</Text>}
           {subtitle && <Text kind="caption">{subtitle}</Text>}
         </Stack>
         <Stack gap="s" className="kit-main-menu-buttons" data-many={buttonCount >= 6 || undefined}>

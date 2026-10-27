@@ -13,10 +13,12 @@ import { fill } from './words'
 export const loadingWords = { title: 'Loading…' }
 export function Loading({ progress, tip, words }: { progress?: number; tip?: string; words?: Partial<typeof loadingWords> }) {
   const w = { ...loadingWords, ...words }
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, w.title) // a word wider than its line drops a step, like every title (0.37.0, F156)
   return (
     <Screen label={w.title}>
       <Panel depth={2} gap="m" className="kit-menu kit-centred">
-        <Text kind="title">{w.title}</Text>
+        <span ref={titleBox} className="kit-fit-title"><Text kind="title">{w.title}</Text></span>
         {progress === undefined ? <Row justify="center"><Spinner label={w.title} /></Row> : <ProgressBar label={w.title} value={progress} />}
         {tip && <Text kind="caption">{tip}</Text>}
       </Panel>

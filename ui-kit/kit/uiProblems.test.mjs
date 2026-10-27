@@ -312,6 +312,13 @@ describe('findProblems — words split in the middle', () => {
     expect(only('split', await problemsOn(chip('data-ui-split-ok')))).toEqual([])
     expect(only('split', await problemsOn(chip('')))).toHaveLength(1)
   })
+  it('a word in a ◀ ▶ picker already stacked (its last step) may break; the same picker unstacked is flagged', async () => {
+    const picker = (fit) => `
+      <div style="width:300px;padding:4px;border:1px solid #888">
+        <div class="kit-picker" data-fit="${fit}" style="padding:0 100px"><span style="overflow-wrap:break-word">Barrierefreiheit</span></div></div>`
+    expect(only('split', await problemsOn(picker('stack')))).toEqual([])
+    expect(only('split', await problemsOn(picker('')))).toHaveLength(1)
+  })
 
   // 0.35.1 (F145): Reconnecting's "Reconnecti / ng…" — a title word wider than its whole card at 200% text. Not a squeeze
   // (the word fits nowhere at that size), but a title can drop a size, so a broken title word is flagged too
@@ -323,6 +330,15 @@ describe('findProblems — words split in the middle', () => {
     const split = only('split', found)
     expect(split).toHaveLength(1) // the title only
     expect(split[0]).toMatch(/^split: "Reconnecting…" is broken in the middle across \d lines — a title word wider than its box \(<div>\)/)
+  })
+
+  // 0.37.0 (F156): the title fit already dropped to body size (data-fit="split") and the word is still wider: breaking
+  // is the last resort, not a missed fit
+  it('a title whose fit went all the way down (data-fit="split") may break', async () => {
+    const found = await problemsOn(`
+      <div style="width:120px;padding:4px;border:1px solid #888">
+        <span data-fit="split"><h2 class="kit-text" data-kind="title" style="font-size:32px;margin:0;overflow-wrap:break-word">Reconnecting…</h2></span></div>`)
+    expect(only('split', found)).toEqual([])
   })
 })
 
