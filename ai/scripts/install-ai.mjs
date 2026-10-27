@@ -8,10 +8,10 @@
 // and content/ai/banter.json — when the bots talk (chance per moment, cooldown, presets, delay; F22).
 // Then prints the steps still missing. The game writes its plug (goals, readings, imagine…) against
 // src/ai/kit/types.ts, and its arena file (src/ai/arenaGame.ts) against src/ai/kit/arena.ts, in src/ai/.
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
 // (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
@@ -162,25 +162,6 @@ function listFiles(dir, base = dir) {
   })
 }
 
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installAi many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(aiDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: aiDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit', { cwd: aiDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
-}
-
 export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   const game = resolve(gameDir)
   const target = join(game, KIT_TARGET)
@@ -193,7 +174,8 @@ export function installAi(gameDir, { dryRun = false, log = console.log } = {}) {
   // (the banter save's golden copy, once — only when the game has the saves module and a personality talks)
   const golden = hasSaves(game) && chattyPersonalities(game).length ? [goldenFile(game)] : []
   const starter = [...Object.keys(STARTERS), ...golden].filter((f) => !existsSync(join(game, f)))
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit has edits (git is asked once per run)
+  const { version, commit } = kitVersion(aiDir, { watch: ['kit'] })
   log(`AI module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))

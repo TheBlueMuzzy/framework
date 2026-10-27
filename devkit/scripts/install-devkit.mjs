@@ -11,10 +11,10 @@
 //      devkit.local.json in .gitignore — only when missing, so re-running changes nothing
 //   4. prints the wiring the game still needs (main.tsx, vite.config, package.json) — only the missing bits
 // On an update it first lists which kit files changed, were added or were removed.
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 const devkitDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -58,27 +58,6 @@ function removeInside(target, file, log) {
   const path = join(target, file)
   if (realpathSync(path).startsWith(realpathSync(target) + sep)) rmSync(path)
   else log(`  ! skipped ${file}: it points outside ${target}`)
-}
-
-// "0.1.0" + "a1b2c3d" — the kit's version and the framework commit it's copied from
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installDevkit many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readText(join(devkitDir, 'kit', 'VERSION')).trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: devkitDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    const edited = execSync('git status --porcelain kit vite devkit-game', { cwd: devkitDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (edited) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
 }
 
 // The wiring a game needs, as { done, step } — so only the missing steps are printed
@@ -161,7 +140,8 @@ export function addBookkeeping(gameDir, { dryRun = false, log = console.log } = 
 
 export function installDevkit(gameDir, { dryRun = false, log = console.log } = {}) {
   if (!existsSync(gameDir)) throw new Error(`No folder at ${gameDir}`)
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit / vite / devkit-game has edits (git is asked once per run)
+  const { version, commit } = kitVersion(devkitDir, { watch: ['kit', 'vite', 'devkit-game'] })
 
   // 1. What changes in each copied folder
   const plans = COPIES.map(({ from, to }) => {

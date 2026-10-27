@@ -11,10 +11,10 @@
 //     words are never touched)
 //   - with the saves module: the emote save's golden copy tests/saves/<game>_emotes-v1.json, once
 //   - prints the wiring steps still missing (only those)
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 const emotesDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/emotes'
@@ -199,25 +199,6 @@ export function uiKitTooOld(versionText) {
   return ''
 }
 
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installEmotes many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(emotesDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: emotesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit scripts', { cwd: emotesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
-}
-
 /** The golden save's text for this game (a muted seat in a room match, the switch on). */
 export function goldenText(gameDir) {
   const key = saveKey(gameDir)
@@ -246,7 +227,8 @@ export function installEmotes(gameDir, { dryRun = false, log = console.log } = {
   const removed = present.filter((f) => !ships.has(f))
   const starter = [CONTENT, ...(hasSaves ? [goldenFile(game)] : [])].filter((f) => !existsSync(join(game, f)))
   const words = wordsToAdd(readText(join(game, TEXT)))
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit / scripts has edits (git is asked once per run)
+  const { version, commit } = kitVersion(emotesDir, { watch: ['kit', 'scripts'] })
   log(`Emotes module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))

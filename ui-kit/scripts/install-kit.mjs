@@ -9,10 +9,10 @@
 //   3. adds the kit's fonts to content/credits.json (no duplicates)
 // On an update it first lists which kit files changed, were added or were removed.
 // It also warns if the game's React is older than the kit needs (REACT_NEEDED).
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
 // (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
@@ -66,27 +66,6 @@ function removeInside(target, file, log) {
   else log(`  ! skipped ${file}: it points outside src/ui/kit`)
 }
 
-// "0.1.0 (a1b2c3d)" — the kit's version and the framework commit it's copied from
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installKit many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readText(join(kitDir, 'VERSION')).trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: uiKitDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    const edited = execSync('git status --porcelain kit', { cwd: uiKitDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (edited) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
-}
-
 // The kit's font credits, with paths as they sit in the game (kit/fonts/x → src/ui/kit/fonts/x)
 function kitCredits() {
   const credits = JSON.parse(readText(join(uiKitDir, 'content', 'credits.json')))
@@ -109,7 +88,8 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   if (!presetNames.includes(preset)) throw new Error(`Unknown style "${preset}". Pick one of: ${presetNames.join(', ')}`)
 
   const target = join(gameDir, 'src', 'ui', 'kit')
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit has edits (git is asked once per run)
+  const { version, commit } = kitVersion(uiKitDir, { watch: ['kit'] })
   const sourceFiles = listFiles(kitDir).filter((f) => !isTest(f) && f !== 'VERSION')
   const oldFiles = listFiles(target).filter((f) => f !== 'VERSION')
   const isUpdate = oldFiles.length > 0

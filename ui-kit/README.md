@@ -423,6 +423,7 @@ gallery's `npm run shoot` uses the same one.
     breaks inside the chip.
   - **The page check** accepts a word that breaks where its part already went all the way: a title at body size
     (`data-fit="split"`), a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
+- 0.37.1 (F159 — `scripts/install-kit.mjs`): the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

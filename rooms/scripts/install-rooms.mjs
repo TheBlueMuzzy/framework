@@ -12,10 +12,10 @@
 //      A game's own wrangler.json without "dev" → "port" gets that one key (0.13.0) — nothing else in it changes.
 //   3. prints the wiring the game still needs (packages, npm scripts, VITE_PARTY_HOST…) — only the missing bits
 // On an update it first lists which files changed, were added or were removed.
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 import { DEFAULT_PARTY_PORT, readPartyPort } from '../kit/vitePlugin.mjs'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
@@ -55,27 +55,6 @@ function removeInside(target, file, log) {
   const path = join(target, file)
   if (realpathSync(path).startsWith(realpathSync(target) + sep)) rmSync(path)
   else log(`  ! skipped ${file}: it points outside ${target}`)
-}
-
-// "0.1.0" + "a1b2c3d" — the module's version and the framework commit it's copied from
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installRooms many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readText(join(roomsDir, 'kit', 'VERSION')).trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: roomsDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    const edited = execSync('git status --porcelain kit templates', { cwd: roomsDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (edited) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
 }
 
 // The game's name for Cloudflare (wrangler.json "name" → <name>.joebrogno.workers.dev)
@@ -281,7 +260,8 @@ export function wiringSteps(gameDir, { justMade = [] } = {}) {
 
 export function installRooms(gameDir, { dryRun = false, log = console.log } = {}) {
   if (!existsSync(gameDir)) throw new Error(`No folder at ${gameDir}`)
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit / templates has edits (git is asked once per run)
+  const { version, commit } = kitVersion(roomsDir, { watch: ['kit', 'templates'] })
 
   // 1. What changes in src/rooms/
   const source = join(roomsDir, 'kit')
