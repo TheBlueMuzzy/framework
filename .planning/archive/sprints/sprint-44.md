@@ -32,3 +32,8 @@ Notes:
   - Proof: lint tests 47/47; root lint clean; root check:fast 23/23 (the starter with lint installed fresh, as warnings — its one find).
 - F90 — task 5 (2026-10-26): the starter took lint 0.1.0 (install-module) as ERRORS (0 finds once its one timer was marked: src/main.tsx `// tuning-ok: when to load the Dev Kit in a release build …`). Proven in the real game: a planted `export const FLASH_MS = 350` → `npm run lint` exit 1 naming bmuz/no-tuning-numbers; removed → exit 0. Starter check:full ALL PASS 10/10.
   - Bug found + fixed (BMUZ, not the module): install-module wrote the ignores into the eslint.config text it read BEFORE the installer ran, wiping lint's own block (the first module whose installer edits that file). Now it re-reads the file after the install (~/.claude/config/bmuz/scripts/install-module.mjs); test-scripts install-module 25/25 with a new case, red on the old line (24/25), green on the fix.
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-26)
+- Went well: measuring first turned an unusable rule (thousands of finds) into a useful one (1–53 a game, mostly real settings).
+- Went wrong: the module's empty folder broke the quick check, and install-module silently wiped another installer's edit.
+- Change: when a new kind of module is made, run the quick check right after the first file lands.
