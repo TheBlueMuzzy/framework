@@ -27,9 +27,12 @@ describe('pseudo', () => {
     expect(isPseudo(once)).toBe(true)
     expect(pseudo(once)).toBe(once)
   })
-  it('a piece of fake-language text (a word split into letter spans) is never rewritten again', () => {
+  it('a piece of fake-language text carrying one of its marker letters is never rewritten again', () => {
     const word = pseudo('Undo') // '[Ûñðöûñ]'
-    for (const piece of [word.slice(1, 3), word.slice(2), [...word][1]]) expect(pseudo(piece)).toBe(piece)
+    for (const piece of [word.slice(2, 5), word.slice(3), 'ð']) expect(pseudo(piece)).toBe(piece)
+  })
+  it('a real word with an accent (ö, é) is still rewritten', () => {
+    for (const word of ['Spieleinstellungsmöglichkeiten', 'Café']) expect(isPseudo(pseudo(word)) && pseudo(word) !== word).toBe(true)
   })
   it('keeps the spaces round the words (JSX text keeps its gaps)', () => {
     expect(pseudo(' Your turn ')).toMatch(/^ \[.*\] $/)

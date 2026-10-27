@@ -605,8 +605,11 @@ export async function check(t) {
 // and the same page check run on it — only what a longer translation breaks: cut off, wider than the screen, a word
 // broken mid-line, things on top of each other. A WARNING, not a failure: nothing is wrong in English today; it's
 // what to fix before the game is translated (the screens that need room for longer words).
+// edge: is in: a word longer than its button doesn't get cut off, it runs out past the button's sides, and the page
+// check names that "touches the edge of its box — 0 px" (sprint 45: a planted German menu word ran past both sides of
+// its button on a 360-wide phone and only edge: saw it).
 export const PSEUDO_CHECK = 'words still fit when they\'re ~40% longer (a translation — the fake language, ?pseudo)'
-const PSEUDO_KINDS = /^(clipped|wider|split|overlap):/
+const PSEUDO_KINDS = /^(clipped|wider|split|overlap|edge):/
 async function checkPseudo(t, findProblems, sizes) {
   const found = {}
   for (const size of sizes) {
