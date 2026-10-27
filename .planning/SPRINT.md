@@ -5,9 +5,9 @@ What changes: GitHub's checks keep their test browsers between runs; every modul
 
 ## F158 🔧 Keep test browsers on GitHub
 Done when: a second GitHub run on the same Playwright version takes its browsers from the cache (the log shows the cache restored and no browser download) and every job is green.
-- [ ] 🤖 1. Measure first: the last GitHub runs' browser-step times per job (gh run view), and the Playwright versions each module and the starter pin — .github/workflows/checks.yml
-- [ ] 🤖 2. Module jobs: actions/cache on ~/.cache/ms-playwright keyed on the module's Playwright version + its engines; the install step then only fetches system packages — .github/workflows/checks.yml
-- [ ] 🤖 3. The starter job: the same cache keyed on its pinned playwright-core version — .github/workflows/checks.yml
+- [x] 🤖 1. Measure first: the last GitHub runs' browser-step times per job (gh run view), and the Playwright versions each module and the starter pin — .github/workflows/checks.yml
+- [x] 🤖 2. Module jobs: actions/cache on ~/.cache/ms-playwright keyed on the module's Playwright version + its engines; the install step then only fetches system packages — .github/workflows/checks.yml
+- [x] 🤖 3. The starter job: the same cache keyed on its pinned playwright-core version — .github/workflows/checks.yml
 - [ ] 🤖 4. Prove it: push the work branch twice, read both runs (first fills, second restores), note the step times — .github/workflows/checks.yml
 Check: the second run's log says the cache was restored and the browser step skips the download; all jobs green; step times before → after in Notes.
 Checked:
@@ -44,3 +44,6 @@ Checked:
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
 - Starting point (2026-10-27, grep): 11 installers each carry the same readKitVersion (version + lint memoise it; the other 9 ask git on every call); the folders watched differ (kit · kit scripts · kit templates · kit vite devkit-game).
+- F158 — task 1 (2026-10-27, gh run view): the slow part is NOT the browsers — it's the Linux packages `--with-deps` fetches from azure.archive.ubuntu.com. Run 40572346582 (green): starter's Chromium step 8.6 min ("Fetched 13.3 MB in 8min 19s (26.6 kB/s)"), saves 36 s. Runs 40567791524 + 40574075274: saves timed out at 15 min both times, stuck mid-apt (libavcodec60, libyuv0). Every Playwright pin is 1.63.0 (ui-kit, devkit, saves, starter). So a browser-only cache (the idea as written) would not have helped → the plan changed: keep the .deb files too.
+- F158 — tasks 2–3: one shared step, .github/actions/test-browsers/action.yml (restore → apt keeps its files + 30 s timeout × 3 retries → install → save on a miss), keyed on the Playwright version + engines; module jobs and the starter job both use it (2ab2d87).
+- Also seen: main's v0.31.0 live-pass run had the starter's online check time out on a click once (locator.click 30 s); the same code was green on the work branch at 19:48 — re-run started to tell a one-off from a real problem.
