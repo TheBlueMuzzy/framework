@@ -52,6 +52,8 @@ const WEBKIT = process.env.SHOOT_ENGINE === 'webkit' || process.argv.includes('-
 const PSEUDO = process.argv.includes('--pseudo')
 const OUT = PSEUDO ? 'screenshots-pseudo' : WEBKIT ? 'screenshots-webkit' : 'screenshots' // (all git-ignored; codeChanges.mjs skips them)
 const withPseudo = (query) => (PSEUDO ? `${query}${query.includes('?') ? '&' : '?'}pseudo` : query)
+// A label the shoot clicks by name, as the page says it (the fake language rewrites labels too)
+const said = (words) => (PSEUDO ? pseudo(words) : words)
 mkdirSync(`${OUT}/screens`, { recursive: true })
 mkdirSync(`${OUT}/layout/screens`, { recursive: true }) // (F149: one small layout file per shot — compareEngines.mjs)
 // SHOOT_PORT=5281 npm run shoot — when 5180 is busy (the gallery already open, or another helper running)
@@ -240,8 +242,7 @@ const text200 = (page) => page.evaluate(() => { document.documentElement.style.f
 const openers = {
   settings: async (page) => {
     await text200(page)
-    const tab = PSEUDO ? pseudo('Accessibility') : 'Accessibility' // (the fake language rewrites the tab's name and the button's label too)
-    while (await page.getByRole('group', { name: PSEUDO ? pseudo('Settings') : 'Settings' }).locator('output').innerText() !== tab) await page.getByLabel(PSEUDO ? pseudo('Next Settings') : 'Next Settings').click()
+    while (await page.getByRole('group', { name: said('Settings') }).locator('output').innerText() !== said('Accessibility')) await page.getByLabel(said('Next Settings')).click()
   },
 }
 
@@ -284,8 +285,8 @@ try {
     }
     // Live restyle: change a tweak with the dev switcher and check it repaints
     await shoot('menu-desktop-tweaked', sizes.desktop, '', async (page) => {
-      await page.getByLabel('Next Corners').click()
-      await page.getByLabel('Next Spacing').click()
+      await page.getByLabel(said('Next Corners')).click()
+      await page.getByLabel(said('Next Spacing')).click()
       await page.locator('.gallery-colour').fill('#b0306a')
     })
     for (const preset of presetNames) {
@@ -310,7 +311,7 @@ try {
     }
     // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
     await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
-      (page) => page.getByRole('button', { name: 'Copy' }).click())
+      (page) => page.getByRole('button', { name: said('Copy') }).click())
   }
 } catch (e) {
   if (!(e instanceof CodeChanged)) throw e
