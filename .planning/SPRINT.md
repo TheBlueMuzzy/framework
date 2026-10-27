@@ -7,10 +7,10 @@ What changes: the kit's room, HUD, pinned, results and end-game screens (and the
 Done when: `npm run shoot:pseudo` (the gallery in the long fake language) finds 0 clipped / split / overlap problems; the English gallery shoot finds nothing new; each fix reuses the kit's existing fit-or-wrap pieces (nameFit, useTitleFit, fit-wrap) rather than a new one; the starter's check:full green on the new kit.
 - [x] 🤖 1. Measure first: rerun shoot:pseudo on today's code, list the clipped / split / overlap finds by screen and by the part that causes them, and name which existing fit-or-wrap piece each part should use — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. Room and lobby: room code, player names, "friends" split — ui-kit/kit/blocks/online.tsx
-- [ ] 🤖 3. HUD: corner texts that overlap each other — ui-kit/kit/blocks/hud.tsx
+- [x] 🤖 3. HUD: corner texts that overlap each other — ui-kit/kit/blocks/hud.tsx
 - [x] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
 - [x] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
-- [ ] 🤖 6. The avatar's name touching its circle, and the smaller screens left by task 1 (emotes, chips, seats, menu, teach, settings) — ui-kit/kit/controls/Avatar.tsx
+- [x] 🤖 6. The avatar's name touching its circle, and the smaller screens left by task 1 (emotes, chips, seats, menu, teach, settings) — ui-kit/kit/controls/Avatar.tsx
 - [ ] 🤖 7. Full shoot:pseudo + the English shoot; the starter takes the new kit (install-module) and its check:full green; README + VERSION — ui-kit/README.md
 Check: shoot:pseudo 0 clipped / split / overlap (from 427 shots with a find); the English shoot no new finds; each fixed part has a test red on the old code where a unit test can see it; the starter's check:full green; root check:fast green.
 
@@ -33,3 +33,7 @@ Notes:
   - Page check (uiProblems.mjs, 0.37.0): a word may break where its part already went all the way — a title at data-fit="split" (body size), a ◀ ▶ picker at data-fit="stack", or a part marked data-ui-split-ok (ConnectionDot). Tests: each case + the same squeeze unmarked still flagged (36/36).
   - Left for after the HUD helper merges (same corner-grid rules): teach at 200% — the screen's bottom-left "Undo" and bottom-right "Plant" corner buttons draw over each other instead of one giving way.
   - Two tests updated for the intended markup (translate="no" on the room code and the old-seats copy).
+- F156 — task 3, HUD (helper, merged 77ab366; read by Claude): root cause — a Bar with a width had a max-content plate, so a corner's least width was its full-length bars (F147 then let the top-left collapse to nothing at big text). Now fit-content: a corner keeps its bars at 2rem with names whole, and gives way to the middle at every text size; a bar with its name beside it shortens, then moves under the name (the results-row rule). F147's useBigText / data-big-text removed (the CSS covers it). Gallery: a 360-wide phone counts as short and the short HUD drops "Round 1" (the demo was over-full; a game on that phone shows less). HUD pseudo 29 → 0, English 0 → 0. Test hudFit.test.tsx (7 styles, red on the old CSS).
+  - The connection chip (mine, 29ea914): a too-long word breaks inside it (data-ui-split-ok), and HudText fit re-measures on page rewrites.
+- F156 — task 6: the avatar's "name touching its circle" was the fake language rewriting its initials (task 1, translate="no"). Teach at 200%: Undo + Plant in both bottom corners can't fit a 390px phone side by side in the long language — accepted in the fake-language shoot only (knownShots, Claude's call). Ask Muzzy: OK to accept, like the talk bubble at 200%?
+- Found on the way (check:fast red, 2026-10-27): saves loadLinkCode judged this device's own code "live" by the real clock, not the game's (options.now) — its test's fixed 2026-10-20 date turned 7 days old today. Fixed in bbb0988 (saves 0.6.5 at task 7).

@@ -93,6 +93,10 @@ const knownShots = {
   // Muzzy 2026-10-25 (F147): the same in every look — and Pixel's wide letters wrap the line to 6 lines upright
   ...Object.fromEntries(['cartoon', 'console', 'cozy', 'fantasy', 'neon', 'pixel'].map((look) => [`screens/talk-${look}-phone-landscape-text-200.png`, 'Muzzy 2026-10-25 (F147): same as Clean — the game makes room for a long line at 200%'])),
   'screens/talk-pixel-phone-text-200.png': "Muzzy 2026-10-25 (F147): Pixel's wide letters wrap the demo line to 6 lines at 200% — the kit warns, the game makes room",
+  // (the fake language only — in English this shot still counts)
+  ...(process.argv.includes('--pseudo') ? {
+    'screens/teach-clean-phone-text-200.png': 'Claude 2026-10-27 (F156), Muzzy to confirm: the callout demo puts a text button in both bottom corners; at 200% in a ~40% longer language each is wider than half a 390px phone, so they meet — the kit warns, the game makes room',
+  } : {}),
 }
 let knownCount = 0
 
