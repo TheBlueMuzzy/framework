@@ -51,9 +51,16 @@ function readKitVersion() {
 
 /** The rules' finds in a game's own code today, with the framework's ESLint: [{ file, line, rule, message }]. */
 export async function countFinds(gameDir) {
-  const require = createRequire(join(moduleDir, '..', 'package.json'))
-  const { ESLint } = require('eslint')
-  const tseslint = require('typescript-eslint')
+  // the game's own ESLint first (a game with a lint has it), else the framework's — GitHub's starter job installs the
+  // game's packages but not the framework root's
+  const load = (name) => {
+    for (const base of [resolve(gameDir), join(moduleDir, '..')]) {
+      try { return createRequire(join(base, 'package.json'))(name) } catch { /* not installed there */ }
+    }
+    throw new Error(`${name} isn't installed in the game or the framework — run npm install in the game`)
+  }
+  const { ESLint } = load('eslint')
+  const tseslint = load('typescript-eslint')
   const { default: bmuz } = await import(pathToFileURL(join(moduleDir, 'kit', 'rules.mjs')).href)
   const eslint = new ESLint({
     cwd: resolve(gameDir),
