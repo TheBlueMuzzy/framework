@@ -415,11 +415,18 @@ flowchart LR
   F90[F90 Coding-standard lint rules]
 ```
 
+## v0.27 — Ready to translate  ← current · planned 2026-10-27
+Goal (Muzzy 2026-10-27: "Ready to translate"): a game's words can be translated without surprises — words typed into code are flagged, and a long fake language shows which ones won't fit.
+- 🔨 F91 🔧 Translation readiness — the lint module flags player words typed into game code (games with content/text/en.json); a dev-only fake language (accented, ~40% longer) and check:framework's cut-off check run in it — should · sprint 45
+```mermaid
+flowchart LR
+  F91[F91 Translation readiness]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
-- 💤 F91 🔧 Translation readiness — player text in JSX flagged toward content/text/en.json (games that opted in), a +40% "pseudo-language" pass reusing the cut-off check — could · gap rank 15
 - 💤 F92 🔧 Tech-lead checks — a new content/ file or top-level src/ folder without a TDD change → sent back; a performance budget line in check:full (bundle size vs a budget in content/) — could · tech lead rows
 - 💤 F97 🧱 Saves on app stores + Steam — the same saves on Capacitor (Preferences), Electron (userData files) and Steam Cloud, behind the same API (research layer 6) — could · needs: F101 · waits for the store run-through (Ideas; Claude's call 2026-10-20: built against real store builds, not stand-ins)
 - 💤 F99 🧱 Saves in Unity — the same save format in C# (persistentDataPath files) (research layer 8) — could · needs: F101 · waits for the first Unity game (Claude's call 2026-10-20)
