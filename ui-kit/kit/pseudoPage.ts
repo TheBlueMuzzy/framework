@@ -1,0 +1,71 @@
+// PSEUDO PAGE — the whole page in the long fake language (F91), to see which words won't fit once translated.
+// It rewrites the words where they're drawn, the way a browser's translate button does, so every word is caught
+// wherever it came from: content/text/en.json, the kit's English defaults, a module's words. React keeps working:
+// when it changes a word, the new word is rewritten too.
+//   - dev only: add ?pseudo to the game's address (applyStyle starts it), or call startPseudoPage() yourself
+//   - also the words a screen reader says or a tooltip shows: title, aria-label, placeholder, alt
+//   - never the Dev Kit (it's a tool, not the game) or code / style elements
+import { pseudo } from './blocks/words'
+
+const ATTRIBUTES = ['title', 'aria-label', 'placeholder', 'alt']
+const SKIP = 'script, style, noscript, code, pre, textarea, [data-devkit], #devkit-root'
+
+const skipped = (node: Node) => {
+  const element = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement
+  return !element || !!element.closest(SKIP)
+}
+
+function rewriteText(node: Text) {
+  if (skipped(node)) return
+  const next = pseudo(node.data)
+  if (next !== node.data) node.data = next
+}
+
+function rewriteAttributes(element: Element) {
+  if (skipped(element)) return
+  for (const name of ATTRIBUTES) {
+    const value = element.getAttribute(name)
+    if (value === null) continue
+    const next = pseudo(value)
+    if (next !== value) element.setAttribute(name, next)
+  }
+}
+
+function rewriteAll(root: Node) {
+  if (root.nodeType === Node.TEXT_NODE) return rewriteText(root as Text)
+  if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return
+  if (root.nodeType === Node.ELEMENT_NODE) rewriteAttributes(root as Element)
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeType === Node.TEXT_NODE) rewriteText(node as Text)
+    else rewriteAttributes(node as Element)
+  }
+}
+
+let stopRunning: (() => void) | null = null
+
+/** Rewrite the page's words into the long fake language, and keep doing it as they change. Returns stop(). */
+export function startPseudoPage(root: Node = document.body): () => void {
+  stopRunning?.()
+  rewriteAll(root)
+  const observer = new MutationObserver((changes) => {
+    for (const change of changes) {
+      if (change.type === 'characterData') rewriteText(change.target as Text)
+      else if (change.type === 'attributes') rewriteAttributes(change.target as Element)
+      else change.addedNodes.forEach(rewriteAll)
+    }
+  })
+  observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRIBUTES })
+  document.documentElement.dataset.pseudo = ''
+  stopRunning = () => { observer.disconnect(); delete document.documentElement.dataset.pseudo; stopRunning = null }
+  return stopRunning
+}
+
+/** ?pseudo in the address, in a dev build → the fake language (applyStyle calls this once at start-up). */
+export function pseudoFromAddress() {
+  if (!import.meta.env?.DEV || typeof location === 'undefined' || stopRunning) return
+  if (!new URLSearchParams(location.search).has('pseudo')) return
+  const start = () => startPseudoPage()
+  if (document.body) start()
+  else addEventListener('DOMContentLoaded', start, { once: true })
+}
