@@ -9,12 +9,14 @@
 //   2. creates the game's own starting files — only if missing, never overwrites:
 //      party/server.ts + party/rules.ts (an example game to replace), party/worker.ts (Cloudflare's front door,
 //      PartyServer), content/rooms.json (the knobs), wrangler.json (the server's name, room storage, local port)
+//      A game's own wrangler.json without "dev" → "port" gets that one key (0.13.0) — nothing else in it changes.
 //   3. prints the wiring the game still needs (packages, npm scripts, VITE_PARTY_HOST…) — only the missing bits
 // On an update it first lists which files changed, were added or were removed.
 import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { DEFAULT_PARTY_PORT, readPartyPort } from '../kit/vitePlugin.mjs'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
 // (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
@@ -27,7 +29,9 @@ export function checkFrameworkStep(gameDir) {
 
 const roomsDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const KIT_TARGET = 'src/rooms'
-export const PARTY_PORT = 1999
+// The local room port a new game starts with. The game's own port is its wrangler.json "dev" → "port" (0.13.0): wrangler
+// dev reads it, and so does the page (kit/vitePlugin.mjs bakes it in) — one place, nothing kept in sync by hand.
+export const PARTY_PORT = DEFAULT_PARTY_PORT
 
 const isTest = (path) => /\.test\./.test(path)
 const readText = (path) => readFileSync(path, 'utf8')
@@ -99,6 +103,47 @@ export function wranglerConfig(gameDir) {
 
 const WRANGLER_FILES = ['wrangler.json', 'wrangler.jsonc', 'wrangler.toml']
 
+// The same JSON, whatever order the keys are in
+const sorted = (value) => Array.isArray(value) ? value.map(sorted)
+  : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, sorted(value[key])])) : value
+const sameJson = (a, b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b))
+
+// 0.13.0 (F155): a game's own wrangler.json with no "dev" → "port" gets one (1999, the port the page used before),
+// because wrangler dev would otherwise pick 8787 while the page looks at 1999. Only that key is added — every other
+// byte of the file stays as the game wrote it (no re-formatting). Returns the new text, or null when there's nothing
+// to add (or the file isn't plain JSON — a .jsonc / .toml or a broken file is left alone and the step says what to add).
+export function withDevPort(text, port = PARTY_PORT) {
+  let config
+  try { config = JSON.parse(text) } catch { return null }
+  if (!config || typeof config !== 'object' || Array.isArray(config)) return null
+  if (config.dev?.port !== undefined) return null
+  let next
+  if (config.dev && typeof config.dev === 'object') {
+    // "dev": { "ip": … } → "dev": { "port": 1999, "ip": … }
+    const at = /"dev"\s*:\s*\{/.exec(text)
+    if (!at) return null
+    const end = at.index + at[0].length
+    const empty = /^\s*\}/.test(text.slice(end))
+    next = `${text.slice(0, end)}${empty ? ` "port": ${port} ` : ` "port": ${port},`}${text.slice(end)}`
+  } else if (config.dev === undefined) {
+    // a new last key, indented like the file's own keys: …,\n  "dev": { "port": 1999, "ip": "0.0.0.0" }\n}
+    const close = text.lastIndexOf('}')
+    const before = text.slice(0, close).trimEnd()
+    const indent = /\n([ \t]+)"/.exec(text)?.[1]
+    const entry = `"dev": { "port": ${port}, "ip": "0.0.0.0" }`
+    const comma = before.endsWith('{') ? '' : ','
+    const eol = text.includes('\r\n') ? '\r\n' : '\n' // a Windows-saved file keeps its own line ends
+    next = indent
+      ? `${before}${comma}${eol}${indent}${entry}${text.slice(before.length)}`
+      : `${before}${comma} ${entry}${text.slice(before.length)}`
+  } else return null
+  // Proof it only added the port: the new file reads back as the old one plus dev.port, nothing else
+  try {
+    if (!sameJson(JSON.parse(next), { ...config, dev: { ...(config.dev ?? { ip: '0.0.0.0' }), port } })) return null
+  } catch { return null }
+  return next
+}
+
 // Files the game gets once, then owns: [where in the game, where in templates/ (or a maker)]
 function starterFiles(gameDir) {
   const hasServer = existsSync(join(gameDir, 'party', 'server.ts'))
@@ -109,7 +154,7 @@ function starterFiles(gameDir) {
     { to: 'party/rules.ts', from: 'party/rules.ts', why: 'an EXAMPLE game ("Count to 10") — replace with the real rules', skip: hasServer },
     { to: 'party/worker.ts', from: 'party/worker.ts', why: "Cloudflare's front door (PartyServer): hands each room to party/server.ts" },
     { to: 'content/rooms.json', from: 'content/rooms.json', why: 'room knobs: seats, idle players, timings' },
-    { to: 'wrangler.json', make: () => JSON.stringify(wranglerConfig(gameDir), null, 2) + '\n', why: 'server name, room storage, local port 1999', skip: hasWrangler },
+    { to: 'wrangler.json', make: () => JSON.stringify(wranglerConfig(gameDir), null, 2) + '\n', why: `server name, room storage, local port ${PARTY_PORT} (dev.port — change it to any free port)`, skip: hasWrangler },
   ].filter((file) => !file.skip)
 }
 
@@ -140,6 +185,15 @@ export function wiringSteps(gameDir, { justMade = [] } = {}) {
   const partyCode = existsSync(join(gameDir, 'party'))
     ? readdirSync(join(gameDir, 'party')).filter((f) => /\.ts$/.test(f) && !isTest(f)).map((f) => text(`party/${f}`)).join('\n')
     : ''
+  // The game's local room port (0.13.0): wrangler's dev.port, which the page reads too through roomsPort()
+  let port = PARTY_PORT, wranglerFile = null, wranglerProblem = null
+  try { ({ port, file: wranglerFile } = readPartyPort(gameDir)) } catch (error) { wranglerProblem = error.message }
+  const devPortSet = (() => {
+    if (!wranglerFile) return true // the installer makes wrangler.json with it
+    if (wranglerFile !== 'wrangler.json') return /"port"|^\s*port\s*=/m.test(text(wranglerFile)) // .jsonc / .toml: the game's own to edit
+    try { return JSON.parse(text('wrangler.json')).dev?.port !== undefined } catch { return false }
+  })()
+  const viteConfig = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs'].find((f) => existsSync(join(gameDir, f)))
 
   return [
     {
@@ -162,7 +216,22 @@ export function wiringSteps(gameDir, { justMade = [] } = {}) {
     },
     {
       done: !localHostInEnv,
-      step: `${localHostInEnv}: remove VITE_PARTY_HOST=localhost… — for local dev leave it unset, so a phone on the Wi-Fi reaches the PC's server (src/rooms/roomClient.ts picks the page's own address, port ${PARTY_PORT})`,
+      step: `${localHostInEnv}: remove VITE_PARTY_HOST=localhost… — for local dev leave it unset, so a phone on the Wi-Fi reaches the PC's server (src/rooms/roomClient.ts picks the page's own address, port ${port})`,
+    },
+    {
+      done: !wranglerProblem,
+      step: `${wranglerProblem} — fix it, then install again`,
+    },
+    {
+      // 0.13.0 (F155): the port lives in ONE place — wrangler's dev.port; the page reads it through the plugin
+      done: devPortSet,
+      step: `${wranglerFile}: give the local room server its port — "dev": { "port": ${PARTY_PORT}, "ip": "0.0.0.0" } (any free port; wrangler dev
+       and the page both read it from there)`,
+    },
+    {
+      done: Boolean(viteConfig) && /\broomsPort\s*\(/.test(text(viteConfig)),
+      step: `${viteConfig ?? 'vite.config.ts'}: import { roomsPort } from './src/rooms/vitePlugin.mjs'   and add roomsPort() to plugins: [ … ]
+       (the page then finds the room server on ${wranglerFile ?? 'wrangler.json'}'s dev port, now ${port} — without it the page always looks at ${PARTY_PORT})`,
     },
     {
       // F82: live-check.mjs pings /health after a deploy — the template has it, older workers don't
@@ -198,7 +267,7 @@ export function wiringSteps(gameDir, { justMade = [] } = {}) {
     // Always shown: how to run it, and the live-build setting (can't be checked from here)
     {
       done: false,
-      step: `Try it: npm run party:dev (server, port ${PARTY_PORT}) + npm run dev. Phone on the same Wi-Fi: npx vite --host, open the Network link.`,
+      step: `Try it: npm run party:dev (server, port ${port}) + npm run dev. Phone on the same Wi-Fi: npx vite --host, open the Network link.`,
     },
     {
       done: false,
@@ -254,7 +323,12 @@ export function installRooms(gameDir, { dryRun = false, log = console.log } = {}
     log(file.exists ? `  keep     ${file.to} (the game's own)` : `  create   ${file.to} — ${file.why}`)
   }
 
-  const result = { plan, starters, isUpdate: plan.isUpdate }
+  // 0.13.0: the game's own wrangler.json without a dev port gets one — only that key (withDevPort)
+  const wranglerPath = join(gameDir, 'wrangler.json')
+  const withPort = existsSync(wranglerPath) ? withDevPort(readText(wranglerPath)) : null
+  if (withPort) log(`  add      wrangler.json "dev" → "port": ${PARTY_PORT} — the local room server's port (wrangler dev and the page both read it; nothing else in the file changes)`)
+
+  const result = { plan, starters, isUpdate: plan.isUpdate, addedDevPort: Boolean(withPort) }
   if (dryRun) {
     log('\nDry run: nothing was changed. After installing, the game would still need:')
     printSteps(gameDir, log)
@@ -270,6 +344,7 @@ export function installRooms(gameDir, { dryRun = false, log = console.log } = {}
     if (file.make) writeText(join(gameDir, file.to), file.make())
     else copyFile(join(roomsDir, 'templates', file.from), join(gameDir, file.to))
   }
+  if (withPort) writeFileSync(wranglerPath, withPort)
 
   log('\nDone. Next steps:')
   printSteps(gameDir, log, starters.filter((file) => !file.exists).map((file) => file.to))

@@ -6,7 +6,6 @@
 // Nothing is hidden in tic-tac-toe, so the bot "imagines" the board exactly as it is.
 // A new game writes its own goals here; the brain, the personalities and the Dev Kit's AI tab stay the same.
 import type { GamePlug, Goal } from './kit/types'
-import type { MomentMap } from './kit/banter'
 import { emptyCells, LINES, otherSeat, winningCells, type Action, type Event, type View } from '../game/rules'
 
 // How good a square is on an empty board: centre 3, corners 2, edges 1.
@@ -47,17 +46,16 @@ export const plug: GamePlug<View, Action, View, Event> = {
   candidates: (world, _seat, limit, rng) => ({ actions: emptyCells(world.board).slice(0, limit).map((cell) => ({ cell })), rng }),
   key: ({ cell }) => String(cell),
   describe: ({ cell }) => `square ${cell + 1}`,
-}
-
-// Banter: what each event means to this seat (the keys of content/ai/banter.json "chance"). Its own export, not
-// plug.moments: GamePlug's moments type has no room for { moment, by } (who caused it), which botBanter's MomentMap takes.
-export const moments: MomentMap<Event> = (event, seat) => {
-  if (event.type === 'won') return event.seat === seat ? 'won' : 'lost'
-  if (event.type === 'draw') return 'closeCall'
-  if (event.type === 'placed') {
-    const mine = event.seat === seat
-    if (event.blocked) return mine ? 'hitRival' : 'gotHit'
-    if (event.threat) return mine ? 'bigMove' : { moment: 'rivalBigMove', by: event.seat }
-  }
-  return null
+  // Banter: what each event means to this seat (the keys of content/ai/banter.json "chance"). A rival's threat names
+  // who made it ({ moment, by }), so a person's good move can always get a bot's answer (banter.json "answerPeople").
+  moments: (event, seat) => {
+    if (event.type === 'won') return event.seat === seat ? 'won' : 'lost'
+    if (event.type === 'draw') return 'closeCall'
+    if (event.type === 'placed') {
+      const mine = event.seat === seat
+      if (event.blocked) return mine ? 'hitRival' : 'gotHit'
+      if (event.threat) return mine ? 'bigMove' : { moment: 'rivalBigMove', by: event.seat }
+    }
+    return null
+  },
 }

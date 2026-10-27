@@ -351,6 +351,15 @@
     /* opened over another screen: the dim was already there (the screen under it hides at once), so no fade-in flash */
     .kit-layer[data-over] > .kit-screen { background-color: color-mix(in srgb, var(--bg) 70%, transparent); }
   }
+  /* Screen shade (0.35.10): a screen of only on-game words (RoundIntro) dims with the game's dark shade instead, in
+     every look — light words on the light veil read ~2:1. Overlay mode: the overlay carries the dim, so it darkens. */
+  .kit-screen[data-shade][data-dialog], .kit-layer:is([data-over], [data-dim]) > .kit-screen[data-shade],
+  .kit-overlay[data-open]:has(> .kit-layer:last-child > .kit-screen[data-shade]) {
+    background-color: color-mix(in srgb, var(--game-shade) 70%, transparent); }
+  @starting-style {
+    .kit-screen[data-shade][data-dialog], .kit-layer[data-dim] > .kit-screen[data-shade] { background-color: transparent; }
+    .kit-layer[data-over] > .kit-screen[data-shade] { background-color: color-mix(in srgb, var(--game-shade) 70%, transparent); }
+  }
 
   /* Pressing: things shrink and/or sink (the style decides how much and how fast).
      A sinking button drops onto its shadow, so the shadow goes. */

@@ -7,7 +7,7 @@ import text from '../../content/text/en.json'
 import { createEmotes } from '../emotes'
 import { botBanter, type BanterSeat } from '../ai/kit/brain'
 import { readBanterSettings } from '../ai/kit/banter'
-import { moments } from '../ai/plug'
+import { plug } from '../ai/plug'
 import { emoteSave, banterSave } from './saves'
 import { playSound } from '../audio'
 
@@ -28,7 +28,7 @@ let bots: () => BanterSeat[] = () => []
 export const setBanterBots = (list: () => BanterSeat[]) => { bots = list }
 
 export const banter = botBanter({
-  moments,
+  moments: plug.moments!, // the plug's own moment map (src/ai/plug.ts)
   bots: () => bots(),
   settings: () => readBanterSettings(banterJson),
   lines: () => text.banter,

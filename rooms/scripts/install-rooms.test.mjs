@@ -159,6 +159,87 @@ describe('install-rooms', () => {
     expect(missing()).not.toMatch(/keepMatchDays/)
   })
 
+  // 0.13.0 (F155): the local room port lives in wrangler.json dev.port — the installer adds only that key
+  describe('the local room port (wrangler.json dev.port)', () => {
+    const missing = () => wiringSteps(game).filter((w) => !w.done).map((w) => w.step).join('\n')
+
+    it('a game\'s own wrangler.json without a dev port gets one — every other byte comes back as it was', () => {
+      const before = [
+        '{',
+        '    "name": "custom",',
+        '    "main": "party/worker.ts",',
+        '    "build": { "command": "node scripts/server-words.mjs" },',
+        '    "rules": [{ "type": "Text", "globs": ["**/*.txt"], "fallthrough": true }],',
+        '    "env": { "staging": { "name": "custom-staging", "vars": { "URL": "https://x.dev/a//b" } } }',
+        '}',
+        '',
+      ].join('\n')
+      write(join(game, 'wrangler.json'), before)
+      const result = installRooms(game, { log: quiet })
+      const after = readFileSync(join(game, 'wrangler.json'), 'utf8')
+      const added = ',\n    "dev": { "port": 1999, "ip": "0.0.0.0" }'
+      const at = before.lastIndexOf('}') - 1 // right after the last value, before the closing line
+      expect(result.addedDevPort).toBe(true)
+      expect(after).toBe(before.slice(0, at) + added + before.slice(at))
+      expect(after.replace(added, '')).toBe(before) // nothing else touched
+      expect(readJson(join(game, 'wrangler.json')).dev).toEqual({ port: 1999, ip: '0.0.0.0' })
+      // a second install changes nothing
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe(after)
+    })
+
+    it('a "dev" block without a port gets just the port, in its own line ends (a Windows-saved file)', () => {
+      const before = '{\r\n  "name": "custom",\r\n  "dev": { "ip": "0.0.0.0", "local_protocol": "http" },\r\n  "observability": { "enabled": true }\r\n}\r\n'
+      write(join(game, 'wrangler.json'), before)
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe(before.replace('"dev": {', '"dev": { "port": 1999,'))
+      const noKeys = '{\r\n  "name": "custom"\r\n}\r\n'
+      write(join(game, 'wrangler.json'), noKeys)
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe('{\r\n  "name": "custom",\r\n  "dev": { "port": 1999, "ip": "0.0.0.0" }\r\n}\r\n')
+    })
+
+    it('a game that already picked a port keeps its file byte for byte, and the steps name its port', () => {
+      const before = '{ "name": "glyph", "rules": [], "dev": { "port": 1997, "ip": "0.0.0.0" } }\n'
+      write(join(game, 'wrangler.json'), before)
+      const lines = []
+      expect(installRooms(game, { log: (line) => lines.push(line) }).addedDevPort).toBe(false)
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe(before)
+      expect(lines.join('\n')).toMatch(/npm run party:dev \(server, port 1997\)/)
+      expect(lines.join('\n')).not.toMatch(/give the local room server its port/)
+    })
+
+    it('never guesses: an environment called "dev" (env.dev) or a .jsonc file is left alone, and the step says what to add', () => {
+      const before = '{ "name": "a", "env": { "dev": { "vars": {} } }, "dev": { "ip": "0.0.0.0" } }'
+      write(join(game, 'wrangler.json'), before)
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe(before)
+      expect(missing()).toMatch(/wrangler\.json: give the local room server its port — "dev": \{ "port": 1999/)
+      rmSync(join(game, 'wrangler.json'))
+      write(join(game, 'wrangler.jsonc'), '{\n  // mine\n  "name": "a"\n}\n')
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.jsonc'), 'utf8')).toBe('{\n  // mine\n  "name": "a"\n}\n')
+      expect(missing()).toMatch(/wrangler\.jsonc: give the local room server its port/)
+    })
+
+    it('a broken wrangler.json is left alone and named', () => {
+      write(join(game, 'wrangler.json'), '{ "name": ')
+      installRooms(game, { log: quiet })
+      expect(readFileSync(join(game, 'wrangler.json'), 'utf8')).toBe('{ "name": ')
+      expect(missing()).toMatch(/wrangler\.json isn't valid JSON/)
+    })
+
+    it('asks for roomsPort() in vite.config until it\'s there; the plugin ships with the kit', () => {
+      installRooms(game, { log: quiet })
+      expect(existsSync(join(game, 'src/rooms/vitePlugin.mjs'))).toBe(true)
+      expect(existsSync(join(game, 'src/rooms/vitePlugin.d.mts'))).toBe(true)
+      expect(existsSync(join(game, 'src/rooms/vitePlugin.test.mjs'))).toBe(false)
+      expect(missing()).toMatch(/vite\.config\.ts: import \{ roomsPort \} from '\.\/src\/rooms\/vitePlugin\.mjs'/)
+      write(join(game, 'vite.config.ts'), "import { roomsPort } from './src/rooms/vitePlugin.mjs'\nexport default { plugins: [roomsPort()] }\n")
+      expect(missing()).not.toMatch(/roomsPort/)
+    })
+  })
+
   it('wrangler.json name comes from package.json', () => {
     expect(wranglerConfig(game).name).toBe('my-game')
   })

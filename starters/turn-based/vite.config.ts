@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import { devkit } from './vite-plugins/devkit/devkitVite'
 import { versionPlugin } from './src/version/vitePlugin.mjs'
 import { crashesMaps } from './src/crashes/vitePlugin.mjs'
+import { roomsPort } from './src/rooms/vitePlugin.mjs'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
     devkit(), // the Dev Kit: live content/tuning, the release switch, Save (dev server only)
     versionPlugin(), // version.json → import.meta.env.APP_VERSION + <meta name="app-version">
     crashesMaps(), // hidden source maps → releases/<version>/maps/ (players never download them)
+    roomsPort(), // wrangler.json dev.port → the page's local room server port (the one place it's written)
   ],
   // Bundled up front, so the first visit to online play never reloads the page mid-test ("new dependencies optimized")
   optimizeDeps: { include: ['partysocket', 'react', 'react-dom/client'] },
