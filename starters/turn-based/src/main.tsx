@@ -39,6 +39,7 @@ function startGame() {
     import('./devkit/mount').then((m) => m.mountDevKit())
   } else if (__DEVKIT_IN_RELEASE__) {
     const mount = () => import('./devkit/mount').then((m) => m.mountDevKit())
+    // tuning-ok: when to load the Dev Kit in a release build (a browser without idle callbacks), not a game setting
     const whenIdle = () => ('requestIdleCallback' in window ? requestIdleCallback(mount, { timeout: 3000 }) : setTimeout(mount, 1000))
     if (document.readyState === 'complete') whenIdle()
     else addEventListener('load', whenIdle, { once: true })

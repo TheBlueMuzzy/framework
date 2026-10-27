@@ -9,7 +9,7 @@ Done when: a framework `lint` module ships two ESLint rules (no React state set 
 - [x] 🤖 2. Rule: no React state set inside useFrame (a useState setter or dispatch called in the callback), RuleTester test red on bad code — lint/kit/rules.mjs
 - [x] 🤖 3. Rule: no tuning numbers in game logic (which files count, the harmless numbers from task 1, the `// tuning-ok: <why>` escape), RuleTester test red on bad code — lint/kit/rules.mjs
 - [x] 🤖 4. The module + installer: lint/kit/VERSION, `bmuz` folders in its package.json, an installer that adds the rules to a game's eslint.config.js (errors in a new game, warnings with a count in an old one), tests; root check:fast runs its tests — scripts/check-modules.mjs
-- [ ] 🤖 5. The starter takes it (install-module); fix or mark its finds; its check:fast + check:full green — starters/turn-based/eslint.config.js
+- [x] 🤖 5. The starter takes it (install-module); fix or mark its finds; its check:fast + check:full green — starters/turn-based/eslint.config.js
 - [ ] 🤖 6. README + VERSION; CLAUDE.md's two "③ until F90" lines (tweakable values in content/, R3F refs in useFrame) become ② with the check named; finds in other games go to Ideas as hand-offs — README.md
 Check: each rule's test red on bad code, then green; the starter's `npm run check:full` green with the module; root check:fast green; the task-1 find list accounted for (fixed, marked, or handed to the game).
 
@@ -29,3 +29,5 @@ Notes:
   - Surprise 1: kit/VERSION alone made check:fast crash (it reads every module's package.json) — fixed at planning time; and the Dev Kit's check:framework requires conformance.mjs in every module copy (a fair rule: the module now has promise checks).
   - Surprise 2: under check:fast's load the first install test ran out of time — TypeScript's parser loads cold (several seconds) and kitVersion ran git per install. Fixed at the cause: kitVersion asked once per run (as version did, F128), the cold load done once in a beforeAll with its own 60 s.
   - Proof: lint tests 47/47; root lint clean; root check:fast 23/23 (the starter with lint installed fresh, as warnings — its one find).
+- F90 — task 5 (2026-10-26): the starter took lint 0.1.0 (install-module) as ERRORS (0 finds once its one timer was marked: src/main.tsx `// tuning-ok: when to load the Dev Kit in a release build …`). Proven in the real game: a planted `export const FLASH_MS = 350` → `npm run lint` exit 1 naming bmuz/no-tuning-numbers; removed → exit 0. Starter check:full ALL PASS 10/10.
+  - Bug found + fixed (BMUZ, not the module): install-module wrote the ignores into the eslint.config text it read BEFORE the installer ran, wiping lint's own block (the first module whose installer edits that file). Now it re-reads the file after the install (~/.claude/config/bmuz/scripts/install-module.mjs); test-scripts install-module 25/25 with a new case, red on the old line (24/25), green on the fix.
