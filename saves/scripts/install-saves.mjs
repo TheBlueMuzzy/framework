@@ -16,10 +16,10 @@
 //       tests/saves/saves.test.ts     — the game's save tests: list its saves there; golden saves go beside it
 //       cloud/worker.ts + cloud/wrangler.json — only with --cloud: the link-code server (port 1998 locally)
 //       board/worker.ts + board/wrangler.json — only with --board: the checked leaderboard (port 1996 locally)
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 // npm run check:framework (the Dev Kit's runner, src/devkit/check-framework.mjs) runs this module's own promise checks
 // (kit/conformance.mjs) — asked for here while the game's package.json doesn't have the script yet
@@ -205,25 +205,6 @@ function listFiles(dir, base = dir) {
   })
 }
 
-// Worked out once per run: it starts two git processes, which take 0.2–0.6 s each on a busy Windows PC (F125: the
-// install tests call installSaves 15 times, so 30 git runs pushed one test past vitest's 5 s limit under check:fast).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(savesDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: savesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit', { cwd: savesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
-}
-
 // --- worker files that fell behind the kit -------------------------------------------------------------------------
 // cloud/ and board/worker.ts are copied ONCE (the game fills them in), but they call the kit, which keeps changing —
 // a copy from an older template can stop compiling or miss a fix (F101 proof: a board/worker.ts from before the F98
@@ -275,7 +256,8 @@ export function installSaves(gameDir, { dryRun = false, cloud = false, board = f
   const wantsBoard = board || existsSync(join(game, BOARD_WORKER))
   const starter = [...STARTERS, ...(wantsCloud ? [CLOUD_WORKER, CLOUD_WRANGLER] : []), ...(wantsBoard ? [BOARD_WORKER, BOARD_WRANGLER] : [])]
     .filter((f) => !existsSync(join(game, f)))
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit has edits (git is asked once per run)
+  const { version, commit } = kitVersion(savesDir, { watch: ['kit'] })
   log(`Saves module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))

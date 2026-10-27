@@ -11,10 +11,10 @@
 //       content/crashes.json                   — where reports go (empty until going live), how many, the server's limits
 //       crashes/worker.ts + crashes/wrangler.json — the game's own crash server (port 1995 locally)
 //   - prints the wiring steps still missing (only those), then how to try it and how to go live (Muzzy's call)
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 import { gameName, tokenFile } from './crash-report.mjs'
 
 const crashesDir = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -129,25 +129,6 @@ export function wiringSteps(gameDir) {
   ]
 }
 
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installCrashes many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(crashesDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: crashesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit scripts', { cwd: crashesDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
-}
-
 // --- a worker copy that fell behind the kit ------------------------------------------------------------------------
 // crashes/worker.ts is copied ONCE, but it calls the kit, which keeps changing. The template says its version; a game's
 // copy with an older one is named with what changed since. Bump the template's "Template version" line AND add a line
@@ -189,7 +170,8 @@ export function installCrashes(gameDir, { dryRun = false, log = console.log } = 
   const changed = [...ships.keys()].filter((f) => !present.includes(f) || !readFileSync(ships.get(f)).equals(readFileSync(join(target, f))))
   const removed = present.filter((f) => !ships.has(f))
   const starter = STARTERS.filter((f) => !existsSync(join(game, f)))
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit / scripts has edits (git is asked once per run)
+  const { version, commit } = kitVersion(crashesDir, { watch: ['kit', 'scripts'] })
   log(`Crashes module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))

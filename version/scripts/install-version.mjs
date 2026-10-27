@@ -8,10 +8,10 @@
 //   - gives the game a version.json ONCE, if it has none: { "version": "0.1.0", "build": 0 } (/save bumps the build)
 //   - prints the wiring still missing (vite.config, main menu, Settings, Dev Kit adapter, an e2e check) — only the
 //     steps not done yet, so an update on a wired game prints nothing to do
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 import { adapterFile } from '../../devkit/kit/check-framework.mjs'
 import { adapterVersion, E2E_DIRS, E2E_EXTS, READS_VERSION_FILE, versionProps, withoutComments } from '../kit/conformance.mjs'
 
@@ -29,25 +29,6 @@ function listFiles(dir, base = dir) {
     if (entry.isDirectory()) return entry.name === 'node_modules' ? [] : listFiles(path, base)
     return [relative(base, path).replaceAll('\\', '/')]
   })
-}
-
-// Worked out once per run: it starts two git processes, which take 0.2–2 s each on a busy Windows PC (F128, as saves
-// 0.6.2 did in F125: the install tests call installVersion many times, and under check:fast those git runs were most of the test's time).
-// The kit's commit can't change while one install runs, so asking again only costs time.
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(moduleDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: moduleDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit', { cwd: moduleDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
 }
 
 // npm run check:framework (the Dev Kit's runner) runs this module's promise checks too
@@ -117,7 +98,8 @@ export function installVersion(gameDir, { dryRun = false, log = console.log } = 
   const changed = kitFiles.filter((f) => !present.includes(f) || !readFileSync(join(moduleDir, 'kit', f)).equals(readFileSync(join(target, f))))
   const removed = present.filter((f) => !kitFiles.includes(f))
   const starter = existsSync(join(game, 'version.json')) ? [] : ['version.json']
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit has edits (git is asked once per run)
+  const { version, commit } = kitVersion(moduleDir, { watch: ['kit'] })
   log(`Version module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))
