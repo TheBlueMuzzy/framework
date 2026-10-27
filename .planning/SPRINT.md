@@ -8,16 +8,17 @@ Done when: a second GitHub run on the same Playwright version takes its browsers
 - [x] 🤖 1. Measure first: the last GitHub runs' browser-step times per job (gh run view), and the Playwright versions each module and the starter pin — .github/workflows/checks.yml
 - [x] 🤖 2. Module jobs: actions/cache on ~/.cache/ms-playwright keyed on the module's Playwright version + its engines; the install step then only fetches system packages — .github/workflows/checks.yml
 - [x] 🤖 3. The starter job: the same cache keyed on its pinned playwright-core version — .github/workflows/checks.yml
-- [ ] 🤖 4. Prove it: push the work branch twice, read both runs (first fills, second restores), note the step times — .github/workflows/checks.yml
+- [x] 🤖 4. Prove it: push the work branch twice, read both runs (first fills, second restores), note the step times — .github/workflows/checks.yml
+- [x] 🤖 5. (Muzzy, mid-sprint: "full auto mode") guard-git refuses a checkout that drops uncommitted work and names the stash instead of asking, so unattended runs never stop on it — ~/.claude/config/bmuz/hooks/guard-git.mjs
 Check: the second run's log says the cache was restored and the browser step skips the download; all jobs green; step times before → after in Notes.
-Checked:
+Checked: 2026-10-27 (Claude) run 40603953184 (fills): all green, caches saved (chromium 291 MB, three engines 584 MB). Run 40604407850 (restores): all green; "Cache restored from key: test-browsers-Linux-pw1.63.0-…" on devkit, ui-kit, saves and the starter; "Kept from an earlier run: 189 Linux packages" (saves), 9 (chromium jobs). Browser step before → after: starter 8.6 min → 14 s, saves 36 s–15 min timeout → 27 s, devkit / ui-kit ~20 s → 15 s.
 
 ## F159 🧱 One shared version helper
 Done when: scripts/kitVersion.mjs is the only place an installer asks git for the version, every installer prints the same line as before, git is asked once per folder per run, and a framework check refuses an installer that asks git itself.
-- [ ] 🤖 1. The helper: kitVersion(moduleDir, { watch: ['kit'] }) → { version, commit }, read once per folder per run, with tests (no git folder, uncommitted changes, asked once) — scripts/kitVersion.mjs
-- [ ] 🤖 2. Every installer uses it (ai, audio, crashes, devkit, emotes, lint, rooms, saves, table, ui-kit, version), each keeping the folders it watches today — ui-kit/scripts/install-kit.mjs
-- [ ] 🤖 3. The guard: a framework test fails when an installer has its own `git rev-parse` / `git status`; check:fast runs the root tests — scripts/check-modules.mjs
-- [ ] 🤖 4. Each module's installer tests green; VERSION bumps (patch) where the installer changed; root check:fast green — scripts/kitVersion.test.mjs
+- [x] 🤖 1. The helper: kitVersion(moduleDir, { watch: ['kit'] }) → { version, commit }, read once per folder per run, with tests (no git folder, uncommitted changes, asked once) — scripts/kitVersion.mjs
+- [x] 🤖 2. Every installer uses it (ai, audio, crashes, devkit, emotes, lint, rooms, saves, table, ui-kit, version), each keeping the folders it watches today — ui-kit/scripts/install-kit.mjs
+- [x] 🤖 3. The guard: a framework test fails when an installer has its own `git rev-parse` / `git status`; check:fast runs the root tests — scripts/check-modules.mjs
+- [x] 🤖 4. Each module's installer tests green; VERSION bumps (patch) where the installer changed; root check:fast green — scripts/kitVersion.test.mjs
 Check: the helper's tests (once-only proven by counting calls); the guard red on a planted `git rev-parse` in an installer, then green; every module's tests green; root check:fast green.
 Checked:
 
@@ -47,3 +48,5 @@ Notes:
 - F158 — task 1 (2026-10-27, gh run view): the slow part is NOT the browsers — it's the Linux packages `--with-deps` fetches from azure.archive.ubuntu.com. Run 40572346582 (green): starter's Chromium step 8.6 min ("Fetched 13.3 MB in 8min 19s (26.6 kB/s)"), saves 36 s. Runs 40567791524 + 40574075274: saves timed out at 15 min both times, stuck mid-apt (libavcodec60, libyuv0). Every Playwright pin is 1.63.0 (ui-kit, devkit, saves, starter). So a browser-only cache (the idea as written) would not have helped → the plan changed: keep the .deb files too.
 - F158 — tasks 2–3: one shared step, .github/actions/test-browsers/action.yml (restore → apt keeps its files + 30 s timeout × 3 retries → install → save on a miss), keyed on the Playwright version + engines; module jobs and the starter job both use it (2ab2d87).
 - Also seen: main's v0.31.0 live-pass run had the starter's online check time out on a click once (locator.click 30 s); the same code was green on the work branch at 19:48 — re-run started to tell a one-off from a real problem.
+- F159 — tasks 1–4 by a fresh helper (fdd0cf3..d1336b2, merged 69f5a55): scripts/kitVersion.mjs + 3 tests; all 11 installers call it with their own watch lists; scripts/installers.test.mjs refuses an installer with its own git call (red on a planted line in install-table.mjs, then green); check:fast runs "framework scripts test"; 11 patch bumps (ai 0.8.3, audio 0.4.2, crashes 0.2.2, devkit 0.28.1, emotes 0.4.2, lint 0.3.1, rooms 0.13.1, saves 0.6.6, table 0.8.2, ui-kit 0.37.1, version 0.1.3). Its check:fast 24/24. Surprise: all 11 already remembered the answer (F128) — the gain is one copy + the guard. A scratch compare showed the same version line from all 11, old vs new.
+- Mid-sprint (Muzzy 2026-10-27, a screenshot of guard-git's "Do you want to proceed?" on the F159 helper's undo of its planted line): "i want you to be in full auto mode, but these kinds of messages are still showing up." → guard-git now REFUSES a checkout / restore that drops uncommitted work and names `git stash push -m "<why>" -- <files>` instead (same effect, keeps a copy), so an unattended run never stops on that prompt; ~/.claude hooks tests 607/607; HOOKS.md row 17 + the /develop "proving a test can fail" line updated.
