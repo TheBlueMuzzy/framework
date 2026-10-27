@@ -7,7 +7,7 @@ What changes: the page check flags light in-game words with nothing dark behind 
 Done when: the UI kit's page check (uiProblems) flags HUD on-game words whose letters sit over a plain light background (too little contrast with the on-game colour, ignoring the words' own halo), the test for it fails on the old check, and the gallery's + the starter's shots have no such problem left (each real find fixed or accepted with a reason in Notes).
 - [x] 🤖 1. Measure first: run a draft of the check over today's gallery (every look, both phones) and the starter; list every find by screen + look in Notes before changing anything — ui-kit/kit/uiProblems.mjs
 - [x] 🤖 2. The check: a new kind in uiProblems, with a test that fails on the old check (kit fonts only) — ui-kit/kit/uiProblems.test.mjs
-- [ ] 🤖 3. Fix or accept each find (a demo HUD with nothing behind it gets the gallery's own game picture or table colour, never a kit colour change); `npm run shoot` + `npm run shoot:webkit` 0 problems; UI kit VERSION + README note — ui-kit/kit/VERSION
+- [x] 🤖 3. Fix or accept each find (a demo HUD with nothing behind it gets the gallery's own game picture or table colour, never a kit colour change); `npm run shoot` + `npm run shoot:webkit` 0 problems; UI kit VERSION + README note — ui-kit/kit/VERSION
 Check: the new test red on the old check, then green; both shoots 0 problems; the starter's `npm run check:full` green with the new kit.
 
 ## F154 🐞 AI moments type fix
@@ -34,4 +34,8 @@ Notes:
     - hand · Clean 1.09:1, Cozy 1.15:1, Cartoon 1.56:1 — every size: the hand demo isn't on the dark stand-in (light stripes) AND under the dim.
     - round (RoundIntro) · Clean only (its only look in the shoot) 1.09:1 — 4 shots: "Round 2 of 5" on light stripes under the dim.
   - Starter (`starters/turn-based`, current main): 0 contrast finds — "Your turn" / "Game over" sit on the felt (#235b45, 7.9:1); Results' "Game over" sits under its dialog's dim (skipped, as planned). With the felt hidden (Sprint 42's plain light page) the draft flags "Your turn" 1.0:1 on #ffffff at both sizes.
+- F153 — Light-words contrast check, task 3 (fix or accept):
+  - Fixed (gallery code only; the kit's look unchanged): the HUD demos (hud, huddock, chips, pinned, emotes, hand) are shown with nothing in the ScreenStack's game layer, so no dim — as in a game, where the HUD is the stack's bottom layer; hand + round now sit on the dark stand-in game.
+  - Accepted (shoot.mjs knownShots, Ask Muzzy): round-clean at its 4 sizes — RoundIntro is a pushed screen, so the game wears the kit's dim, light (--bg 70%) in Clean: 2.1:1, carried by its halo. That's the kit's own look in a game whose game is the stack's children; whether RoundIntro (only on-game words, no card) should skip the light dim is a kit look call for Muzzy.
+  - Proof: npm run shoot 961 shots, 0 problems (16 known: 8 before + 8 round); npm run shoot:webkit 504 shots, 0 problems (8 known); compare:engines no wrap differs (1 accepted, as before). Starter at its 7 sizes with the new check: 0 finds on its screens; 'Your turn' 1.0:1 flagged when the felt is hidden. Shots: dev/.scratch/framework-f153/proof/.
 - Unattended (Muzzy 2026-10-26: "go with your picks"): one helper per feature. F153 touches ui-kit only; F154 ai + the starter's src/ai; F155 rooms + the starter's online parts — F154 and F155 both reinstall into the starter, so they merge one after the other.
