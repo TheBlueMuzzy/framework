@@ -393,6 +393,10 @@ gallery's `npm run shoot` uses the same one.
   in the kit looks different. Fix a find by putting the game's picture or table colour behind the words. (The gallery:
   the hand and round demos now sit on the dark stand-in game, and the HUD demos no longer wear the light dim a pushed
   screen brings — in a game the HUD is the stack's bottom layer, never under it.)
+- 0.35.10: **The round intro dims the game dark, in every look.** "Round 2 of 5" is light on-game words; over the
+  light looks' veil (the background colour at 70%) it read ~2:1, held up only by its halo. RoundIntro now asks for
+  the game's dark shade (`--game-shade` at 70%) instead — a new `shade` option on `Screen` for any screen of only
+  on-game words over the game (overlay mode too). Muzzy 2026-10-26: "Dark veil, every look".
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

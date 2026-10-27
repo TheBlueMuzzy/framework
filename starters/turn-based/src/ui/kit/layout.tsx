@@ -15,6 +15,9 @@ type ScreenProps = {
   children?: ReactNode // goes in the centre
   label?: string // what a screen reader calls this screen
   dialog?: boolean // dims what's underneath; for a small question on top of another screen
+  // shade (0.35.10): the dim behind this screen is the game's dark shade (--game-shade), not the light veil, in every
+  // look — for a screen of only on-game words over the game (RoundIntro), so light words never sit on a light wash
+  shade?: boolean
   // The whole screen scrolls when its contents are taller than it — drag, wheel or keys, with no scroll bar showing.
   // The centre OPENS in the middle (taller than the window: at the top); after that its top stays put and it only
   // grows or shrinks DOWNWARD, so a control just tapped (+ / −, Person ▶ AI) stays under the finger (Muzzy 2026-10-10:
@@ -45,7 +48,7 @@ type ScreenProps = {
   slideEdge?: 'top' | 'bottom' | 'left' | 'right'
   onSlideEnd?: () => void
 }
-export function Screen({ children, label, dialog, scroll, grow, backdrop, backdropFit = 'cover', column, swipe, slide, slideEdge = 'bottom', onSlideEnd, ...slots }: ScreenProps) {
+export function Screen({ children, label, dialog, shade, scroll, grow, backdrop, backdropFit = 'cover', column, swipe, slide, slideEdge = 'bottom', onSlideEnd, ...slots }: ScreenProps) {
   const slotNames = { topLeft: 'top-left', top: 'top', topRight: 'top-right', bottomLeft: 'bottom-left', bottom: 'bottom', bottomRight: 'bottom-right' }
   const centre = useRef<HTMLDivElement>(null)
   const self = useRef<HTMLElement>(null)
@@ -66,7 +69,7 @@ export function Screen({ children, label, dialog, scroll, grow, backdrop, backdr
     return () => el.removeEventListener('animationend', onEnd)
   }, [slide])
   return (
-    <section className="kit-screen" ref={self} aria-label={label} data-dialog={dialog || undefined} data-scroll={scroll || undefined}
+    <section className="kit-screen" ref={self} aria-label={label} data-dialog={dialog || undefined} data-shade={shade || undefined} data-scroll={scroll || undefined}
       data-grow={!scroll && grow ? grow : undefined} role={dialog ? 'dialog' : undefined} aria-modal={dialog || undefined}
       data-backdrop={backdrop ? backdropFit : undefined} data-column={column || undefined} data-swipe={swipe ? '' : undefined}
       data-slide={slide} data-slide-edge={slide ? slideEdge : undefined}

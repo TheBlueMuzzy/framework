@@ -2,7 +2,7 @@
 // The reveal's real look (rows unseen then seen in order, the card's size never changing) is in statListLook.test.tsx.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Countdown, GameOver, rankPlayers, Results, StatList, Victory } from './flow'
+import { Countdown, GameOver, rankPlayers, Results, RoundIntro, StatList, Victory } from './flow'
 
 afterEach(() => { cleanup(); vi.useRealTimers(); document.documentElement.removeAttribute('data-reduce-motion') })
 
@@ -23,6 +23,14 @@ describe('Countdown', () => {
     aSecondLater()
     aSecondLater()
     expect(onDone).toHaveBeenCalledOnce()
+  })
+})
+
+// The round intro is only on-game words, so the game behind it wears the dark shade, not the light veil (0.35.10)
+describe('RoundIntro', () => {
+  it('asks for the dark shade behind it (data-shade)', () => {
+    render(<RoundIntro round={2} total={5} />)
+    expect(screen.getByLabelText('Round 2 of 5').hasAttribute('data-shade')).toBe(true)
   })
 })
 

@@ -397,9 +397,9 @@ flowchart LR
 
 ## v0.25 — What the starter showed  ← current · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "go with your picks"): fix what building the turn-based starter showed — the page check misses light in-game words on a light page, the AI module's moments type is narrower than its README, the rooms module's local port is fixed.
-- 🔨 F153 🔧 Light-words contrast check — the page check flags the HUD's light on-game words when nothing dark sits behind them (only a plain light page): the starter's "Game over" all but vanished with all 10 checks green (v0.24 look-back, Sprint 42 retro) — should · sprint 43
-- 🔨 F154 🐞 AI moments type fix — the AI module's GamePlug.moments takes { moment, by } the way botBanter's MomentMap and the README already do; the starter drops its workaround — should · sprint 43
-- 🔨 F155 🐞 Rooms local port — the local room server's port comes from the game's own settings, not a fixed 1999, so two games (or a game and the starter) run online side by side — should · sprint 43
+- ✅ F153 🔧 Light-words contrast check — the page check flags the HUD's light on-game words when nothing dark sits behind them (only a plain light page): the starter's "Game over" all but vanished with all 10 checks green (v0.24 look-back, Sprint 42 retro) — should · sprint 43
+- ✅ F154 🐞 AI moments type fix — the AI module's GamePlug.moments takes { moment, by } the way botBanter's MomentMap and the README already do; the starter drops its workaround — should · sprint 43
+- ✅ F155 🐞 Rooms local port — the local room server's port comes from the game's own settings, not a fixed 1999, so two games (or a game and the starter) run online side by side — should · sprint 43
 ```mermaid
 flowchart LR
   F153[F153 Light-words contrast check]
