@@ -204,6 +204,12 @@
      bar without a width — before, it held its length and stuck out of the plate. */
   .kit-hud-chip[data-width] { inline-size: max-content; max-inline-size: 100%; }
   .kit-hud-chip[data-width] > .kit-progress { flex: 0 1 auto; min-inline-size: 2rem; inline-size: var(--kit-bar-w); }
+  /* …and a bar with its name beside it (showLabel) keeps room for the name: the bar gets shorter first, down to 2rem,
+     then moves under the name (the results-row rule) — before, the name never shrank and the bar stuck out of its plate
+     past the corner (0.37.0, F156: a longer "Energy" at 200% text and on a 360px phone). The bar still asks for its full
+     length (inline-size), so the plate is as long as before wherever there's room. */
+  .kit-hud-chip:is([data-width="s"], [data-width="m"], [data-width="l"])[data-label-at="beside"] { flex-wrap: wrap; }
+  .kit-hud-chip:is([data-width="s"], [data-width="m"], [data-width="l"])[data-label-at="beside"] > .kit-progress { flex: 1 1 2rem; max-inline-size: var(--kit-bar-w); }
   /* (in hud-rem, 0.35.2: they stop growing with the HUD's words) */
   .kit-hud-chip[data-width="s"] { --kit-bar-w: calc(4 * var(--hud-rem)); }
   .kit-hud-chip[data-width="m"] { --kit-bar-w: calc(8 * var(--hud-rem)); }
