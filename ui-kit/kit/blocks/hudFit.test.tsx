@@ -7,8 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright'
 import { presets } from '../styles'
 import { openBrowser, showInStyle } from '../stylePage.test-util.mjs'
-import { Bar, Counter, Hud, HudText } from './hud'
-import { Stack } from '../layout'
+import { Bar, ConnectionDot, Counter, Hud, HudText, Score, TimerRing } from './hud'
+import { Row, Stack } from '../layout'
 import { pseudo } from './words'
 
 let browser: Browser
@@ -34,39 +34,35 @@ async function barIn(page: Page, preset: string, width: number, label: string) {
   })
 }
 
-// A whole HUD's top row on a phone on its side: the vitals corner (two bars with a width, one named) beside a long status
-// in the middle. The corner gives way — its bars get shorter, never under 2rem, its name whole — so the middle keeps its
-// words on one line (before, a bar's plate was its full length at least: the corner never gave way and the middle
-// wrapped onto more lines, pushing the turn banner onto the bottom row).
-const longStatus = pseudo('Round 1 of 9')
-const hud = renderToStaticMarkup(
+// The gallery HUD's top row on a phone on its side at 200% text, in the long fake language: the vitals corner (two bars
+// with a width, one named) beside the status (round · timer · score) and a wide right corner (coins, settings, the
+// connection's sentence). The corner gives way to the middle — its bars get shorter, its name stays whole — and keeps
+// that much room. Before (0.35.4, F147), past the text cap it could shrink to nothing: the bars stuck out over the
+// middle and the timer and the score covered "Energy" (hud-*-phone-landscape-text-200 in the fake language).
+type FindProblems = (options: { screenWidth: number; checkFocus: boolean }) => string[]
+const uiProblems = '../uiProblems.mjs' // (no types; a plain path so TypeScript doesn't look for them)
+const topRow = renderToStaticMarkup(
   <div style={{ position: 'fixed', inset: 0 }}>
-    <Hud vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label={longName} value={40} variant="accent" width="s" showLabel /></Stack>}
-      status={<HudText>{longStatus}</HudText>} currency={<Counter label="Coins" icon="🪙" value={250} />} onPause={() => {}} />
+    <Hud vitals={<Stack gap="xs"><Bar label={pseudo('Health')} icon="❤" value={70} variant="danger" width="m" /><Bar label={longName} value={40} variant="accent" width="s" showLabel /></Stack>}
+      status={<Row gap="s"><HudText>{pseudo('Round 1')}</HudText><TimerRing seconds={20} total={20} label={pseudo('Time left')} /><Score value={120} compact words={{ score: pseudo('Score') }} /></Row>}
+      currency={<Row gap="s"><Counter label={pseudo('Coins')} icon="🪙" value={250} /><ConnectionDot status="weak" words={{ weak: pseudo('Weak connection') }} /></Row>}
+      onPause={() => {}} />
   </div>)
-async function topRow(page: Page, preset: string) {
-  await showInStyle(page, preset, hud)
-  return page.evaluate(() => {
-    const line = document.querySelector('[data-slot="top"] .kit-text')!
-    const lineHeight = parseFloat(getComputedStyle(line).lineHeight) || parseFloat(getComputedStyle(line).fontSize) * 1.2
-    const corner = document.querySelector('[data-slot="top-left"]')!.getBoundingClientRect()
-    const name = document.querySelector('.kit-bar-label')!.getBoundingClientRect()
-    const bars = [...document.querySelectorAll('[data-slot="top-left"] .kit-progress')].map((bar) => bar.getBoundingClientRect())
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-    return {
-      oneLine: line.getBoundingClientRect().height < lineHeight * 1.5,
-      nameInCorner: name.right <= corner.right + 0.5,
-      barsInCorner: bars.every((bar) => bar.right <= corner.right + 0.5 && bar.width >= 2 * rem - 0.5),
-    }
-  })
-}
 
-describe.each(Object.keys(presets))('a HUD on a phone on its side, in %s', (preset) => {
-  it('the vitals corner gives way to a long status: the status on one line, the bars and their name inside the corner', async () => {
-    const page = await browser.newPage({ viewport: { width: 667, height: 375 } })
-    const row = await topRow(page, preset)
+describe.each(Object.keys(presets))('a HUD on a phone on its side at 200%% text, in %s', (preset) => {
+  it('the vitals corner gives way to the middle but keeps its bars and their name: nothing covers them', async () => {
+    const findProblems = ((await import(/* @vite-ignore */ uiProblems)) as { findProblems: FindProblems }).findProblems
+    const page = await browser.newPage({ viewport: { width: 844, height: 390 } })
+    await showInStyle(page, preset, topRow)
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+    const overlaps = (await page.evaluate(findProblems, { screenWidth: 844, checkFocus: false })).filter((p: string) => p.startsWith('overlap'))
+    const inCorner = await page.evaluate(() => {
+      const corner = document.querySelector('[data-slot="top-left"]')!.getBoundingClientRect()
+      return [...document.querySelectorAll('[data-slot="top-left"] :is(.kit-progress, .kit-bar-label)')]
+        .every((piece) => piece.getBoundingClientRect().right <= corner.right + 0.5)
+    })
     await page.close()
-    expect(row).toEqual({ oneLine: true, nameInCorner: true, barsInCorner: true })
+    expect({ overlaps, inCorner }).toEqual({ overlaps: [], inCorner: true })
   })
 })
 
