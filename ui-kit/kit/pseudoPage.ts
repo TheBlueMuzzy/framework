@@ -15,18 +15,28 @@ const skipped = (node: Node) => {
   return !element || !!element.closest(SKIP)
 }
 
+// What this pass wrote last, per text node / attribute: its own write comes back to it as a change, and must never be
+// rewritten again (sprint 45: the Settings language picker's "日本語" has no accented letters, so the rewritten word
+// didn't look done — each write came back and grew it, to 5 million characters and a stack overflow)
+const wroteText = new WeakMap<Text, string>()
+const wroteAttribute = new WeakMap<Element, Map<string, string>>()
+
 function rewriteText(node: Text) {
-  if (skipped(node)) return
+  if (wroteText.get(node) === node.data || skipped(node)) return
   const next = pseudo(node.data)
+  wroteText.set(node, next)
   if (next !== node.data) node.data = next
 }
 
 function rewriteAttributes(element: Element) {
   if (skipped(element)) return
+  const wrote = wroteAttribute.get(element) ?? new Map<string, string>()
+  wroteAttribute.set(element, wrote)
   for (const name of ATTRIBUTES) {
     const value = element.getAttribute(name)
-    if (value === null) continue
+    if (value === null || wrote.get(name) === value) continue
     const next = pseudo(value)
+    wrote.set(name, next)
     if (next !== value) element.setAttribute(name, next)
   }
 }

@@ -60,6 +60,15 @@ describe('startPseudoPage', () => {
     expect(isPseudo(p.firstChild!.textContent!)).toBe(true)
     expect(isPseudo(p.lastElementChild!.textContent!)).toBe(true)
   })
+  it('never rewrites its own writes — a word with no accented letters (日本語) stays one bracketed word', async () => {
+    document.body.innerHTML = '<p id="w">日本語</p><button aria-label="日本語">x</button>'
+    stop = startPseudoPage()
+    for (let i = 0; i < 3; i++) await new Promise((done) => queueMicrotask(() => done(null))) // let its own writes come back
+    const once = pseudo('日本語')
+    expect(document.getElementById('w')!.textContent).toBe(once)
+    expect(document.querySelector('button')!.getAttribute('aria-label')).toBe(once)
+    expect(pseudo(once)).toBe(once)
+  })
   it('stop() leaves the words as they are and stops rewriting', async () => {
     document.body.innerHTML = '<p id="w">Your turn</p>'
     startPseudoPage()()

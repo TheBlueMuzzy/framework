@@ -21,6 +21,7 @@ import { createServer } from 'vite'
 import { chromium, webkit } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
+import { pseudo } from '../kit/blocks/words.ts'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 import { recordLayout } from './compareEngines.mjs'
 
@@ -239,7 +240,8 @@ const text200 = (page) => page.evaluate(() => { document.documentElement.style.f
 const openers = {
   settings: async (page) => {
     await text200(page)
-    while (await page.getByRole('group', { name: 'Settings' }).locator('output').innerText() !== 'Accessibility') await page.getByLabel('Next Settings').click()
+    const tab = PSEUDO ? pseudo('Accessibility') : 'Accessibility' // (the fake language rewrites the tab's name and the button's label too)
+    while (await page.getByRole('group', { name: PSEUDO ? pseudo('Settings') : 'Settings' }).locator('output').innerText() !== tab) await page.getByLabel(PSEUDO ? pseudo('Next Settings') : 'Next Settings').click()
   },
 }
 
