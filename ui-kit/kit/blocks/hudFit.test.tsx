@@ -7,7 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright'
 import { presets } from '../styles'
 import { openBrowser, showInStyle } from '../stylePage.test-util.mjs'
-import { Bar } from './hud'
+import { Bar, Counter, Hud, HudText } from './hud'
+import { Stack } from '../layout'
 import { pseudo } from './words'
 
 let browser: Browser
@@ -32,6 +33,42 @@ async function barIn(page: Page, preset: string, width: number, label: string) {
     }
   })
 }
+
+// A whole HUD's top row on a phone on its side: the vitals corner (two bars with a width, one named) beside a long status
+// in the middle. The corner gives way — its bars get shorter, never under 2rem, its name whole — so the middle keeps its
+// words on one line (before, a bar's plate was its full length at least: the corner never gave way and the middle
+// wrapped onto more lines, pushing the turn banner onto the bottom row).
+const longStatus = pseudo('Round 1 of 9')
+const hud = renderToStaticMarkup(
+  <div style={{ position: 'fixed', inset: 0 }}>
+    <Hud vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label={longName} value={40} variant="accent" width="s" showLabel /></Stack>}
+      status={<HudText>{longStatus}</HudText>} currency={<Counter label="Coins" icon="🪙" value={250} />} onPause={() => {}} />
+  </div>)
+async function topRow(page: Page, preset: string) {
+  await showInStyle(page, preset, hud)
+  return page.evaluate(() => {
+    const line = document.querySelector('[data-slot="top"] .kit-text')!
+    const lineHeight = parseFloat(getComputedStyle(line).lineHeight) || parseFloat(getComputedStyle(line).fontSize) * 1.2
+    const corner = document.querySelector('[data-slot="top-left"]')!.getBoundingClientRect()
+    const name = document.querySelector('.kit-bar-label')!.getBoundingClientRect()
+    const bars = [...document.querySelectorAll('[data-slot="top-left"] .kit-progress')].map((bar) => bar.getBoundingClientRect())
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+    return {
+      oneLine: line.getBoundingClientRect().height < lineHeight * 1.5,
+      nameInCorner: name.right <= corner.right + 0.5,
+      barsInCorner: bars.every((bar) => bar.right <= corner.right + 0.5 && bar.width >= 2 * rem - 0.5),
+    }
+  })
+}
+
+describe.each(Object.keys(presets))('a HUD on a phone on its side, in %s', (preset) => {
+  it('the vitals corner gives way to a long status: the status on one line, the bars and their name inside the corner', async () => {
+    const page = await browser.newPage({ viewport: { width: 667, height: 375 } })
+    const row = await topRow(page, preset)
+    await page.close()
+    expect(row).toEqual({ oneLine: true, nameInCorner: true, barsInCorner: true })
+  })
+})
 
 describe.each(Object.keys(presets))('a bar with its name beside it, in %s', (preset) => {
   it('squeezed: the bar moves under its long name, both inside the plate, the plate inside its corner', async () => {
