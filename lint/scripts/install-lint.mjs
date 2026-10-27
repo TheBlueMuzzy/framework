@@ -86,7 +86,7 @@ export function addRules(text, level) {
   const importAt = lastImport.index + lastImport[0].length
   let before = text.slice(importAt, end.index).trimEnd()
   // the list's last real code, past any comment lines after it — a comma added after a `// note` would be inside it
-  const lastCode = before.split('\n').map((line) => line.replace(/\s*\/\/.*$/, '')).join('\n').trimEnd().length
+  const lastCode = before.split('\n').map((line) => line.replace(/(^|\s)\/\/.*$/, '')).join('\n').trimEnd().length
   const lastChar = before[lastCode - 1]
   if (lastChar !== ',' && lastChar !== '[' && lastChar !== '(') before = `${before.slice(0, lastCode)},${before.slice(lastCode)}`
   const block = [

@@ -64,6 +64,12 @@ describe('addRules', () => {
     expect(text).toContain("{ ignores: ['dist'] }, // build output\n  // more rules later\n  {")
     expect(syntaxOk(text)).toBe(true)
   })
+  it('a // inside a string (a web address) is not a comment', () => {
+    const withUrl = PLAIN_CONFIG.replace("{ ignores: ['dist'] }\n", "{ settings: { docs: 'http://example.com' } }\n")
+    const { text } = addRules(withUrl, 'error')
+    expect(text).toContain("{ settings: { docs: 'http://example.com' } },\n  {")
+    expect(syntaxOk(text)).toBe(true)
+  })
   it('leaves a config that already has the rules alone', () => {
     const once = addRules(STARTER_CONFIG, 'warn').text
     expect(addRules(once, 'error')).toEqual({ text: once, already: true })
