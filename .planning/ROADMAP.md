@@ -428,6 +428,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-26 — **Saves: the real-Firefox test can lose its browser under heavy load** (Sprint 43: "Target page, context or browser has been closed", 8 tests, while 12 test browsers ran; alone 276/276 at once) — if it comes back, give that test its own browser launch retry or run it apart from the shoots.
+- 2026-10-26 — **Starter: after Results, Escape shows a faint "✕" board mark (1–3:1) and a key-press focus ring** (found by F153 — Light-words contrast check's helper, outside the starter's own checks) — look at it next time the starter is touched.
 - 2026-10-26 — → v0.25 F154. **AI module: `GamePlug.moments` refuses `{ moment, by }`** (found building F151 — Turn-based starter): ai/kit/types.ts only allows a string or a list, but botBanter's MomentMap and the README allow `{ moment, by }` — the starter exports its moments separately to get round it. Widen the type.
 - 2026-10-26 — → v0.25 F155. **Rooms module: the local room server port is fixed at 1999** (found building F151 — Turn-based starter): roomClient.ts uses 1999 unless VITE_PARTY_HOST is set — two games (or a game and the starter) can't run online locally side by side without it. Read the port from the game's wrangler.json / ports.mjs.
 - 2026-10-26 — → v0.24 F152. **🐞 "1ST" touches the avatar's ring on Results / End game, in both engines** (found by F148's side-by-side look): the page check misses it (a badge on a round avatar). Give the rank badge room, and teach the check a ring edge.
