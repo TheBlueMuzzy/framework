@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.25.0, 2026-10-26)
+Release target: none — a library; each milestone releases on its own (latest v0.27.0, 2026-10-26)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -395,7 +395,7 @@ flowchart LR
   F152[F152 Results badge room]
 ```
 
-## v0.25 — What the starter showed  ← current · planned 2026-10-26
+## v0.25 — What the starter showed  ✅ released 2026-10-26 (v0.27.0) · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "go with your picks"): fix what building the turn-based starter showed — the page check misses light in-game words on a light page, the AI module's moments type is narrower than its README, the rooms module's local port is fixed.
 - ✅ F153 🔧 Light-words contrast check — the page check flags the HUD's light on-game words when nothing dark sits behind them (only a plain light page): the starter's "Game over" all but vanished with all 10 checks green (v0.24 look-back, Sprint 42 retro) — should · sprint 43
 - ✅ F154 🐞 AI moments type fix — the AI module's GamePlug.moments takes { moment, by } the way botBanter's MomentMap and the README already do; the starter drops its workaround — should · sprint 43
