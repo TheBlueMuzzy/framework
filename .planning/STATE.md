@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-27 12:05 PM — **Sprint 46 built, waiting on Muzzy (branch dev/v0-28-room-for-longer-words): F156 — Room for longer words — UI kit 0.37.0: the gallery in the fake language has 0 words cut off / split / overlapping (from 208 shots), English 0; names, initials, room codes and the game's name are translate="no"; fits re-measure when words change on the page; the HUD's corners give way with bars at 2rem. Also saves 0.6.5 (a link-code clock bug check:fast found). Next: Muzzy approves F156 + answers "accept teach's corner buttons in the fake language?" → retro → /deliver v0.28.** Released v0.29.0 before (v0.27 Ready to translate ✅). Hand-offs to Roll Better / Goops / Glyphtender in ROADMAP Ideas. Muzzy: one thing to keep doing, or stop doing, next time?
+2026-10-27 — **F156 — Room for longer words approved by Muzzy ("all approved": teach's corner buttons accepted in the fake language, retro kept). Delivering v0.28 → v0.30.0: security review, notes, merge, release.** Released v0.29.0 before (v0.27 Ready to translate ✅). Hand-offs to Roll Better / Goops / Glyphtender in ROADMAP Ideas. Muzzy: one thing to keep doing, or stop doing, next time?
 - v0.9 closed 2026-10-26 (F59 — Game core, F60 — Dev Kit Time tool, F62 — Goops passes the pack ✅; Goops' own Claude handles Goops). F64 — Realtime starter waits in Later. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
@@ -10,7 +10,7 @@ Reviewed through: framework 9ee0cf4 (F156 8d42a96..9ee0cf4: Claude wrote and rea
 
 ## Where we are
 Stage: develop   Milestone: v0.28 Room for longer words   Sprint: 46
-Doing: F156 — Room for longer words, built — waiting on Muzzy   Branch: dev/v0-28-room-for-longer-words   Version: 0.29.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.2.0)
+Doing: F156 — Room for longer words, done ✅ — delivering   Branch: dev/v0-28-room-for-longer-words   Version: 0.29.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.2.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.29.0
 
 ## Key facts

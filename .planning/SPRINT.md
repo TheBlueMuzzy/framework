@@ -36,6 +36,11 @@ Notes:
   - Two tests updated for the intended markup (translate="no" on the room code and the old-seats copy).
 - F156 — task 3, HUD (helper, merged 77ab366; read by Claude): root cause — a Bar with a width had a max-content plate, so a corner's least width was its full-length bars (F147 then let the top-left collapse to nothing at big text). Now fit-content: a corner keeps its bars at 2rem with names whole, and gives way to the middle at every text size; a bar with its name beside it shortens, then moves under the name (the results-row rule). F147's useBigText / data-big-text removed (the CSS covers it). Gallery: a 360-wide phone counts as short and the short HUD drops "Round 1" (the demo was over-full; a game on that phone shows less). HUD pseudo 29 → 0, English 0 → 0. Test hudFit.test.tsx (7 styles, red on the old CSS).
   - The connection chip (mine, 29ea914): a too-long word breaks inside it (data-ui-split-ok), and HudText fit re-measures on page rewrites.
-- F156 — task 6: the avatar's "name touching its circle" was the fake language rewriting its initials (task 1, translate="no"). Teach at 200%: Undo + Plant in both bottom corners can't fit a 390px phone side by side in the long language — accepted in the fake-language shoot only (knownShots, Claude's call). Ask Muzzy: OK to accept, like the talk bubble at 200%?
+- F156 — task 6: the avatar's "name touching its circle" was the fake language rewriting its initials (task 1, translate="no"). Teach at 200%: Undo + Plant in both bottom corners can't fit a 390px phone side by side in the long language — accepted in the fake-language shoot only (knownShots, Claude's call). Muzzy 2026-10-27: accepted ("all approved").
 - Found on the way (check:fast red, 2026-10-27): saves loadLinkCode judged this device's own code "live" by the real clock, not the game's (options.now) — its test's fixed 2026-10-20 date turned 7 days old today. Fixed in bbb0988 (saves 0.6.5 at task 7).
 - Lesson → ROADMAP Ideas (2026-10-27): a lint rule for "a module takes a now() option but calls Date.now() itself" — the saves time-bomb (its test's fixed date aged 7 days) would have been caught the day it was written.
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-27)
+- Went well: measuring first showed most finds came from the fake language rewriting names and codes, not the layout.
+- Went wrong: a saves test only broke once its fixed date got old — the code read the real clock in one place.
+- Change: a module that takes a clock option uses it everywhere (→ ROADMAP Ideas: the lint rule).
