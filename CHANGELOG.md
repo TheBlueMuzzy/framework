@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.30.0 — 2026-10-27
+
+The UI kit now makes room for longer words: in the long fake language, the whole gallery has no words cut off, broken mid-word or overlapping, and English looks the same as before. Player names, initials, room codes and the game's name are marked as never translated, so a browser's translate button and the fake language both leave them alone.
+
+### New
+- UI kit 0.37.0:
+  - Player names, avatar initials, the room code, the game's name and the credits' names carry `translate="no"`. `Text` takes `translate="no"` for a game's own (a score name, a code).
+  - Word-fits re-measure when their words change on the page, not only when the window or React changes them: HUD text with `fit`, titles and the ◀ ▶ picker. A browser's translate button now gets fitted titles too.
+  - The Lobby room keeps "Room QX2T" and its share line whole; Copy moves under them when there's no room beside them.
+  - A title beside only a ‹ that's still too wide at body size gets its own line under the ‹, the way a title beside an action already did.
+  - The place column on Results and the end screens ("1st") is never narrower than its word. Loading's title fits like the other titles.
+  - HUD: a corner gives way to the middle at every text size, its bars getting shorter down to 2rem. A bar with its name beside it shortens first, then moves under the name. ConnectionDot breaks a word that's too long for the room beside its dot inside its chip.
+  - The page check no longer blames a word that breaks after its part already shrank as far as it goes: a title at body size, a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
+- The turn-based starter takes UI kit 0.37.0 and saves 0.6.5.
+
+### Fixed
+- Saves 0.6.5: fetching another device's link code no longer makes this device forget its own still-working code when the game passes its own clock, so "Delete my data" still reaches it.
+
+### Known issues
+- The gallery's callout demo at 200% text in the fake language: its two bottom-corner buttons are each wider than half a phone, so they meet. Status: accepted — the kit warns, the game makes room.
+
 ## v0.29.0 — 2026-10-27
 
 Games can now be translated without surprises. The lint module flags player words that are typed into game code instead of `content/text/en.json`, and the UI kit can show a game in a long fake language, so words that won't fit once translated show up before any translator sees them.

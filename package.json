@@ -1,7 +1,7 @@
 {
   "name": "game-framework",
   "private": true,
-  "version": "0.29.0",
+  "version": "0.30.0",
   "type": "module",
   "description": "Framework root: holds the ONE shared ESLint setup (eslint.config.js) for every module. Run `npm install` here once. Each module's `npm run lint` uses it (npm puts this folder's node_modules/.bin on the path and ESLint finds eslint.config.js by walking up). `npm run lint` here lints every module at once.",
   "scripts": {

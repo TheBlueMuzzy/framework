@@ -10,7 +10,7 @@ Reviewed through: framework 2d2e55f (9ee0cf4..2d2e55f: plan files + one knownSho
 
 ## Where we are
 Stage: deliver   Milestone: v0.28 Room for longer words ✅   Sprint: — (46 archived)
-Doing: released v0.30.0 — next /sprint   Branch: main   Version: 0.29.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.2.0)
+Doing: released v0.30.0 — next /sprint   Branch: main   Version: 0.30.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.2.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.30.0
 
 ## Key facts
