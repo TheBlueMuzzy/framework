@@ -431,6 +431,14 @@ flowchart LR
   F91[✅ F91 Translation readiness] --> F156[✅ F156 Room for longer words]
 ```
 
+## v0.29 — Clocks you can trust  ← current · planned 2026-10-27
+Goal (Muzzy 2026-10-27: "clock lint rule"): code that takes a clock option (`now`) uses it everywhere — a stray `Date.now()` beside it is a lint error, so a test with a fixed date can never turn red on its own a week later.
+- 🔨 F157 🔧 Clock lint rule — the lint module gets bmuz/own-clock: in code that takes a `now` clock option, a bare `Date.now()` (not a default value or a `?? Date.now()` fallback) is an error, `// clock-ok: <why>` for real ones; the framework's own lint uses it on every module; install-module adds it to games (found by F156 — Room for longer words: saves' link-code test went red when its fixed date turned 7 days old) — should · sprint 47
+```mermaid
+flowchart LR
+  F157[F157 Clock lint rule]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -450,7 +458,6 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-10-27 — **Lint: a module that takes a `now()` option never calls `Date.now()` itself** (found by F156 — Room for longer words: saves' loadLinkCode judged its own link code by the real clock, and its test's fixed 2026-10-20 date turned check:fast red 7 days later). A rule in the framework's root eslint: in a function whose options / parameters carry `now`, a bare `Date.now()` (not a default value or a `?? Date.now()` fallback) is refused.
 - 2026-10-27 — **Fake-language leftovers outside F156 — Room for longer words' bar** (full shoot:pseudo, 2026-10-27): edge 95 (words touching their box), ring 4, small 2 (an invisible 16px-tall element named after the Game over / Victory title, landscape at 200% — not a control a player taps), grows 2 (a Neon player chip 3px wider after it appeared, on a 360 phone — the fake language rewrites after first measure). And a PlayerChip's / seat button's aria-label is the player's name, which the fake language still rewrites (only drawn words are translate="no").
 - 2026-10-27 — **GitHub's test-browser download keeps the browsers between runs** (v0.27 look-back: the saves job's `playwright install --with-deps` timed out at 15 min and held up the merge — the second time after v0.23's 35-min hang; a re-run passed): keep `~/.cache/ms-playwright` with actions/cache keyed on the Playwright version in .github/workflows/checks.yml, so only the system packages are fetched each run; also in templates/checks.yml for the games.
 - 2026-10-27 — **Hand to the game sessions (found by F91 — Translation readiness, read-only measure):** each takes lint 0.2.0 and UI kit 0.36.0 with install-module (the player-text rule goes in as warnings with the list), then moves player words to content/text/en.json or marks `// text-ok: <why>`, and looks at the game with `?pseudo`. Roll Better 7 (src/hooks/useRoom.ts room errors: "Room not found", "Connection lost"… — real) · Goops 3 (Spotlight aria-label "Tip" real; "Shunt piece", "Goo failed:" dev words) · Glyphtender 31 (4 label + 2 aria-label real; ~20 move reasons from its own turn / draft / refresh helpers — real if the game shows them; AI report labels and rails-check notes → text-ok).
