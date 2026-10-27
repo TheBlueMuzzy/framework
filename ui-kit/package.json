@@ -14,7 +14,8 @@
     "shoot": "node scripts/shoot.mjs",
     "shoot:webkit": "node scripts/shoot.mjs --webkit",
     "compare:engines": "node scripts/compareEngines.mjs",
-    "pick-sheet": "node scripts/pick-sheet.mjs"
+    "pick-sheet": "node scripts/pick-sheet.mjs",
+    "shoot:pseudo": "node scripts/shoot.mjs --pseudo"
   },
   "dependencies": {
     "react": "^19.3.0",

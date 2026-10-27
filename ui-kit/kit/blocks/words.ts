@@ -33,8 +33,12 @@ const longer = (word: string) => {
   const lower = letters.map((ch) => ch.toLowerCase())
   return accent(word) + accent(Array.from({ length: extra }, (_, i) => lower[i % lower.length]).join(''))
 }
-/** Is this text already in the fake language? (so the page pass never does it twice) */
-export const isPseudo = (text: string) => /^\s*\[[\s\S]*\]\s*$/.test(text) && /[áéíöûñŕšţÅÉÍÖÛÑŔŠŢ]/u.test(text)
+const PSEUDO_LETTERS = new Set(Object.values(ACCENTS))
+/** Is this text already in the fake language — whole, or a PIECE of it? A part that splits its words into pieces (the
+ *  talking bubble's wave: one span per letter) hands back fragments with no brackets; rewriting those again grew the
+ *  text ~40% a round until the page ran out of stack (found by shoot:pseudo, sprint 45). Any fake-language letter in
+ *  it = done. (A real "Café" is left as it is — English UI words rarely carry these marks.) */
+export const isPseudo = (text: string) => [...text].some((ch) => PSEUDO_LETTERS.has(ch))
 export function pseudo(text: string) {
   if (!/\p{L}/u.test(text) || isPseudo(text)) return text
   const lead = text.match(/^\s*/)![0]
