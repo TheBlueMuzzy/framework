@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "install-lint": "node scripts/install-lint.mjs"
+  },
+  "bmuz": {
+    "folders": ["src/lint"],
+    "check": "lint"
   },
   "devDependencies": {
     "vitest": "^5.0.2"
