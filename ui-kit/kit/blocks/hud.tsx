@@ -286,8 +286,12 @@ function useFitText(box: RefObject<HTMLDivElement | null>, text: string | null) 
     fitNow(true)
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => fitNow())
     observer?.observe(el)
+    // …and when its words change on the page without React (a browser's translate button, the fake language: 0.37.0,
+    // F156 — the fit stayed measured on the English word). The fit itself only sets attributes, so it never loops.
+    const rewritten = typeof MutationObserver === 'undefined' ? null : new MutationObserver(() => fitNow(true))
+    rewritten?.observe(el, { characterData: true, childList: true, subtree: true })
     document.fonts?.ready.then(() => fitNow(true))
-    return () => { open = false; observer?.disconnect() }
+    return () => { open = false; observer?.disconnect(); rewritten?.disconnect() }
   }, [box, text])
 }
 
@@ -423,11 +427,13 @@ export function Rank({ place, of, format = ordinal, label = 'Place' }: RankProps
 
 // CONNECTION DOT — online status. Says it in words too when something's wrong.
 // Its words may take two lines (between words) when its HUD corner gives way — big text on an upright phone (0.35.2).
+// A word too long for the room beside the dot breaks there as the last resort (0.37.0, F156: a translated "connection"
+// ran out of the chip) — data-ui-split-ok tells the page check that's on purpose.
 export const connectionWords = { good: 'Connected', weak: 'Weak connection', lost: 'Offline' }
 export function ConnectionDot({ status, words }: { status: 'good' | 'weak' | 'lost'; words?: Partial<typeof connectionWords> }) {
   const w = { ...connectionWords, ...words }
   return (
-    <Chip role="status" aria-label={w[status]} data-wrap>
+    <Chip role="status" aria-label={w[status]} data-wrap data-ui-split-ok>
       <span className="kit-dot" data-status={status} />
       {status !== 'good' && <Text kind="caption">{w[status]}</Text>}
     </Chip>

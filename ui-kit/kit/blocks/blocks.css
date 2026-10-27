@@ -123,6 +123,9 @@
      a left corner, the one that gives way (an upright phone at 200% text: it ran out of its chip, the dot squeezed off).
      Only there: in a right corner it would narrow the corner's other pieces' row too. */
   .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { white-space: normal; }
+  /* …and a word wider than the whole corner breaks there, the last resort Results' names and titles take (0.37.0, F156:
+     a long "connection" at 200% text ran out of its chip onto the 40% beside it) — a word that fits never breaks */
+  .kit-screen > :is([data-slot="top-left"], [data-slot="bottom-left"]) .kit-hud-chip[data-wrap] .kit-text { overflow-wrap: break-word; min-inline-size: 0; }
   /* a bar in a HUD corner gives way when the other corner grows (a 5-digit score pushed the Score chip over the bars on
      a 390px phone — Goops 2026-10-17): it shrinks to 2rem instead of holding its 6rem minimum. Bars with a width keep it. */
   .kit-hud-chip:not([data-width]) { max-inline-size: 100%; min-inline-size: 0; }

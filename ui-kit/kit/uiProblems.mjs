@@ -23,7 +23,9 @@
 //              3:1 against what's behind their letters, their halo not counted (it's for busy game art) — 0.35.9
 //   "split:"   a word broken across lines in the middle ("Accessibil / ity") although it would fit on one line of the
 //              box it's drawn in; a word wider than that box may still wrap — 0.34.1 — unless it's in a title (0.35.1:
-//              a title can drop a size instead — "Reconnecti / ng…")
+//              a title can drop a size instead — "Reconnecti / ng…"). A part whose words have nowhere else to go and no
+//              smaller size (ConnectionDot's chip: its dot never moves, its corner gives way) carries data-ui-split-ok:
+//              there a word too long for the room left beside its fixed parts breaks as the last resort — 0.37.0
 // Used by the gallery's screenshots (scripts/shoot.mjs) and by a game's npm run check:framework (conformance.mjs).
 // Skipped: the Dev Kit (#devkit-root), anything hidden, inert or aria-hidden, anything inside [data-ui-check="skip"]
 // (a game's on-purpose overlap, e.g. a title drawn over its own shadow copy), and things covered by something else
@@ -350,6 +352,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // where words end, not "in the middle".
   const splitWords = (el) => {
     const out = []
+    if (el.closest('[data-ui-split-ok]')) return out
     const range = document.createRange()
     for (const n of wordsIn(el, false)) {
       for (const m of n.textContent.matchAll(/[^\s\-­‐-—/]{2,}/g)) {

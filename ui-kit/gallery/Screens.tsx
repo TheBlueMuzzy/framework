@@ -157,7 +157,7 @@ function HudSample() {
     <Hud
       vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label="Energy" value={40 + (tick % 4) * 20} variant="accent" width="s" showLabel />
         {!short && <Bar label="Lives" pips value={2} max={3} />}</Stack>}
-      status={<Row gap="s"><HudText>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
+      status={<Row gap="s"><HudText fit>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
         <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>{gear}</Button>{byCoins && connection}</Row>}
       onPause={() => screens.push('pause')}

@@ -303,6 +303,16 @@ describe('findProblems — words split in the middle', () => {
     expect(only('split', found)).toEqual([])
   })
 
+  // 0.37.0 (F156): ConnectionDot's chip — a translated "connection" too long for the room beside the dot breaks on purpose
+  it('a word in a data-ui-split-ok part may break; the same squeeze without it is flagged', async () => {
+    const chip = (mark) => `
+      <div ${mark} style="display:flex;width:150px;border:1px solid #888;border-radius:8px">
+        <span style="flex:none;width:60px">●</span>
+        <span style="min-width:0;overflow-wrap:break-word">Verbindungsfehler</span></div>`
+    expect(only('split', await problemsOn(chip('data-ui-split-ok')))).toEqual([])
+    expect(only('split', await problemsOn(chip('')))).toHaveLength(1)
+  })
+
   // 0.35.1 (F145): Reconnecting's "Reconnecti / ng…" — a title word wider than its whole card at 200% text. Not a squeeze
   // (the word fits nowhere at that size), but a title can drop a size, so a broken title word is flagged too
   it('a TITLE word wider than its box is flagged; the same word as plain text is not', async () => {
