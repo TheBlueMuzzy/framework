@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.27.0, 2026-10-26)
+Release target: none — a library; each milestone releases on its own (latest v0.28.0, 2026-10-26)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -407,9 +407,9 @@ flowchart LR
   F155[F155 Rooms local port]
 ```
 
-## v0.26 — Rules check themselves  ← current · planned 2026-10-26
+## v0.26 — Rules check themselves  ✅ released 2026-10-26 (v0.28.0) · planned 2026-10-26
 Goal (Muzzy 2026-10-26: "Rules check themselves"): two coding rules Claude only remembers today become lint errors in every game — no React state set inside useFrame, no tuning numbers in game logic.
-- 🔨 F90 🔧 Coding-standard lint rules — a framework lint module: no React state set inside useFrame, no hard-coded tuning numbers in game logic (`// tuning-ok: <why>` for real constants); install-module adds them to a game's lint — should · sprint 44
+- ✅ F90 🔧 Coding-standard lint rules — a framework lint module: no React state set inside useFrame, no hard-coded tuning numbers in game logic (`// tuning-ok: <why>` for real constants); install-module adds them to a game's lint — should · sprint 44
 ```mermaid
 flowchart LR
   F90[F90 Coding-standard lint rules]
@@ -435,6 +435,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-26 — **Hand to the game sessions (found by F90 — Coding-standard lint rules, read-only measure):** each takes the lint module with `install-module.mjs lint .` — it goes in as warnings with the list — then moves each setting to `content/` or marks a real constant `// tuning-ok: <why>`, and switches the rules to errors. Roll Better 53 finds (pop/shrink timings, die + wall sizes, row spacing, haptics, 13 game timers) · Goops 31 (goo particle physics R0/RSEP/KREP/SEP/DROP_R, OUCH_SHARE, GAZE_FOLLOW; SAVE_VERSION, EPSILON, ONE_DAY_S, slot indices are real constants) · Glyphtender 25 (8 AI *_WEIGHTS groups — likely content/ai, SCORE_BEAT_MS, WAIT_FOR_VIEW_MS; FAR, MAX_PLAYERS are constants). All three have the Dev Kit's idle-load `setTimeout(mount, 1000)` in main.tsx → `// tuning-ok:` like the starter. No `useFrame` state finds (Roll Better's RowChips only sets state when the chip changes — allowed).
 - 2026-10-26 — **Saves: the real-Firefox test can lose its browser under heavy load** (Sprint 43: "Target page, context or browser has been closed", 8 tests, while 12 test browsers ran; alone 276/276 at once) — if it comes back, give that test its own browser launch retry or run it apart from the shoots.
 - 2026-10-26 — **Starter: after Results, Escape shows a faint "✕" board mark (1–3:1) and a key-press focus ring** (found by F153 — Light-words contrast check's helper, outside the starter's own checks) — look at it next time the starter is touched.
 - 2026-10-26 — → v0.25 F154. **AI module: `GamePlug.moments` refuses `{ moment, by }`** (found building F151 — Turn-based starter): ai/kit/types.ts only allows a string or a list, but botBanter's MomentMap and the README allow `{ moment, by }` — the starter exports its moments separately to get round it. Widen the type.
