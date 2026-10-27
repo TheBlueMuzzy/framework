@@ -287,6 +287,11 @@
   .kit-listrow-text:has(.kit-result-name) { min-inline-size: auto; max-inline-size: 100%; }
   .kit-result-name > .kit-text { min-inline-size: 0; overflow-wrap: break-word; }
   .kit-place { min-inline-size: 3.5ch; }
+  /* The Lobby room's head (0.37.0, F156): the same rule — "Room QX2T" and its share line keep room for their longest word,
+     and Copy moves under them when they'd be narrower (long words at 200% text squeezed them to a few letters a line) */
+  .kit-room-head { flex-wrap: wrap; }
+  .kit-room-head > .kit-result-name { min-inline-size: auto; }
+  .kit-room-head > .kit-button { margin-inline-start: auto; }
   /* An avatar in a list row (Results, the Lobby room) keeps room for the ring the winner / you wear (kit.css: an outline
      0.1875rem + 0.125rem outside its box — not part of the box, so the row's gap never counted it: "1ST", the name and
      its ★ had 3 px at 100% text and the ring crossed them at 200%, 0.35.8, F152). Every row's avatar, ringed or not, so

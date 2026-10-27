@@ -330,7 +330,7 @@ export function PlayerSeats({ players, activeId, onSeatTap, showNames = true }: 
               : avatar}
             {showNames && (
               <Stack gap="xs">
-                <Text kind="label">{p.name}</Text>
+                <Text kind="label" translate="no">{p.name}</Text>
                 {p.score !== undefined && <Text kind="caption">{p.score}</Text>}
               </Stack>
             )}
@@ -387,7 +387,7 @@ export function PlayerChip({
         <Stack gap="xs" className="kit-player-chip-text">
           {hasNameLine && (
             <Row gap="xs" className="kit-nowrap">
-              {showName && <Text kind="label">{name}</Text>}
+              {showName && <Text kind="label" translate="no">{name}</Text>}
               {shown(badge) && <Badge>{badge}</Badge>}
               {oneLine && shown(detail) && <Text kind="caption">{detail}</Text>}
             </Row>

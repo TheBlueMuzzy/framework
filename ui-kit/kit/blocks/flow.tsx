@@ -93,7 +93,7 @@ export function Results({ players, meId, lowestWins, title, message, onContinue,
                   <span className="kit-place"><Text kind="heading">{format(p.place)}</Text></span>
                   <Avatar name={p.name} src={p.avatar} color={p.color} active={p.place === 1} />
                   <Row gap="xs" className="kit-result-name">
-                    <Text kind="label">{p.name}</Text>
+                    <Text kind="label" translate="no">{p.name}</Text>
                     {p.place === 1 && <Badge variant="primary"><span role="img" aria-label={w.winner}>★</span></Badge>}
                     {p.id === meId && <Badge variant="primary">{w.you}</Badge>}
                   </Row>

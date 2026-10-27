@@ -5,8 +5,8 @@ What changes: the kit's room, HUD, pinned, results and end-game screens (and the
 
 ## F156 🔧 Room for longer words
 Done when: `npm run shoot:pseudo` (the gallery in the long fake language) finds 0 clipped / split / overlap problems; the English gallery shoot finds nothing new; each fix reuses the kit's existing fit-or-wrap pieces (nameFit, useTitleFit, fit-wrap) rather than a new one; the starter's check:full green on the new kit.
-- [ ] 🤖 1. Measure first: rerun shoot:pseudo on today's code, list the clipped / split / overlap finds by screen and by the part that causes them, and name which existing fit-or-wrap piece each part should use — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. Room and lobby: room code, player names, "friends" split — ui-kit/kit/blocks/online.tsx
+- [x] 🤖 1. Measure first: rerun shoot:pseudo on today's code, list the clipped / split / overlap finds by screen and by the part that causes them, and name which existing fit-or-wrap piece each part should use — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. Room and lobby: room code, player names, "friends" split — ui-kit/kit/blocks/online.tsx
 - [ ] 🤖 3. HUD: corner texts that overlap each other — ui-kit/kit/blocks/hud.tsx
 - [ ] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
 - [ ] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
@@ -19,3 +19,8 @@ Notes:
 - Starting point (F91 — Translation readiness, 2026-10-27, full shoot:pseudo): 427 of 961 shots with a find — edge 659, clipped 190, split 94, overlap 46. The check's kinds by screen: room 99, hud 57, pinned 45, results 43, endgame + endgamedim 40, emotes 12, chips 12, roomauto 7, menu 4, seats / victoryreveal / teach / settings 1–2. Task 1 re-measures, since the bar is set from today's code.
 - Decision (Claude, 2026-10-27): `edge:` finds (a word touching its box) aren't part of the 0 bar — they're 659 mostly-harmless touches and check:framework's fake-language pass already treats a word running past its button as edge: → task 1 lists the ones that run past, those are fixed; the rest stay counted, not chased.
 - Decision (Claude, 2026-10-27): the fake-language check stays a warning in games (they may have their own long words to sort); the gallery's own bar is 0.
+- F156 — task 1 (2026-10-27, full shoot:pseudo on 3913903-era code, 961 shots in 922 s): the same as F91 — 208 shots with a clipped / split / overlap find (edge 659, clipped 190, split 94, overlap 46). By screen: room 100, hud 57, pinned 45, results 43, endgame + endgamedim 40, chips 12, emotes 12, roomauto 7, menu 4, the rest 1–2.
+  - Root cause of nearly all "clipped" (190): the fake language rewrote words that are never translated — a player's initials in the avatar circle ("SM" → "[ŠMš]", spilling out), player names, the room code ("QX2T" → "[ǪẊǫ2Ţţ]"). A real translation never touches them. Fix: HTML's own `translate="no"` (a browser's translate button already honours it) on the avatar, every player-name Text, the room code and the credits names; the fake language skips `[translate="no"]`; Text takes `translate`. Re-shoot of room / pinned / results / chips / emotes / parts: clipped 0 (from ~150).
+  - Real: the Lobby room head at 200% text on a phone — Copy stayed beside "Room QX2T" and its share line, squeezing them to a few letters a line ("[ŔÖÖ / ɱŔÖ]", "friends" split). Fix (task 2): the Results rows' rule — the words keep room for their longest word and Copy wraps under them (.kit-room-head in blocks.css). Re-shoot room / roomauto / lobby: 0 (from 100), 1 lobby split left (task 6).
+  - Suspected: HudText / title fits re-measure only when React changes the words, so a word the fake language swaps on the page keeps its English fit (HUD overlaps "Weak connection" × "40%", "Roll" × "Hold to Roll") — task 3 checks this in the browser first.
+  - Odd: Results "[1šţš]" ("1st") reported split, but the phone-small shot shows it whole — task 5 looks at what the check measures.

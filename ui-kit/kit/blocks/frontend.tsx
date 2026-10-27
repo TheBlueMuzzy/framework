@@ -161,7 +161,7 @@ export function Credits({ people = [], assets = [], notices = 'third-party-notic
             {people.map((group) => (
               <Stack key={group.role} gap="xs">
                 <Text kind="heading">{group.role}</Text>
-                {group.names.map((name) => <Text key={name}>{name}</Text>)}
+                {group.names.map((name) => <Text key={name} translate="no">{name}</Text>)}
               </Stack>
             ))}
             {assets.length > 0 && (

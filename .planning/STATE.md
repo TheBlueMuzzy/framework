@@ -10,7 +10,7 @@ Reviewed through: framework 626f64b (F91 6f725cf..626f64b by Claude: lint/kit/ru
 
 ## Where we are
 Stage: develop   Milestone: v0.28 Room for longer words   Sprint: 46
-Doing: F156 — Room for longer words, planned   Branch: main (→ dev/v0-28-room-for-longer-words at /develop)   Version: 0.29.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.36.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2 · lint 0.2.0)
+Doing: F156 — Room for longer words, building   Branch: dev/v0-28-room-for-longer-words   Version: 0.29.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.36.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.4 · version 0.1.2 · lint 0.2.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.29.0
 
 ## Key facts
