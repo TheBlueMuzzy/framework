@@ -123,8 +123,14 @@ function Modes() {
 // F145: counted in the page's own text size, as a game should — Settings' Text size sets the page's font size, which a
 // media query never sees, so an upright phone at 200% (30 lines of its text don't fit) is short too.
 // Answers '' (not short), 'upright' or 'sideways'.
-const isShortScreen = () => innerHeight > 30 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16) ? ''
-  : innerWidth > innerHeight ? 'sideways' : 'upright'
+// F156: a small phone (under 24 lines of text wide — 360 px at 100%) counts as upright-short too: on 360×780 the full
+// HUD only just fit in English, and a translation's longer words (a name over its bar, the connection on 3 lines) left
+// the turn banner no height — it drew over the bottom row. A game on that phone would show less, as here.
+const isShortScreen = () => {
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+  if (innerHeight > 30 * rem && innerWidth >= 24 * rem) return ''
+  return innerWidth > innerHeight ? 'sideways' : 'upright'
+}
 function useShortScreen() {
   return useSyncExternalStore((changed) => {
     addEventListener('resize', changed)
@@ -146,7 +152,10 @@ function HudSample() {
   // 0.33.1 (F123): and it needs less room, as a game on a small phone on its side would — portraits only (the names are
   // read out), the score as just its number, no lives row, the hint without its detail line (667×375 and 768×343 had
   // no room for them). F145: short counts the text size, so an upright phone at 200% does the same — except the
-  // connection, which stays at the bottom when upright (by the coins it squeezed the bars off: no width to spare there)
+  // connection, which stays at the bottom when upright (by the coins it squeezed the bars off: no width to spare there).
+  // F156: and the status as just its timer and score — no "Round 1" line. In a translation's longer words the middle
+  // between the corners was too narrow for it: round, timer and score stacked 4 lines tall and the turn banner landed
+  // on the seats and Roll (667×375, and 844×390 at 200% in Pixel).
   const shortness = useShortScreen()
   const short = shortness !== ''
   const byCoins = shortness === 'sideways'
@@ -157,7 +166,7 @@ function HudSample() {
     <Hud
       vitals={<Stack gap="xs"><Bar label="Health" icon="❤" value={70} variant="danger" width="m" /><Bar label="Energy" value={40 + (tick % 4) * 20} variant="accent" width="s" showLabel />
         {!short && <Bar label="Lives" pips value={2} max={3} />}</Stack>}
-      status={<Row gap="s"><HudText fit>Round 1</HudText><TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
+      status={<Row gap="s">{!short && <HudText fit>Round 1</HudText>}<TimerRing seconds={20 - (tick % 21)} total={20} /><Score value={120 + tick * 15} combo={1 + (tick % 4)} compact={short} /></Row>}
       currency={<Row gap="s"><Counter label="Coins" icon="🪙" value={250 + tick * 5} />
         <Button variant="secondary" icon aria-label="Settings" onClick={() => screens.push('settings')}>{gear}</Button>{byCoins && connection}</Row>}
       onPause={() => screens.push('pause')}

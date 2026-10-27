@@ -41,8 +41,11 @@ describe('blocks.css 0.35.4 (F147)', () => {
     expect(rule('.kit-menu > .kit-button {')).toContain('min-block-size: max(var(--target-min), calc(1lh + 2 * var(--border-width)))')
   })
 
-  it('HUD past its text cap: the top-left corner gives way to the middle (only then)', () => {
-    expect(rule('.kit-hud-slot[data-big-text]) > [data-slot="top-left"]')).toContain('min-inline-size: 0')
+  // 0.37.0 (F156): replaced — a bar's plate hugs it with fit-content, so a corner gives way at every text size
+  // (hudFit.test.tsx measures it in a browser); the top-left never shrinks to nothing past the text cap any more
+  it('HUD: no corner shrinks to nothing past the text cap; a bar\'s plate is fit-content', () => {
+    expect(css).not.toContain('data-big-text')
+    expect(rule('.kit-hud-chip[data-width] {')).toContain('inline-size: fit-content')
   })
 
   it('MenuHeader ‹ stops growing inside its border, not at the button\'s outside', () => {
