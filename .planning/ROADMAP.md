@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.29.0, 2026-10-27)
+Release target: none — a library; each milestone releases on its own (latest v0.30.0, 2026-10-27)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -423,12 +423,12 @@ flowchart LR
   F91[F91 Translation readiness]
 ```
 
-## v0.28 — Room for longer words  ← current · planned 2026-10-27
+## v0.28 — Room for longer words  ✅ released 2026-10-27 (v0.30.0) · planned 2026-10-27
 Goal (Muzzy 2026-10-27: "yes next"): every kit screen holds words ~40% longer — `npm run shoot:pseudo` finds 0 cut-off, split or overlapping words.
 - ✅ F156 🔧 Room for longer words — the kit's room, HUD, pinned, results and end-game screens wrap or fit words ~40% longer (427 of 961 gallery shots had a find in the fake language: names cut off, "friends" split, HUD corners overlapping; the parts page's avatar name touches its circle); `shoot:pseudo` 0 clipped / split / overlap is the bar — should · needs: F91 · sprint 46
 ```mermaid
 flowchart LR
-  F91[✅ F91 Translation readiness] --> F156[F156 Room for longer words]
+  F91[✅ F91 Translation readiness] --> F156[✅ F156 Room for longer words]
 ```
 
 ## Later
