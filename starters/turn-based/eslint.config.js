@@ -37,6 +37,6 @@ export default defineConfig([
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/devkit-game/**', '**/*.test.*'],
     plugins: { bmuz },
-    rules: { 'bmuz/no-state-in-frame': 'error', 'bmuz/no-tuning-numbers': 'error' },
+    rules: { 'bmuz/no-state-in-frame': 'error', 'bmuz/no-tuning-numbers': 'error', 'bmuz/no-player-text': 'error' },
   },
 ])
