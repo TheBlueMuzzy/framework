@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.28.0 — 2026-10-26
+
+A new lint module keeps two coding rules without anyone having to remember them: settings belong in `content/`, not typed into game code, and 3D games never update React state every frame. A clean game gets them as errors; an older game gets warnings and a list of what to move.
+
+### New
+- The lint module (`install-module.mjs lint .`) adds two rules to a game's own lint, so its quick check names the line:
+  - A named setting in game code (`const POP_DURATION = 0.15`), a group of them, or a fixed timer delay is flagged: move it to `content/`. A real constant passes when it says why: `// tuning-ok: <why>`.
+  - React state set on every frame inside `useFrame` is flagged: keep the value in a ref. Setting it only when something changed (inside an `if`) is fine.
+- The installer picks how strict to be from the game's code today: errors when it's clean, warnings plus the list when it isn't. An update never changes that choice.
+- The Dev Kit's framework check confirms the rules are on, and reminds a game while they're still warnings.
+- The turn-based starter has both rules as errors, so new games start clean.
+
 ## v0.27.0 — 2026-10-26
 
 Light in-game words like "Your turn" or "Game over" can no longer vanish on a light page unnoticed: the page check now flags them. The round intro reads clearly in every look, and two games can now run online side by side on one computer.
