@@ -23,3 +23,8 @@ Notes:
 - F157 — task 2: bmuz/own-clock in lint/kit/rules.mjs + 15 RuleTester cases (rules.test.mjs, 73/73): the saves bug red at its line; defaults, ?? fallbacks, clock definitions, a handed-in time, the fix itself, and `// clock-ok: <why>` green; a clock-ok without its why still red.
 - F157 — tasks 3–5 (2026-10-27): root eslint.config.js loads lint/kit/rules.mjs for every module (0 finds). install-lint: clockLevel from the game's own clock finds; added beside a 0.1.0 / 0.2.0 block; conformance wants it. lint 0.3.0. Starter: own-clock as an error, check:full 10/10.
 - Review (fresh helper, 3536038..313b68c): 4 real — a ?? / || anywhere up the tree counted as the fallback (`name || "at " + Date.now()`); the clock-name pattern matched "know"/"snow" and every callback inside startClock; window.performance.now / DateTime.now switched a file into clock mode; a class field `now = () => Date.now()` wasn't seen as the clock — + the warn hint skipped clock warnings. All fixed in 3fa0834, tests red first (ba36fba: 9 of 10 cases red on the first rule). The tighter fallback then found audio's `options.rng ?? seededRandom(Date.now())` — a seed, not a time → clock-ok.
+
+Retro: (Claude's draft; Muzzy kept it, 2026-10-27)
+- Went well: running the rule on the old saves file proved it catches the real bug, at its line.
+- Went wrong: my first rule had 4 mistakes (fallbacks too loose, clock names too broad, browser clocks counted, class fields missed) — a fresh review caught them.
+- Change: every new lint rule gets a fresh review before the hand-off.

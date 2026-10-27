@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.30.0, 2026-10-27)
+Release target: none — a library; each milestone releases on its own (latest v0.31.0, 2026-10-27)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -431,12 +431,12 @@ flowchart LR
   F91[✅ F91 Translation readiness] --> F156[✅ F156 Room for longer words]
 ```
 
-## v0.29 — Clocks you can trust  ← current · planned 2026-10-27
+## v0.29 — Clocks you can trust  ✅ released 2026-10-27 (v0.31.0) · planned 2026-10-27
 Goal (Muzzy 2026-10-27: "clock lint rule"): code that takes a clock option (`now`) uses it everywhere — a stray `Date.now()` beside it is a lint error, so a test with a fixed date can never turn red on its own a week later.
-- 🔨 F157 🔧 Clock lint rule — the lint module gets bmuz/own-clock: in code that takes a `now` clock option, a bare `Date.now()` (not a default value or a `?? Date.now()` fallback) is an error, `// clock-ok: <why>` for real ones; the framework's own lint uses it on every module; install-module adds it to games (found by F156 — Room for longer words: saves' link-code test went red when its fixed date turned 7 days old) — should · sprint 47
+- ✅ F157 🔧 Clock lint rule — the lint module gets bmuz/own-clock: in code that takes a `now` clock option, a bare `Date.now()` (not a default value or a `?? Date.now()` fallback) is an error, `// clock-ok: <why>` for real ones; the framework's own lint uses it on every module; install-module adds it to games (found by F156 — Room for longer words: saves' link-code test went red when its fixed date turned 7 days old) — should · sprint 47
 ```mermaid
 flowchart LR
-  F157[F157 Clock lint rule]
+  F157[✅ F157 Clock lint rule]
 ```
 
 ## Later

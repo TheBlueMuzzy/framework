@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-27 1:10 PM — **Sprint 47 built, waiting on Muzzy (branch dev/v0-29-clocks-you-can-trust): F157 — Clock lint rule — lint 0.3.0 bmuz/own-clock: a stray Date.now() in a file that takes a clock option is an error (fallbacks and the clock's own definition pass; // clock-ok: <why>). The framework's own lint runs it (0 finds); games get it with install-module (0 finds in all three); the starter has it. Next: Muzzy approves F157 → retro → /deliver v0.29.** Released v0.30.0 before (v0.28 Room for longer words ✅). Muzzy: one thing to keep doing, or stop doing, next time?
+2026-10-27 — **F157 — Clock lint rule approved by Muzzy (retro kept). Delivering v0.29 → v0.31.0.** Released v0.30.0 before (v0.28 Room for longer words ✅). Muzzy: one thing to keep doing, or stop doing, next time?
 - v0.9 closed 2026-10-26 (F59 — Game core, F60 — Dev Kit Time tool, F62 — Goops passes the pack ✅; Goops' own Claude handles Goops). F64 — Realtime starter waits in Later. Roll Better's @react-three/rapier ships with no licence → its next release is refused until checked (ROADMAP Ideas).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 - Glyphtender `dev/framework-checks` (pushed): all 6 pieces newest, GitHub checks green. It ships at its own /deliver.
@@ -10,7 +10,7 @@ Reviewed through: framework 3fa0834 (F157 3536038..313b68c by a fresh helper: 4 
 
 ## Where we are
 Stage: develop   Milestone: v0.29 Clocks you can trust   Sprint: 47
-Doing: F157 — Clock lint rule, built — waiting on Muzzy   Branch: dev/v0-29-clocks-you-can-trust   Version: 0.30.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.3.0)
+Doing: F157 — Clock lint rule, done ✅ — delivering   Branch: dev/v0-29-clocks-you-can-trust   Version: 0.30.0 (emotes 0.4.1 · ai 0.8.2 · rooms 0.13.0 · table 0.8.1 · UI kit 0.37.0 · Dev Kit 0.28.0 · crashes 0.2.1 · audio 0.4.1 · saves 0.6.5 · version 0.1.2 · lint 0.3.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.30.0
 
 ## Key facts
