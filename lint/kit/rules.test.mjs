@@ -124,5 +124,23 @@ tester.run('own-clock', rules['own-clock'], {
     { code: 'function f({ now }) { return now() }\nfunction g() { return Date.now() - 5 }', errors: [{ messageId: 'stray' }] },
     { code: 'const age = (o) => Date.now() - o.now()', errors: [{ messageId: 'stray' }] },
     { code: 'function f(o) { o.now() }\n// clock-ok:\nlog(Date.now())', errors: [{ messageId: 'stray' }] }, // the why is needed
+    // the review (sprint 47): a ?? / || is a fallback only when Date.now() IS its right side
+    { code: 'function f({ now }) { now() }\nconst label = name || `at ${Date.now()}`', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nconst r = cache ?? fetchFresh(Date.now())', errors: [{ messageId: 'stray' }] },
+    // …a clock's name is exact (not "know", "snow"), and only the function that holds the call counts
+    { code: 'function f({ now }) { now() }\nconst know = () => Date.now()', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nfunction snow() { return Date.now() }', errors: [{ messageId: 'stray' }] },
+    { code: 'function f({ now }) { now() }\nfunction startClock() { setInterval(() => save(Date.now()), 1) }', errors: [{ messageId: 'stray' }] },
   ],
+})
+
+tester.run('own-clock (the review, sprint 47: what must still pass)', rules['own-clock'], {
+  valid: [
+    'const t = window.performance.now()\nconst s = Date.now()',      // the browser's clocks aren't a clock option
+    'const t = globalThis.performance.now()\nconst s = Date.now()',
+    'const t = DateTime.now()\nconst s = Date.now()',                // luxon
+    'class C { now = () => Date.now() }\nnew C().now()',              // a class field defining the clock
+    'function f({ now = () => (ok ? Date.now() : 0) }) { now() }',    // anywhere inside a default value
+  ],
+  invalid: [],
 })
