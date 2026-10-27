@@ -15,12 +15,18 @@ function tester(files) {
   }
   return { t, results }
 }
-const config = (level) => `import bmuz from './src/lint/rules.mjs' // bmuz lint (F90)\nexport default [{ plugins: { bmuz }, rules: { 'bmuz/no-state-in-frame': '${level}', 'bmuz/no-tuning-numbers': '${level}' } }]\n`
+const config = (level) => `import bmuz from './src/lint/rules.mjs' // bmuz lint (F90)\nexport default [{ plugins: { bmuz }, rules: { 'bmuz/no-state-in-frame': '${level}', 'bmuz/no-tuning-numbers': '${level}', 'bmuz/own-clock': '${level}' } }]\n`
 const pkg = JSON.stringify({ scripts: { lint: 'eslint .' } })
 
 describe('ruleLevels', () => {
   it('reads string, array and number levels', () => {
-    expect(ruleLevels(`'bmuz/no-state-in-frame': ['warn'], "bmuz/no-tuning-numbers": 2`)).toEqual({ 'bmuz/no-state-in-frame': 'warn', 'bmuz/no-tuning-numbers': 'error', 'bmuz/no-player-text': null })
+    expect(ruleLevels(`'bmuz/no-state-in-frame': ['warn'], "bmuz/no-tuning-numbers": 2`)).toEqual({ 'bmuz/no-state-in-frame': 'warn', 'bmuz/no-tuning-numbers': 'error', 'bmuz/own-clock': null, 'bmuz/no-player-text': null })
+  })
+  it('a game on the older block (no own-clock, lint 0.2.0) is told to run the installer again', async () => {
+    const older = config('error').replace(", 'bmuz/own-clock': 'error'", '')
+    const { t, results } = tester({ 'eslint.config.js': older, 'package.json': pkg })
+    await check(t)
+    expect(results[CHECKS.rules]).toBe('fail')
   })
   it('a rule only in a comment is not on', () => {
     expect(ruleLevels(`// 'bmuz/no-tuning-numbers': 'error'`)['bmuz/no-tuning-numbers']).toBe(null)

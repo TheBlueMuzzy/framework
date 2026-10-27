@@ -1,7 +1,7 @@
 // THE LINT MODULE'S PROMISE CHECKS — run by the Dev Kit's check-framework.mjs (npm run check:framework).
-// The promise: the game's own lint holds the two coding rules, so every quick check refuses a setting written into the
-// code and React state set every frame. What the game must provide:
-//   - eslint.config imports ./src/lint/rules.mjs and switches both rules on (install-lint adds it)
+// The promise: the game's own lint holds the coding rules, so every quick check refuses a setting written into the
+// code, React state set every frame, and (0.3.0, F157) a stray Date.now() beside a clock option. What the game must provide:
+//   - eslint.config imports ./src/lint/rules.mjs and switches the rules on (install-lint adds it)
 //   - a "lint" script in package.json (the quick check runs it)
 //   - the rules as errors once the game is clean — warnings are a game's way in, said here until they're switched
 // (The finds themselves are the lint's job: npm run lint lists them.)
@@ -9,13 +9,13 @@
 export const title = 'Lint'
 
 export const CHECKS = {
-  rules: 'the game\'s lint has the coding rules (bmuz/no-state-in-frame, bmuz/no-tuning-numbers; bmuz/no-player-text when its words live in content/text/en.json)',
+  rules: 'the game\'s lint has the coding rules (bmuz/no-state-in-frame, bmuz/no-tuning-numbers, bmuz/own-clock; bmuz/no-player-text when its words live in content/text/en.json)',
   script: 'the game\'s checks run its lint (a "lint" script)',
   strict: 'the coding rules are errors, not warnings',
 }
 
 const ESLINT_CONFIGS = ['eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.mts']
-const RULES = ['bmuz/no-state-in-frame', 'bmuz/no-tuning-numbers']
+const RULES = ['bmuz/no-state-in-frame', 'bmuz/no-tuning-numbers', 'bmuz/own-clock'] // (own-clock: lint 0.3.0, F157)
 const TEXT_RULE = 'bmuz/no-player-text' // F91: on when the game keeps its words in content/text/en.json
 const withoutComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"])\/\/[^\n]*/g, '$1')
 
@@ -57,7 +57,7 @@ export async function check(t) {
     const name = CHECKS.strict
     const warned = wanted.filter((rule) => levels[rule] === 'warn')
     if (!config || missing.length) t.skip(name, 'the rules aren\'t on yet (above)')
-    else if (warned.length) t.warn(name, [`${warned.join(' and ')} ${warned.length > 1 ? 'are' : 'is'} still a warning — a find doesn't stop the checks.`], `Move each find's setting to content/ (or // tuning-ok: <why>) and its player words to content/text/en.json (or // text-ok: <why>), then switch to 'error' in ${config}.`)
+    else if (warned.length) t.warn(name, [`${warned.join(' and ')} ${warned.length > 1 ? 'are' : 'is'} still a warning — a find doesn't stop the checks.`], `Move each find's setting to content/ (or // tuning-ok: <why>) its player words to content/text/en.json (or // text-ok: <why>) and a stray Date.now() to the clock option (or // clock-ok: <why>), then switch to 'error' in ${config}.`)
     else t.pass(name, `all ${wanted.length} errors`)
   }
 }
