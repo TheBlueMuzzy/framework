@@ -439,6 +439,20 @@ flowchart LR
   F157[✅ F157 Clock lint rule]
 ```
 
+## v0.30 — Steadier checks  ← current · planned 2026-10-27
+Goal (Muzzy 2026-10-27: "do A … they seem like easy adds"): the framework's own checks stop holding up merges and stop letting old slips come back — GitHub keeps its test browsers, every installer reads its version one shared way, and the starter and the fake language come out clean.
+- 🔨 F158 🔧 Keep test browsers on GitHub — checks.yml keeps the downloaded test browsers between runs (actions/cache on ~/.cache/ms-playwright, keyed on the Playwright version + engines), so only the system packages are fetched each run (v0.27 look-back: the saves job's browser download timed out at 15 min and held up the merge, after v0.23's 35-min hang) — should · sprint 48
+- 🔨 F159 🧱 One shared version helper — one framework script reads a module's VERSION + git commit once (git asked only once per run), every installer uses it, and a framework check refuses an installer that asks git itself (v0.26 look-back: the slow install was fixed twice, F128 then F90) — should · sprint 48
+- 🔨 F160 🐞 Starter Escape after Results — after Results, Escape leaves a faint "✕" board mark (1–3:1) and a key-press focus ring on the starter (found by F153 — Light-words contrast check's helper): measured on today's code first, then fixed at its root with a check that keeps it fixed — should · sprint 48
+- 🔨 F161 ✨ Fake-language leftovers — the shoot:pseudo finds left after F156 — Room for longer words (edge 95, ring 4, small 2, grows 2) and a player's name in aria-labels still rewritten: measured first, fixed or listed with a reason in knownShots — could · sprint 48
+```mermaid
+flowchart LR
+  F158[🔨 F158 Keep test browsers]
+  F159[🔨 F159 One version helper]
+  F160[🔨 F160 Starter Escape]
+  F161[🔨 F161 Fake-language leftovers]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
