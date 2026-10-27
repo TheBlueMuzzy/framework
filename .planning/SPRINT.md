@@ -8,8 +8,8 @@ Done when: `npm run shoot:pseudo` (the gallery in the long fake language) finds 
 - [x] 🤖 1. Measure first: rerun shoot:pseudo on today's code, list the clipped / split / overlap finds by screen and by the part that causes them, and name which existing fit-or-wrap piece each part should use — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. Room and lobby: room code, player names, "friends" split — ui-kit/kit/blocks/online.tsx
 - [ ] 🤖 3. HUD: corner texts that overlap each other — ui-kit/kit/blocks/hud.tsx
-- [ ] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
-- [ ] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
+- [x] 🤖 4. Pinned box: words cut off — ui-kit/kit/blocks/pinned.tsx
+- [x] 🤖 5. Results and end game: names cut off — ui-kit/kit/blocks/flow.tsx
 - [ ] 🤖 6. The avatar's name touching its circle, and the smaller screens left by task 1 (emotes, chips, seats, menu, teach, settings) — ui-kit/kit/controls/Avatar.tsx
 - [ ] 🤖 7. Full shoot:pseudo + the English shoot; the starter takes the new kit (install-module) and its check:full green; README + VERSION — ui-kit/README.md
 Check: shoot:pseudo 0 clipped / split / overlap (from 427 shots with a find); the English shoot no new finds; each fixed part has a test red on the old code where a unit test can see it; the starter's check:full green; root check:fast green.
@@ -24,3 +24,12 @@ Notes:
   - Real: the Lobby room head at 200% text on a phone — Copy stayed beside "Room QX2T" and its share line, squeezing them to a few letters a line ("[ŔÖÖ / ɱŔÖ]", "friends" split). Fix (task 2): the Results rows' rule — the words keep room for their longest word and Copy wraps under them (.kit-room-head in blocks.css). Re-shoot room / roomauto / lobby: 0 (from 100), 1 lobby split left (task 6).
   - Suspected: HudText / title fits re-measure only when React changes the words, so a word the fake language swaps on the page keeps its English fit (HUD overlaps "Weak connection" × "40%", "Roll" × "Hold to Roll") — task 3 checks this in the browser first.
   - Odd: Results "[1šţš]" ("1st") reported split, but the phone-small shot shows it whole — task 5 looks at what the check measures.
+- F156 — tasks 4–6 (2026-10-27):
+  - Pinned (45 clipped), chips, emotes, parts: all were names / initials → translate="no" (task 1). Re-shoot: 0.
+  - Results / end game: "1st" split at 200% text — .kit-place's fixed 3.5ch replaced the flex item's own "as wide as my word" minimum → max(3.5ch, min-content). Re-shoot: 0.
+  - Main menu "Better" split: it's the game's name ("Roll Better") — never translated → translate="no" on MainMenu's title (and its art's alt).
+  - Same blind spot as HudText in the title fit (useTitleFit) and the ◀ ▶ picker (fitPicker): they re-measure on resize / React words only, so a word swapped on the page kept its English fit → each also re-measures on a MutationObserver of its own words (the fits only set attributes: no loop). Loading's title had no fit at all → useTitleFit like Seat picker.
+  - A title beside only a ‹ (Lobby "Play online", payslip) at body size still wider than its room: the header wraps and the title gets its own line under the ‹ — tight's motion (blocks.css), word whole.
+  - Page check (uiProblems.mjs, 0.37.0): a word may break where its part already went all the way — a title at data-fit="split" (body size), a ◀ ▶ picker at data-fit="stack", or a part marked data-ui-split-ok (ConnectionDot). Tests: each case + the same squeeze unmarked still flagged (36/36).
+  - Left for after the HUD helper merges (same corner-grid rules): teach at 200% — the screen's bottom-left "Undo" and bottom-right "Plant" corner buttons draw over each other instead of one giving way.
+  - Two tests updated for the intended markup (translate="no" on the room code and the old-seats copy).

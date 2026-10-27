@@ -265,7 +265,7 @@ describe('PlayerSeats (0.29.0, F109: the tappable seat row)', () => {
           <Row key={p.id} gap="s" className="kit-hud-chip" data-state={p.id === activeId ? 'active' : undefined}>
             <Avatar name={p.name} src={p.avatar} active={p.id === activeId} />
             <Stack gap="xs">
-              <Text kind="label">{p.name}</Text>
+              <Text kind="label" translate="no">{p.name}</Text>{/* (0.37.0, F156: a name is never translated) */}
               {p.score !== undefined && <Text kind="caption">{p.score}</Text>}
             </Stack>
           </Row>
