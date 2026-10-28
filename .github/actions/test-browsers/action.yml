@@ -22,12 +22,15 @@ inputs:
 runs:
   using: composite
   steps:
+    # (inputs reach the shell through env and quotes, never pasted into the script — v0.32.0 security review)
     - id: version
       shell: bash
       working-directory: ${{ inputs.folder }}
+      env:
+        BROWSERS: ${{ inputs.browsers }}
       run: |
         echo "playwright=$(node -p "require('playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
-        echo "engines=$(echo '${{ inputs.browsers }}' | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+        echo "engines=$(echo "$BROWSERS" | tr ' ' '-')" >> "$GITHUB_OUTPUT"
 
     - id: cache
       uses: actions/cache/restore@v4
@@ -53,7 +56,13 @@ runs:
     # Browsers already in ~/.cache/ms-playwright are skipped; packages already in apt's folder aren't fetched again
     - shell: bash
       working-directory: ${{ inputs.folder }}
-      run: npx ${{ inputs.cli }} install --with-deps ${{ inputs.browsers }}
+      env:
+        CLI: ${{ inputs.cli }}
+        BROWSERS: ${{ inputs.browsers }}
+      # ($BROWSERS unquoted on purpose: one word per engine)
+      run: |
+        case "$CLI" in playwright|playwright-core) ;; *) echo "cli must be playwright or playwright-core, not '$CLI'"; exit 1 ;; esac
+        npx "$CLI" install --with-deps $BROWSERS
 
     - shell: bash
       if: steps.cache.outputs.cache-hit != 'true'

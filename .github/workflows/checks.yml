@@ -9,6 +9,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# The checks only read the repo (v0.32.0 security review: a smaller token if any step were ever compromised)
+permissions:
+  contents: read
+
 # A newer push to the same branch cancels the run still going
 concurrency:
   group: checks-${{ github.ref }}
