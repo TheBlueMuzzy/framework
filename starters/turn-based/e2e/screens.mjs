@@ -1,5 +1,6 @@
-// EVERY SCREEN AT EVERY SIZE — the main menu, the board, Pause, Settings, Credits, the results and the online lobby,
-// at the 7 sizes the UI kit checks (390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080).
+// EVERY SCREEN AT EVERY SIZE — the main menu, the board, Pause, Settings, Credits, the results, the main menu again
+// after Escape on the results (F160) and the online lobby, at the 7 sizes the UI kit checks
+// (390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080).
 //   node e2e/screens.mjs [outDir] [port]          (npm run e2e:screens)
 // Each one is checked with the UI kit's own page check (src/ui/kit/uiProblems.mjs: wider than the screen, too small to
 // tap, clipped, overlapping, faint, touching its box's edge, growing) and shot to outDir/screens-<size>-<screen>.png.
@@ -63,6 +64,18 @@ try {
       await page.waitForTimeout(150) // a polling step while the bot thinks
     }
     await look(page, size, 'results')
+    // Escape (or a phone's Back) on the results = their Main menu button (F160): never the finished board left under
+    // them, with "Game over", nothing to do but Pause, and a key-press focus ring on the last square tapped
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(400) // a polling step: the results close
+    if (await page.locator('[data-board]').count()) {
+      failures++
+      const focused = await page.evaluate(() => `${document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.tagName}${document.activeElement?.matches(':focus-visible') ? ' (focus ring on)' : ''}`)
+      console.log(`  FAIL ${size} results-escape: Escape on the results left the finished board showing (focus: ${focused}), not the main menu`)
+    } else {
+      await page.getByRole('button', { name: /Careless/ }).waitFor()
+      await look(page, size, 'results-escape')
+    }
     await context.close()
   }
 } catch (error) {
@@ -72,5 +85,5 @@ try {
   await browser.close()
   await server.close()
 }
-console.log(failures ? `\nSCREENS FAILED — ${failures} problem(s)` : '\nSCREENS OK — 7 screens × 7 sizes, no problems')
+console.log(failures ? `\nSCREENS FAILED — ${failures} problem(s)` : '\nSCREENS OK — 8 screens × 7 sizes, no problems')
 process.exit(failures ? 1 : 0)
