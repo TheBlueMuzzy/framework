@@ -132,6 +132,9 @@
 
   .kit-panel, .kit-stack { display: flex; flex-direction: column; min-inline-size: 0; min-block-size: 0; }
   .kit-panel { padding: var(--gap-l); }
+  /* A button in a column is never squashed below its words (0.37.1, F161): Pause's buttons on a phone on its side at
+     200% text gave up height down to 44 px and their words ran over the edges — now the card scrolls instead */
+  :is(.kit-panel, .kit-stack) > .kit-button { flex-shrink: 0; }
   @media (max-height: 30rem) { .kit-panel { padding: var(--gap-m); } } /* landscape phones: room for content */
   .kit-row { display: flex; flex-wrap: wrap; align-items: center; }
   .kit-row[data-justify="center"] { justify-content: center; }
@@ -169,7 +172,9 @@
   .kit-text[data-kind="label"] { font-weight: 600; }
 
   .kit-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--gap-s);
-    padding: var(--gap-s) var(--gap-l); border-style: solid; font-weight: 600; text-align: center; user-select: none; }
+    padding: max(var(--gap-s), 0.3em) var(--gap-l); border-style: solid; font-weight: 600; text-align: center; user-select: none; }
+  /* (0.3em at the least above and below, 0.37.1 — F161: the gaps don't grow with the text size, so at 200% an accent over
+     a capital or a mark under a letter — Ŕ, Ţ, Ǫ — came within 1 px of the button's edge. At 100% the gap is the larger.) */
   /* Icon-only: the glyph is title-sized so it fills the (at least 44px) button instead of floating small in it */
   /* 0.21.0: a little room each side, so a wide glyph at a big text size never touches the edge. 0.34.1: the glyph
      stops growing at three quarters of the 44px button, so even a wide one (◀) and its side room stay 44px wide — at
@@ -211,7 +216,8 @@
 
   .kit-picker { display: inline-flex; align-items: center; gap: var(--gap-xs); max-inline-size: 100%; }
   .kit-picker > .kit-button { flex: none; }
-  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: break-word; padding-block: var(--gap-xs); }
+  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: break-word; padding-block: max(var(--gap-xs), 0.15em); }
+  /* (0.15em at the least, 0.37.1 — F161: at 200% text the ring of an Å sat 1 px under the picker's top border) */
   /* 0.34.1: whole words; and a little room above and below, so at 200% text (when the words are taller than the 44px
      arrows) they don't touch the picker's border — at 100% the arrows are taller anyway, so nothing moves */
   .kit-stepper .kit-picker-value { flex-basis: 2.5rem; }
