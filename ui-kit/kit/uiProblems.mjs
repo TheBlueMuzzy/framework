@@ -518,6 +518,16 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const reach = s.outlineStyle === 'none' ? 0 : Math.max(0, parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset)) * shrunk(av)
     const b = av.getBoundingClientRect()
     const body = rounded(b, av), ring = rounded(b, av, reach)
+    // What a scroll area (or any box hiding overflow) around the avatar cuts off isn't drawn (0.37.1, F161: Results'
+    // last row under the list's edge — "Continue" below the list "touched" the hidden part's ring). Words outside that
+    // box are measured to the part it shows, as a plain box; words inside it to the whole ring, as before.
+    let clipper = av.parentElement
+    while (clipper && clipper !== document.documentElement && getComputedStyle(clipper).overflowY === 'visible' && getComputedStyle(clipper).overflowX === 'visible') clipper = clipper.parentElement
+    if (clipper === document.documentElement) clipper = null
+    const seen = clipper && visibleBox(av)
+    if (clipper && !seen) continue // all of it scrolled out of sight
+    const seenRing = seen && { left: Math.max(seen.left - reach, b.left - reach), right: Math.min(seen.right + reach, b.right + reach), R: 0,
+      top: seen.top > b.top + 0.5 ? seen.top : seen.top - reach, bottom: seen.bottom < b.bottom - 0.5 ? seen.bottom : seen.bottom + reach }
     const near = [
       ...texts.filter((el) => !el.closest('.kit-badge')).map((el) => [el, wordsBox(wordsIn(el, false)), null]),
       ...[...document.querySelectorAll('.kit-badge')].filter((el) => shown(el)).map((el) => [el, el.getBoundingClientRect(), el]),
@@ -526,7 +536,8 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       if (!box || av.contains(el) || el.contains(av) || moving(el)) continue
       const piece = shape ? rounded(box, shape) : { ...box, R: 0 } // (words: the box of their letters)
       if (apart(piece, body) <= 0) continue // ON the avatar: on purpose
-      const room = apart(piece, ring)
+      const cut = seenRing && (seen.top > b.top + 0.5 || seen.bottom < b.bottom - 0.5 || seen.left > b.left + 0.5 || seen.right < b.right - 0.5)
+      const room = cut && !clipper.contains(el) ? apart(piece, seenRing) : apart(piece, ring)
       // (a chip shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it — the gallery's
       // pinned chips at 200% text: "Bot" 1 px from its 10 px portrait)
       if (room < 1.5 * Math.min(1, shrunk(av))) problems.push(`ring: "${name(el)}" touches the ring around "${name(av)}" — ${Math.max(0, Math.round(room))} px of room`)
