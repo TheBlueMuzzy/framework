@@ -340,7 +340,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     const midX = (content.left + content.right) / 2, midY = (content.top + content.bottom) / 2
     if (midX < b.left || midX > b.right || midY < b.top || midY > b.bottom) return '' // it sits outside the box, not in it
     const room = Math.min(content.left - inside.left, content.top - inside.top, inside.right - content.right, inside.bottom - content.bottom)
-    if (room >= 1.5) return ''
+    // (a box shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it, like the ring's
+    // below — 0.37.1, F161: the gallery's pinned chips at 200% text sideways had 3 px, drawn at 0.4 as 1)
+    if (room >= 1.5 * Math.min(1, k)) return ''
     const what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
     return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
   }
