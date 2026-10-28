@@ -439,6 +439,9 @@ gallery's `npm run shoot` uses the same one.
     had been squeezed to a 16 px strip (Pixel in English, every look in a longer language); the card scrolls instead.
   - **The page check:** a box shrunk onto the table keeps its edge room shrunk too (like the ring's), and the part of an
     avatar a scroll area hides has no ring to touch.
+  - **A title's fit** (MenuHeader, end screens) re-measures at the next frame, and only when its width or text size
+    changes — refitting inside the observer's own turn gave "ResizeObserver loop" page errors (Pixel's Lobby and Payslip
+    at 200% in the fake language, about one full run in three).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
