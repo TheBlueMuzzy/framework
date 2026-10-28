@@ -407,10 +407,11 @@
     .kit-end { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
       align-items: center; column-gap: var(--gap-l); }
     .kit-end > .kit-end-info { max-block-size: 100%; }
-    /* …and its list keeps the card's list floor there too — when even that won't fit, the card scrolls as one
-       (0.37.1, F161: at 200% text in a ~40% longer language the title and message took the column and the list was
-       squeezed to a 16 px strip — its rows out of sight) */
-    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+    /* …and its list never goes under about one row — when even that won't fit, the card scrolls as one (0.37.1, F161:
+       at 200% text the title and message took the column and the list was squeezed to a 16 px strip, its rows out of
+       sight — in Pixel in English, in every look in a ~40% longer language). Not the portrait floor (4rem): a short
+       list of one or two rows sideways keeps its own height, so the card doesn't start scrolling in English. */
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(1.5rem, var(--kit-scroll-contents, 0rem)); }
   }
   .kit-dot { flex: none; inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; } /* (flex: none — a squeezed chip never squashes it) */
 

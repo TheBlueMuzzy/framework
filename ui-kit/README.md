@@ -434,8 +434,8 @@ gallery's `npm run shoot` uses the same one.
   - **Room above and below accents:** badges have 0.1em above and below their words, the ◀ ▶ picker's value at least
     0.15em (the gaps don't grow with the text size, so at 200% an Å or Ţ came within 1 px). A badge on its own line in
     a card breaks a too-long word inside itself instead of running out of the card.
-  - **Victory / Game over on a phone on its side** keep the list's floor (the card scrolls) — at 200% in a longer
-    language the list had been squeezed to a 16 px strip.
+  - **Victory / Game over on a phone on its side:** the list never goes under about one row (1.5rem) — at 200% text it
+    had been squeezed to a 16 px strip (Pixel in English, every look in a longer language); the card scrolls instead.
   - **The page check:** a box shrunk onto the table keeps its edge room shrunk too (like the ring's), and the part of an
     avatar a scroll area hides has no ring to touch.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
