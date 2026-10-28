@@ -222,6 +222,14 @@ describe('findProblems — quality bars', () => {
       <div style="${chip(8)}">Roomy</div><br><div style="${chip(1)};margin-top:-30px">Tight</div></div>`)
     expect(only('edge', found)).toEqual(['edge: "Tight" touches the edge of its box (<div>, its own) — 0 px of room'])
   })
+  // F161: the gallery's pinned chips at 200% text sideways — 36 "1 px of room" finds on chips whose room is 3+ px before
+  // they shrink onto the table (like the ring check's, F152: a small copy of a chip with room has room)
+  it('edge: a chip shrunk onto the table keeps its room shrunk too — 3 px drawn at 0.4 is fine; touching still counts', async () => {
+    const chip = (pad) => `display:inline-block;background:#29366f;color:#fff;border:2px solid #f4f4f4;padding:${pad}px;line-height:1;transform:scale(0.4);transform-origin:0 0`
+    const found = await problemsOn(`<div style="background:#1a1c2c;padding:20px;height:200px">
+      <div style="${chip(3)}">Roomy</div><br><div style="${chip(0)};margin-top:-10px">Tight</div></div>`)
+    expect(only('edge', found)).toEqual(['edge: "Tight" touches the edge of its box (<div>, its own) — 0 px of room'])
+  })
 
   it('edge: a picture marked data-ui-bleed may run edge to edge; a badge hanging outside the card is not "in" it', async () => {
     const found = await problemsOn(`<div style="${card};padding:0;margin:20px;position:relative;overflow:hidden">
