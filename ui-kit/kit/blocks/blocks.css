@@ -412,7 +412,9 @@
 
   /* Player chip: a HUD plate for one player, placed by the game (never catches taps) */
   .kit-player-chip { pointer-events: none; align-items: center; inline-size: max-content; }
-  .kit-player-chip-text { min-inline-size: 0; }
+  /* …its detail line's numbers all one width (0.37.1, F161): "S1 · T5" → "S2 · T5" made the chip 3 px wider mid-game
+     (a 2 is wider than a 1 in most fonts) — a chip filling in keeps its size */
+  .kit-player-chip-text { min-inline-size: 0; font-variant-numeric: tabular-nums lining-nums; }
   .kit-player-chip-score { display: inline-flex; align-items: center; gap: var(--gap-xs); white-space: nowrap; }
   .kit-player-chip-icon { display: inline-grid; place-items: center; inline-size: var(--target-min); block-size: var(--target-min); font-size: var(--text-heading); }
   .kit-player-chip[data-size="s"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 2rem; block-size: 2rem; }
