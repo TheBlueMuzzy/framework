@@ -211,7 +211,8 @@
 
   .kit-picker { display: inline-flex; align-items: center; gap: var(--gap-xs); max-inline-size: 100%; }
   .kit-picker > .kit-button { flex: none; }
-  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: break-word; padding-block: var(--gap-xs); }
+  .kit-picker-value { flex: 1 1 5rem; min-inline-size: 0; text-align: center; font-weight: 600; overflow-wrap: break-word; padding-block: max(var(--gap-xs), 0.15em); }
+  /* (0.15em at the least, 0.37.1 — F161: at 200% text the ring of an Å sat 1 px under the picker's top border) */
   /* 0.34.1: whole words; and a little room above and below, so at 200% text (when the words are taller than the 44px
      arrows) they don't touch the picker's border — at 100% the arrows are taller anyway, so nothing moves */
   .kit-stepper .kit-picker-value { flex-basis: 2.5rem; }
@@ -256,6 +257,10 @@
   button.kit-listrow { padding-inline: 0; } /* link rows line up with value rows */
 
   .kit-card { display: flex; flex-direction: column; gap: var(--gap-s); padding: var(--gap-l); text-align: start; border-style: solid; }
+  /* A badge on its own line in a card is never wider than the card (0.37.1, F161): a word longer than the card's width
+     breaks inside the badge instead of running out of it, cut off (ModeSelect's "Popular", translated, on a phone) */
+  /* (anywhere, not break-word: the badge is a flex box, and its words only shrink below one word with anywhere) */
+  .kit-card > .kit-badge { white-space: normal; overflow-wrap: anywhere; max-inline-size: 100%; }
   .kit-card-title { font-size: var(--text-heading); font-weight: 700; }
   /* Words only a screen reader hears (0.27.0: a locked Card's "Locked", at the end of its title) — a clipped line of
      its own, 1 px tall and pulled back by 1 px, so it never moves a word of the title or grows the card */
@@ -265,7 +270,9 @@
      inside the page's height instead of adding a 1 px page scroll below it */
   .kit-live { margin-block: -0.0625rem 0; }
 
-  .kit-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 0 var(--gap-s); font-weight: 700; line-height: 1.6; border-style: solid; }
+  /* (0.1em above and below, 0.37.1 — F161: an accent over a capital or a mark under a letter — Ý, Ţ, Þ — touched the
+     badge's top or bottom edge; line-height alone left 1 px) */
+  .kit-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 0.1em var(--gap-s); font-weight: 700; line-height: 1.6; border-style: solid; }
   /* (its initials never outgrow it: at 200% text "SM" was wider than the 44px circle — 0.35.1, like an icon button's glyph) */
   .kit-avatar { display: inline-grid; place-items: center; flex: none; inline-size: var(--target-min); block-size: var(--target-min); overflow: hidden; font-weight: 600;
     font-size: min(1em, var(--target-min) * 0.45); }

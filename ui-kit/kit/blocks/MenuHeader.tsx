@@ -42,7 +42,15 @@ export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean
     if (!on) { box.removeAttribute('data-fit'); return }
     fitMenuTitle(box, oneLine)
     if (typeof ResizeObserver === 'undefined') return // (tests without a browser)
-    const refit = new ResizeObserver(() => fitMenuTitle(box, oneLine))
+    // (only when its width or its text size changes — the fit's own step changes only its height — and not inside the
+    // observer's own turn but at the next frame, 0.37.1 — F161: a refit there moved the parts below the title in the
+    // same turn, "ResizeObserver loop completed with undelivered notifications" on Pixel's Lobby and Payslip at 200%)
+    const room = () => `${box.clientWidth} ${getComputedStyle(box).fontSize}`
+    let fittedFor = room(), frame = 0
+    const refit = new ResizeObserver(() => {
+      if (room() === fittedFor || frame) return
+      frame = requestAnimationFrame(() => { frame = 0; fittedFor = room(); fitMenuTitle(box, oneLine) })
+    })
     refit.observe(box)
     // …and when its words change on the page without React (a browser's translate button, the fake language: 0.37.0,
     // F156 — "Reconnecting…" kept the fit of the English word). The fit only sets data-fit, so it never loops.
@@ -50,7 +58,7 @@ export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean
     rewritten?.observe(box, { characterData: true, childList: true, subtree: true })
     let live = true
     void document.fonts?.ready.then(() => { if (live) fitMenuTitle(box, oneLine) })
-    return () => { live = false; refit.disconnect(); rewritten?.disconnect() }
+    return () => { live = false; cancelAnimationFrame(frame); refit.disconnect(); rewritten?.disconnect() }
   }, [titleBox, on, oneLine, words])
 }
 

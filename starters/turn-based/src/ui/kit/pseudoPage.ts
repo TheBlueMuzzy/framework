@@ -7,6 +7,8 @@
 //   - never the Dev Kit (it's a tool, not the game) or code / style elements
 //   - never what says translate="no" (0.37.0, F156): a player's name, initials, a room code stay the same in every
 //     language — a browser's translate button leaves them too
+//   - …nor those words inside any label (0.37.1, F161): a chip / seat button named after its player keeps the name
+//     ("Ana"; "Remove Ana" → "[Ŕéɱöṽéŕé Ana]")
 import { pseudo } from './blocks/words'
 
 const ATTRIBUTES = ['title', 'aria-label', 'placeholder', 'alt']
@@ -30,6 +32,23 @@ function rewriteText(node: Text) {
   if (next !== node.data) node.data = next
 }
 
+// The words the page never translates (0.37.1, F161): what's inside translate="no" (a player's name, a room code) and
+// those parts' own labels. The same words in ANY label stay as written — a PlayerChip or a seat button is named after
+// its player (aria-label) but holds words that are translated (a score, a badge), so it can't be translate="no" itself;
+// the name drawn inside it is, and that marks the name. Gathered once per pass (a React commit arrives as one batch,
+// the chip with its name inside it).
+let keptWords: string[] = []
+function gatherKeptWords() {
+  const words = new Set<string>()
+  for (const el of document.querySelectorAll('[translate="no"]')) {
+    if (el.closest('[data-devkit], #devkit-root')) continue
+    const text = el.textContent?.trim()
+    if (text) words.add(text)
+    for (const name of ATTRIBUTES) { const value = el.getAttribute(name)?.trim(); if (value) words.add(value) }
+  }
+  keptWords = [...words]
+}
+
 function rewriteAttributes(element: Element) {
   if (skipped(element)) return
   const wrote = wroteAttribute.get(element) ?? new Map<string, string>()
@@ -37,7 +56,7 @@ function rewriteAttributes(element: Element) {
   for (const name of ATTRIBUTES) {
     const value = element.getAttribute(name)
     if (value === null || wrote.get(name) === value) continue
-    const next = pseudo(value)
+    const next = pseudo(value, keptWords)
     wrote.set(name, next)
     if (next !== value) element.setAttribute(name, next)
   }
@@ -59,8 +78,10 @@ let stopRunning: (() => void) | null = null
 /** Rewrite the page's words into the long fake language, and keep doing it as they change. Returns stop(). */
 export function startPseudoPage(root: Node = document.body): () => void {
   stopRunning?.()
+  gatherKeptWords()
   rewriteAll(root)
   const observer = new MutationObserver((changes) => {
+    gatherKeptWords()
     for (const change of changes) {
       if (change.type === 'characterData') rewriteText(change.target as Text)
       else if (change.type === 'attributes') rewriteAttributes(change.target as Element)
