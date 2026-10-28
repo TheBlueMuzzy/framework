@@ -409,6 +409,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     for (let p = el.parentElement; p && p !== document.documentElement && !(sideSeen && endSeen); p = p.parentElement) {
       if (moving(p)) break // a carousel sliding, a card on its way in
       const s = getComputedStyle(p)
+      // (a box that scrolls that way brings the words into view: what's further out only cuts the scroll box itself)
+      if (/(auto|scroll)/.test(s.overflowX)) sideSeen = true
+      if (/(auto|scroll)/.test(s.overflowY)) endSeen = true
       const hidesSides = !sideSeen && /^(hidden|clip)$/.test(s.overflowX)
       const hidesEnds = !endSeen && /^(hidden|clip)$/.test(s.overflowY)
       if (!hidesSides && !hidesEnds) continue

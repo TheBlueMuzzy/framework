@@ -471,7 +471,10 @@ describe('findProblems — cut-offs at a card edge, words past their card, a squ
 
   it('clipped: words that fit, rows scrolled part-way under the bottom, and a strip that scrolls sideways are not cut off', async () => {
     const found = await withFont(`${panel('<h2 style="margin:0;font-size:20px">Settings</h2>')}
-      <div style="position:absolute;left:16px;top:200px;width:200px;height:60px;overflow-x:auto;white-space:nowrap">A long sideways strip of words you scroll along</div>`)
+      <div style="position:absolute;left:16px;top:200px;width:200px;height:60px;overflow-x:auto;white-space:nowrap">A long sideways strip of words you scroll along</div>
+      <div style="position:absolute;left:240px;top:16px;width:140px;height:100px;overflow:hidden">
+        <div style="height:100px;overflow-y:auto">${'<p style="margin:0 0 8px">A setting row</p>'.repeat(8)}</div></div>`)
+    // (the last: a settings page that scrolls, in a stage that hides its overflow — its rows below scroll into view)
     expect(only('clipped', found)).toEqual([])
   })
 
