@@ -370,7 +370,9 @@
 
   /* Pressing: things shrink and/or sink (the style decides how much and how fast).
      A sinking button drops onto its shadow, so the shadow goes. */
-  button.kit-target { transition: transform var(--motion-fast) var(--ease), background-color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease); }
+  /* (its words and border fade with its background, 0.37.3 — F160: only the background faded, so a button swapping style
+     — the starter's winning-line pulse — showed its new white mark on the old near-white fill for the whole fade) */
+  button.kit-target { transition: transform var(--motion-fast) var(--ease), background-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease); }
   button.kit-target:active:not(:disabled) { transform: translateY(var(--press-shift)) scale(var(--press-scale)); }
   .kit-button:active:not(:disabled) { box-shadow: none; }
 
