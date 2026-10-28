@@ -19,7 +19,7 @@ Done when: on the starter's online game, Escape and the browser's Back on Result
 - [x] 🤖 1. Measure on today's code: play an online match to Results, press Escape and Back; say what really happens — starters/turn-based/e2e/online.mjs
 - [x] 🤖 2. A check that fails on today's behaviour (Escape + Back on online Results → main menu) — starters/turn-based/e2e/online.mjs
 - [x] 🤖 3. Results on the screen stack (or the same leave-on-close rule as TableScreen.tsx), leaving the room cleanly — starters/turn-based/src/ui/OnlineScreen.tsx
-- [ ] 🤖 4. The starter's check:full green; root check:fast green — starters/turn-based/package.json
+- [x] 🤖 4. The starter's check:full green; root check:fast green — starters/turn-based/package.json
 Check: the new check red on today's code, green after; screenshots before → after looked at; starter check:full green.
 Checked:
 
