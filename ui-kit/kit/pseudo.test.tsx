@@ -2,6 +2,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { fill, isPseudo, pseudo, PSEUDO_GROWTH } from './blocks/words'
 import { startPseudoPage } from './pseudoPage'
+import { render } from '@testing-library/react'
+import { PlayerChip, PlayerSeats } from './blocks/hud'
 
 const letters = (text: string) => [...text].filter((ch) => /\p{L}/u.test(ch)).length
 
@@ -39,6 +41,16 @@ describe('pseudo', () => {
   })
 })
 
+describe('pseudo — kept words (F161)', () => {
+  it('keeps the given words as written, whole words only; a text of only kept words is left exactly as it was', () => {
+    expect(pseudo('Ana', ['Ana'])).toBe('Ana')
+    expect(pseudo('Remove Ana', ['Ana'])).toMatch(/^\[\S+ Ana\]$/)
+    expect(pseudo('Bananas', ['Ana'])).not.toContain('Ana') // inside another word: rewritten
+    expect(pseudo('Wave at Sherman Meredith', ['Sherman', 'Sherman Meredith'])).toContain('Sherman Meredith')
+    expect(pseudo('{n}', ['Ana'])).toBe(pseudo('{n}')) // slots alone are still bracketed as before
+  })
+})
+
 describe('startPseudoPage', () => {
   let stop: (() => void) | null = null
   afterEach(() => { stop?.(); stop = null; document.body.innerHTML = '' })
@@ -59,6 +71,32 @@ describe('startPseudoPage', () => {
     expect(document.querySelector('[role="img"]')!.textContent).toBe('SM')
     expect(document.querySelector('[role="img"]')!.getAttribute('aria-label')).toBe('Sherman Meredith')
     expect(isPseudo(document.querySelector('p')!.firstChild!.textContent!)).toBe(true) // "Room" itself is a word
+  })
+  // F161: the chip and the seat button are named after the player (aria-label), but hold words that ARE translated
+  // (a score, a badge), so they can't be translate="no" themselves — the name drawn inside them is, and that marks it
+  it("keeps a player's name as written in a label too — a PlayerChip, a seat button, Remove Ana (F161)", async () => {
+    const view = render(
+      <>
+        <PlayerChip name="Ana" score={3} />
+        <PlayerSeats players={[{ id: 'b', name: 'Sherman Meredith', tapLabel: 'Wave at Sherman Meredith' }, { id: 'c', name: 'Bo' }]} onSeatTap={() => {}} />
+        <button aria-label="Remove Ana">x</button>
+      </>,
+    )
+    stop = startPseudoPage()
+    const chip = view.container.querySelector('.kit-player-chip')!
+    expect(chip.getAttribute('aria-label')).toBe('Ana')
+    expect(isPseudo(chip.querySelector('.kit-player-chip-score')!.getAttribute('aria-label')!)).toBe(true) // "3 points" is words
+    const [wave, bo] = view.container.querySelectorAll('.kit-seat-button')
+    expect(bo.getAttribute('aria-label')).toBe('Bo')
+    expect(wave.getAttribute('aria-label')).toContain('Sherman Meredith')
+    expect(isPseudo(wave.getAttribute('aria-label')!)).toBe(true) // "Wave at" is still rewritten
+    const remove = view.container.querySelector('button[aria-label$="Ana]"]')!
+    expect(remove.getAttribute('aria-label')).toMatch(/^\[\S+ Ana\]$/)
+    // …and a chip that arrives after the pass started (React mounting it later)
+    const later = render(<PlayerChip name="Zed" />)
+    await new Promise((done) => queueMicrotask(() => done(null)))
+    expect(later.container.querySelector('.kit-player-chip')!.getAttribute('aria-label')).toBe('Zed')
+    view.unmount(); later.unmount()
   })
   it('keeps rewriting as the game changes its words', async () => {
     document.body.innerHTML = '<p id="w">Your turn</p>'

@@ -8,11 +8,11 @@
 //     warnings (an older game's checks don't go red overnight), with the count, so the game cleans up in its own time
 //     and then switches them to 'error'. --errors makes them errors anyway.
 //   - an update leaves that block alone (how strict is the game's call) and only says how many finds are left
-import { execSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { kitVersion } from '../../scripts/kitVersion.mjs'
 
 const moduleDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const KIT_TARGET = 'src/lint'
@@ -30,23 +30,6 @@ function listFiles(dir, base = dir) {
     if (entry.isDirectory()) return entry.name === 'node_modules' ? [] : listFiles(path, base)
     return [relative(base, path).replaceAll('\\', '/')]
   })
-}
-
-// Worked out once per run: it starts two git processes, 0.2–2 s each on a busy Windows PC (as version did, F128)
-let kitVersionOnce = null
-function kitVersion() {
-  kitVersionOnce ??= readKitVersion()
-  return kitVersionOnce
-}
-
-function readKitVersion() {
-  const version = readFileSync(join(moduleDir, 'kit', 'VERSION'), 'utf8').trim()
-  let commit = 'no git'
-  try {
-    commit = execSync('git rev-parse --short HEAD', { cwd: moduleDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
-    if (execSync('git status --porcelain kit', { cwd: moduleDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()) commit += ' + uncommitted changes'
-  } catch { /* not a git folder: fine */ }
-  return { version, commit }
 }
 
 /** The rules' finds in a game's own code today, with the framework's ESLint: [{ file, line, rule, message }]. */
@@ -165,7 +148,8 @@ export async function installLint(gameDir, { dryRun = false, errors = false, log
   const present = listFiles(target).filter((f) => f !== 'VERSION')
   const changed = kitFiles.filter((f) => !present.includes(f) || !readFileSync(join(moduleDir, 'kit', f)).equals(readFileSync(join(target, f))))
   const removed = present.filter((f) => !kitFiles.includes(f))
-  const { version, commit } = kitVersion()
+  // kit/VERSION + the commit, " + uncommitted changes" when kit has edits (git is asked once per run)
+  const { version, commit } = kitVersion(moduleDir, { watch: ['kit'] })
   log(`Lint module ${version} (framework ${commit}) → ${KIT_TARGET}/`)
   changed.forEach((f) => log(`  ${present.includes(f) ? 'changed' : 'added  '} ${f}`))
   removed.forEach((f) => log(`  removed ${f}`))

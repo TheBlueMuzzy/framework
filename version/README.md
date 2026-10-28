@@ -3,7 +3,7 @@
 Every game shows its version the same way, from one file. Muzzy, 2026-10-20: "version number visibility is important in
 all games… should be a built in process". Built from Goops' own copy (its sprint 11), now one module for every game.
 
-Module **0.1.2** (0.1.2, F128: the installer asks git for the kit’s commit once per run, not on every install). Web (Vite) games.
+Module **0.1.3** (0.1.3, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.1.2, F128: the installer asks git for the kit’s commit once per run, not on every install). Web (Vite) games.
 
 ## What it does
 - **One source:** `version.json` — `{ "version": "X.Y.Z", "build": N }` (BMUZ versioning: `/save` bumps `build`,

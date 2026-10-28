@@ -75,4 +75,5 @@ Then the game's TDD says what's different and keeps the module contracts below t
 - A random player goes first; scripted checks get a fixed game (`import.meta.env.DEV && navigator.webdriver` → you go
   first; `?seed=7` → the bot's choices replay). Tests pass `startMatch(opponent, { firstSeat })`.
 - Decisions: `keepMatchDays` 7 (a live game) in `content/rooms.json`; rooms hold 2 seats; online, a player who goes idle
-  or drops gets Careful Cleo playing for them.
+  or drops gets Careful Cleo playing for them. Esc or a phone's Back on the results = their Main menu button (F160:
+  the game is over, so "back" leaves it — not the finished board with nothing to do but Pause).

@@ -407,12 +407,22 @@
     .kit-end { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
       align-items: center; column-gap: var(--gap-l); }
     .kit-end > .kit-end-info { max-block-size: 100%; }
+    /* …and its list never goes under about one row — when even that won't fit, the card scrolls as one (0.37.1, F161:
+       at 200% text the title and message took the column and the list was squeezed to a 16 px strip, its rows out of
+       sight — in Pixel in English, in every look in a ~40% longer language). Not the portrait floor (4rem): a short
+       list of one or two rows sideways keeps its own height, so the card doesn't start scrolling in English. */
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(1.5rem, var(--kit-scroll-contents, 0rem)); }
   }
   .kit-dot { flex: none; inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; } /* (flex: none — a squeezed chip never squashes it) */
 
   /* Player chip: a HUD plate for one player, placed by the game (never catches taps) */
   .kit-player-chip { pointer-events: none; align-items: center; inline-size: max-content; }
-  .kit-player-chip-text { min-inline-size: 0; }
+  /* …its detail line's numbers all one width (0.37.1, F161): "S1 · T5" → "S2 · T5" made the chip 3 px wider mid-game
+     (a 2 is wider than a 1 in most fonts) — a chip filling in keeps its size */
+  .kit-player-chip-text { min-inline-size: 0; font-variant-numeric: tabular-nums lining-nums; }
+  /* A detail line too long for the room the chip has wraps between its words (0.37.1, F161: the goal chip's "If you
+     lock it now", translated, at 200% text ran on under its ★ 30 and out of the chip). Names and badges stay one line. */
+  .kit-player-chip-text > .kit-text[data-kind="caption"] { white-space: normal; }
   .kit-player-chip-score { display: inline-flex; align-items: center; gap: var(--gap-xs); white-space: nowrap; }
   .kit-player-chip-icon { display: inline-grid; place-items: center; inline-size: var(--target-min); block-size: var(--target-min); font-size: var(--text-heading); }
   .kit-player-chip[data-size="s"] :is(.kit-avatar, .kit-player-chip-icon) { inline-size: 2rem; block-size: 2rem; }

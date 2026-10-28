@@ -439,6 +439,20 @@ flowchart LR
   F157[✅ F157 Clock lint rule]
 ```
 
+## v0.30 — Steadier checks  ← current · planned 2026-10-27 · built 2026-10-27, approved
+Goal (Muzzy 2026-10-27: "do A … they seem like easy adds"): the framework's own checks stop holding up merges and stop letting old slips come back — GitHub keeps its test browsers, every installer reads its version one shared way, and the starter and the fake language come out clean.
+- ✅ F158 🔧 Keep test browsers on GitHub — checks.yml keeps the downloaded test browsers between runs (actions/cache on ~/.cache/ms-playwright, keyed on the Playwright version + engines), so only the system packages are fetched each run (v0.27 look-back: the saves job's browser download timed out at 15 min and held up the merge, after v0.23's 35-min hang) — should · sprint 48
+- ✅ F159 🧱 One shared version helper — one framework script reads a module's VERSION + git commit once (git asked only once per run), every installer uses it, and a framework check refuses an installer that asks git itself (v0.26 look-back: the slow install was fixed twice, F128 then F90) — should · sprint 48
+- ✅ F160 🐞 Starter Escape after Results — after Results, Escape leaves a faint "✕" board mark (1–3:1) and a key-press focus ring on the starter (found by F153 — Light-words contrast check's helper): measured on today's code first, then fixed at its root with a check that keeps it fixed — should · sprint 48
+- ✅ F161 ✨ Fake-language leftovers — the shoot:pseudo finds left after F156 — Room for longer words (edge 95, ring 4, small 2, grows 2) and a player's name in aria-labels still rewritten: measured first, fixed or listed with a reason in knownShots — could · sprint 48
+```mermaid
+flowchart LR
+  F158[✅ F158 Keep test browsers]
+  F159[✅ F159 One version helper]
+  F160[✅ F160 Starter Escape]
+  F161[✅ F161 Fake-language leftovers]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -458,6 +472,10 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-10-27 — ✅ done in UI kit 0.37.3 (Muzzy: the normal fix — words and border fade with the background). **A kit Button's mark flickers when its style swaps** (found by F160 — Starter Escape after Results' helper): `button.kit-target` (ui-kit/kit/kit.css) fades its background over 120 ms but switches its text colour at once, so the starter's winning-line pulse shows a white ✕ on a near-white square for ~120 ms every 450 ms (the "faint ✕"). Options: change the colour at the fade's midpoint · drop the background fade · the starter pulses something else — Muzzy's call, it changes how buttons move in every game. The page check can catch the flicker now and then (it only skips words whose own element moves).
+- 2026-10-27 — **Online Results ignore Escape** (F160): OnlineScreen.tsx draws its results inline, not on the screen stack — Escape does nothing and a phone's Back leaves the page, unlike the game against the computer (now: back to the main menu).
+- 2026-10-27 — **Cut-offs the page check misses (found by F161 — Fake-language leftovers' helper, fake language):** Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; the desktop parts page in Pixel, ModeSelect's card titles run past their cards; the Room's player list at 200% upright shrinks to about one visible row (it scrolls, nothing flags it). None counted by uiProblems — teach it, then fix.
+- 2026-10-27 — (Muzzy 2026-10-27: accepted for now; a numbers font for Cartoon stays an option) **Cartoon's chip grows 3–4 px when a number changes** (F161): its body font, Fredoka, has no equal-width digits, so tabular-nums does nothing there — another font for numbers in Cartoon, or accept it (Muzzy's call).
 - 2026-10-27 — **Hand to the game sessions (found by F157 — Clock lint rule, read-only measure):** lint 0.3.0 adds bmuz/own-clock — Roll Better, Goops and Glyphtender each have 0 finds today, so it goes in as an error with the same `install-module.mjs lint .` that brings lint 0.1.0 / 0.2.0 (the hand-off lines below).
 - 2026-10-27 — **Fake-language leftovers outside F156 — Room for longer words' bar** (full shoot:pseudo, 2026-10-27): edge 95 (words touching their box), ring 4, small 2 (an invisible 16px-tall element named after the Game over / Victory title, landscape at 200% — not a control a player taps), grows 2 (a Neon player chip 3px wider after it appeared, on a 360 phone — the fake language rewrites after first measure). And a PlayerChip's / seat button's aria-label is the player's name, which the fake language still rewrites (only drawn words are translate="no").
 - 2026-10-27 — **GitHub's test-browser download keeps the browsers between runs** (v0.27 look-back: the saves job's `playwright install --with-deps` timed out at 15 min and held up the merge — the second time after v0.23's 35-min hang; a re-run passed): keep `~/.cache/ms-playwright` with actions/cache keyed on the Playwright version in .github/workflows/checks.yml, so only the system packages are fetched each run; also in templates/checks.yml for the games.

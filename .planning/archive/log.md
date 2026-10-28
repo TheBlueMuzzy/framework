@@ -1,4 +1,8 @@
 # Log archive (newest first)
+- 2026-10-25 — Released v0.23.0 (v0.21 The kit meets every player): every UI kit screen holds up at 200% text, What's new after an update, gamepad focus ring.
+- 2026-10-25 — Sprint 39 planned (unattended): every screen holds up at 200% text (F144 the shoot sees every screen at 200%, F145 the fixes).
+- 2026-10-25 — Sprint 38 planned: the kit meets every player (F141 words stay whole at big text, F142 gamepad focus ring, F143 What's new after an update).
+- 2026-10-25 — Released v0.22.0 (v0.20 Two new looks): the UI kit has Dark console and Fantasy looks (7 in all), and numbers are full height in every font.
 - 2026-10-24 — Sprint 37 planned: two new looks (F138 the sketch + picks, F139 the looks in the kit, F140 everything lists 7).
 - 2026-10-24 — Released v0.21.0 (v0.19 Smoother tools): the Dev Kit's Tuning tab edits the content files a game lists and Save keeps hand-wrapped lists; a stray 0, a false CSS warning, Mode select's empty column and the silent part-way save code are fixed.
 - 2026-10-24 — Sprint 36 planned: the Dev Kit edits every file it should (F132 more files in the Tuning tab, F133 Save keeps hand-wrapped lists); v0.19 also holds F134–F137 for sprint 37.

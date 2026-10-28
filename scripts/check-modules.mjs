@@ -14,7 +14,9 @@ const root = join(import.meta.dirname, '..')
 const modules = readdirSync(root).filter((name) => existsSync(join(root, name, 'kit', 'VERSION')))
 
 // [label, folder, command]
-const checks = [['lint (all modules)', root, 'npm run -s lint']]
+// + the framework's own tests in scripts/ (F159: the shared version helper, and the guard that no installer asks git
+// itself). The quotes keep the pattern away from the shell; node finds the files itself, the same on Windows and Linux.
+const checks = [['lint (all modules)', root, 'npm run -s lint'], ['framework scripts test', root, 'node --test "scripts/*.test.mjs"']]
 for (const name of modules) {
   const scripts = JSON.parse(readFileSync(join(root, name, 'package.json'), 'utf8')).scripts ?? {}
   for (const script of ['test', 'typecheck']) {

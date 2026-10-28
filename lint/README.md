@@ -65,3 +65,4 @@ New games start from a starter that already has it, as errors.
   told to run the installer again). The framework's own lint runs it on every module too (root eslint.config.js).
   Measured first (sprint 47): 0 finds in the framework and three games today; saves 0.6.4's link-code bug is caught
   at its line.
+- 0.3.1 (F159): the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged.
