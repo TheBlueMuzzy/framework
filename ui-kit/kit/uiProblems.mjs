@@ -344,6 +344,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     // below — 0.37.1, F161: the gallery's pinned chips at 200% text sideways had 3 px, drawn at 0.4 as 1)
     if (room >= 1.5 * Math.min(1, k)) return ''
     const what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
+    // (0.38.0, F162: Mode select's titles in Pixel, fake language, ran ~30 px out past their cards and read "touches —
+    // 0 px", like a near miss) — out past the box's inside edge by a pixel or more: said as it is
+    if (room <= -1) return `runs ${Math.round(-room)} px past the edge of its box (${what}${box === el ? ', its own' : ''})`
     return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
   }
 
@@ -386,6 +389,60 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     return out
   }
   for (const el of texts) problems.push(...splitWords(el))
+
+  // …and words cut off by a box AROUND them that hides what runs past it (0.38.0, F162: Settings in Pixel at 200% text,
+  // in the fake language — the card scrolls up and down but hides its sides, and its title's "]" was cut off at the
+  // card's right edge). Only a side that can't be scrolled to counts: overflow hidden or clip that way. Rows scrolled
+  // part-way under a scroll box's edge are fine (they scroll into view); so are words moving right now.
+  for (const el of texts) {
+    if (moving(el)) continue
+    const words = wordsIn(el, false)
+    if (!words.length) continue
+    const range = document.createRange()
+    const lines = words.flatMap((n) => { range.selectNodeContents(n); return [...range.getClientRects()].filter((r) => r.width > 0.5) })
+    if (!lines.length) continue
+    const run = { left: Math.min(...lines.map((r) => r.left)), right: Math.max(...lines.map((r) => r.right)), top: Math.min(...lines.map((r) => r.top)), bottom: Math.max(...lines.map((r) => r.bottom)) }
+    let sideSeen = false, endSeen = false // (only the nearest box that hides each way: one line per words)
+    for (let p = el.parentElement; p && p !== document.documentElement && !(sideSeen && endSeen); p = p.parentElement) {
+      if (moving(p)) break // a carousel sliding, a card on its way in
+      const s = getComputedStyle(p)
+      const hidesSides = !sideSeen && /^(hidden|clip)$/.test(s.overflowX)
+      const hidesEnds = !endSeen && /^(hidden|clip)$/.test(s.overflowY)
+      if (!hidesSides && !hidesEnds) continue
+      const b = p.getBoundingClientRect()
+      const k = p.offsetWidth ? b.width / p.offsetWidth : 1 // (shrunk by a transform)
+      // what it shows: its box inside its border (overflow is cut at the padding's edge)
+      const left = b.left + p.clientLeft * k, top = b.top + p.clientTop * k, right = left + p.clientWidth * k, bottom = top + p.clientHeight * k
+      const what = p.classList[0] ? `.${p.classList[0]}` : `<${p.tagName.toLowerCase()}>`
+      if (hidesSides) {
+        sideSeen = true
+        const hidden = Math.max(left - run.left, run.right - right)
+        if (hidden > 1) problems.push(`clipped: "${name(el)}" is cut off by the side of its box (${what}), which hides what runs past it — ${Math.round(hidden)} px hidden`)
+      }
+      if (hidesEnds) {
+        endSeen = true
+        const hidden = Math.max(top - run.top, run.bottom - bottom)
+        if (hidden > 1) problems.push(`clipped: "${name(el)}" is cut off by the top or bottom of its box (${what}), which hides what runs past it — ${Math.round(hidden)} px hidden`)
+      }
+    }
+  }
+
+  // A scroll list squeezed to about one row (0.38.0, F162: the Room's players at 200% text on an upright phone — a
+  // 128 px list for rows of ~156 px; it scrolled, so nothing was "cut off"). Its rows: what's in it (through a lone
+  // wrapper — a ScrollArea's Stack or Grid); measured by the shortest, so a list that shows 2 of its smallest rows is
+  // fine. One row or one long text in a short box isn't a list. Moving rows (still arriving) aren't judged.
+  for (const el of document.querySelectorAll('body *')) {
+    const s = getComputedStyle(el)
+    if (!/(auto|scroll)/.test(s.overflowY) || el.scrollHeight <= el.clientHeight + 1 || !shown(el) || moving(el)) continue
+    let rows = [...el.children]
+    while (rows.length === 1) rows = [...rows[0].children]
+    const heights = rows.filter((r) => !['absolute', 'fixed'].includes(getComputedStyle(r).position)).map((r) => r.getBoundingClientRect().height).filter((h) => h >= 8)
+    if (heights.length < 2) continue
+    const k = el.offsetHeight ? el.getBoundingClientRect().height / el.offsetHeight : 1
+    const row = Math.min(...heights)
+    const shows = (el.clientHeight * k) / row
+    if (shows < 1.5) problems.push(`squeezed: the list "${name(el)}" shows ${shows.toFixed(1)} of a row at a time (its shortest row is ${Math.round(row)} px) — give it room for 2 rows, or let the card around it scroll as one`)
+  }
 
   const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')

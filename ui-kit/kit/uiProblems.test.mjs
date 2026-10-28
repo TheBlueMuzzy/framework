@@ -462,11 +462,11 @@ describe('findProblems — cut-offs at a card edge, words past their card, a squ
   // Settings in Pixel at 200% text (fake language): its card scrolls up and down but hides what's past its sides, and the
   // title's last letter ("]") was cut off at the card's right edge. The edge check skips boxes that scroll (rows scrolled
   // part-way under an edge are fine), and the text check only looked at the words' own box.
-  const panel = (inside) => `<div style="position:absolute;left:16px;top:16px;width:200px;height:120px;overflow-x:hidden;overflow-y:auto;
+  const panel = (inside) => `<div style="position:absolute;left:16px;top:16px;width:150px;height:120px;overflow-x:hidden;overflow-y:auto;
     background:#29366f;color:#fff;border:4px solid #f4f4f4;padding:12px">${inside}<div style="height:300px">Rows</div></div>`
   it('clipped: a title cut off by the side of a card that scrolls up and down (its last letter hidden) is flagged once', async () => {
-    const found = await withFont(panel('<h2 style="margin:0;font-size:32px;white-space:nowrap">[Šéţţíñĝšš]</h2>'))
-    expect(noPx(only('clipped', found))).toEqual(['clipped: "[Šéţţíñĝšš]" is cut off by the side of its box (<div>), which hides what runs past it'])
+    const found = await withFont(panel('<h2 style="margin:0;font-size:32px;white-space:nowrap">[Šéţţíñĝššéţ]</h2>'))
+    expect(noPx(only('clipped', found))).toEqual(['clipped: "[Šéţţíñĝššéţ]" is cut off by the side of its box (<div>), which hides what runs past it'])
   })
 
   it('clipped: words that fit, rows scrolled part-way under the bottom, and a strip that scrolls sideways are not cut off', async () => {
