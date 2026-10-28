@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.32.0 — 2026-10-27
+
+Steadier checks. GitHub keeps its test browsers between runs, so the step that timed out twice in one day now takes under 30 seconds. The UI kit holds up in the long fake language with nothing left over, and a button's words now fade with its colour.
+
+### New
+- UI kit 0.37.2:
+  - In the fake language (`?pseudo`), a player's name stays as written inside every label too. A chip or seat button named "Ana" stays "Ana", and "Remove Ana" keeps the name.
+  - A player chip's numbers are all one width, so "S1 · T5" → "S2 · T5" no longer makes the chip wider mid-game.
+  - Badges and the ◀ ▶ picker have room above and below accented letters. A badge in a card wraps a too-long word instead of running out of the card.
+  - Victory and Game over on a phone on its side keep at least one row of their list in view, and the card scrolls instead.
+  - The page check scales its edge room for shrunk parts, and ignores a ring hidden by a scroll area.
+  - A full fake-language shoot now finds nothing: edge 95, ring 4 and small 2 → 0.
+- UI kit 0.37.3: a button's words and border fade together with its background. Before, a button swapping style showed its new white mark on the old near-white fill for the whole fade.
+- Every module installer reads its version through one shared script, and a framework test refuses an installer that asks git itself. Version line in games: unchanged. (ai 0.8.3, audio 0.4.2, crashes 0.2.2, devkit 0.28.1, emotes 0.4.2, lint 0.3.1, rooms 0.13.1, saves 0.6.6, table 0.8.2, version 0.1.3.)
+- The framework's checks on GitHub keep the test browsers and the Linux packages they need between runs. A stalled download now gives up after 30 seconds and tries again.
+- The turn-based starter: Escape or a phone's Back on the results goes to the main menu, like the Main menu button. Before, it left the finished board with nothing to do. The starter is on UI kit 0.37.3.
+
+### Fixed
+- Fixed "ResizeObserver loop" page errors from a title's fit. It now re-measures at the next frame, and only when its width or text size changes.
+
 ## v0.31.0 — 2026-10-27
 
 A new lint rule keeps clocks honest: code that takes a clock option (`now`) can no longer read the computer's clock with `Date.now()` somewhere else in the same file. A test with a fixed date now stays right next week instead of failing on its own.

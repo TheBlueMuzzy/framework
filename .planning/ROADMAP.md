@@ -1,5 +1,5 @@
 # Game Framework — Roadmap
-Release target: none — a library; each milestone releases on its own (latest v0.31.0, 2026-10-27)
+Release target: none — a library; each milestone releases on its own (latest v0.32.0, 2026-10-27)
 
 ## v0.1 — Game UI kit  ✅ released (prototype) 2026-09-28
 Goal: any game can get good-looking, standard menus, settings, dialogs and HUD in one of 5 styles, built passively by the `game-ui` skill. Design: `design/ui-kit.md`.
@@ -439,7 +439,7 @@ flowchart LR
   F157[✅ F157 Clock lint rule]
 ```
 
-## v0.30 — Steadier checks  ← current · planned 2026-10-27 · built 2026-10-27, approved
+## v0.30 — Steadier checks  ✅ released 2026-10-27 (v0.32.0) · planned 2026-10-27
 Goal (Muzzy 2026-10-27: "do A … they seem like easy adds"): the framework's own checks stop holding up merges and stop letting old slips come back — GitHub keeps its test browsers, every installer reads its version one shared way, and the starter and the fake language come out clean.
 - ✅ F158 🔧 Keep test browsers on GitHub — checks.yml keeps the downloaded test browsers between runs (actions/cache on ~/.cache/ms-playwright, keyed on the Playwright version + engines), so only the system packages are fetched each run (v0.27 look-back: the saves job's browser download timed out at 15 min and held up the merge, after v0.23's 35-min hang) — should · sprint 48
 - ✅ F159 🧱 One shared version helper — one framework script reads a module's VERSION + git commit once (git asked only once per run), every installer uses it, and a framework check refuses an installer that asks git itself (v0.26 look-back: the slow install was fixed twice, F128 then F90) — should · sprint 48
