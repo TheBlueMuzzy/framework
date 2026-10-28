@@ -3,7 +3,9 @@
 //   "wider:"   the page is wider than the screen (a phone quietly zooms out to fit it)
 //   "small:"   a control smaller than 44×44 px (a fingertip misses it)
 //   "clipped:" a control cut off at the edge of a box that hides overflow (its outline / shadow too) or past the
-//              screen edge (and not in something that scrolls), or text cut off
+//              screen edge (and not in something that scrolls), or text cut off — by its own box, or (0.38.0) by a box
+//              around it that hides what runs past its side, top or bottom (a card's title losing its last letter)
+//   "squeezed:" a scroll list too short to show 2 of its rows at once (the Room's players at 200% text) — 0.38.0
 //   "overlap:" two things on screen sit on top of each other (text over text, a control over text…) — new in 0.18.0;
 //              and a solid chip, badge or panel slid part-way onto a bar, meter or picture — 0.33.1 — or onto
 //              another card's words — 0.33.2. A toast or tooltip (the top layer) over the page is on top by design
@@ -16,6 +18,7 @@
 //              2 px to the box's inside edge — text, an icon, a picture, an avatar or a badge. Things meant to run edge
 //              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
+//              Words out past the box's edge say "runs N px past the edge of its box" — 0.38.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 //   "ring:"    words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring (an outline)
 //              included and its round shape (a circle, not its box) — 0.35.8

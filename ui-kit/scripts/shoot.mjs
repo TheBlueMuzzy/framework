@@ -168,7 +168,21 @@ async function shoot(file, size, query, prepare) {
   // …and its layout (F149): each text's line count + each part's size, for npm run compare:engines
   writeFileSync(`${OUT}/layout/${file}.json`, JSON.stringify(await page.evaluate(recordLayout)))
   shotCount++
-  report(`${file}.png`, [...page.errors, ...(await page.evaluate(findProblems, { screenWidth: size.width, checkFocus: !prepare }))])
+  report(`${file}.png`, [...page.errors, ...(await problemsOnWholePage(page, size, !prepare))])
+}
+
+// The page check judges what's on screen. A page taller than the screen (the parts page) is checked a screenful at a
+// time, scrolled down and back up (F162: Pixel's Mode select cards on the desktop parts page ran past their cards
+// 2,400 px down — only the first 900 px were ever checked). The same problem on two screenfuls is said once.
+async function problemsOnWholePage(page, size, checkFocus) {
+  const found = await page.evaluate(findProblems, { screenWidth: size.width, checkFocus })
+  const { total, view } = await page.evaluate(() => ({ total: document.documentElement.scrollHeight, view: innerHeight }))
+  for (let top = view; top < total; top += view) {
+    await page.evaluate((y) => new Promise((done) => { scrollTo({ top: y, behavior: 'instant' }); requestAnimationFrame(() => requestAnimationFrame(done)) }), Math.min(top, total - view))
+    found.push(...(await page.evaluate(findProblems, { screenWidth: size.width, checkFocus: false })))
+  }
+  if (total > view) await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }))
+  return [...new Set(found)]
 }
 
 // Screen stack (on the parts page's demo): open → dialog on top → Esc → Esc ends back at the start;
