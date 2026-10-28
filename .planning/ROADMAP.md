@@ -453,6 +453,18 @@ flowchart LR
   F161[✅ F161 Fake-language leftovers]
 ```
 
+## v0.31 — Cleaner edges  ← current · planned 2026-10-28
+Goal (Muzzy 2026-10-28 /roadmap: "A and B both in full auto … that should be low hanging fruit"): the page check catches the cut-offs it misses today and the kit fixes them, online Results leave like the game against the computer, and a release fills in the module versions itself.
+- 🔨 F162 🐞 Cut-offs the page check misses — teach uiProblems the three it misses (found by F161 — Fake-language leftovers' helper): Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; Pixel's ModeSelect card titles run past their cards (desktop parts page); the Room's player list at 200% upright shrinks to about one visible row. Each new rule red on today's kit first, then the kit fixed at its root — should · sprint 49
+- 🔨 F163 🐞 Online Results take Escape — the starter's OnlineScreen.tsx draws Results inline, not on the screen stack, so Escape does nothing and a phone's Back leaves the page; make it leave to the main menu like the game against the computer (F160 — Starter Escape after Results), with the starter's screens check guarding it — should · sprint 49
+- 🔨 F164 🔧 Module versions filled at release — release.mjs writes STATE's "Version: … (emotes 0.4.2 · ai 0.8.3 …)" list from each module's kit/VERSION, so it's never a release behind (v0.30 look-back) — could · sprint 49
+```mermaid
+flowchart LR
+  F162[🔨 F162 Cut-offs the check misses]
+  F163[🔨 F163 Online Results Escape]
+  F164[🔨 F164 Module versions at release]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -474,10 +486,10 @@ flowchart LR
 ## Ideas
 - 2026-10-27 — **Hand to the game sessions (v0.30 look-back):** ~/.claude/config/bmuz/templates/checks.yml now keeps the test browser + its Linux packages between GitHub runs (F158 — Keep test browsers on GitHub's cache, inline) — each game copies the new template over its .github/workflows/checks.yml and watches its next two runs (the first fills, the second should say "Cache restored"). Untested in a game yet.
 - 2026-10-27 — **The starter's e2e went red on GitHub twice this milestone, each passing on a re-run** (v0.30 look-back): main's online check (locator.click 30 s) after v0.31.0, and devkit-live waiting for the Tuning tab on F161 — Fake-language leftovers' branch. If a third comes, find the race (the GitHub machine is ~2.5× slower) — never a longer timeout.
-- 2026-10-27 — **STATE's module versions are hand-copied at every release** (v0.30 look-back: the "Version: … (emotes 0.4.1 · ai 0.8.2 …)" line was a release behind until fixed by hand) — release.mjs could fill it from each module's kit/VERSION.
+- 2026-10-27 — → v0.31 F164. **STATE's module versions are hand-copied at every release** (v0.30 look-back: the "Version: … (emotes 0.4.1 · ai 0.8.2 …)" line was a release behind until fixed by hand) — release.mjs could fill it from each module's kit/VERSION.
 - 2026-10-27 — ✅ done in UI kit 0.37.3 (Muzzy: the normal fix — words and border fade with the background). **A kit Button's mark flickers when its style swaps** (found by F160 — Starter Escape after Results' helper): `button.kit-target` (ui-kit/kit/kit.css) fades its background over 120 ms but switches its text colour at once, so the starter's winning-line pulse shows a white ✕ on a near-white square for ~120 ms every 450 ms (the "faint ✕"). Options: change the colour at the fade's midpoint · drop the background fade · the starter pulses something else — Muzzy's call, it changes how buttons move in every game. The page check can catch the flicker now and then (it only skips words whose own element moves).
-- 2026-10-27 — **Online Results ignore Escape** (F160): OnlineScreen.tsx draws its results inline, not on the screen stack — Escape does nothing and a phone's Back leaves the page, unlike the game against the computer (now: back to the main menu).
-- 2026-10-27 — **Cut-offs the page check misses (found by F161 — Fake-language leftovers' helper, fake language):** Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; the desktop parts page in Pixel, ModeSelect's card titles run past their cards; the Room's player list at 200% upright shrinks to about one visible row (it scrolls, nothing flags it). None counted by uiProblems — teach it, then fix.
+- 2026-10-27 — → v0.31 F163. **Online Results ignore Escape** (F160): OnlineScreen.tsx draws its results inline, not on the screen stack — Escape does nothing and a phone's Back leaves the page, unlike the game against the computer (now: back to the main menu).
+- 2026-10-27 — → v0.31 F162. **Cut-offs the page check misses (found by F161 — Fake-language leftovers' helper, fake language):** Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; the desktop parts page in Pixel, ModeSelect's card titles run past their cards; the Room's player list at 200% upright shrinks to about one visible row (it scrolls, nothing flags it). None counted by uiProblems — teach it, then fix.
 - 2026-10-27 — (Muzzy 2026-10-27: accepted for now; a numbers font for Cartoon stays an option) **Cartoon's chip grows 3–4 px when a number changes** (F161): its body font, Fredoka, has no equal-width digits, so tabular-nums does nothing there — another font for numbers in Cartoon, or accept it (Muzzy's call).
 - 2026-10-27 — **Hand to the game sessions (found by F157 — Clock lint rule, read-only measure):** lint 0.3.0 adds bmuz/own-clock — Roll Better, Goops and Glyphtender each have 0 finds today, so it goes in as an error with the same `install-module.mjs lint .` that brings lint 0.1.0 / 0.2.0 (the hand-off lines below).
 - 2026-10-27 — **Fake-language leftovers outside F156 — Room for longer words' bar** (full shoot:pseudo, 2026-10-27): edge 95 (words touching their box), ring 4, small 2 (an invisible 16px-tall element named after the Game over / Victory title, landscape at 200% — not a control a player taps), grows 2 (a Neon player chip 3px wider after it appeared, on a 360 phone — the fake language rewrites after first measure). And a PlayerChip's / seat button's aria-label is the player's name, which the fake language still rewrites (only drawn words are translate="no").
