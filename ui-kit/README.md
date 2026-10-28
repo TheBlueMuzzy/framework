@@ -443,6 +443,9 @@ gallery's `npm run shoot` uses the same one.
   - **A title's fit** (MenuHeader, end screens) re-measures at the next frame, and only when its width or text size
     changes — refitting inside the observer's own turn gave "ResizeObserver loop" page errors (Pixel's Lobby and Payslip
     at 200% in the fake language, about one full run in three).
+- 0.37.3 (F160 — Starter Escape after Results, Muzzy 2026-10-27): **a button's words and border fade with its background.**
+  Only the background faded, so a button swapping style (the starter's winning-line pulse) showed its new white mark on
+  the old near-white fill for the whole 120 ms fade — the "faint ✕". Words, border and fill now change as one.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
