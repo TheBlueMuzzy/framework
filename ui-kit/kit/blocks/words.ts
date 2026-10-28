@@ -52,9 +52,9 @@ export function pseudo(text: string, keep: readonly string[] = []) {
   const kept = [...new Set(keep.map((w) => w.trim()).filter((w) => /\p{L}/u.test(w)))].sort((a, b) => b.length - a.length)
   const pieces = new RegExp(`(\\{\\w+\\}${kept.map((w) => `|(?<![\\p{L}\\p{N}])${escaped(w)}(?![\\p{L}\\p{N}])`).join('')})`, 'u')
   const parts = body.split(pieces)
-  const left = (part: string, i: number) => i % 2 === 1 // (split keeps each matched piece at an odd index)
-  const keptHere = parts.some((part, i) => left(part, i) && !/^\{\w+\}$/.test(part))
-  if (keptHere && parts.every((part, i) => left(part, i) || !/\p{L}/u.test(part))) return text // nothing else to translate
-  const out = parts.map((part, i) => (left(part, i) ? part : part.replace(/\p{L}[\p{L}'’]*/gu, longer))).join('')
+  const left = (i: number) => i % 2 === 1 // (split keeps each matched piece at an odd index)
+  const keptHere = parts.some((part, i) => left(i) && !/^\{\w+\}$/.test(part))
+  if (keptHere && parts.every((part, i) => left(i) || !/\p{L}/u.test(part))) return text // nothing else to translate
+  const out = parts.map((part, i) => (left(i) ? part : part.replace(/\p{L}[\p{L}'’]*/gu, longer))).join('')
   return `${lead}[${out}]${trail}`
 }

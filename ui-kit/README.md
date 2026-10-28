@@ -424,7 +424,8 @@ gallery's `npm run shoot` uses the same one.
   - **The page check** accepts a word that breaks where its part already went all the way: a title at body size
     (`data-fit="split"`), a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
 - 0.37.1 (F161): **Fake-language leftovers.** A full `npm run shoot:pseudo`: edge 95 · ring 4 · small 2 → 0 counted
-  (9 shots accepted in `knownShots` with their reason, fake language only — Muzzy to confirm); English unchanged.
+  (9 shots accepted in `knownShots` with their reason, fake language only — Muzzy to confirm), and the kit's own 22
+  "bubble has no side with room" warnings at 200% (13 shots) accepted like Muzzy's F145 / F147 talk calls; English unchanged.
   - **A player's name in a label stays as written:** the fake language keeps every word the page marks
     `translate="no"` inside any label too — a PlayerChip or seat button named "Ana" stays "Ana", "Remove Ana" becomes
     "[Ŕéɱöṽéŕé Ana]". (`pseudo(text, keep)` takes the kept words.)
