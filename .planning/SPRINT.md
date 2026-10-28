@@ -25,14 +25,15 @@ Checked:
 
 ## F164 🔧 Module versions filled at release
 Done when: release.mjs, in a project whose folders hold `<module>/kit/VERSION`, rewrites STATE's "Version: X (a 1.2.3 · b …)" list from those files; projects without modules are untouched; tests cover both.
-- [ ] 🤖 1. Read how the list is written today in STATE and which modules have kit/VERSION; decide the order (keep today's order, new modules at the end) — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 2. Tests red first: a framework-shaped project gets the list filled; a game without modules keeps its Version line as before — ~/.claude/config/bmuz/scripts/test-scripts.mjs
-- [ ] 🤖 3. Build it in release.mjs's STATE Version step — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 4. A dry run on the framework prints today's list matching the modules' VERSION files; ~/.claude script tests green — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 1. Read how the list is written today in STATE and which modules have kit/VERSION; decide the order (keep today's order, new modules at the end) — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 2. Tests red first: a framework-shaped project gets the list filled; a game without modules keeps its Version line as before — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 3. Build it in release.mjs's STATE Version step — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 4. A dry run on the framework prints today's list matching the modules' VERSION files; ~/.claude script tests green — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 Check: the new tests red then green; a dry run on the framework names every module's current version; all script tests green.
-Checked:
+Checked: 2026-10-28 (helper, code read by Claude) new suite release-module-list red first (1 pass, 2 fail: labels kept + audio appended; list added when missing), then 3/3; test-scripts 346/0, test-hooks 611/0. Dry run on the framework (read-only, .scratch/framework-f164/proof.mjs): the list it would write = today's STATE list, all 11 match kit/VERSION, "UI kit" / "Dev Kit" labels and order kept.
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
 - Work branch: dev/v0-31-cleaner-edges.
+- F164 — by a fresh helper, in ~/.claude (not this repo): moduleVersions(root) + moduleList(oldList, modules) in scripts/lib.mjs (lib so a read-only script can preview it — release.mjs runs on load); release.mjs rebuilds the "(…)" after STATE's Version number when the project has top-level <folder>/kit/VERSION. Labels match folders ignoring case, spaces and dashes (no name table); new modules at the end under their folder name; a listed module with no folder is dropped; a missing list is added. Games (copies under src/) untouched — tested. Any bracket right after the number in a module project counts as the list (only the framework has modules today).
 Retro:
