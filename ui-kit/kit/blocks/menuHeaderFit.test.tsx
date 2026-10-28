@@ -96,6 +96,30 @@ describe.each(Object.keys(presets))('MenuHeader title beside an action in %s', (
   })
 })
 
+// F162 (0.38.0): Settings in Pixel at 200% text on a phone, in the fake language — a ‹, the title and the version on
+// the right. The title went "tight" (its own line, heading size), but one word was wider than the whole row even there,
+// so it ran past the card's side and its last letter ("]") was cut off. Now it takes the last step instead: body size,
+// on its own line, and only a word wider than the row even then may break.
+describe('a title too wide for its whole row, beside a ‹ and an action', () => {
+  it.each([[390, 844], [360, 780]])('Pixel at double text size, %ix%i: the title stays inside its row', async (width, height) => {
+    const page = await browser.newPage({ viewport: { width, height } })
+    const markup = renderToStaticMarkup(<Modal title="[Šéţţíñĝššéţ]" onBack={() => {}}
+      headerAction={<Text kind="caption">v0.1.0.12</Text>} actions={<Button>Done</Button>}><p>Audio</p></Modal>)
+    await showInStyle(page, 'pixel', markup)
+    const t = await page.evaluate(`(() => {
+      document.documentElement.style.fontSize = '200%'
+      const box = document.querySelector('.kit-menu-header-title')
+      ;(${fitMenuTitle.toString()})(box, true)
+      const row = box.parentElement.getBoundingClientRect()
+      const r = document.createRange(); r.selectNodeContents(box.firstElementChild)
+      const right = Math.max(...[...r.getClientRects()].map((q) => q.right))
+      return { fit: box.dataset.fit, past: right - row.right }
+    })()`) as { fit: string; past: number }
+    expect(t.past, `fit "${t.fit}"`).toBeLessThanOrEqual(1)
+    await page.close()
+  })
+})
+
 // F145 (0.35.1): the end screens' titles fit the same way (useTitleFit) — the art Game over's frame left its display
 // title "Ga / me / ove / r" at 200% text. In a narrow report it drops a step instead; at 100% it keeps its size.
 describe('End-screen title (Game over, display size) in a narrow report', () => {
