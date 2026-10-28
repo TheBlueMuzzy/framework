@@ -430,4 +430,18 @@ describe('findProblems — a ring around an avatar', () => {
       .replace('left:100px', 'left:18px')}<span class="kit-badge" style="position:absolute;left:46px;top:46px;width:20px;height:20px;border-radius:50%;background:#2a6"></span></div>`)
     expect(only('ring', found)).toEqual([])
   })
+
+  // F161: Results' last row scrolled under the list's bottom edge — only the avatar's top shows, and "Continue" below
+  // the list was "touching" the ring of the part the list hides
+  it('the part of an avatar a scroll area hides has no ring to touch; the part it shows still counts', async () => {
+    const list = (top) => `<div style="position:absolute;left:0;top:0;width:400px;height:30px;overflow:auto">
+      <div style="position:relative;height:200px">${avatar(true).replace('top:20px', `top:${top}px`)}</div></div>
+      <span style="position:absolute;left:150px;top:34px;line-height:20px">Continue</span>`
+    // the list shows the avatar's top 6 px; the words sit below the list, 1 px right of where the hidden ring would be
+    expect(only('ring', await problemsOn(list(24)))).toEqual([])
+    // …but words inside the list, by the part that shows, still touch it
+    const inside = `<div style="position:absolute;left:0;top:0;width:400px;height:60px;overflow:auto">
+      <div style="position:relative;height:200px">${avatar(true)}${place(97)}</div></div>`
+    expect(only('ring', await problemsOn(inside))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 0 px of room'])
+  })
 })
