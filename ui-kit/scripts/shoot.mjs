@@ -96,7 +96,7 @@ const knownShots = {
   // (the fake language only — in English this shot still counts)
   ...(process.argv.includes('--pseudo') ? {
     'screens/teach-clean-phone-text-200.png': 'Muzzy 2026-10-27 (F156):the callout demo puts a text button in both bottom corners; at 200% in a ~40% longer language each is wider than half a 390px phone, so they meet — the kit warns, the game makes room',
-    // Claude 2026-10-27 (F161), Muzzy to confirm — what's left after the shared causes were fixed:
+    // Claude 2026-10-27 (F161), accepted by Muzzy 2026-10-27 — what's left after the shared causes were fixed:
     // (the kit's own bubble warnings, the same as Muzzy's F145 / F147 talk calls above, now in the longer language)
     ...Object.fromEntries(['clean', 'cartoon', 'console', 'cozy', 'fantasy', 'neon'].map((look) => [`screens/talk-${look}-phone-text-200.png`, "Claude 2026-10-27 (F161): like Muzzy's F145 / F147 talk calls — at 200% in a ~40% longer language the demo line takes so many lines upright that no side of the ◀ ▶ pickers has room; the kit warns, the game makes room"])),
     ...Object.fromEntries(presetNames.map((look) => [`screens/emotes-${look}-phone-landscape-text-200.png`, "Claude 2026-10-27 (F161): like the talk calls — at 200% text sideways in a ~40% longer language three speech bubbles on a 390 px-tall screen have no side left clear of each other; the kit warns, the game makes room"])),

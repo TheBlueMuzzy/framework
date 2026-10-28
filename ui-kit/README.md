@@ -425,7 +425,7 @@ gallery's `npm run shoot` uses the same one.
     (`data-fit="split"`), a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
 - 0.37.1 (F159 — `scripts/install-kit.mjs`): the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged.
 - 0.37.2 (F161): **Fake-language leftovers.** A full `npm run shoot:pseudo`: edge 95 · ring 4 · small 2 → 0 counted
-  (9 shots accepted in `knownShots` with their reason, fake language only — Muzzy to confirm), and the kit's own 22
+  (9 shots accepted in `knownShots` with their reason, fake language only — accepted by Muzzy 2026-10-27), and the kit's own 22
   "bubble has no side with room" warnings at 200% (13 shots) accepted like Muzzy's F145 / F147 talk calls; English unchanged.
   - **A player's name in a label stays as written:** the fake language keeps every word the page marks
     `translate="no"` inside any label too — a PlayerChip or seat button named "Ana" stays "Ana", "Remove Ana" becomes
