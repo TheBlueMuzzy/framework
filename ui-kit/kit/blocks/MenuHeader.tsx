@@ -45,7 +45,7 @@ export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean
     // (only when its width or its text size changes — the fit's own step changes only its height — and not inside the
     // observer's own turn but at the next frame, 0.37.1 — F161: a refit there moved the parts below the title in the
     // same turn, "ResizeObserver loop completed with undelivered notifications" on Pixel's Lobby and Payslip at 200%)
-    const room = () => { const s = getComputedStyle(box); return `${box.clientWidth} ${s.fontSize} ${s.fontFamily}` }
+    const room = () => `${box.clientWidth} ${getComputedStyle(box).fontSize}`
     let fittedFor = room(), frame = 0
     const refit = new ResizeObserver(() => {
       if (room() === fittedFor || frame) return
