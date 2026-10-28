@@ -423,6 +423,22 @@ gallery's `npm run shoot` uses the same one.
     breaks inside the chip.
   - **The page check** accepts a word that breaks where its part already went all the way: a title at body size
     (`data-fit="split"`), a stacked ◀ ▶ picker, or a part marked `data-ui-split-ok`.
+- 0.37.1 (F161): **Fake-language leftovers.** A full `npm run shoot:pseudo`: edge 95 · ring 4 · small 2 → 0 counted
+  (7 shots accepted in `knownShots` with their reason, fake language only — Muzzy to confirm); English unchanged.
+  - **A player's name in a label stays as written:** the fake language keeps every word the page marks
+    `translate="no"` inside any label too — a PlayerChip or seat button named "Ana" stays "Ana", "Remove Ana" becomes
+    "[Ŕéɱöṽéŕé Ana]". (`pseudo(text, keep)` takes the kept words.)
+  - **A chip's detail numbers are all one width** ("S1 · T5" → "S2 · T5" no longer makes the chip 3 px wider mid-game,
+    in English too). A look whose body font has no equal-width digits (Cartoon's Fredoka) still widens by 3–4 px.
+    A detail too long for the chip's room wraps between its words.
+  - **Room above and below accents:** badges have 0.1em above and below their words; buttons at least 0.3em, the ◀ ▶
+    picker's value 0.15em (the gaps don't grow with the text size, so at 200% an Ŕ or Ţ came within 1 px). A button in
+    a column is never squashed below its words (the card scrolls instead). A badge on its own line in a card breaks a
+    too-long word inside itself instead of running out of the card.
+  - **Victory / Game over on a phone on its side** keep the list's floor (the card scrolls) — at 200% in a longer
+    language the list had been squeezed to a 16 px strip.
+  - **The page check:** a box shrunk onto the table keeps its edge room shrunk too (like the ring's), and the part of an
+    avatar a scroll area hides has no ring to touch.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

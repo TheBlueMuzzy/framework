@@ -96,6 +96,10 @@ const knownShots = {
   // (the fake language only — in English this shot still counts)
   ...(process.argv.includes('--pseudo') ? {
     'screens/teach-clean-phone-text-200.png': 'Muzzy 2026-10-27 (F156):the callout demo puts a text button in both bottom corners; at 200% in a ~40% longer language each is wider than half a 390px phone, so they meet — the kit warns, the game makes room',
+    // Claude 2026-10-27 (F161), Muzzy to confirm — what's left after the shared causes were fixed:
+    ...Object.fromEntries(['neon', 'pixel'].map((look) => [`screens/menu-${look}-phone-landscape-text-200.png`, `Claude 2026-10-27 (F161): one word ("Settings", ~40% longer, in ${look === 'neon' ? "Neon's wide Orbitron" : "Pixel's wide Silkscreen"} capitals) is wider than a half-width menu button at 200% text sideways — a word can't break, so it reaches the button's edge; a game picks a shorter word for that button`])),
+    'screens/results-pixel-phone-landscape-text-200.png': "Claude 2026-10-27 (F161): Pixel's title font (Silkscreen) draws an accent over a capital (Ŕ) far above the line; at 200% text sideways the title sits at the top of the card, so the mark meets the card's top edge — a real Ř/Č title in Pixel would need a line more of room",
+    ...Object.fromEntries(['cartoon', 'cozy', 'fantasy', 'pixel'].map((look) => [`screens/hand-${look}-phone-landscape-text-200.png`, "Claude 2026-10-27 (F161): the gallery's own stand-in hand screen — its four demo buttons take two lines in the longer language at 200% text sideways, which pushes the rack to the screen's bottom edge; a game lays out its own buttons"])),
   } : {}),
 }
 let knownCount = 0
