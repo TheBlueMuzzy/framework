@@ -41,6 +41,16 @@ describe('pseudo', () => {
   })
 })
 
+describe('pseudo — kept words (F161)', () => {
+  it('keeps the given words as written, whole words only; a text of only kept words is left exactly as it was', () => {
+    expect(pseudo('Ana', ['Ana'])).toBe('Ana')
+    expect(pseudo('Remove Ana', ['Ana'])).toMatch(/^\[\S+ Ana\]$/)
+    expect(pseudo('Bananas', ['Ana'])).not.toContain('Ana') // inside another word: rewritten
+    expect(pseudo('Wave at Sherman Meredith', ['Sherman', 'Sherman Meredith'])).toContain('Sherman Meredith')
+    expect(pseudo('{n}', ['Ana'])).toBe(pseudo('{n}')) // slots alone are still bracketed as before
+  })
+})
+
 describe('startPseudoPage', () => {
   let stop: (() => void) | null = null
   afterEach(() => { stop?.(); stop = null; document.body.innerHTML = '' })

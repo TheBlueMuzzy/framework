@@ -40,12 +40,21 @@ const MARKER_LETTERS = new Set([...'ƀðƒĝĥĵķļɱþǫŕţṽŵẋƁÐƑĜĤ
 /** Is this text already in the fake language — whole ([…]), or a piece of it with one of its marker letters? (The page
  *  pass also remembers its own writes, pseudoPage.ts — that's what stops a word looping; this stops a piece of one.) */
 export const isPseudo = (text: string) => /^\s*\[[\s\S]*\]\s*$/.test(text) || [...text].some((ch) => MARKER_LETTERS.has(ch))
-export function pseudo(text: string) {
+// keep (0.37.1, F161): words never translated, kept as written wherever they appear — a player's name inside a label
+// ("Remove Ana" → "[Ŕéɱöṽéŕé Ana]"). A text that is only kept words (and slots) stays exactly as it was: "Ana" → "Ana".
+const escaped = (word: string) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+export function pseudo(text: string, keep: readonly string[] = []) {
   if (!/\p{L}/u.test(text) || isPseudo(text)) return text
   const lead = text.match(/^\s*/)![0]
   const trail = text.match(/\s*$/)![0]
   const body = text.slice(lead.length, text.length - trail.length)
-  // {slots} kept; every other run of letters made longer
-  const out = body.split(/(\{\w+\})/).map((part) => (/^\{\w+\}$/.test(part) ? part : part.replace(/\p{L}[\p{L}'’]*/gu, longer))).join('')
+  // {slots} and kept words (whole words only, longest first) left alone; every other run of letters made longer
+  const kept = [...new Set(keep.map((w) => w.trim()).filter((w) => /\p{L}/u.test(w)))].sort((a, b) => b.length - a.length)
+  const pieces = new RegExp(`(\\{\\w+\\}${kept.map((w) => `|(?<![\\p{L}\\p{N}])${escaped(w)}(?![\\p{L}\\p{N}])`).join('')})`, 'u')
+  const parts = body.split(pieces)
+  const left = (part: string, i: number) => i % 2 === 1 // (split keeps each matched piece at an odd index)
+  const keptHere = parts.some((part, i) => left(part, i) && !/^\{\w+\}$/.test(part))
+  if (keptHere && parts.every((part, i) => left(part, i) || !/\p{L}/u.test(part))) return text // nothing else to translate
+  const out = parts.map((part, i) => (left(part, i) ? part : part.replace(/\p{L}[\p{L}'’]*/gu, longer))).join('')
   return `${lead}[${out}]${trail}`
 }
