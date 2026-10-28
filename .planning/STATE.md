@@ -2,7 +2,7 @@
 
 ## ▶ RESUME HERE
 2026-10-27 — **Sprint 48 approved (Muzzy: "/deliver", auto mode) — v0.30 Steadier checks is being delivered from dev/v0-30-steadier-checks.** F158 — Keep test browsers on GitHub, F159 — One shared version helper, F160 — Starter Escape after Results (+ UI kit 0.37.3: button words fade with the fill), F161 — Fake-language leftovers ✅. Full check green at dce998d.
-- Next: /deliver (security review, patch notes, merge, release, look-back).
+- /deliver in progress: patch notes written (.planning/archive/releases/v0.32.0.md); a security review of v0.31.0..527abb5 is running; then merge.mjs, release.mjs milestone, look-back.
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
