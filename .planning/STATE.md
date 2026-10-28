@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-27 — **Released v0.32.0 (v0.30 Steadier checks ✅: GitHub keeps its test browsers — 8.6 min → under 30 s; one shared version helper for every installer; the starter's Escape on Results → main menu; fake-language leftovers → 0, UI kit 0.37.3 — a button's words fade with its fill). Next: /roadmap — nothing planned past v0.30; ROADMAP Ideas has the game hand-offs (lint 0.1–0.3, UI kit 0.36–0.37) and today's leftovers (cut-offs the page check misses, online Results ignore Escape).** Look-back: archive/lookbacks/v0.30.md.
+2026-10-27 — **Released v0.32.0 (v0.30 Steadier checks ✅: GitHub keeps its test browsers — 8.6 min → under 30 s; one shared version helper for every installer; the starter's Escape on Results → main menu; fake-language leftovers → 0, UI kit 0.37.3 — a button's words fade with its fill). Next: /roadmap — nothing planned past v0.30; ROADMAP Ideas has the game hand-offs (lint 0.1–0.3, UI kit 0.36–0.37) and today's leftovers (cut-offs the page check misses, online Results ignore Escape).** Look-back: archive/lookbacks/v0.30.md (4 hooks/checklist lessons landed in ~/.claude; templates/checks.yml keeps test browsers for games). Muzzy: one thing to keep doing, or stop doing, next time?
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
@@ -42,4 +42,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-10-26 — Released v0.26.0 (v0.24 A test game guards every update): a tic-tac-toe starter with every module wired; the framework's checks play it on every change; the results ring has room (UI kit 0.35.8).
 - 2026-10-26 — Sprint 41 done: the kit and saves hold up in iPhone's engine; a scrolling card's buttons get a soft fade above them (UI kit 0.35.7). v0.23 ready to /deliver.
 - 2026-10-25 — Sprint 41 planned (unattended): the kit and saves work in iPhone's engine (F148 shoot in WebKit, F149 fixes, F150 saves in every engine).
-- 2026-10-25 — Released v0.24.0 (v0.22 Big text in every look): every look holds up at 200% text — HUD sideways, pickers, names and titles, the story bubble; the page check measures in the right font.

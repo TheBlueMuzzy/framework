@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-25 — Released v0.24.0 (v0.22 Big text in every look): every look holds up at 200% text — HUD sideways, pickers, names and titles, the story bubble; the page check measures in the right font.
 - 2026-10-25 — Released v0.23.0 (v0.21 The kit meets every player): every UI kit screen holds up at 200% text, What's new after an update, gamepad focus ring.
 - 2026-10-25 — Sprint 39 planned (unattended): every screen holds up at 200% text (F144 the shoot sees every screen at 200%, F145 the fixes).
 - 2026-10-25 — Sprint 38 planned: the kit meets every player (F141 words stay whole at big text, F142 gamepad focus ring, F143 What's new after an update).
