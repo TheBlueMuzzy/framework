@@ -6,8 +6,8 @@ What changes: the kit's page check flags three kinds of cut-off it misses today 
 ## F162 🐞 Cut-offs the page check misses
 Done when: uiProblems flags all three cases (a title's last character clipped by its card's edge, a card title running past its card, a scroll list squeezed to about one row), each new rule red on today's kit first, the kit fixed at the root, and a full shoot (English + pseudo) green.
 - [x] 🤖 1. Measure first: reproduce the three on today's kit (Pixel 200% Settings title, Pixel ModeSelect titles on the desktop parts page, Room player list at 200% upright) — screenshots + what really happens now in Notes — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 2. Teach uiProblems the missing rules with unit tests red first (clipped last glyph at a card edge · text past its card · a scroll list shorter than ~2 rows) — ui-kit/kit/uiProblems.mjs
-- [ ] 🤖 3. Run the full shoot with the new rules on today's kit; list every find (old ones too) in Notes — ui-kit/scripts/shoot.mjs
+- [x] 🤖 2. Teach uiProblems the missing rules with unit tests red first (clipped last glyph at a card edge · text past its card · a scroll list shorter than ~2 rows) — ui-kit/kit/uiProblems.mjs
+- [x] 🤖 3. Run the full shoot with the new rules on today's kit; list every find (old ones too) in Notes — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 4. Fix the Settings title / ModeSelect titles at the root — ui-kit/kit/blocks/frontend.tsx
 - [ ] 🤖 5. Fix the Room's player list room at 200% upright — ui-kit/kit/blocks/online.tsx
 - [ ] 🤖 6. UI kit VERSION + README line; kit tests + full shoot (normal + pseudo) green; the starter takes it, check:full green — ui-kit/kit/VERSION
