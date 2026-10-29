@@ -21,7 +21,7 @@ Done when: on the starter's online game, Escape and the browser's Back on Result
 - [x] 🤖 3. Results on the screen stack (or the same leave-on-close rule as TableScreen.tsx), leaving the room cleanly — starters/turn-based/src/ui/OnlineScreen.tsx
 - [x] 🤖 4. The starter's check:full green; root check:fast green — starters/turn-based/package.json
 Check: the new check red on today's code, green after; screenshots before → after looked at; starter check:full green.
-Checked:
+Checked: 2026-10-29 (helper, code read by Claude; merged after the 10-28 crash) starter check:full 10/10 green on the work branch (online, screens, smoke, framework, devkit-live…)
 
 ## F164 🔧 Module versions filled at release
 Done when: release.mjs, in a project whose folders hold `<module>/kit/VERSION`, rewrites STATE's "Version: X (a 1.2.3 · b …)" list from those files; projects without modules are untouched; tests cover both.
