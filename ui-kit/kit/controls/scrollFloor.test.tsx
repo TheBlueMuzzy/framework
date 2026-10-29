@@ -58,3 +58,16 @@ describe('A ScrollArea in a card keeps a floor', () => {
     expect(list).toBeGreaterThanOrEqual(2 * rem) // its one row, whole
   })
 })
+
+// F162 (0.38.0): the parts page's "Scroll area" demo — a label above the list in a card with the smallest gap. The
+// list's room (it reaches out past its rows by up to half the card's side gap, for their outlines) was wider than that
+// gap, so the list's box lay over the label: "overlap" in every look and size. Its room is never more than half the
+// gap it sits in.
+describe('A ScrollArea under a label in a tight card', () => {
+  it.each(['xs', 's', 'm'])('gap %s: the list never reaches over the label above it', async (gap) => {
+    await showInStyle(page, 'clean', renderToStaticMarkup(<Panel gap={gap as 'xs' | 's' | 'm'}><span className="kit-text" data-kind="label">Scroll area</span>
+      <ScrollArea label="Players">{Array.from({ length: 6 }, (_, i) => <div key={i} style={{ blockSize: '2rem' }}>Row {i}</div>)}</ScrollArea></Panel>))
+    const gapBetween = await page.evaluate(() => document.querySelector('.kit-scroll')!.getBoundingClientRect().top - document.querySelector('.kit-text')!.getBoundingClientRect().bottom)
+    expect(gapBetween).toBeGreaterThanOrEqual(0)
+  })
+})

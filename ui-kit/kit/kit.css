@@ -298,6 +298,10 @@
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: auto;
     scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) / 2); padding: var(--kit-scroll-room); margin: calc(-1 * var(--kit-scroll-room)); }
   .kit-scroll::-webkit-scrollbar { display: none; }
+  /* …and never more than half the gap it sits in (0.38.0, F162: the parts page's Scroll area demo, in a gap-xs card —
+     the list's box reached over its label above it, "overlap" in every look and size) */
+  [data-gap="xs"] > .kit-scroll { --kit-scroll-room: min(0.5rem, var(--gap-m) / 2, var(--gap-xs) / 2); }
+  [data-gap="s"] > .kit-scroll { --kit-scroll-room: min(0.5rem, var(--gap-m) / 2, var(--gap-s) / 2); }
   /* (0.35.1, F145) It gives up height only down to --kit-scroll-min (default 4rem: two rows or so, growing with the text
      size) — or its whole contents, if shorter. Past that, the card itself scrolls as one (the last resort above): at
      200% text on a phone the Room's player list was squeezed to a 16 px sliver under the big words, and the Seat picker's
