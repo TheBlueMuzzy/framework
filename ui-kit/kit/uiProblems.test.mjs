@@ -320,6 +320,14 @@ describe('findProblems — words split in the middle', () => {
     expect(only('split', found)).toEqual([])
   })
 
+  // 0.38.0 (F162): the parts page's Carousel at 200% text in the fake language — "[Lockdown]" wider than the carousel's
+  // window (between its ◀ ▶) broke inside it; the check measured it against the card around, where it would fit
+  it('a word wider than a window that hides its overflow may wrap, though it would fit the card around', async () => {
+    const found = await problemsOn(`<div style="width:300px;padding:4px;border:1px solid #888">
+      <div style="width:120px;overflow:hidden"><span style="display:block;overflow-wrap:anywhere">Supercalifragilistic</span></div></div>`)
+    expect(only('split', found)).toEqual([])
+  })
+
   // 0.37.0 (F156): ConnectionDot's chip — a translated "connection" too long for the room beside the dot breaks on purpose
   it('a word in a data-ui-split-ok part may break; the same squeeze without it is flagged', async () => {
     const chip = (mark) => `

@@ -388,8 +388,13 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
         if (lines.length < 2) continue
         const tops = lines.map((r) => r.top)
         if (Math.max(...tops) - Math.min(...tops) < Math.min(...lines.map((r) => r.height)) / 2) continue // one line
-        let box = el
-        while (box && box !== document.body && !drawsBox(box)) box = box.parentElement
+        // (…and no wider than a window on the way that hides what runs past its sides — 0.38.0, F162: a Carousel's
+        // window between its ◀ ▶ is narrower than the card around it)
+        let box = el, view = Infinity
+        while (box && box !== document.body && !drawsBox(box)) {
+          if (box !== el && /^(hidden|clip)$/.test(getComputedStyle(box).overflowX)) view = Math.min(view, box.getBoundingClientRect().width)
+          box = box.parentElement
+        }
         let room = innerWidth, what = 'the screen'
         if (box && box !== document.body) {
           const s = getComputedStyle(box)
@@ -397,6 +402,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
           room = box.getBoundingClientRect().width - k * ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'].reduce((sum, side) => sum + parseFloat(s[side]), 0)
           what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
         }
+        room = Math.min(room, view)
         const wide = lines.reduce((sum, r) => sum + r.width, 0)
         // (fits = with room to spare: within half a pixel either way the browser decides, and a word a hair wider than its
         // line — 0.3 px, Mode select's "[Öñļíñéöñ]" on a phone, 0.38.0 — really doesn't fit)

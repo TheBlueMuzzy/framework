@@ -8,13 +8,18 @@ import {
 import { ScreensDemo } from './ScreensDemo'
 import { gear } from './symbols'
 
-// (its title fits like the kit's titles — 0.38.0, F162: "Display" at 200% text in the fake language split mid-word)
-function Section({ title, children }: { title: string; children: ReactNode }) {
+// A big word that fits like the kit's titles: a word wider than its line drops a size (0.38.0, F162: the "Display"
+// sample and the section titles split mid-word at 200% text in the fake language)
+function FitTitle({ kind, children }: { kind: 'display' | 'title'; children: string }) {
   const titleBox = useRef<HTMLSpanElement>(null)
-  useTitleFit(titleBox, true, false, title)
+  useTitleFit(titleBox, true, false, children)
+  return <span ref={titleBox} className="kit-fit-title"><Text kind={kind}>{children}</Text></span>
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Stack gap="m">
-      <span ref={titleBox} className="kit-fit-title"><Text kind="title">{title}</Text></span>
+      <FitTitle kind="title">{title}</FitTitle>
       {children}
     </Stack>
   )
@@ -146,8 +151,8 @@ function Display() {
         </ScrollArea>
       </Panel>
       <Stack gap="xs">
-        <Text kind="display">Display</Text>
-        <Text kind="title">Title</Text>
+        <FitTitle kind="display">Display</FitTitle>
+        <FitTitle kind="title">Title</FitTitle>
         <Text kind="heading">Heading</Text>
         <Text kind="body">Body text — never below the accessibility floor.</Text>
         <Text kind="label">Label</Text>
