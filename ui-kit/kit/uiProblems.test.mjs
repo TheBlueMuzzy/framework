@@ -311,6 +311,15 @@ describe('findProblems — words split in the middle', () => {
     expect(only('split', found)).toEqual([])
   })
 
+  // 0.38.0 (F162): Mode select's card title "[Öñļíñéöñ]" in the fake language on a phone, 0.3 px wider than its card's
+  // inside — the browser broke it (it doesn't fit), and the check said it fits: its pieces add up to within its +0.5 px
+  it('a word a hair wider than its box (under half a pixel) may wrap: it doesn\'t fit', async () => {
+    await page.setContent('<span id="w" style="font:24px sans-serif">Onlineonline</span>')
+    const wide = await page.$eval('#w', (el) => el.getBoundingClientRect().width)
+    const found = await problemsOn(`<div style="width:${wide - 0.3}px;padding:4px;border:1px solid #888;font:24px sans-serif;overflow-wrap:break-word">Onlineonline</div>`)
+    expect(only('split', found)).toEqual([])
+  })
+
   // 0.37.0 (F156): ConnectionDot's chip — a translated "connection" too long for the room beside the dot breaks on purpose
   it('a word in a data-ui-split-ok part may break; the same squeeze without it is flagged', async () => {
     const chip = (mark) => `

@@ -398,7 +398,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
           what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
         }
         const wide = lines.reduce((sum, r) => sum + r.width, 0)
-        if (wide <= room + 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
+        // (fits = with room to spare: within half a pixel either way the browser decides, and a word a hair wider than its
+        // line — 0.3 px, Mode select's "[Öñļíñéöñ]" on a phone, 0.38.0 — really doesn't fit)
+        if (wide <= room - 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
         // …and a TITLE's word even when it's wider than its box (0.35.1, F145: "Reconnecti / ng…" at 200% text): a title
         // has a smaller size to go to (MenuHeader and the end screens drop a step), so a split one was never fitted —
         // unless its fit already went all the way down (data-fit="split": body size, the last resort — 0.37.0, F156)
