@@ -35,4 +35,13 @@ Checked:
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
 - Work branch: dev/v0-31-cleaner-edges.
+- F162 task 1 (measure, helper 1): the three reproduced — Settings in Pixel at 200% in the fake language: the title "tight" (heading size, own line) still 48–78 px wider than its row, its "]" cut off by the card's side (the card scrolls up/down but hides its sides); Pixel's Mode cards on the desktop parts page (below the first 900 px, never checked): titles ~30 px past their cards, read as "touches — 0 px"; the Room at 200% upright: the players list 128 px (the 4rem floor) for rows of ~156 px — it scrolled, so nothing was "cut off". (Helper 1's own notes were lost when it crashed; this line is from its commit messages and tests.)
+- F162 task 3 (full shoot, new rules, kit at d804578 = before any fix; 961 shots each): **English 61 problems (8 known), fake language 104 (50 known).** By kind (English / fake language shots):
+  - squeezed: Seat picker (12 / 10, 200% upright + sideways), Room players (7 / 7, 200% upright), Victory reveal + Victory (7 / 10, 200% sideways), Settings' Accessibility tab (3 / 3, Cartoon Cozy Pixel 200% sideways), end screens "You win!" (4 / 12, 200% upright), art Game over (2 / 2), Mode select (1 / 1, 200% sideways), Payslip (– / 3), Game over (– / 1). Root: the list floor is a fixed 4rem ("two rows or so") — at 200% text a row is 66–224 px, so it holds under 1.5 rows; on a phone on its side the end screens' floor is ~one row (1.5rem, F161).
+  - squeezed on the card itself (Feedback's tooltip card sideways, 3 / 13; the art Game over card, 1 / 1): a card already scrolling as one, the last resort — the rule's own mistake.
+  - overlap on the parts page, every look and size (20 / 20): the "Scroll area" demo's label × its list — the scroll box's room (half the card's side gap, reaching over the label) is wider than the gap-xs above it. Old, never seen: below the first screenful.
+  - edge on the parts page (– / 8): the Mode cards' titles ("Online", "Party", "Solo") run past their cards in Pixel, Neon, Fantasy — a card title never wraps a word (it's not a .kit-text).
+  - clipped by .gallery-game (Idle warning + bot, – / 6; Countdown's "3", 1 / 1): the Idle card is a popover (top layer: no box clips it), the "3" is measured by its line box, not its ink — the rule's own mistakes.
+  - clipped by its card's side (fake language): Settings' title (Pixel 200% upright, the task-4 case), the art Game over's "Try again" (200% upright).
+  - parts page at 200% in the fake language (below the first screenful): 2 split words ("Buttons", the "Display" title) and 2 carousel slides cut off by the carousel's view.
 Retro:
