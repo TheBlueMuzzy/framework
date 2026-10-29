@@ -453,6 +453,17 @@ describe('findProblems — a ring around an avatar', () => {
       <div style="position:relative;height:200px">${avatar(true)}${place(97)}</div></div>`
     expect(only('ring', await problemsOn(inside))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 0 px of room'])
   })
+
+  // 0.38.0 (F162): the Room at 200% text in the fake language — the card scrolls as one, and its row of buttons stays
+  // at its foot (sticky) while the players scroll under it: "I'm ready" sat beside Muzzy's ring going by underneath.
+  // Like an overlap with a sticky row (scrollsOutFromUnder): scrolling takes it out from under, so it isn't judged.
+  it('words on a sticky row the avatar scrolls out from under are not judged; the same row fixed in place is', async () => {
+    const card = (sticky) => `<div style="position:absolute;left:0;top:0;width:400px;height:100px;overflow:auto">
+      <div style="position:relative;height:300px">${avatar(true).replace('top:20px', 'top:66px')}</div>
+      <div style="position:${sticky ? 'sticky' : 'absolute'};bottom:0;${sticky ? '' : 'top:76px;width:400px;'}height:24px;padding-left:148px;box-sizing:border-box;line-height:24px">Ready</div></div>`
+    expect(only('ring', await problemsOn(card(true)))).toEqual([])
+    expect(only('ring', await problemsOn(card(false)))).toHaveLength(1)
+  })
 })
 
 // 0.38.0 (F162) — three cut-offs the check missed (found by F161 in the fake language, ?pseudo). Words are drawn in the

@@ -621,6 +621,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       if (!box || av.contains(el) || el.contains(av) || moving(el)) continue
       const piece = shape ? rounded(box, shape) : { ...box, R: 0 } // (words: the box of their letters)
       if (apart(piece, body) <= 0) continue // ON the avatar: on purpose
+      // …or on a sticky row it scrolls out from under (0.38.0, F162: the Room at 200% text, its buttons' row at the
+      // card's foot and Muzzy's row going by underneath — the same as an overlap with a sticky row)
+      if (scrollsOutFromUnder(el, av)) continue
       const cut = seenRing && (seen.top > b.top + 0.5 || seen.bottom < b.bottom - 0.5 || seen.left > b.left + 0.5 || seen.right < b.right - 0.5)
       const room = cut && !clipper.contains(el) ? apart(piece, seenRing) : apart(piece, ring)
       // (a chip shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it — the gallery's
