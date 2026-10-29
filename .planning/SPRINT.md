@@ -8,11 +8,11 @@ Done when: uiProblems flags all three cases (a title's last character clipped by
 - [x] 🤖 1. Measure first: reproduce the three on today's kit (Pixel 200% Settings title, Pixel ModeSelect titles on the desktop parts page, Room player list at 200% upright) — screenshots + what really happens now in Notes — ui-kit/scripts/shoot.mjs
 - [x] 🤖 2. Teach uiProblems the missing rules with unit tests red first (clipped last glyph at a card edge · text past its card · a scroll list shorter than ~2 rows) — ui-kit/kit/uiProblems.mjs
 - [x] 🤖 3. Run the full shoot with the new rules on today's kit; list every find (old ones too) in Notes — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 4. Fix the Settings title / ModeSelect titles at the root — ui-kit/kit/blocks/frontend.tsx
-- [ ] 🤖 5. Fix the Room's player list room at 200% upright — ui-kit/kit/blocks/online.tsx
-- [ ] 🤖 6. UI kit VERSION + README line; kit tests + full shoot (normal + pseudo) green; the starter takes it, check:full green — ui-kit/kit/VERSION
+- [x] 🤖 4. Fix the Settings title / ModeSelect titles at the root — ui-kit/kit/blocks/frontend.tsx (the roots were MenuHeader's fit — a last "split" step — and the Card title, kit.css: it never broke a word)
+- [x] 🤖 5. Fix the Room's player list room at 200% upright — ui-kit/kit/blocks/online.tsx (the root was the 4rem list floor: ScrollArea now measures two of its own rows, kit.css / blocks.css; Settings' pages, Lobby join sideways and the gallery's own finds fixed too)
+- [x] 🤖 6. UI kit VERSION + README line; kit tests + full shoot (normal + pseudo) green; the starter takes it, check:full green — ui-kit/kit/VERSION
 Check: each new rule's test red then green; the three cases flagged on today's kit, then 0 after the fix; full shoot + shoot:pseudo green; kit tests; starter check:full green.
-Checked:
+Checked: 2026-10-29 — new tests each red first: menuHeaderFit 2, uiProblems 6 (3 false-find fixes, split hair + window, ring under a sticky row), scrollFloor 2, cardLook 7, settingsFloor 3, carouselFit 2, lobbyJoinFit 2 → green; kit tests 56 files / 924 green; full shoot 961 shots: English 61 → 0 (8 known), fake language 104 → 0 (43 known, was 50); UI kit 0.38.0; starter turn-based takes it, check:full 10/10 (1.3 min). One English run hit ERR_NETWORK_CHANGED on one shot (the PC's network blinked) — the final run was clean.
 
 ## F163 🐞 Online Results take Escape
 Done when: on the starter's online game, Escape and the browser's Back on Results land on the main menu (like the game against the computer), and the starter's screens check fails on the old behaviour.
