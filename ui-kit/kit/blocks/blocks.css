@@ -86,9 +86,13 @@
      never changes the card's size or moves its header. Only the current page shows (the others are also inert). */
   /* The pages' cell: as tall as the tallest page, and the one part of the card that gives up height (each page then
      scrolls inside itself — 0.10.3) */
-  .kit-screen > [data-slot="center"] > .kit-panel.kit-wide > .kit-settings-pages { flex: 1 1 auto; min-block-size: 0; }
-  .kit-settings-pages { display: grid; grid-template-rows: minmax(0, 1fr); }
-  .kit-settings-page { grid-area: 1 / 1; min-inline-size: 0; min-block-size: 0; display: flex; flex-direction: column; visibility: hidden; }
+  /* …but never below two of a page's list rows (0.38.0, F162: on a phone on its side at 200% text the Accessibility list
+     showed 1.4 rows) — the floor ScrollArea measures, copied onto each page by Settings (keepPageFloors); the cell keeps
+     the biggest one (auto), so switching tabs still never resizes the card. Past that, the card scrolls as one. */
+  .kit-screen > [data-slot="center"] > .kit-panel.kit-wide > .kit-settings-pages { flex: 1 1 auto; min-block-size: auto; }
+  .kit-settings-pages { display: grid; grid-template-rows: minmax(auto, 1fr); }
+  .kit-settings-page { grid-area: 1 / 1; min-inline-size: 0; display: flex; flex-direction: column; visibility: hidden;
+    min-block-size: min(max(var(--kit-scroll-min, 4rem), var(--kit-scroll-rows, 0rem)), var(--kit-scroll-contents, 0rem)); }
   .kit-settings-page[data-current] { visibility: visible; }
   /* A section heading row ("type": "heading"): breathing room above it, except at the very top */
   .kit-settings-heading { padding-block: var(--gap-l) var(--gap-xs); }
