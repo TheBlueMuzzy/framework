@@ -300,8 +300,10 @@
      size) — or its whole contents, if shorter. Past that, the card itself scrolls as one (the last resort above): at
      200% text on a phone the Room's player list was squeezed to a 16 px sliver under the big words, and the Seat picker's
      list to 43 px. ScrollArea measures its contents (--kit-scroll-contents). Only straight in a card: one inside a
-     stack of its own (Victory's report) would spill out of that stack instead. */
-  .kit-panel > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+     stack of its own (Victory's report) would spill out of that stack instead. And never under two of its own rows
+     (0.38.0, F162: --kit-scroll-rows, measured by ScrollArea — the Room's player rows are ~156 px at 200% text, and its
+     4rem list showed under one player). */
+  .kit-panel > .kit-scroll { min-block-size: min(max(var(--kit-scroll-min, 4rem), var(--kit-scroll-rows, 0rem)), var(--kit-scroll-contents, 0rem)); }
   .kit-scroll[data-scrolls] { overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }

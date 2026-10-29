@@ -398,7 +398,7 @@
      the list was squeezed to 16 px inside the art Game over's frame and the report spilled over the buttons. */
   @media (height > 30rem), (width < 40rem) {
     .kit-end > .kit-end-info { display: contents; }
-    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(max(var(--kit-scroll-min, 4rem), var(--kit-scroll-rows, 0rem)), var(--kit-scroll-contents, 0rem)); }
   }
   /* The scroll that follows a reveal stops the newest row clear of the "more below" fade (flow.tsx reads this) */
   .kit-scroll .kit-stat-row { scroll-margin-block-end: var(--kit-scroll-fade, 2rem); }
@@ -415,8 +415,9 @@
     /* …and its list never goes under about one row — when even that won't fit, the card scrolls as one (0.37.1, F161:
        at 200% text the title and message took the column and the list was squeezed to a 16 px strip, its rows out of
        sight — in Pixel in English, in every look in a ~40% longer language). Not the portrait floor (4rem): a short
-       list of one or two rows sideways keeps its own height, so the card doesn't start scrolling in English. */
-    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(1.5rem, var(--kit-scroll-contents, 0rem)); }
+       list of one or two rows sideways keeps its own height, so the card doesn't start scrolling in English. Two of its
+       own rows since 0.38.0 (F162: --kit-scroll-rows — at 200% text Victory's list showed one stat row at a time). */
+    .kit-end > .kit-end-info > .kit-scroll { min-block-size: min(var(--kit-scroll-rows, 1.5rem), var(--kit-scroll-contents, 0rem)); }
   }
   .kit-dot { flex: none; inline-size: 0.75rem; block-size: 0.75rem; border-radius: 50%; } /* (flex: none — a squeezed chip never squashes it) */
 
