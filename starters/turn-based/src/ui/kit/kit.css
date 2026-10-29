@@ -241,6 +241,10 @@
   .kit-carousel-track { display: grid; }
   .kit-carousel-item { grid-area: 1 / 1; min-inline-size: 0; display: flex; align-items: center; justify-content: center; visibility: hidden; }
   .kit-carousel-item[data-current] { visibility: visible; }
+  /* A slide is never wider than the window (0.38.0, F162: "[Lockdown]" and its line at 200% text in a longer language
+     ran past both sides and were cut off): its words wrap, and a word wider than the window breaks, as a .kit-text's does */
+  .kit-carousel-item > * { min-inline-size: 0; max-inline-size: 100%; }
+  .kit-carousel-item .kit-text { min-inline-size: 0; }
   .kit-carousel-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap-xs); }
   .kit-carousel-dot { inline-size: 0.5rem; block-size: 0.5rem; }
   .kit-tab { flex: 1 0 auto; padding: var(--gap-s) var(--gap-l); border: 0; background: none; font-weight: 600; }
@@ -261,7 +265,9 @@
      breaks inside the badge instead of running out of it, cut off (ModeSelect's "Popular", translated, on a phone) */
   /* (anywhere, not break-word: the badge is a flex box, and its words only shrink below one word with anywhere) */
   .kit-card > .kit-badge { white-space: normal; overflow-wrap: anywhere; max-inline-size: 100%; }
-  .kit-card-title { font-size: var(--text-heading); font-weight: 700; }
+  /* (a word wider than the card breaks inside it, as a .kit-text's does — 0.38.0, F162: Mode select's titles in a ~40%
+     longer language ran out past their cards in Pixel's and Neon's wide capitals) */
+  .kit-card-title { font-size: var(--text-heading); font-weight: 700; overflow-wrap: break-word; }
   /* Words only a screen reader hears (0.27.0: a locked Card's "Locked", at the end of its title) — a clipped line of
      its own, 1 px tall and pulled back by 1 px, so it never moves a word of the title or grows the card */
   .kit-sr-only { display: block; inline-size: 0.0625rem; block-size: 0.0625rem; margin-block-end: -0.0625rem;
@@ -296,12 +302,18 @@
   .kit-scroll { flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: auto;
     scrollbar-width: none; --kit-scroll-room: min(0.5rem, var(--gap-m) / 2); padding: var(--kit-scroll-room); margin: calc(-1 * var(--kit-scroll-room)); }
   .kit-scroll::-webkit-scrollbar { display: none; }
+  /* …and never more than half the gap it sits in (0.38.0, F162: the parts page's Scroll area demo, in a gap-xs card —
+     the list's box reached over its label above it, "overlap" in every look and size) */
+  [data-gap="xs"] > .kit-scroll { --kit-scroll-room: min(0.5rem, var(--gap-m) / 2, var(--gap-xs) / 2); }
+  [data-gap="s"] > .kit-scroll { --kit-scroll-room: min(0.5rem, var(--gap-m) / 2, var(--gap-s) / 2); }
   /* (0.35.1, F145) It gives up height only down to --kit-scroll-min (default 4rem: two rows or so, growing with the text
      size) — or its whole contents, if shorter. Past that, the card itself scrolls as one (the last resort above): at
      200% text on a phone the Room's player list was squeezed to a 16 px sliver under the big words, and the Seat picker's
      list to 43 px. ScrollArea measures its contents (--kit-scroll-contents). Only straight in a card: one inside a
-     stack of its own (Victory's report) would spill out of that stack instead. */
-  .kit-panel > .kit-scroll { min-block-size: min(var(--kit-scroll-min, 4rem), var(--kit-scroll-contents, 0rem)); }
+     stack of its own (Victory's report) would spill out of that stack instead. And never under two of its own rows
+     (0.38.0, F162: --kit-scroll-rows, measured by ScrollArea — the Room's player rows are ~156 px at 200% text, and its
+     4rem list showed under one player). */
+  .kit-panel > .kit-scroll { min-block-size: min(max(var(--kit-scroll-min, 4rem), var(--kit-scroll-rows, 0rem)), var(--kit-scroll-contents, 0rem)); }
   .kit-scroll[data-scrolls] { overscroll-behavior: contain; }
   .kit-scroll[data-max="s"] { max-block-size: 10rem; }
   .kit-scroll[data-max="m"] { max-block-size: 18rem; }

@@ -3,7 +3,9 @@
 //   "wider:"   the page is wider than the screen (a phone quietly zooms out to fit it)
 //   "small:"   a control smaller than 44×44 px (a fingertip misses it)
 //   "clipped:" a control cut off at the edge of a box that hides overflow (its outline / shadow too) or past the
-//              screen edge (and not in something that scrolls), or text cut off
+//              screen edge (and not in something that scrolls), or text cut off — by its own box, or (0.38.0) by a box
+//              around it that hides what runs past its side, top or bottom (a card's title losing its last letter)
+//   "squeezed:" a scroll list too short to show 2 of its rows at once (the Room's players at 200% text) — 0.38.0
 //   "overlap:" two things on screen sit on top of each other (text over text, a control over text…) — new in 0.18.0;
 //              and a solid chip, badge or panel slid part-way onto a bar, meter or picture — 0.33.1 — or onto
 //              another card's words — 0.33.2. A toast or tooltip (the top layer) over the page is on top by design
@@ -16,6 +18,7 @@
 //              2 px to the box's inside edge — text, an icon, a picture, an avatar or a badge. Things meant to run edge
 //              to edge (a cover picture, a divider) carry data-ui-bleed; things in a scroll area, hanging outside the
 //              box or moving right now (a "+4" floating away) are skipped. Words are measured by their ink. — 0.21.0
+//              Words out past the box's edge say "runs N px past the edge of its box" — 0.38.0
 //   "grows:"   a card that grew after it first appeared (noted by the kit's useFixedSize, fixedSize.ts) — 0.21.0
 //   "ring:"    words or a badge closer than ~2 px to an avatar's visible edge, measured as drawn: its ring (an outline)
 //              included and its round shape (a circle, not its box) — 0.35.8
@@ -36,12 +39,28 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   const problems = []
   const SKIP = '#devkit-root, [data-ui-check="skip"], [inert], [aria-hidden="true"]'
   const name = (el) => (el.getAttribute('aria-label') ?? el.getAttribute('alt') ?? el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 30) || `<${el.tagName.toLowerCase()}>`
+  // The boxes around an element that can cut it off, nearest first: its ancestors — but none for something in the top
+  // layer (a popover, a modal dialog) or placed by the screen (position: fixed), and for one placed by a box further out
+  // (position: absolute) only that box and the ones around it (0.38.0, F162: the Idle warning, a popover over the
+  // gallery's stage, read as cut off by the stage). (A transform that makes a box the one a fixed part is placed by
+  // isn't followed: the kit draws none around its fixed parts.)
+  const clippers = (el) => {
+    const out = []
+    let placedBy = null // an absolute box's own box to be placed in: the ones between don't clip it
+    for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
+      if (e !== el && (!placedBy || e === placedBy)) { out.push(e); placedBy = null }
+      const s = getComputedStyle(e)
+      if (s.position === 'fixed' || e.matches(':popover-open, dialog:modal')) break
+      if (s.position === 'absolute') placedBy = e.offsetParent
+    }
+    return out
+  }
   // The part of an element you can actually see: its box cut by every ancestor that hides overflow (a scroll area, a
   // panel) and by the screen — null when nothing of it shows (a row scrolled out of its list)
   const visibleBox = (el) => {
     const b = el.getBoundingClientRect()
     let left = b.left, top = b.top, right = b.right, bottom = b.bottom
-    for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+    for (const p of clippers(el)) {
       const s = getComputedStyle(p)
       if (s.overflowX === 'visible' && s.overflowY === 'visible') continue
       const c = p.getBoundingClientRect()
@@ -344,6 +363,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     // below — 0.37.1, F161: the gallery's pinned chips at 200% text sideways had 3 px, drawn at 0.4 as 1)
     if (room >= 1.5 * Math.min(1, k)) return ''
     const what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
+    // (0.38.0, F162: Mode select's titles in Pixel, fake language, ran ~30 px out past their cards and read "touches —
+    // 0 px", like a near miss) — out past the box's inside edge by a pixel or more: said as it is
+    if (room <= -1) return `runs ${Math.round(-room)} px past the edge of its box (${what}${box === el ? ', its own' : ''})`
     return `touches the edge of its box (${what}${box === el ? ', its own' : ''}) — ${Math.max(0, Math.round(room))} px of room`
   }
 
@@ -366,8 +388,13 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
         if (lines.length < 2) continue
         const tops = lines.map((r) => r.top)
         if (Math.max(...tops) - Math.min(...tops) < Math.min(...lines.map((r) => r.height)) / 2) continue // one line
-        let box = el
-        while (box && box !== document.body && !drawsBox(box)) box = box.parentElement
+        // (…and no wider than a window on the way that hides what runs past its sides — 0.38.0, F162: a Carousel's
+        // window between its ◀ ▶ is narrower than the card around it)
+        let box = el, view = Infinity
+        while (box && box !== document.body && !drawsBox(box)) {
+          if (box !== el && /^(hidden|clip)$/.test(getComputedStyle(box).overflowX)) view = Math.min(view, box.getBoundingClientRect().width)
+          box = box.parentElement
+        }
         let room = innerWidth, what = 'the screen'
         if (box && box !== document.body) {
           const s = getComputedStyle(box)
@@ -375,8 +402,11 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
           room = box.getBoundingClientRect().width - k * ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'].reduce((sum, side) => sum + parseFloat(s[side]), 0)
           what = box.classList[0] ? `.${box.classList[0]}` : `<${box.tagName.toLowerCase()}>`
         }
+        room = Math.min(room, view)
         const wide = lines.reduce((sum, r) => sum + r.width, 0)
-        if (wide <= room + 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
+        // (fits = with room to spare: within half a pixel either way the browser decides, and a word a hair wider than its
+        // line — 0.3 px, Mode select's "[Öñļíñéöñ]" on a phone, 0.38.0 — really doesn't fit)
+        if (wide <= room - 0.5) out.push(`split: "${m[0]}" is broken in the middle across ${lines.length} lines, though it fits on one line of its box (${what})`)
         // …and a TITLE's word even when it's wider than its box (0.35.1, F145: "Reconnecti / ng…" at 200% text): a title
         // has a smaller size to go to (MenuHeader and the end screens drop a step), so a split one was never fitted —
         // unless its fit already went all the way down (data-fit="split": body size, the last resort — 0.37.0, F156)
@@ -386,6 +416,67 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     return out
   }
   for (const el of texts) problems.push(...splitWords(el))
+
+  // …and words cut off by a box AROUND them that hides what runs past it (0.38.0, F162: Settings in Pixel at 200% text,
+  // in the fake language — the card scrolls up and down but hides its sides, and its title's "]" was cut off at the
+  // card's right edge). Only a side that can't be scrolled to counts: overflow hidden or clip that way. Rows scrolled
+  // part-way under a scroll box's edge are fine (they scroll into view); so are words moving right now. Words are
+  // measured by their ink (Countdown's "3" at 200% sideways: its line ran past the stage, its letter didn't), and only
+  // the boxes that can clip them count (clippers: not for a popover or a fixed part).
+  for (const el of texts) {
+    if (moving(el)) continue
+    const words = wordsIn(el, false)
+    if (!words.length) continue
+    const run = wordsBox(words)
+    if (!run) continue
+    let sideSeen = false, endSeen = false // (only the nearest box that hides each way: one line per words)
+    for (const p of clippers(el)) {
+      if (sideSeen && endSeen) break
+      if (moving(p)) break // a carousel sliding, a card on its way in
+      const s = getComputedStyle(p)
+      // (a box that scrolls that way brings the words into view: what's further out only cuts the scroll box itself)
+      if (/(auto|scroll)/.test(s.overflowX)) sideSeen = true
+      if (/(auto|scroll)/.test(s.overflowY)) endSeen = true
+      const hidesSides = !sideSeen && /^(hidden|clip)$/.test(s.overflowX)
+      const hidesEnds = !endSeen && /^(hidden|clip)$/.test(s.overflowY)
+      if (!hidesSides && !hidesEnds) continue
+      const b = p.getBoundingClientRect()
+      const k = p.offsetWidth ? b.width / p.offsetWidth : 1 // (shrunk by a transform)
+      // what it shows: its box inside its border (overflow is cut at the padding's edge)
+      const left = b.left + p.clientLeft * k, top = b.top + p.clientTop * k, right = left + p.clientWidth * k, bottom = top + p.clientHeight * k
+      const what = p.classList[0] ? `.${p.classList[0]}` : `<${p.tagName.toLowerCase()}>`
+      if (hidesSides) {
+        sideSeen = true
+        const hidden = Math.max(left - run.left, run.right - right)
+        if (hidden > 1) problems.push(`clipped: "${name(el)}" is cut off by the side of its box (${what}), which hides what runs past it — ${Math.round(hidden)} px hidden`)
+      }
+      if (hidesEnds) {
+        endSeen = true
+        const hidden = Math.max(top - run.top, run.bottom - bottom)
+        if (hidden > 1) problems.push(`clipped: "${name(el)}" is cut off by the top or bottom of its box (${what}), which hides what runs past it — ${Math.round(hidden)} px hidden`)
+      }
+    }
+  }
+
+  // A scroll list squeezed to about one row (0.38.0, F162: the Room's players at 200% text on an upright phone — a
+  // 128 px list for rows of ~156 px; it scrolled, so nothing was "cut off"). Its rows: what's in it (through a lone
+  // wrapper — a ScrollArea's Stack or Grid); measured by the shortest, so a list that shows 2 of its smallest rows is
+  // fine. One row or one long text in a short box isn't a list. Moving rows (still arriving) aren't judged; nor rows
+  // taller than half the screen — two of them can't show at once anywhere, so there's no room to give (a card already
+  // scrolling as one on a phone on its side at 200% text: Feedback's tooltip demo, 284 px tall on a 390 px screen).
+  for (const el of document.querySelectorAll('body *')) {
+    const s = getComputedStyle(el)
+    if (!/(auto|scroll)/.test(s.overflowY) || el.scrollHeight <= el.clientHeight + 1 || !shown(el) || moving(el)) continue
+    let rows = [...el.children]
+    while (rows.length === 1) rows = [...rows[0].children]
+    const heights = rows.filter((r) => !['absolute', 'fixed'].includes(getComputedStyle(r).position)).map((r) => r.getBoundingClientRect().height).filter((h) => h >= 8)
+    if (heights.length < 2) continue
+    const k = el.offsetHeight ? el.getBoundingClientRect().height / el.offsetHeight : 1
+    const row = Math.min(...heights)
+    if (2 * row > innerHeight) continue
+    const shows = (el.clientHeight * k) / row
+    if (shows < 1.5) problems.push(`squeezed: the list "${name(el)}" shows ${shows.toFixed(1)} of a row at a time (its shortest row is ${Math.round(row)} px) — give it room for 2 rows, or let the card around it scroll as one`)
+  }
 
   const boxes = things.map(visibleBox)
   const hitAll = document.createElement('style')
@@ -536,6 +627,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
       if (!box || av.contains(el) || el.contains(av) || moving(el)) continue
       const piece = shape ? rounded(box, shape) : { ...box, R: 0 } // (words: the box of their letters)
       if (apart(piece, body) <= 0) continue // ON the avatar: on purpose
+      // …or on a sticky row it scrolls out from under (0.38.0, F162: the Room at 200% text, its buttons' row at the
+      // card's foot and Muzzy's row going by underneath — the same as an overlap with a sticky row)
+      if (scrollsOutFromUnder(el, av)) continue
       const cut = seenRing && (seen.top > b.top + 0.5 || seen.bottom < b.bottom - 0.5 || seen.left > b.left + 0.5 || seen.right < b.right - 0.5)
       const room = cut && !clipper.contains(el) ? apart(piece, seenRing) : apart(piece, ring)
       // (a chip shrunk onto the table is a small copy of one that has room: its 1.5 px shrinks with it — the gallery's
