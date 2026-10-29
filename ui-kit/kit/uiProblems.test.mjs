@@ -506,4 +506,39 @@ describe('findProblems — cut-offs at a card edge, words past their card, a squ
     expect(only('squeezed', await withFont(list(60, 1)))).toEqual([])
     expect(only('squeezed', await withFont(`<div style="height:50px;width:200px;overflow:auto">${'Lots of words in one paragraph. '.repeat(20)}</div>`))).toEqual([])
   })
+
+  // The full shoot's own false finds (task 3): a card on a phone on its side at 200% text, already scrolling as one,
+  // whose parts are each over half the screen tall (Feedback's tooltip demo, 284 px on a 390 px screen) — two of them
+  // can't fit on the screen at all, so there's no room to give
+  it('squeezed: rows taller than half the screen are not judged — two of them could never show at once', async () => {
+    expect(only('squeezed', await withFont(`<div style="height:300px;overflow:auto">
+      <div style="height:240px">A tall part</div><div style="height:240px">Another</div></div>`))).toEqual([])
+  })
+
+  // …the Idle warning: a popover (the top layer) placed over the gallery's stage, which hides its overflow — no box
+  // clips the top layer, nor a box placed by the screen (position: fixed), nor one placed by a box further out
+  // (position: absolute) — only the boxes from the one it's placed by outward
+  it('clipped: words in a popover, a fixed box or a box placed further out are not cut off by a box they escape', async () => {
+    // (the box that hides is not itself placed, so the absolute one is placed by the box around it)
+    await withFont(`<div style="position:absolute;left:0;top:200px;width:300px"><div style="height:100px;overflow:hidden">
+      <div id="pop" popover="manual" style="inset:auto;left:10px;top:185px;margin:0;width:200px">Still there? A bot plays</div>
+      <div style="position:fixed;left:10px;top:290px">A fixed note at its foot</div>
+      <div style="position:absolute;left:10px;top:-10px">Placed by the page</div></div></div>`)
+    await page.evaluate(() => document.getElementById('pop').showPopover())
+    expect(only('clipped', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
+  })
+
+  it('clipped: words placed by the box that hides its overflow are still cut off by it', async () => {
+    const found = await withFont(`<div style="position:absolute;left:0;top:200px;width:300px;height:100px;overflow:hidden">
+      <div style="position:absolute;left:10px;top:-15px;font-size:24px">Placed by the box</div></div>`)
+    expect(noPx(only('clipped', found))).toEqual(['clipped: "Placed by the box" is cut off by the top or bottom of its box (<div>), which hides what runs past it'])
+  })
+
+  // …and Countdown's "3" on a phone on its side: its line box (a tall line) runs past the stage, its ink doesn't —
+  // words are measured by their ink, as the edge check does
+  it('clipped: a tall line whose letters are all inside the box is not cut off', async () => {
+    const found = await withFont(`<div style="position:absolute;left:0;top:100px;width:300px;height:70px;overflow:hidden">
+      <div style="font-size:60px;line-height:70px">3</div></div>`)
+    expect(only('clipped', found)).toEqual([])
+  })
 })

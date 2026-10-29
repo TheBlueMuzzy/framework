@@ -39,12 +39,28 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   const problems = []
   const SKIP = '#devkit-root, [data-ui-check="skip"], [inert], [aria-hidden="true"]'
   const name = (el) => (el.getAttribute('aria-label') ?? el.getAttribute('alt') ?? el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 30) || `<${el.tagName.toLowerCase()}>`
+  // The boxes around an element that can cut it off, nearest first: its ancestors — but none for something in the top
+  // layer (a popover, a modal dialog) or placed by the screen (position: fixed), and for one placed by a box further out
+  // (position: absolute) only that box and the ones around it (0.38.0, F162: the Idle warning, a popover over the
+  // gallery's stage, read as cut off by the stage). (A transform that makes a box the one a fixed part is placed by
+  // isn't followed: the kit draws none around its fixed parts.)
+  const clippers = (el) => {
+    const out = []
+    let placedBy = null // an absolute box's own box to be placed in: the ones between don't clip it
+    for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
+      if (e !== el && (!placedBy || e === placedBy)) { out.push(e); placedBy = null }
+      const s = getComputedStyle(e)
+      if (s.position === 'fixed' || e.matches(':popover-open, dialog:modal')) break
+      if (s.position === 'absolute') placedBy = e.offsetParent
+    }
+    return out
+  }
   // The part of an element you can actually see: its box cut by every ancestor that hides overflow (a scroll area, a
   // panel) and by the screen — null when nothing of it shows (a row scrolled out of its list)
   const visibleBox = (el) => {
     const b = el.getBoundingClientRect()
     let left = b.left, top = b.top, right = b.right, bottom = b.bottom
-    for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+    for (const p of clippers(el)) {
       const s = getComputedStyle(p)
       if (s.overflowX === 'visible' && s.overflowY === 'visible') continue
       const c = p.getBoundingClientRect()
@@ -396,17 +412,18 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // …and words cut off by a box AROUND them that hides what runs past it (0.38.0, F162: Settings in Pixel at 200% text,
   // in the fake language — the card scrolls up and down but hides its sides, and its title's "]" was cut off at the
   // card's right edge). Only a side that can't be scrolled to counts: overflow hidden or clip that way. Rows scrolled
-  // part-way under a scroll box's edge are fine (they scroll into view); so are words moving right now.
+  // part-way under a scroll box's edge are fine (they scroll into view); so are words moving right now. Words are
+  // measured by their ink (Countdown's "3" at 200% sideways: its line ran past the stage, its letter didn't), and only
+  // the boxes that can clip them count (clippers: not for a popover or a fixed part).
   for (const el of texts) {
     if (moving(el)) continue
     const words = wordsIn(el, false)
     if (!words.length) continue
-    const range = document.createRange()
-    const lines = words.flatMap((n) => { range.selectNodeContents(n); return [...range.getClientRects()].filter((r) => r.width > 0.5) })
-    if (!lines.length) continue
-    const run = { left: Math.min(...lines.map((r) => r.left)), right: Math.max(...lines.map((r) => r.right)), top: Math.min(...lines.map((r) => r.top)), bottom: Math.max(...lines.map((r) => r.bottom)) }
+    const run = wordsBox(words)
+    if (!run) continue
     let sideSeen = false, endSeen = false // (only the nearest box that hides each way: one line per words)
-    for (let p = el.parentElement; p && p !== document.documentElement && !(sideSeen && endSeen); p = p.parentElement) {
+    for (const p of clippers(el)) {
+      if (sideSeen && endSeen) break
       if (moving(p)) break // a carousel sliding, a card on its way in
       const s = getComputedStyle(p)
       // (a box that scrolls that way brings the words into view: what's further out only cuts the scroll box itself)
@@ -436,7 +453,9 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
   // A scroll list squeezed to about one row (0.38.0, F162: the Room's players at 200% text on an upright phone — a
   // 128 px list for rows of ~156 px; it scrolled, so nothing was "cut off"). Its rows: what's in it (through a lone
   // wrapper — a ScrollArea's Stack or Grid); measured by the shortest, so a list that shows 2 of its smallest rows is
-  // fine. One row or one long text in a short box isn't a list. Moving rows (still arriving) aren't judged.
+  // fine. One row or one long text in a short box isn't a list. Moving rows (still arriving) aren't judged; nor rows
+  // taller than half the screen — two of them can't show at once anywhere, so there's no room to give (a card already
+  // scrolling as one on a phone on its side at 200% text: Feedback's tooltip demo, 284 px tall on a 390 px screen).
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el)
     if (!/(auto|scroll)/.test(s.overflowY) || el.scrollHeight <= el.clientHeight + 1 || !shown(el) || moving(el)) continue
@@ -446,6 +465,7 @@ export function findProblems({ screenWidth = innerWidth, checkFocus = true } = {
     if (heights.length < 2) continue
     const k = el.offsetHeight ? el.getBoundingClientRect().height / el.offsetHeight : 1
     const row = Math.min(...heights)
+    if (2 * row > innerHeight) continue
     const shows = (el.clientHeight * k) / row
     if (shows < 1.5) problems.push(`squeezed: the list "${name(el)}" shows ${shows.toFixed(1)} of a row at a time (its shortest row is ${Math.round(row)} px) — give it room for 2 rows, or let the card around it scroll as one`)
   }
