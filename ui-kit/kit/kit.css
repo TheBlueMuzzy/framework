@@ -261,7 +261,9 @@
      breaks inside the badge instead of running out of it, cut off (ModeSelect's "Popular", translated, on a phone) */
   /* (anywhere, not break-word: the badge is a flex box, and its words only shrink below one word with anywhere) */
   .kit-card > .kit-badge { white-space: normal; overflow-wrap: anywhere; max-inline-size: 100%; }
-  .kit-card-title { font-size: var(--text-heading); font-weight: 700; }
+  /* (a word wider than the card breaks inside it, as a .kit-text's does — 0.38.0, F162: Mode select's titles in a ~40%
+     longer language ran out past their cards in Pixel's and Neon's wide capitals) */
+  .kit-card-title { font-size: var(--text-heading); font-weight: 700; overflow-wrap: break-word; }
   /* Words only a screen reader hears (0.27.0: a locked Card's "Locked", at the end of its title) — a clipped line of
      its own, 1 px tall and pulled back by 1 px, so it never moves a word of the title or grows the card */
   .kit-sr-only { display: block; inline-size: 0.0625rem; block-size: 0.0625rem; margin-block-end: -0.0625rem;

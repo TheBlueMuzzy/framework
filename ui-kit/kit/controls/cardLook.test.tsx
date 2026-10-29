@@ -63,4 +63,17 @@ describe.each(Object.keys(presets))('Card in %s', (preset) => {
       expect(contrast(hex(text), hex(looks.background))).toBeGreaterThanOrEqual(4.5)
     }
   })
+
+  // F162 (0.38.0): Mode select's cards in the fake language — a title word wider than its card ("[Öñļíñéöñ]" in Pixel's
+  // and Neon's wide capitals) ran out past the card's side: the card title wasn't a .kit-text, so it never broke a word
+  it('a title word wider than its card breaks inside the card instead of running past its side', async () => {
+    await showInStyle(page, preset, renderToStaticMarkup(<div style={{ display: 'grid', gridTemplateColumns: '7.5rem' }}>
+      <Card title="[Ŵŵŵŵŵŵŵŵŵŵŵŵŵŵ]" onClick={() => {}}><span className="kit-text" data-kind="caption">Room code play</span></Card></div>))
+    const past = await page.$eval('.kit-card-title', (title) => {
+      const card = title.parentElement!.getBoundingClientRect()
+      const r = document.createRange(); r.selectNodeContents(title)
+      return Math.max(...[...r.getClientRects()].map((q) => q.right)) - card.right
+    })
+    expect(past).toBeLessThan(0)
+  })
 })
