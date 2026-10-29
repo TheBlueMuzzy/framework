@@ -65,7 +65,8 @@ export function useTitleFit(titleBox: RefObject<HTMLElement | null>, on: boolean
 /** Picks the title's size for the room it has (.kit-menu-header-title → data-fit): "" = title size, it fits on one
  *  line · "small" = a step down (heading size), wrapping between words if it must · "smaller" = body size, when a
  *  word is still too wide at heading size (a ‹ AND an action on a 360-wide phone) · "tight" = last resort, a word too
- *  wide even at body size: heading size again, and the action moves under the title (kit CSS). The first check is with
+ *  wide even at body size: heading size again, and the action moves under the title (kit CSS) · "split" = a word wider
+ *  than that whole row even so: body size on its own line, and only that word may break (0.38.0). The first check is with
  *  the words on one line (data-fit="measure", kit CSS). Self-contained, so the look tests can run it in a browser.
  *  oneLine = false (no action, 0.35.1): the first check is at title size, wrapping between words — it only steps down
  *  when a word is wider than its line; still too wide at body size → "split" (body size, that word may break). */
@@ -78,5 +79,11 @@ export function fitMenuTitle(box: HTMLElement, oneLine = true) {
     box.dataset.fit = step
     if (words.scrollWidth <= box.clientWidth + 1) return
   }
-  box.dataset.fit = oneLine ? 'tight' : 'split' // one word is too wide even at body size: the action moves under the title
+  if (!oneLine) { box.dataset.fit = 'split'; return } // one word is too wide even at body size: it may break
+  box.dataset.fit = 'tight' // too wide even at body size beside the ‹ and the action: the title gets the row, the action moves under it
+  // …and a word wider than that whole row even so (0.38.0, F162: Settings in Pixel at 200% text in the fake language —
+  // its "]" ran past the card's side and was cut off): the last step, body size on its own line; only a word wider
+  // than the row even then breaks. (In "tight" the box is as wide as its longest word, so it's measured by the row.)
+  const row = box.parentElement
+  if (row && words.scrollWidth > row.clientWidth + 1) box.dataset.fit = 'split'
 }

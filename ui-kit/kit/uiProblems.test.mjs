@@ -311,6 +311,23 @@ describe('findProblems — words split in the middle', () => {
     expect(only('split', found)).toEqual([])
   })
 
+  // 0.38.0 (F162): Mode select's card title "[Öñļíñéöñ]" in the fake language on a phone, 0.3 px wider than its card's
+  // inside — the browser broke it (it doesn't fit), and the check said it fits: its pieces add up to within its +0.5 px
+  it('a word a hair wider than its box (under half a pixel) may wrap: it doesn\'t fit', async () => {
+    await page.setContent('<span id="w" style="font:24px sans-serif">Onlineonline</span>')
+    const wide = await page.$eval('#w', (el) => el.getBoundingClientRect().width)
+    const found = await problemsOn(`<div style="width:${wide - 0.3}px;padding:4px;border:1px solid #888;font:24px sans-serif;overflow-wrap:break-word">Onlineonline</div>`)
+    expect(only('split', found)).toEqual([])
+  })
+
+  // 0.38.0 (F162): the parts page's Carousel at 200% text in the fake language — "[Lockdown]" wider than the carousel's
+  // window (between its ◀ ▶) broke inside it; the check measured it against the card around, where it would fit
+  it('a word wider than a window that hides its overflow may wrap, though it would fit the card around', async () => {
+    const found = await problemsOn(`<div style="width:300px;padding:4px;border:1px solid #888">
+      <div style="width:120px;overflow:hidden"><span style="display:block;overflow-wrap:anywhere">Supercalifragilistic</span></div></div>`)
+    expect(only('split', found)).toEqual([])
+  })
+
   // 0.37.0 (F156): ConnectionDot's chip — a translated "connection" too long for the room beside the dot breaks on purpose
   it('a word in a data-ui-split-ok part may break; the same squeeze without it is flagged', async () => {
     const chip = (mark) => `
@@ -443,5 +460,113 @@ describe('findProblems — a ring around an avatar', () => {
     const inside = `<div style="position:absolute;left:0;top:0;width:400px;height:60px;overflow:auto">
       <div style="position:relative;height:200px">${avatar(true)}${place(97)}</div></div>`
     expect(only('ring', await problemsOn(inside))).toEqual(['ring: "1ST" touches the ring around "Muzzy" — 0 px of room'])
+  })
+
+  // 0.38.0 (F162): the Room at 200% text in the fake language — the card scrolls as one, and its row of buttons stays
+  // at its foot (sticky) while the players scroll under it: "I'm ready" sat beside Muzzy's ring going by underneath.
+  // Like an overlap with a sticky row (scrollsOutFromUnder): scrolling takes it out from under, so it isn't judged.
+  it('words on a sticky row the avatar scrolls out from under are not judged; the same row fixed in place is', async () => {
+    const card = (sticky) => `<div style="position:absolute;left:0;top:0;width:400px;height:100px;overflow:auto">
+      <div style="position:relative;height:300px">${avatar(true).replace('top:20px', 'top:66px')}</div>
+      <div style="position:${sticky ? 'sticky' : 'absolute'};bottom:0;${sticky ? '' : 'top:76px;width:400px;'}height:24px;padding-left:148px;box-sizing:border-box;line-height:24px">Ready</div></div>`
+    expect(only('ring', await problemsOn(card(true)))).toEqual([])
+    expect(only('ring', await problemsOn(card(false)))).toHaveLength(1)
+  })
+})
+
+// 0.38.0 (F162) — three cut-offs the check missed (found by F161 in the fake language, ?pseudo). Words are drawn in the
+// kit's own Nunito file (never a system font: GitHub's Linux draws others wider or narrower), and each case is far
+// past its edge, so a few px of font difference never changes the answer; the px in a line are left out of the match.
+describe('findProblems — cut-offs at a card edge, words past their card, a squeezed list (F162)', () => {
+  const nunito = readFileSync(new URL('./fonts/nunito.woff2', import.meta.url)).toString('base64')
+  const withFont = async (html) => {
+    await page.setContent(`<!doctype html><style>@font-face{font-family:Proof;src:url(data:font/woff2;base64,${nunito})}
+      body{margin:0;font:16px/1.4 Proof} button{width:60px;height:48px}</style>${html}`)
+    await page.evaluate(() => document.fonts.load('16px Proof'))
+    return page.evaluate(findProblems, { screenWidth: 400, checkFocus: false })
+  }
+  const noPx = (lines) => lines.map((p) => p.replace(/ — \d+ px.*/, ''))
+
+  // Settings in Pixel at 200% text (fake language): its card scrolls up and down but hides what's past its sides, and the
+  // title's last letter ("]") was cut off at the card's right edge. The edge check skips boxes that scroll (rows scrolled
+  // part-way under an edge are fine), and the text check only looked at the words' own box.
+  const panel = (inside) => `<div style="position:absolute;left:16px;top:16px;width:150px;height:120px;overflow-x:hidden;overflow-y:auto;
+    background:#29366f;color:#fff;border:4px solid #f4f4f4;padding:12px">${inside}<div style="height:300px">Rows</div></div>`
+  it('clipped: a title cut off by the side of a card that scrolls up and down (its last letter hidden) is flagged once', async () => {
+    const found = await withFont(panel('<h2 style="margin:0;font-size:32px;white-space:nowrap">[Šéţţíñĝššéţ]</h2>'))
+    expect(noPx(only('clipped', found))).toEqual(['clipped: "[Šéţţíñĝššéţ]" is cut off by the side of its box (<div>), which hides what runs past it'])
+  })
+
+  it('clipped: words that fit, rows scrolled part-way under the bottom, and a strip that scrolls sideways are not cut off', async () => {
+    const found = await withFont(`${panel('<h2 style="margin:0;font-size:20px">Settings</h2>')}
+      <div style="position:absolute;left:16px;top:200px;width:200px;height:60px;overflow-x:auto;white-space:nowrap">A long sideways strip of words you scroll along</div>
+      <div style="position:absolute;left:240px;top:16px;width:140px;height:100px;overflow:hidden">
+        <div style="height:100px;overflow-y:auto">${'<p style="margin:0 0 8px">A setting row</p>'.repeat(8)}</div></div>`)
+    // (the last: a settings page that scrolls, in a stage that hides its overflow — its rows below scroll into view)
+    expect(only('clipped', found)).toEqual([])
+  })
+
+  // Mode select in Pixel on a desktop (fake language): a card title one word wider than its card ran out past the card's
+  // side — the edge check said "touches the edge — 0 px", which reads like a near miss
+  const modeCard = (title) => `<div style="padding:20px"><button style="width:140px;height:auto;padding:16px;text-align:start;background:#29366f;color:#fff;border:4px solid #f4f4f4">
+    <span style="display:block;font-size:24px;font-weight:700">${title}</span><span style="display:block">Pick a mode</span></button></div>`
+  it('edge: a card title running past its card says it runs past, and by how much', async () => {
+    const found = await withFont(modeCard('[Öñļíñéöñ]'))
+    expect(only('edge', found)).toHaveLength(1)
+    expect(only('edge', found)[0]).toMatch(/^edge: "\[Öñļíñéöñ\]" runs \d+ px past the edge of its box \(<button>\)$/)
+  })
+
+  it('edge: a card title that fits its card is fine', async () => {
+    expect(only('edge', await withFont(modeCard('Online')))).toEqual([])
+  })
+
+  // The Room at 200% text on an upright phone: the players list was squeezed to 128 px for rows of ~156 px — less than
+  // one player showed, and it scrolled, so nothing was cut off or touching anything
+  const list = (height, rows = 4) => `<div style="padding:20px"><div role="region" aria-label="Players" tabindex="0" style="height:${height}px;overflow:auto">
+    ${Array.from({ length: rows }, (_, i) => `<div style="height:60px;display:flex;align-items:center">Player ${i + 1}</div>`).join('')}</div></div>`
+  it('squeezed: a scrolling list too short for even two of its rows is flagged once, with how much of a row shows', async () => {
+    const found = await withFont(list(50))
+    expect(only('squeezed', found)).toEqual(['squeezed: the list "Players" shows 0.8 of a row at a time (its shortest row is 60 px) — give it room for 2 rows, or let the card around it scroll as one'])
+  })
+
+  it('squeezed: a list with room for two rows, a list that fits, and a short box of one long text are fine', async () => {
+    expect(only('squeezed', await withFont(list(120)))).toEqual([])
+    expect(only('squeezed', await withFont(list(60, 1)))).toEqual([])
+    expect(only('squeezed', await withFont(`<div style="height:50px;width:200px;overflow:auto">${'Lots of words in one paragraph. '.repeat(20)}</div>`))).toEqual([])
+  })
+
+  // The full shoot's own false finds (task 3): a card on a phone on its side at 200% text, already scrolling as one,
+  // whose parts are each over half the screen tall (Feedback's tooltip demo, 284 px on a 390 px screen) — two of them
+  // can't fit on the screen at all, so there's no room to give
+  it('squeezed: rows taller than half the screen are not judged — two of them could never show at once', async () => {
+    expect(only('squeezed', await withFont(`<div style="height:300px;overflow:auto">
+      <div style="height:240px">A tall part</div><div style="height:240px">Another</div></div>`))).toEqual([])
+  })
+
+  // …the Idle warning: a popover (the top layer) placed over the gallery's stage, which hides its overflow — no box
+  // clips the top layer, nor a box placed by the screen (position: fixed), nor one placed by a box further out
+  // (position: absolute) — only the boxes from the one it's placed by outward
+  it('clipped: words in a popover, a fixed box or a box placed further out are not cut off by a box they escape', async () => {
+    // (the box that hides is not itself placed, so the absolute one is placed by the box around it)
+    await withFont(`<div style="position:absolute;left:0;top:200px;width:300px"><div style="height:100px;overflow:hidden">
+      <div id="pop" popover="manual" style="inset:auto;left:10px;top:185px;margin:0;width:200px">Still there? A bot plays</div>
+      <div style="position:fixed;left:10px;top:290px">A fixed note at its foot</div>
+      <div style="position:absolute;left:10px;top:-10px">Placed by the page</div></div></div>`)
+    await page.evaluate(() => document.getElementById('pop').showPopover())
+    expect(only('clipped', await page.evaluate(findProblems, { screenWidth: 400, checkFocus: false }))).toEqual([])
+  })
+
+  it('clipped: words placed by the box that hides its overflow are still cut off by it', async () => {
+    const found = await withFont(`<div style="position:absolute;left:0;top:200px;width:300px;height:100px;overflow:hidden">
+      <div style="position:absolute;left:10px;top:-15px;font-size:24px">Placed by the box</div></div>`)
+    expect(noPx(only('clipped', found))).toEqual(['clipped: "Placed by the box" is cut off by the top or bottom of its box (<div>), which hides what runs past it'])
+  })
+
+  // …and Countdown's "3" on a phone on its side: its line box (a tall line) runs past the stage, its ink doesn't —
+  // words are measured by their ink, as the edge check does
+  it('clipped: a tall line whose letters are all inside the box is not cut off', async () => {
+    const found = await withFont(`<div style="position:absolute;left:0;top:100px;width:300px;height:70px;overflow:hidden">
+      <div style="font-size:60px;line-height:70px">3</div></div>`)
+    expect(only('clipped', found)).toEqual([])
   })
 })
