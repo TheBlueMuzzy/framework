@@ -1,17 +1,20 @@
 // PARTS — every layout box and control on one page, built only from style names.
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import {
   Hud, Panel, Stack, Row, Grid,
   Avatar, Badge, Button, Card, Carousel, ListRow, ProgressBar, RoomCodeInput, ScrollArea,
-  Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle,
+  Selector, Slider, Stepper, Tabs, Text, TextInput, Toggle, useTitleFit,
 } from '../kit'
 import { ScreensDemo } from './ScreensDemo'
 import { gear } from './symbols'
 
+// (its title fits like the kit's titles — 0.38.0, F162: "Display" at 200% text in the fake language split mid-word)
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  const titleBox = useRef<HTMLSpanElement>(null)
+  useTitleFit(titleBox, true, false, title)
   return (
     <Stack gap="m">
-      <Text kind="title">{title}</Text>
+      <span ref={titleBox} className="kit-fit-title"><Text kind="title">{title}</Text></span>
       {children}
     </Stack>
   )
