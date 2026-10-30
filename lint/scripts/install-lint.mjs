@@ -95,8 +95,11 @@ export function addRules(text, level, textLevel = null, clockLevel = null) {
   const lastImport = imports.at(-1)
   const importAt = lastImport.index + lastImport[0].length
   let before = text.slice(importAt, end.index).trimEnd()
-  // the list's last real code, past any comment lines after it — a comma added after a `// note` would be inside it
-  const lastCode = before.split('\n').map((line) => line.replace(/(^|\s)\/\/.*$/, '')).join('\n').trimEnd().length
+  // the list's last real code, past any comment lines after it — a comma added after a `// note` would be inside it.
+  // Comments become spaces of the same length, so the position found is a position in `before` itself (F165: removing
+  // them shifted it back by an earlier line's comment, and the comma landed inside a word: re,actRefresh)
+  const blanked = before.split('\n').map((line) => line.replace(/(^|\s)\/\/.*$/, (comment, space) => space + ' '.repeat(comment.length - space.length)))
+  const lastCode = blanked.join('\n').trimEnd().length
   const lastChar = before[lastCode - 1]
   if (lastChar !== ',' && lastChar !== '[' && lastChar !== '(') before = `${before.slice(0, lastCode)},${before.slice(lastCode)}`
   const block = [
