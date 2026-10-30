@@ -36,7 +36,7 @@ Done when: each module has an UPGRADES.md of hand steps by version (LOOK CHANGE 
 - [x] 🤖 3. Build both in install-module (a module says its minimum Dev Kit in its UPGRADES.md) — ~/.claude/config/bmuz/scripts/install-module.mjs
 - [ ] 🤖 4. Dry run against a fresh read-only clone of the real Glyphtender (its ORIGINAL versions) prints the right steps and refuses ai before devkit; script tests + root check:fast green — ~/.claude/config/bmuz/scripts/install-module.mjs
 Check: new tests red then green; the dry run's output matches the report's hand fixes; all script tests; root check:fast.
-Checked:
+Checked: 2026-10-30 (partial — task 4's check:fast not green yet) — install-module suite: 10 new tests, 6 red on the old script (29/35) → 35/35 after the build; all script tests 348/356, the 8 red are stop-servers / port-preflight (this PC's port lookup, the report's stop-servers problem — untouched here); framework scripts/upgrades.test.mjs 2/2 (proven red on a step newer than kit/VERSION); Glyphtender clone dry runs: ai refused "update devkit first", devkit 0 steps, rooms 6, audio 1, ui-kit 11 (computed — its own tests timed out 3× under load). Root check:fast 13/24 twice: all 11 red rows are timeouts (CPU ~86% from Goops' vite + economy-sim sessions); one at a time 9 modules green, ui-kit 920/924 + saves 281/283 red only on browser timeouts. No module code changed (only <module>/UPGRADES.md + a scripts test) — re-run check:fast when the machine is quiet.
 
 ## F169 🐞 Audio keeps the tuned mix
 Done when: `audio:check --fix` evens a file's loudness and moves the difference into that sound's volumeDb in content/audio.json, so what the player hears stays the same; a game with no volumeDb behaves as today; tests red first.
@@ -69,4 +69,19 @@ Notes:
   - stay (8 real): ai/arena.ts:152 report title, ai/decisions.ts:113 "CALL IT", Board.tsx:176 aria-label Garden, GameScreen.tsx:159 aria-label, SeedTray.tsx:147 label Seeds, HelpLayer.tsx:213 + 217 label Tip, TutorialLayer.tsx:73 label Tutorial
   - total 31 → 9; no-tuning-numbers 20 → 20, exhaustive-deps 1 → 1 (nothing else moved)
 - F167 review (Claude): the name rule also exempts any function ending in Problem(s) — a game function like showProblem() that builds player words would be skipped too. None in our games today; tighten if one appears.
+- F168 — Upgrade notes + install order, decided:
+  - Where: `<module>/UPGRADES.md` beside its README, not kit/ — every installer copies kit/ into the game. Format: `- <version>: <step>` newest first (several lines per version allowed), `LOOK CHANGE —` at the start where sizes/looks change, `Needs Dev Kit: <x.y.z>` once. Modules with nothing to do say "No hand steps so far".
+  - The game's version = the first x.y.z in its first module folder's VERSION (src/ai/kit/VERSION…). Printed: steps newer than the game's version, up to the new one; none for a first install or when current.
+  - Needs Dev Kit: refused (dry run too) when the game's Dev Kit is older; a game with NO Dev Kit is warned, not refused (no runner = nothing to crash; step 5 already says "install the Dev Kit"). A framework without UPGRADES.md installs as before.
+  - Real minimum for `t.warn`: Dev Kit 0.21.0 (d93b985, F103 — 0.20.5 had none), not 0.28 as the report guessed. ai and lint say it (the only modules besides devkit whose checks call t.warn; every other runner call is in 0.19.0's runner).
+  - ai's "chattiness means banter" check came in ai 0.4.0 (ff7aae1, F22 — VERSION 0.4.0 there; the CHANGELOG groups it under 0.5.0), so the line is 0.4.0.
+  - The audio 0.4.0 line ends "(F169 will change --fix… this line is updated then)" for F169.
+  - install-module's usage line still doesn't list lint (it installs through the "new module" path) — left; the report's point.
+- F168 dry runs on a fresh clone of Glyphtender (eb032a7: ai 0.2.1, audio 0.3.1, devkit 0.20.2, rooms 0.7.0, ui-kit 0.20.1), vs the report's hand fixes:
+  - ai → `✗ ai 0.8.3's checks need Dev Kit 0.21.0 or newer — the game has Dev Kit 0.20.2, so nothing was installed → update devkit first: node ~/.claude/config/bmuz/scripts/install-module.mjs devkit .` = the report's runner crash, now refused before it happens. After the Dev Kit, its 0.4.0 chattiness step = the report's TEMP chattiness 0.
+  - devkit → no steps = report 0 hand fixes.
+  - rooms 0.7.0 → 0.13.1, 6 steps: 0.13.0 roomsPort · 0.12.0 sendEmote in a fake room · 0.10.0 keep a match (storage, onRestore, keepMatchDays) · 0.9.0 matchEnded/cameBack/clearCameBack in a fake room · 0.9.0 Rejoin match · 0.8.0 /health = the report's 3 hand fixes (4 fields, roomsPort, /health) + its 3 "work left" items. The installer's own 7 steps print as before.
+  - audio 0.3.1 → 0.4.2, 1 step: 0.4.0 --fix then listen (volumeDb mix) = the report's 1 hand fix + its design risk.
+  - ui-kit 0.20.1 → 0.38.0, 11 steps (computed with the same filter — install-module stopped at the kit's own tests: 3 runs, a different browser test timed out each time; each passes alone): 6 LOOK CHANGE (0.38.0, 0.37.2, 0.35.8 lobby rows, 0.35.5 ❤ chip, 0.33.0, 0.21.0 chips) · 0.35.5 + 0.35.7 scroll-driven animation never finishes · 0.35.5 icon glyph box · 0.30.0 old crashes/emotes/ai copies · 0.22.0 non-commercial credits 🔴 = the report's 2 test-harness fixes (shots settle, button wrap) + the taller chips / 4th lobby seat look call.
+  - Clone left clean (git status empty): C:\Users\Muzzy\Documents\dev\.scratch\framework-f168\glyphtender.
 Retro:
