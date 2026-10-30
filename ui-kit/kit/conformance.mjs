@@ -25,7 +25,7 @@ export const SIZES = [
 
 const KINDS = [
   { kind: 'overlap', name: 'nothing overlaps', fix: 'Give each part its own slot (Screen slots, Row, Stack, the HUD slots) instead of placing it on top of another; an overlap that\'s on purpose → data-ui-check="skip" on it.' },
-  { kind: 'clipped', also: ['wider'], name: 'nothing is clipped or wider than the screen', fix: 'Leave room inside scroll areas and panels (padding, not a tighter box); let text wrap or shrink (the kit\'s text sizes), and keep the page inside the screen width.' },
+  { kind: 'clipped', also: ['wider', 'squeezed'], name: 'nothing is clipped or wider than the screen', fix: 'Leave room inside scroll areas and panels (padding, not a tighter box); let text wrap or shrink (the kit\'s text sizes), and keep the page inside the screen width.' },
   { kind: 'small', name: 'every tap target is at least 44 px', fix: 'Use the kit\'s Button / IconButton (they\'re 44 px) or give the control min-width / min-height of the kit\'s tap size.' },
   { kind: 'focus', name: 'no focus ring without the keyboard', fix: 'Focus rings only on :focus-visible (the kit\'s controls do this) — don\'t call focus() on a control at start-up without { focusVisible: false }.' },
   // 0.21.0 — quality bars a player notices (Muzzy's rules, now checked)
@@ -609,7 +609,7 @@ export async function check(t) {
 // check names that "touches the edge of its box — 0 px" (sprint 45: a planted German menu word ran past both sides of
 // its button on a 360-wide phone and only edge: saw it).
 export const PSEUDO_CHECK = 'words still fit when they\'re ~40% longer (a translation — the fake language, ?pseudo)'
-const PSEUDO_KINDS = /^(clipped|wider|split|overlap|edge):/
+const PSEUDO_KINDS = /^(clipped|wider|squeezed|split|overlap|edge):/
 async function checkPseudo(t, findProblems, sizes) {
   const found = {}
   for (const size of sizes) {

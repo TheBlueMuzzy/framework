@@ -1,9 +1,11 @@
 // ONLINE PLAY — the rooms module (src/rooms): make a room, share its 4-letter code, a friend joins, the host starts.
 // The server (party/) owns the game; this screen only shows the view it sends and sends your taps. Emotes go through
 // the room. Leave always goes through online.leave() (a closed tab keeps the seat: "Rejoin match" on the main menu).
-import { useEffect, useState } from 'react'
+// The results open on the kit's screen stack ('online-results'), like the game against the computer's, so Esc and a
+// phone's Back close them — and closing them leaves the room, like their Leave button (F163, F160's rule).
+import { useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from 'react'
 import text from '../../content/text/en.json'
-import { Hud, HudText, Lobby, Reconnecting, Results, fill, rejoinWords, screens, toast, welcomeBackLine } from './kit'
+import { Hud, HudText, Lobby, Reconnecting, Results, fill, rejoinWords, screens, toast, useScreens, welcomeBackLine } from './kit'
 import { useRoom } from '../rooms/useRoom'
 import { cleanRoomCode, makeRoomCode } from '../rooms/roomCodes'
 import { getPlayerName, setPlayerName } from '../rooms/identity'
@@ -118,18 +120,64 @@ export function OnlineScreen({ start, onClose }: { start: OnlineStart; onClose: 
         actions={<EmoteSeats emotes={emotes} seats={seats} mine={mySeatId ?? []} activeId={game.over ? undefined : order[game.turn]} avoid=".kit-hud-slot" />}
       />
       {phase === 'over' && (
-        <Results
-          dim
-          title={resultTitle}
-          meId={mySeatId ?? undefined}
-          players={seats.map((s, mark) => ({ id: s.id, name: s.name, score: game.winner === mark ? 1 : 0 }))}
-          words={{ rematch: text.online.rematch, quit: text.online.leave, points: text.results.points, winner: text.results.winner, you: text.results.you }}
-          onRematch={online.isHost ? () => online.start({}) : undefined}
-          onQuit={leave}
-        />
+        <ResultsOnStack onClosed={leave} results={{
+          dim: true,
+          title: resultTitle,
+          meId: mySeatId ?? undefined,
+          players: seats.map((s, mark) => ({ id: s.id, name: s.name, score: game.winner === mark ? 1 : 0 })),
+          words: { rematch: text.online.rematch, quit: text.online.leave, points: text.results.points, winner: text.results.winner, you: text.results.you },
+          onRematch: online.isHost ? () => online.start({}) : undefined,
+          onQuit: leave,
+        }} />
       )}
     </>
   )
+}
+
+// THE RESULTS ON THE SCREEN STACK — while the match is over, ResultsOnStack (drawn by the online screen, nothing on the
+// page itself) opens 'online-results' on the kit's stack and hands it what to show; OnlineResultsScreen (in App's
+// screens) draws it. A rematch (the match no longer over) or leaving takes ResultsOnStack away, and the results with it.
+type ResultsShown = ComponentProps<typeof Results>
+export const ONLINE_RESULTS = 'online-results'
+let shown: ResultsShown | null = null
+const watchers = new Set<() => void>()
+function show(next: ResultsShown | null) {
+  shown = next
+  watchers.forEach((watcher) => watcher())
+}
+const watch = (watcher: () => void) => { watchers.add(watcher); return () => { watchers.delete(watcher) } }
+
+/** The online results, on the screen stack (App's screens: { 'online-results': OnlineResultsScreen }). */
+export function OnlineResultsScreen() {
+  const results = useSyncExternalStore(watch, () => shown, () => shown)
+  return results ? <Results {...results} /> : null
+}
+
+function ResultsOnStack({ results, onClosed }: { results: ResultsShown; onClosed: () => void }) {
+  // What they show, kept up to date (set before they open, so they open with their buttons there to take the focus)
+  useEffect(() => { show(results) })
+  useEffect(() => {
+    if (!screens.current.includes(ONLINE_RESULTS)) screens.push(ONLINE_RESULTS)
+    return () => {
+      if (screens.current.at(-1) === ONLINE_RESULTS) screens.pop()
+      show(null)
+    }
+  }, [])
+  // Esc (or a phone's Back) closed them while the match is still over: leave the room, like their Leave button — the
+  // same rule as TableScreen's (F160). The match is over, so "back" means leave it, never the finished board left
+  // behind them. (Play again starts a new match first, which takes this away, so it never sees that close.)
+  const closedRef = useRef(onClosed)
+  useEffect(() => { closedRef.current = onClosed })
+  const up = useScreens().includes(ONLINE_RESULTS)
+  const wereUp = useRef(false)
+  useEffect(() => {
+    if (up) wereUp.current = true
+    else if (wereUp.current) {
+      wereUp.current = false
+      closedRef.current()
+    }
+  }, [up])
+  return null
 }
 
 /** Why the room shut you out, in the game's words (content/text/en.json online.closed). */

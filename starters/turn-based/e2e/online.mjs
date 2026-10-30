@@ -3,7 +3,11 @@
 //   node e2e/online.mjs [outDir] [vitePort] [serverPort]          (npm run e2e:online)
 // Tab A: Play online → Create a room. Tab B: Play online → types A's code → Join. A starts the game. Each tab taps a
 // free square on its own turn until both show the result; A sends an emote and B sees its bubble. Screenshots of
-// both tabs (lobby, mid-game, results). Any console error or page error fails it.
+// both tabs (lobby, mid-game, results). A (the host) taps Play again: the results close on both tabs, the room kept, and
+// they play a second match. Then A presses Escape on its results and B the browser's Back on its own (F163):
+// each must land on the main menu (like the game against the computer, F160), having left the room the normal way
+// (its "leave" message sent, no Rejoin offer) — never stuck on the results, never off the page. Any console error or
+// page error fails it.
 // Starts its OWN dev server (6403) and room server and stops both at the end. The room server runs on the game's own
 // room port — wrangler.json dev.port (6499), the line the page reads too (rooms 0.13.0: roomsPort() in vite.config) —
 // so this also proves the page finds its server with nothing pointed by hand (no VITE_PARTY_HOST). Its storage is a
@@ -42,12 +46,49 @@ async function openTab(name, width, height) {
   const context = await browser.newContext({ viewport: { width, height } })
   const page = await context.newPage()
   page.noise = []
+  page.leftRoom = false // sent the room its "leave" message (online.leave(), the only clean way out of a room)
+  page.on('websocket', (ws) => ws.on('framesent', (f) => { if (String(f.payload).includes('"type":"leave"')) page.leftRoom = true }))
   page.on('console', (m) => { if (m.type() === 'error') page.noise.push(`${name} console error: ${m.text()}`) })
   page.on('pageerror', (e) => page.noise.push(`${name} page error: ${e.message}`))
   await page.goto(`http://127.0.0.1:${PORT}/`)
   await checkVersion(page)
   await page.getByRole('button', { name: 'Play online' }).click()
   return page
+}
+
+// After Escape / Back on the results: still on the game's page, at the main menu, having left the room cleanly
+async function expectMainMenu(page, name, key) {
+  await page.waitForTimeout(400) // a polling step: the results close
+  await page.screenshot({ path: `${OUT}/online-${name}-results-${key.toLowerCase()}.png` })
+  const where = page.url().startsWith(`http://127.0.0.1:${PORT}`) ? null : page.url()
+  const results = where ? 0 : await finished(page)
+  if (where) return fail(`${key} on ${name}'s online results left the game's page (now at ${where}), not the main menu`)
+  if (results) return fail(`${key} on ${name}'s online results did nothing — the results are still up, not the main menu`)
+  await page.getByRole('button', { name: 'Play online' }).waitFor({ timeout: 5000 })
+  if (!page.leftRoom) fail(`${key} on ${name}'s online results reached the main menu without leaving the room (no "leave" sent)`)
+  else if (await page.getByRole('button', { name: /Rejoin/ }).count()) fail(`${key} on ${name}'s online results left a Rejoin offer on the main menu`)
+  else console.log(`  ${key} on ${name}'s results → main menu, room left`)
+}
+
+// Each tab taps a free square on its own turn until both show the result; returns how many moves it took
+async function playToEnd(shoot) {
+  let moves = 0
+  for (let step = 0; step < 300 && !(await finished(a) && await finished(b)); step++) {
+    for (const page of [a, b]) {
+      if (!(await page.getByText('Your turn').count())) continue
+      const free = page.locator('[data-board] [data-mark=""]:not([aria-disabled])')
+      if (await free.count()) {
+        await free.first().click()
+        moves++
+        if (shoot && moves === 3) {
+          await a.screenshot({ path: `${OUT}/online-A-game.png` })
+          await b.screenshot({ path: `${OUT}/online-B-game.png` })
+        }
+      }
+    }
+    await a.waitForTimeout(100) // a polling step: each move goes to the server and back
+  }
+  return moves
 }
 
 const finished = (page) => page.getByRole('heading', { name: /win|draw/i }).count()
@@ -78,22 +119,7 @@ try {
   await b.getByText('Hello!').first().waitFor({ timeout: 5000 })
   console.log('  B saw A\'s emote')
 
-  let moves = 0
-  for (let step = 0; step < 300 && !(await finished(a) && await finished(b)); step++) {
-    for (const page of [a, b]) {
-      if (!(await page.getByText('Your turn').count())) continue
-      const free = page.locator('[data-board] [data-mark=""]:not([aria-disabled])')
-      if (await free.count()) {
-        await free.first().click()
-        moves++
-        if (moves === 3) {
-          await a.screenshot({ path: `${OUT}/online-A-game.png` })
-          await b.screenshot({ path: `${OUT}/online-B-game.png` })
-        }
-      }
-    }
-    await a.waitForTimeout(100) // a polling step: each move goes to the server and back
-  }
+  const moves = await playToEnd(true)
   if (!(await finished(a)) || !(await finished(b))) fail('the game never ended on both tabs')
   else {
     const titleA = (await a.getByRole('heading', { name: /win|draw/i }).first().textContent()).trim()
@@ -105,6 +131,21 @@ try {
     await a.waitForTimeout(600)
     await a.screenshot({ path: `${OUT}/online-A-results.png` })
     await b.screenshot({ path: `${OUT}/online-B-results.png` })
+
+    // Play again (A hosts): the results close on both tabs WITHOUT leaving the room — a new match on an empty board
+    await a.getByRole('button', { name: 'Play again' }).click()
+    for (const page of [a, b]) await page.locator('[data-board] [data-mark]:not([data-mark=""])').first().waitFor({ state: 'detached' })
+    if (await finished(a) || await finished(b)) fail('Play again left the results up')
+    if (a.leftRoom || b.leftRoom) fail('Play again closed the results by leaving the room')
+    const again = await playToEnd(false)
+    if (!(await finished(a)) || !(await finished(b))) fail('the rematch never ended on both tabs')
+    else console.log(`  Play again → a new match, over after ${again} moves, room kept`)
+
+    // Escape (A) and a phone's Back (B) on the results = their Leave button (F163): the main menu, the room left
+    await a.keyboard.press('Escape')
+    await expectMainMenu(a, 'A', 'Escape')
+    await b.goBack()
+    await expectMainMenu(b, 'B', 'Back')
   }
   const noise = [...a.noise, ...b.noise]
   if (noise.length) fail(`console not clean:\n    ${noise.join('\n    ')}`)

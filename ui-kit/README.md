@@ -446,6 +446,21 @@ gallery's `npm run shoot` uses the same one.
 - 0.37.3 (F160 — Starter Escape after Results, Muzzy 2026-10-27): **a button's words and border fade with its background.**
   Only the background faded, so a button swapping style (the starter's winning-line pulse) showed its new white mark on
   the old near-white fill for the whole 120 ms fade — the "faint ✕". Words, border and fill now change as one.
+- 0.38.0 (F162 — Cut-offs the page check misses): **the page check sees three more cut-offs, and the kit stops making
+  them.** A full shoot with the new rules on 0.37.3 found 61 problems in English and 104 in the fake language → 0 / 0.
+  - **The page check:** words cut off by a box around them that hides its sides (`clipped:`, measured by their ink;
+    a popover, a fixed part or one placed further out isn't cut by a box it escapes); words out past their box's edge
+    say "runs N px past"; a scroll list showing under 1.5 of its rows says `squeezed:` (rows over half the screen tall
+    aren't judged — two can't show anywhere). A long page (the parts page) is checked a screenful at a time. A word
+    under half a pixel too wide, or wider than a window that hides its sides (a Carousel's), may break.
+  - **A scroll list in a card keeps two of its own rows** (ScrollArea measures them: `--kit-scroll-rows`), or 4rem
+    if that's more; past that the card scrolls as one — the Room's players, the Seat picker, Victory / Game over (on a
+    phone on its side too: it was ~one row), Mode select, Payslip at 200% text. Settings' pages keep it too (every tab
+    keeps the biggest, so tabs still never resize the card).
+  - **Titles and words:** a MenuHeader title wider than its whole row even at heading size takes the last step (body
+    size, its own line); a Card title's word wider than its card breaks inside it; a Carousel slide is never wider than
+    its window; Lobby join on its side keeps your name + Create at least their widest word (Join moves under the code
+    boxes when both won't fit); a scroll list's room is never more than half the gap it sits in.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

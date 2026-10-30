@@ -27,7 +27,7 @@ one, type its code in the other. (A phone on the same Wi-Fi reaches it too: open
 | `npm run smoke` | loads, plays one round against the computer at phone + desktop size, console clean |
 | `npm run e2e:devkit-live` | the Dev Kit's main promise: a Tuning edit changes the running board; ⏸ / ◐ / the game's own Pause hold the bot |
 | `npm run e2e:screens` | every screen (menu, board, Pause, Settings, Credits, results, lobby) at 7 sizes, checked with the UI kit's page check |
-| `npm run e2e:online` | two browser tabs play a whole game through `wrangler dev` (on the game's room port, wrangler.json dev.port = 6499, with its own storage folder) |
+| `npm run e2e:online` | two browser tabs play a whole game, a rematch, then Escape / Back on the results → main menu, through `wrangler dev` (on the game's room port, wrangler.json dev.port = 6499, with its own storage folder) |
 | `npm run check:full` | all of the above, side by side → `e2e-shots/checks.html` |
 
 Every script starts its own servers on 6xxx ports and stops them. Playwright: `playwright-core` is pinned to 1.63.0
@@ -76,4 +76,5 @@ Then the game's TDD says what's different and keeps the module contracts below t
   first; `?seed=7` → the bot's choices replay). Tests pass `startMatch(opponent, { firstSeat })`.
 - Decisions: `keepMatchDays` 7 (a live game) in `content/rooms.json`; rooms hold 2 seats; online, a player who goes idle
   or drops gets Careful Cleo playing for them. Esc or a phone's Back on the results = their Main menu button (F160:
-  the game is over, so "back" leaves it — not the finished board with nothing to do but Pause).
+  the game is over, so "back" leaves it — not the finished board with nothing to do but Pause); online too, where it
+  leaves the room like their Leave button (F163: the online results open on the screen stack, `online-results`).
