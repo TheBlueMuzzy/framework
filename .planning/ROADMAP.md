@@ -453,16 +453,16 @@ flowchart LR
   F161[✅ F161 Fake-language leftovers]
 ```
 
-## v0.31 — Cleaner edges  ← current · planned 2026-10-28
+## v0.31 — Cleaner edges  ✅ released 2026-10-29 (v0.33.0) · planned 2026-10-28
 Goal (Muzzy 2026-10-28 /roadmap: "A and B both in full auto … that should be low hanging fruit"): the page check catches the cut-offs it misses today and the kit fixes them, online Results leave like the game against the computer, and a release fills in the module versions itself.
-- 🔨 F162 🐞 Cut-offs the page check misses — teach uiProblems the three it misses (found by F161 — Fake-language leftovers' helper): Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; Pixel's ModeSelect card titles run past their cards (desktop parts page); the Room's player list at 200% upright shrinks to about one visible row. Each new rule red on today's kit first, then the kit fixed at its root — should · sprint 49
-- 🔨 F163 🐞 Online Results take Escape — the starter's OnlineScreen.tsx draws Results inline, not on the screen stack, so Escape does nothing and a phone's Back leaves the page; make it leave to the main menu like the game against the computer (F160 — Starter Escape after Results), with the starter's screens check guarding it — should · sprint 49
-- 🔨 F164 🔧 Module versions filled at release — release.mjs writes STATE's "Version: … (emotes 0.4.2 · ai 0.8.3 …)" list from each module's kit/VERSION, so it's never a release behind (v0.30 look-back) — could · sprint 49
+- ✅ F162 🐞 Cut-offs the page check misses — teach uiProblems the three it misses (found by F161 — Fake-language leftovers' helper): Pixel at 200%, Settings' title loses its closing "]" at the card's right edge; Pixel's ModeSelect card titles run past their cards (desktop parts page); the Room's player list at 200% upright shrinks to about one visible row. Each new rule red on today's kit first, then the kit fixed at its root — should · sprint 49
+- ✅ F163 🐞 Online Results take Escape — the starter's OnlineScreen.tsx draws Results inline, not on the screen stack, so Escape does nothing and a phone's Back leaves the page; make it leave to the main menu like the game against the computer (F160 — Starter Escape after Results), with the starter's screens check guarding it — should · sprint 49
+- ✅ F164 🔧 Module versions filled at release — release.mjs writes STATE's "Version: … (emotes 0.4.2 · ai 0.8.3 …)" list from each module's kit/VERSION, so it's never a release behind (v0.30 look-back) — could · sprint 49
 ```mermaid
 flowchart LR
-  F162[🔨 F162 Cut-offs the check misses]
-  F163[🔨 F163 Online Results Escape]
-  F164[🔨 F164 Module versions at release]
+  F162[✅ F162 Cut-offs the check misses]
+  F163[✅ F163 Online Results Escape]
+  F164[✅ F164 Module versions at release]
 ```
 
 ## Later
