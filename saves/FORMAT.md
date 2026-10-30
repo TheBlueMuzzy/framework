@@ -42,7 +42,9 @@ error). Unknown fields INSIDE `data` are kept (§3 step 6).
 ## 3. Loading — the newest GOOD copy wins
 Try `<key>`, then `<key>~1`, `<key>~2`… For each copy, in this order:
 1. **Empty** (missing, or only spaces) → try the next.
-2. **Not JSON** (a write cut off) → damaged, try the next.
+2. **Not JSON** (a write cut off — or an old build's plain value, like the text `done`) → the game's `oldSave` rule
+   gets the text itself and may recognise it (`{ version, data }`, then on from step 4); otherwise damaged, try the
+   next. (Saves kit 0.7.0, F166.)
 3. **A record** = an object whose `save` is text and which has a `data` field (even `null`). Then: `save` not this
    save's key → damaged; `version` not a whole number from 1 up (missing too) → damaged. **Not a record** → the game's
    `oldSave` rule may recognise a save from before the kit (`{ version, data }`); otherwise damaged.

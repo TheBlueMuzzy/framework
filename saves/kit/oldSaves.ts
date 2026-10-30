@@ -4,7 +4,8 @@
 // odd character in the key becomes "_": glyphtender:new-game → glyphtender_new-game-v2.json). Several for one version
 // are fine: <key>-v1-before-the-module.json. Each file:
 //   { "about": "what it is and where it came from",
-//     "stored": <exactly what was in the browser's storage under the key>,
+//     "stored": <exactly what was in the browser's storage under the key: JSON as it is, or the text as a string —
+//                "done" = the plain text done (a value from before the module that isn't JSON)>,
 //     "expect": { "totalXp": 1200 } }      ← optional: values it must load with (fields of the loaded save)
 // Get "stored" from the browser: DevTools → Application → Local Storage → the key's value. Or in a test:
 // makeGoldenSave(save, data, about).
@@ -86,7 +87,8 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 export function checkGoldenSave(save: SaveUnderTest['save'], golden: GoldenSave): string[] {
   const storage = memoryStorage()
   const target = testable(save, storage)
-  storage.data[target.key] = JSON.stringify(golden.stored)
+  // a string is the stored text exactly (a plain old value like done, or a record copied from DevTools as text)
+  storage.data[target.key] = typeof golden.stored === 'string' ? golden.stored : JSON.stringify(golden.stored)
   const loaded = target.load() as Record<string, unknown>
   const report = target.report()
   const problems: string[] = []
