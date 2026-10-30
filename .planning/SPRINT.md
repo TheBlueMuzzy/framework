@@ -13,12 +13,12 @@ Checked: 2026-10-30 — 3 new addRules tests red on the old installer (107/110; 
 
 ## F166 🐞 Saves read old plain values
 Done when: createSave's oldSave receives an old value that isn't JSON (Glyphtender's tutorial "done") as its raw text instead of reporting it damaged, and the starter test doesn't turn check:fast red before a game's first createSave; tests red first.
-- [ ] 🤖 1. Tests: a stored plain "done" reaches oldSave and is adopted; JSON values unchanged — red first — saves/kit/oldSaves.test.ts
-- [ ] 🤖 2. Text that doesn't parse goes to oldSave as a string (damaged only if oldSave returns null) — saves/kit/saves.ts
-- [ ] 🤖 3. The starter test skips with "no saves listed yet" until the game has a createSave (check:framework's Saves row is what stays red) — saves/kit/saves.test.ts
-- [ ] 🤖 4. Saves kit VERSION + README line (oldSave takes raw text); saves tests + root check:fast green — saves/kit/VERSION
+- [x] 🤖 1. Tests: a stored plain "done" reaches oldSave and is adopted; JSON values unchanged — red first — saves/kit/oldSaves.test.ts
+- [x] 🤖 2. Text that doesn't parse goes to oldSave as a string (damaged only if oldSave returns null) — saves/kit/saves.ts
+- [x] 🤖 3. The starter test skips with "no saves listed yet" until the game has a createSave (check:framework's Saves row is what stays red) — saves/templates/tests/saves/saves.test.ts (the starter the installer copies; not saves/kit/saves.test.ts)
+- [x] 🤖 4. Saves kit VERSION + README line (oldSave takes raw text); saves tests + root check:fast green — saves/kit/VERSION
 Check: new tests red then green; saves tests; root check:fast.
-Checked:
+Checked: 2026-10-30 — 6 new plain-text tests: 3 red on the old code (15/18 — "done" loaded as fresh, no ~1 backup of it, a golden text value double-wrapped) → 18/18 after the fix (42dd2fb red, c32e8bf fix); savesInCode test red (TypeError: not a function, 18/19 — not committed red: the commit hook refuses a type error) → 19/19 (f96a4da). Scratch game from install-saves: no createSave → the starter test 1 skipped, exit 0 (the old one failed); a createSave not listed → red "…— made in ../../src/game/save.ts". Saves 283/283, tsc clean; root check:fast 24/24 (incl. the starter with fresh modules); starters/turn-based check:full 10/10 (1.3 min).
 
 ## F167 🐞 Lint knows rule messages
 Done when: no-player-text doesn't flag the refusal reasons a rules check returns through helpers (checkDraft / checkFor / checkAction…), a test red first, and the Glyphtender scratch copy's ~23 refusal-reason finds go to 0 while its ~8 real ones stay.
@@ -50,4 +50,15 @@ Checked:
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
 - Work branch: dev/v0-32-smoother-upgrades.
+- F166 — Saves read old plain values, the other places that read stored text (decided):
+  - readCopy (load, peek, the slide-into-backup check, newerVersionStored) — changed: text that isn't JSON → oldSave gets the text; no oldSave or null/throw → damaged in the same words as before ("not JSON"). One door, so all four follow.
+  - A plain old value is now a GOOD copy: the first save after it slides it into ~1 (the old "done" kept as a backup, as for any good copy).
+  - checkRecord / interpret(raw) for save codes (saveCode.ts) — unchanged: a code is always JSON made by exportRecord (records only); a code that doesn't parse is refused before checkRecord. A parsed string in a code already reached oldSave.
+  - cloud (cloudRoutes.ts) — unchanged: it carries save codes as JSON, never a stored value.
+  - savedAtOf / exportRecord's newer copy — unchanged: a plain value has no savedAt ('' is right) and can't be "newer" (only a record has a version).
+  - checkGoldenSave (oldSaves.ts) — changed: a string `stored` goes into storage as that exact text (was JSON.stringify'd, so "done" became "\"done\"" and never tested the real plain-text path); objects as before. No golden save in the framework or starter has a string `stored`.
+  - FORMAT.md step 2 (the any-language format) says the same, so the Unity port does it too.
+- F166: the "no saves yet" skip needs the game's code: the starter test raw-imports src/**/*.{ts,tsx} (not src/saves/, not tests) and asks savesInCode (oldSaves.ts — the same createSave/createRun call conformance.mjs findSaves looks for; a small copy, since the test is TS and conformance is .mjs). check:framework already skips its save rows before the first createSave; its direct-storage row is what stays red for a game still writing localStorage itself (Glyphtender today).
+- F166: the starter's own src/saves stays at 0.6.5 (its module copies move at milestones — F156; check:fast's "starter (fresh modules)" ran it on 0.7.0, green). Its own tests/saves/saves.test.ts lists its saves, so the skip never applies there. A game that already has the test copies the new top part by hand (README 0.7.0 line).
+- F166: no oldSave example in ~/.claude config/skills or the installer's hints; README Hooking-it-up + Golden saves + saves.ts's doc comment now show the plain-text case.
 Retro:
