@@ -1,0 +1,14 @@
+v0.33.0 — 2026-10-29
+
+Cleaner edges. The UI kit's page check now catches words cut off by a card's side, titles running past their card, and lists squeezed to less than two rows — and the kit no longer makes any of them: a full shoot finds nothing in English or the long fake language. Online results in the starter now close with Escape, like the game against the computer.
+
+NEW
+• UI kit 0.38.0:
+• A scroll list keeps room for two of its own rows (measured, or 4rem if that's more). When there isn't room, the whole card scrolls instead. Before, at 200% text the Room's player list showed less than one player, and the Seat picker, Victory, Results, Mode select and Settings lists were squeezed the same way.
+• A menu title too wide for its whole row, even at heading size, drops to body size on its own line, with its action under it. Before, Settings' title in Pixel at 200% text in a long language ran past the card's side and was cut off.
+• A card title breaks a word wider than its card, and a carousel slide is never wider than its window.
+• Lobby join on a phone on its side: your name and Create never shrink below their longest word.
+• The page check learns three cut-offs: words cut off by a box that hides its sides, words running past their box, and a scroll list squeezed under two rows (counted under "nothing is clipped"). It also stops flagging popups, a countdown digit's line box, cards already scrolling as one, and a sticky row over a scrolling avatar.
+• A full shoot: English 61 → 0 problems, the fake language 104 → 0.
+• The turn-based starter: Escape or a phone's Back on the online results leaves the room and goes to the main menu, like their Leave button and like the game against the computer. Before, Escape did nothing and Back left the page. The starter is on UI kit 0.38.0.
+• A release now writes STATE's module-version list itself, from each module's own version file. Games are unchanged.
