@@ -11,7 +11,9 @@ two mistakes that used to depend on Claude remembering:
 | `bmuz/own-clock` (0.3.0, F157) | **a stray `Date.now()` in a file that takes a clock option** (a `{ now }` option, or a read of `options.now`) — a test pins `now` to a fixed date, the stray keeps reading today, and the test goes red on its own a week later (saves 0.6.4's link codes) | use the clock it was given. Fine as is: the fallback (`now = () => Date.now()`, `options.now?.() ?? Date.now()`), the clock's own definition (`now: () => …`, `realNow`), a plain `now` parameter (a time handed in). A real one says why: `// clock-ok: <why>` |
 
 Not player words, never flagged: imports, object keys, `console.*`, `Error` messages, anything thrown, what a rules
-`check` returns (the Table's refusal reasons). Anything else that isn't for players says why: `// text-ok: <why>`.
+`check` returns (the Table's refusal reasons) — also from the helpers it splits into, named `check…` (`checkTurn`,
+`checkFor`), and a self-check's list named `…Problem(s)` (`railsProblems`); the name must be that word (`checkout`,
+`checkedLabel` are still judged), and a callback inside one is judged by its own name. Anything else that isn't for players says why: `// text-ok: <why>`.
 Measured on four games (sprint 45): the screens' words had already moved to en.json; the real gap was messages in
 plain strings (Roll Better's room errors).
 
@@ -67,3 +69,4 @@ New games start from a starter that already has it, as errors.
   at its line.
 - 0.3.1 (F159): the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged.
 - 0.3.2 (F165): the installer's comma goes after the list's last real code even when an earlier line of the list ends in a `//` comment — before, the comment's length moved it into a word (Glyphtender's globalIgnores line gave `re,actRefresh.configs.vite` and a broken eslint.config.js).
+- 0.4.0 (F167): `no-player-text` also leaves alone what a rules check returns through its helpers — functions named `check…` (`checkTurn`, `checkFor`, `checkDraft`; not `checkout`/`checked`) — and a self-check's `…Problem(s)` list (`railsProblems`, `jsonProblem`). Glyphtender's 31 finds → 9: its 16 engine refusal reasons and 6 tutorial self-check lines are gone; its real words stay. No hand step: a game's `// text-ok` on such a line can go.
