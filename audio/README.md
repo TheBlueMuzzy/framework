@@ -2,7 +2,7 @@
 
 Sound for a game. **Code never names a file**: the game says *what happened* (`playSound('seed.land')`), and `content/audio.json` says *what that sounds like* — which files, how loud, how high, how much it varies, which volume group, how often it may repeat. Swapping a placeholder for a final sound means dropping in a file and editing the JSON (or, soon, the Dev Kit Sound Board).
 
-Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.4.2** (0.4.2, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.4.1, F128: the installer asks git for the kit’s commit once per run, not on every install) (0.4.0: every sound equally loud and on time — `npm run audio:check`; 0.3.0: the Dev Kit's full pause silences it; its promise checks). Proven in Glyphtender (its v0.9).
+Design: `../.planning/design/audio.md`. Framework v0.6 (F27 engine + rules, F28 music + mix). Kit **0.5.0** (0.5.0, F169: `audio:check --fix` keeps a mix tuned by ear — each file's change moves into the `volumeDb` of the sounds that play it, so the game sounds the same; a game updating from before 0.4.0: run `npm run audio:check -- --fix`, then listen) (0.4.2, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.4.1, F128: the installer asks git for the kit’s commit once per run, not on every install) (0.4.0: every sound equally loud and on time — `npm run audio:check`; 0.3.0: the Dev Kit's full pause silences it; its promise checks). Proven in Glyphtender (its v0.9).
 
 No library: the browser's own Web Audio does it all. No runtime dependencies.
 
@@ -52,7 +52,14 @@ ui/ui_button_tap_01.mp3        ui      -22.5 dB  -2.8 dB   1 ms   0.10 s  4.5 dB
   tail don't count; a short click can't be measured in LUFS). Music and ambience: LUFS, the standard for long sounds.
   Both read the same for a steady sound, so −18 means the same everywhere. **Peak**: the loudest sample.
   **Onset**: how long until the sound really starts (effects + menus only — music may start softly).
-- **`--fix`** rewrites only the flagged files, keeping their names (content/audio.json needs no change): brought to the
+- **A mix tuned by ear is kept** (0.5.0, F169): when `--fix` changes a file by X dB, every sound (or music layer) that
+  plays it and sets its own `volumeDb` gets the opposite, so it sounds just as loud in the game (`seed.land` −3 with a
+  file 6 dB too loud → file evened, `volumeDb` 3). It prints what it moved. Only those numbers are written — every other
+  character of content/audio.json (layout, order, `_help` notes) stays. One `volumeDb` covers all of a sound's variants,
+  so it moves by their average change: the sound is as loud as before on average, and its variants come out even with
+  each other. A `volumeDb` never leaves −40…6 (the file goes only as far as that allows; the rest is for the ear). A
+  sound without a `volumeDb` of its own isn't given one — it plays at the even level, as before.
+- **`--fix`** rewrites only the flagged files, keeping their names (no file list changes): brought to the
   target, the spikes held under the ceiling by a fast limiter (never shaved more than `maxLimitingDb`, 3.5 dB — a very
   spiky file ends a little under target instead), effects + menus trimmed to their onset. A file that can't come any
   closer (already limited — its loudness *is* its spikes) is left as it was. Each file is first copied to

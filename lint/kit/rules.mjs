@@ -121,7 +121,10 @@ const noStateInFrame = {
 //     - a sentence in a plain string — a capital, a space, words: setError('Room not found') (Roll Better's room
 //       errors were the real gap: the screens' words had already moved)
 //   Not player words, so never flagged: imports, object keys, console.*, Error messages, anything thrown, what a
-//   rules `check` returns (the Table's refusal reasons — a game that shows one gives the player en.json words for it).
+//   rules `check` returns (the Table's refusal reasons — a game that shows one gives the player en.json words for it)
+//   and the helpers it splits into, named check… (checkTurn, checkFor — lint 0.4.0, F167: Glyphtender's 16), and a
+//   self-check's list, named …Problem(s) (the tutorial's railsProblems, a test wants it empty). The name must BE that
+//   word: checkout, checkedLabel, noProblemsHere are still judged; so is a callback inside one (it has its own name).
 //   Anything else that isn't for players (a Dev Kit report's label) says why: `// text-ok: <why>`.
 const PLAYER_PROPS = new Set(['title', 'label', 'aria-label', 'aria-description', 'aria-roledescription', 'placeholder', 'alt',
   'text', 'message', 'heading', 'subtitle', 'caption', 'tooltip', 'hint', 'description', 'detail', 'confirmLabel', 'cancelLabel'])
@@ -137,6 +140,8 @@ const functionName = (fn) => {
   if (p?.type === 'VariableDeclarator' && p.id.type === 'Identifier') return p.id.name
   return null
 }
+// check, checkTurn, check_draft — not checkout / checked; railsProblems, jsonProblem, problems
+const CHECK_NAME = /^check(?![a-z])|(^p|P)roblems?$/
 
 const noPlayerText = {
   meta: {
@@ -166,7 +171,7 @@ const noPlayerText = {
           if (/^[A-Z]\w*Error$/.test(name ?? '') || name === 'require') return true
         }
         if (n.type === 'JSXAttribute') return true // props are judged by name, below
-        if (n.type.endsWith('FunctionExpression') || n.type === 'FunctionDeclaration') return functionName(n) === 'check'
+        if (n.type.endsWith('FunctionExpression') || n.type === 'FunctionDeclaration') return CHECK_NAME.test(functionName(n) ?? '')
       }
       return false
     }

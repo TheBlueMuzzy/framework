@@ -56,7 +56,10 @@ export interface SaveOptions<T> {
   /** progress only: how each field combines with another device's copy (default: newest). */
   fields?: FieldRules<T>
   /** A save written BEFORE the game used this module (no record around it): which version it is and its data,
-   *  or null when it isn't one. e.g. Goops: (raw) => raw?.v === 1 ? { version: 1, data: raw } : null */
+   *  or null when it isn't one. raw is the stored value read as JSON — or, when the stored text isn't JSON, that text
+   *  itself (a cut-off write arrives this way too, so return null for anything you don't recognise).
+   *  e.g. Goops: (raw) => raw?.v === 1 ? { version: 1, data: raw } : null
+   *       Glyphtender's tutorial (it kept the word done): (raw) => raw === 'done' ? { version: 1, data: { done: true } } : null */
   oldSave?: (raw: any) => { version: number; data: unknown } | null // eslint-disable-line @typescript-eslint/no-explicit-any -- whatever an old build wrote
   /** The game's own last tidy-up after defaults are filled in (a value out of range → the default, a renamed id…). */
   clean?: (data: T) => T
@@ -185,8 +188,9 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
   let lastReport: LoadReport = { from: 'fresh', added: [], replaced: [], problems: [], note: null }
   warnAboutKey(options.key, onProblem)
 
-  /** Any parsed value → a usable record at today's version, a newer build's, or broken (and why). */
-  function interpret(parsed: unknown): Outcome<T> {
+  /** Any parsed value → a usable record at today's version, a newer build's, or broken (and why).
+   *  notKnown: the problem when it isn't a record and oldSave doesn't know it either. */
+  function interpret(parsed: unknown, notKnown = 'it isn\'t a save this game knows'): Outcome<T> {
     let version0: number
     let data: unknown
     let savedAt = ''
@@ -200,7 +204,7 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
     } else {
       let old: { version: number; data: unknown } | null = null
       try { old = oldSave ? oldSave(parsed) : null } catch { old = null }
-      if (!old) return { state: 'damaged', problem: 'it isn\'t a save this game knows' }
+      if (!old) return { state: 'damaged', problem: notKnown }
       version0 = old.version
       data = old.data
     }
@@ -225,11 +229,12 @@ function makeSave<T>(options: SaveOptions<T>, recordName: string, storageKey = r
     return { state: 'good', record, upgradedFrom: version0 < version ? version0 : undefined, added: filled.added, replaced: filled.replaced }
   }
 
-  /** One stored copy (text) → what it is. */
+  /** One stored copy (text) → what it is. Text that isn't JSON may still be an old build's plain value (Glyphtender's
+   *  tutorial kept the word "done"): oldSave gets the text itself, and it's damaged only if oldSave doesn't know it. */
   function readCopy(text: string | null): Outcome<T> {
     if (text === null || text.trim() === '') return { state: 'empty' }
     let parsed: unknown
-    try { parsed = JSON.parse(text) } catch { return { state: 'damaged', problem: 'it is cut off or isn\'t readable (not JSON)' } }
+    try { parsed = JSON.parse(text) } catch { return interpret(text, 'it is cut off or isn\'t readable (not JSON)') }
     return interpret(parsed)
   }
 

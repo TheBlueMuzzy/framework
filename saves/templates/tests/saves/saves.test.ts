@@ -10,7 +10,7 @@
 // Golden saves: see the top of src/saves/oldSaves.ts. check:framework also fails a save with no golden copy for a version.
 import { describe, expect, it } from 'vitest'
 import {
-  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenSavesFor, missingGoldenVersions,
+  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenSavesFor, missingGoldenVersions, savesInCode,
   type RunUnderTest, type SaveUnderTest,
 } from '../../src/saves/oldSaves'
 // import { progressSave } from '../../src/progress/save'
@@ -26,9 +26,17 @@ const RUNS: RunUnderTest[] = [
 
 const golden = import.meta.glob('./*.json', { eager: true, import: 'default' })
 
-it('every save the game makes is listed in SAVES or RUNS (tests/saves/saves.test.ts)', () => {
-  expect(SAVES.length + RUNS.length, 'add each createSave to SAVES (and each createRun to RUNS) at the top of this file').toBeGreaterThan(0)
-})
+// the game's own code (not the module's copy in src/saves/, not tests): a game with no createSave yet is skipped, not red
+const gameCode = import.meta.glob(['../../src/**/*.{ts,tsx}', '!../../src/saves/**', '!../../src/**/*.test.*'], { eager: true, query: '?raw', import: 'default' })
+const madeIn = savesInCode(gameCode)
+
+if (!madeIn.length && !SAVES.length && !RUNS.length) {
+  it.skip('no saves listed yet — add the game\'s first createSave (then list it in SAVES below)', () => {})
+} else {
+  it('every save the game makes is listed in SAVES or RUNS (tests/saves/saves.test.ts)', () => {
+    expect(SAVES.length + RUNS.length, `add each createSave to SAVES (and each createRun to RUNS) at the top of this file — made in ${madeIn.join(', ')}`).toBeGreaterThan(0)
+  })
+}
 
 // a run's save is tested like any other save
 const everySave: SaveUnderTest[] = [...SAVES, ...RUNS.map(({ run, sample }) => ({ save: run.save, sample }))]

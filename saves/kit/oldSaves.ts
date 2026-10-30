@@ -4,7 +4,8 @@
 // odd character in the key becomes "_": glyphtender:new-game → glyphtender_new-game-v2.json). Several for one version
 // are fine: <key>-v1-before-the-module.json. Each file:
 //   { "about": "what it is and where it came from",
-//     "stored": <exactly what was in the browser's storage under the key>,
+//     "stored": <exactly what was in the browser's storage under the key: JSON as it is, or the text as a string —
+//                "done" = the plain text done (a value from before the module that isn't JSON)>,
 //     "expect": { "totalXp": 1200 } }      ← optional: values it must load with (fields of the loaded save)
 // Get "stored" from the browser: DevTools → Application → Local Storage → the key's value. Or in a test:
 // makeGoldenSave(save, data, about).
@@ -55,6 +56,16 @@ export function missingGoldenVersions(key: string, version: number, fileNames: s
   return Array.from({ length: version }, (_, i) => i + 1).filter((v) => !have.has(v))
 }
 
+/** The game's files (path → text) that make a save or a run (createSave / createRun outside a comment) — so the game's
+ *  test can tell "no saves yet" (skipped) from "saves made but not listed" (fails). The same call check:framework
+ *  finds (conformance.mjs findSaves). */
+export function savesInCode(files: Record<string, unknown>): string[] {
+  const withoutComments = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, '')
+  return Object.entries(files)
+    .filter(([, text]) => typeof text === 'string' && /\bcreate(Save|Run)\s*(<[^>]*>)?\s*\(/.test(withoutComments(text)))
+    .map(([path]) => path)
+}
+
 /** This save's golden files out of every file found (e.g. import.meta.glob('./*.json', { eager: true, import: 'default' })). */
 export function goldenSavesFor(key: string, files: Record<string, unknown>): { file: string; version: number; golden: GoldenSave }[] {
   return Object.entries(files)
@@ -86,7 +97,8 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 export function checkGoldenSave(save: SaveUnderTest['save'], golden: GoldenSave): string[] {
   const storage = memoryStorage()
   const target = testable(save, storage)
-  storage.data[target.key] = JSON.stringify(golden.stored)
+  // a string is the stored text exactly (a plain old value like done, or a record copied from DevTools as text)
+  storage.data[target.key] = typeof golden.stored === 'string' ? golden.stored : JSON.stringify(golden.stored)
   const loaded = target.load() as Record<string, unknown>
   const report = target.report()
   const problems: string[] = []

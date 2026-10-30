@@ -53,7 +53,15 @@ tester.run('no-player-text', rules['no-player-text'], {
     "function f() { if (bad) throw `Goo shader: ${log}` }",
     "const rules = { check(state) { if (state.over) return 'The game is over.'; return null } }", // the Table's refusal reasons
     "function check(s) { return 'That square is taken.' }",
-    "setMode('online')",                                                      // one word, lower case: an id
+    // F167: Glyphtender's rules split the check into helpers, each returning string | null
+    "export function checkTurn(state, action) { if (state.phase !== 'play') return state.phase === 'refresh' ? 'Choose seeds to refresh first' : 'It is not time to move'; return null }",
+    "function checkFor(state, seat, action) { if (state.phase === 'over') return 'The game is over.'; return checkAction(state, action) }",
+    "const checkDraft = (state, hex) => (state.phase !== 'draft' ? 'The draft is over' : null)",
+    "const rules = { checkRefresh(state) { return 'The same seed was set aside twice' } }",
+    // …and a self-check's problem list (the tutorial's railsProblems, which a test expects to be empty)
+    "export function railsProblems(words) { const problems = []; if (!words.ok) problems.push('Your turn 1 made a word'); return problems }",
+    "const jsonProblem = (v) => (typeof v === 'function' ? 'A function is not plain JSON' : null)",
+    "setMode('online')",                                                     // one word, lower case: an id
     "const KEY = 'turn-based-starter:settings'",
     "// text-ok: the Dev Kit's arena report, not a player screen\nconst label = 'Rival glyphlings it tangled'",
     "const t = <p>{'Hi there'}</p> // text-ok: a test fixture",
@@ -69,6 +77,13 @@ tester.run('no-player-text', rules['no-player-text'], {
     { code: "setError('Connection lost')", errors: [{ messageId: 'sentence' }] },             // …a game's setError isn't an Error
     { code: "const why = closed ? 'Room closed' : null", errors: [{ messageId: 'sentence' }] },
     { code: "function play() { return 'It is not time to move' }", errors: [{ messageId: 'sentence' }] }, // not a rules check
+    // F167: only a name that IS check… / …Problem(s) — not checkout, checked, or the word inside a longer name
+    { code: "function checkoutScreen() { return 'Thanks for your order' }", errors: [{ messageId: 'sentence' }] },
+    { code: "const checkedLabel = () => 'Sound is on'", errors: [{ messageId: 'sentence' }] },
+    { code: "function noProblemsHere() { return 'All good here' }", errors: [{ messageId: 'sentence' }] },
+    // a callback inside a check helper is judged by its own name (as inside check itself)
+    { code: "function checkTurn(s) { s.list.forEach(() => setError('Not your turn')); return null }", errors: [{ messageId: 'sentence' }] },
+    { code: "const SPROUT = { piece: null, reason: 'Sprout is playing its scripted turn' }", errors: [{ messageId: 'sentence' }] }, // a reason outside a check
     { code: "// text-ok:\nsetError('Room not found')", errors: [{ messageId: 'sentence' }] },              // the why is needed
   ],
 })

@@ -70,6 +70,51 @@ describe('addRules', () => {
     expect(text).toContain("{ settings: { docs: 'http://example.com' } },\n  {")
     expect(syntaxOk(text)).toBe(true)
   })
+  // F165: Glyphtender's config — a comment on an earlier line of the list put the comma inside a word
+  // (re,actRefresh.configs.vite → "ReferenceError: re is not defined")
+  const GLYPHTENDER_CONFIG = `import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist', 'src/ui/kit', 'src/audio', 'sketches', '.claude']), // src/ui/kit + src/audio = framework copies (linted there); sketches = throwaway prototypes; .claude = helpers' worktrees
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+  },
+])
+`
+  it('a comment on an earlier line of the list (Glyphtender\'s) leaves the rest of the config as it was', () => {
+    const { text } = addRules(GLYPHTENDER_CONFIG, 'error')
+    expect(text).toContain('      reactRefresh.configs.vite,\n')
+    expect(text).toContain('      globals: globals.browser,\n    },\n  },\n  {\n')
+    expect(syntaxOk(text)).toBe(true)
+  })
+  it('a comment on an earlier line, and no trailing comma: the comma goes after the last element', () => {
+    const noComma = GLYPHTENDER_CONFIG.replace('    },\n  },\n])', '    },\n  }\n])')
+    const { text } = addRules(noComma, 'error')
+    expect(text).toContain('      globals: globals.browser,\n    },\n  },\n  {\n')
+    expect(syntaxOk(text)).toBe(true)
+  })
+  it('a comment on an earlier line and on the last element\'s line: the comma goes before the last comment', () => {
+    const both = PLAIN_CONFIG.replace('  js.configs.recommended,\n', '  js.configs.recommended, // the basics\n')
+      .replace("{ ignores: ['dist'] }\n", "{ ignores: ['dist'] } // build output\n")
+    const { text } = addRules(both, 'error')
+    expect(text).toContain("  js.configs.recommended, // the basics\n  { ignores: ['dist'] }, // build output\n  {")
+    expect(syntaxOk(text)).toBe(true)
+  })
   it('leaves a config that already has the rules alone', () => {
     const once = addRules(STARTER_CONFIG, 'warn').text
     expect(addRules(once, 'error')).toEqual({ text: once, already: true })

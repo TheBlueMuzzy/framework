@@ -2,7 +2,7 @@
 
 The player's saves — settings, progress, a run in progress, save slots — kept so that **no update, broken write, full storage or browser habit loses them**. The game says *what* it saves (`createSave({ key, kind, version, fresh, upgrades })`); the module keeps it versioned, upgraded step by step, backed up, and copyable as a **save code**.
 
-Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.6.6** (0.6.6, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.6.5: fetching another device's link code checks whether this device's own code is still live by the game's clock (`now`), not the computer's — a game passing its own clock could forget its code, so "Delete my data" missed it · 0.6.4, F150: proven in real Chromium, WebKit and Firefox — see *Proven in which browsers*; "quota exceeded" on an empty storage (Safari's old private window) now says "blocked", not "full"; `openSaves` knows a full disk by every engine's name for it · 0.6.3: a save code that only partly loads offers to reload the game, so what came back shows — `partlyLoaded()` · 0.6.2: the installer asks git once per run · 0.6.1: the v0.11.0 security review — body size, wrong tries per IPv6 /48). Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
+Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.7.0** (0.7.0, F166: an old value that isn't JSON (Glyphtender's tutorial kept the plain text `done`) goes to `oldSave` as that text instead of being called damaged; a golden save's `stored` string is put in storage as that exact text; the game's `tests/saves/saves.test.ts` starter skips with "no saves listed yet" until the game's first createSave (`savesInCode`) — a game that already has the test copies the new top part by hand) (0.6.6, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.6.5: fetching another device's link code checks whether this device's own code is still live by the game's clock (`now`), not the computer's — a game passing its own clock could forget its code, so "Delete my data" missed it · 0.6.4, F150: proven in real Chromium, WebKit and Firefox — see *Proven in which browsers*; "quota exceeded" on an empty storage (Safari's old private window) now says "blocked", not "full"; `openSaves` knows a full disk by every engine's name for it · 0.6.3: a save code that only partly loads offers to reload the game, so what came back shows — `partlyLoaded()` · 0.6.2: the installer asks git once per run · 0.6.1: the v0.11.0 security review — body size, wrong tries per IPv6 /48). Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
 
 No library: localStorage, the browser's own CompressionStream, and nothing else at run time (the optional link-code cloud and Daily board are small workers of the game's own on Cloudflare — no packages but wrangler).
 
@@ -64,6 +64,10 @@ export const progressSave = createSave<Progress>({
   oldSave: (raw) => (raw?.v === 1 ? { version: 1, data: raw } : null), // a save written before the module
   clean: (p) => ({ ...p, totalXp: Math.max(0, p.totalXp) }),           // the game's own last tidy-up
 })
+// oldSave's raw = the stored value read as JSON — or, when the stored text isn't JSON, that text itself (0.7.0).
+// Glyphtender's tutorial kept the plain word done:
+//   oldSave: (raw) => (raw === 'done' ? { version: 1, data: { done: true } } : null)
+// A cut-off write reaches oldSave as text too, so return null for anything you don't recognise.
 const progress = progressSave.load()   // anywhere; never throws
 progressSave.save(progress)            // { ok } | { ok: false, reason: full|blocked|newer|not-kept|not-data, message }
 
@@ -169,6 +173,7 @@ A real save from each version, committed as `tests/saves/<key>-v<N>.json` — se
   "stored": <exactly what was in the browser under the key>,
   "expect": { "totalXp": 18250 } }
 ```
+`stored` is the JSON as it is (an object), or the text as a string: `"stored": "done"` = the plain text `done` in storage (an old value that isn't JSON, 0.7.0).
 Get `stored` from DevTools → Application → Local Storage → the key, or `makeGoldenSave(save, data, about)` in a test. **Every release that changes a save's version adds the old version's golden save** — check:framework fails until it's there.
 
 ## The public API
@@ -197,7 +202,7 @@ SAVE_SETTINGS_ROWS · SAVE_CODE_ROW · SAVE_HEALTH_ROW · HEALTH_WORDS · CODE_W
 openSaves(backend, { game, copyFrom?, delayMs?, page?, onProblem?, useForKit? }) → Promise<storage + flush() · waiting() · problem() · loadMs · close()> · browserBackend(game) · slowBackend(start?, { waitMs?, native? }) · COPIED_MARKER
 setSavesStorage(storage, { native? }) · savesStorage() · savesOnNativeStorage() · switchedStorage
 setSavesConfig(json) · readSavesConfig(json) · memoryStorage(start?) · mergeRecords(kind, fields, a, b) · fillMissing(saved, fresh)
-oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds
+oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds · savesInCode
 ```
 Every player-facing sentence (`NOTES`, `CODE_WORDS`, `HEALTH_WORDS`, `NUDGE_WORDS`, `RUN_WORDS`, `REPLAY_WORDS`, the panel's `words`) can be replaced.
 

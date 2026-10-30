@@ -465,7 +465,24 @@ flowchart LR
   F164[✅ F164 Module versions at release]
 ```
 
+## v0.32 — Smoother upgrades  ✅ released 2026-10-30 (v0.34.0) · planned 2026-10-30
+Goal (Muzzy 2026-10-30: framework first, then the Glyphtender catch-up): updating a game to today's framework needs no hand fixes for the problems the Glyphtender rehearsal hit (.planning/research/2026-10-29-glyphtender-catchup.md).
+- ✅ F165 🐞 Lint installer comma — install-lint puts its comma inside a word when the config list has a comment on an earlier line (Glyphtender: "re,actRefresh") — must · sprint 50
+- ✅ F166 🐞 Saves read old plain values — oldSave gets an old non-JSON value as raw text (Glyphtender's tutorial "done"), and the starter test waits for a game's first createSave — must · sprint 50
+- ✅ F167 🐞 Lint knows rule messages — no-player-text exempts refusal reasons returned through check* helpers (~23 false finds in Glyphtender) — must · sprint 50
+- ✅ F168 🔧 Upgrade notes + install order — per-module UPGRADES.md, install-module prints the steps since a game's version and refuses a module that needs a newer Dev Kit — must · sprint 50
+- ✅ F169 🐞 Audio keeps the tuned mix — audio:check --fix moves the loudness difference into volumeDb so a mix tuned by ear stays as heard — should · sprint 50
+```mermaid
+flowchart LR
+  F165[✅ F165 Lint installer comma]
+  F166[✅ F166 Saves read old plain values]
+  F167[✅ F167 Lint knows rule messages]
+  F168[✅ F168 Upgrade notes + install order]
+  F169[✅ F169 Audio keeps the tuned mix]
+```
+
 ## Later
+- 💤 F170 🐞 Starter online test race — the starter's e2e/online.mjs went red on GitHub a 3rd time and passed on a re-run (2026-10-30, run 41052406220: "Play again left the results up" and "Back on B's online results left the game's page (about:blank)"; before: v0.31.0 main + F161's branch, 2026-10-27) — find the race on a slow runner (likely the results' screen-stack open/close vs the rematch arriving), fix it, prove it with repeated runs — should
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
