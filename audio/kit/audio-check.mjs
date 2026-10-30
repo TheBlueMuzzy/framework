@@ -149,7 +149,8 @@ const round1 = (x) => Math.round(x * 10) / 10 + 0 // + 0: never "-0"
 export function volumeMoves(tuned, changedDb) {
   const moves = []
   for (const sound of tuned) {
-    if (!sound.files.length) continue
+    // none of its files changed: left exactly as written (no rounding, no range clamp — only a moved value is ours)
+    if (!sound.files.some((f) => f in changedDb)) continue
     const average = sound.files.reduce((sum, f) => sum + (changedDb[f] ?? 0), 0) / sound.files.length
     const to = Math.min(VOLUME_RANGE_DB[1], Math.max(VOLUME_RANGE_DB[0], round1(sound.volumeDb - average))) // a hair over (an MP3's rounding) stays in range
     if (to !== sound.volumeDb) moves.push({ name: sound.name, path: sound.path, from: sound.volumeDb, to, byDb: round1(to - sound.volumeDb) })
