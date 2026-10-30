@@ -24,10 +24,10 @@ Checked: 2026-10-30 — 6 new plain-text tests: 3 red on the old code (15/18 —
 Done when: no-player-text doesn't flag the refusal reasons a rules check returns through helpers (checkDraft / checkFor / checkAction…), a test red first, and the Glyphtender scratch copy's ~23 refusal-reason finds go to 0 while its ~8 real ones stay.
 - [x] 🤖 1. Tests: a rules check split into check* helpers that return string | null — red first; a non-check function's words still flagged — lint/kit/rules.test.mjs
 - [x] 🤖 2. Exempt functions named check* (and what the rules' check calls) — lint/kit/rules.mjs
-- [ ] 🤖 3. Run lint on ~/Documents/dev/.scratch/glyphtender-catchup (read-only): finds before → after in Notes — lint/kit/rules.mjs
-- [ ] 🤖 4. Lint kit VERSION + README line; lint tests + root check:fast green — lint/kit/VERSION
+- [x] 🤖 3. Run lint on ~/Documents/dev/.scratch/glyphtender-catchup (read-only): finds before → after in Notes — lint/kit/rules.mjs
+- [x] 🤖 4. Lint kit VERSION + README line; lint tests + root check:fast green — lint/kit/VERSION
 Check: new tests red then green; the scratch copy's refusal-reason finds 23 → 0, real finds kept; root check:fast.
-Checked:
+Checked: 2026-10-30 — 6 new "not flagged" tests red on the old rule (115/121), 5 new "still flagged" (checkout, checkedLabel, noProblemsHere, a callback inside checkTurn, SPROUT's reason) green on both → 121/121 after the fix (04183ad red, 85217fe fix); Glyphtender scratch copy no-player-text 31 → 9 (22 refusal reasons / self-check lines → 0; the 8 real ones + SPROUT stay; no-tuning-numbers 20 → 20 unchanged), scratch clone left clean; root check:fast 24/24.
 
 ## F168 🔧 Upgrade notes + install order
 Done when: each module has an UPGRADES.md of hand steps by version (LOOK CHANGE marked), install-module prints the steps between the game's version and the new one, and refuses (with the fix) a module whose checks need a newer Dev Kit than the game has; tests cover both.
@@ -61,4 +61,11 @@ Notes:
 - F166: the "no saves yet" skip needs the game's code: the starter test raw-imports src/**/*.{ts,tsx} (not src/saves/, not tests) and asks savesInCode (oldSaves.ts — the same createSave/createRun call conformance.mjs findSaves looks for; a small copy, since the test is TS and conformance is .mjs). check:framework already skips its save rows before the first createSave; its direct-storage row is what stays red for a game still writing localStorage itself (Glyphtender today).
 - F166: the starter's own src/saves stays at 0.6.5 (its module copies move at milestones — F156; check:fast's "starter (fresh modules)" ran it on 0.7.0, green). Its own tests/saves/saves.test.ts lists its saves, so the skip never applies there. A game that already has the test copies the new top part by hand (README 0.7.0 line).
 - F166: no oldSave example in ~/.claude config/skills or the installer's hints; README Hooking-it-up + Golden saves + saves.ts's doc comment now show the plain-text case.
+- F167 — Lint knows rule messages, the rule (decided): a function whose name IS `check…` (`/^check(?![a-z])/`: check, checkTurn, checkFor — not checkout / checkedLabel) or ends in `…Problem(s)` (railsProblems, jsonProblem) — its own strings aren't player words. By name only, not "returns string | null" (a .ts type isn't in plain JS, and every Glyphtender helper is already named check…) and not "reached from the rules' check" (a call graph across files is a lot of rule for 0 extra finds). A callback inside one is still judged by its own name, as for check before.
+- F167: Glyphtender scratch copy, no-player-text before → after (lint 0.3.2 → 0.4.0, run by copying rules.mjs into the clone's src/lint and restoring it; git status clean after):
+  - engine/turn.ts 9 → 0 (checkTurn) · engine/refresh.ts 3 → 0 (checkRefresh) · engine/draft.ts 2 → 0 (checkDraft) · engine/rules.ts 2 → 0 (checkFor)
+  - tutorial/railsCheck.ts 6 → 0 (railsProblems — the tutorial's self-check, rails.test.ts wants it empty; dev words, not player words)
+  - tutorial/railsSteps.ts 1 → 1 — KEPT on purpose: `SPROUT = { reason: 'Sprout is playing its scripted turn' }` is a rails refusal the referee shows the player (railsRefuses → store/referee.ts), and every other rails reason there already comes from en.json via `reason(key)` — a real find, so the "~23" was 22 + this one
+  - stay (8 real): ai/arena.ts:152 report title, ai/decisions.ts:113 "CALL IT", Board.tsx:176 aria-label Garden, GameScreen.tsx:159 aria-label, SeedTray.tsx:147 label Seeds, HelpLayer.tsx:213 + 217 label Tip, TutorialLayer.tsx:73 label Tutorial
+  - total 31 → 9; no-tuning-numbers 20 → 20, exhaustive-deps 1 → 1 (nothing else moved)
 Retro:
