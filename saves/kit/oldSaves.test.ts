@@ -4,7 +4,7 @@ import {
 } from './oldSaves'
 import { createRun, type Run } from './run'
 import { createSave, type Save } from './saves'
-import { removeKey, type StorageLike } from './storage'
+import { memoryStorage, removeKey, type StorageLike } from './storage'
 
 const quiet = () => {}
 const choices = createSave({
@@ -102,5 +102,57 @@ describe('runs (createRun)', () => {
     const problems = checkRunEnds(leaky, { turn: 7, scores: [3, 4] })
     expect(problems.join(' | ')).toContain('left copies behind: glyphtender:run~1')
     expect(problems.join(' | ')).toContain('the finished run loads again')
+  })
+})
+
+describe('a save from before the module that is plain text, not JSON (F166 — Glyphtender\'s tutorial "done")', () => {
+  const tutorial = (oldSave?: (raw: unknown) => { version: number; data: unknown } | null) => createSave({
+    key: 'glyphtender:tutorial', kind: 'progress', version: 1, fresh: { done: false }, onProblem: quiet, storage: null, oldSave,
+  })
+  const knowsDone = (raw: unknown) => (raw === 'done' ? { version: 1, data: { done: true } } : null)
+
+  it('the stored text "done" reaches oldSave as that text and is adopted', () => {
+    const save = tutorial(knowsDone).withStorage(memoryStorage({ 'glyphtender:tutorial': 'done' }))
+    expect(save.load()).toEqual({ done: true })
+    expect(save.report()).toMatchObject({ from: 'save', problems: [], note: null })
+    expect(save.peek()).toMatchObject({ state: 'good', savedAt: '', data: { done: true } })
+  })
+
+  it('the first save after it keeps the old text as the newest backup', () => {
+    const storage = memoryStorage({ 'glyphtender:tutorial': 'done' })
+    const save = tutorial(knowsDone).withStorage(storage)
+    expect(save.save({ done: true }).ok).toBe(true)
+    expect(storage.data['glyphtender:tutorial~1']).toBe('done')
+    expect(JSON.parse(storage.data['glyphtender:tutorial'])).toMatchObject({ save: 'glyphtender:tutorial', version: 1, data: { done: true } })
+  })
+
+  it('text oldSave doesn\'t know — or no oldSave at all, or one that throws — is still damaged, in the same words as before', () => {
+    for (const save of [tutorial(knowsDone), tutorial(), tutorial(() => { throw new Error('boom') })]) {
+      const placed = save.withStorage(memoryStorage({ 'glyphtender:tutorial': 'half-done' }))
+      expect(placed.load()).toEqual({ done: false })
+      expect(placed.report().problems).toEqual(['the save: it is cut off or isn\'t readable (not JSON)'])
+    }
+  })
+
+  it('JSON values still reach oldSave parsed, exactly as before', () => {
+    const seen: unknown[] = []
+    const save = tutorial((raw) => { seen.push(raw); return knowsDone(raw) ?? (raw && typeof raw === 'object' ? { version: 1, data: raw } : null) })
+    expect(save.withStorage(memoryStorage({ 'glyphtender:tutorial': '"done"' })).load()).toEqual({ done: true })
+    expect(save.withStorage(memoryStorage({ 'glyphtender:tutorial': '{"done":true}' })).load()).toEqual({ done: true })
+    expect(seen).toEqual(['done', { done: true }])
+  })
+
+  it('a golden save whose "stored" is text is put in storage as that exact text', () => {
+    expect(checkGoldenSave(tutorial(knowsDone), { stored: 'done', expect: { done: true } })).toEqual([])
+    expect(checkGoldenSave(tutorial(), { stored: 'done' })[0]).toContain('didn\'t load')
+    // the value copied from DevTools as text (not pasted in as JSON) is the same save
+    const asText = JSON.stringify({ save: 'glyphtender:tutorial', version: 1, savedAt: '', data: { done: true } })
+    expect(checkGoldenSave(tutorial(), { stored: asText, expect: { done: true } })).toEqual([])
+  })
+
+  it('round trip, damaged saves and full storage still pass for a save with a text oldSave', () => {
+    expect(checkRoundTrip(tutorial(knowsDone), { done: true })).toEqual([])
+    expect(checkDamagedSaves(tutorial(knowsDone), { done: true })).toEqual([])
+    expect(checkFullStorage(tutorial(knowsDone), { done: true })).toEqual([])
   })
 })
