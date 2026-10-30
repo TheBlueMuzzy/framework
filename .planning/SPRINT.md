@@ -68,4 +68,5 @@ Notes:
   - tutorial/railsSteps.ts 1 → 1 — KEPT on purpose: `SPROUT = { reason: 'Sprout is playing its scripted turn' }` is a rails refusal the referee shows the player (railsRefuses → store/referee.ts), and every other rails reason there already comes from en.json via `reason(key)` — a real find, so the "~23" was 22 + this one
   - stay (8 real): ai/arena.ts:152 report title, ai/decisions.ts:113 "CALL IT", Board.tsx:176 aria-label Garden, GameScreen.tsx:159 aria-label, SeedTray.tsx:147 label Seeds, HelpLayer.tsx:213 + 217 label Tip, TutorialLayer.tsx:73 label Tutorial
   - total 31 → 9; no-tuning-numbers 20 → 20, exhaustive-deps 1 → 1 (nothing else moved)
+- F167 review (Claude): the name rule also exempts any function ending in Problem(s) — a game function like showProblem() that builds player words would be skipped too. None in our games today; tighten if one appears.
 Retro:
