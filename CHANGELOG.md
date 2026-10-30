@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.34.0 — 2026-10-30
+
+Smoother upgrades. Bringing a game up to today's framework no longer needs hand fixes for what the Glyphtender rehearsal ran into: the module installer now prints the hand steps since the game's version and refuses a module that needs a newer Dev Kit, and the audio fix keeps a mix tuned by ear sounding the same.
+
+### Breaking
+- A game that already has `tests/saves/saves.test.ts` copies the new top part of the saves template by hand (it skips until the game's first save instead of failing).
+
+### New
+- Every module has an `UPGRADES.md` beside its README: the hand steps by version, with LOOK CHANGE on the ones that change sizes or looks, and the Dev Kit a module needs. The module installer prints the steps between the game's version and the new one (in a dry run too), and refuses a module whose checks need a newer Dev Kit, naming the command that updates it.
+- Audio 0.5.0: `audio:check --fix` moves each file's loudness change into the volume setting of the sounds that play it, so a mix tuned by ear sounds the same (Glyphtender: 41 tuned sounds within 0.05 dB). Sounds with several variants share one volume setting, so their variants come out even with each other — a short listen is worth it. Sounds whose files weren't changed keep their setting exactly.
+- Saves 0.7.0: an old save stored as plain text (not JSON) reaches `oldSave` as that text, so a game can carry over values like a tutorial's "done". Golden saves can store plain text too.
+- Lint 0.4.0: the "player words in code" rule no longer flags the refusal reasons a rules check returns through helpers named `check…` or ending in `Problem(s)` (Glyphtender: 31 → 9 finds, every real one kept).
+
+### Fixed
+- Fixed the lint installer putting its comma inside a word when the game's eslint config list had a comment on an earlier line (Glyphtender got `re,actRefresh`, and lint stopped running). Lint 0.3.2.
+
 ## v0.33.0 — 2026-10-29
 
 Cleaner edges. The UI kit's page check now catches words cut off by a card's side, titles running past their card, and lists squeezed to less than two rows — and the kit no longer makes any of them: a full shoot finds nothing in English or the long fake language. Online results in the starter now close with Escape, like the game against the computer.

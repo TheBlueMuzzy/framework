@@ -9,7 +9,7 @@ Reviewed through: framework 0c9c798 (sprint 50, F165–F169 54e4087..0c9c798 + ~
 
 ## Where we are
 Stage: deliver   Milestone: v0.32 Smoother upgrades   Sprint: 50
-Doing: — (v0.34.0 released; next: the Glyphtender catch-up)   Branch: main   Version: 0.33.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.13.1 · table 0.8.2 · UI kit 0.38.0 · Dev Kit 0.28.1 · crashes 0.2.2 · audio 0.4.2 · saves 0.6.6 · version 0.1.3 · lint 0.3.1)
+Doing: — (v0.34.0 released; next: the Glyphtender catch-up)   Branch: main   Version: 0.34.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.13.1 · table 0.8.2 · UI kit 0.38.0 · Dev Kit 0.28.1 · crashes 0.2.2 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
