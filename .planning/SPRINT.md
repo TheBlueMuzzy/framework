@@ -5,11 +5,11 @@ What changes: the lint installer never breaks a game's eslint.config.js; saves a
 
 ## F165 🐞 Lint installer comma
 Done when: install-lint on a config whose list has a `//` comment on an earlier line (Glyphtender's globalIgnores line) puts the comma after the list's last real code, a test red on today's code first.
-- [ ] 🤖 1. A test with Glyphtender's exact config shape (a trailing comment on an earlier line) — red on today's installer — lint/scripts/install-lint.test.mjs
-- [ ] 🤖 2. Find the last real code's position in the original text, not in the comment-stripped copy — lint/scripts/install-lint.mjs
-- [ ] 🤖 3. Lint kit VERSION + README line; lint tests + root check:fast green — lint/kit/VERSION
+- [x] 🤖 1. A test with Glyphtender's exact config shape (a trailing comment on an earlier line) — red on today's installer — lint/scripts/install-lint.test.mjs
+- [x] 🤖 2. Find the last real code's position in the original text, not in the comment-stripped copy — lint/scripts/install-lint.mjs
+- [x] 🤖 3. Lint kit VERSION + README line; lint tests + root check:fast green — lint/kit/VERSION
 Check: the new test red then green; all install-lint tests; root check:fast.
-Checked:
+Checked: 2026-10-30 — 3 new addRules tests red on the old installer (107/110; the Glyphtender one showed `re,actRefresh.configs.vite`) → 110/110 green after the fix (02bb4f3 red, 5659c5f fix); the real games/glyphtender/eslint.config.js run through addRules passes node --check, no `re,act`; root check:fast 24/24. Same pattern searched in every installer + conformance: none (the other comment strippers keep newlines and are used for line numbers or yes/no tests only).
 
 ## F166 🐞 Saves read old plain values
 Done when: createSave's oldSave receives an old value that isn't JSON (Glyphtender's tutorial "done") as its raw text instead of reporting it damaged, and the starter test doesn't turn check:fast red before a game's first createSave; tests red first.

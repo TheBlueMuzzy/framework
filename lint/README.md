@@ -66,3 +66,4 @@ New games start from a starter that already has it, as errors.
   Measured first (sprint 47): 0 finds in the framework and three games today; saves 0.6.4's link-code bug is caught
   at its line.
 - 0.3.1 (F159): the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged.
+- 0.3.2 (F165): the installer's comma goes after the list's last real code even when an earlier line of the list ends in a `//` comment — before, the comment's length moved it into a word (Glyphtender's globalIgnores line gave `re,actRefresh.configs.vite` and a broken eslint.config.js).
