@@ -9,7 +9,7 @@ Reviewed through: framework 8de57bd (sprint 49: F163 042a932..5e79ab7 OnlineScre
 
 ## Where we are
 Stage: deliver   Milestone: v0.31 Cleaner edges   Sprint: 49
-Doing: sprint 49 — F162 Cut-offs the page check misses   Branch: dev/v0-31-cleaner-edges   Version: 0.33.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.13.1 · table 0.8.2 · UI kit 0.38.0 · Dev Kit 0.28.1 · crashes 0.2.2 · audio 0.4.2 · saves 0.6.6 · version 0.1.3 · lint 0.3.1)
+Doing: — (v0.33.0 released; next /sprint)   Branch: main   Version: 0.33.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.13.1 · table 0.8.2 · UI kit 0.38.0 · Dev Kit 0.28.1 · crashes 0.2.2 · audio 0.4.2 · saves 0.6.6 · version 0.1.3 · lint 0.3.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
