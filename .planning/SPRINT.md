@@ -40,12 +40,12 @@ Checked: 2026-10-30 (partial — task 4's check:fast not green yet) — install-
 
 ## F169 🐞 Audio keeps the tuned mix
 Done when: `audio:check --fix` evens a file's loudness and moves the difference into that sound's volumeDb in content/audio.json, so what the player hears stays the same; a game with no volumeDb behaves as today; tests red first.
-- [ ] 🤖 1. Tests: a sound with volumeDb −3 that's 6 dB too loud → file evened, its volumeDb raised by the same 6 dB, heard loudness unchanged — red first — audio/kit/audio-check.test.mjs
-- [ ] 🤖 2. --fix writes the offset into content/audio.json (keeping its layout) and says what it moved — audio/kit/audio-check.mjs
-- [ ] 🤖 3. The check measures heard loudness (file + volumeDb) where a game set one, so a balanced-by-ear mix isn't flagged — audio/kit/loudness.mjs
-- [ ] 🤖 4. Audio kit VERSION + README + UPGRADES line; audio tests + root check:fast + the starter's check:full green — audio/kit/VERSION
+- [x] 🤖 1. Tests: a sound with volumeDb −3 that's 6 dB too loud → file evened, its volumeDb raised by the same 6 dB, heard loudness unchanged — red first — audio/kit/audio-check.test.mjs
+- [x] 🤖 2. --fix writes the offset into content/audio.json (keeping its layout) and says what it moved — audio/kit/audio-check.mjs
+- [x] 🤖 3. The check measures heard loudness (file + volumeDb) where a game set one, so a balanced-by-ear mix isn't flagged — audio/kit/loudness.mjs (built differently — see Notes: the check still judges the file, its words say a tuned sound keeps its in-game level; audio-check.mjs + conformance.mjs)
+- [x] 🤖 4. Audio kit VERSION + README + UPGRADES line; audio tests + root check:fast + the starter's check:full green — audio/kit/VERSION
 Check: new tests red then green; on the Glyphtender scratch copy the heard levels before/after --fix match within 0.5 dB; root check:fast; starter check:full.
-Checked:
+Checked: 2026-10-30 — 8 new tests red on the old audio-check (8 failed / 11 passed, b766508) → green after the fix (46ae7c3) + 1 range test; audio 178/178, tsc + eslint clean (1 old warning in react.ts). Glyphtender (fresh copy of eb032a7's public/audio + content/audio.json in .scratch/framework-f169/gt): --fix changed 21 files and moved 16 volumeDb; heard level (file + volumeDb) of all 41 tuned sounds before → after: worst change per sound 0.05 dB (seed.land −3 → 3, sprout.grow −8 → −12.7, amb.night 0 → −8…); content/audio.json diff = only those 16 numbers (parses). Single variants move up to 2.6 dB (seed.pick) because variants are evened to each other — see Notes. Root check:fast 14/24: all 10 red rows are timeouts only (15 tests, "timed out in 5000/30000/60000ms", CPU busy with the Goops sim); one at a time all green: audio 178, version 29, table 47, emotes 55, rooms 205, lint 121, ai 162, saves 283, devkit 533, ui-kit 924. Starter turn-based check:full ALL PASS 10/10 (1.8 min).
 
 Notes:
 - No open P0/P1 bugs in this repo (no BUGS.md).
@@ -84,4 +84,14 @@ Notes:
   - audio 0.3.1 → 0.4.2, 1 step: 0.4.0 --fix then listen (volumeDb mix) = the report's 1 hand fix + its design risk.
   - ui-kit 0.20.1 → 0.38.0, 11 steps (computed with the same filter — install-module stopped at the kit's own tests: 3 runs, a different browser test timed out each time; each passes alone): 6 LOOK CHANGE (0.38.0, 0.37.2, 0.35.8 lobby rows, 0.35.5 ❤ chip, 0.33.0, 0.21.0 chips) · 0.35.5 + 0.35.7 scroll-driven animation never finishes · 0.35.5 icon glyph box · 0.30.0 old crashes/emotes/ai copies · 0.22.0 non-commercial credits 🔴 = the report's 2 test-harness fixes (shots settle, button wrap) + the taller chips / 4th lobby seat look call.
   - Clone left clean (git status empty): C:\Users\Muzzy\Documents\dev\.scratch\framework-f168\glyphtender.
+- F169 — Audio keeps the tuned mix, decided:
+  - Task 3 not built as written: judging HEARD loudness (file + volumeDb) against the target could never clear — the fix keeps the heard level by design, so a flagged tuned sound would stay flagged forever. The check still judges the FILE (the design rule: files even, mix in volumeDb + buses); the report adds "N of their sounds set their own volumeDb (tuned by ear): --fix moves each file's change into it, so they sound the same in the game", and check:framework's fix hint says the same. After --fix a tuned mix isn't flagged (files even) and sounds as approved. loudness.mjs unchanged.
+  - Who counts as tuned: a sound or music layer with a volumeDb number in the file (0 counts — Glyphtender's amb.night). No volumeDb → not given one, plays at the even level (= before F169).
+  - Variants: one volumeDb covers all of a sound's files, so it moves by their AVERAGE change (an unchanged variant counts 0) — the sound is as loud as before on average; its variants come out even with each other (Glyphtender seed.pick: single files ±2.6 dB, the sound 0.05). Ask Muzzy (on the real Glyphtender pass): listen to seed.pick / seed.drop / no / reveal.bonus, whose variants were 4–5 dB apart before.
+  - A file two sounds play (ui_toggle_flip, the tier.* sounds) moves every tuned sound that plays it.
+  - Range: volumeDb stays in −40…6 (config.ts SOUND_RANGES / LAYER_RANGES); a file whose change would push a volumeDb past it is evened only as far as that allows ("its volumeDb can't go past -40…6 dB, so it went only that far — the rest is for the ear").
+  - The change moved is the MEASURED one (after − before loudness), to 0.1 dB, written after every file (content/audio.json always matches the files if a later file fails). Writing = swap only those number characters in the text (a small walker finds each value's position) — layout, key order, `_help`, one-line layer objects, CRLF all kept; tested on a copy of Glyphtender's real audio.json (audio/kit/glyphtender-audio.test.json — `.test.` so the installer never copies it).
+  - fixSounds now returns { changes, moves } (only main used it).
+  - A game that already ran 0.4.x's --fix (only the .scratch catch-up copy so far): UPGRADES 0.5.0 says put audio-originals/ back, delete it, run --fix again.
+  - Kit 0.5.0 (minor: --fix now writes content/audio.json). The starter's own src/audio stays 0.4.x until its milestone (F156); check:fast's "starter (fresh modules)" ran 0.5.0, green.
 Retro:
