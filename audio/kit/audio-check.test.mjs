@@ -4,10 +4,11 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { formatTable, listSounds, main, originalOf, summarize } from './audio-check.mjs'
-import { DEFAULT_LOUDNESS, findFfmpeg } from './loudness.mjs'
+import { changeLimits, formatTable, listSounds, main, originalOf, setJsonNumbers, summarize, tunedSounds, volumeMoves } from './audio-check.mjs'
+import { DEFAULT_LOUDNESS, findFfmpeg, measureFile } from './loudness.mjs'
 
 const ffmpeg = findFfmpeg()
 if (!ffmpeg) console.log('ffmpeg is not installed — the full audio-check run is skipped (winget install Gyan.FFmpeg · brew install ffmpeg)')
@@ -164,4 +165,135 @@ describe('the command', () => {
     expect(said.join('\n')).toMatch(/ui_test_ok_01\.mp3 .*[78]\.\d dB too loud/)
     expect(said.join('\n')).toContain('±2')
   }, 30000)
+})
+
+// F169: a game that balanced its mix by ear (a sound's own volumeDb) keeps it — --fix moves each file's change into
+// the volumeDb of the sounds that play it, so what the player hears stays the same.
+describe('keeping the tuned mix', () => {
+  // Glyphtender's real content/audio.json (2026-10-30, eb032a7): the layout every edit must keep
+  const glyphtenderText = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'glyphtender-audio.test.json'), 'utf8')
+  const glyphtender = JSON.parse(glyphtenderText)
+
+  it('finds every sound and music layer that sets its own volumeDb, with its files; a sound without one is left out', () => {
+    const tuned = tunedSounds({
+      sounds: {
+        'seed.land': { files: ['sfx/a_01.mp3', 'sfx/a_02.mp3'], volumeDb: -3 },
+        'plain': { files: ['sfx/b_01.mp3'] },
+        'zero': { files: ['sfx/c_01.mp3'], volumeDb: 0 },
+        '_note': { files: ['sfx/d_01.mp3'], volumeDb: -2 },
+      },
+      music: { tracks: { garden: { layers: { harp: { file: 'mus/harp.mp3', volumeDb: -2 }, pad: { files: ['mus/pad.mp3'], volumeDb: -8 }, bells: { file: 'mus/bells.mp3' } } } } },
+    })
+    expect(tuned.map((s) => [s.name, s.path, s.volumeDb, s.files])).toEqual([
+      ['seed.land', ['sounds', 'seed.land', 'volumeDb'], -3, ['sfx/a_01.mp3', 'sfx/a_02.mp3']],
+      ['zero', ['sounds', 'zero', 'volumeDb'], 0, ['sfx/c_01.mp3']],
+      ['music garden · harp', ['music', 'tracks', 'garden', 'layers', 'harp', 'volumeDb'], -2, ['mus/harp.mp3']],
+      ['music garden · pad', ['music', 'tracks', 'garden', 'layers', 'pad', 'volumeDb'], -8, ['mus/pad.mp3']],
+    ])
+    expect(tunedSounds(null)).toEqual([])
+    expect(tunedSounds(glyphtender).find((s) => s.name === 'sprout.grow')).toMatchObject({ volumeDb: -8, files: ['sfx/sfx_sprout_leaf_01.mp3', 'sfx/sfx_sprout_leaf_02.mp3'] })
+  })
+
+  it('a sound with volumeDb -3 whose file is evened 6 dB down gets volumeDb +3 — heard the same', () => {
+    const tuned = tunedSounds({ sounds: { 'seed.land': { files: ['sfx/land_01.mp3'], volumeDb: -3 } } })
+    expect(volumeMoves(tuned, { 'sfx/land_01.mp3': -6 })).toEqual([{ name: 'seed.land', path: ['sounds', 'seed.land', 'volumeDb'], from: -3, to: 3, byDb: 6 }])
+    expect(volumeMoves(tuned, {})).toEqual([]) // nothing changed: nothing moves
+  })
+
+  it("variants: the sound moves by its files' average change (an unchanged variant counts as 0), so it sounds as loud on average", () => {
+    const tuned = tunedSounds({ sounds: { 'seed.land': { files: ['sfx/l_01.mp3', 'sfx/l_02.mp3'], volumeDb: -3 }, 'step': { files: ['sfx/s_01.mp3', 'sfx/s_02.mp3'], volumeDb: -8 } } })
+    expect(volumeMoves(tuned, { 'sfx/l_01.mp3': -6, 'sfx/l_02.mp3': -5 }).map((m) => [m.name, m.to])).toEqual([['seed.land', 2.5]])
+    expect(volumeMoves(tuned, { 'sfx/s_01.mp3': 13 }).map((m) => [m.name, m.to])).toEqual([['step', -14.5]])
+  })
+
+  it("a file two sounds play moves both their volumeDb; a sound with no volumeDb of its own isn't given one", () => {
+    const tuned = tunedSounds({ sounds: {
+      'ui.toggle.on': { files: ['ui/flip.mp3'], volumeDb: -6 }, 'ui.toggle.off': { files: ['ui/flip.mp3'], volumeDb: -6 }, 'other': { files: ['ui/flip.mp3'] },
+    } })
+    expect(volumeMoves(tuned, { 'ui/flip.mp3': 4.3 }).map((m) => [m.name, m.to])).toEqual([['ui.toggle.on', -10.3], ['ui.toggle.off', -10.3]])
+  })
+
+  it("how far a file may change so every volumeDb that plays it stays in -40…6 (the Dev Kit's range)", () => {
+    const tuned = tunedSounds({ sounds: { a: { files: ['sfx/x.mp3'], volumeDb: 0 }, b: { files: ['sfx/x.mp3'], volumeDb: -38 }, c: { files: ['sfx/y.mp3'] } } })
+    expect(changeLimits(tuned, 'sfx/x.mp3')).toEqual({ lowestDb: -6, highestDb: 2 }) // a can rise to +6; b can fall to -40
+    expect(changeLimits(tuned, 'sfx/y.mp3')).toEqual({ lowestDb: -Infinity, highestDb: Infinity }) // nobody's tuned mix
+  })
+
+  it('writes only the numbers it changes — every other byte of the file (layout, order, notes, one-line objects) stays', () => {
+    const edits = [
+      { path: ['sounds', 'seed.land', 'volumeDb'], value: 3 },
+      { path: ['sounds', 'sprout.grow', 'volumeDb'], value: -21.4 },
+      { path: ['music', 'tracks', 'garden', 'layers', 'pad', 'volumeDb'], value: -2.5 },
+    ]
+    const text = setJsonNumbers(glyphtenderText, edits)
+    const expected = structuredClone(glyphtender)
+    expected.sounds['seed.land'].volumeDb = 3
+    expected.sounds['sprout.grow'].volumeDb = -21.4
+    expected.music.tracks.garden.layers.pad.volumeDb = -2.5
+    expect(JSON.parse(text)).toEqual(expected)
+    const before = glyphtenderText.split('\n')
+    const after = text.split('\n')
+    expect(after.length).toBe(before.length)
+    const differ = before.map((line, i) => [line, after[i]]).filter(([a, b]) => a !== b)
+    expect(differ).toEqual([
+      ['      "volumeDb": -3,', '      "volumeDb": 3,'],
+      ['      "volumeDb": -8,', '      "volumeDb": -21.4,'],
+      ['          "pad": { "file": "mus/mus_garden_pad_loop.mp3", "volumeDb": -8 },', '          "pad": { "file": "mus/mus_garden_pad_loop.mp3", "volumeDb": -2.5 },'],
+    ])
+    // the -8 that changed is sprout.grow's, not one of the other -8s
+    expect(after.indexOf('      "volumeDb": -21.4,')).toBeGreaterThan(after.indexOf('    "sprout.grow": {'))
+    expect(after.indexOf('      "volumeDb": -21.4,')).toBeLessThan(after.indexOf('    "score.pop": {'))
+    expect(setJsonNumbers(glyphtenderText, [])).toBe(glyphtenderText)
+  })
+
+  it("keeps Windows line endings, and refuses a path that isn't a number", () => {
+    const crlf = '{\r\n  "sounds": {\r\n    "a": { "files": ["sfx/a.mp3"], "volumeDb": -6 }\r\n  }\r\n}\r\n'
+    expect(setJsonNumbers(crlf, [{ path: ['sounds', 'a', 'volumeDb'], value: 0.5 }])).toBe(crlf.replace('-6', '0.5'))
+    expect(() => setJsonNumbers(crlf, [{ path: ['sounds', 'b', 'volumeDb'], value: 1 }])).toThrow(/sounds\.b\.volumeDb/)
+    expect(() => setJsonNumbers(crlf, [{ path: ['sounds', 'a', 'files'], value: 1 }])).toThrow(/not a number/)
+  })
+
+  it.skipIf(!ffmpeg)("--fix: a sound with volumeDb -3 that's 6 dB too loud → file evened, its volumeDb raised by 6, heard the same; a sound without volumeDb as before", async () => {
+    const make = (path, amplitude) => {
+      mkdirSync(join(game, path, '..'), { recursive: true })
+      execFileSync(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `aevalsrc=${amplitude}*sin(2*PI*800*t):s=44100:d=0.4`, '-ac', '1', '-c:a', 'pcm_s16le', join(game, path)])
+    }
+    make('public/audio/sfx/sfx_land_01.wav', 0.354) // RMS ≈ -12: 6 dB over -18
+    make('public/audio/sfx/sfx_plain_01.wav', 0.354)
+    const json = [
+      '{',
+      '  "_help": { "sounds.land": "The seed lands." },',
+      '  "sounds": {',
+      '    "land": { "files": ["sfx/sfx_land_01.wav"], "volumeDb": -3 },',
+      '    "plain": {',
+      '      "files": ["sfx/sfx_plain_01.wav"]',
+      '    }',
+      '  }',
+      '}',
+      '',
+    ].join('\n')
+    put('content/audio.json', json)
+    const said = []
+    const log = (l) => said.push(l)
+    expect(await main(['--fix', game], { log })).toBe(0)
+    const text = said.join('\n')
+    const after = readFileSync(join(game, 'content/audio.json'), 'utf8')
+    const moved = JSON.parse(after).sounds.land.volumeDb
+    expect(moved).toBeGreaterThan(2.4)
+    expect(moved).toBeLessThan(3.6)
+    expect(after).toBe(json.replace('"volumeDb": -3', `"volumeDb": ${moved}`)) // only that number changed
+    expect(JSON.parse(after).sounds.plain.volumeDb).toBeUndefined() // no volumeDb of its own: none given, as today
+    expect(text).toContain('content/audio.json: volumeDb moved so the game sounds the same')
+    expect(text).toContain(`land: -3 → ${moved} dB`)
+    // heard = the file + volumeDb: the same as before (within 0.5 dB), and the file itself is even
+    const land = await measureFile(ffmpeg, join(game, 'public/audio/sfx/sfx_land_01.wav'), 'sfx')
+    const landBefore = await measureFile(ffmpeg, join(game, 'audio-originals/sfx/sfx_land_01.wav'), 'sfx')
+    expect(Math.abs((land.loudnessDb + moved) - (landBefore.loudnessDb - 3))).toBeLessThan(0.5)
+    expect(Math.abs(land.loudnessDb + 18)).toBeLessThan(0.5)
+    // a second run: all even, nothing moves again
+    said.length = 0
+    expect(await main(['--fix', game], { log })).toBe(0)
+    expect(readFileSync(join(game, 'content/audio.json'), 'utf8')).toBe(after)
+    expect(said.join('\n')).not.toContain('volumeDb moved')
+  }, 60000)
 })
