@@ -482,6 +482,7 @@ flowchart LR
 ```
 
 ## Later
+- 💤 F170 🐞 Starter online test race — the starter's e2e/online.mjs went red on GitHub a 3rd time and passed on a re-run (2026-10-30, run 41052406220: "Play again left the results up" and "Back on B's online results left the game's page (about:blank)"; before: v0.31.0 main + F161's branch, 2026-10-27) — find the race on a slow runner (likely the results' screen-stack open/close vs the rematch arriving), fix it, prove it with repeated runs — should
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
