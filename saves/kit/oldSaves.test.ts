@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenFileName, goldenSavesFor, goldenVersionOf, makeGoldenSave, missingGoldenVersions,
+  checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenFileName, goldenSavesFor, goldenVersionOf, makeGoldenSave, missingGoldenVersions, savesInCode,
 } from './oldSaves'
 import { createRun, type Run } from './run'
 import { createSave, type Save } from './saves'
@@ -26,6 +26,16 @@ describe('golden save files', () => {
   it('missing versions are named; several files for one version count once', () => {
     expect(missingGoldenVersions('a:b', 3, ['a_b-v1.json', 'a_b-v1-old.json', 'a_b-v3.json'])).toEqual([2])
     expect(missingGoldenVersions('a:b', 1, [])).toEqual([1])
+  })
+
+  it('savesInCode names the game files that make a save or a run — a comment or another word doesn\'t count (F166)', () => {
+    const files = {
+      '../../src/progress/save.ts': "export const progressSave = createSave<Progress>({ key: 'goops-progress', kind: 'progress', version: 1, fresh })",
+      '../../src/game/run.ts': 'export const matchRun = createRun({ key: "x:run", version: 1, fresh })',
+      '../../src/ui/menu.ts': '// later: createSave({ … })\n/* createRun( */ const recreateSave = 1',
+    }
+    expect(savesInCode(files)).toEqual(['../../src/progress/save.ts', '../../src/game/run.ts'])
+    expect(savesInCode({})).toEqual([])
   })
 
   it('goldenSavesFor picks this save\'s files, oldest version first', () => {

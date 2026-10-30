@@ -56,6 +56,16 @@ export function missingGoldenVersions(key: string, version: number, fileNames: s
   return Array.from({ length: version }, (_, i) => i + 1).filter((v) => !have.has(v))
 }
 
+/** The game's files (path → text) that make a save or a run (createSave / createRun outside a comment) — so the game's
+ *  test can tell "no saves yet" (skipped) from "saves made but not listed" (fails). The same call check:framework
+ *  finds (conformance.mjs findSaves). */
+export function savesInCode(files: Record<string, unknown>): string[] {
+  const withoutComments = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, '')
+  return Object.entries(files)
+    .filter(([, text]) => typeof text === 'string' && /\bcreate(Save|Run)\s*(<[^>]*>)?\s*\(/.test(withoutComments(text)))
+    .map(([path]) => path)
+}
+
 /** This save's golden files out of every file found (e.g. import.meta.glob('./*.json', { eager: true, import: 'default' })). */
 export function goldenSavesFor(key: string, files: Record<string, unknown>): { file: string; version: number; golden: GoldenSave }[] {
   return Object.entries(files)
