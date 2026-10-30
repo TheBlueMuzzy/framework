@@ -23,7 +23,7 @@ Checked: 2026-10-30 — 6 new plain-text tests: 3 red on the old code (15/18 —
 ## F167 🐞 Lint knows rule messages
 Done when: no-player-text doesn't flag the refusal reasons a rules check returns through helpers (checkDraft / checkFor / checkAction…), a test red first, and the Glyphtender scratch copy's ~23 refusal-reason finds go to 0 while its ~8 real ones stay.
 - [x] 🤖 1. Tests: a rules check split into check* helpers that return string | null — red first; a non-check function's words still flagged — lint/kit/rules.test.mjs
-- [ ] 🤖 2. Exempt functions named check* (and what the rules' check calls) — lint/kit/rules.mjs
+- [x] 🤖 2. Exempt functions named check* (and what the rules' check calls) — lint/kit/rules.mjs
 - [ ] 🤖 3. Run lint on ~/Documents/dev/.scratch/glyphtender-catchup (read-only): finds before → after in Notes — lint/kit/rules.mjs
 - [ ] 🤖 4. Lint kit VERSION + README line; lint tests + root check:fast green — lint/kit/VERSION
 Check: new tests red then green; the scratch copy's refusal-reason finds 23 → 0, real finds kept; root check:fast.
