@@ -275,6 +275,10 @@ describe('keeping the tuned mix', () => {
     put('content/audio.json', json)
     const said = []
     const log = (l) => said.push(l)
+    // the report says the tuned sound keeps its in-game level (it's the file that's off, not the mix)
+    expect(await main([game], { log })).toBe(0)
+    expect(said.join('\n')).toContain("1 of their sounds set their own volumeDb (tuned by ear): --fix moves each file's change into it, so they sound the same in the game.")
+    said.length = 0
     expect(await main(['--fix', game], { log })).toBe(0)
     const text = said.join('\n')
     const after = readFileSync(join(game, 'content/audio.json'), 'utf8')
