@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-30 — **Sprint 50 (v0.32 Smoother upgrades) planned with Muzzy: F165 — Lint installer comma, F166 — Saves read old plain values, F167 — Lint knows rule messages, F168 — Upgrade notes + install order, F169 — Audio keeps the tuned mix. Next: /develop F165 task 1 on dev/v0-32-smoother-upgrades. Then the Glyphtender catch-up (Muzzy: framework first; bots stay silent).** Rehearsal report: .planning/research/2026-10-29-glyphtender-catchup.md; scratch copy ~/Documents/dev/.scratch/glyphtender-catchup.
+2026-10-30 02:00 — **AUTO MODE (Muzzy asleep): Sprint 50 (v0.32 Smoother upgrades). Built: F165 — Lint installer comma, F166 — Saves read old plain values, F167 — Lint knows rule messages, F168 — Upgrade notes + install order (task 4's root check:fast pending: red only on timeouts while Goops' economy sim ran at ~86% CPU — re-run when quiet). Building: F169 — Audio keeps the tuned mix (helper). Then: root check:fast + starter check:full on a quiet PC, review, Reviewed through, retro draft. /deliver waits for Muzzy.** Rehearsal report: .planning/research/2026-10-29-glyphtender-catchup.md.
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
