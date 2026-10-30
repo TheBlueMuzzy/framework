@@ -45,4 +45,7 @@ Notes:
   - clipped by .gallery-game (Idle warning + bot, – / 6; Countdown's "3", 1 / 1): the Idle card is a popover (top layer: no box clips it), the "3" is measured by its line box, not its ink — the rule's own mistakes.
   - clipped by its card's side (fake language): Settings' title (Pixel 200% upright, the task-4 case), the art Game over's "Try again" (200% upright).
   - parts page at 200% in the fake language (below the first screenful): 2 split words ("Buttons", the "Display" title) and 2 carousel slides cut off by the carousel's view.
-Retro:
+Retro: (drafted by Claude from the Notes — Muzzy was travelling; his words win)
+- went well: red-first tests sent both F162 fixes to their real causes (the 4rem list floor, not online.tsx; a card title never breaking, not frontend.tsx); the full shoot with the new rules found 5 more kit problems and 6 false finds in the check itself — all fixed with tests.
+- went wrong: the PC crashed on 10-28 mid-sprint and both helpers died; F163 had committed everything, F162 had a half-done task 4 uncommitted, and its task-1 measurement notes lived only in its head — a fresh helper rebuilt them from its commit messages.
+- change: a helper writes its findings into SPRINT Notes and commits them as it goes (not only in its final report), so a crash loses nothing.
