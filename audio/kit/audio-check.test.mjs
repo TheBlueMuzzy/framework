@@ -296,4 +296,18 @@ describe('keeping the tuned mix', () => {
     expect(readFileSync(join(game, 'content/audio.json'), 'utf8')).toBe(after)
     expect(said.join('\n')).not.toContain('volumeDb moved')
   }, 60000)
+
+  it.skipIf(!ffmpeg)("--fix goes only as far as a volumeDb's range lets it: +4 can take 2 dB more, so a file 6 dB too loud comes down 2", async () => {
+    mkdirSync(join(game, 'public/audio/sfx'), { recursive: true })
+    execFileSync(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'aevalsrc=0.354*sin(2*PI*800*t):s=44100:d=0.4', '-ac', '1', '-c:a', 'pcm_s16le', join(game, 'public/audio/sfx/sfx_hot_01.wav')])
+    put('content/audio.json', JSON.stringify({ sounds: { hot: { files: ['sfx/sfx_hot_01.wav'], volumeDb: 4 } } }, null, 2))
+    const said = []
+    expect(await main(['--fix', game], { log: (l) => said.push(l) })).toBe(0)
+    const text = said.join('\n')
+    expect(text).toMatch(/sfx_hot_01\.wav: -12\.\d → -1[34]\.\d dB .*its volumeDb can't go past -40…6 dB/)
+    expect(text).toMatch(/still: [34]\.\d dB too loud/)
+    const volumeDb = JSON.parse(readFileSync(join(game, 'content/audio.json'), 'utf8')).sounds.hot.volumeDb
+    expect(volumeDb).toBeGreaterThan(5.4)
+    expect(volumeDb).toBeLessThanOrEqual(6)
+  }, 60000)
 })
