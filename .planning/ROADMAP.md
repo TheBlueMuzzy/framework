@@ -482,6 +482,8 @@ flowchart LR
 ```
 
 ## Later
+- 💤 F171 🔧 Checks notice a busy PC — when check:fast fails only on timeouts, say "timeouts only — the PC is busy (name the busiest process)" and re-run those modules one at a time instead of reporting red (v0.32 look-back: another chat's bot sims held the CPU all night; every run went 11–14/24 red on timeouts and each module had to be proven alone by hand) — should
+- 💤 F172 🔧 Planner publish recognised from any chat — stop-plan-check only counts a publish by the Artifact tool; a chat opened outside the project publishes through the artifacts connector from a scratchpad copy and had to write .git/bmuz-ppp-published by hand three times (v0.32 look-back) — count a publish to the project's planner slug however it was sent — could
 - 💤 F170 🐞 Starter online test race — the starter's e2e/online.mjs went red on GitHub a 3rd time and passed on a re-run (2026-10-30, run 41052406220: "Play again left the results up" and "Back on B's online results left the game's page (about:blank)"; before: v0.31.0 main + F161's branch, 2026-10-27) — find the race on a slow runner (likely the results' screen-stack open/close vs the rematch arriving), fix it, prove it with repeated runs — should
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
