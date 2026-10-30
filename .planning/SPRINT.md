@@ -31,7 +31,7 @@ Checked: 2026-10-30 — 6 new "not flagged" tests red on the old rule (115/121),
 
 ## F168 🔧 Upgrade notes + install order
 Done when: each module has an UPGRADES.md of hand steps by version (LOOK CHANGE marked), install-module prints the steps between the game's version and the new one, and refuses (with the fix) a module whose checks need a newer Dev Kit than the game has; tests cover both.
-- [ ] 🤖 1. Each module's kit/UPGRADES.md: "<version>: <hand step>" lines, filled from the Glyphtender report + the root CHANGELOG (audio 0.4.0 --fix, ai 0.5.0 chattiness, rooms OnlineRoom fields, ui-kit taller chips = LOOK CHANGE…) — audio/kit/VERSION
+- [x] 🤖 1. Each module's UPGRADES.md (beside its README, not in kit/ — installers copy kit/ into games): "<version>: <hand step>" lines, filled from the Glyphtender report + the root CHANGELOG (audio 0.4.0 --fix, ai 0.5.0 chattiness, rooms OnlineRoom fields, ui-kit taller chips = LOOK CHANGE…) — audio/kit/VERSION
 - [ ] 🤖 2. Tests red first: steps since the game's version are printed; a module needing Dev Kit ≥ X refuses on an older Dev Kit with "update devkit first" — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 - [ ] 🤖 3. Build both in install-module (a module says its minimum Dev Kit in its UPGRADES.md) — ~/.claude/config/bmuz/scripts/install-module.mjs
 - [ ] 🤖 4. Dry run against a fresh read-only clone of the real Glyphtender (its ORIGINAL versions) prints the right steps and refuses ai before devkit; script tests + root check:fast green — ~/.claude/config/bmuz/scripts/install-module.mjs
