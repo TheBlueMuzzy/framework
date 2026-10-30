@@ -213,6 +213,22 @@ describe('keeping the tuned mix', () => {
     expect(volumeMoves(tuned, { 'ui/flip.mp3': 4.3 }).map((m) => [m.name, m.to])).toEqual([['ui.toggle.on', -10.3], ['ui.toggle.off', -10.3]])
   })
 
+  it('a sound none of whose files changed keeps its volumeDb exactly — not rounded, not pulled into range (review)', () => {
+    const text = [
+      '{',
+      '  "sounds": {',
+      '    "fixed": { "files": ["sfx/fixed.mp3"], "volumeDb": -3 },',
+      '    "fine": { "files": ["sfx/fine.mp3"], "volumeDb": -3.25 },',
+      '    "hot": { "files": ["sfx/hot.mp3"], "volumeDb": 8 }',
+      '  }',
+      '}',
+      '',
+    ].join('\n')
+    const moves = volumeMoves(tunedSounds(JSON.parse(text)), { 'sfx/fixed.mp3': -6 })
+    expect(moves.map((m) => m.name)).toEqual(['fixed'])
+    expect(setJsonNumbers(text, moves.map((m) => ({ path: m.path, value: m.to })))).toBe(text.replace('"volumeDb": -3 ', '"volumeDb": 3 '))
+  })
+
   it("how far a file may change so every volumeDb that plays it stays in -40…6 (the Dev Kit's range)", () => {
     const tuned = tunedSounds({ sounds: { a: { files: ['sfx/x.mp3'], volumeDb: 0 }, b: { files: ['sfx/x.mp3'], volumeDb: -38 }, c: { files: ['sfx/y.mp3'] } } })
     expect(changeLimits(tuned, 'sfx/x.mp3')).toEqual({ lowestDb: -6, highestDb: 2 }) // a can rise to +6; b can fall to -40
