@@ -92,6 +92,7 @@ Notes:
   - Range: volumeDb stays in −40…6 (config.ts SOUND_RANGES / LAYER_RANGES); a file whose change would push a volumeDb past it is evened only as far as that allows ("its volumeDb can't go past -40…6 dB, so it went only that far — the rest is for the ear").
   - The change moved is the MEASURED one (after − before loudness), to 0.1 dB, written after every file (content/audio.json always matches the files if a later file fails). Writing = swap only those number characters in the text (a small walker finds each value's position) — layout, key order, `_help`, one-line layer objects, CRLF all kept; tested on a copy of Glyphtender's real audio.json (audio/kit/glyphtender-audio.test.json — `.test.` so the installer never copies it).
   - fixSounds now returns { changes, moves } (only main used it).
+  - Review fix (0e4ccfe red → a22f918): volumeMoves skipped no sound, so once any file was fixed an UNTOUCHED sound's volumeDb was rounded (-3.25 → -3.2) or clamped (8 → 6) and printed as "moved". Now a sound none of whose files changed is left exactly as written; a changed sound's own 0.1 dB rounding / range clamp stays (≤0.05 dB heard; the clamp only meets what config.ts plays anyway). Audio 179/179.
   - A game that already ran 0.4.x's --fix (only the .scratch catch-up copy so far): UPGRADES 0.5.0 says put audio-originals/ back, delete it, run --fix again.
   - Kit 0.5.0 (minor: --fix now writes content/audio.json). The starter's own src/audio stays 0.4.x until its milestone (F156); check:fast's "starter (fresh modules)" ran 0.5.0, green.
 Retro:
