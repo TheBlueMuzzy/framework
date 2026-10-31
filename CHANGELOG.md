@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### New
+- UI kit 0.39.0: the teaching bubble (Callout) has colours of its own — `callout`, `on-callout`, `callout-border` — so a game can make tutorial and tip bubbles stand out from its panels. Every look starts them at its panel colours, so nothing changes until a game picks its own (Glyphtender: a light bubble with dark words and outline, on its dark garden). Dev Kit 0.28.2's Color tab lists them as "Tip bubbles", and skips them for a game on an older kit.
+
 ## v0.34.0 — 2026-10-30
 
 Smoother upgrades. Bringing a game up to today's framework no longer needs hand fixes for what the Glyphtender rehearsal ran into: the module installer now prints the hand steps since the game's version and refuses a module that needs a newer Dev Kit, and the audio fix keeps a mix tuned by ear sounding the same.

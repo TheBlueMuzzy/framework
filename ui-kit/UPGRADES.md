@@ -3,6 +3,7 @@
 Hand steps a game does when it updates this module, newest first. `install-module.mjs` prints the ones between the game's version and the new one.
 Format: `- <version>: <step>` (LOOK CHANGE = sizes or looks change: re-take the game's screenshots and show Muzzy before re-recording them) · `Needs Dev Kit: <version>` = the install is refused on an older Dev Kit.
 
+- 0.39.0: three new style colours for the teaching bubble (Callout — tutorials, tips): `callout`, `on-callout`, `callout-border`. Every preset sets them to its panel colours, so nothing changes until a game sets them in content/ui/style.json `tweaks` (the Dev Kit's Color tab lists them from Dev Kit 0.28.2). A game test that reads the bubble's colours from `--surface` reads `--callout` now.
 - 0.38.0: LOOK CHANGE — a scroll list in a card keeps room for two of its own rows (or 4rem), else the whole card scrolls; a menu title too wide even at heading size drops to body size on its own line.
 - 0.37.2: LOOK CHANGE — badges get room above and below their words; a chip's detail numbers are all one width.
 - 0.35.8: LOOK CHANGE — avatars in list rows (Results, end screens, the Lobby room's players) keep room for the winner ring: rows a little taller, names 0.3125rem further right. A game with its own "N rows in view" rule can lose a row on a short screen (Glyphtender: 3 of 4 lobby seats at 768×343).

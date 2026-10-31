@@ -9,6 +9,7 @@ const textPairs: [text: string, background: string][] = [
   ['on-bg', 'bg'], ['on-surface', 'surface'], ['on-primary', 'primary'], ['on-danger', 'danger'], ['on-success', 'success'],
   ['muted', 'surface'], ['muted', 'bg'], // captions, hints and inactive tabs sit on both
   ['on-game', 'game-shade'], ['accent', 'game-shade'], // HUD text on the game: its shadow is what it reads against
+  ['on-callout', 'callout'], // the teaching bubble's words (0.39.0)
 ]
 // success is also a card's edge (Card tone="success", 0.27.0): a shape on the card's surface
 const shapePairs: [shape: string, background: string][] = [['focus', 'bg'], ['focus', 'surface'], ['success', 'surface']]
