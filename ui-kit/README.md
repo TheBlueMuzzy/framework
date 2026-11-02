@@ -461,6 +461,7 @@ gallery's `npm run shoot` uses the same one.
     size, its own line); a Card title's word wider than its card breaks inside it; a Carousel slide is never wider than
     its window; Lobby join on its side keeps your name + Create at least their widest word (Join moves under the code
     boxes when both won't fit); a scroll list's room is never more than half the gap it sits in.
+- 0.39.0: the teaching bubble (Callout — tutorials, tips) has colours of its own — `callout`, `on-callout`, `callout-border`. Every look starts them at its panel colours, so nothing changes until a game sets them in content/ui/style.json `tweaks` (UPGRADES.md).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
