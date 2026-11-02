@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-10-30 — **Released v0.34.0 (v0.32 Smoother upgrades) — next: the Glyphtender catch-up (/sprint in Glyphtender, from .planning/research/2026-10-29-glyphtender-catchup.md).** install-module prints each module's hand steps (UPGRADES.md) and refuses a module needing a newer Dev Kit; audio --fix keeps a tuned mix; saves adopt plain-text old values; lint's installer comma + rule-message false alarms fixed. Glyphtender: after its audio update, listen to seed.pick, seed.drop, no and reveal.bonus (variants evened).
+2026-11-02 — **rooms 0.14.0 merged into main (unreleased) — bots wait in a match nobody is connected to + `bot:` ids refused (Glyphtender v0.13.0, live). Also on main since v0.34.0: UI kit 0.39.0 + Dev Kit 0.28.2 (tip-bubble colours) and their README notes. Next: /deliver a framework update (v0.34.1 or a milestone), then the Ideas from 2026-11-02 (stop-plan-check deploy wait — Muzzy said yes, needs his hand; handoff-check's project; crash maps by script; check-all port pre-flight).** (Before: **Released v0.34.0 (v0.32 Smoother upgrades) — next: the Gly…)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
