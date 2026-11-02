@@ -43,6 +43,12 @@ describe('protocol: checking what players send', () => {
     expect(send({ type: 'join', name: 'Sam', persistentId: 'abcdefgh12345678' })).toBeNull()
   })
 
+  it('a persistentId that starts "bot:" is refused — it would own a bot seat the host added (0.14.0, security review)', () => {
+    expect(send({ type: 'join', name: 'Sam', persistentId: 'bot:1234567', create: false })).toBeNull()
+    expect(send({ type: 'join', name: 'Sam', persistentId: 'bot:1234567', create: false, rejoin: true })).toBeNull()
+    expect(send({ type: 'join', name: 'Sam', persistentId: 'robot:12345678', create: false })).not.toBeNull() // (only the prefix)
+  })
+
   it('refuses huge messages unread', () => {
     expect(send({ type: 'action', action: 'x'.repeat(MAX_MESSAGE_LENGTH) })).toBeNull()
   })
