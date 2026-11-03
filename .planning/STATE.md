@@ -9,7 +9,7 @@ Reviewed through: framework 61c418f (sprint 51, d6e6a5d..61c418f — see each fe
 
 ## Where we are
 Stage: deliver   Milestone: v0.33 Releases that don't need babysitting   Sprint: 51
-Doing: — (Sprint 51 done; next /deliver)   Branch: dev/v0-33-releases   Version: 0.34.1 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.2.2 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
+Doing: — (Sprint 51 done; next /deliver)   Branch: dev/v0-33-releases   Version: 0.35.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

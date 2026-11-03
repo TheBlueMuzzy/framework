@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.34.1",
-  "build": 12,
+  "version": "0.35.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -222,6 +222,11 @@
       "version": "0.34.1",
       "date": "2026-11-03",
       "summary": "rooms 0.14.0 — a match everyone left waits; UI kit 0.39.0 + Dev Kit 0.28.2 — tip-bubble colours"
+    },
+    {
+      "version": "0.35.0",
+      "date": "2026-11-03",
+      "summary": "Releases that don't need babysitting: crash maps only from the release build; slow-test warning in the starter"
     }
   ]
 }

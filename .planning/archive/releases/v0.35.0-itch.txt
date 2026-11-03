@@ -1,0 +1,11 @@
+v0.35.0 — 2026-11-03
+
+Releases that don't need babysitting. Crash maps now come only from the real release build, so test runs leave nothing behind, and the BMUZ release tools build and check them against the live page by themselves. The starter game also warns about slow unit tests that are likely to time out on GitHub.
+
+BREAKING
+• Crashes 0.3.0: only a build marked CRASHES_MAPS=release files crash maps under releases/<version>/maps/. The BMUZ release script sets it, with the deploy workflow's settings, right after the release commit. A game that rebuilt its maps by hand at release (e.g. NODE_ENV=production VITE_PARTY_HOST=… npm run build) drops that step.
+• Crashes 0.3.0: check and e2e builds now put their maps in node_modules/.cache/crashes-maps/. Delete any untracked releases/*/maps folders left by older check builds (git clean -n releases first to see them).
+
+NEW
+• Crashes 0.3.0: crash maps from test runs never end up in releases/ again, and never ship.
+• Starter game: its fast check lists unit tests that took over 1 s with no time limit of their own. GitHub's runner measured about 4× slower than the PC, so these may time out there. It's a warning only, never a failure. Games get the same warning by copying the BMUZ check-all template's slow-tests.mjs.
