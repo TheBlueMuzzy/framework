@@ -1,6 +1,6 @@
 {
   "name": "Game Framework",
-  "version": "0.34.0",
+  "version": "0.34.1",
   "build": 0,
   "history": [
     {
@@ -217,6 +217,11 @@
       "version": "0.34.0",
       "date": "2026-10-30",
       "summary": "Smoother upgrades"
+    },
+    {
+      "version": "0.34.1",
+      "date": "2026-11-03",
+      "summary": "rooms 0.14.0 — a match everyone left waits; UI kit 0.39.0 + Dev Kit 0.28.2 — tip-bubble colours"
     }
   ]
 }

@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.34.1 — 2026-11-03
+
+An online match that everyone has left now waits for its players: no bot moves, no turn clock, and nothing written to storage until someone comes back. Tip and tutorial bubbles also get colours of their own, so a game can make them stand out from its panels.
+
+### Breaking
+- Rooms 0.14.0: a game that keeps a timer's end time in its state (e.g. `turnEndsAt` for its screens) adds `rules.onResume(state, room, timersEndAt)` and returns the state with that time moved (`timersEndAt.turn`). Without it, the screens show an end time that has already passed after a wait.
+- Rooms 0.14.0: an e2e or test that expects bots to play out a match nobody is connected to keeps one player connected, or expects the wait.
+
+### New
+- Rooms 0.14.0: a match being played with nobody connected waits. The game's timers and the "away → bot takes over" timers are held, and each goes on for the time it had left when the first player is back. The match's own expiry (keepMatchDays, keepUnplayedMatchHours) keeps counting. A held match survives a server restart still held, and sets no storage alarm.
+- UI kit 0.39.0: three new style colours for tip / tutorial bubbles: `callout`, `on-callout`, `callout-border`. Every preset sets them to its panel colours, so nothing changes until a game sets them in content/ui/style.json `tweaks`. A game test that read the bubble's colour from `--surface` reads `--callout` now.
+- Dev Kit 0.28.2: the Color tab lists the three bubble colours, and skips them for a game on an older UI kit.
+
+### Fixed
+- Rooms 0.14.0: a join whose player id starts with `bot:` is refused, so a player can't claim a bot's seat by sending its id.
+
 ## Unreleased
 
 ### New

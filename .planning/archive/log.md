@@ -1,4 +1,8 @@
 # Log archive (newest first)
+- 2026-10-26 — Released v0.28.0 (v0.26 Rules check themselves): the lint module — settings belong in content/, no React state set every frame in useFrame; the starter has both as errors; install-module keeps an installer's own eslint.config edit.
+- 2026-10-26 — Released v0.27.0 (v0.25 What the starter showed): the page check flags light in-game words on a light page; the round intro dims the game dark in every look; each game picks its local room port; the AI accepts { moment, by } moments.
+- 2026-10-26 — Released v0.26.0 (v0.24 A test game guards every update): a tic-tac-toe starter with every module wired; the framework's checks play it on every change; the results ring has room (UI kit 0.35.8).
+- 2026-10-26 — Sprint 41 done: the kit and saves hold up in iPhone's engine; a scrolling card's buttons get a soft fade above them (UI kit 0.35.7). v0.23 ready to /deliver.
 - 2026-10-25 — Sprint 41 planned (unattended): the kit and saves work in iPhone's engine (F148 shoot in WebKit, F149 fixes, F150 saves in every engine).
 - 2026-10-25 — Released v0.24.0 (v0.22 Big text in every look): every look holds up at 200% text — HUD sideways, pickers, names and titles, the story bubble; the page check measures in the right font.
 - 2026-10-25 — Released v0.23.0 (v0.21 The kit meets every player): every UI kit screen holds up at 200% text, What's new after an update, gamepad focus ring.
