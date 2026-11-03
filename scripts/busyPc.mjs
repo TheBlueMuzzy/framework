@@ -8,7 +8,8 @@ import { cpus } from 'node:os'
 
 // A test runner's "ran out of time" words: vitest (test + hook, and its workers too slow to start — 3 of 11 under
 // load, F171's proof run), Playwright, node:test
-const TIMEOUT = [/\b(Test|Hook) timed out in \d+ ?ms/i, /Timeout waiting for worker to respond/i, /\bTimeout (of )?\d+ ?ms exceeded/i, /\btest timed out after \d+ ?ms/i]
+// ("Timeout waiting for worker to respond", "Timeout starting forks runner": any timeout from vitest's worker pool)
+const TIMEOUT = [/\b(Test|Hook) timed out in \d+ ?ms/i, /\[vitest-pool[\w-]*\]: Timeout/i, /\bTimeout (of )?\d+ ?ms exceeded/i, /\btest timed out after \d+ ?ms/i]
 export const timedOut = (log) => TIMEOUT.some((words) => words.test(log))
 
 // The process using the most CPU right now, as "name (what it runs) 88%" (share of the whole PC) — or "unknown".
@@ -20,15 +21,19 @@ export function busiestProcess() {
       const top = sh('ps', ['-eo', 'pcpu=,comm=,args=', '--sort=-pcpu']).trim().split('\n')[0]?.trim().match(/^([\d.]+)\s+(\S+)\s+(.*)$/)
       return top ? `${top[2]} (${top[3].slice(0, 60)}) ${Math.round(Number(top[1]) / cpus().length)}%` : 'unknown'
     }
-    // the per-process CPU share right now (not the total since it started), then that process's command line
+    // the CPU share right now (not the total since it started), added up per program — 24 spinning node processes are
+    // one busy "node ×24", not 24 small ones (F171's proof run named one of them at 3%) — then the busiest one's
+    // command line, to say what it is
     const script = [
-      "$top = Get-CimInstance Win32_PerfFormattedData_PerfProc_Process | Where-Object { $_.Name -notin '_Total','Idle' } | Sort-Object PercentProcessorTime -Descending | Select-Object -First 1",
-      '$cmd = (Get-CimInstance Win32_Process -Filter "ProcessId = $($top.IDProcess)").CommandLine',
-      '@{ name = $top.Name; share = $top.PercentProcessorTime; cmd = $cmd } | ConvertTo-Json -Compress',
+      "$all = Get-CimInstance Win32_PerfFormattedData_PerfProc_Process | Where-Object { $_.Name -notin '_Total','Idle' }",
+      "$top = $all | Group-Object { $_.Name -replace '#\\d+$','' } | Sort-Object { ($_.Group | Measure-Object PercentProcessorTime -Sum).Sum } -Descending | Select-Object -First 1",
+      '$one = $top.Group | Sort-Object PercentProcessorTime -Descending | Select-Object -First 1',
+      '$cmd = (Get-CimInstance Win32_Process -Filter "ProcessId = $($one.IDProcess)").CommandLine',
+      '@{ name = $top.Name; count = $top.Count; share = ($top.Group | Measure-Object PercentProcessorTime -Sum).Sum; cmd = $cmd } | ConvertTo-Json -Compress',
     ].join('; ')
     const top = JSON.parse(sh('powershell', ['-NoProfile', '-Command', script]).trim())
     const what = (top.cmd || '').replace(/^"[^"]*"\s*|^\S+\s*/, '').slice(0, 60) // the command line without the program itself
-    return `${top.name.replace(/#\d+$/, '')}${what ? ` (${what})` : ''} ${Math.round(top.share / cpus().length)}%`
+    return `${top.name}${top.count > 1 ? ` ×${top.count}` : ''}${what ? ` (${what})` : ''} ${Math.round(top.share / cpus().length)}%`
   } catch {
     return 'unknown'
   }
@@ -47,5 +52,8 @@ export async function rerunTimeouts(results, run, { say = console.log, busiest =
     : `\n⏱ ${n} check${n > 1 ? 's' : ''} timed out — the PC may be busy (busiest: ${who}) — re-running ${n > 1 ? 'them one at a time' : 'it alone'}`)
   const alone = new Map()
   for (const r of slow) alone.set(r, { ...(await run(r.check)), check: r.check })
+  // still out of time alone → the PC is too busy to tell; that's not a code problem (yet), so say what to do
+  const stillSlow = [...alone.values()].filter((r) => !r.ok && timedOut(r.log)).map((r) => r.label)
+  if (stillSlow.length) say(`⏱ ${stillSlow.join(', ')} ran out of time alone too — the PC is too busy to tell: run check:fast again when it's quieter (busiest now: ${busiest()})`)
   return results.map((r) => alone.get(r) ?? r)
 }

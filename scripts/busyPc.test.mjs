@@ -7,6 +7,7 @@ test('a timeout is recognised in each test runner\'s words', () => {
   assert.ok(timedOut(' FAIL  kit/save.test.ts > saves > a whole game\nError: Test timed out in 5000ms.'))         // vitest
   assert.ok(timedOut('Error: Hook timed out in 10000ms.'))                                                        // vitest hook
   assert.ok(timedOut('Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond'))             // vitest, a worker slow to start
+  assert.ok(timedOut('Error: [vitest-pool]: Timeout starting forks runner.'))                                      // …or its runner
   assert.ok(timedOut('browserType.launch: Timeout 180000ms exceeded.'))                                            // Playwright
   assert.ok(timedOut('Test timeout of 30000ms exceeded.'))                                                         // Playwright, a whole test (review)
   assert.ok(timedOut('not ok 3 - arena\n  error: \'test timed out after 30000ms\'\n  code: \'ERR_TEST_FAILURE\'')) // node:test
@@ -46,6 +47,15 @@ test('a timed-out check that fails alone too stays red; a real failure is never 
   assert.deepEqual(calls, ['saves test'])
   assert.deepEqual(after.map((r) => r.ok), [false, false])
   assert.match(said[0], /1 check timed out — the PC may be busy \(busiest: chrome\.exe 40%\) — re-running it alone/)
+})
+
+test('out of time alone too → still red, and says the PC is too busy to tell (run again when quieter)', async () => {
+  const said = []
+  const results = [{ label: 'ai test', ok: false, log: 'Error: Test timed out in 5000ms.', check: ['ai test'] }]
+  const run = async ([label]) => ({ label, ok: false, log: 'Error: Test timed out in 5000ms.' })
+  const after = await rerunTimeouts(results, run, { say: (line) => said.push(line), busiest: () => 'node ×24 95%' })
+  assert.equal(after[0].ok, false)
+  assert.match(said[1], /ai test ran out of time alone too — the PC is too busy to tell: run check:fast again when it's quieter \(busiest now: node ×24 95%\)/)
 })
 
 test('nothing timed out → nothing re-run, nothing said', async () => {
