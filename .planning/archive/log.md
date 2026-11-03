@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-27 — Released v0.30.0 (v0.28 Room for longer words): the UI kit holds words ~40% longer — names and codes are never translated, fits re-measure, the Lobby room and the HUD make room; saves 0.6.5 keeps its own link code by the game's clock.
+- 2026-10-27 — Released v0.29.0 (v0.27 Ready to translate): the lint module flags player words typed into game code; `?pseudo` shows a game in a long fake language and the framework check warns where words won't fit once translated.
 - 2026-10-26 — Released v0.28.0 (v0.26 Rules check themselves): the lint module — settings belong in content/, no React state set every frame in useFrame; the starter has both as errors; install-module keeps an installer's own eslint.config edit.
 - 2026-10-26 — Released v0.27.0 (v0.25 What the starter showed): the page check flags light in-game words on a light page; the round intro dims the game dark in every look; each game picks its local room port; the AI accepts { moment, by } moments.
 - 2026-10-26 — Released v0.26.0 (v0.24 A test game guards every update): a tic-tac-toe starter with every module wired; the framework's checks play it on every change; the results ring has room (UI kit 0.35.8).
