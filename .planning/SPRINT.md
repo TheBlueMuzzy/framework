@@ -1,5 +1,5 @@
 # Sprint 51 — Releases that don't need babysitting
-Started 2026-11-03 · Milestone v0.33 Releases that don't need babysitting · Features: F172, F173, F174, F175 (in this order)
+Started 2026-11-03 · Milestone v0.33 Releases that don't need babysitting · Features: F172, F176, F173, F174, F175 (in this order — F176 added 2026-11-03, Muzzy "yes", built second so the rest of the sprint's ~/.claude edits can't be wiped)
 Muzzy 2026-11-03: "1. releases that don't need babysitting 2. yes. update config" — Claude runs /update-config; Muzzy approves the settings prompt.
 What changes: /deliver stops sending the turn back for a planner publish made from another chat or a release waiting on Muzzy's deploy; crash maps build and check themselves; a test-only commit keeps its security review; check:fast warns about a slow test with no time limit. What stays the same: every game, every module, the live sites — BMUZ tooling only.
 
@@ -11,6 +11,15 @@ Done when: a planner published from a scratchpad copy (artifacts connector, any 
 - [x] 🤖 4. Tests green; HOOKS.md line; synced to ~/.claude-config — ~/.claude/config/bmuz/HOOKS.md
 Check: the new test red then green; test-hooks all green.
 Checked: 2026-11-03 — 3 new stop-plan-check tests: 2 red on the old hook (scratchpad copy with the same bytes, publish_version content — both "block"; the stale copy already blocked) → green after the fix; whole test-hooks 617/617. Matched by bytes, not by slug: the planner link (claude.ai/artifact/<short id>) and publish_files' slug (a UUID) are different ids, and the bytes also prove the copy isn't stale. Synced to ~/.claude-config 7f9aa8c + 79ea0b3.
+
+## F176 🐞 Sync keeps unpushed edits
+Done when: setup.sh (the copy /sync runs) never overwrites a ~/.claude file that was changed here since the last sync — it keeps it and names it ("kept your newer copy of …; push it with /save"); files only the other machine changed still come in; a test red on today's setup.sh first.
+- [ ] 🤖 1. Measure today: how /sync runs setup.sh, what .config-applied records, and a scratch run that loses a local edit — ~/.claude-config/setup.sh
+- [ ] 🤖 2. Test: a fake home + repo where one file changed here and another came from the other machine → today the local edit is lost (red) — ~/.claude/config/bmuz/hooks/test-config-sync.sh
+- [ ] 🤖 3. setup.sh keeps a file whose live copy differs from the repo's last-applied version (.config-applied), copies the rest, and lists what it kept — ~/.claude-config/setup.sh
+- [ ] 🤖 4. The /sync skill says what was kept and offers to push it — ~/.claude/skills/sync/SKILL.md
+- [ ] 🤖 5. Tests green; config-sync.md line; pushed — ~/.claude/references/config-sync.md
+Check: the new test red then green; test-config-sync all green; a real /sync dry run on this PC keeps nothing it shouldn't.
 
 ## F173 🔧 Release waits on Muzzy's deploy
 Done when: a release whose live check waits on Muzzy (a deploy only he can run) hands back once with that to-do instead of being sent back every turn; it still refuses once the push has happened and no live check ran.
