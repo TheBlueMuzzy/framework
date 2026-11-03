@@ -14,12 +14,13 @@ Checked: 2026-11-03 — 3 new stop-plan-check tests: 2 red on the old hook (scra
 
 ## F176 🐞 Sync keeps unpushed edits
 Done when: setup.sh (the copy /sync runs) never overwrites a ~/.claude file that was changed here since the last sync — it keeps it and names it ("kept your newer copy of …; push it with /save"); files only the other machine changed still come in; a test red on today's setup.sh first.
-- [ ] 🤖 1. Measure today: how /sync runs setup.sh, what .config-applied records, and a scratch run that loses a local edit — ~/.claude-config/setup.sh
-- [ ] 🤖 2. Test: a fake home + repo where one file changed here and another came from the other machine → today the local edit is lost (red) — ~/.claude/config/bmuz/hooks/test-config-sync.sh
-- [ ] 🤖 3. setup.sh keeps a file whose live copy differs from the repo's last-applied version (.config-applied), copies the rest, and lists what it kept — ~/.claude-config/setup.sh
-- [ ] 🤖 4. The /sync skill says what was kept and offers to push it — ~/.claude/skills/sync/SKILL.md
-- [ ] 🤖 5. Tests green; config-sync.md line; pushed — ~/.claude/references/config-sync.md
+- [x] 🤖 1. Measure today: how /sync runs setup.sh, what .config-applied records, and a scratch run that loses a local edit — ~/.claude-config/setup.sh
+- [x] 🤖 2. Test: a fake home + repo where one file changed here and another came from the other machine → today the local edit is lost (red) — ~/.claude/config/bmuz/scripts/test-config-sync.sh
+- [x] 🤖 3. setup.sh keeps a file whose live copy differs from the repo's last-applied version (.config-applied), copies the rest, and lists what it kept — ~/.claude-config/setup.sh
+- [x] 🤖 4. The /sync skill says what was kept and offers to push it — ~/.claude/skills/sync/SKILL.md
+- [x] 🤖 5. Tests green; config-sync.md line; pushed — ~/.claude/references/config-sync.md
 Check: the new test red then green; test-config-sync all green; a real /sync dry run on this PC keeps nothing it shouldn't.
+Checked: 2026-11-03 — measured: the wipe came from my own 13:15 settings push → another session saw "1 update" and ran /sync → setup.sh `cp -r` over ~/.claude (session start only nudges, it never copies). 5 new config-sync tests (two fake machines, the real setup.sh, plugins off): 3 red on the old setup.sh (local edit lost, not named, both-changed lost) → 12/12 green. Real runs on this PC: in sync → kept nothing (8.6 s); then with an unpushed config-sync.md edit → "Kept 1 file(s) … ~/.claude/references/config-sync.md", edit intact. Whole test-scripts 354/361: the 7 red are stop-servers 2 + port-preflight 5, red alone too, scripts untouched since 10-26 → added to the existing 2026-10-30 stop-servers Idea. Pushed: claude-config f4eea93, f7a54e3, ccc985e; status quiet after.
 
 ## F173 🔧 Release waits on Muzzy's deploy
 Done when: a release whose live check waits on Muzzy (a deploy only he can run) hands back once with that to-do instead of being sent back every turn; it still refuses once the push has happened and no live check ran.
