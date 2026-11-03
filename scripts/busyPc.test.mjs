@@ -6,6 +6,7 @@ import { busiestProcess, rerunTimeouts, timedOut } from './busyPc.mjs'
 test('a timeout is recognised in each test runner\'s words', () => {
   assert.ok(timedOut(' FAIL  kit/save.test.ts > saves > a whole game\nError: Test timed out in 5000ms.'))         // vitest
   assert.ok(timedOut('Error: Hook timed out in 10000ms.'))                                                        // vitest hook
+  assert.ok(timedOut('Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond'))             // vitest, a worker slow to start
   assert.ok(timedOut('browserType.launch: Timeout 180000ms exceeded.'))                                            // Playwright
   assert.ok(timedOut('Test timeout of 30000ms exceeded.'))                                                         // Playwright, a whole test (review)
   assert.ok(timedOut('not ok 3 - arena\n  error: \'test timed out after 30000ms\'\n  code: \'ERR_TEST_FAILURE\'')) // node:test

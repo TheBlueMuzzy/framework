@@ -6,8 +6,9 @@
 import { spawnSync } from 'node:child_process'
 import { cpus } from 'node:os'
 
-// A test runner's "ran out of time" words: vitest (test + hook), Playwright, node:test
-const TIMEOUT = [/\b(Test|Hook) timed out in \d+ ?ms/i, /\bTimeout (of )?\d+ ?ms exceeded/i, /\btest timed out after \d+ ?ms/i]
+// A test runner's "ran out of time" words: vitest (test + hook, and its workers too slow to start — 3 of 11 under
+// load, F171's proof run), Playwright, node:test
+const TIMEOUT = [/\b(Test|Hook) timed out in \d+ ?ms/i, /Timeout waiting for worker to respond/i, /\bTimeout (of )?\d+ ?ms exceeded/i, /\btest timed out after \d+ ?ms/i]
 export const timedOut = (log) => TIMEOUT.some((words) => words.test(log))
 
 // The process using the most CPU right now, as "name (what it runs) 88%" (share of the whole PC) — or "unknown".
