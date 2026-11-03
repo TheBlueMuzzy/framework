@@ -19,7 +19,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
-// F175: scripts/slow-tests.mjs (copy ~/.claude/config/bmuz/templates/slow-tests.mjs) notes unit tests over 2 s with no time limit
+// F175: scripts/slow-tests.mjs (copy ~/.claude/config/bmuz/templates/slow-tests.mjs) notes unit tests over 1 s with no time limit
 // of their own; it writes this file, printed as a warning at the end. Without it, unit tests run as before.
 const SLOW_FILE = 'node_modules/.cache/slow-tests.json'
 const SLOW_REPORTER = existsSync(new URL('./slow-tests.mjs', import.meta.url)) ? ' --reporter=default --reporter=./scripts/slow-tests.mjs' : ''
@@ -148,11 +148,11 @@ if (tier === 'full') {
 const minutes = ((Date.now() - started) / 60000).toFixed(1)
 const failed = results.filter((r) => !r.ok)
 console.log(`\n${failed.length ? `NOT OK — ${failed.length} failed: ${failed.map((r) => r.name).join(', ')}` : `ALL PASS — ${results.length} checks`} (${minutes} min). Page: e2e-shots/checks.html`)
-// F175: unit tests over 2 s with no time limit of their own — they'll likely time out on GitHub (a warning, never a fail)
+// F175: unit tests over 1 s with no time limit of their own — they'll likely time out on GitHub (a warning, never a fail)
 let slow = []
 try { slow = JSON.parse(readFileSync(SLOW_FILE, 'utf8')) } catch { /* no unit-test run, or nothing slow */ }
 if (slow.length) {
-  console.log(`\n⚠ ${slow.length} slow unit test${slow.length > 1 ? 's' : ''} with no time limit of ${slow.length > 1 ? 'their' : 'its'} own — GitHub's runner is ~2.5× slower, so ${slow.length > 1 ? 'they' : 'it'} may time out there (5 s). Give a whole-game test \`{ timeout: 60_000 }\`, or make it faster:`)
+  console.log(`\n⚠ ${slow.length} slow unit test${slow.length > 1 ? 's' : ''} with no time limit of ${slow.length > 1 ? 'their' : 'its'} own — GitHub's runner is ~4× slower, so ${slow.length > 1 ? 'they' : 'it'} may time out there (5 s). Give a whole-game test \`{ timeout: 60_000 }\`, or make it faster:`)
   for (const t of slow) console.log(`    ${t.file} — ${t.name} (${(t.ms / 1000).toFixed(1)} s)`)
 }
 writeReport()
