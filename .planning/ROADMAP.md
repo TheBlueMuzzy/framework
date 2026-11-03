@@ -481,7 +481,7 @@ flowchart LR
   F169[✅ F169 Audio keeps the tuned mix]
 ```
 
-## v0.33 — Releases that don't need babysitting  ← current · planned 2026-11-03
+## v0.33 — Releases that don't need babysitting  ✅ released 2026-11-03 (v0.35.0) · planned 2026-11-03
 Goal (Muzzy 2026-11-03: "releases that don't need babysitting"): /deliver stops looping on the planner and live-pass messages, crash maps build themselves, and a one-line test fix doesn't cost a 24-minute re-check (Glyphtender v0.13.0 / v0.14.0 deliveries).
 - ✅ F172 🔧 Planner publish recognised from any chat — stop-plan-check only counts a publish by the Artifact tool; a chat opened outside the project publishes through the artifacts connector from a scratchpad copy and was asked to republish again and again (v0.32 look-back; 3+ times again 2026-11-03) — count a publish to the project's planner slug however it was sent — must · sprint 51 · approved 2026-11-03
 - ✅ F173 🔧 Release waits on Muzzy's deploy — stop-plan-check lets a release that's waiting on Muzzy's server deploy hand back once with that to-do, instead of sending the turn back on "live-pass doesn't record a live check" (Glyphtender v0.13.0 looped 6 turns; Muzzy 2026-11-02: "yes") — must · sprint 51 · approved 2026-11-03
