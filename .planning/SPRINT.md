@@ -5,7 +5,7 @@ What changes: /deliver stops sending the turn back for a planner publish made fr
 
 ## F172 🔧 Planner publish recognised from any chat
 Done when: a planner published from a scratchpad copy (artifacts connector, any chat) counts for stop-plan-check — the hook no longer asks again for a page the server says is unchanged; a test red on today's hook first.
-- [ ] 🙋 1. Approve the /update-config prompt so Claude may edit the BMUZ hooks and scripts (Claude runs it) — ~/.claude/settings.json
+- [x] 🙋 1. Let Claude edit the BMUZ hooks and scripts in auto mode — ~/.claude/settings.json (2026-11-03: auto mode refused Claude's own /update-config edit as self-modification; Muzzy pasted a `!` node line adding 3 Edit allow rules + an autoMode.allow line; a test write in hooks/ passed)
 - [ ] 🤖 2. Read how the hook decides "published" today (.git/bmuz-ppp-published, Artifact tool only) and write a test for a publish_files / publish_version publish — red first — ~/.claude/config/bmuz/hooks/test-hooks.mjs
 - [ ] 🤖 3. Count a publish to the project's planner slug however it was sent (incl. a scratchpad copy, incl. "unchanged") — ~/.claude/config/bmuz/hooks/stop-plan-check.mjs
 - [ ] 🤖 4. Tests green; HOOKS.md line; synced to ~/.claude-config — ~/.claude/config/bmuz/HOOKS.md
@@ -37,5 +37,6 @@ Done when: a commit that only changes test files (*.test.*, e2e/) since `Securit
 Check: new tests red then green; root check:fast; the starter check.
 
 ## Notes
+- Lesson (2026-11-03): auto mode never lets Claude widen its own permissions (settings.json edits are refused as self-modification, even with Muzzy's OK) — the way is a one-line `!` command Muzzy pastes himself. The other machine needs the same paste (settings.json is synced by config-sync — check after the next /sync).
 - Open bugs: none open in the framework.
 - Claude's call (2026-11-03): F175's gate change is security only — a test-only commit can still break a game, so the code review and the full check still reopen.
