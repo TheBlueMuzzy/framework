@@ -75,10 +75,14 @@ export function holders(port, all) {
   const mine = new Set()
   for (let p = byPid.get(process.pid); p && !mine.has(p.pid); p = byPid.get(p.ppid)) mine.add(p.pid)
   mine.add(process.pid)
-  const named = new RegExp(`(^|[\\s:=])${port}($|[\\s"'/])`)
-  // a shell only mentions the port in a command it was given (Claude Code's own shells keep theirs) — it never listens
-  const shell = /^"?[^"]*[\\/](bash|sh|zsh|pwsh|powershell)(\.exe)?"?\s/i
-  return all.filter(p => !mine.has(p.pid) && named.test(p.cmd) && !shell.test(p.cmd)).map(p => p.pid)
+  // port-shaped words only: `--port 5291` / `--port=5291` / `-p 5291`, an address `127.0.0.1:1997` (workerd's
+  // --socket-addr), or the port alone as an argument (`hold.mjs 6011`) — never any `=N` (`--max-old-space-size=4096`,
+  // `--workers=3000` aren't ports: review)
+  const named = new RegExp(`(--port[= ]|\\s-p |(localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0|\\[::1?\\]):|\\s)${port}($|[\\s"'/])`)
+  // a shell only mentions the port in a command it was given (Claude Code's own shells keep theirs), and a browser only
+  // visits it (`http://localhost:5173/`) — neither listens
+  const notServer = /^"?(?:[^"]*[\\/])?(bash|sh|zsh|pwsh|powershell|chrome|msedge|firefox)(\.exe)?"?\s/i
+  return all.filter(p => !mine.has(p.pid) && named.test(p.cmd) && !notServer.test(p.cmd)).map(p => p.pid)
 }
 
 // Every process: [{ pid, ppid, cmd, started }]. Throws with the reason when the list can't be read.
