@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-03 — **Sprint 51 — Releases that don't need babysitting (v0.33), on dev/v0-33-releases: F172 — Planner publish recognised from any chat ✅ (approved) · next F176 — Sync keeps unpushed edits (added, Muzzy "yes") · then F173 — Release waits on Muzzy's deploy · F174 — Crash maps by the release script · F175 — Test-only commits + slow tests. All BMUZ tooling in ~/.claude — push each ~/.claude edit to ~/.claude-config the moment it lands (another session's /sync wiped one at 13:17:59 until F176 is in). Muzzy added the hook-edit allow rules to settings.json himself (auto mode refuses Claude's own).** (Before: Released v0.34.1 — rooms 0.14.0 + UI kit 0.39.0… Before that: 2026-11-02 — rooms 0.14.0 merged into main (unreleased)… Before that: **Released v0.34.0 (v0.32 Smoother upgrades) — next: the Gly…)
+2026-11-03 — **Sprint 51 — Releases that don't need babysitting (v0.33), on dev/v0-33-releases: F172 — Planner publish recognised from any chat ✅ · F176 — Sync keeps unpushed edits ✅ (both approved) · next F173 — Release waits on Muzzy's deploy · F174 — Crash maps by the release script · F175 — Test-only commits + slow tests. All BMUZ tooling in ~/.claude — push each ~/.claude edit to ~/.claude-config the moment it lands (another session's /sync wiped one at 13:17:59 until F176 is in). Muzzy added the hook-edit allow rules to settings.json himself (auto mode refuses Claude's own).** (Before: Released v0.34.1 — rooms 0.14.0 + UI kit 0.39.0… Before that: 2026-11-02 — rooms 0.14.0 merged into main (unreleased)… Before that: **Released v0.34.0 (v0.32 Smoother upgrades) — next: the Gly…)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
@@ -9,7 +9,7 @@ Reviewed through: F176 — Sync keeps unpushed edits (~/.claude-config setup.sh 
 
 ## Where we are
 Stage: develop   Milestone: v0.33 Releases that don't need babysitting   Sprint: 51
-Doing: F176 — Sync keeps unpushed edits — building   Branch: dev/v0-33-releases   Version: 0.34.1 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.2.2 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
+Doing: F173 — Release waits on Muzzy's deploy — building   Branch: dev/v0-33-releases   Version: 0.34.1 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.2.2 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

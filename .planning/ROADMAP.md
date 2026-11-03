@@ -487,14 +487,14 @@ Goal (Muzzy 2026-11-03: "releases that don't need babysitting"): /deliver stops 
 - 🔨 F173 🔧 Release waits on Muzzy's deploy — stop-plan-check lets a release that's waiting on Muzzy's server deploy hand back once with that to-do, instead of sending the turn back on "live-pass doesn't record a live check" (Glyphtender v0.13.0 looped 6 turns; Muzzy 2026-11-02: "yes") — must · sprint 51
 - 🔨 F174 🔧 Crash maps by the release script — release.mjs / live-check.mjs builds releases/<v>/maps with the deploy workflow's env and checks its main-*.js.map matches the live page; check builds leave no strays (Glyphtender v0.12–v0.14 by hand, strays removed twice 2026-11-03) — should · sprint 51
 - 🔨 F175 🔧 Test-only commits + slow tests — a test-file-only commit keeps the security review; check:fast flags a test over ~2 s with no time limit before GitHub's slower runner times it out (Glyphtender v0.14.0: red Checks + a 24-min re-check for a one-line `{ timeout }`) — should · sprint 51
-- 🔨 F176 🐞 Sync keeps unpushed edits — setup.sh (run by /sync) copies ~/.claude-config over ~/.claude whole, so a ~/.claude edit not pushed yet is silently lost; keep (and name) a file changed here since the last sync instead (sprint 51: another session's /sync wiped the F172 hook fix at 13:17:59 — Muzzy 2026-11-03: "yes") — must · sprint 51
+- ✅ F176 🐞 Sync keeps unpushed edits — setup.sh (run by /sync) copies ~/.claude-config over ~/.claude whole, so a ~/.claude edit not pushed yet is silently lost; keep (and name) a file changed here since the last sync instead (sprint 51: another session's /sync wiped the F172 hook fix at 13:17:59 — Muzzy 2026-11-03: "yes") — must · sprint 51 · approved 2026-11-03
 ```mermaid
 flowchart LR
   F172[✅ F172 Planner publish recognised from any chat]
   F173[🔨 F173 Release waits on Muzzy's deploy]
   F174[🔨 F174 Crash maps by the release script]
   F175[🔨 F175 Test-only commits + slow tests]
-  F176[🔨 F176 Sync keeps unpushed edits]
+  F176[✅ F176 Sync keeps unpushed edits]
 ```
 
 ## Later
