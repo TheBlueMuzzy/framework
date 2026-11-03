@@ -13,9 +13,9 @@ Checked:
 
 ## F170 🐞 Starter online test race
 Done when: the starter's online test passes on a slowed-down PC 10 times in a row, and the race it lost on GitHub is named and fixed.
-- [ ] 🤖 1. Reproduce on a slow machine (CPU throttled in the test browser) — find which step loses the race — starters/turn-based/e2e/online.mjs
-- [ ] 🤖 2. Fix the root cause in the game code or the test's wait (whichever is wrong) — starters/turn-based/src/ui/OnlineScreen.tsx
-- [ ] 🤖 3. Prove it: 10 throttled runs green; starter check green — starters/turn-based/e2e/online.mjs
+- [x] 🤖 1. Reproduce on a slow machine (CPU throttled in the test browser) — find which step loses the race — starters/turn-based/e2e/online.mjs
+- [x] 🤖 2. Fix the root cause in the game code or the test's wait (whichever is wrong) — starters/turn-based/src/ui/OnlineScreen.tsx
+- [x] 🤖 3. Prove it: 10 throttled runs green; starter check green — starters/turn-based/e2e/online.mjs
 Check: 10 throttled runs in a row green; check:full on the starter; GitHub run green.
 Checked:
 
@@ -36,3 +36,5 @@ Checked:
 - F177 measured 2026-11-03 (3 servers started from this shell, 20 rounds): netstat -ano listed each 1 time in 20, Get-NetTCPConnection 0–2, a connect 20/20, a bind attempt failed 20/20. Same live: 5173 (another project's vite) showed only TIME_WAIT rows in netstat while it answered. So the knock is the truth; netstat only names who.
 - F177 surprise: the command-line fallback first named Claude Code's own shells as 5173's holder (their commands mention the port) — shells and this process's parents are skipped now, with a test.
 - Claude's call (F177): ports.mjs keeps heldPorts() a plain (sync) call — the knock runs in a child Node — so a game with an older check-all and the new ports.mjs still works.
+- F170: CPU throttle alone (5×, 6× ×8, 8×, 12×, 20×) never failed the test (11 runs green) — but a page probe showed the old results over the rematch's empty board in EVERY run (1–12 DOM changes, ~30 ms). Cause: the server sends a rematch as two messages, the new board (view) first, then the room (phase "playing"); OnlineScreen showed the results while room.phase was "over", so between the two the old results (retitled "It's a draw") stayed up over the new board, its board inert. Holding B's (or A's) room message 1 s reproduced GitHub run 41702523187 exactly ("Play again left the results up", "over after 0 moves"); online.mjs now holds B's 800 ms every run: red 2/2 on the old code.
+- F170 (fix measured 2026-11-03): with the fix, 10/10 green at 5× CPU throttle + the 800 ms hold (13–15 s each); the probe saw 0 frames of results over the new board (was 1–12); unthrottled 8–9 s. Starter check:fast ALL PASS, check:full ALL PASS 10/10 (1.3 min). check:full first refused twice: 6403 / 6499 showed LISTENING with owner 0 while refusing connections — F177's case, while another worktree used the ports. GitHub run not checked (not pushed).
