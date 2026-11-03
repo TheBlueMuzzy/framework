@@ -13,7 +13,7 @@ Checked:
 
 ## F170 🐞 Starter online test race
 Done when: the starter's online test passes on a slowed-down PC 10 times in a row, and the race it lost on GitHub is named and fixed.
-- [ ] 🤖 1. Reproduce on a slow machine (CPU throttled in the test browser) — find which step loses the race — starters/turn-based/e2e/online.mjs
+- [x] 🤖 1. Reproduce on a slow machine (CPU throttled in the test browser) — find which step loses the race — starters/turn-based/e2e/online.mjs
 - [ ] 🤖 2. Fix the root cause in the game code or the test's wait (whichever is wrong) — starters/turn-based/src/ui/OnlineScreen.tsx
 - [ ] 🤖 3. Prove it: 10 throttled runs green; starter check green — starters/turn-based/e2e/online.mjs
 Check: 10 throttled runs in a row green; check:full on the starter; GitHub run green.
@@ -32,3 +32,4 @@ Checked:
 - Open bugs: none open in the framework.
 - Claude's call (2026-11-03): the two port bugs (stop-servers misses a listener · pre-flight refuses closing connections) are one feature — same lookup, same file.
 - Measured 2026-11-03 (planning): test-scripts stop-servers still red ("stopped by port → the port stays free" ✗, then EPERM removing its temp folder); netstat listed no row for the test's port while it answered.
+- F170: CPU throttle alone (5×, 6× ×8, 8×, 12×, 20×) never failed the test (11 runs green) — but a page probe showed the old results over the rematch's empty board in EVERY run (1–12 DOM changes, ~30 ms). Cause: the server sends a rematch as two messages, the new board (view) first, then the room (phase "playing"); OnlineScreen showed the results while room.phase was "over", so between the two the old results (retitled "It's a draw") stayed up over the new board, its board inert. Holding B's (or A's) room message 1 s reproduced GitHub run 41702523187 exactly ("Play again left the results up", "over after 0 moves"); online.mjs now holds B's 800 ms every run: red 2/2 on the old code.
