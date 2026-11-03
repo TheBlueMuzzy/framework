@@ -3,11 +3,11 @@ Started 2026-11-03 · Milestone v0.34 · Features: F177, F170, F171 (in this ord
 
 ## F177 🐞 Port lookup you can trust
 Done when: stop-servers finds (and stops) a server started from Claude Code's shell, the port pre-flight sees it too, and a port with only closing connections counts as free.
-- [ ] 🤖 1. Measure today: a listener started here vs netstat / Get-NetTCPConnection / a connect test — which lookups see it, ~20 tries — ~/.claude/config/bmuz/templates/ports.mjs
-- [ ] 🤖 2. Tests red first: a missed listener, and a port with only closing rows — ~/.claude/config/bmuz/scripts/test-scripts.mjs
-- [ ] 🤖 3. The lookup sees every listener and counts only LISTENING rows (owner 0 = free) — ~/.claude/config/bmuz/templates/ports.mjs
-- [ ] 🤖 4. stop-servers refuses "nothing is listening" while the port still answers; the test cleans up its own server — ~/.claude/config/bmuz/scripts/stop-servers.mjs
-- [ ] 🤖 5. Starter's copy matches the template; suites green; push ~/.claude — starters/turn-based/scripts/ports.mjs
+- [x] 🤖 1. Measure today: a listener started here vs netstat / Get-NetTCPConnection / a connect test — which lookups see it, ~20 tries — ~/.claude/config/bmuz/templates/ports.mjs
+- [x] 🤖 2. Tests red first: a missed listener, and a port with only closing rows — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 3. The lookup sees every listener — knocks on the port; netstat + command lines only name the holder (closing rows = free) — ~/.claude/config/bmuz/templates/ports.mjs
+- [x] 🤖 4. stop-servers refuses "nothing is listening" while the port still answers; the test cleans up its own server — ~/.claude/config/bmuz/scripts/stop-servers.mjs
+- [x] 🤖 5. Starter's copy matches the template; suites green; push ~/.claude — starters/turn-based/scripts/ports.mjs
 Check: stop-servers + port-preflight suites red then green, 3 runs in a row; the starter check.
 Checked:
 
@@ -32,3 +32,6 @@ Checked:
 - Open bugs: none open in the framework.
 - Claude's call (2026-11-03): the two port bugs (stop-servers misses a listener · pre-flight refuses closing connections) are one feature — same lookup, same file.
 - Measured 2026-11-03 (planning): test-scripts stop-servers still red ("stopped by port → the port stays free" ✗, then EPERM removing its temp folder); netstat listed no row for the test's port while it answered.
+- F177 measured 2026-11-03 (3 servers started from this shell, 20 rounds): netstat -ano listed each 1 time in 20, Get-NetTCPConnection 0–2, a connect 20/20, a bind attempt failed 20/20. Same live: 5173 (another project's vite) showed only TIME_WAIT rows in netstat while it answered. So the knock is the truth; netstat only names who.
+- F177 surprise: the command-line fallback first named Claude Code's own shells as 5173's holder (their commands mention the port) — shells and this process's parents are skipped now, with a test.
+- Claude's call (F177): ports.mjs keeps heldPorts() a plain (sync) call — the knock runs in a child Node — so a game with an older check-all and the new ports.mjs still works.
