@@ -14,6 +14,10 @@ import { mkdirSync, readdirSync, readFileSync, renameSync, copyFileSync, rmSync 
 import { dirname, join, relative, resolve } from 'node:path'
 
 export const MAPS_FOLDER = 'releases'
+// 0.3.0: an ordinary build (check:fast, check:full, an e2e's own build) isn't what players run — its maps go here
+// instead (node_modules: never committed, never uploaded), so checks leave nothing in releases/. Only the release
+// build — CRASHES_MAPS=release, which release.mjs sets with the deploy's settings — files them under releases/.
+export const CHECK_MAPS_FOLDER = 'node_modules/.cache/crashes-maps'
 
 /** The game folder's version.json → "X.Y.Z.B" (VERSION_BUILD overrides the build number, as in the version module). */
 export function readGameVersion(root, env = process.env) {
@@ -60,8 +64,9 @@ export function moveMaps(outDir, mapsDir) {
   return moved
 }
 
-/** @param {{ root?: string, version?: string }} [options] root = the game folder (default: Vite's root); version = the
- *  version to file the maps under (default: version.json) */
+/** @param {{ root?: string, version?: string, release?: boolean }} [options] root = the game folder (default: Vite's
+ *  root); version = the version to file the maps under (default: version.json); release = this is the build players
+ *  get (default: CRASHES_MAPS=release in the environment) → releases/, else the check cache */
 export function crashesMaps(options = {}) {
   let outDir = null
   let mapsDir = null
@@ -75,7 +80,8 @@ export function crashesMaps(options = {}) {
     configResolved(config) {
       const root = resolve(options.root ?? config.root)
       outDir = resolve(config.root, config.build.outDir)
-      mapsDir = join(root, MAPS_FOLDER, options.version ?? readGameVersion(root), 'maps')
+      const release = options.release ?? process.env.CRASHES_MAPS === 'release'
+      mapsDir = join(root, release ? MAPS_FOLDER : CHECK_MAPS_FOLDER, options.version ?? readGameVersion(root), 'maps')
       log = (message) => config.logger.info(message)
     },
     // closeBundle: after everything is written (public/ copied too), so a .map from anywhere is caught.
