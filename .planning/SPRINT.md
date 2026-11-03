@@ -24,10 +24,11 @@ Checked: 2026-11-03 — measured: the wipe came from my own 13:15 settings push 
 
 ## F173 🔧 Release waits on Muzzy's deploy
 Done when: a release whose live check waits on Muzzy (a deploy only he can run) hands back once with that to-do instead of being sent back every turn; it still refuses once the push has happened and no live check ran.
-- [ ] 🤖 1. Test: a release tag, no push yet, a hand-off naming Muzzy's deploy → no send-back; pushed + no live-pass → still sent back — red first — ~/.claude/config/bmuz/hooks/test-hooks.mjs
-- [ ] 🤖 2. stop-plan-check rule 8 reads "pushed yet?" (origin has the tag) before asking for live-pass — ~/.claude/config/bmuz/hooks/stop-plan-check.mjs
-- [ ] 🤖 3. Tests green; the deliver skill's §5 line says so — ~/.claude/skills/deliver/SKILL.md
+- [x] 🤖 1. Test: a release tag, no push yet, a hand-off naming Muzzy's deploy → no send-back; pushed + no live-pass → still sent back — red first — ~/.claude/config/bmuz/hooks/test-hooks.mjs
+- [x] 🤖 2. stop-plan-check rule 8 reads "pushed yet?" (origin has the tag) before asking for live-pass — ~/.claude/config/bmuz/hooks/stop-plan-check.mjs
+- [x] 🤖 3. Tests green; the deliver skill's §5 line says so — ~/.claude/skills/deliver/SKILL.md
 Check: the new tests red then green; test-hooks all green.
+Checked: 2026-11-03 — 4 new stop-plan-check tests: "tagged, not pushed, hand-back names the deploy → allowed" red on the old hook (the other 3 already right) → green; whole test-hooks 621/621. "Pushed?" = a remote-tracking branch holds the tag's commit (git for-each-ref --contains, local — no network in a Stop hook); "waits on Muzzy" = the last message says "deploy". Unpushed + silent now says "push, or say what it waits on". Synced: claude-config 9a6b667 (hook + tests), 6f4fd9d (/deliver §5); status quiet.
 
 ## F174 🔧 Crash maps by the release script
 Done when: after the release commit, one script step builds releases/<v>/maps with the deploy workflow's env (read from .github/workflows/deploy.yml), checks its main-*.js.map name matches the live page's assets/main-*.js, and check builds leave no untracked maps behind; tried on Glyphtender.
