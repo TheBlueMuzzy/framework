@@ -32,11 +32,11 @@ Checked: 2026-11-03 — 4 new stop-plan-check tests: "tagged, not pushed, hand-b
 
 ## F174 🔧 Crash maps by the release script
 Done when: after the release commit, one script step builds releases/<v>/maps with the deploy workflow's env (read from .github/workflows/deploy.yml), checks its main-*.js.map name matches the live page's assets/main-*.js, and check builds leave no untracked maps behind; tried on Glyphtender.
-- [ ] 🤖 1. Measure today: which builds write maps where (check:fast, check:full, e2e:update, the release build) on Glyphtender — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 2. Build the maps with deploy.yml's env after the release commit, commit them with it — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 3. live-check.mjs compares the maps' main-*.js.map with the live page's main-*.js — ~/.claude/config/bmuz/scripts/live-check.mjs
-- [ ] 🤖 4. Check builds put their maps aside (or clean them) so nothing stray is left — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 5. Tests + a dry run on Glyphtender — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 1. Measure today: which builds write maps where (check:fast, check:full, e2e:update, the release build) on Glyphtender — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 2. Build the maps with deploy.yml's env after the release commit, commit them with it — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 3. live-check.mjs compares the maps' main-*.js.map with the live page's main-*.js — ~/.claude/config/bmuz/scripts/live-check.mjs
+- [x] 🤖 4. Check builds put their maps aside (or clean them) so nothing stray is left — crashes/kit/vitePlugin.mjs (crashes 0.3.0: only CRASHES_MAPS=release files under releases/; the rest go to node_modules/.cache/crashes-maps)
+- [x] 🤖 5. Tests + a dry run on Glyphtender — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 Check: test-scripts green; Glyphtender dry run builds matching maps and leaves git status clean.
 
 ## F175 🔧 Test-only commits + slow tests
