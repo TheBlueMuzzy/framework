@@ -43,12 +43,13 @@ Checked: 2026-11-03 — measured: every vite build (check:fast's build, check:fu
 
 ## F175 🔧 Test-only commits + slow tests
 Done when: a commit that only changes test files (*.test.*, e2e/) since `Security reviewed:` doesn't reopen the security gate (the code review and full check still do); check:fast prints a warning for a test that took over ~2 s with no time limit of its own.
-- [ ] 🤖 1. Measure today: replay Glyphtender's fc44068 against release.mjs's gates — which ones it reopened — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 2. Security gate skips test-file-only commits (named in the dry run) — test red first — ~/.claude/config/bmuz/scripts/release.mjs
-- [ ] 🤖 3. check-all's unit-test step lists tests over ~2 s without their own timeout (vitest JSON report) — starters/turn-based/scripts/check-all.mjs
-- [ ] 🤖 4. Starter check + Glyphtender's check:fast run it; the 2-s line in content if it's a knob — starters/turn-based/scripts/check-all.mjs
-- [ ] 🤖 5. Tests green; root check:fast green — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 1. Measure today: replay Glyphtender's fc44068 against release.mjs's gates — which ones it reopened — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 2. Security gate skips test-file-only commits (named in the dry run) — test red first — ~/.claude/config/bmuz/scripts/release.mjs
+- [x] 🤖 3. check-all's unit-test step lists tests over ~1 s without their own timeout (a vitest reporter, scripts/slow-tests.mjs) — starters/turn-based/scripts/check-all.mjs
+- [x] 🤖 4. Starter check + Glyphtender's tests run it; the line is a tooling constant (tuning-ok), not game content — starters/turn-based/scripts/check-all.mjs
+- [x] 🤖 5. Tests green; root check:fast green — ~/.claude/config/bmuz/scripts/test-scripts.mjs
 Check: new tests red then green; root check:fast; the starter check.
+Checked: 2026-11-03 — fc44068 (one `{ timeout }` line) reopened all 3 gates. Now: a commit whose code files are all tests (*.test/spec.*, e2e/, tests/) stays inside "Security reviewed" (isTestFile in lib.mjs); code review + full check still reopen — release-gates test red → green (35/35). Slow tests: vitest reports a test's own limit as options.timeout and a test without one as the config default (probed: 5000 vs 60000), so a reporter flags "over the line + default limit"; check-all prints them as ⚠ after the result, never a fail; works with or without the reporter file (template + starter). Probe in the starter: the no-limit 2.2 s test flagged, the 60 s-limit one not. The line: 2 s first — but Glyphtender's save test takes 1.3 s here and went over 5 s on GitHub (~4×), so 2 s would have missed it → 1 s; on Glyphtender's 860 tests that flags 12 whole-game tests (bot golden games, sims, a 4-player server game, 1.1–1.7 s) — real risks of the same shape, not noise. Framework check:fast 24/24; release / gates / crash-maps / module-list / notes / live-check / save / config-sync suites 133/133. Glyphtender's own check-all not changed (a game repo): it gets the warning by copying templates/slow-tests.mjs + the 3 check-all lines — its next catch-up.
 
 ## Notes
 - Lesson (2026-11-03 13:17:59): another session's start-up re-copied ~/.claude-config over ~/.claude mid-task and WIPED the F172 hook fix + tests (the 614-pass run had read the old files). Rule for this sprint: copy each ~/.claude edit into ~/.claude-config and push right after it lands, before running tests; then grep the live file once more. Fix for good → ROADMAP Ideas 2026-11-03 "setup.sh overwrites newer local edits".
