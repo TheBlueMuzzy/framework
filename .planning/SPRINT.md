@@ -22,13 +22,14 @@ Checked:
 ## F171 🔧 Checks notice a busy PC
 Done when: when check:fast fails only on timeouts, it says "timeouts only — the PC is busy (busiest: <process>)" and re-runs those modules one at a time, reporting their real result.
 - [ ] 🤖 1. Measure today: what check:fast prints when a module times out under load — scripts/check-modules.mjs
-- [ ] 🤖 2. Tests red first: timeouts-only → re-run alone; a real failure → still red — scripts/check-modules.mjs
-- [ ] 🤖 3. Name the busiest process; re-run the timed-out modules one at a time — scripts/check-modules.mjs
+- [x] 🤖 2. Tests red first: timeouts-only → re-run alone; a real failure → still red — scripts/check-modules.mjs
+- [x] 🤖 3. Name the busiest process; re-run the timed-out modules one at a time — scripts/check-modules.mjs
 - [ ] 🤖 4. Root check:fast green on a quiet PC and on a loaded one — scripts/check-modules.mjs
 Check: new tests red then green; check:fast under a fake load.
 Checked:
 
 ## Notes
+- F171 (2026-11-03): the timeout logic lives in scripts/busyPc.mjs (timedOut · busiestProcess · rerunTimeouts), check-modules calls it after the run. Tried live: it named the F170 helper's chrome-headless-shell at 36% (1.7 s to ask). Claude's call: a timed-out check gets ONE more go alone (not more) — failing alone too = red.
 - Open bugs: none open in the framework.
 - Claude's call (2026-11-03): the two port bugs (stop-servers misses a listener · pre-flight refuses closing connections) are one feature — same lookup, same file.
 - Measured 2026-11-03 (planning): test-scripts stop-servers still red ("stopped by port → the port stays free" ✗, then EPERM removing its temp folder); netstat listed no row for the test's port while it answered.
