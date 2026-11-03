@@ -77,8 +77,8 @@ export async function check(t) {
     const wired = Boolean(config) && calls('crashesMaps', t.read(config))
     if (problems.length) t.fail(name, problems, wired
       ? 'Delete the .map files named (a map in public/ is copied into every build), then build again — crashesMaps() moves the build\'s own maps out after every other plugin; one still left means a plugin wrote it later still (name it in the sprint notes).'
-      : `${config ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ] — it builds hidden maps and moves them to releases/<version>/maps/. Delete any .map in public/ or dist/, then build again.`)
-    else t.pass(name, `${config}: crashesMaps() — maps go to releases/<version>/maps/`)
+      : `${config ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ] — it builds hidden maps and moves them out of the build (the release build files them under releases/<version>/maps/). Delete any .map in public/ or dist/, then build again.`)
+    else t.pass(name, `${config}: crashesMaps() — maps leave the build (releases/<version>/maps/ for the release build)`)
   }
 
   {

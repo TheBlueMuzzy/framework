@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { build } from 'vite'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readAppVersion } from '../../version/kit/versionFile.mjs'
-import { crashesMaps, findMaps, readGameVersion } from './vitePlugin.mjs'
+import { CHECK_MAPS_FOLDER, crashesMaps, findMaps, readGameVersion } from './vitePlugin.mjs'
 
 const dirs = []
 const gameAt = (version, build) => {
@@ -21,12 +21,14 @@ const gameAt = (version, build) => {
 }
 afterEach(() => {
   delete process.env.VERSION_BUILD
+  delete process.env.CRASHES_MAPS
   while (dirs.length) rmSync(dirs.pop(), { recursive: true, force: true })
 })
 
 describe('crashesMaps', () => {
-  it('a real build: hidden maps, every .map moved to releases/<version>/maps/, none left in dist, no sourceMappingURL', async () => {
+  it('a release build: hidden maps, every .map moved to releases/<version>/maps/, none left in dist, no sourceMappingURL', async () => {
     const root = gameAt('0.3.1', 12)
+    process.env.CRASHES_MAPS = 'release'
     await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] })
     const dist = join(root, 'dist')
     expect(findMaps(dist)).toEqual([])
@@ -44,6 +46,7 @@ describe('crashesMaps', () => {
     // (found by the scratch-Goops proof: the PWA plugin, enforce post, writes its service worker + maps in its own
     // sequential closeBundle — after crashesMaps had already swept dist/, so two maps shipped)
     const root = gameAt('0.1.0', 1)
+    process.env.CRASHES_MAPS = 'release'
     const pwaLike = {
       name: 'pwa-like', enforce: 'post', apply: 'build',
       closeBundle: {
@@ -73,7 +76,17 @@ describe('crashesMaps', () => {
     dirs.push(root)
     expect(() => readGameVersion(root)).toThrow(/version\.json is missing/)
     const game = gameAt('0.1.0', 0)
-    await build({ root: game, configFile: false, logLevel: 'silent', plugins: [crashesMaps({ version: '9.9.9.9' })] })
+    await build({ root: game, configFile: false, logLevel: 'silent', plugins: [crashesMaps({ version: '9.9.9.9', release: true })] })
     expect(existsSync(join(game, 'releases', '9.9.9.9', 'maps'))).toBe(true)
+  }, 60_000)
+
+  it('0.3.0: an ordinary build (a check, an e2e) keeps its maps out of dist AND out of releases/ — only the release build files them', async () => {
+    // (Glyphtender v0.12–v0.14: check builds left 15+ untracked maps in releases/<version>/maps, and a local build's maps
+    // don't fit the live code — the release build with the deploy's settings is the only one that counts)
+    const root = gameAt('0.2.0', 3)
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] })
+    expect(findMaps(join(root, 'dist'))).toEqual([])
+    expect(existsSync(join(root, 'releases'))).toBe(false)
+    expect(findMaps(join(root, CHECK_MAPS_FOLDER, '0.2.0.3', 'maps'))).toContain('stray.js.map')
   }, 60_000)
 })

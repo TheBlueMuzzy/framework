@@ -19,10 +19,14 @@
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
+// F175: scripts/slow-tests.mjs (copy ~/.claude/config/bmuz/templates/slow-tests.mjs) notes unit tests over 1 s with no time limit
+// of their own; it writes this file, printed as a warning at the end. Without it, unit tests run as before.
+const SLOW_FILE = 'node_modules/.cache/slow-tests.json'
+const SLOW_REPORTER = existsSync(new URL('./slow-tests.mjs', import.meta.url)) ? ' --reporter=default --reporter=./scripts/slow-tests.mjs' : ''
 
 // [name, command] — fast checks don't use ports, so they all run at once
 const FAST = [
-  ['unit tests', 'npx vitest run'],
+  ['unit tests', `npx vitest run${SLOW_REPORTER}`], // + slow tests with no limit of their own (F175)
   ['build', 'npm run -s build'],
   ['lint', 'npm run -s lint'],
   ['ui rules', 'npm run -s check:ui'], // the UI kit's rule checker: screens built only from kit parts and style names
@@ -131,6 +135,7 @@ const started = Date.now()
 // starved Glyphtender's whole-AI-game unit tests past their 5 s limit (F70, 2026-10-19). 32 threads → all; 4 cores → 2.
 const FAST_JOBS = Math.max(1, Math.min(FAST.length, Math.floor(availableParallelism() / 2)))
 console.log(`Fast checks (${FAST.length}, ${FAST_JOBS >= FAST.length ? 'together' : `${FAST_JOBS} at a time`}):`)
+rmSync(SLOW_FILE, { force: true }) // (only this run's slow tests are reported)
 const results = await pool(FAST, FAST_JOBS)
 if (tier === 'full') {
   if (results.every((r) => r.ok)) {
@@ -143,6 +148,13 @@ if (tier === 'full') {
 const minutes = ((Date.now() - started) / 60000).toFixed(1)
 const failed = results.filter((r) => !r.ok)
 console.log(`\n${failed.length ? `NOT OK — ${failed.length} failed: ${failed.map((r) => r.name).join(', ')}` : `ALL PASS — ${results.length} checks`} (${minutes} min). Page: e2e-shots/checks.html`)
+// F175: unit tests over 1 s with no time limit of their own — they'll likely time out on GitHub (a warning, never a fail)
+let slow = []
+try { slow = JSON.parse(readFileSync(SLOW_FILE, 'utf8')) } catch { /* no unit-test run, or nothing slow */ }
+if (slow.length) {
+  console.log(`\n⚠ ${slow.length} slow unit test${slow.length > 1 ? 's' : ''} with no time limit of ${slow.length > 1 ? 'their' : 'its'} own — GitHub's runner is ~4× slower, so ${slow.length > 1 ? 'they' : 'it'} may time out there (5 s). Give a whole-game test \`{ timeout: 60_000 }\`, or make it faster:`)
+  for (const t of slow) console.log(`    ${t.file} — ${t.name} (${(t.ms / 1000).toFixed(1)} s)`)
+}
 writeReport()
 process.exit(failed.length ? 1 : 0)
 
