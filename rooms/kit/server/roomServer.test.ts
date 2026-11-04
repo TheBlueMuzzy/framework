@@ -515,6 +515,36 @@ describe('RoomServer: the game', () => {
     }
   })
 
+  // …and a tab that comes back keeps what it had before it dropped (useRoom keeps the last room + board), so the
+  // order counts across the reconnect too (review: the join sent the room before the board)
+  const wrongMoments = (messages: FakeConnection['received']) => {
+    let phase = ''
+    let view: View | null = null
+    const wrong: string[] = []
+    messages.forEach((m, i) => {
+      if (m.type === 'room') phase = m.room.phase
+      if (m.type === 'view') view = m.view as View | null
+      if (phase === 'over' && view && view.total < 10) wrong.push(`#${i} (${m.type}): room "over", board total ${view.total}`)
+    })
+    return wrong
+  }
+  it('a tab that dropped before the last move and comes back after it: the finished board before "over"', () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 3; i++) { send(ann, { type: 'action', action: { add: 1 } }); send(bob, { type: 'action', action: { add: 2 } }) } // 9, Ann's turn
+    drop(bob)
+    send(ann, { type: 'action', action: { add: 1 } }) // 10 → over, Bob away
+    const back = join('tab-bob-2', 'Bob', BOB)
+    expect(wrongMoments([...bob.received, ...back.received]), back.received.map((m) => m.type).join(' → ')).toEqual([])
+  })
+  it('a tab that was away when the rematch started: "playing" before the new board', () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 4; i++) { send(ann, { type: 'action', action: { add: 1 } }); send(bob, { type: 'action', action: { add: 2 } }) }
+    drop(bob)
+    send(ann, { type: 'start', options: { secretBase: 3 } }) // rematch while Bob is away
+    const back = join('tab-bob-2', 'Bob', BOB)
+    expect(wrongMoments([...bob.received, ...back.received]), back.received.map((m) => m.type).join(' → ')).toEqual([])
+  })
+
   it('everyone gone mid-game: the room waits, then clears', () => {
     const { ann, bob } = startGame()
     drop(ann)

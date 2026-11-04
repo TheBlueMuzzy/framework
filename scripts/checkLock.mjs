@@ -18,8 +18,12 @@ export function takeCheckLock(root, { say = console.log, env = process.env } = {
   const gitDir = spawnSync('git', ['rev-parse', '--git-dir'], { cwd: root, encoding: 'utf8' }).stdout?.trim()
   if (!gitDir) return () => {} // not a git folder: nothing to share a lock with
   const lock = isAbsolute(gitDir) ? join(gitDir, 'bmuz-check.lock') : join(root, gitDir, 'bmuz-check.lock')
+  // our caller holds it (and frees it) — only if the lock really names it: a dev server or shell it started can
+  // outlive it with the setting still in its environment, and its pid can be reused (review)
   const heldBy = Number(env.BMUZ_CHECK_LOCK_HELD)
-  if (heldBy && alive(heldBy)) return () => {} // our caller holds it (and frees it)
+  let named = 0
+  try { named = Number(readFileSync(lock, 'utf8').split(' ')[0]) } catch { /* no lock */ }
+  if (heldBy && named === heldBy && alive(heldBy)) return () => {}
   const nap = new Int32Array(new SharedArrayBuffer(4))
   const deadline = Date.now() + MOST_WAIT_MS
   let told = false

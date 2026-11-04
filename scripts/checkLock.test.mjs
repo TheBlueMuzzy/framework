@@ -73,6 +73,14 @@ test('started by whoever holds the lock (the hand-back hook, /save) → runs str
   assert.ok(existsSync(lockFile(dir)), 'the holder frees its own lock')
 })
 
+test('an old "the lock is mine" setting the lock doesn\'t back up (a leftover child, a reused pid) → takes the lock normally', (t) => {
+  const dir = repo(t)
+  const release = takeCheckLock(dir, { ...quietly, env: { BMUZ_CHECK_LOCK_HELD: String(process.ppid) } }) // no lock file at all
+  assert.match(readFileSync(lockFile(dir), 'utf8'), new RegExp(`^${process.pid} `))
+  release()
+  assert.ok(!existsSync(lockFile(dir)))
+})
+
 test('not a git folder → runs without a lock (GitHub\'s copies, a zip)', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'checklock-nogit-'))
   t.after(() => rmSync(dir, { recursive: true, force: true }))
