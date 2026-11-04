@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.38.0 — 2026-11-03
+
+A sync that knows its own work. The PC ↔ laptop setup sync no longer mistakes this machine's own changes for the other machine's, so it stops refusing pushes for nothing — and it still never pushes over the other machine's real changes. The framework's test rule against fixed waits now covers its plain-JavaScript tests too.
+
+### New
+- Framework lint: the "no fixed waits in tests" rule covers `.test.mjs` files as well as `.test.ts` / `.test.tsx` — a test that waits a set time instead of for a result fails on a busy computer.
+
+### Fixed
+- BMUZ setup sync (shared by every project, not a module): a change made straight in the sync repo on this machine, whose files this machine already has, no longer counts as "the other machine's changes" — that refused the push until a full setup run. A change the other machine made still blocks the push, as before.
+
 ## v0.37.0 — 2026-11-03
 
 Steadier rooms and checks. Online games never flash the last match's results over a new board: the room and the board now always arrive in an order that agrees. And two framework checks started at once take turns instead of breaking each other.

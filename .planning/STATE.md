@@ -9,7 +9,7 @@ Reviewed through: framework 79df827 (v0.37.0..79df827: one code commit, 7b3ccec 
 
 ## Where we are
 Stage: deliver   Milestone: v0.36 A sync that knows its own work   Sprint: 54
-Doing: — (v0.38.0 released; next /sprint)   Branch: dev/v0-36-sync   Version: 0.37.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.15.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
+Doing: — (v0.38.0 released; next /sprint)   Branch: dev/v0-36-sync   Version: 0.38.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.15.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

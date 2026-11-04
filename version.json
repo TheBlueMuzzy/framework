@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.37.0",
-  "build": 2,
+  "version": "0.38.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -237,6 +237,11 @@
       "version": "0.37.0",
       "date": "2026-11-03",
       "summary": "Steadier rooms and checks"
+    },
+    {
+      "version": "0.38.0",
+      "date": "2026-11-03",
+      "summary": "A sync that knows its own work"
     }
   ]
 }
