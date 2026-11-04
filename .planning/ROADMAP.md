@@ -527,6 +527,38 @@ flowchart LR
   F180[✅ F180 Sync knows its own pushes]
 ```
 
+## v0.37 — A lean, measured BMUZ  · planned 2026-11-04
+Goal (Muzzy 2026-11-04: "this can't happen. we definitely need to avoid the inner-platform effect"): every BMUZ rule earns its place and is enforced by code where it can be (a "smart exe" — Muzzy), the framework keeps only proven parts, and one recipe says how parts move between games and the framework. Measured from the session history, not guessed. Feature freeze on the framework (bug fixes only) and games paused until it's done. After it: extract through the recipe, then games update (next milestone).
+- 🔨 F181 🔧 Hook firing log — every hook writes one line when it fires (rule, project, blocked/warned, time) to a local log, so the audit and later checkups see what each rule really catches — must
+- 🔨 F182 ❓ Rule inventory + verdicts — every rule in CLAUDE.md, the skills, PROJECT-FILES and the hooks: where it lives, ①②③, how often it fired in the past sessions, false alarms, a proposed verdict (keep · merge · make it a hook · delete) — a page Muzzy comments on; ✅ when he approves the verdicts
+- 🔨 F183 ❓ Framework inventory + verdicts — every brick, plumbing piece and quality gate: size, proven by which game, used by which game today, a proposed verdict (keep · freeze · move back to its game · archive) + the inner-platform test (time to start a tiny game from the starter vs plain) — a page Muzzy comments on; ✅ when he approves
+- ⏳ F184 🧱 Hook rule runner — one shared runner + one file per rule (id, what it checks, why with Muzzy's quote, its test, on/off), lint-tool style; today's big hooks split into rules with their tests kept — must · needs: F182
+- ⏳ F185 🔧 Slimmed rule set — apply F182's verdicts: rules merged or deleted, judgement rules made hooks, CLAUDE.md down to the judgement-only lines with the dated quotes moved into rule files — must · needs: F182, F184
+- ⏳ F186 🔧 Slimmed framework — apply F183's verdicts — must · needs: F183
+- ⏳ F187 🔧 Bloat test both ways — every addition names what it replaces (or "nothing" and why); /checkup runs a monthly removal pass from the firing log — should · needs: F181, F185
+- ⏳ F188 ❓ Module recipe — one page: what counts as a brick, plumbing or a gate; how a part comes out of a game; how it goes in; what proves it — needs: F186
+- ⏳ F189 🎮 Games list module candidates — Glyphtender and Goops each list candidates against the recipe, nothing extracted yet — must · needs: F188
+```mermaid
+flowchart LR
+  F181[🔨 F181 Hook firing log]
+  F182[🔨 F182 Rule inventory + verdicts]
+  F183[🔨 F183 Framework inventory + verdicts]
+  F184[⏳ F184 Hook rule runner]
+  F185[⏳ F185 Slimmed rule set]
+  F186[⏳ F186 Slimmed framework]
+  F187[⏳ F187 Bloat test both ways]
+  F188[⏳ F188 Module recipe]
+  F189[⏳ F189 Games list module candidates]
+  F182 --> F184
+  F182 --> F185
+  F184 --> F185
+  F183 --> F186
+  F181 --> F187
+  F185 --> F187
+  F186 --> F188
+  F188 --> F189
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
