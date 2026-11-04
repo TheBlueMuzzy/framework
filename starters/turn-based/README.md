@@ -10,9 +10,19 @@ What's in it: a main menu, two computer opponents with different characters, a b
 Credits, placeholder sounds, emotes (and the bots' banter), saves (settings, progress, Continue), online play with
 room codes, crash catching, and the version on the menu and in Settings — all from the framework's modules.
 
-## Run it
+## First: put the modules in
+The starter commits only its own game — the module copies (`src/ui/kit`, `src/devkit`, `src/rooms`, … the folders in the
+table at the bottom) are not in git (`.gitignore`). A fresh copy has none, so **run this once after copying it**:
 ```
 npm install
+npm run install-modules     → every module, fresh from ~/Documents/dev/framework (each module's own installer)
+```
+After that the copies are the game's own: update ONE module later with
+`node ~/.claude/config/bmuz/scripts/install-module.mjs <module> .` (it runs the module's checks first). A new game made
+from the starter deletes the module lines at the end of `.gitignore`, so its copies are committed like any game's.
+
+## Run it
+```
 npm run dev              → http://localhost:6173  (press ` for the Dev Kit)
 npm run party:dev        → the room server for online play, on this computer (port 6499: wrangler.json dev.port — the page reads the same line) — nothing is deployed
 ```

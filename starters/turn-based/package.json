@@ -3,8 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "The framework's turn-based starter: tic-tac-toe with every framework module installed and wired. A new game copies it; the framework's checks play it on every module change.",
+  "description": "The framework's turn-based starter: tic-tac-toe with every framework module wired. Its module copies are not committed — run `npm run install-modules` once after copying it. A new game copies it; the framework's checks play it on every module change.",
   "scripts": {
+    "install-modules": "node scripts/install-modules.mjs",
     "dev": "vite --port 6173",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

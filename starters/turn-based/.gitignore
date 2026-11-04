@@ -18,3 +18,18 @@ devkit.local.json
 # the crashes module's source maps (src/crashes, vite crashesMaps()): a starter never releases, and every build rewrites
 # them — a real game DELETES this line before its first release and commits releases/<version>/maps/ (crashes README)
 releases/
+
+# the framework modules' copies (F186 — Slimmed framework): the starter commits only its own game. `npm run install-modules`
+# puts today's modules in (scripts/install-modules.mjs); the framework's starter-check does the same in its copy.
+/src/devkit/
+/vite-plugins/devkit/
+/src/ui/kit/
+/src/audio/
+/src/table/
+/src/ai/kit/
+/src/rooms/
+/src/saves/
+/src/version/
+/src/crashes/
+/src/emotes/
+/src/lint/
