@@ -18,7 +18,7 @@ Check: every ①② rule in CLAUDE.md and every hook rule appears once; each ver
 
 ## F183 ❓ Framework inventory + verdicts
 Done when: one page lists every framework brick, plumbing piece and quality gate: lines, proven by which game, used by which game today (and which version), a proposed verdict (keep · freeze · move back to its game · archive), plus the inner-platform test — and Muzzy approves or changes the verdicts.
-- [ ] 🤖 1. Build the inventory from the framework + every game's copies, run the inner-platform test on a scratch copy of the starter, write the report, publish it as a page — .planning/research/audit-2026-11/framework.md
+- [x] 🤖 1. Build the inventory from the framework + every game's copies, run the inner-platform test on a scratch copy of the starter, write the report, publish it as a page — .planning/research/audit-2026-11/framework.md (page: https://claude.ai/artifact/THpcWZYUCE432ML9YY8GT2)
 - [ ] 🙋 2. Read the page, approve or change the verdicts — .planning/research/audit-2026-11/framework.md
 Check: every top-level framework folder and every game's VERSION copy appears; sizes match a line count; "used by" checked against each game's files, not docs.
 
