@@ -9,6 +9,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { rerunTimeouts } from './busyPc.mjs'
 
 const root = join(import.meta.dirname, '..')
 const modules = readdirSync(root).filter((name) => existsSync(join(root, name, 'kit', 'VERSION')))
@@ -39,7 +40,7 @@ function run([label, cwd, command]) {
     child.on('close', (code) => {
       const seconds = ((Date.now() - started) / 1000).toFixed(0)
       console.log(`${code === 0 ? '✓' : '✗'} ${label} (${seconds}s)`)
-      done({ label, ok: code === 0, log })
+      done({ label, ok: code === 0, log, check: [label, cwd, command] })
     })
   })
 }
@@ -63,8 +64,10 @@ function versionNotesMatch() {
 console.log(`Checking ${modules.length} modules: ${modules.join(', ')}${starters.length ? ` + starter${starters.length > 1 ? 's' : ''} ${starters.join(', ')}` : ''}`)
 const versions = versionNotesMatch()
 console.log(`${versions.ok ? '✓' : '✗'} ${versions.label}`)
-const results = [versions, ...await Promise.all(checks.map(run))]
+let results = [versions, ...await Promise.all(checks.map(run))]
 for (const check of starterChecks) results.push(await run(check))
+// a check that ran out of time side by side gets one more go alone — a busy PC isn't a red check (F171)
+results = await rerunTimeouts(results, run)
 const failed = results.filter((result) => !result.ok)
 // the end of each failed log — a starter's longer: it holds the log of every starter check that failed
 for (const result of failed) {

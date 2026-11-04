@@ -43,6 +43,48 @@ export function listeningPorts() {
 // The processes listening on one port: [pid…].
 export const listeners = (port) => listeningPorts().get(port) ?? []
 
+// Which of these ports does something answer on? Set(port). Asked by knocking (127.0.0.1, then ::1 — Vite listens on
+// [::1] only), not read from netstat (F177): a server started from Claude Code's shell is missing from netstat's list
+// most of the time (1–2 reads in 20 listed it, a knock found it 20 in 20), and a port with only closing rows
+// (TIME_WAIT / FIN_WAIT, owner 0) answers nothing — it's free. The knock runs in a child Node so this stays a plain call.
+// If the child can't run, netstat's list is the answer (the old way).
+export function answeringPorts(ports) {
+  const list = [...new Set(ports)].filter(Number.isInteger)
+  if (!list.length) return new Set()
+  const knock = [
+    "import net from 'node:net'",
+    'const knock = (port, host) => new Promise(done => { const s = net.connect({ port, host }); const end = (yes) => { s.destroy(); done(yes) }; s.once(\'connect\', () => end(true)); s.once(\'error\', () => end(false)); s.setTimeout(1500, () => end(false)) })',
+    `const ports = ${JSON.stringify(list)}`,
+    "const yes = await Promise.all(ports.map(async p => (await knock(p, '127.0.0.1')) || (await knock(p, '::1'))))",
+    'console.log(JSON.stringify(ports.filter((p, i) => yes[i])))',
+  ].join(String.fromCharCode(10))
+  const r = sh(process.execPath, ['--input-type=module', '-e', knock])
+  try { return new Set(JSON.parse(r.stdout.trim().split(String.fromCharCode(10)).find(l => l.startsWith('[')))) } catch { /* fall back */ }
+  const listening = listeningPorts()
+  return new Set(list.filter(p => listening.has(p)))
+}
+
+// The processes holding one port: netstat's listeners when it lists them, else every process whose command line names
+// the port as a word (`vite --port 5291`, `wrangler dev --port=1997`, `hold.mjs 6011`) — what's left to go on when
+// netstat leaves the server out (F177). `all` = processes(). Never this process or the ones it runs inside (the shell
+// that ran `stop-servers.mjs 5173` names the port too — it was named as 5173's holder).
+export function holders(port, all) {
+  const pids = listeners(port)
+  if (pids.length) return pids
+  const byPid = new Map(all.map(p => [p.pid, p]))
+  const mine = new Set()
+  for (let p = byPid.get(process.pid); p && !mine.has(p.pid); p = byPid.get(p.ppid)) mine.add(p.pid)
+  mine.add(process.pid)
+  // port-shaped words only: `--port 5291` / `--port=5291` / `-p 5291`, an address `127.0.0.1:1997` (workerd's
+  // --socket-addr), or the port alone as an argument (`hold.mjs 6011`) — never any `=N` (`--max-old-space-size=4096`,
+  // `--workers=3000` aren't ports: review)
+  const named = new RegExp(`(--port[= ]|\\s-p |(localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0|\\[::1?\\]):|\\s)${port}($|[\\s"'/])`)
+  // a shell only mentions the port in a command it was given (Claude Code's own shells keep theirs), and a browser only
+  // visits it (`http://localhost:5173/`) — neither listens
+  const notServer = /^"?(?:[^"]*[\\/])?(bash|sh|zsh|pwsh|powershell|chrome|msedge|firefox)(\.exe)?"?\s/i
+  return all.filter(p => !mine.has(p.pid) && named.test(p.cmd) && !notServer.test(p.cmd)).map(p => p.pid)
+}
+
 // Every process: [{ pid, ppid, cmd, started }]. Throws with the reason when the list can't be read.
 // tries: stop-servers needs the list (3 tries); the pre-flight only wants a name for its message (1 try, then without it).
 export function processes({ tries: most = 3 } = {}) {
@@ -92,16 +134,17 @@ function folderOf(p, byPid) {
 }
 
 // The ports in the list that something already holds: [{ port, pid, cmd, folder }] — [] when all are free.
-// Only a taken port pays for the process list, so a run with every port free costs one netstat / ss call.
+// Taken = something answers there (answeringPorts); netstat and the process list only name who. Only a taken port pays
+// for those, so a run with every port free costs one quick knock.
 export function heldPorts(ports) {
-  const listening = listeningPorts()
-  const taken = [...new Set(ports)].filter(port => listening.has(port))
+  const taken = [...answeringPorts(ports)]
   if (!taken.length) return []
-  let byPid = new Map()
-  try { byPid = new Map(processes({ tries: 1 }).map(p => [p.pid, p])) } catch { /* still say the port, without the process */ }
+  let all = []
+  try { all = processes({ tries: 1 }) } catch { /* still say the port, without the process */ }
+  const byPid = new Map(all.map(p => [p.pid, p]))
   return taken.map(port => {
-    const pid = listening.get(port)[0] ?? 0
+    const pid = holders(port, all)[0] ?? 0
     const p = byPid.get(pid)
-    return { port, pid, cmd: p ? shortCommand(p.cmd) || '(a system process)' : `process ${pid || '?'}`, folder: p ? folderOf(p, byPid) : '' }
+    return { port, pid, cmd: p ? shortCommand(p.cmd) || '(a system process)' : pid ? `process ${pid}` : "(Windows didn't say which process)", folder: p ? folderOf(p, byPid) : '' }
   })
 }

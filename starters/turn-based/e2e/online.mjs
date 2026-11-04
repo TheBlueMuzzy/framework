@@ -13,6 +13,9 @@
 // so this also proves the page finds its server with nothing pointed by hand (no VITE_PARTY_HOST). Its storage is a
 // folder of its own (PERSIST_TO, default .wrangler/state-e2e). `npm run party:dev` uses the same port: stop it first
 // (check:full's port check says so). serverPort, if given, must be that same port (check-all passes it for that check).
+// Slow machines (F170): at Play again, B's "room" message is held back 800 ms behind the new board, every run — the
+// gap a slow runner leaves between the two, made long enough to always see. ONLINE_CPU_SLOW=5 also slows both tabs'
+// CPU 5× (Chrome's own throttle, like a slow GitHub runner); off by default.
 import { mkdirSync } from 'node:fs'
 import { createServer } from 'vite'
 import { unstable_dev } from 'wrangler'
@@ -22,6 +25,8 @@ import { readPartyPort } from '../src/rooms/vitePlugin.mjs'
 
 const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6403)
+const CPU_SLOW = Number(process.env.ONLINE_CPU_SLOW ?? 1)
+const SLOW_ROOM_MS = 800 // how long B's rematch "room" message is held back: a slow machine's gap, made long (F170)
 const { port: SERVER_PORT } = readPartyPort()
 if (process.argv[4] && Number(process.argv[4]) !== SERVER_PORT) {
   console.log(`ONLINE NOT STARTED — asked for room port ${process.argv[4]}, but wrangler.json dev.port (what the page reads) is ${SERVER_PORT}. Make them agree (scripts/check-all.mjs).`)
@@ -45,9 +50,28 @@ const browser = await chromium.launch()
 async function openTab(name, width, height) {
   const context = await browser.newContext({ viewport: { width, height } })
   const page = await context.newPage()
+  if (CPU_SLOW > 1) await (await context.newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate: CPU_SLOW })
   page.noise = []
   page.leftRoom = false // sent the room its "leave" message (online.leave(), the only clean way out of a room)
-  page.on('websocket', (ws) => ws.on('framesent', (f) => { if (String(f.payload).includes('"type":"leave"')) page.leftRoom = true }))
+  page.holdNextStart = false // hold back the room's next "a match is on" message (F170, below)
+  // The tab's line to the room server goes through here: it notes "leave", and can hold one message back (in order:
+  // whatever comes after it waits too)
+  await page.routeWebSocket((url) => url.port === String(SERVER_PORT), (ws) => {
+    const room = ws.connectToServer()
+    let delivered = Promise.resolve()
+    room.onMessage((message) => {
+      const text = String(message)
+      if (page.holdNextStart && text.includes('"type":"room"') && text.includes('"phase":"playing"')) {
+        page.holdNextStart = false
+        delivered = delivered.then(() => new Promise((done) => setTimeout(done, SLOW_ROOM_MS)))
+      }
+      delivered = delivered.then(() => ws.send(message))
+    })
+    ws.onMessage((message) => {
+      if (String(message).includes('"type":"leave"')) page.leftRoom = true
+      room.send(message)
+    })
+  })
   page.on('console', (m) => { if (m.type() === 'error') page.noise.push(`${name} console error: ${m.text()}`) })
   page.on('pageerror', (e) => page.noise.push(`${name} page error: ${e.message}`))
   await page.goto(`http://127.0.0.1:${PORT}/`)
@@ -132,7 +156,11 @@ try {
     await a.screenshot({ path: `${OUT}/online-A-results.png` })
     await b.screenshot({ path: `${OUT}/online-B-results.png` })
 
-    // Play again (A hosts): the results close on both tabs WITHOUT leaving the room — a new match on an empty board
+    // Play again (A hosts): the results close on both tabs WITHOUT leaving the room — a new match on an empty board.
+    // The server sends a rematch as two messages: the new board (view) first, then the room ("a match is on"). B gets
+    // the room late, like on a slow machine (F170: GitHub's runner lost this race 4 times — the old results, now "It's
+    // a draw", stayed up over the new empty board until the room caught up)
+    b.holdNextStart = true
     await a.getByRole('button', { name: 'Play again' }).click()
     for (const page of [a, b]) await page.locator('[data-board] [data-mark]:not([data-mark=""])').first().waitFor({ state: 'detached' })
     if (await finished(a) || await finished(b)) fail('Play again left the results up')

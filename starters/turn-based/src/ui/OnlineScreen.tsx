@@ -3,7 +3,7 @@
 // the room. Leave always goes through online.leave() (a closed tab keeps the seat: "Rejoin match" on the main menu).
 // The results open on the kit's screen stack ('online-results'), like the game against the computer's, so Esc and a
 // phone's Back close them — and closing them leaves the room, like their Leave button (F163, F160's rule).
-import { useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from 'react'
 import text from '../../content/text/en.json'
 import { Hud, HudText, Lobby, Reconnecting, Results, fill, rejoinWords, screens, toast, useScreens, welcomeBackLine } from './kit'
 import { useRoom } from '../rooms/useRoom'
@@ -119,7 +119,11 @@ export function OnlineScreen({ start, onClose }: { start: OnlineStart; onClose: 
         banner={<Board board={game.board} winLine={game.winLine} canPlay={myTurn} onPlay={(cell) => { online.active(); online.send({ cell }) }} />}
         actions={<EmoteSeats emotes={emotes} seats={seats} mine={mySeatId ?? []} activeId={game.over ? undefined : order[game.turn]} avoid=".kit-hud-slot" />}
       />
-      {phase === 'over' && (
+      {/* The results need BOTH messages to say "over": the room's phase and the board's own game (the view). They
+          arrive as two messages, a beat apart on a slow machine — at a rematch the new board comes first, at a match's
+          end the room does — so trusting the phase alone left the results ("It's a draw") up over the rematch's
+          empty board until the room caught up (F170). */}
+      {phase === 'over' && game.over && (
         <ResultsOnStack onClosed={leave} results={{
           dim: true,
           title: resultTitle,
@@ -154,9 +158,11 @@ export function OnlineResultsScreen() {
 }
 
 function ResultsOnStack({ results, onClosed }: { results: ResultsShown; onClosed: () => void }) {
-  // What they show, kept up to date (set before they open, so they open with their buttons there to take the focus)
-  useEffect(() => { show(results) })
-  useEffect(() => {
+  // What they show, kept up to date (set before they open, so they open with their buttons there to take the focus).
+  // Layout effects: they open and close in the same paint as the board under them changes — never a frame of the
+  // last match's results over the new board (F170)
+  useLayoutEffect(() => { show(results) })
+  useLayoutEffect(() => {
     if (!screens.current.includes(ONLINE_RESULTS)) screens.push(ONLINE_RESULTS)
     return () => {
       if (screens.current.at(-1) === ONLINE_RESULTS) screens.pop()
