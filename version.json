@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.36.0",
-  "build": 1,
+  "version": "0.37.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -232,6 +232,11 @@
       "version": "0.36.0",
       "date": "2026-11-03",
       "summary": "Checks that don't cry wolf"
+    },
+    {
+      "version": "0.37.0",
+      "date": "2026-11-03",
+      "summary": "Steadier rooms and checks"
     }
   ]
 }

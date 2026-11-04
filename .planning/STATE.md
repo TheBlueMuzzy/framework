@@ -9,7 +9,7 @@ Reviewed through: framework 4612869 (sprint 53, 89e82d1..4612869 — F179 + F178
 
 ## Where we are
 Stage: deliver   Milestone: v0.35 Steadier rooms and checks   Sprint: 53
-Doing: — (v0.37.0 released; next /sprint)   Branch: dev/v0-35-steady   Version: 0.36.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
+Doing: — (v0.37.0 released; next /sprint)   Branch: dev/v0-35-steady   Version: 0.37.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.15.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

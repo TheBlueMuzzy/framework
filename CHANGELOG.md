@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.37.0 — 2026-11-03
+
+Steadier rooms and checks. Online games never flash the last match's results over a new board: the room and the board now always arrive in an order that agrees. And two framework checks started at once take turns instead of breaking each other.
+
+### Breaking
+- Rooms 0.15.0 is a server change: a game that updates it deploys its room server again (`npm run party:deploy`), as with any change under `src/rooms/server/`.
+
+### New
+- Rooms 0.15.0: when a player's room says the match is over, the board they have is always the finished one. A match's end sends the last board first, then "over". A start or rematch sends "playing" first, then the new board. A player who reconnects gets them in the same order. A game can show its results from the room's phase alone.
+- Framework check: a second check:fast started while one is running says it's waiting, then runs after it — the same lock the BMUZ hand-back check, commit check and save already use.
+
+### Fixed
+- Rooms: a rematch's empty board arrived before the room said "playing", so the last match's results stayed up over it for a moment. The final move's board could also arrive just after "over".
+- Rooms: a player who dropped before the last move and came back after it got "over" before the finished board.
+- Starter game: shows its online results from the room's phase alone again (its extra check from v0.36.0 is no longer needed with rooms 0.15.0).
+- Crashes: its worker type-check test uses its own folder on every run, so two runs at once can't remove it under each other.
+
 ## v0.36.0 — 2026-11-03
 
 Checks that don't cry wolf. A red check now means a real problem: the port tools see every local server, the starter game's online test no longer fails at random on slow machines, and a busy PC re-runs the checks that ran out of time instead of reporting them red.
