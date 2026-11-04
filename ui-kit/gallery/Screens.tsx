@@ -9,13 +9,12 @@ import { gear } from './symbols'
 import { TalkSample } from './Talk'
 import { PayslipSample, VictoryRevealSample } from './Report'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
-import whatsNew from './content/text/whats-new.json'
 import {
   ArtLayer, ArtStage, LevelMeter, PullHandle, SnapControl, TitleArt, type LevelStep,
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
-  TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, showWhatsNew, writeLastSeen, type HandPlace, type HandStage, type ToastPlace,
+  TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -579,7 +578,6 @@ const openers: Record<string, () => void> = {
     danger: true, onConfirm: () => toast('Progress reset'), words: { yes: 'Reset' } }),
   // What's new the way a game shows it: last seen 0.3, this build 0.4.0.12 → the 0.4.0 lines (its own slot, so the
   // gallery opens it every time and never touches a game's record)
-  whatsnew: () => { writeLastSeen('0.3.0', 'gallery-whats-new'); showWhatsNew({ version: '0.4.0.12', ...whatsNew, storageKey: 'gallery-whats-new' }) },
   pause: () => { screens.push('hud'); screens.push('pause') },
   reconnecting: () => { screens.push('hud'); screens.push('reconnecting') },
   failed: () => { screens.push('hud'); screens.push('failed') },

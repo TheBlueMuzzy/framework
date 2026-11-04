@@ -10,10 +10,12 @@
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
 // Usage: npm run shoot
+// STYLES (F186): a routine run shoots only the styles real games use (GAME_STYLES below: Clean, Cozy, Neon, Cartoon).
+// Before a UI kit release, all seven: npm run shoot:all (= --all-styles; it works with --webkit and --pseudo too).
 // WEBKIT (F148): npm run shoot:webkit (= node scripts/shoot.mjs --webkit, or SHOOT_ENGINE=webkit) — iPhone's engine,
-// Playwright's own WebKit. Only the 18 key screens, in all 7 looks, on a 390×844 phone upright and an 844×390 one on
-// its side, at 100% and 200% text (504 shots, ~11 min), plus the screen stack and menu checks on the phone — saved to
-// screenshots-webkit/ with the same names as the Chromium shots.
+// Playwright's own WebKit. Only the 17 key screens, in the game styles (all 7 with --all-styles), on a 390×844 phone
+// upright and an 844×390 one on its side, at 100% and 200% text, plus the screen stack and menu checks on the phone —
+// saved to screenshots-webkit/ with the same names as the Chromium shots.
 // LAYOUTS (F149): every shot also writes <shots folder>/layout/<shot>.json — each text's line count and each part's
 // size — so npm run compare:engines lists what wraps or sizes differently between the two runs.
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
@@ -25,12 +27,18 @@ import { pseudo } from '../kit/blocks/words.ts'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 import { recordLayout } from './compareEngines.mjs'
 
-// Preset names = the JSON files in kit/styles/
-const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
+// Every style the kit has = the JSON files in kit/styles/
+const allPresets = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
+// The styles real games use (content/ui/style.json "preset"): Clean (the turn-based starter), Cozy (Glyphtender),
+// Neon (Goops), Cartoon (Roll Better). A game that picks another style → add it here, so routine runs shoot it too.
+const GAME_STYLES = ['clean', 'cozy', 'neon', 'cartoon']
+const ALL_STYLES = process.argv.includes('--all-styles')
+const presetNames = ALL_STYLES ? allPresets : allPresets.filter((preset) => GAME_STYLES.includes(preset))
+console.log(`Styles: ${presetNames.join(', ')}${ALL_STYLES ? ' (all of them — before a UI kit release)' : ' (the ones games use; npm run shoot:all for every style)'}`)
 // Shown in every style, for picking a style and catching a style that breaks one of them
 const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'talk', 'payslip', 'victoryreveal']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk', 'whatsnew']
+const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },

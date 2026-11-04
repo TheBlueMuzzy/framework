@@ -467,6 +467,12 @@ gallery's `npm run shoot` uses the same one.
   `?screen=emotes`; git tag `archive/emotes-0.4.2` keeps them. The announcer (`LiveAnnouncer`, `announce`,
   `liveRegion`) moved to `kit/blocks/announce.tsx`, same names, same behaviour (TalkingBubble speaks through it).
   `PlayerSeats` (tappable seats, `badge`, `seatProps`) stays. A game's copy keeps working until it updates.
+- 0.41.0 (F186): **`WhatsNew` archived** (no game called it) — `WhatsNew`, `showWhatsNew`, `whatsNewWords`,
+  `kit/blocks/whatsNew.ts` (`whatsNewDecision`, `readLastSeen` / `writeLastSeen`, `shortVersion`…), the kit's
+  `whats-new` screen and the gallery's `?screen=whatsnew`; git tag `archive/whats-new` keeps it.
+  **Screenshot runs** (`npm run shoot`, `shoot:webkit`, `shoot:pseudo`) now shoot only the styles games use — Clean,
+  Cozy, Neon, Cartoon (`GAME_STYLES` in `scripts/shoot.mjs`); `npm run shoot:all` (`--all-styles`) shoots all seven,
+  before a UI kit release.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
