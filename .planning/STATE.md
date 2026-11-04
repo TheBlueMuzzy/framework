@@ -9,7 +9,7 @@ Reviewed through: framework 0b7ea3a (sprint 52, 1373903..0b7ea3a — F177 + F171
 
 ## Where we are
 Stage: deliver   Milestone: v0.34 Checks that don't cry wolf   Sprint: 52
-Doing: — (v0.36.0 released; next /sprint)   Branch: dev/v0-34-checks   Version: 0.35.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
+Doing: — (v0.36.0 released; next /sprint)   Branch: dev/v0-34-checks   Version: 0.36.0 (emotes 0.4.2 · ai 0.8.3 · rooms 0.14.0 · table 0.8.2 · UI kit 0.39.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.7.0 · version 0.1.3 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

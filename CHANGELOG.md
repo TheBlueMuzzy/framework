@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.36.0 — 2026-11-03
+
+Checks that don't cry wolf. A red check now means a real problem: the port tools see every local server, the starter game's online test no longer fails at random on slow machines, and a busy PC re-runs the checks that ran out of time instead of reporting them red.
+
+### New
+- Framework check: when checks run out of time side by side, it says "the PC is busy", names the busiest program, and runs those checks again one at a time. The result run alone is the one that counts. A real failure is never re-run, and a check that's still too slow alone says to try again when the PC is quieter.
+- Starter game: its online test now always holds back one of the rematch messages for a moment, so this kind of timing bug shows up on every run, not only on slow machines.
+
+### Fixed
+- Starter game: after Play again online, the last match's results ("It's a draw") could stay up over the new empty board for a moment, and taps on the board did nothing until they closed. The results now wait until the match and the board both say the game is over. Games built from the starter should copy the same check into their online screen.
+- Starter game: its port check before the full checks (`scripts/ports.mjs`) now finds a server that Windows leaves out of its port list, and no longer refuses a port that only has closing connections left. Games update by copying the BMUZ template `templates/ports.mjs` over their `scripts/ports.mjs`.
+
+### Known issues
+- The rooms module sends the board and the room in opposite orders at a match's start and end. Any game that shows results from the room's phase alone can see the same brief overlap the starter had. Planned: fix it in the module (in the roadmap's Ideas).
+
 ## v0.35.0 — 2026-11-03
 
 Releases that don't need babysitting. Crash maps now come only from the real release build, so test runs leave nothing behind, and the BMUZ release tools build and check them against the live page by themselves. The starter game also warns about slow unit tests that are likely to time out on GitHub.
