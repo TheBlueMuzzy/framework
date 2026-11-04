@@ -1,0 +1,31 @@
+# Sprint 56 — Start the rebuild: hooks that never go quiet, a lighter framework
+Started 2026-11-04 · Milestone v0.37 · Features: F184, F186
+
+## F184 🧱 Hook rule runner
+Done when: every BMUZ hook rule lives in its own small file run by one shared runner; a rule that breaks is reported loudly and the other rules still run; the commit checks run inside git's own commit step in each BMUZ project; HOOKS.md's table is made from the rule files — and every hook behaves exactly as before (no rule changes yet — those are F185 — Slimmed rule set).
+- [ ] 🤖 1. Runner + the rule-file shape (id · event · what · why · on/off · tests); a crashing rule or a broken shared file says so loudly, never silently allows everything — tests red first — ~/.claude/config/bmuz/hooks/runner.mjs
+- [ ] 🤖 2. Before-action rules move into rule files (guard-edits, guard-git, commit-typecheck, live-push); the old hook files become one-line starters, settings.json unchanged — ~/.claude/config/bmuz/hooks/guard-git.mjs
+- [ ] 🤖 3. After-edit rules move (lint-edit, check-ui-edit, rule-kind, sketch-lint, plan-lint) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [ ] 🤖 4. Turn-end and moment rules move (handoff-check, stop-plan-check, stop-check-fast, stop-unsaved, session-moments) — ~/.claude/config/bmuz/hooks/handoff-check.mjs
+- [ ] 🤖 5. Commit checks also run in git's own commit step, set per BMUZ project (never globally — collabs aren't touched) by save.mjs; refuse `--no-verify` — ~/.claude/config/bmuz/scripts/save.mjs
+- [ ] 🤖 6. HOOKS.md's rule table generated from the rule files; firing log lines carry the rule id — ~/.claude/config/bmuz/HOOKS.md
+- [ ] 🤖 7. Whole hook + script suites green with their old tests unchanged; push to ~/.claude-config — ~/.claude/config/bmuz/hooks/test-hooks.mjs
+Check: the old test suites pass unchanged (same answers, same wording); a rule made to throw on purpose gives a loud message while the others still fire; a commit with a type error is refused by git itself in a BMUZ project and untouched in a non-BMUZ repo.
+
+## F186 🔧 Slimmed framework
+Done when: the cuts Muzzy approved in the framework audit (`research/audit-2026-11/framework.md` §7) are done — no game loses anything it uses, every check stays green, and the README tells the truth.
+- [ ] 🤖 1. The starter keeps only its own game; its modules are installed fresh when it's copied or checked (no committed module copies) — starters/turn-based/README.md
+- [ ] 🤖 2. Emotes archived (a git tag keeps it) with the UI kit's emote parts and the AI's banter; the starter unwired — emotes/README.md
+- [ ] 🤖 3. Saves slimmed to what Glyphtender calls (leaderboards, link-code cloud, replay, any-platform storage, save health archived — check cloudRoutes / saveCode against Glyphtender first) — saves/README.md
+- [ ] 🤖 4. Screenshot runs shoot the styles games use; all seven only before a UI kit release; WhatsNew archived — ui-kit/scripts/shoot.mjs
+- [ ] 🤖 5. README: every module, proven by · used by · frozen marks, no version history in the table — README.md
+- [ ] 🤖 6. Framework check:fast + the starter's check:full green; tracked lines before/after counted — scripts/starter-check.mjs
+Check: check:fast green; starter check:full green; no file in any game changed; tracked lines down by about the audit's estimate (~46k).
+
+## Notes
+- Open bugs: none open in the framework (BUGS.md has no open P0/P1).
+- Muzzy 2026-11-04: "remember, i don't really understand this level of technical decisions" — Claude makes the engineering calls and logs them here; questions to Muzzy only about what he sees, plays or wants (hand-off template, ~/.claude-config ded89a6).
+- Claude's call (F184): move first, change later. F184 only moves rules into files with their tests unchanged; the false-alarm fixes (≈1,000 loops) are F185 — Slimmed rule set, so if anything breaks we know which step did it.
+- Claude's call (F184): the old hook files stay as one-line starters so settings.json (Muzzy's file) doesn't change; joining them into one runner per event can come later.
+- Claude's call (F186): the extraction queue stays until F188 — Module recipe decides its fate (audit §9). Games keep their own copies, so archiving a module never touches a game.
+- Claude's call: two helpers side by side — F184 works in ~/.claude, F186 in the framework repo, so they never touch the same files.
