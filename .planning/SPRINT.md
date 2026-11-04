@@ -17,9 +17,9 @@ Done when: a second framework check:fast while one is running waits for it (sayi
 - [x] 🤖 2. Tests red first: a second run waits for the first, then runs; a lock left by a dead run is ignored — scripts/busyPc.test.mjs
 - [x] 🤖 3. check:fast takes a lock (like check:full's .check-lock) — scripts/check-modules.mjs
 - [x] 🤖 4. The crashes worker test uses its own folder per run — crashes/templates/worker/worker.test.ts
-- [ ] 🤖 5. Two check:fast at once: both green — scripts/check-modules.mjs
+- [x] 🤖 5. Two check:fast at once: both green — scripts/check-modules.mjs
 Check: new tests red then green; two runs at once both green.
-Checked:
+Checked: 2026-11-03 — lock tests 5/5, three runs in a row (after a fix: 2 of them first failed on a busy PC — a timed hold and a 1 s limit; now no timers). Two check:fast 3 s apart: the second printed "⏳ another check:fast is running here (process 56380, since 9:52:11 PM) — waiting for it" and ran after the first, one at a time (before: side by side). Both ran under another session's bot sims (scripts/bots/economy.mjs, ~76% CPU, named by F171): 2 of 24 red each (my test bug, fixed; and one module too slow even alone). Final check:fast on the same busy PC: 11 timed out → re-run alone → 24/24 (10:13 PM). crashes worker test passes with its own folder per run. BMUZ lock change pushed to ~/.claude-config (0f4bbd7).
 
 ## Notes
 - F178 measured 2026-11-03 (two framework check:fast at once, 2 s apart): both ended 24/24, but only thanks to F171 — Checks notice a busy PC (3 and 4 timed-out checks re-run alone) — and each took twice as long; the crashes cache clash (TS5058) didn't repeat this time, but did at 4:27 PM.
