@@ -499,14 +499,14 @@ flowchart LR
 
 ## v0.34 — Checks that don't cry wolf  · planned 2026-11-03
 Goal (Muzzy 2026-11-03: "let's just jam all the way through those bugs"): a red check means a real problem — the port lookup sees every server (and ignores closing connections), the starter's online test stops racing on GitHub, and a busy PC is named instead of reported red.
-- 🔨 F177 🐞 Port lookup you can trust — templates/ports.mjs reads one `netstat -ano`: a listener started from Claude Code's shell sometimes isn't in it (stop-servers says "nothing is listening" while the server answers; test-scripts stop-servers + port-preflight red 2026-11-03), and a port with only closing rows (TIME_WAIT, owner 0) is refused as busy (Glyphtender F97 + F99) — find a lookup that sees every listener, count only real listeners — should · sprint 52
-- 🔨 F170 🐞 Starter online test race — the starter's e2e/online.mjs went red on GitHub a 3rd time and passed on a re-run (2026-10-30, run 41052406220: "Play again left the results up" and "Back on B's online results left the game's page (about:blank)"; before: v0.31.0 main + F161's branch, 2026-10-27; a 4th time 2026-11-03, run 41702523187 on dev/v0-33-releases — a plan-only commit, the same code green 4 min earlier) — find the race on a slow runner (likely the results' screen-stack open/close vs the rematch arriving), fix it, prove it with repeated runs — should · sprint 52
-- 🔨 F171 🔧 Checks notice a busy PC — when check:fast fails only on timeouts, say "timeouts only — the PC is busy (name the busiest process)" and re-run those modules one at a time instead of reporting red (v0.32 look-back: another chat's bot sims held the CPU all night; every run went 11–14/24 red on timeouts and each module had to be proven alone by hand) — should · sprint 52
+- ✅ F177 🐞 Port lookup you can trust — templates/ports.mjs reads one `netstat -ano`: a listener started from Claude Code's shell sometimes isn't in it (stop-servers says "nothing is listening" while the server answers; test-scripts stop-servers + port-preflight red 2026-11-03), and a port with only closing rows (TIME_WAIT, owner 0) is refused as busy (Glyphtender F97 + F99) — find a lookup that sees every listener, count only real listeners — should · sprint 52 · approved 2026-11-03
+- ✅ F170 🐞 Starter online test race — the starter's e2e/online.mjs went red on GitHub a 3rd time and passed on a re-run (2026-10-30, run 41052406220: "Play again left the results up" and "Back on B's online results left the game's page (about:blank)"; before: v0.31.0 main + F161's branch, 2026-10-27; a 4th time 2026-11-03, run 41702523187 on dev/v0-33-releases — a plan-only commit, the same code green 4 min earlier) — find the race on a slow runner (likely the results' screen-stack open/close vs the rematch arriving), fix it, prove it with repeated runs — should · sprint 52 · approved 2026-11-03
+- ✅ F171 🔧 Checks notice a busy PC — when check:fast fails only on timeouts, say "timeouts only — the PC is busy (name the busiest process)" and re-run those modules one at a time instead of reporting red (v0.32 look-back: another chat's bot sims held the CPU all night; every run went 11–14/24 red on timeouts and each module had to be proven alone by hand) — should · sprint 52 · approved 2026-11-03
 ```mermaid
 flowchart LR
-  F177[🔨 F177 Port lookup you can trust]
-  F170[🔨 F170 Starter online test race]
-  F171[🔨 F171 Checks notice a busy PC]
+  F177[✅ F177 Port lookup you can trust]
+  F170[✅ F170 Starter online test race]
+  F171[✅ F171 Checks notice a busy PC]
 ```
 
 ## Later
