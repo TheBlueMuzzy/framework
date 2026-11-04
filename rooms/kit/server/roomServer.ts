@@ -283,9 +283,13 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.log(result.cameBack ? `${seat.name} is back (${seat.id})` : `${seat.name} joined (${seat.id})`)
 
     this.restartIdleClock(seat.id) // (back on their turn: a fresh idle clock)
-    if (wasAway) this.seatChanged(seat.id, 'back')
-    this.afterSeatsChanged()
+    // F179's rule for a tab coming back too (it still holds the room + board it had): a match on → the room first,
+    // then the board; a match over → the finished board first, then the room (review: "over" came before the board)
+    const over = this.data.phase === 'over'
+    if (!over) this.afterSeatsChanged()
+    if (wasAway) this.seatChanged(seat.id, 'back') // (the game hears it; everyone gets their board)
     if (this.game !== null) this.sendView(seat)
+    if (over || wasAway) this.afterSeatsChanged() // (after a seat change: the seats as they are now)
     if (wasAway && this.data.phase !== 'lobby') this.sayWelcomeBack(seat.id)
   }
 
@@ -334,8 +338,8 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.data.personMoved = false
     this.game = state
     this.aMoveWasMade()
+    this.sendRoomToEveryone() // "playing" first, then the new board (afterGameChanged) — F179's rule
     this.afterGameChanged()
-    this.sendRoomToEveryone()
   }
 
   private handleKick(connection: PartyConnection, seat: SeatRecord, targetId: string): void {
@@ -578,10 +582,14 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.afterGameChanged()
   }
 
-  /** After every game change: is it over? Then everyone gets their own view. */
+  /** After every game change: everyone gets their own view — and when it's over, the room says so AFTER the views.
+   *  The rule (F179): when a tab's room says "over", the board it has is the finished one. So the end sends the board
+   *  first, then the room; a start sends the room first, then the board (handleStart). Before, a match's last move
+   *  came after "over", and a rematch's empty board came before "playing" — last match's results over the new board. */
   private afterGameChanged(): void {
     if (this.game === null) return
-    if (this.data.phase === 'playing' && this.rules.isOver(this.game)) {
+    const nowOver = this.data.phase === 'playing' && this.rules.isOver(this.game)
+    if (nowOver) {
       this.data.phase = 'over'
       this.stopGameTimers()
       this.clearIdleClocks()
@@ -589,13 +597,13 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.log('game over')
       // (a finished game isn't kept: if nobody's here — the bots played it out — the room clears after the usual wait)
       if (this.sockets.size === 0) this.startEmptyRoomTimer()
-      this.sendRoomToEveryone()
     }
     this.changed()
     for (const seatId of this.sockets.keys()) {
       const seat = findSeat(this.data, seatId)
       if (seat) this.sendView(seat)
     }
+    if (nowOver) this.sendRoomToEveryone()
   }
 
   private sendView(seat: SeatRecord): void {

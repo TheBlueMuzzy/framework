@@ -491,6 +491,60 @@ describe('RoomServer: the game', () => {
     expect(bob.last('view')?.view).toMatchObject({ total: 0, mySecret: 6 })
   })
 
+  // F179 — Rooms messages in one order: a tab takes the room and the board (its view) as two messages. Read them in
+  // the order they arrive, the way useRoom does: the room must never say "over" while the board is already a new
+  // match's (that put last match's results over the rematch's empty board — F170, the starter's online test).
+  it('the room and the board never disagree that way: at the start, the end, a rematch and a rejoin', () => {
+    const { ann, bob } = startGame()
+    const play = () => { for (let i = 0; i < 4; i++) { send(ann, { type: 'action', action: { add: 1 } }); send(bob, { type: 'action', action: { add: 2 } }) } }
+    play() // total 12 → over
+    send(ann, { type: 'start', options: { secretBase: 7 } }) // rematch straight from the results
+    play()
+    drop(bob)
+    const back = join('tab-bob-2', 'Bob', BOB) // rejoin after the match ended
+    for (const tab of [ann, bob, back]) {
+      let phase = ''
+      let view: View | null = null
+      const wrong: string[] = []
+      tab.received.forEach((m, i) => {
+        if (m.type === 'room') phase = m.room.phase
+        if (m.type === 'view') view = m.view as View | null
+        if (phase === 'over' && view && view.total < 10) wrong.push(`#${i} (${m.type}): room "over", board total ${view.total}`)
+      })
+      expect(wrong, `${tab.id} received ${tab.received.map((m) => m.type).join(' → ')}`).toEqual([])
+    }
+  })
+
+  // …and a tab that comes back keeps what it had before it dropped (useRoom keeps the last room + board), so the
+  // order counts across the reconnect too (review: the join sent the room before the board)
+  const wrongMoments = (messages: FakeConnection['received']) => {
+    let phase = ''
+    let view: View | null = null
+    const wrong: string[] = []
+    messages.forEach((m, i) => {
+      if (m.type === 'room') phase = m.room.phase
+      if (m.type === 'view') view = m.view as View | null
+      if (phase === 'over' && view && view.total < 10) wrong.push(`#${i} (${m.type}): room "over", board total ${view.total}`)
+    })
+    return wrong
+  }
+  it('a tab that dropped before the last move and comes back after it: the finished board before "over"', () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 3; i++) { send(ann, { type: 'action', action: { add: 1 } }); send(bob, { type: 'action', action: { add: 2 } }) } // 9, Ann's turn
+    drop(bob)
+    send(ann, { type: 'action', action: { add: 1 } }) // 10 → over, Bob away
+    const back = join('tab-bob-2', 'Bob', BOB)
+    expect(wrongMoments([...bob.received, ...back.received]), back.received.map((m) => m.type).join(' → ')).toEqual([])
+  })
+  it('a tab that was away when the rematch started: "playing" before the new board', () => {
+    const { ann, bob } = startGame()
+    for (let i = 0; i < 4; i++) { send(ann, { type: 'action', action: { add: 1 } }); send(bob, { type: 'action', action: { add: 2 } }) }
+    drop(bob)
+    send(ann, { type: 'start', options: { secretBase: 3 } }) // rematch while Bob is away
+    const back = join('tab-bob-2', 'Bob', BOB)
+    expect(wrongMoments([...bob.received, ...back.received]), back.received.map((m) => m.type).join(' → ')).toEqual([])
+  })
+
   it('everyone gone mid-game: the room waits, then clears', () => {
     const { ann, bob } = startGame()
     drop(ann)

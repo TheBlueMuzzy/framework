@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-27 — Released v0.31.0 (v0.29 Clocks you can trust): lint 0.3.0 — code that takes a clock option never reads Date.now() beside it; the framework and the starter run it as an error.
 - 2026-10-27 — Released v0.30.0 (v0.28 Room for longer words): the UI kit holds words ~40% longer — names and codes are never translated, fits re-measure, the Lobby room and the HUD make room; saves 0.6.5 keeps its own link code by the game's clock.
 - 2026-10-27 — Released v0.29.0 (v0.27 Ready to translate): the lint module flags player words typed into game code; `?pseudo` shows a game in a long fake language and the framework check warns where words won't fit once translated.
 - 2026-10-26 — Released v0.28.0 (v0.26 Rules check themselves): the lint module — settings belong in content/, no React state set every frame in useFrame; the starter has both as errors; install-module keeps an installer's own eslint.config edit.

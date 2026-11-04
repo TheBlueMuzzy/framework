@@ -10,6 +10,7 @@ import { spawn } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { rerunTimeouts } from './busyPc.mjs'
+import { takeCheckLock } from './checkLock.mjs'
 
 const root = join(import.meta.dirname, '..')
 const modules = readdirSync(root).filter((name) => existsSync(join(root, name, 'kit', 'VERSION')))
@@ -61,6 +62,8 @@ function versionNotesMatch() {
   return { label: 'version notes = kit/VERSION', ok: !wrong.length, log: wrong.join('\n') }
 }
 
+// one run at a time: a second one (the hand-back hook's, a helper's) waits for this one (F178)
+takeCheckLock(root)
 console.log(`Checking ${modules.length} modules: ${modules.join(', ')}${starters.length ? ` + starter${starters.length > 1 ? 's' : ''} ${starters.join(', ')}` : ''}`)
 const versions = versionNotesMatch()
 console.log(`${versions.ok ? '✓' : '✗'} ${versions.label}`)
