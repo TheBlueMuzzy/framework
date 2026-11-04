@@ -519,8 +519,15 @@ flowchart LR
   F178[✅ F178 check:fast refuses a second run]
 ```
 
+## v0.36 — A sync that knows its own work  · planned 2026-11-03
+Goal (Muzzy 2026-11-03: "keep going"): the PC ↔ laptop sync never mistakes this machine's own changes for the other machine's, so it never blocks a push for nothing — and still never pushes over the laptop's real changes.
+- 🔨 F180 🔧 Sync knows its own pushes — config-sync.sh status said INCOMING for 6 commits this PC had made and already applied, and refused to push until setup.sh ran (v0.34 look-back, 2026-11-03); count a commit this machine pushed (or files already identical) as applied — could · sprint 54
+```mermaid
+flowchart LR
+  F180[🔨 F180 Sync knows its own pushes]
+```
+
 ## Later
-- 💤 F180 🔧 Sync knows its own pushes — config-sync.sh status said INCOMING for 6 commits this PC had made and already applied, and refused to push until setup.sh ran (v0.34 look-back, 2026-11-03); count a commit this machine pushed (or files already identical) as applied — could
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
 - 💤 F106 🧱 Crash reports, round 3 — charts over time (Analytics Engine), a player "report a bug" button, native crashes from app-store / desktop builds — could · needs: F105
