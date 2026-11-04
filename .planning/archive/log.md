@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-10-29 — Released v0.33.0 (v0.31 Cleaner edges): the UI kit's lists never squeeze under two rows and long titles never get cut off (0 problems in a full shoot, English + fake language), online results close with Escape in the starter, and a release writes the module versions itself. The PC crashed mid-sprint on 10-28; nothing was lost.
 - 2026-10-28 — Sprint 49 planned (unattended): cleaner edges (F162 the page check catches three cut-offs, F163 online Results take Escape, F164 a release fills the module versions).
 - 2026-10-27 — Released v0.32.0 (v0.30 Steadier checks): GitHub keeps its test browsers between runs, one shared version helper, the starter's Escape on Results goes to the menu, the kit holds up in the fake language with nothing left over and a button's words fade with its colour.
 - 2026-10-27 — Sprint 48 planned (unattended): steadier checks (F158 GitHub keeps its test browsers, F159 one shared version helper, F160 the starter after Results + Escape, F161 fake-language leftovers).

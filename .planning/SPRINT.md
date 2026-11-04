@@ -13,7 +13,7 @@ Checked: 2026-11-04 01:45 — by a fresh helper, read by Claude: new fire-log te
 
 ## F182 ❓ Rule inventory + verdicts
 Done when: one page lists every BMUZ rule (CLAUDE.md, the skills, PROJECT-FILES, the hooks): where it lives, ①②③, how often it fired, false alarms, overlaps, and a proposed verdict (keep · merge · make it a hook · delete) with a one-line reason — and Muzzy approves or changes the verdicts.
-- [ ] 🤖 1. Build the inventory from the files + the firing log, write the report, publish it as a page — .planning/research/audit-2026-11/rules.md
+- [x] 🤖 1. Build the inventory from the files + the firing log, write the report, publish it as a page — .planning/research/audit-2026-11/rules.md (page: https://claude.ai/artifact/Ja6U8U5fXdeNDtBvTX7Zad)
 - [ ] 🙋 2. Read the page, approve or change the verdicts — .planning/research/audit-2026-11/rules.md
 Check: every ①② rule in CLAUDE.md and every hook rule appears once; each verdict has its reason and its firing count; spot-check 5 counts against the log.
 
