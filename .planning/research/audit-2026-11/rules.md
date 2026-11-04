@@ -414,3 +414,5 @@ Checked first-hand: the session-start awk line (it matches any heading containin
 - **CLAUDE.md shrink:** every line there was asked for by Muzzy. Nothing is lost — the quotes move into the rule files beside the code that enforces them — but which lines leave CLAUDE.md is his call (F185 — Slimmed rule set).
 - **One decision only Muzzy can make:** "small tweaks don't need a task" (CLAUDE.md) vs SP1 "every mid-sprint commit needs a SPRINT line". My pick: the tweak rule wins — SP1 only asks when the commit names a sprint feature (Fnn) — because a sprint line for a typo fix is ceremony, and the firing log showed SP1 ~50 % false.
 - **Order for the rebuild:** the runner (F184 — Hook rule runner) first, with the fail-loudly rule, then the false-alarm fixes as its first rules — they remove ~1,000 loops, the biggest win on this page.
+
+**Muzzy decided (2026-11-04):** (1) "your pick" — the tweak rule wins: SP1 only asks for a SPRINT line when a commit names a sprint feature (Fnn) → F185 — Slimmed rule set. (2) "yes" — the commit checks move into git's own commit hook, set per BMUZ project, never globally → F184 — Hook rule runner.
