@@ -3,10 +3,10 @@ Started 2026-11-03 · Milestone v0.35 · Features: F179, F178 (in this order)
 
 ## F179 🧱 Rooms messages in one order
 Done when: at every moment a game can see (start, rematch, end, rejoin) the room and the board never disagree in the way that put last match's results over a new board — proven by a server test of the message order and the starter's online test without its own extra check.
-- [ ] 🤖 1. Measure today: a server test records the message order at start, rematch, end and rejoin — rooms/kit/server/roomServer.test.ts
-- [ ] 🤖 2. Pick the order (room before board at start, like at the end — or both in one message) and say why in Notes; test red first — rooms/kit/server/roomServer.test.ts
-- [ ] 🤖 3. The server sends them in that order — rooms/kit/server/roomServer.ts
-- [ ] 🤖 4. Say the rule in the README + a version note (rooms 0.15.0) — rooms/README.md
+- [x] 🤖 1. Measure today: a server test records the message order at start, rematch, end and rejoin — rooms/kit/server/roomServer.test.ts
+- [x] 🤖 2. Pick the order (room before board at start, like at the end — or both in one message) and say why in Notes; test red first — rooms/kit/server/roomServer.test.ts
+- [x] 🤖 3. The server sends them in that order — rooms/kit/server/roomServer.ts
+- [x] 🤖 4. Say the rule in the README + a version note (rooms 0.15.0) — rooms/README.md
 - [ ] 🤖 5. Starter takes the new rooms; its online test (with the held-back message) green — starters/turn-based/e2e/online.mjs
 Check: the order test red then green; rooms test + typecheck; starter check:full.
 Checked:
@@ -22,5 +22,7 @@ Check: new tests red then green; two runs at once both green.
 Checked:
 
 ## Notes
+- F179 measured 2026-11-03 (a tab's messages replayed in order, start → end → rematch → end → rejoin): 2 wrong moments, not 1 — #18 a rematch's empty board (total 0) while the room still said "over" (the F170 — Starter online test race bug), and #15 the room said "over" one message BEFORE the last move's board (total 9) — a phase-only game would show results over a board missing its final move.
+- Claude's call (F179): one rule, "when the room says over, the board is the finished one" — the end sends the last board, then the room; a start sends the room ("playing"), then the new board. Not one combined message: that changes the protocol for every client; the order alone fixes both moments. A start's brief "playing + last match's finished board" is harmless (no results, nobody's turn changes until the new board lands).
 - Open bugs: none open in the framework.
 - Planning (2026-11-03): handleStart sends views (afterGameChanged) THEN the room; a match's end sends the room THEN views — the F170 — Starter online test race root cause.

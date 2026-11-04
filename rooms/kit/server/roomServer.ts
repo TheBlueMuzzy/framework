@@ -334,8 +334,8 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.data.personMoved = false
     this.game = state
     this.aMoveWasMade()
+    this.sendRoomToEveryone() // "playing" first, then the new board (afterGameChanged) — F179's rule
     this.afterGameChanged()
-    this.sendRoomToEveryone()
   }
 
   private handleKick(connection: PartyConnection, seat: SeatRecord, targetId: string): void {
@@ -578,10 +578,14 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.afterGameChanged()
   }
 
-  /** After every game change: is it over? Then everyone gets their own view. */
+  /** After every game change: everyone gets their own view — and when it's over, the room says so AFTER the views.
+   *  The rule (F179): when a tab's room says "over", the board it has is the finished one. So the end sends the board
+   *  first, then the room; a start sends the room first, then the board (handleStart). Before, a match's last move
+   *  came after "over", and a rematch's empty board came before "playing" — last match's results over the new board. */
   private afterGameChanged(): void {
     if (this.game === null) return
-    if (this.data.phase === 'playing' && this.rules.isOver(this.game)) {
+    const nowOver = this.data.phase === 'playing' && this.rules.isOver(this.game)
+    if (nowOver) {
       this.data.phase = 'over'
       this.stopGameTimers()
       this.clearIdleClocks()
@@ -589,13 +593,13 @@ export class RoomServer<State, Options, Action, View, Event = never> {
       this.log('game over')
       // (a finished game isn't kept: if nobody's here — the bots played it out — the room clears after the usual wait)
       if (this.sockets.size === 0) this.startEmptyRoomTimer()
-      this.sendRoomToEveryone()
     }
     this.changed()
     for (const seatId of this.sockets.keys()) {
       const seat = findSeat(this.data, seatId)
       if (seat) this.sendView(seat)
     }
+    if (nowOver) this.sendRoomToEveryone()
   }
 
   private sendView(seat: SeatRecord): void {
