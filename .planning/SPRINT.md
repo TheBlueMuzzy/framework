@@ -13,15 +13,17 @@ Checked: 2026-11-03 — the order test red on the old server (2 wrong moments: #
 
 ## F178 🔧 check:fast refuses a second run
 Done when: a second framework check:fast while one is running waits for it (saying so) instead of breaking it, and the crashes worker test no longer shares one folder between runs.
-- [ ] 🤖 1. Measure today: two check:fast at once — which tests clash, and on what — scripts/check-modules.mjs
-- [ ] 🤖 2. Tests red first: a second run waits for the first, then runs; a lock left by a dead run is ignored — scripts/busyPc.test.mjs
-- [ ] 🤖 3. check:fast takes a lock (like check:full's .check-lock) — scripts/check-modules.mjs
-- [ ] 🤖 4. The crashes worker test uses its own folder per run — crashes/templates/worker/worker.test.ts
+- [x] 🤖 1. Measure today: two check:fast at once — which tests clash, and on what — scripts/check-modules.mjs
+- [x] 🤖 2. Tests red first: a second run waits for the first, then runs; a lock left by a dead run is ignored — scripts/busyPc.test.mjs
+- [x] 🤖 3. check:fast takes a lock (like check:full's .check-lock) — scripts/check-modules.mjs
+- [x] 🤖 4. The crashes worker test uses its own folder per run — crashes/templates/worker/worker.test.ts
 - [ ] 🤖 5. Two check:fast at once: both green — scripts/check-modules.mjs
 Check: new tests red then green; two runs at once both green.
 Checked:
 
 ## Notes
+- F178 measured 2026-11-03 (two framework check:fast at once, 2 s apart): both ended 24/24, but only thanks to F171 — Checks notice a busy PC (3 and 4 timed-out checks re-run alone) — and each took twice as long; the crashes cache clash (TS5058) didn't repeat this time, but did at 4:27 PM.
+- F178 found: BMUZ already had a check lock (`.git/bmuz-check.lock`, hooks/lib.mjs holdCheckLock — the hand-back hook, the commit check and /save take it), but a check:fast started by hand never took it, so the hook couldn't see my background run. Claude's call: check:fast takes the SAME lock (scripts/checkLock.mjs, same file + format), and holdCheckLock sets BMUZ_CHECK_LOCK_HELD=<its pid> for what it starts, so the hook's own check:fast doesn't wait on the hook. The crashes test also gets its own folder per run (worker-typecheck-<pid>) — the root clash, fixed too.
 - F179 measured 2026-11-03 (a tab's messages replayed in order, start → end → rematch → end → rejoin): 2 wrong moments, not 1 — #18 a rematch's empty board (total 0) while the room still said "over" (the F170 — Starter online test race bug), and #15 the room said "over" one message BEFORE the last move's board (total 9) — a phase-only game would show results over a board missing its final move.
 - Claude's call (F179): one rule, "when the room says over, the board is the finished one" — the end sends the last board, then the room; a start sends the room ("playing"), then the new board. Not one combined message: that changes the protocol for every client; the order alone fixes both moments. A start's brief "playing + last match's finished board" is harmless (no results, nobody's turn changes until the new board lands).
 - Open bugs: none open in the framework.

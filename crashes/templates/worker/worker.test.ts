@@ -85,7 +85,8 @@ describe('the crashes worker', () => {
     // The module's own tsc can't follow '../src/crashes/…' (that folder only exists in a game), so this builds that
     // layout in a throwaway folder inside node_modules (where @types/node is found) and runs tsc on it.
     const here = dirname(fileURLToPath(import.meta.url))
-    const game = join(here, '..', '..', 'node_modules', '.cache', 'worker-typecheck')
+    // its own folder per run: two runs at once shared one, and one removed it under the other (TS5058, F178)
+    const game = join(here, '..', '..', 'node_modules', '.cache', `worker-typecheck-${process.pid}`)
     rmSync(game, { recursive: true, force: true })
     mkdirSync(join(game, 'src', 'crashes'), { recursive: true })
     mkdirSync(join(game, 'crashes'), { recursive: true })
