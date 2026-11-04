@@ -509,7 +509,7 @@ flowchart LR
   F171[✅ F171 Checks notice a busy PC]
 ```
 
-## v0.35 — Steadier rooms and checks  · planned 2026-11-03
+## v0.35 — Steadier rooms and checks  ✅ released 2026-11-03 (v0.37.0) · planned 2026-11-03
 Goal (Muzzy 2026-11-03: "your pick", from the v0.34 look-back): an online game never shows last match's results over a new board, and two check runs at once never break each other.
 - ✅ F179 🧱 Rooms messages in one order — the rooms server sends the board (view) before the room at a match's start but after it at its end, so a game drawing from room.phase alone shows old results over a new board for a beat (F170 — Starter online test race); send them in one order (or useRoom applies both together) and say the rule in the rooms README — should · sprint 53 · approved 2026-11-03
 - ✅ F178 🔧 check:fast refuses a second run — the framework's check:fast takes a lock like check:full's (.check-lock): a second run (the hand-back hook's, a helper's) waits or says "a check is already running" instead of sharing crashes' node_modules/.cache/worker-typecheck folder and turning red (v0.34 look-back: TS5058 at 4:27 PM, 2026-11-03) — should · sprint 53 · approved 2026-11-03
