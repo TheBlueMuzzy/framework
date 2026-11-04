@@ -14,13 +14,14 @@ Check: the old test suites pass unchanged (same answers, same wording); a rule m
 
 ## F186 🔧 Slimmed framework
 Done when: the cuts Muzzy approved in the framework audit (`research/audit-2026-11/framework.md` §7) are done — no game loses anything it uses, every check stays green, and the README tells the truth.
-- [ ] 🤖 1. The starter keeps only its own game; its modules are installed fresh when it's copied or checked (no committed module copies) — starters/turn-based/README.md
-- [ ] 🤖 2. Emotes archived (a git tag keeps it) with the UI kit's emote parts and the AI's banter; the starter unwired — emotes/README.md
-- [ ] 🤖 3. Saves slimmed to what Glyphtender calls (leaderboards, link-code cloud, replay, any-platform storage, save health archived — check cloudRoutes / saveCode against Glyphtender first) — saves/README.md
-- [ ] 🤖 4. Screenshot runs shoot the styles games use; all seven only before a UI kit release; WhatsNew archived — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 5. README: every module, proven by · used by · frozen marks, no version history in the table — README.md
-- [ ] 🤖 6. Framework check:fast + the starter's check:full green; tracked lines before/after counted — scripts/starter-check.mjs
+- [x] 🤖 1. The starter keeps only its own game; its modules are installed fresh when it's copied or checked (no committed module copies) — starters/turn-based/README.md
+- [x] 🤖 2. Emotes archived (a git tag keeps it) with the UI kit's emote parts and the AI's banter; the starter unwired — emotes/README.md
+- [x] 🤖 3. Saves slimmed to what Glyphtender calls (leaderboards, link-code cloud, replay, any-platform storage, save health archived — check cloudRoutes / saveCode against Glyphtender first) — saves/README.md
+- [x] 🤖 4. Screenshot runs shoot the styles games use; all seven only before a UI kit release; WhatsNew archived — ui-kit/scripts/shoot.mjs
+- [x] 🤖 5. README: every module, proven by · used by · frozen marks, no version history in the table — README.md
+- [x] 🤖 6. Framework check:fast + the starter's check:full green; tracked lines before/after counted — scripts/starter-check.mjs
 Check: check:fast green; starter check:full green; no file in any game changed; tracked lines down by about the audit's estimate (~46k).
+Checked: 2026-11-04 12:43 — by a fresh helper (a5ad333..0913562), checked by Claude: tracked lines 164,892 → 111,942 (−29 %), files 1,309 → 909 (recounted); framework check:fast 22/22 (Claude's own run, 12:43); starter check:full 10/10 and the routine shoot 569 shots / 0 problems (helper). No game folder changed. Archived under local tags archive/emotes-0.4.2, archive/saves-0.7.0, archive/whats-new. Kept on purpose: the screen-reader announcer (Goops uses it), AI chattiness (Glyphtender sets it), Rooms' emote relay (frozen, optional). Versions: UI kit 0.41.0, AI 0.9.0, Saves 0.8.0. BMUZ text still to update: sprint skill step 5 (npm run install-modules), install-module/lib emotes lists, game-ui shoot:all before a kit release.
 
 ## Notes
 - Open bugs: none open in the framework (BUGS.md has no open P0/P1).
