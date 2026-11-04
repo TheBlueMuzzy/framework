@@ -4,7 +4,6 @@
 //     break an old save is caught before players see it
 //   - the game's save tests pass: every golden save loads with today's code, round trip, damaged saves, full storage
 //   - a run (createRun) is ended somewhere in the game's code, and its test proves an ended run never comes back
-//   - a game that keeps a seed + move record (recordRun) has a test that replays one and compares it (sameResult)
 //   - the game's own code saves through the module, not straight into localStorage / sessionStorage
 //     (room codes and player ids — the rooms module's "rooms:" keys — are fine; anything else that must stay is
 //     listed in content/saves.json "storageAllowed" with why)
@@ -117,7 +116,7 @@ export function missingVersions(key, version, fileNames) {
 
 export async function check(t) {
   // (this module's own copy is left out: an older Dev Kit's gameCode() still hands it over, and its createSave /
-  //  createRun calls — run.ts, nudge.ts, the examples in comments of this file — aren't the game's saves)
+  //  createRun calls — run.ts, the examples in comments of this file — aren't the game's saves)
   const code = t.gameCode().filter((f) => !f.path.startsWith(`${t.rel}/`))
   const saves = findSaves(code)
   {
@@ -172,26 +171,8 @@ export async function check(t) {
       .filter((line) => !allowed.some((file) => line.startsWith(`${file}:`)))
     const problems = []
     if (!settings) problems.push('content/saves.json is missing (or isn\'t valid JSON) — the installer gives a starter once.')
-    if (direct.length) problems.push('Game code uses the browser\'s storage directly (no version, no backups, no save code):', ...direct.map((l) => '  ' + l))
+    if (direct.length) problems.push('Game code uses the browser\'s storage directly (no version, no backups):', ...direct.map((l) => '  ' + l))
     if (problems.length) t.fail(name, problems.slice(0, 20), 'Move each onto createSave (src/saves). One that must stay (e.g. a room code, until F95) → list its file in content/saves.json "storageAllowed": [{ "file": "src/…", "why": "…" }].')
     else t.pass(name, allowed.length ? `${allowed.length} file${allowed.length === 1 ? '' : 's'} allowed in content/saves.json` : 'no direct storage use')
-  }
-  {
-    // Layer 3 (0.4.0): a record is only worth keeping if replaying it gives back the SAME game — a rule that reads the
-    // clock or Math.random would make Continue land on a different board. Only a test that replays and compares proves it.
-    const name = 'a game kept as seed + moves has a replay test'
-    // (recordRun<GameSetup, Action>({ … }) counts too — Glyphtender's record.ts writes it with its types)
-    // (types may nest — recordRun<Foo<Bar>, A>( — so anything up to the "(" counts; review F94)
-    const called = (name, text) => new RegExp(`\\b${name}\\s*(<[\\s\\S]*?>)?\\s*\\(`).test(withoutComments(text))
-    const keeps = code.filter((f) => called('recordRun', f.text))
-    if (!keeps.length) {
-      t.skip(name, 'no recordRun in the game\'s code')
-    } else {
-      const tests = t.files({ dirs: ['tests', 'src'], skip: [t.rel] }).filter((f) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(f.path))
-      // (a replay only in a comment doesn't count; replayRun<S, A, Setup>( does — review F94)
-      const replays = tests.filter((f) => called('replayRun', f.text) && called('sameResult', f.text))
-      if (replays.length) t.pass(name, replays.map((f) => f.path).join(' · '))
-      else t.fail(name, [`${keeps.map((f) => f.path).join(', ')} keep${keeps.length === 1 ? 's' : ''} a record (recordRun), but no test replays one and compares it with the live game.`], 'Add a test that plays a game the way the screen does (people + AI moves into the record), then replayRun(rules, record, { rulesVersion }) and expect sameResult(live, replayed, fingerprint) — after every move if you can (README → Seed + move log).')
-    }
   }
 }

@@ -21,7 +21,7 @@ export function browserStorage(): StorageLike | null {
   }
 }
 
-// --- the one switch: where every save, run, link code, board memory and health check keeps its data ---------------
+// --- the one switch: where every save and run keeps its data -----------------------------------------------------
 
 let chosen: { storage: StorageLike | null; native: boolean } | null = null
 

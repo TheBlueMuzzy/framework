@@ -3,7 +3,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { goldenFileName } from './oldSaves'
-import { COPIED_MARKER } from './platform'
 import { backupKey, createSave, damagedKey } from './saves'
 import { memoryStorage } from './storage'
 
@@ -26,7 +25,7 @@ describe('FORMAT.md matches the kit', () => {
 
   it('the keys §1 lists are the ones the kit writes', () => {
     // (a row's first key only: "`<key>~1` … `<key>~5`" → <key>~1)
-    expect(tableKeys('1. Keys')).toEqual(['<key>', backupKey('<key>', 1), damagedKey('<key>'), '<key>~device', '<key>/list', '<key>/<id>', COPIED_MARKER])
+    expect(tableKeys('1. Keys')).toEqual(['<key>', backupKey('<key>', 1), damagedKey('<key>'), '<key>~device', '<key>/list', '<key>/<id>'])
     const storage = memoryStorage()
     const save = createSave({ key: 'mygame:progress', kind: 'progress', version: 1, fresh: { played: 0 }, fields: { played: 'add-up' }, storage })
     save.save({ played: 1 })

@@ -1,8 +1,8 @@
 // SAVES IN REAL BROWSERS (F150) — every other saves test runs in Node with a pretend storage. This one puts the
 // module on a real page in Playwright's Chromium (Chrome, Edge), WebKit (Safari — and every iPhone browser) and
-// Firefox, and does what a player's browser does: save, reload, close and reopen, load, an upgrade step, a save
-// code (made in the page, read in Node, and the other way round), a really full storage, a private window and a
-// browser that refuses storage. Each engine must give the same results and say the same plain words.
+// Firefox, and does what a player's browser does: save, reload, close and reopen, load, an upgrade step, a really
+// full storage, a private window and a browser that refuses storage. (0.8.0: the save code, openSaves and health
+// check tests went with those parts — git tag archive/saves-0.7.0.) Each engine must give the same results and say the same plain words.
 //
 // How: the kit (kit/index.ts) is bundled in memory by Vite, and Playwright answers http://localhost:6171/ itself
 // (route) — no server, no files written; nothing listens on that port. localhost = a "secure" page, like https.
@@ -15,7 +15,6 @@ import { join } from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
 import { build } from 'vite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { createSave, makeSaveCode, memoryStorage, readSaveCode } from '../kit/index.ts'
 
 const ORIGIN = 'http://localhost:6171' // answered by Playwright (route), never a real server
 const KIT = join(import.meta.dirname, '..', 'kit', 'index.ts')
@@ -50,16 +49,6 @@ const GAME = `
 const PAGE = `<!doctype html><meta charset="utf-8"><title>saves in a real browser</title><script type="module">${GAME}</script>`
 
 const ENGINES = [['chromium', chromium], ['webkit', webkit], ['firefox', firefox]]
-
-// The same game in Node (pretend storage), to read the page's codes and make codes for the page
-function nodeGame(storage = memoryStorage()) {
-  const progress = createSave({
-    key: 'f150:progress', kind: 'progress', version: 1, fresh: { xp: 0, unlocks: [] },
-    fields: { xp: 'highest', unlocks: 'collect' }, storage, onProblem: () => {},
-  })
-  const settings = createSave({ key: 'f150:settings', kind: 'settings', version: 1, fresh: { volume: 0.8 }, storage, onProblem: () => {} })
-  return { storage, progress, settings, both: [progress, settings] }
-}
 
 let bundle = ''
 beforeAll(async () => {
@@ -159,33 +148,6 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
     expect(report).toEqual({ data: { xp: 120, unlocks: ['red'] }, from: 'backup', note: 'Your last save was damaged, so the game loaded the copy saved before it.' })
   }, 60_000)
 
-  it('a save code made here loads in Node, and one made in Node loads here', async () => {
-    await page.evaluate(() => window.settings().save({ volume: 0.3 }))
-    const code = await page.evaluate(() => window.kit.makeSaveCode([window.progress(1), window.settings()]))
-    expect(code).toMatch(/^F150-1z-[A-Za-z0-9_-]+$/) // z = packed by the browser's own CompressionStream
-
-    const there = nodeGame()
-    expect(await readSaveCode(code, there.both)).toMatchObject({ ok: true })
-    expect(there.progress.load()).toEqual({ xp: 150, unlocks: ['red'] })
-    expect(there.settings.load()).toEqual({ volume: 0.3 })
-
-    // the other way: a code from "another device" — more xp, another unlock, other settings
-    const other = nodeGame()
-    other.progress.save({ xp: 400, unlocks: ['blue'] })
-    other.settings.save({ volume: 1 })
-    const otherCode = await makeSaveCode(other.both)
-    const result = await page.evaluate(async (c) => {
-      const saves = [window.progress(1), window.settings()]
-      const damaged = await window.kit.readSaveCode(c.slice(0, -12), saves) // a code copied only in part
-      const loaded = await window.kit.readSaveCode(c, saves)
-      return { damaged: damaged.message, ok: loaded.ok, progress: window.progress(1).load(), settings: window.settings().load() }
-    }, otherCode)
-    expect(result.damaged).toBe('That save code is damaged or incomplete. Copy the whole code again and paste it here.')
-    expect(result.ok).toBe(true)
-    expect(result.progress).toEqual({ xp: 400, unlocks: ['red', 'blue'] }) // progress merged: nothing lost on either side
-    expect(result.settings).toEqual({ volume: 1 }) // settings replaced
-  }, 60_000)
-
   it('an upgrade step: version 1 saves load in version 2, and an older build leaves the newer save alone', async () => {
     await reload(page) // "the game updated"
     const upgraded = await page.evaluate(() => {
@@ -194,14 +156,14 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
       const result = p.save(data)
       return { data, upgradedFrom: p.report().upgradedFrom, result, stored: JSON.parse(localStorage.getItem('f150:progress')).version }
     })
-    expect(upgraded).toEqual({ data: { xp: 400, unlocks: ['red', 'blue'], stars: 3 }, upgradedFrom: 1, result: { ok: true }, stored: 2 })
+    expect(upgraded).toEqual({ data: { xp: 150, unlocks: ['red'], stars: 3 }, upgradedFrom: 1, result: { ok: true }, stored: 2 })
 
     await reload(page) // "rolled back to the older build"
     const older = await page.evaluate(() => {
       const p = window.progress(1)
       return { data: p.load(), newer: p.report().newer, saved: p.save({ xp: 1, unlocks: [] }).reason, stored: JSON.parse(localStorage.getItem('f150:progress')).data }
     })
-    expect(older).toEqual({ data: { xp: 0, unlocks: [] }, newer: 2, saved: 'newer', stored: { xp: 400, unlocks: ['red', 'blue'], stars: 3 } })
+    expect(older).toEqual({ data: { xp: 0, unlocks: [] }, newer: 2, saved: 'newer', stored: { xp: 150, unlocks: ['red'], stars: 3 } })
   }, 60_000)
 
   it('a full storage: the same "full" in every engine, the same plain words, the last good save kept — and old backups make room', async () => {
@@ -224,34 +186,6 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
     expect(full.loaded).toEqual({ xp: 50, unlocks: ['a', 'bb'], stars: 1 })
     expect(full.backup2).toBe(null) // the oldest copy went to make room
     await page.evaluate(() => localStorage.clear())
-  }, 60_000)
-
-  it('openSaves on the browser\'s storage: a change waiting to be written goes out when the page closes; a full disk says "full"', async () => {
-    await page.evaluate(async () => {
-      const opened = await window.kit.openSaves(window.kit.browserBackend('f150'), { game: 'f150', copyFrom: null, delayMs: 60_000, onProblem: (m) => window.problems.push(m) })
-      window.progress(2).save({ xp: 7, unlocks: [], stars: 0 })
-      window.waiting = opened.waiting()
-      window.storedBeforeClose = localStorage.getItem('f150:progress')
-    })
-    expect(await page.evaluate(() => ({ waiting: window.waiting, stored: window.storedBeforeClose }))).toEqual({ waiting: 1, stored: null })
-    await reload(page) // pagehide → written at once
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('f150:progress')).data)).toEqual({ xp: 7, unlocks: [], stars: 0 })
-
-    const full = await page.evaluate(async () => {
-      const opened = await window.kit.openSaves(window.kit.browserBackend('f150'), { game: 'f150', delayMs: 60_000, retryMs: 60_000, onProblem: (m) => window.problems.push(m) })
-      window.fillStorage()
-      window.progress(2).save({ xp: 8, unlocks: ['x'.repeat(50_000)], stars: 0 })
-      const flushed = await opened.flush()
-      const next = window.progress(2).save({ xp: 9, unlocks: [], stars: 0 }) // refused before it touches anything
-      await opened.close()
-      window.kit.setSavesStorage(undefined)
-      localStorage.clear()
-      return { flushed, problem: opened.problem(), next }
-    })
-    expect(full).toEqual({
-      flushed: 'full', problem: 'full',
-      next: { ok: false, reason: 'full', message: 'The browser\'s storage for this game is full, so this wasn\'t saved. The game keeps running; your last good save is still there.' },
-    })
   }, 60_000)
 
   it('a browser that refuses storage: "blocked", the same words, the game keeps running', async () => {
@@ -283,22 +217,12 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
     await reload(page)
   }, 60_000)
 
-  it('the health check in a normal window', async () => {
-    await reload(page)
-    const health = await page.evaluate(() => window.kit.checkSaveHealth())
-    expect(health.canSave).toBe(true)
-    expect(health.warnings.map((w) => w.id)).toEqual(NORMAL_WARNINGS[name])
-  }, 60_000)
-
   it('a private window: saves last while it is open, the next one starts empty', async () => {
     const browser = await launch(name, () => engine.launch())
     try {
       const fresh = await browser.newContext() // Playwright's own contexts keep nothing on disk, like a private window
       await serve(fresh)
       const tab = await open(fresh)
-      const health = await tab.evaluate(() => window.kit.checkSaveHealth())
-      expect(health.canSave).toBe(true)
-      expect(PRIVATE_WARNINGS[name]).toContainEqual(health.warnings.map((w) => w.id))
       expect(await tab.evaluate(() => window.progress(2).save({ xp: 5, unlocks: [], stars: 0 }))).toEqual({ ok: true })
       await reload(tab)
       expect(await tab.evaluate(() => window.progress(2).load().xp)).toBe(5)
@@ -314,10 +238,3 @@ describe.each(ENGINES.filter(([, engine]) => installed(engine) || process.env.CI
     }
   }, 60_000)
 })
-
-// What the health check says in each engine (see README → "Proven in which browsers" for why)
-const NORMAL_WARNINGS = { chromium: ['not-kept'], webkit: ['safari'], firefox: ['not-kept'] }
-// A test window that keeps nothing — each engine's accepted answers. Chromium's private guess compares the room it
-// gets with its memory limit, and that room follows the machine's free disk: this PC says "not kept", GitHub's small
-// Linux disk says "private" (both fine for a window that keeps nothing — the real guess is real-device only).
-const PRIVATE_WARNINGS = { chromium: [['not-kept'], ['private']], webkit: [['private', 'safari']], firefox: [['not-kept']] }
