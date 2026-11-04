@@ -54,7 +54,8 @@ export default defineConfig([
     // a screenshot run) — the crashes tests did this twice (sprints 31 and 37). Wait for the thing itself instead:
     // vi.waitFor(() => expect(...)). A 0 ms "next turn" is fine. A wait that really must be a set time (proving
     // nothing happens, a polling step) says why on an eslint-disable-next-line.
-    files: ['**/*.test.{ts,tsx}', '**/*.test.helper.ts'],
+    // (.test.mjs too — v0.35 look-back: the framework's scripts/ and modules' plain-JS tests weren't covered)
+    files: ['**/*.test.{ts,tsx,mjs}', '**/*.test.helper.ts'],
     rules: {
       'no-restricted-syntax': ['error', {
         selector: "CallExpression[callee.name='setTimeout'][arguments.1.type='Literal'][arguments.1.value>0]",

@@ -52,6 +52,7 @@ describe('crashesMaps', () => {
       closeBundle: {
         sequential: true,
         async handler() {
+          // eslint-disable-next-line no-restricted-syntax -- the delay IS the case: a plugin that writes its maps late
           await new Promise((done) => setTimeout(done, 50))
           writeFileSync(join(root, 'dist', 'sw.js'), 'self.x=1\n//# sourceMappingURL=sw.js.map\n')
           writeFileSync(join(root, 'dist', 'sw.js.map'), '{}')
