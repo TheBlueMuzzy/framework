@@ -283,9 +283,13 @@ export class RoomServer<State, Options, Action, View, Event = never> {
     this.log(result.cameBack ? `${seat.name} is back (${seat.id})` : `${seat.name} joined (${seat.id})`)
 
     this.restartIdleClock(seat.id) // (back on their turn: a fresh idle clock)
-    if (wasAway) this.seatChanged(seat.id, 'back')
-    this.afterSeatsChanged()
+    // F179's rule for a tab coming back too (it still holds the room + board it had): a match on → the room first,
+    // then the board; a match over → the finished board first, then the room (review: "over" came before the board)
+    const over = this.data.phase === 'over'
+    if (!over) this.afterSeatsChanged()
+    if (wasAway) this.seatChanged(seat.id, 'back') // (the game hears it; everyone gets their board)
     if (this.game !== null) this.sendView(seat)
+    if (over || wasAway) this.afterSeatsChanged() // (after a seat change: the seats as they are now)
     if (wasAway && this.data.phase !== 'lobby') this.sayWelcomeBack(seat.id)
   }
 
