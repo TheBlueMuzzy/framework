@@ -7,9 +7,9 @@ Done when: at every moment a game can see (start, rematch, end, rejoin) the room
 - [x] 🤖 2. Pick the order (room before board at start, like at the end — or both in one message) and say why in Notes; test red first — rooms/kit/server/roomServer.test.ts
 - [x] 🤖 3. The server sends them in that order — rooms/kit/server/roomServer.ts
 - [x] 🤖 4. Say the rule in the README + a version note (rooms 0.15.0) — rooms/README.md
-- [ ] 🤖 5. Starter takes the new rooms; its online test (with the held-back message) green — starters/turn-based/e2e/online.mjs
+- [x] 🤖 5. Starter takes the new rooms; its online test (with the held-back message) green — starters/turn-based/e2e/online.mjs
 Check: the order test red then green; rooms test + typecheck; starter check:full.
-Checked:
+Checked: 2026-11-03 — the order test red on the old server (2 wrong moments: #15 "over" before the last board, #18 a rematch board before "playing"), green after; rooms 214/214 + typecheck. Starter took rooms 0.13.0 → 0.15.0 (installer: lint + code checks pass). With the starter's own `&& game.over` removed, its online test (B's rematch room message held 800 ms every run) passed 3/3 — the server order alone does it, so the extra check is gone and the comment points at the rule. Starter check:full 10/10 (1.3 min); its results shot (online-A-results.png) shows "You win!", both seats ranked, Leave + Play again, padded.
 
 ## F178 🔧 check:fast refuses a second run
 Done when: a second framework check:fast while one is running waits for it (saying so) instead of breaking it, and the crashes worker test no longer shares one folder between runs.

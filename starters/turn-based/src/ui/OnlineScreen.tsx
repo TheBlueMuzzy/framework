@@ -119,11 +119,11 @@ export function OnlineScreen({ start, onClose }: { start: OnlineStart; onClose: 
         banner={<Board board={game.board} winLine={game.winLine} canPlay={myTurn} onPlay={(cell) => { online.active(); online.send({ cell }) }} />}
         actions={<EmoteSeats emotes={emotes} seats={seats} mine={mySeatId ?? []} activeId={game.over ? undefined : order[game.turn]} avoid=".kit-hud-slot" />}
       />
-      {/* The results need BOTH messages to say "over": the room's phase and the board's own game (the view). They
-          arrive as two messages, a beat apart on a slow machine — at a rematch the new board comes first, at a match's
-          end the room does — so trusting the phase alone left the results ("It's a draw") up over the rematch's
-          empty board until the room caught up (F170). */}
-      {phase === 'over' && game.over && (
+      {/* The room's phase alone is enough: rooms 0.15.0 sends the finished board BEFORE "over" and "playing" BEFORE a
+          rematch's new board (F179), so the results never show over the wrong board. (Rooms 0.13 sent a rematch's
+          board first — the last results stayed up over the empty board, F170; e2e/online.mjs holds a message back
+          every run to keep it that way.) */}
+      {phase === 'over' && (
         <ResultsOnStack onClosed={leave} results={{
           dim: true,
           title: resultTitle,
