@@ -1,5 +1,5 @@
 // @vitest-environment node
-// Names are never cut short (0.33.0, F119), in a real browser, in all 5 styles: Results cut "Sherman Meredith" to
+// Names are never cut short (0.33.0, F119), in a real browser, in all 7 styles: Results cut "Sherman Meredith" to
 // "Sherman Mere…" and "Muzzy" (beside its ★ and You badges) to "Muz…" on a phone; the Lobby room cut its "Share this
 // code with your friends" line. Now a name wraps (its badges move under it) and the page check finds nothing cut off.
 // And on a phone on its side the Lobby room's Leave / I'm ready no longer slide up over the waiting line.

@@ -1,5 +1,5 @@
 // @vitest-environment node
-// MenuHeader beside an action, in a real browser, in all 5 styles (0.27.0): Goops' Upgrades dialog — "UPGRADES" with a
+// MenuHeader beside an action, in a real browser, in all 7 styles (0.27.0): Goops' Upgrades dialog — "UPGRADES" with a
 // compact "RESPEC" on the right — rendered "UPGRAD / ES" on 360 / 390 wide phones. Now the title drops a step (heading
 // size) before it wraps, and never breaks inside a word; on a wide screen it keeps its title size.
 import { renderToStaticMarkup } from 'react-dom/server'

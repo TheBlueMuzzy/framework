@@ -1,5 +1,5 @@
 // @vitest-environment node
-// StatList's reveal in a real browser, in all 5 styles (0.31.0, Goops' payslip): the rows are unseen, then seen one
+// StatList's reveal in a real browser, in all 7 styles (0.31.0, Goops' payslip): the rows are unseen, then seen one
 // after another in order (the Results rows' entrance, each row `reveal` ms after the one above), and the card is its
 // final size from the start — the same box before, during and after the reveal, and the same as with no reveal at all.
 // The clock is the page's own animations, stopped at set moments (the Dev Kit's full pause stops them the same way).
