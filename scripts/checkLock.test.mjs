@@ -27,32 +27,39 @@ test('no other run → takes the lock at once, and frees it', (t) => {
   assert.ok(!existsSync(lockFile(dir)))
 })
 
-test('another check:fast holds it → says so, waits for it to end, then runs', { timeout: 30_000 }, async (t) => {
+test('another check:fast holds it → says so, waits for it to end, then runs', { timeout: 60_000 }, async (t) => {
   const dir = repo(t)
-  // a second Node holds the lock for ~1.5 s, the way a running check:fast would
+  const lib = JSON.stringify(pathToFileURL(join(import.meta.dirname, 'checkLock.mjs')).href)
+  // a second Node holds the lock like a running check:fast — until this test closes its input (no timer: on a busy PC
+  // the waiter took longer to start than a fixed hold, and found the lock already free)
   const holder = spawn(process.execPath, ['--input-type=module', '-e',
-    `import { takeCheckLock } from ${JSON.stringify(pathToFileURL(join(import.meta.dirname, 'checkLock.mjs')).href)}
-const release = takeCheckLock(${JSON.stringify(dir)}, { say: () => {} }); console.log('held'); setTimeout(() => { release(); process.exit(0) }, 1500)`], { stdio: ['ignore', 'pipe', 'inherit'] })
+    `import { takeCheckLock } from ${lib}
+const release = takeCheckLock(${JSON.stringify(dir)}, { say: () => {} }); console.log('held'); process.stdin.resume(); process.stdin.on('end', () => { release(); process.exit(0) })`], { stdio: ['pipe', 'pipe', 'inherit'] })
   await new Promise((held) => holder.stdout.once('data', held))
-  const said = []
-  const started = Date.now()
   // the wait runs in another child so this test's own clock keeps going
   const waiter = spawn(process.execPath, ['--input-type=module', '-e',
-    `import { takeCheckLock } from ${JSON.stringify(pathToFileURL(join(import.meta.dirname, 'checkLock.mjs')).href)}
+    `import { takeCheckLock } from ${lib}
 const release = takeCheckLock(${JSON.stringify(dir)}); console.log('got it'); release()`], { stdio: ['ignore', 'pipe', 'inherit'] })
-  waiter.stdout.on('data', (d) => said.push(...String(d).trim().split('\n')))
+  const said = []
+  let gotIt = false
+  waiter.stdout.on('data', (d) => {
+    for (const line of String(d).trim().split('\n')) {
+      said.push(line)
+      if (/waiting for it/.test(line)) holder.stdin.end() // it's waiting → now the first run ends
+      if (line === 'got it') gotIt = true
+    }
+  })
   await new Promise((done) => waiter.on('exit', done))
-  assert.ok(Date.now() - started >= 1000, `waited ${Date.now() - started} ms`)
   assert.match(said[0], /another check:fast is running here \(process \d+, since .+\) — waiting for it/)
-  assert.equal(said.at(-1), 'got it')
+  assert.ok(gotIt, said.join(' | '))
 })
 
-test('a lock left by a run that died is taken over at once', (t) => {
+test('a lock left by a run that died is taken over without waiting', (t) => {
   const dir = repo(t)
   writeFileSync(lockFile(dir), `999999 ${Date.now()}`)
-  const started = Date.now()
-  const release = takeCheckLock(dir, quietly)
-  assert.ok(Date.now() - started < 1000)
+  const said = []
+  const release = takeCheckLock(dir, { say: (line) => said.push(line) })
+  assert.deepEqual(said, []) // (no "waiting" — a timing limit here failed on a busy PC: git alone took over 1 s)
   assert.match(readFileSync(lockFile(dir), 'utf8'), new RegExp(`^${process.pid} `))
   release()
 })
