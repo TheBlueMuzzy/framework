@@ -24,7 +24,7 @@ function modules() {
 
 test('every module has an UPGRADES.md', () => {
   const found = modules()
-  assert.ok(found.length >= 11, `found only ${found.length} modules: ${found.join(', ')}`)
+  assert.ok(found.length >= 10, `found only ${found.length} modules: ${found.join(', ')}`)
   const missing = found.filter((name) => !existsSync(join(root, name, 'UPGRADES.md')))
   assert.deepEqual(missing, [], `add <module>/UPGRADES.md (copy one, even "No hand steps so far") for: ${missing.join(', ')}`)
 })

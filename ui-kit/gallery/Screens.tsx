@@ -6,7 +6,6 @@ import { createContext, useContext, useEffect, useRef, useState, useSyncExternal
 import credits from '../content/credits.json'
 import { TeachSample } from './Teach'
 import { gear } from './symbols'
-import { EmotesSample } from './Emotes'
 import { TalkSample } from './Talk'
 import { PayslipSample, VictoryRevealSample } from './Report'
 import seats from './content/seats.json' // player colours come from content JSON, like a game's would
@@ -571,7 +570,6 @@ const samples: Record<string, ComponentType> = {
   idlebot: () => <IdleSample startBot />,
   teach: TeachSample,
   talk: TalkSample,
-  emotes: EmotesSample,
   failed: () => <Reconnecting failed onRetry={() => screens.replace('reconnecting')} onQuit={() => { screens.pop(); screens.pop() }} />,
 }
 
@@ -589,12 +587,12 @@ const openers: Record<string, () => void> = {
 }
 // Screens shown over a dark stand-in game (like Roll Better's table), to check plain HUD text reads on it
 // (hand and round too, F153: their on-game words sat on the light stripes — the page check's contrast: 1.1:1)
-const darkScreens = ['hud', 'huddock', 'chips', 'pinned', 'emotes', 'talk', 'hand', 'round']
+const darkScreens = ['hud', 'huddock', 'chips', 'pinned', 'talk', 'hand', 'round']
 // The game's own HUD: in a game it's the ScreenStack's children (its bottom layer, Glyphtender, Goops) or sits beside
 // an overlay stack (Roll Better) — never a screen pushed over the game, so never under the light dim the first screen
 // over the game's layer brings (F153: the gallery pushed them, and their words read 2:1 on that wash in the light
 // looks). Shown here with nothing in the stack's game layer, so there's no dim; the dark stand-in is still behind them.
-const hudScreens = ['hud', 'huddock', 'chips', 'pinned', 'emotes', 'hand']
+const hudScreens = ['hud', 'huddock', 'chips', 'pinned', 'hand']
 const isKnown = (id: string) => Object.hasOwn(samples, id) || Object.hasOwn(openers, id)
 
 // ── The stage: a bar (back to the menu, style) over a stand-in game that runs the screen stack ──

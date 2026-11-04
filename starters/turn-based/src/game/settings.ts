@@ -5,9 +5,6 @@ import settingsJson from '../../content/ui/settings.json'
 import { applyAccessibility, defaultValues, type SettingsSchema, type SettingsValues } from '../ui/kit'
 import { applyAudioSettings, getAudio } from '../audio'
 import { applyCrashSetting } from '../crashes'
-import { applyEmoteSetting } from '../emotes'
-import { applyBanterSetting } from '../ai/kit/settingsRow'
-import { banter, emotes } from './table'
 import { settingsSave } from './saves'
 
 export const settingsSchema = settingsJson as SettingsSchema
@@ -23,6 +20,4 @@ export function applySettings(values: SettingsValues) {
   const audio = getAudio()
   if (audio) applyAudioSettings(audio, values) // the Audio tab
   applyCrashSetting(values) // "Send crash reports"
-  applyEmoteSetting(emotes, values) // "Hide everyone's emotes"
-  applyBanterSetting(banter, values) // "Bot chatter"
 }

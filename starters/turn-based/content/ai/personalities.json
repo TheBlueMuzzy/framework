@@ -6,7 +6,7 @@
     "traits.planning": "How often it plays for a good square (the BUILD goal: centre, corners, two in a row).",
     "nudge": "How much the goals it didn't roll still count (0-1).",
     "focus": "At a big moment (a win is there) how single-minded it is (0-1). 1 = it never misses a win it can see.",
-    "chattiness": "0-100: how likely it is to say something (lines in content/text/en.json \"banter\")."
+    "chattiness": "0-100: how chatty it is. Nothing reads it since the bots' banter was archived (AI 0.9.0); kept for the Dev Kit's AI tab."
   },
   "personalities": [
     {

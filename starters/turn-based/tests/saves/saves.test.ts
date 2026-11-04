@@ -13,13 +13,11 @@ import {
   checkDamagedSaves, checkFullStorage, checkGoldenSave, checkRoundTrip, checkRunEnds, goldenSavesFor, missingGoldenVersions,
   type RunUnderTest, type SaveUnderTest,
 } from '../../src/saves/oldSaves'
-import { banterSave, emoteSave, matchRun, progressSave, settingsSave } from '../../src/game/saves'
+import { matchRun, progressSave, settingsSave } from '../../src/game/saves'
 
 const SAVES: SaveUnderTest[] = [
   { save: settingsSave, sample: { textSize: '150%', botSpeed: 'Slow', sound: false } },
   { save: progressSave, sample: { wins: 5, losses: 1, draws: 2 } },
-  { save: emoteSave, sample: { hideAll: false, match: '', seats: ['seat-1'] } },
-  { save: banterSave, sample: { chatter: 'off' } },
 ]
 
 const RUNS: RunUnderTest[] = [

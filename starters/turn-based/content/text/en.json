@@ -65,24 +65,5 @@
       "careful": { "name": "Careful Cleo", "bio": "Never misses a block. Never misses a win." },
       "careless": { "name": "Careless Cass", "bio": "Loves the middle square. Forgets to look at yours." }
     }
-  },
-  "banter": {
-    "careless": {
-      "won": "Ha! Didn't see that coming, did you?",
-      "lost": "Wait, where did that come from?",
-      "bigMove": "Two in a row! Watch out.",
-      "rivalBigMove": "Ooh, nice one.",
-      "gotHit": "Hey, I wanted that square!",
-      "closeCall": "Phew. Nobody wins."
-    }
-  },
-  "emotes": {
-    "hello": "Hello!",
-    "wellPlayed": "Well played!",
-    "thanks": "Thanks!",
-    "wow": "Wow!",
-    "oops": "Oops!",
-    "thinking": "Thinking…",
-    "goodGame": "Good game!"
   }
 }

@@ -8,16 +8,17 @@ import paceFile from '../../content/ai/pace.json'
 import { rulesClock } from '../devkit/gameClock'
 import { botWait, paceNow, thinkDelay, waitLeft } from '../ai/kit/pace'
 import { addMove, replay, type MoveRecord, type Seat } from '../table/core'
-import { botMove, personalityOf, type Opponent } from '../ai/bots'
+import { botMove, type Opponent } from '../ai/bots'
 import { playSound } from '../audio'
 import { moment } from '../crashes'
 import { ticTacToe, type Action, type Event, type Setup, type State } from './rules'
-import { banter, emotes, setBanterBots } from './table'
 import { matchRun, progressSave } from './saves'
 import { botSpeed } from './settings'
 
 export const YOU: Seat = 0
 export const BOT: Seat = 1
+/** A seat's id on the screens (the UI kit's seat row and results): "seat-0", "seat-1". */
+export const seatId = (seat: Seat) => `seat-${seat}`
 
 export interface Match {
   opponent: Opponent
@@ -80,8 +81,6 @@ export function continueMatch(saved: { opponent: Opponent; record: MoveRecord<Se
 
 function begin(next: Match) {
   set(next)
-  setBanterBots(() => (match ? [{ seat: BOT, personality: personalityOf(match.opponent.personality) }] : []))
-  emotes.setMatch('') // a local game: mutes start clean
   matchRun.autosave({ opponent: next.opponent, record: next.record })
   nextTurn()
 }
@@ -120,7 +119,6 @@ function hear(events: Event[]) {
       log('A draw') // text-ok: the Dev Kit's event log, not a player screen
     }
   }
-  banter.hear(events)
 }
 
 function finish(state: State) {
@@ -164,9 +162,7 @@ function nextTurn() {
 /** Back to the main menu. An unfinished game is ended (left from the menu = abandoned, no Continue). */
 export function leaveMatch() {
   stopWaiting()
-  banter.stop()
   if (match && !match.state.over) matchRun.end()
-  setBanterBots(() => [])
   set(null)
 }
 
@@ -182,7 +178,6 @@ export function restoreMatch(snapshot: unknown) {
   const { state } = replay(ticTacToe, s.record) // throws in plain words if a move isn't allowed
   stopWaiting()
   set({ opponent: s.opponent, record: s.record, state, rng: s.rng, series: s.series ?? { you: 0, them: 0 }, resultsOpen: s.resultsOpen === true })
-  setBanterBots(() => (match ? [{ seat: BOT, personality: personalityOf(match.opponent.personality) }] : []))
   if (state.over && !s.resultsOpen) scheduleResults()
   else nextTurn()
 }

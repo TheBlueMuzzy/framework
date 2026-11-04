@@ -3,7 +3,7 @@
 // once, a tap finishes then confirms, and the numbers are read live (a changed value takes effect without a re-render).
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { liveRegion } from './emotes'
+import { liveRegion } from './announce'
 import {
   DEFAULT_TALK_FEEL, TALK_FEEL_RANGES, TALK_GROW_MS, TalkingBubble, finishTalk, growScale, restAfter, spikeShape, startTalk,
   stepTalk, squelchGap, talkFeel, talkOutline, waveOffsets, keepWaveInside, type TalkFeel, type TalkState,
