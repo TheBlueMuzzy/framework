@@ -1,4 +1,6 @@
 # Log archive (newest first)
+- 2026-10-28 — Sprint 49 planned (unattended): cleaner edges (F162 the page check catches three cut-offs, F163 online Results take Escape, F164 a release fills the module versions).
+- 2026-10-27 — Released v0.32.0 (v0.30 Steadier checks): GitHub keeps its test browsers between runs, one shared version helper, the starter's Escape on Results goes to the menu, the kit holds up in the fake language with nothing left over and a button's words fade with its colour.
 - 2026-10-27 — Sprint 48 planned (unattended): steadier checks (F158 GitHub keeps its test browsers, F159 one shared version helper, F160 the starter after Results + Escape, F161 fake-language leftovers).
 - 2026-10-27 — Released v0.31.0 (v0.29 Clocks you can trust): lint 0.3.0 — code that takes a clock option never reads Date.now() beside it; the framework and the starter run it as an error.
 - 2026-10-27 — Released v0.30.0 (v0.28 Room for longer words): the UI kit holds words ~40% longer — names and codes are never translated, fits re-measure, the Lobby room and the HUD make room; saves 0.6.5 keeps its own link code by the game's clock.
