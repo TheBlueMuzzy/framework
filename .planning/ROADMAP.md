@@ -521,10 +521,10 @@ flowchart LR
 
 ## v0.36 — A sync that knows its own work  · planned 2026-11-03
 Goal (Muzzy 2026-11-03: "keep going"): the PC ↔ laptop sync never mistakes this machine's own changes for the other machine's, so it never blocks a push for nothing — and still never pushes over the laptop's real changes.
-- 🔨 F180 🔧 Sync knows its own pushes — config-sync.sh status said INCOMING for 6 commits this PC had made and already applied, and refused to push until setup.sh ran (v0.34 look-back, 2026-11-03); count a commit this machine pushed (or files already identical) as applied — could · sprint 54
+- ✅ F180 🔧 Sync knows its own pushes — config-sync.sh status said INCOMING for 6 commits this PC had made and already applied, and refused to push until setup.sh ran (v0.34 look-back, 2026-11-03); count a commit this machine pushed (or files already identical) as applied — could · sprint 54 · approved 2026-11-03
 ```mermaid
 flowchart LR
-  F180[🔨 F180 Sync knows its own pushes]
+  F180[✅ F180 Sync knows its own pushes]
 ```
 
 ## Later
