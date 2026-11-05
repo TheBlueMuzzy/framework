@@ -5,7 +5,7 @@
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: ~/.claude-config f5e1b60 (F185 — the helper's tests + Claude's re-run of its replay proof and the 3 heredoc cases) · framework 0913562 (sprint 56 F186 a5ad333..0913562 — a fresh helper's cuts, checked by Claude: line counts, tags, no game touched, check:fast 22/22) + ~/.claude-config 2207bf2 (F184 runner.mjs, fallback/broken.mjs, save.mjs hooksPath read by Claude; HC10 written by Claude, 8 tests) · older: archive/log.md
+Reviewed through: ~/.claude-config f5e1b60 (F185: helper tests + Claude re-ran the replay proof) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 57
