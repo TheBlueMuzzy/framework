@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-05 01:05 — **Sprint 57 built + checked, waiting on Muzzy's approval: F185 — Slimmed rule set is live** — the audit's false alarms cut (pipe rule repairs the command, heredoc refusals 352 → 167, 614 lint notes moved to turn end; no real catch lost), 6 judgement rules are hooks now, context checkpoint at 45 / 55 %, CLAUDE.md 20 → 9.6 KB, session start 1.6 KB. Next: his approval → archive sprint 57 → /sprint F188 — Module recipe. (Older entries: the Log + git history.)
+2026-11-05 — **Sprint 57 ✅ approved by Muzzy: F185 — Slimmed rule set is live** — the audit's false alarms cut (pipe rule repairs the command, heredoc refusals 352 → 167, 614 lint notes moved to turn end; no real catch lost), 6 judgement rules are hooks now, context checkpoint at 45 / 55 %, CLAUDE.md 20 → 9.6 KB, session start 1.6 KB. Next: /sprint — F188 — Module recipe and F187 — Bloat test both ways are ready. (Older entries: the Log + git history.)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
