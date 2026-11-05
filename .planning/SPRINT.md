@@ -10,11 +10,12 @@ Notes (F188, Claude 2026-11-05): extraction queue KEPT — it is the one safe wa
 
 ## F187 🔧 Bloat test both ways
 Done when: the bloat test in BMUZ-PLAN asks every addition what it replaces; git's own commit step refuses a commit that ADDS a new hook rule file or a new framework module folder without a "Replaces: …" line (or "Replaces: nothing — <why>"); the monthly /checkup proposes removals from the firing log (rules that never fired, rules that mostly cry wolf) — and everyday commits are untouched.
-- [ ] 🤖 1. Bloat test both ways in BMUZ-PLAN: an addition names what it replaces or why nothing; removals happen for a reason (consolidating, efficiency) — ~/.claude/config/bmuz/BMUZ-PLAN.md
-- [ ] 🤖 2. Commit rule: a commit adding a new rule file under hooks/rules/ or a new top-level framework module folder needs "Replaces: …" in its message — tests red first — ~/.claude/config/bmuz/hooks/rules/guard-git/_hook.mjs
-- [ ] 🤖 3. /checkup removal pass: from the firing log, rules that never fired in 60 days and rules whose firings were mostly undone the next step → proposed cuts in the checkup report (proposals only) — ~/.claude/config/bmuz/checkup.sh
-- [ ] 🤖 4. Whole hook + script suites green; HOOKS.md regenerated; pushed — ~/.claude/config/bmuz/hooks/test-hooks.mjs
+- [x] 🤖 1. Bloat test both ways in BMUZ-PLAN: an addition names what it replaces or why nothing; removals happen for a reason (consolidating, efficiency) — ~/.claude/config/bmuz/BMUZ-PLAN.md
+- [x] 🤖 2. Commit rule: a commit adding a new rule file under hooks/rules/ or a new top-level framework module folder needs "Replaces: …" in its message — tests red first — ~/.claude/config/bmuz/hooks/rules/guard-git/_hook.mjs
+- [x] 🤖 3. /checkup removal pass: from the firing log, rules that never fired in 60 days and rules whose firings were mostly undone the next step → proposed cuts in the checkup report (proposals only) — ~/.claude/config/bmuz/checkup.sh
+- [x] 🤖 4. Whole hook + script suites green; HOOKS.md regenerated; pushed — ~/.claude/config/bmuz/hooks/test-hooks.mjs
 Check: the new commit rule refuses a test commit that adds a rule file with no "Replaces:" and lets the same commit through with one; an everyday commit (no new rule / module) passes untouched; the checkup pass run on today's firing log lists its proposals; whole suites green.
+Checked: 2026-11-05 09:30 — by a fresh helper (proof in .scratch/bmuz-f187/proof.md), checked by Claude: GG15 ("Replaces:" for a new rule file / module folder) runs in git's commit step + config-sync push — refused its OWN push live, then passed with the line; guard-git-replaces 14/14 (5 red first), fire-log 15/15 (2 red first), removal-pass 9/9; whole suites hooks 802/802, scripts 408/408; pushed 6dd7eec. Claude: 4 silent-because-it-works guards marked rare (SU1, GE5, SL1, SP6 — the first pass would have proposed cutting the save-before-leaving guard), 5 suites re-run green, removal pass now proposes nothing wrong; pushed 76bff5a. ~/.claude-config has no git commit step on purpose (GG4 would refuse every Fnn push on its main) — GG15 runs in config-sync push instead.
 
 ## Notes
 - Open bugs: none open in the framework (BUGS.md has no open P0/P1).

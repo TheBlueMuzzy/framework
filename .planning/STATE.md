@@ -1,11 +1,11 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-05 — **Sprint 58 started (Muzzy: "go"): F188 — Module recipe (Claude writes it) + F187 — Bloat test both ways (a helper).** Before: **Sprint 57 ✅ approved by Muzzy: F185 — Slimmed rule set is live** — the audit's false alarms cut (pipe rule repairs the command, heredoc refusals 352 → 167, 614 lint notes moved to turn end; no real catch lost), 6 judgement rules are hooks now, context checkpoint at 45 / 55 %, CLAUDE.md 20 → 9.6 KB, session start 1.6 KB. Next: Muzzy reads the recipe page; then F189 — Games list module candidates. (Older entries: the Log + git history.)
+2026-11-05 09:35 — **Sprint 58 built, waiting on Muzzy:** F188 — Module recipe written (page https://claude.ai/artifact/PVnzrSrjBddLtYp65SbcCD — he reads it: "does it match how you picture it?"); F187 — Bloat test both ways built + checked (live: "Replaces:" on new rules / modules, monthly removal pass in /checkup). Next: his read + approval → archive sprint 58 → F189 — Games list module candidates (the last v0.37 feature; needs the games' sessions). (Older entries: the Log + git history.)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: ~/.claude-config f5e1b60 (F185: helper tests + Claude re-ran the replay proof) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
+Reviewed through: ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 58
