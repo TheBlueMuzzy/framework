@@ -4,6 +4,7 @@ Muzzy's library of reusable game modules. Games **copy** a module in (with a ver
 
 The founding rule: **one game proves a module, a second makes it general.** A module only one game uses is **frozen** —
 bug fixes only, no new features, until a second game needs it (F186 — Slimmed framework, from the 2026-11 audit).
+How a game's part becomes a module, and how a module goes into a game: `.planning/design/module-recipe.md`.
 
 ## Modules
 Install any of them with `node ~/.claude/config/bmuz/scripts/install-module.mjs <module> <game-folder>` (it runs the
