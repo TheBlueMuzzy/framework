@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-04 — **Sprint 55 ✅ (audit approved by Muzzy: "all approved your picks"); sprint 56 planned: F184 — Hook rule runner + F186 — Slimmed framework.** Muzzy's two decisions are in research/audit-2026-11/rules.md §10. Audit pages: rules https://claude.ai/artifact/Ja6U8U5fXdeNDtBvTX7Zad · framework https://claude.ai/artifact/THpcWZYUCE432ML9YY8GT2. Next: /develop — two helpers side by side (F184 in ~/.claude, F186 in the framework). (Older entries: the Log + git history.)
+2026-11-04 23:05 — **Sprint 56 built + checked, waiting on Muzzy's approval: F184 — Hook rule runner (live; every rule its own file, loud when one breaks, commit checks in git's own step per project) + F186 — Slimmed framework (−29 % lines, 4 cuts, no game touched).** Added: HC10 — a "waiting" progress line needs a wake-up running (a helper sat idle ~10 h). Next: Muzzy approves → archive sprint 56 → /sprint: F185 — Slimmed rule set (the false-alarm fixes, ~1,000 loops). (Older entries: the Log + git history.)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 

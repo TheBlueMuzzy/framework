@@ -3,14 +3,15 @@ Started 2026-11-04 · Milestone v0.37 · Features: F184, F186
 
 ## F184 🧱 Hook rule runner
 Done when: every BMUZ hook rule lives in its own small file run by one shared runner; a rule that breaks is reported loudly and the other rules still run; the commit checks run inside git's own commit step in each BMUZ project; HOOKS.md's table is made from the rule files — and every hook behaves exactly as before (no rule changes yet — those are F185 — Slimmed rule set).
-- [ ] 🤖 1. Runner + the rule-file shape (id · event · what · why · on/off · tests); a crashing rule or a broken shared file says so loudly, never silently allows everything — tests red first — ~/.claude/config/bmuz/hooks/runner.mjs
-- [ ] 🤖 2. Before-action rules move into rule files (guard-edits, guard-git, commit-typecheck, live-push); the old hook files become one-line starters, settings.json unchanged — ~/.claude/config/bmuz/hooks/guard-git.mjs
-- [ ] 🤖 3. After-edit rules move (lint-edit, check-ui-edit, rule-kind, sketch-lint, plan-lint) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
-- [ ] 🤖 4. Turn-end and moment rules move (handoff-check, stop-plan-check, stop-check-fast, stop-unsaved, session-moments) — ~/.claude/config/bmuz/hooks/handoff-check.mjs
-- [ ] 🤖 5. Commit checks also run in git's own commit step, set per BMUZ project (never globally — collabs aren't touched) by save.mjs; refuse `--no-verify` — ~/.claude/config/bmuz/scripts/save.mjs
-- [ ] 🤖 6. HOOKS.md's rule table generated from the rule files; firing log lines carry the rule id — ~/.claude/config/bmuz/HOOKS.md
-- [ ] 🤖 7. Whole hook + script suites green with their old tests unchanged; push to ~/.claude-config — ~/.claude/config/bmuz/hooks/test-hooks.mjs
+- [x] 🤖 1. Runner + the rule-file shape (id · event · what · why · on/off · tests); a crashing rule or a broken shared file says so loudly, never silently allows everything — tests red first — ~/.claude/config/bmuz/hooks/runner.mjs
+- [x] 🤖 2. Before-action rules move into rule files (guard-edits, guard-git, commit-typecheck, live-push); the old hook files become one-line starters, settings.json unchanged — ~/.claude/config/bmuz/hooks/guard-git.mjs
+- [x] 🤖 3. After-edit rules move (lint-edit, check-ui-edit, rule-kind, sketch-lint, plan-lint) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [x] 🤖 4. Turn-end and moment rules move (handoff-check, stop-plan-check, stop-check-fast, stop-unsaved, session-moments) — ~/.claude/config/bmuz/hooks/handoff-check.mjs
+- [x] 🤖 5. Commit checks also run in git's own commit step, set per BMUZ project (never globally — collabs aren't touched) by save.mjs; refuse `--no-verify` — ~/.claude/config/bmuz/scripts/save.mjs
+- [x] 🤖 6. HOOKS.md's rule table generated from the rule files; firing log lines carry the rule id — ~/.claude/config/bmuz/HOOKS.md
+- [x] 🤖 7. Whole hook + script suites green with their old tests unchanged; push to ~/.claude-config — ~/.claude/config/bmuz/hooks/test-hooks.mjs
 Check: the old test suites pass unchanged (same answers, same wording); a rule made to throw on purpose gives a loud message while the others still fire; a commit with a type error is refused by git itself in a BMUZ project and untouched in a non-BMUZ repo.
+Checked: 2026-11-04 23:05 — built by a fresh helper in a scratch copy, swapped in live 12:48; live suites hooks 685/0 + scripts 396/0 (13:00). Claude read runner.mjs, fallback/broken.mjs (a guard that can't load refuses before a tool call; repairs to ~/.claude/config/bmuz still allowed), save.mjs core.hooksPath (--local only; a repo with its own hooks is left alone; never --global). 109 rule files; HOOKS.md table generated (hooks-doc --check OK). Pushed ~/.claude-config 1449bdc. Added the same night (Muzzy: "is there a way to ensure that doesn't happen going forward?"): HC10 — a waiting progress line needs a wake-up running (8 new tests; hooks 692/0, scripts 396/0) + develop skill line marked ②, pushed 2207bf2. The helper itself sat idle ~10 h waiting on a test notice before pushing — the reason for HC10.
 
 ## F186 🔧 Slimmed framework
 Done when: the cuts Muzzy approved in the framework audit (`research/audit-2026-11/framework.md` §7) are done — no game loses anything it uses, every check stays green, and the README tells the truth.
