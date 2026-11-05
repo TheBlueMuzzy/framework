@@ -535,8 +535,8 @@ Goal (Muzzy 2026-11-04: "this can't happen. we definitely need to avoid the inne
 - ✅ F184 🧱 Hook rule runner — one shared runner + one file per rule (id, what it checks, why with Muzzy's quote, its test, on/off), lint-tool style; today's big hooks split into rules with their tests kept — must · needs: F182
 - ✅ F185 🔧 Slimmed rule set — apply F182's verdicts: rules merged or deleted, judgement rules made hooks, CLAUDE.md down to the judgement-only lines with the dated quotes moved into rule files — must · needs: F182, F184
 - ✅ F186 🔧 Slimmed framework — apply F183's verdicts — must · needs: F183
-- 🟢 F187 🔧 Bloat test both ways — every addition names what it replaces (or "nothing" and why); /checkup runs a monthly removal pass from the firing log — should · needs: F181, F185
-- 🟢 F188 ❓ Module recipe — one page: what counts as a brick, plumbing or a gate; how a part comes out of a game; how it goes in; what proves it — needs: F186
+- 🔨 F187 🔧 Bloat test both ways — every addition names what it replaces (or "nothing" and why); /checkup runs a monthly removal pass from the firing log — should · needs: F181, F185
+- 🔨 F188 ❓ Module recipe — one page: what counts as a brick, plumbing or a gate; how a part comes out of a game; how it goes in; what proves it — needs: F186
 - ⏳ F189 🎮 Games list module candidates — Glyphtender and Goops each list candidates against the recipe, nothing extracted yet — must · needs: F188
 ```mermaid
 flowchart LR
@@ -546,8 +546,8 @@ flowchart LR
   F184[✅ F184 Hook rule runner]
   F185[✅ F185 Slimmed rule set]
   F186[✅ F186 Slimmed framework]
-  F187[🟢 F187 Bloat test both ways]
-  F188[🟢 F188 Module recipe]
+  F187[🔨 F187 Bloat test both ways]
+  F188[🔨 F188 Module recipe]
   F189[⏳ F189 Games list module candidates]
   F182 --> F184
   F182 --> F185
