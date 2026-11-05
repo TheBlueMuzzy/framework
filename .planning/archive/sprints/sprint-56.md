@@ -31,3 +31,8 @@ Checked: 2026-11-04 12:43 — by a fresh helper (a5ad333..0913562), checked by C
 - Claude's call (F184): the old hook files stay as one-line starters so settings.json (Muzzy's file) doesn't change; joining them into one runner per event can come later.
 - Claude's call (F186): the extraction queue stays until F188 — Module recipe decides its fate (audit §9). Games keep their own copies, so archiving a module never touches a game.
 - Claude's call: two helpers side by side — F184 works in ~/.claude, F186 in the framework repo, so they never touch the same files.
+
+Retro (Muzzy 2026-11-04: "good" — Claude's draft):
+- Went well: the framework got 29 % lighter with every check green and no game touched.
+- Went wrong: a helper sat idle ~10 h waiting on a notice, and main didn't notice until Muzzy asked.
+- Change: a "waiting" hand-back needs a wake-up running (HC10).
