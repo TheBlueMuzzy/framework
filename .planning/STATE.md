@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-05 09:35 — **Sprint 58 built, waiting on Muzzy:** F188 — Module recipe written (page https://claude.ai/artifact/PVnzrSrjBddLtYp65SbcCD — he reads it: "does it match how you picture it?"); F187 — Bloat test both ways built + checked (live: "Replaces:" on new rules / modules, monthly removal pass in /checkup). Next: his read + approval → archive sprint 58 → F189 — Games list module candidates (the last v0.37 feature; needs the games' sessions). (Older entries: the Log + git history.)
+2026-11-05 — **Sprint 58 ✅ approved by Muzzy: F188 — Module recipe (https://claude.ai/artifact/PVnzrSrjBddLtYp65SbcCD) + F187 — Bloat test both ways (live).** Only F189 — Games list module candidates is left in v0.37: Glyphtender and Goops each list, against the recipe, what they have that the other could use — read-only, nothing extracted. Next: /sprint for F189. (Older entries: the Log + git history.)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
