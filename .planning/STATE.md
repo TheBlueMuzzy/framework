@@ -1,15 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-04 23:15 — **Sprint 56 ✅ approved by Muzzy: F184 — Hook rule runner (live: every rule its own file, loud when one breaks, commit checks in git's own step per project) + F186 — Slimmed framework (−29 % lines, no game touched).** Added: HC10 — a "waiting" progress line needs a wake-up running. Waiting on Muzzy: how to change the sprint 56 retro, then archive it. Next: /sprint — F185 — Slimmed rule set (the false-alarm fixes, ~1,000 loops) and F188 — Module recipe are ready. (Older entries: the Log + git history.)
+2026-11-04 23:20 — **Sprint 56 ✅ archived; sprint 57 = F185 — Slimmed rule set (Muzzy: "go f185"), auto mode.** A helper fixes the hook false alarms + adds the new hook rules in a scratch copy of the hooks folder (swap at the end); Claude slims CLAUDE.md in parallel (rules moved, not lost). Next after it: F188 — Module recipe (ready). (Older entries: the Log + git history.)
 - ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
 Reviewed through: framework 0913562 (sprint 56 F186 a5ad333..0913562 — a fresh helper's cuts, checked by Claude: line counts, tags, no game touched, check:fast 22/22) + ~/.claude-config 2207bf2 (F184 runner.mjs, fallback/broken.mjs, save.mjs hooksPath read by Claude; HC10 written by Claude, 8 tests) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 56
-Doing: sprint 56 done (F184, F186 ✅), retro pending   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
+Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 57
+Doing: sprint 57 (F185)   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
