@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **F197 — Tutorial trial ✅** (Muzzy: the copy teaches the same; "build it now" as building blocks any game picks from). New milestone **v0.39 — Tutorial blocks** in ROADMAP: F198 — Tutorial module, F199 — Spotlight + bubble placement, F200 — Dev Kit Lessons tab, F201 — Starter teaches. Next: Sprint 63 (all four), F198 ∥ F199 by helpers first. Report: research/tutorial-trial.md (Decision section).
+2026-11-06 — **Sprint 63 started (v0.39 — Tutorial blocks)** on `dev/v0-39-tutorial-blocks` (Muzzy: "build it now"). F198 — Tutorial module ∥ F199 — Spotlight + bubble placement by two helpers in worktrees; then F201 — Starter teaches, F200 — Dev Kit Lessons tab. Next: check each helper's report first-hand, merge, check:fast, then the next two. Goops' real swap waits for Goops' own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -9,8 +9,8 @@
 Reviewed through: framework 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 62 (done)
-Doing: planning Sprint 63 (v0.39 — Tutorial blocks)   Branch: dev/tutorial-trial   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 63
+Doing: F198 — building, F199 — building   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
