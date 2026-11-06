@@ -1,11 +1,11 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 11:18 — **Sprint 61 in flight** (F194 — Goops catch-up rehearsal, F195 — Glyphtender catch-up rehearsal) on dev/v0-38-shared. Two helpers work on throwaway clones: ~/Documents/dev/.scratch/goops-catchup (tasks 1–5 done; final check:full running, ~36 min) and ~/Documents/dev/.scratch/glyphtender-catchup (7–10 done; final check:full running). Each writes its report to .planning/research/2026-11-06-<game>-catchup.md (not yet committed). 9 framework finds already fixed + logged in SPRINT (tasks 13, 14). Left: task 12 — the saves installer warning for old bare-format golden files (F194 find), the reports reviewed + committed, framework check:fast, both games' real update sprints outlined from the reports. Real games untouched. Goops' crash server: Muzzy said yes (2026-11-06) — deploy in Goops' own sprint; measured ~0.15 ms CPU, 2–4 rows per report (free plan: 10 ms, 100k rows/day).
+2026-11-06 — **Sprint 61 built: both rehearsals green** — F194 — Goops catch-up rehearsal (report research/2026-11-06-goops-catchup.md) and F195 — Glyphtender catch-up rehearsal (research/2026-11-06-glyphtender-catchup.md); 14 framework finds, all fixed on dev/v0-38-shared. Waiting on Muzzy's OK. Then: retro → archive → /deliver v0.38 (Games take what both use; F196 — Test helpers and F197 — Tutorial trial are could/should, not musts) → each game's real update sprint, in its own session, from its report.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework cb6f089 (sprint 60: /code-review low a87ae1f..e2aa624 — 3 real bugs fixed in cb6f089, a test each) · rehearsal fixes 91b8f1b, e293df1, 9800344, 25f5f0e, 615ab4a (each a test red first) · older: archive/log.md
+Reviewed through: framework 0284f5a (sprint 61: /code-review low came back empty in 7 s — Claude read the 55-line diff, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.38 Games take what both use   Sprint: 61
