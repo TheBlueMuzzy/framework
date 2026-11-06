@@ -8,7 +8,7 @@ Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research p
 
 ## Where we are
 Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 59
-Doing: F189 — done; delivering v0.39.0   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
+Doing: F189 — done; delivering v0.39.0   Branch: dev/v0-37-audit   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
