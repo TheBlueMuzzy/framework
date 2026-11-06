@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import bmuz from './src/lint/rules.mjs' // bmuz lint (F90)
 
 export default defineConfig([
-  globalIgnores(['dist', 'e2e-shots', '.claude', '.wrangler', 'src/table', 'src/devkit', 'vite-plugins/devkit', 'src/ui/kit', 'src/version', 'src/saves', 'src/crashes', 'src/audio', 'src/ai/kit', 'src/rooms', 'src/lint']), // install-module adds each framework module's folders here (they're linted in the framework)
+  globalIgnores(['dist', 'e2e-shots', '.claude', '.wrangler', 'src/table', 'src/devkit', 'vite-plugins/devkit', 'src/ui/kit', 'src/version', 'src/saves', 'src/crashes', 'src/audio', 'src/ai/kit', 'src/rooms', 'src/lint', 'src/tutorial']), // install-module adds each framework module's folders here (they're linted in the framework)
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
