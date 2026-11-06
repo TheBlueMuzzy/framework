@@ -164,6 +164,9 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     expect(fileReadsRow('export const kick = liveSetting(settings, (s: SettingsValues) => s?.wallKick === true)', 'wallKick')).toBe(true)
     expect(fileReadsRow('export const kick = liveSetting(settings, ({ wallKick }) => wallKick === true)', 'wallKick')).toBe(true)
     expect(fileReadsRow("export const g = liveSetting(settings, (v) => v.gooStyleX)", 'gooStyle')).toBe(false)
+    // with a type argument and the mapper on the next line, as Goops writes it
+    expect(fileReadsRow("export const gooStyle = liveSetting<GooStyle>(settings, (v) => (v.gooStyle === 'Particle' ? 'particle' : 'jelly'))", 'gooStyle')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting<WallKickMode>(settings,\n  (v) => toMode(v.wallKick))', 'wallKick')).toBe(true)
   })
   it('counts real reads only — not comments, words from a .json file, or a longer name that starts the same', () => {
     expect(fileReadsRow('// values.tips is read in tips.ts', 'tips')).toBe(false)

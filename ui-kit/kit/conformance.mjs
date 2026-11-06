@@ -443,11 +443,12 @@ export function fileReadsRow(text, id) {
   if (fileFeedsInfo(code, id)) return true
   // a liveSetting's mapper (0.42.0): its parameter IS the settings, whatever it's called — liveSetting(s, (v) => v.tips)
   // · (s: SettingsValues) => s?.tips · ({ tips }) => … (F194 rehearsal: Goops' gooStyle read as unread with (v))
-  for (const m of code.matchAll(/\bliveSetting\s*\([^,]*,\s*(?:\(\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?\)|([A-Za-z_$][\w$]*))\s*=>/g)) {
+  // (an optional type argument: liveSetting<GooStyle>(…) — Goops writes it that way)
+  for (const m of code.matchAll(/\bliveSetting\s*(?:<[^>]*>)?\s*\([^,]*,\s*(?:\(\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?\)|([A-Za-z_$][\w$]*))\s*=>/g)) {
     const param = escapeRe(m[1] ?? m[2])
     if (new RegExp(`\\b${param}\\s*\\??\\.\\s*${name}(?![\\w$])|\\b${param}\\s*\\??\\.?\\[\\s*${q}\\s*\\]`).test(code)) return true
   }
-  for (const m of code.matchAll(/\bliveSetting\s*\([^,]*,\s*\(\s*\{([^{}]*)\}/g)) {
+  for (const m of code.matchAll(/\bliveSetting\s*(?:<[^>]*>)?\s*\([^,]*,\s*\(\s*\{([^{}]*)\}/g)) {
     if (m[1].split(',').map((part) => part.trim().split(/[\s:=]/)[0]).includes(id)) return true
   }
   // a settings call named by the id: useSetting('tips') · getSetting('tips') · readPref('tips')
