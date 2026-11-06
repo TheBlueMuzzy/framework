@@ -40,6 +40,7 @@ export interface LessonRetry {
   when: Condition // e.g. the piece landed in the wrong place
   setup?: Record<string, unknown> // what the game does before the next try (old set-up stays: it piles up)
   message?: string // shown on each retry; {tries} = how many so far
+  button?: string // F198: the button that closes it (a text id, like a step's); left out = the game's default word
   max?: number // after this many retries the step just moves on (never stuck); default: no limit
 }
 
@@ -52,6 +53,11 @@ export interface LessonStep {
   // periscope" — the screen already says it, so only the spotlight shows)
   pointer?: unknown
   dim?: boolean // darken everything but what it points at
+  // F198: the button that closes the message — a text id (or the words), like `message`: "next", "gotIt", "play"…
+  // The game turns it into its own words (Glyphtender's Next / Got it / Play). A step with a button always waits for
+  // it; if the step moves on by something else (`advance`), the button only closes the words. Left out: the game's
+  // default word on a message that waits to be closed.
+  button?: string
   while?: WhileShowing // default 'run'
   showAfter?: number // seconds before the message shows (the game runs meanwhile); default 0
   advance?: Condition // default: dismiss
@@ -100,6 +106,7 @@ export interface LessonInterrupt {
   message: string
   pointer?: unknown
   while?: WhileShowing // default 'pause'
+  button?: string // F198: the button that closes it (a text id, like a step's); left out = the game's default word
   remember?: boolean
   // F31: only during these steps (step ids, both included; left out = from the first / to the last) — day one's D4 is
   // armed from D2 to the end; E1's red X only during E1. Outside them it waits (an event can still fire it later).

@@ -388,3 +388,83 @@ describe('the lesson runner, day one additions', () => {
     expect(restart.log).toEqual(['{"goop":"left by B"}', '{"own":1}'])
   })
 })
+
+// F198 (the F197 trial's hand fix 4): a step says which button closes it — the words are the game's (a text id, like
+// a message), so one game's "Next" / "Got it" / "Play" are just ids — and whether it dims the rest (`dim`).
+describe('button words', () => {
+  it('a step names its button; the message carries it, waits for it, and closing it moves on', () => {
+    const t = setup({ id: 'b', steps: [
+      { id: 'one', message: 'one', button: 'next', while: 'pause' },
+      { id: 'two', message: 'two', button: 'play', dim: true },
+    ] })
+    t.runner.start(t.lesson)
+    expect(t.runner.view().message).toMatchObject({ text: 'one', button: 'next', dim: false, waitsForDismiss: true })
+    t.run(300); t.runner.dismiss(); t.run(1)
+    expect(t.runner.view().message).toMatchObject({ text: 'two', button: 'play', dim: true, waitsForDismiss: true })
+  })
+
+  it('a button on a step that moves on by doing something: the button only closes the words, the step still waits', () => {
+    const t = setup({ id: 'b', steps: [
+      { id: 'drag', message: 'drag', button: 'gotIt', dim: true, advance: { on: 'event', event: 'moved' } },
+      { id: 'after', message: 'after' },
+    ] })
+    t.runner.start(t.lesson)
+    expect(t.runner.view().message).toMatchObject({ button: 'gotIt', dim: true, waitsForDismiss: true })
+    t.run(300); t.runner.dismiss()
+    expect(t.runner.view().message).toBeNull()
+    expect(t.runner.view().stepId).toBe('drag')
+    t.runner.event('moved'); t.run(1)
+    expect(t.runner.view().stepId).toBe('after')
+  })
+
+  it('no button named → none on the message (the game shows its own default word); a step that doesn\'t wait has none', () => {
+    const t = setup({ id: 'b', steps: [
+      { id: 'plain', message: 'plain' },
+      { id: 'act', message: 'act', advance: { on: 'event', event: 'go' } },
+    ] })
+    t.runner.start(t.lesson)
+    expect(t.runner.view().message?.button).toBeUndefined()
+    expect(t.runner.view().message?.waitsForDismiss).toBe(true)
+    t.run(300); t.runner.dismiss(); t.run(1)
+    expect(t.runner.view().message).toMatchObject({ text: 'act', waitsForDismiss: false })
+    expect(t.runner.view().message?.button).toBeUndefined()
+  })
+
+  it('an interrupt and a retry can name their button too', () => {
+    const t = setup({ id: 'b', steps: [
+      { id: 's', message: 's', advance: { on: 'event', event: 'hit' }, retry: { when: { on: 'event', event: 'miss' }, message: 'again', button: 'tryAgain' } },
+    ], interrupts: [{ id: 'oops', when: { on: 'event', event: 'oops' }, message: 'oops', button: 'gotIt' }] })
+    t.runner.start(t.lesson)
+    t.runner.event('miss')
+    expect(t.runner.view().message).toMatchObject({ kind: 'retry', button: 'tryAgain' })
+    t.run(300); t.runner.dismiss()
+    t.runner.event('oops')
+    expect(t.runner.view().message).toMatchObject({ kind: 'interrupt', button: 'gotIt' })
+  })
+
+  it('a game pattern can carry the button and the dim ("gotIt" = pause, dim, a Got it button)', () => {
+    const gotIt = { while: 'pause' as const, dim: true, button: 'gotIt' }
+    expect(expandStep({ id: 'x', pattern: 'gotIt', message: 'hi' }, { gotIt })).toMatchObject({ while: 'pause', dim: true, button: 'gotIt' })
+    expect(expandStep({ id: 'x', pattern: 'gotIt', message: 'hi', button: 'play' }, { gotIt }).button).toBe('play') // the step wins
+  })
+})
+
+// F198 (the F197 trial's hand fix 2 — its one real bug): the order a game sees between two steps. The contract
+// (README): a step's `setup` is where its state is decided; setSpeed may be called between steps, before that setup.
+describe('the order between steps', () => {
+  it('moving on: the old message goes and the game runs again (setSpeed) BEFORE the next step\'s setup', () => {
+    const { clock, run } = handClock()
+    const calls: string[] = []
+    const runner = createLessonRunner({
+      clock, timing: () => TIMING,
+      game: { setup: (s) => calls.push(`setup ${JSON.stringify(s)}`), gate: () => null, setSpeed: (s) => calls.push(`speed ${s}`) },
+    })
+    runner.start(() => ({ id: 'o', steps: [
+      { id: 'a', message: 'a', while: 'pause', setup: { limit: 1 } },
+      { id: 'b', message: 'b', while: 'pause', setup: { limit: 2 } },
+    ] }))
+    run(300); calls.length = 0
+    runner.dismiss()
+    expect(calls).toEqual(['speed 1', 'setup {"limit":2}', 'speed 1', 'speed 0'])
+  })
+})

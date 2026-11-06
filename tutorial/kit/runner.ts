@@ -43,6 +43,7 @@ export interface LessonMessage {
   pointer?: unknown
   dim: boolean
   waitsForDismiss: boolean // it has a "Got it" (and Enter closes it)
+  button?: string // F198: which words that button has (a text id: "next", "gotIt", "play"…); none = the game's default
   armed: boolean // …which works now
   tries: number // retries so far in this step ({tries} in the words)
   insisting?: boolean // F32: the step's insist has come (the same words, now with the game stopped and the dim on)
@@ -241,7 +242,8 @@ export function createLessonRunner(o: { game: LessonGame; clock: LessonClock; ti
     // (no message but a pointer: it only points — the spotlight, no words, nothing to close)
     if (s.message || s.pointer !== undefined) {
       const message: LessonMessage = { kind: 'step', text: s.message ?? '', pointer: s.pointer, dim: !!s.dim,
-        waitsForDismiss: !!s.message && (closedByDismiss(advanceOn) || w === 'pause'), armed: false, tries }
+        waitsForDismiss: !!s.message && (closedByDismiss(advanceOn) || w === 'pause' || s.button !== undefined), armed: false, tries }
+      if (message.waitsForDismiss && s.button !== undefined) message.button = s.button
       if (!s.showAfter) show(message, w)
       else stepTimers.after('show', s.showAfter * 1000, () => show(message, w))
     }
@@ -277,7 +279,8 @@ export function createLessonRunner(o: { game: LessonGame; clock: LessonClock; ti
     tries++
     if (r.max !== undefined && tries > r.max) return advance() // never stuck: after enough tries it moves on
     if (r.setup) game.setup(r.setup)
-    if (r.message) show({ kind: 'retry', text: r.message, pointer: step?.pointer, dim: false, waitsForDismiss: true, armed: false, tries }, 'pause')
+    if (r.message) show({ kind: 'retry', text: r.message, pointer: step?.pointer, dim: false, waitsForDismiss: true, armed: false, tries,
+      ...(r.button !== undefined ? { button: r.button } : {}) }, 'pause')
   }
 
   // a step's reaction (lessonTypes LessonReaction): its words over the step's message until `until`; the game's
@@ -325,7 +328,8 @@ export function createLessonRunner(o: { game: LessonGame; clock: LessonClock; ti
     firedInterrupts.add(id)
     if (it.remember) game.markSeen?.(`interrupt:${id}`)
     interrupt = { saved: view.message ? { message: view.message, while: showingWhile } : null }
-    show({ kind: 'interrupt', text: it.message, pointer: it.pointer, dim: false, waitsForDismiss: true, armed: false, tries }, it.while ?? 'pause')
+    show({ kind: 'interrupt', text: it.message, pointer: it.pointer, dim: false, waitsForDismiss: true, armed: false, tries,
+      ...(it.button !== undefined ? { button: it.button } : {}) }, it.while ?? 'pause')
   }
 
   function begin(get: () => Lesson, at: number) {
