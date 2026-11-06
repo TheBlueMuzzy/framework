@@ -2,7 +2,7 @@
 
 ## ▶ RESUME HERE
 2026-11-06 — **Released v0.39.0 — v0.37 A lean, measured BMUZ ✅** (library: tag v0.39.0 on GitHub). The freeze is lifted. Next: /define the next milestone — games take what both use (ROADMAP Ideas 2026-11-06, from the F189 page https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv), then Glyphtender + Goops update.
-- Ask Muzzy: OK to run a small crash server on Cloudflare for Goops? (needed for Crashes in Goops)
+- Muzzy 2026-11-06: "yes" — Goops gets its own small crash server on his Cloudflare (like Glyphtender's), for Crashes in Goops.
 - Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git — the commit check now says so).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
