@@ -591,13 +591,13 @@ flowchart LR
 ## v0.39 — Tutorial blocks  ← current · planned 2026-11-06
 Goal (Muzzy 2026-11-06: "the tutorial module can be brought into any game, and that game can utilize any of the elements from it. Sort of how you can load a library… build it now"): a tutorial toolbox any game installs and uses only the parts it wants. Goops' lesson player is its heart (proven unchanged in Glyphtender by F197 — Tutorial trial); the UI kit's Callout, tips memory and nudge timer already exist and stay where they are. Each game keeps its own steps, words, "the player did X" checks, look and when-to-teach rules. Glyphtender keeps its tutorial until Muzzy wants it redone; Goops swaps in its own session.
 - 🔨 F198 🧱 Tutorial module — a new `tutorial/` brick from Goops' lesson player: steps from lesson files (+ button words: Next / Got it / Play), wait for a tap / an event / a number / time, hold the game (pause, slow, only some controls), hints and retries, one lesson at a time (a queue), words per control type (keys / mouse / phone); installer, README, tests, conformance — must · sprint 63
-- 🔨 F199 🧱 Spotlight + bubble placement — the UI kit gets Goops' spotlight (dim everything but the thing being taught) and Glyphtender's placement rule (the bubble covers as little of the play area as it can) as Callout options — must · sprint 63
+- ✅ F199 🧱 Spotlight + bubble placement — the UI kit gets Goops' spotlight (dim everything but the thing being taught) and Glyphtender's placement rule (the bubble covers as little of the play area as it can) as Callout options — must · sprint 63
 - 🔨 F200 🔧 Dev Kit Lessons tab — edit a game's lesson files live while it runs (from Goops' own tab), for any game with the tutorial module — should · needs: F198 · sprint 63
 - 🔨 F201 🎮 Starter teaches — the turn-based starter gets a 3-step tutorial built from the module + kit blocks, so every new game starts with one and starter-check plays it — must · needs: F198, F199 · sprint 63
 ```mermaid
 flowchart LR
   F198[🔨 F198 Tutorial module]
-  F199[🔨 F199 Spotlight + bubble placement]
+  F199[✅ F199 Spotlight + bubble placement]
   F200[🔨 F200 Dev Kit Lessons tab]
   F201[🔨 F201 Starter teaches]
   F198 --> F200

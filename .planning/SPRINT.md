@@ -19,6 +19,7 @@ Done when: the UI kit has a Spotlight (dims everything except one or more things
 - [x] 🤖 10. UI kit version + UPGRADES + CATALOG lines — ui-kit/UPGRADES.md
 - [x] 🤖 18. Review fix (/code-review low 7f3dcf5..ddb194c): a screen box measured from the page (DOMRect has x AND left) was read as a point — test red first, then green (447 block tests); a stale gallery comment out — ui-kit/kit/blocks/teach.tsx
 Check: ui-kit tests + check:framework's UI checks green; Claude looks at the teach screen on phone + desktop in two styles (breathing room measured to the dim's edge).
+Checked: 2026-11-06 — ui-kit 937 tests + check-ui by the helper; after the merge + review fix: kit blocks 447/447 (Claude), GitHub Checks (check:fast + check:framework) green on 63c7329; Claude looked at the phone (cozy, then the merged code in clean) and desktop (clean) Board view — bubble off the board and the switcher, Plant outline ≥ 15 px from the grid, console clean but a favicon 404. Muzzy 2026-11-06: the dim feels right; "approved".
 
 ## F201 🎮 Starter teaches
 Done when: a brand-new game made from the turn-based starter opens with a 3-step "how to play" tutorial built only from the module + kit blocks (a lesson file, a pointer bubble, the spotlight, the nudge), replayable from Settings, and starter-check plays it end to end.
