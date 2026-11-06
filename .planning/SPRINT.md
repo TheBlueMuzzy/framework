@@ -21,6 +21,9 @@ Done when: a throwaway copy of Glyphtender (`~/Documents/dev/.scratch/glyphtende
 - [x] 🤖 13. Rehearsal find: saves UPGRADES 0.9.0 named Glyphtender as holding moves — it holds none (5b01a82) — saves/UPGRADES.md
 - [x] 🤖 14. Rehearsal find: version's installer read crashes/lint copies as game code → a false "Still to wire" step; copies now found by their VERSION file, test red first (91b8f1b) — version/scripts/install-version.mjs
 - [x] 🤖 15. Rehearsal find: crashes' installer always printed "Going live" and port 1995 — now done once client.url is https, port read from the game's crashes/wrangler.json; test red first — crashes/scripts/install-crashes.mjs
+- [x] 🤖 16. Rehearsal find (Goops): the UI kit's list floor took Credits' whole first group as one row, so the card scrolled as one and the list touched its edge — a group now counts as its lines; real-browser test red first (1528 px → under 8rem), screenshot checked (9800344) — ui-kit/kit/controls/ScrollArea.tsx
+- [x] 🤖 17. Rehearsal find (Glyphtender): full screen on a phone that never opened Settings stayed off, and startFullscreen() kept an earlier call's load — the row's default now applies; test red first (25f5f0e) — ui-kit/kit/blocks/fullscreen.ts
+- [x] 🤖 18. Rehearsal find (Goops): version's installer asked for <MainMenu version> on a game drawing its own menu — now the same data-version-spot rule as check:framework; test red first — version/scripts/install-version.mjs
 Check: the copy's check:full green; its golden saves replay; the real Glyphtender's git status unchanged.
 
 ## Wrap-up

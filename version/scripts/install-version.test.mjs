@@ -78,6 +78,19 @@ describe('wiringSteps', () => {
     expect(own.map((w) => w.step)).toEqual([expect.stringContaining('src/ui/About.tsx')])
   })
 
+  it("a main menu the game draws itself (data-version-spot) counts, as check:framework counts it (F194 rehearsal: Goops' Console)", () => {
+    const own = {
+      ...kits,
+      'vite.config.ts': "import { versionPlugin } from './src/version/vitePlugin.mjs'\nexport default { plugins: [versionPlugin()] }",
+      'src/ui/Console.tsx': "import { versionLabel } from '../version'\nexport const Console = () => <span data-version-spot=\"main-menu\">{versionLabel}</span>",
+      'src/ui/menus.tsx': "import { versionLabel } from '../version'\nconst b = <Settings version={versionLabel} />",
+      'src/devkit-game/tabs.ts': "import { g } from './gAdapter'\nregisterDevKitGame(g)",
+      'src/devkit-game/gAdapter.ts': "import { versionLabel } from '../version'\nexport const g = { version: versionLabel }",
+      'tests/start.mjs': "import { checkVersion } from '../src/version/e2e.mjs'\nawait checkVersion(page)",
+    }
+    expect(wiringSteps(game(own)).filter((w) => !w.done)).toEqual([])
+  })
+
   it("another module's copy is never read as game code (F195 rehearsal: crashes' words named <Settings onChange>)", () => {
     const wired = {
       ...kits,
