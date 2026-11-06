@@ -5,7 +5,7 @@
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework cb6f089 (sprint 60: /code-review low a87ae1f..e2aa624 — 3 real bugs fixed in cb6f089, a test each) · framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
+Reviewed through: framework cb6f089 (sprint 60: /code-review low a87ae1f..e2aa624 — 3 real bugs fixed in cb6f089, a test each) · rehearsal fixes 91b8f1b, e293df1, 9800344, 25f5f0e, 615ab4a (each a test red first) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.38 Games take what both use   Sprint: 61
@@ -46,5 +46,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-03 — Sprint 52 built (v0.34 Checks that don't cry wolf): stop-servers + the port pre-flight now see servers netstat leaves out and ignore closing connections; the starter's online results no longer linger over a rematch; a busy PC re-runs timed-out checks alone instead of going red. Waiting on Muzzy's approval.
 - 2026-11-03 — Released v0.35.0 (v0.33 Releases that don't need babysitting): crash maps only from the release build, built with the deploy's settings and checked against the live page; slow unit tests flagged before GitHub times them out; test-only fixes keep the security review; releases stop looping on the planner and on Muzzy's server deploy; /sync never wipes unpushed edits.
 - 2026-11-03 — Released v0.34.1 (update): rooms 0.14.0 — an online match everyone has left waits (no bot moves, no turn clock, nothing written) and goes on for the time left when someone is back; a `bot:` player id is refused; UI kit 0.39.0 — tip bubbles get their own colours (Dev Kit 0.28.2 lists them). All from Glyphtender (v0.13.0 / its new kit look).
-- 2026-10-30 — Released v0.34.0 (v0.32 Smoother upgrades): updating a game prints the hand steps since its version and refuses a module that needs a newer Dev Kit; audio's fix keeps a mix tuned by ear; old plain-text saves carry over; lint's installer and rule-message false alarms fixed — all found by the Glyphtender catch-up rehearsal.
-- 2026-10-30 — Sprint 50 planned: smoother upgrades (F165 lint installer comma, F166 saves read old plain values, F167 lint knows rule messages, F168 upgrade notes + install order, F169 audio keeps the tuned mix) — from the Glyphtender catch-up rehearsal.
