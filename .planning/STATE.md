@@ -1,16 +1,16 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 63 (v0.39 — Tutorial blocks)** on `dev/v0-39-tutorial-blocks`: F199 — Spotlight + bubble placement ✅ (Muzzy approved; UI kit 0.43.0). F198 — Tutorial module: the helper is running the Goops copy's check:full after the swap (`.scratch/goops-tutorial-swap`); then Claude checks its report, merges, check:fast, reviews, hands it over. Then F201 — Starter teaches and F200 — Dev Kit Lessons tab. Framework gap to fix: extract.mjs swap refuses a copy of a game (folder name must match). Goops' real swap waits for its own session.
+2026-11-06 — **Sprint 63 (v0.39 — Tutorial blocks)** on `dev/v0-39-tutorial-blocks`: F199 — Spotlight + bubble placement ✅ (UI kit 0.43.0) · F198 — Tutorial module ✅ (tutorial 0.1.0, lint 0.4.1; X01 released — Goops swaps in its own session: `extract.mjs swap X01`, rehearsed green on a copy). Now: one helper builds F201 — Starter teaches then F200 — Dev Kit Lessons tab (both touch the starter). Then Claude checks, merges, check:fast, reviews, hands over.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
+Reviewed through: framework e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 63
-Doing: F198 — building (helper); F201 + F200 next   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Doing: F201 — building, then F200 (one helper)   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -37,6 +37,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-06 — F198 — Tutorial module done (Muzzy approved): a tutorial toolbox any game loads like a library; Goops' own lesson player swapped for it on a copy with every Goops check green.
 - 2026-11-06 — F199 — Spotlight + bubble placement done (Muzzy approved): the UI kit can dim everything but what's being taught, and its pointer bubble keeps off the play area. F198 — Tutorial module is on its last check.
 - 2026-11-06 — F197 — Tutorial trial done: Goops' lesson player taught Glyphtender's first 3 steps on a copy, unchanged, and Muzzy says it teaches the same. He chose to build a tutorial toolbox now that any game picks from — planned as v0.39 — Tutorial blocks.
 - 2026-11-06 — v0.38 Games take what both use: the parts both games built are shared (live settings, full screen + the turn-your-phone card, the new-version fix); the save check replays moves; both games' updates rehearsed green on copies, 15 framework finds fixed first.
