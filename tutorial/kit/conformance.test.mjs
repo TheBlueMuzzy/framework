@@ -57,6 +57,17 @@ describe('the runner\'s clock', () => {
     const old = { path: 'src/game/lessons/runner.ts', text: 'export function createLessonRunner(o: { game: LessonGame; clock: LessonClock }) {\n}\n' }
     expect(runnerClocks([old])).toEqual([])
   })
+
+  it('a "/*" inside a string isn\'t a comment (F201: the README\'s own lesson glob, then a /** doc */, hid the call)', () => {
+    const text = [
+      "const files = import.meta.glob<Lesson>('../../content/lessons/*.json', { eager: true, import: 'default' })",
+      'export const runner = createLessonRunner({ clock: rulesClock, timing: () => t, game })',
+      '/** Settings → Replay tutorial */',
+      "const url = 'http://example.com' // a comment after a string with // in it",
+      '/* createLessonRunner({ clock: wallClock }) */',
+    ].join('\n')
+    expect(runnerClocks([{ path: 'src/tutorial-game/firstGame.ts', text }])).toEqual([{ where: 'src/tutorial-game/firstGame.ts:2', clock: 'rulesClock' }])
+  })
 })
 
 describe('check', () => {

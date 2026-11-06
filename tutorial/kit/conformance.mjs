@@ -69,11 +69,34 @@ export function lessonProblems(path, text) {
   return out
 }
 
+/** The code with its comments blanked (line breaks kept, so line numbers stay) — reading strings as strings: a "/*" or
+ *  "//" inside quotes isn't a comment (F201: the README's own `import.meta.glob('…/lessons/*.json')`, then a doc
+ *  comment's end, blanked the code between them and hid the runner). */
+function withoutComments(text) {
+  let out = '', quote = null
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i + 1]
+    if (quote) {
+      out += c
+      if (c === '\\') { out += next ?? ''; i++ } else if (c === quote) quote = null
+    } else if (c === '/' && (next === '/' || next === '*')) {
+      const end = next === '/' ? text.indexOf('\n', i) : text.indexOf('*/', i + 2) + 2
+      const stop = end <= 1 || end === -1 ? text.length : end
+      out += text.slice(i, stop).replace(/[^\n]/g, ' ')
+      i = stop - 1
+    } else {
+      if (c === '"' || c === "'" || c === '`') quote = c
+      out += c
+    }
+  }
+  return out
+}
+
 /** The clock each createLessonRunner call in the game's code is given → [{ where, clock }] (clock null = can't tell). */
 export function runnerClocks(files) {
   const found = []
   for (const { path, text } of files) {
-    const code = text.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' ')).replace(/(^|[^:'"])\/\/[^\n]*/g, '$1')
+    const code = withoutComments(text)
     const call = /\bcreateLessonRunner\s*\(/g
     let m
     while ((m = call.exec(code))) {

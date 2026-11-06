@@ -100,3 +100,5 @@ between steps), words per control type, the installer, the promise checks. `npm 
 ## Versions
 - 0.1.0 (F198): Goops' lesson player (runner, lesson format, patterns — its two tank patterns stay Goops') + button
   words + words per control type + the promise checks.
+- 0.1.1 (F201): the clock check reads strings as strings (a lesson glob's `/*` + a later doc comment hid the runner).
+  First used whole by the turn-based starter (`starters/turn-based`: its README "Your game's tutorial").
