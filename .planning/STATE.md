@@ -1,15 +1,15 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 60 planned: the parts both games share** (F190 — Save check replays the moves, F191 — Settings the game follows live, F192 — Phone screen handling, F193 — New version on first visit, fixed), on dev/v0-38-shared. Next: /develop.
-- Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git).
+2026-11-06 — **Sprint 60 ✅ approved by Muzzy ("good to go")**: F190 — Save check replays the moves (Saves 0.9.0, breaking hand step for games whose saves hold moves), F191 — Settings the game follows live + F192 — Phone screen handling (UI kit 0.42.0), F193 — New version on first visit, fixed (Version 0.2.0) — on dev/v0-38-shared, unreleased. Next: sprint 60 retro → archive → /sprint 61 (F194 — Goops catch-up rehearsal, F195 — Glyphtender catch-up rehearsal).
+- Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once (its module copies are no longer in git).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
 Reviewed through: framework cb6f089 (sprint 60: /code-review low a87ae1f..e2aa624 — 3 real bugs fixed in cb6f089, a test each) · framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.38 Games take what both use   Sprint: 60
-Doing: sprint 60 (F190, F191, F192, F193)   Branch: dev/v0-38-shared   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
+Doing: F190, F191, F192, F193 — done; sprint 60 retro   Branch: dev/v0-38-shared   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

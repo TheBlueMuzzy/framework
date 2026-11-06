@@ -24,7 +24,7 @@ Done when: the UI kit has full screen on phones (a Settings → Display row, on 
 - [x] 🤖 9. Full screen on phones + its Settings row — ui-kit/kit/layout.tsx
 - [x] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
 - [x] 🤖 11. Screenshots of the card at every size; the starter proves both — ui-kit/scripts/shoot.mjs
-- [ ] 🙋 12. Look at the card in the screenshots: does it read well? — ui-kit/scripts/shoot.mjs
+- [x] 🙋 12. Look at the card in the screenshots: does it read well? (Muzzy 2026-11-06: "good to go") — ui-kit/scripts/shoot.mjs
 - [x] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md (VERSION left to F191: lines under "- NEXT:")
 Check: shots of the card at every size, looked at by Claude; full screen asked only on a tap, never on a computer by default; ui-kit tests + starter-check green.
 Checked: 2026-11-06 — 98 shots (7 sizes × 7 styles), page check 0 problems; Claude looked at Neon 844x390, Cozy 390x844, Pixel 768x343: centred card, nothing touching an edge, title wraps cleanly on narrow phones. Live starter run: phone full screen only after a tap, computer never. Review fix: Reset that turns it off now leaves full screen; its button and Esc tell live settings (2 tests red first). check:fast 22/22 (cb6f089).
