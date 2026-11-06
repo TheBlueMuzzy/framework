@@ -18,7 +18,7 @@ const moduleDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const KIT_TARGET = 'src/lint'
 const ESLINT_CONFIGS = ['eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.mts']
 // what the rules don't read: framework module copies (linted in the framework), the Dev Kit's game tools, tests
-const NOT_GAME_CODE = ['src/table', 'src/devkit', 'src/ui/kit', 'src/version', 'src/saves', 'src/crashes', 'src/audio', 'src/ai/kit', 'src/emotes', 'src/rooms', 'src/lint', 'src/devkit-game']
+export const NOT_GAME_CODE = ['src/table', 'src/devkit', 'src/ui/kit', 'src/version', 'src/saves', 'src/crashes', 'src/audio', 'src/ai/kit', 'src/emotes', 'src/rooms', 'src/lint', 'src/devkit-game', 'src/tutorial']
 export const MARK = 'bmuz lint (F90'
 const isTest = (path) => /\.test\./.test(path)
 
