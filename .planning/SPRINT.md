@@ -5,7 +5,7 @@ Started 2026-11-06 · Milestone v0.38 · Features: F194, F195
 Done when: a throwaway copy of Goops (`~/Documents/dev/.scratch/goops-catchup`) runs on today's framework — every module current, plus Saves, Crashes, Lint and the sprint 60 parts — with its check:full green; a report says how long each step took, every hand fix, and what the framework got wrong (fixed in the framework first). The real Goops is untouched.
 - [x] 🤖 1. Copy Goops, check:full green before any change, timed — .planning/research/2026-11-06-goops-catchup.md
 - [x] 🤖 2. Every module Goops has to current with install-module.mjs (Dev Kit first), each timed, hand fixes noted — ~/.claude/config/bmuz/scripts/install-module.mjs
-- [ ] 🤖 3. Take Saves (progress onto createSave + an upgrade step + a golden save of today's format, so no rank is lost), Crashes ("Send crash reports" on by default — Muzzy 2026-11-06), Lint — .planning/research/2026-11-06-goops-catchup.md
+- [x] 🤖 3. Take Saves (progress onto createSave + an upgrade step + a golden save of today's format, so no rank is lost), Crashes ("Send crash reports" on by default — Muzzy 2026-11-06), Lint — .planning/research/2026-11-06-goops-catchup.md
 - [ ] 🤖 4. Swap in the shared parts: liveSetting for gooStyle / wallKick / readoutSetting, the kit's upright card, startUpdates — .planning/research/2026-11-06-goops-catchup.md
 - [ ] 🤖 5. Crash server run locally (wrangler dev) against the copy; CPU + writes per report measured against Cloudflare's free plan — nothing deployed — .planning/research/2026-11-06-goops-catchup.md
 - [ ] 🤖 6. check:full green on the copy; the report — .planning/research/2026-11-06-goops-catchup.md
