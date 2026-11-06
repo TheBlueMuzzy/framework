@@ -102,5 +102,7 @@ One file per real save from each version, in the game's `tests/saves/`: `<key wi
 ```
 - `stored` = the value that was under `<key>`, parsed (the test writes `JSON.stringify(stored)` back under `<key>`).
 - `expect` (optional) = top-level fields the loaded save must have, with these values.
+- A save whose loaded data holds a move list (`moves` or `record.moves`) is also played through the game's own rules
+  (the game's replay, as Continue does it); a move that doesn't fit fails the golden save (0.9.0, F190).
 Another language's version passes when every golden save loads with the same result as the TypeScript kit:
 the same `data` after upgrade + fill, the same "newer" / "damaged" calls.
