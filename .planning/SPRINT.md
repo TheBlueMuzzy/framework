@@ -13,7 +13,7 @@ Check: the audit's bad save fails the check; the starter's golden saves pass; sa
 Done when: one UI kit helper gives a game a setting that follows the Settings screen at once (get · subscribe · keeps its value across a reload) — what Glyphtender's gameSettings.ts and Goops' gooStyle / wallKick / readoutSetting each do by hand; the starter uses it for one row.
 - [x] 🤖 5. The helper, from Glyphtender's gameSettings.ts and the shape of Goops' gooStyle.ts — ui-kit/kit/blocks/Settings.tsx
 - [x] 🤖 6. Tests: change a row → the game sees it at once; the value survives a reload — ui-kit/kit/blocks/Settings.tsx
-- [ ] 🤖 7. The starter uses it for one row, so starter-check plays it — starters/turn-based/src/ui/menus.tsx
+- [x] 🤖 7. The starter uses it for one row, so starter-check plays it — starters/turn-based/src/ui/menus.tsx
 - [ ] 🤖 8. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
 Check: the new tests red before the helper, green after; ui-kit tests + starter-check green.
 
