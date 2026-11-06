@@ -1,14 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-05 — **Sprint 59 planned: F189 — Games list module candidates** (the last v0.37 feature, read-only). Muzzy: "get this knocked out and get back to working on games with fully updated framework/bmuz" — no separate wait to re-measure the cleanup; task 1 re-runs the checks first-hand, the firing log + monthly /checkup do the rest. Next: /develop task 1. After it: /deliver v0.37, then the next milestone extracts what Muzzy picks + updates the games.
+2026-11-06 — **F189 — Games list module candidates ✅** (Muzzy: "go auto"; page https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv). Delivering v0.39.0 — v0.37 A lean, measured BMUZ. Next milestone (Claude's pick, Muzzy's "go auto"): Goops takes Saves + Crashes + Lint; UI kit gets the live game-settings helper + phone screen handling; Version gets Goops' first-visit fix; test helpers if room; tutorial = trial only. Ask Muzzy: OK to run a small crash server on Cloudflare for Goops? (when that milestone is planned)
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
+Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 59
-Doing: sprint 59 (F189)   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
+Doing: F189 — done; delivering v0.39.0   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -35,6 +35,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-06 — v0.37 A lean, measured BMUZ done: both games listed what the other could use (F189 — Games list module candidates) — no new module needed yet; Goops taking Saves + Crashes would unfreeze both. Cleanup checks re-run green; one outdated script test fixed.
 - 2026-11-04 — Sprint 55 built overnight (v0.37 A lean, measured BMUZ): every hook answer is now logged (F181 — Hook firing log); two audit pages measure every BMUZ rule (F182 — Rule inventory + verdicts) and every framework part (F183 — Framework inventory + verdicts) with proposed verdicts for Muzzy; session start stops printing Goops' old notes.
 - 2026-11-04 — BMUZ: decisions from every side — a decision question from Muzzy gets a weighing brief before Claude answers, and a pick without a Weighed block (why it is this way · long term · standards · his goals · against the pick) is sent back (hooks session-moments + handoff-check, 630/630 hook tests; ~/.claude-config f2c6056).
 - 2026-11-03 — Released v0.38.0 (v0.36 A sync that knows its own work): the PC ↔ laptop sync stops refusing pushes for this machine's own changes; the no-fixed-wait test rule covers every test file.
