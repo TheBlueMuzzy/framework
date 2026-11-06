@@ -559,7 +559,7 @@ flowchart LR
   F188 --> F189
 ```
 
-## v0.38 — Games take what both use  · planned 2026-11-06
+## v0.38 — Games take what both use  ✅ released 2026-11-06 (v0.40.0) · planned 2026-11-06
 Goal (Muzzy 2026-11-06: "ok"; from F189 — Games list module candidates, `research/module-candidates/README.md`): the parts both games already wrote go into the modules they belong to, Goops takes Saves + Crashes + Lint (so they stop being frozen), and each game's update is rehearsed on a throwaway copy first — the real updates then run in each game's own session. No new module.
 - ✅ F190 🧱 Save check replays the moves — the golden-save check replays every saved game's moves through the rules, so a save that no longer fits is caught (the 2026-11-04 gap; before Goops' progress moves onto Saves) — must
 - ✅ F191 🧱 Settings the game follows live — one small UI kit helper from Glyphtender's `src/ui/gameSettings.ts`; replaces Goops' three hand-written copies (gooStyle, wallKick, readoutSetting) — must
