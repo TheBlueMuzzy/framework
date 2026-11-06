@@ -1,15 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-05 — **Sprint 58 ✅ approved by Muzzy: F188 — Module recipe (https://claude.ai/artifact/PVnzrSrjBddLtYp65SbcCD) + F187 — Bloat test both ways (live).** Only F189 — Games list module candidates is left in v0.37: Glyphtender and Goops each list, against the recipe, what they have that the other could use — read-only, nothing extracted. Next: /sprint for F189. (Older entries: the Log + git history.)
-- ~/.claude this session: guard-git refuses a work-dropping checkout and names the stash (Muzzy: keep it); stop-check-fast checks the project, not a helper worktree. Synced to the laptop.
+2026-11-05 — **Sprint 59 planned: F189 — Games list module candidates** (the last v0.37 feature, read-only). Muzzy: "get this knocked out and get back to working on games with fully updated framework/bmuz" — no separate wait to re-measure the cleanup; task 1 re-runs the checks first-hand, the firing log + monthly /checkup do the rest. Next: /develop task 1. After it: /deliver v0.37, then the next milestone extracts what Muzzy picks + updates the games.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
 Reviewed through: ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 58
-Doing: sprint 58 (F188, F187)   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
+Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 59
+Doing: sprint 59 (F189)   Branch: dev/v0-37-audit   Version: 0.38.0 (unreleased on the branch: ai 0.9.0 · rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · lint 0.4.0; emotes archived)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
