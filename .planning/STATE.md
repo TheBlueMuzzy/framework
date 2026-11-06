@@ -10,7 +10,7 @@ Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research p
 
 ## Where we are
 Stage: deliver   Milestone: — (v0.37 released; next: /define)   Sprint: — (59 archived)
-Doing: nothing — v0.39.0 released   Branch: dev/v0-37-audit   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
+Doing: nothing — v0.39.0 released   Branch: main   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
