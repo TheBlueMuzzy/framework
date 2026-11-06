@@ -23,7 +23,7 @@ Done when: the UI kit has full screen on phones (a Settings → Display row, on 
 - [x] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
 - [x] 🤖 11. Screenshots of the card at every size; the starter proves both — ui-kit/scripts/shoot.mjs
 - [ ] 🙋 12. Look at the card in the screenshots: does it read well? — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
+- [x] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md (VERSION left to F191: lines under "- NEXT:")
 Check: shots of the card at every size, looked at by Claude; full screen asked only on a tap, never on a computer by default; ui-kit tests + starter-check green.
 
 ## F193 🧱 New version on first visit, fixed
