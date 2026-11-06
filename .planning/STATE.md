@@ -10,7 +10,7 @@ Reviewed through: framework 227c7fd (F197 — Tutorial trial: plan + research fi
 
 ## Where we are
 Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 63
-Doing: F198 — building, F199 — building   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Doing: F198 — building, F199 — building (helpers); F201 + F200 next   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
