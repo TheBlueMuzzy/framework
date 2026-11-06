@@ -27,6 +27,14 @@ From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`):
   themselves; a game's own card: `const fixed = useFixedSize()` → `<div ref={fixed}>`).
 - **Comfort rows in Settings** (0.21.0): `reduceMotion` switched on in `content/ui/settings.json` — always; and
   `masterVolume` too when the audio module is installed. The kit's default settings file has both.
+- **A row the game itself reads** (0.42.0, F191 — a tray side, a goo style, a bot speed): one line, `liveSetting`, and
+  the game follows the Settings screen the moment the row changes (Reset too) — no onChange wiring, no store of its own:
+  - `export const gooStyle = liveSetting(settingsJson, (v) => (v.gooStyle === 'Particle' ? 'particle' : 'jelly'))`
+  - game code: `gooStyle.get()` · a component: `useLiveSetting(gooStyle)` (redraws only when the value changes) ·
+    `gooStyle.subscribe(fn)` returns "stop".
+  - The mapper gets every row's value (saved, or its default) and may build an object from several rows — it's kept
+    the same object until a field changes. It starts from the kit's settings storage, so it survives a reload; a game
+    that keeps settings with its own saves passes the same load as `<Settings load>`: `liveSetting(json, map, { load })`.
 - **A gamepad** (0.34.1): the kit doesn't read pads itself. The game sends the d-pad as arrow keys, calls
   `screens.pop()` on B — and calls **`markPadUsed()`** (from the kit) on any pad press, so the screen the kit opens
   next shows the focus ring, like after a key. The browser's own `gamepadconnected` (fired only after a first press)
@@ -473,6 +481,12 @@ gallery's `npm run shoot` uses the same one.
   **Screenshot runs** (`npm run shoot`, `shoot:webkit`, `shoot:pseudo`) now shoot only the styles games use — Clean,
   Cozy, Neon, Cartoon (`GAME_STYLES` in `scripts/shoot.mjs`); `npm run shoot:all` (`--all-styles`) shoots all seven,
   before a UI kit release.
+- 0.42.0 (F191 — Settings the game follows live): **`liveSetting(schema, map, { load?, storageKey? })`** +
+  **`useLiveSetting(setting)`** (`kit/blocks/liveSetting.ts`) — what Glyphtender's `gameSettings.ts` (a zustand store
+  kept in step by hand) and Goops' `gooStyle` / `wallKick` / `readoutSetting` (get · setFromSetting · subscribe, each
+  hand-copied) do, as one line per setting. `<Settings>` tells every live setting each change once it's saved
+  (`onSettingsChange(listener)`, also exported); `loadSettings` takes the game's own `load` as a third argument. The
+  starter's Bot speed uses it. Nothing changes for a game until it switches (UPGRADES.md).
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

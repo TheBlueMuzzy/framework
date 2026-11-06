@@ -11,10 +11,10 @@ Check: the audit's bad save fails the check; the starter's golden saves pass; sa
 
 ## F191 🧱 Settings the game follows live
 Done when: one UI kit helper gives a game a setting that follows the Settings screen at once (get · subscribe · keeps its value across a reload) — what Glyphtender's gameSettings.ts and Goops' gooStyle / wallKick / readoutSetting each do by hand; the starter uses it for one row.
-- [ ] 🤖 5. The helper, from Glyphtender's gameSettings.ts and the shape of Goops' gooStyle.ts — ui-kit/kit/blocks/Settings.tsx
-- [ ] 🤖 6. Tests: change a row → the game sees it at once; the value survives a reload — ui-kit/kit/blocks/Settings.tsx
-- [ ] 🤖 7. The starter uses it for one row, so starter-check plays it — starters/turn-based/src/ui/menus.tsx
-- [ ] 🤖 8. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
+- [x] 🤖 5. The helper, from Glyphtender's gameSettings.ts and the shape of Goops' gooStyle.ts — ui-kit/kit/blocks/Settings.tsx
+- [x] 🤖 6. Tests: change a row → the game sees it at once; the value survives a reload — ui-kit/kit/blocks/Settings.tsx
+- [x] 🤖 7. The starter uses it for one row, so starter-check plays it — starters/turn-based/src/ui/menus.tsx
+- [x] 🤖 8. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
 Check: the new tests red before the helper, green after; ui-kit tests + starter-check green.
 
 ## F192 🧱 Phone screen handling
@@ -41,6 +41,8 @@ Check: each case has a test; version tests green.
 - Open bugs: none open P0/P1 in BUGS.md. The golden-save gap (ROADMAP Ideas 2026-11-04) is F190.
 - Claude's call: the update starter is handed the game's own registerSW, so a game without offline mode can still import the Version module.
 - Claude's call: the replay check only runs on saves that hold moves (Goops' progress save has none).
+- F191 proof (2026-11-06): liveSetting tests 9 red on a stub → 9 green; starter bot-speed tests 2 green; ui-kit 55 files / 892 tests green; root check:fast all 22 checks green (starter turn-based, fresh modules, 26 s).
+- Claude's call (F191): `<Settings>` tells every live setting each change itself (`onSettingsChange`), so a game needs no onChange line per setting; a mapper's object is kept the same until a field changes (useSyncExternalStore); no zustand in the kit.
 - Claude's call: one helper per feature in its own worktree, side by side (different modules). Each bumps only its own module's VERSION; F191 and F192 both touch the UI kit, so F191 bumps it and F192 adds its line under the same version at merge (main bumps once).
 - F193 cases (task 14, read 2026-11-06 from each game's main.tsx + vite.config.ts + node_modules/vite-plugin-pwa):
   | Case | Should | Goops (registerSW immediate + onNeedReload guard + controllerchange) | Glyphtender (plain registerSW immediate, pwa 1.3.0) | Roll Better (plain registerSW immediate, pwa 1.2.0) |

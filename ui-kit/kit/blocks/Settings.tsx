@@ -8,6 +8,8 @@
 // Values are remembered in the browser, in a slot of the game's own (or pass your own load/save).
 // At start-up, call applyAccessibility(loadSettings(schema)) so text size and reduce motion apply
 // before Settings opens.
+// A row the GAME reads (a tray side, a goo style, a bot speed): liveSetting (liveSetting.ts, 0.42.0) — it follows this
+// screen the moment a row changes, with no onChange wiring.
 import { useEffect, useRef, useState } from 'react'
 import { Panel, Row, Screen } from '../layout'
 import { Button, ListRow, ScrollArea, Selector, Slider, Stepper, Tabs, Text, Toggle } from '../controls'
@@ -91,9 +93,19 @@ function withSaved(schema: SettingsSchema, saved: SettingsValues | null): Settin
   return values
 }
 
-// At start-up: applyAccessibility(loadSettings(schema)) — pass the same storageKey as <Settings>, if you gave it one.
-export function loadSettings(schema: SettingsSchema = defaultSchema, storageKey = settingsStorageKey()): SettingsValues {
-  return withSaved(schema, loadFromBrowser(storageKey))
+// At start-up: applyAccessibility(loadSettings(schema)) — pass the same storageKey as <Settings>, if you gave it one
+// (0.42.0: or the same load, for a game that keeps its settings with its own saves).
+export function loadSettings(schema: SettingsSchema = defaultSchema, storageKey = settingsStorageKey(),
+  load: () => SettingsValues | null = () => loadFromBrowser(storageKey)): SettingsValues {
+  return withSaved(schema, load())
+}
+
+// 0.42.0 (F191): every change the Settings screen makes (a row, or Reset) is told to these listeners once it's saved.
+// liveSetting (liveSetting.ts) listens here, so a game's live settings follow the screen with no onChange wiring.
+const changeListeners = new Set<(values: SettingsValues) => void>()
+export function onSettingsChange(listener: (values: SettingsValues) => void) {
+  changeListeners.add(listener)
+  return () => { changeListeners.delete(listener) }
 }
 
 // Text size and reduce motion drive the kit itself: text is in rem, so the page's font size scales
@@ -161,6 +173,7 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
     setValues(next)
     save(next)
     applyAccessibility(next)
+    changeListeners.forEach((listener) => listener(next))
     onChange?.(next, changedId)
   }
   const set = (id: string) => (value: SettingValue) => update({ ...values, [id]: value }, id)
