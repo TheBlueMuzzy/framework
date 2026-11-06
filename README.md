@@ -9,7 +9,9 @@ How a game's part becomes a module, and how a module goes into a game: `.plannin
 ## Modules
 Install any of them with `node ~/.claude/config/bmuz/scripts/install-module.mjs <module> <game-folder>` (it runs the
 module's own checks first). Each module's README says what it does in detail; its `UPGRADES.md` lists the hand steps
-between versions; `CHANGELOG.md` has the history.
+between versions; `CHANGELOG.md` has the history. An UPGRADES line that names a game ("Glyphtender's run keeps moves")
+is checked in that game's code before it's written — v0.38's saves note named Glyphtender wrongly, and only its
+rehearsal caught it.
 
 | Module | What it gives a game | Proven by | Used by | Frozen? |
 |---|---|---|---|---|
