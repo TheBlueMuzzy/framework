@@ -9,7 +9,7 @@ Done when: a throwaway copy of Goops (`~/Documents/dev/.scratch/goops-catchup`) 
 - [ ] 🤖 4. Swap in the shared parts: liveSetting for gooStyle / wallKick / readoutSetting, the kit's upright card, startUpdates — .planning/research/2026-11-06-goops-catchup.md
 - [ ] 🤖 5. Crash server run locally (wrangler dev) against the copy; CPU + writes per report measured against Cloudflare's free plan — nothing deployed — .planning/research/2026-11-06-goops-catchup.md
 - [ ] 🤖 6. check:full green on the copy; the report — .planning/research/2026-11-06-goops-catchup.md
-- [x] 🤖 14. Rehearsal finds fixed in the framework, each with a test red first: version's installer asked for <MainMenu version> on a game drawing its own menu (615ab4a); the UI kit's list floor took Credits' whole first group as one row, so the card scrolled as one (9800344, screenshot checked) — ui-kit/kit/controls/ScrollArea.tsx
+- [x] 🤖 14. Rehearsal finds fixed in the framework, each with a test red first: version's installer asked for <MainMenu version> on a game drawing its own menu (615ab4a); the UI kit's list floor took Credits' whole first group as one row, so the card scrolled as one (9800344, screenshot checked); the saves README now says how a game's own save moves onto the module — the record shape, old golden files, nonsense values in oldSave (4c8992e; the installer warning for old golden files is in task 12) — ui-kit/kit/controls/ScrollArea.tsx
 Check: the copy's check:full green with its e2e sw-update; an old-format Goops progress save loads with its rank; the real Goops' git status unchanged.
 
 ## F195 🔧 Glyphtender catch-up rehearsal
