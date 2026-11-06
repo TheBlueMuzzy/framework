@@ -10,7 +10,7 @@ Reviewed through: framework 4854ea4 (sprint 61: /code-review low came back empty
 
 ## Where we are
 Stage: deliver   Milestone: — (v0.38 released; next: games update)   Sprint: — (61 archived)
-Doing: delivering v0.40.0   Branch: dev/v0-38-shared   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Doing: delivering v0.40.0   Branch: main   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
