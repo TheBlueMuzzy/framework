@@ -41,4 +41,6 @@ Check: each case has a test; version tests green.
 - Open bugs: none open P0/P1 in BUGS.md. The golden-save gap (ROADMAP Ideas 2026-11-04) is F190.
 - Claude's call: the update starter is handed the game's own registerSW, so a game without offline mode can still import the Version module.
 - Claude's call: the replay check only runs on saves that hold moves (Goops' progress save has none).
+- F191 proof (2026-11-06): liveSetting tests 9 red on a stub → 9 green; starter bot-speed tests 2 green; ui-kit 55 files / 892 tests green; root check:fast all 22 checks green (starter turn-based, fresh modules, 26 s).
+- Claude's call (F191): `<Settings>` tells every live setting each change itself (`onSettingsChange`), so a game needs no onChange line per setting; a mapper's object is kept the same until a field changes (useSyncExternalStore); no zustand in the kit.
 - Claude's call: one helper per feature in its own worktree, side by side (different modules). Each bumps only its own module's VERSION; F191 and F192 both touch the UI kit, so F191 bumps it and F192 adds its line under the same version at merge (main bumps once).
