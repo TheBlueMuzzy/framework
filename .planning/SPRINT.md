@@ -17,6 +17,7 @@ Done when: one UI kit helper gives a game a setting that follows the Settings sc
 - [x] 🤖 7. The starter uses it for one row, so starter-check plays it — starters/turn-based/src/ui/menus.tsx
 - [x] 🤖 8. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
 Check: the new tests red before the helper, green after; ui-kit tests + starter-check green.
+Checked: 2026-11-06 — by the helper, checked by Claude: liveSetting 9 red on a stub → 9 green; starter bot speed 2 green; ui-kit 892 → 901 after the merge + review fixes; Claude read liveSetting.ts (47 lines). Merged check:fast 22/22 (cb6f089).
 
 ## F192 🧱 Phone screen handling
 Done when: the UI kit has full screen on phones (a Settings → Display row, on for phones, off for computers — from Glyphtender src/ui/fullscreen.ts) and the "turn your phone upright" card (from Goops src/ui/App.tsx), shown when the screen is turned against content/ui/style.json "orientation"; a game with no orientation set never shows it.
@@ -26,6 +27,7 @@ Done when: the UI kit has full screen on phones (a Settings → Display row, on 
 - [ ] 🙋 12. Look at the card in the screenshots: does it read well? — ui-kit/scripts/shoot.mjs
 - [x] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md (VERSION left to F191: lines under "- NEXT:")
 Check: shots of the card at every size, looked at by Claude; full screen asked only on a tap, never on a computer by default; ui-kit tests + starter-check green.
+Checked: 2026-11-06 — 98 shots (7 sizes × 7 styles), page check 0 problems; Claude looked at Neon 844x390, Cozy 390x844, Pixel 768x343: centred card, nothing touching an edge, title wraps cleanly on narrow phones. Live starter run: phone full screen only after a tap, computer never. Review fix: Reset that turns it off now leaves full screen; its button and Esc tell live settings (2 tests red first). check:fast 22/22 (cb6f089).
 Checked (2026-11-06, helper): new tests red first (no module), then green — fullscreen 9, upright 7, starter phoneScreen 3; ui-kit 56 files / 899 tests; check-ui 176 files pass; card shots 98 (2 ways × 7 sizes × 7 styles), 0 problems, looked at (breathing room on every side, nothing touching an edge) — ~/Documents/dev/.scratch/framework-f192/; live in Chromium (starter): phone 390×844 not full screen before its tap, full screen after; computer 1440×900 never after a click; no card (style "any"); starter check:fast 5/5; framework check:fast 22/22. Task 12 (Muzzy looks) still open.
 
 ## F193 🧱 New version on first visit, fixed
@@ -35,11 +37,14 @@ Done when: the Version module has one update starter with Goops' fix (a page tha
 - [x] 🤖 16. The e2e helper for a game's sw-update check — version/kit/e2e.mjs
 - [x] 🤖 17. UPGRADES note + VERSION + README — version/README.md
 Check: each case has a test; version tests green.
+Checked: 2026-11-06 — 5 cases, each a test (updates.test.ts 6/9 red against the plain line → 10/10); e2e helper 6/6 + 1 review test (a label with no build part, red first); version 46 tests; not yet run in a real browser — a game's own sw-update proves it when it takes 0.2.0. check:fast 22/22 (cb6f089).
 
 ## Wrap-up
-- [ ] 🤖 18. Framework check:fast green after the merges, /code-review on the sprint, the planner republished — scripts/check-modules.mjs
+- [x] 🤖 18. Framework check:fast green after the merges, /code-review on the sprint, the planner republished — scripts/check-modules.mjs
 
 ## Notes
+- Review (/code-review low a87ae1f..e2aa624, 2026-11-06): 3 real bugs, all fixed in cb6f089 with a test each, red first — Reset left the page full screen while Settings said off; full screen's own button and a computer's Esc didn't tell live settings; nextVersion("dev") gave "de.9999".
+- Merges: F191 and F192 both edited Settings.tsx / blocks index / the starter's settings.ts — kept both; F192's notes numbered under UI kit 0.42.0. Each merge needed the starter's module copies refreshed (`npm run install-modules -- --all`) before the commit's type check passed — CT1's hint now names it for stale copies too (~/.claude-config 12a0d0f).
 - Open bugs: none open P0/P1 in BUGS.md. The golden-save gap (ROADMAP Ideas 2026-11-04) is F190.
 - Claude's call: the update starter is handed the game's own registerSW, so a game without offline mode can still import the Version module.
 - Claude's call: the replay check only runs on saves that hold moves (Goops' progress save has none).

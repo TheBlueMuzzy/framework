@@ -5,7 +5,7 @@
 - Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
+Reviewed through: framework cb6f089 (sprint 60: /code-review low a87ae1f..e2aa624 — 3 real bugs fixed in cb6f089, a test each) · framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.38 Games take what both use   Sprint: 60
