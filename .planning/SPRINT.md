@@ -17,6 +17,7 @@ Done when: the UI kit has a Spotlight (dims everything except one or more things
 - [x] 🤖 8. Callout "keep clear" placement option from Glyphtender's rule (away from the live spot; toward the nearer edge; flips to fit) — tests — ~/Documents/dev/games/glyphtender/src/tutorial/tipsPlace.ts
 - [x] 🤖 9. Gallery teach screen shows both; screenshots 390x844, 360x780, 844x390, 768x343, ~1100 wide, 1440x900, 1920x1080, every style; Claude looks — ui-kit/kit/blocks/teach.tsx
 - [x] 🤖 10. UI kit version + UPGRADES + CATALOG lines — ui-kit/UPGRADES.md
+- [x] 🤖 18. Review fix (/code-review low 7f3dcf5..ddb194c): a screen box measured from the page (DOMRect has x AND left) was read as a point — test red first, then green (447 block tests); a stale gallery comment out — ui-kit/kit/blocks/teach.tsx
 Check: ui-kit tests + check:framework's UI checks green; Claude looks at the teach screen on phone + desktop in two styles (breathing room measured to the dim's edge).
 
 ## F201 🎮 Starter teaches
