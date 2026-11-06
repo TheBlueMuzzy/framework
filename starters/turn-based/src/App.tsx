@@ -1,7 +1,8 @@
 // THE APP — one screen stack (the UI kit's) over whichever base screen is showing: the main menu, a game against the
 // computer, or online play. Pause, Results (both games'), Settings and Credits open on top of it.
 import { useCallback, useState } from 'react'
-import { ScreenStack, ToastStack } from './ui/kit'
+import { ScreenStack, ToastStack, UprightCard } from './ui/kit'
+import text from '../content/text/en.json'
 import { roomBeforeReload } from './rooms/lastRoom'
 import { useMatch } from './game/match'
 import { MainMenuScreen } from './ui/MainMenuScreen'
@@ -32,6 +33,8 @@ export default function App() {
       {(online || match) && <TableWorld />}
       <ScreenStack screens={SCREENS}>{base}</ScreenStack>
       <ToastStack />
+      {/* a phone held against content/ui/style.json "orientation" (this game: "any", so never) */}
+      <UprightCard words={text.upright} />
     </>
   )
 }
