@@ -8,3 +8,5 @@ export type {
   Condition, Lesson, LessonHint, LessonInsist, LessonInterrupt, LessonReaction, LessonRetry, LessonStep, LessonTiming, WhileShowing,
 } from './lessonTypes'
 export { PATTERNS, expandStep } from './patterns'
+export { guessControls, lessonLine, watchControls, wordsFor } from './controlWords'
+export type { ControlKind, ControlWords } from './controlWords'
