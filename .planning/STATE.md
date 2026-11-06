@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 62 started (F197 — Tutorial trial)** on `dev/tutorial-trial`, Muzzy's go = /develop. One helper builds task 1 on `.scratch/glyphtender-tutorial-trial` (Goops' lesson runner teaching Glyphtender's first 3 rails steps) → report + verdict page in .planning/research/tutorial-trial.md. Next: check the helper's report first-hand (shots, line counts, e2e unchanged, real games untouched), publish the page, hand-off card; 🙋 Muzzy task 2 = play the copy, agree with the verdict.
+2026-11-06 — **Sprint 62 (F197 — Tutorial trial): task 1 done and checked** on `dev/tutorial-trial`. Verdict page: https://claude.ai/artifact/5H3vkAU5fKjwhVSajLUZim — pick (c) each game keeps its own tutorial; Goops' lesson player becomes the shared part when a new game needs one. Waiting on 🙋 Muzzy task 2: play the copy's first 3 steps (`.scratch/glyphtender-tutorial-trial`, `npx vite --host --port 5450`), does it teach the same, agree with the pick? Then: Checked line, /code-review (only the report changed here — a plan doc), ROADMAP ✅, F197: done, retro, archive.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
