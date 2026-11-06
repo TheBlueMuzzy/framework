@@ -9,6 +9,7 @@ Done when: Glyphtender and Goops each have a list of their own parts checked aga
 - [x] 🤖 4. One combined page: candidates that pass the two-game rule, ranked; one line per part that stays; published — .planning/research/module-candidates/README.md (page: https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv)
 - [ ] 🙋 5. Read it: which candidates go into the next milestone's extraction? — .planning/research/module-candidates/README.md
 Check: both games' `git status` identical before and after; every candidate names its files and the §2 test it passes; Claude opens each candidate's files first-hand before it goes on the page.
+Checked: 2026-11-05 — framework check:fast 22/22 · hooks 802/802 · scripts 409/409 after one outdated test was fixed (~/.claude-config 0a370b0: it still expected the removal pass to propose stop-unsaved, whose only rule SU1 became a rare guard in 76bff5a) · skill tests not run (they cost plan usage; they run only with Muzzy's yes) · both games' git status + HEAD identical before and after · Claude opened every file named on the page.
 
 ## Notes
 - Open bugs: no open P0/P1. The golden-save gap (ROADMAP Bugs 2026-11-04) waits for the next milestone — it matters when games take Saves.
