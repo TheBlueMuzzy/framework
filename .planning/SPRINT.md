@@ -30,7 +30,7 @@ Check: shots of the card at every size, looked at by Claude; full screen asked o
 Done when: the Version module has one update starter with Goops' fix (a page that already ran under the game's worker swaps to the new version; a first visit never reloads), handed the game's own update hookup so a game without offline mode can still import the module; plus a test helper for each game's "new version arrives" check.
 - [x] 🤖 14. Every case written down (first visit, returning player, a player from an older version's worker) and what Glyphtender, Goops and Roll Better each do today — version/kit/index.ts
 - [x] 🤖 15. The update starter with Goops' fix — test red first — version/kit/index.ts
-- [ ] 🤖 16. The e2e helper for a game's sw-update check — version/kit/e2e.mjs
+- [x] 🤖 16. The e2e helper for a game's sw-update check — version/kit/e2e.mjs
 - [ ] 🤖 17. UPGRADES note + VERSION + README — version/README.md
 Check: each case has a test; version tests green.
 
