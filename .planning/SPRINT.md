@@ -8,6 +8,7 @@ Done when: a golden save whose moves no longer fit the game's rules fails the sa
 - [x] 🤖 3. The starter wires its replay; its real golden saves still pass — saves/templates/tests/saves/saves.test.ts
 - [x] 🤖 4. UPGRADES note + VERSION + README — saves/UPGRADES.md
 Check: the audit's bad save fails the check; the starter's golden saves pass; saves tests + starter-check green.
+Checked: 2026-11-06 — the audit's Nim save with `{ cell: 4 }` now fails ("Move 1 (seat 0) is not allowed"), it passed before (it.fails pin, task 1); saves 135 / 135 (oldSaves 25 / 25, red 4 first); starter 29 / 29 (save tests 18 / 18, its 3 real golden saves pass, red 1 / 17 before wiring); `npm run check:fast` at the root: all 22 checks green, starter-check (fresh modules) ✓ 14 s.
 
 ## F191 🧱 Settings the game follows live
 Done when: one UI kit helper gives a game a setting that follows the Settings screen at once (get · subscribe · keeps its value across a reload) — what Glyphtender's gameSettings.ts and Goops' gooStyle / wallKick / readoutSetting each do by hand; the starter uses it for one row.
