@@ -8,14 +8,16 @@ Framework: `dev/v0-38-shared` @ 5b01a82.
 - **Total time: 10:07 → 11:27 = 80 min**, and 56 of those were check:full runs (two full runs, 22.5 + 21.2 min, plus re-runs).
 - The actual update work (every module, the Saves step, the sprint 60 swaps) took **~23 min**.
 - **Hand fixes: 2 small ones, 0 code fixes** (put back a release map a check build had overwritten · copied today's `scripts/ports.mjs`).
-- **Framework got wrong: 5 things.** All were small, none broke the game, and each was sent to main as it was found.
+- **Framework got wrong: 6 things.** None broke the game, and each was sent to main as it was found.
+  - 4 were fixed in the framework during the run (#1–#4).
+  - Left for wrap-up: #5, a check build overwrote a released crash map (crashes 0.3.0 removes the cause; a guard is still missing), and #6, the crashes upgrade note.
 - **Final check:full: green.** The first run was 38/40. `online-ai` and `trails` failed under load, then passed alone, and `online-ai` passed again with both other online checks running beside it.
 - **Compared with 2026-10-29** (the same game, on framework v0.33):
   | | 2026-10-29 | 2026-11-06 |
   |---|---|---|
   | Total time | about a day of work, ~2.5 hrs of it checks | 80 min (56 of it checks) |
   | Hand fixes | 9, plus 4 "TEMP" unblocks | 2, none of them in code |
-  | Framework problems | 23 | 5, all small |
+  | Framework problems | 23 | 6 (4 fixed during the run) |
   | Modules behind | 6, by many versions (ui-kit 0.20 → 0.38) | 6, by 1–3 versions each |
   | Modules new to the game | 4 (lint, version, saves, crashes) | 0 |
   - The game had done its own catch-up sprints since then (F92–F104), so this rehearsal tested the **routine update** path. The last one tested the big jump.
@@ -54,25 +56,33 @@ Framework: `dev/v0-38-shared` @ 5b01a82.
    - It doesn't: Glyphtender has no `createRun`, so a game in progress isn't kept on the device.
    - Its 6 golden saves are new-game, online-options, tutorial and wordsToSend, and none hold moves. (The F93 run proof was only ever on a scratch copy.)
    - The sprint brief carried the same mistake.
-   - **Already fixed by main during the run.** The line now says Glyphtender's and Goops' saves hold none.
+   - **FIXED in the framework (5b01a82).** The line now says Glyphtender's and Goops' saves hold none.
 2. **The version installer prints a false "Still to wire: `<Settings version={versionLabel}>`".**
    - Where: `version/scripts/install-version.mjs:49`, the `gameCode` filter.
    - It skips a hand-written list of module folders, but not `src/crashes/` or `src/lint/`. So it read the words "`<Settings onChange>`" inside `src/crashes/conformance.mjs` as a Settings with no version.
    - Glyphtender already passes the version (`shownVersion(versionLabel)`).
-   - Fix: build the skip list from every module's folders (`moduleFolders`) instead of a list kept by hand. Add a test with a crashes copy in the game.
+   - **FIXED in the framework during the run:** the installer now finds module copies by their VERSION file (a test went red first; 47/47). The copy was installed before the fix, so it hasn't been re-run there.
 3. **The crashes installer always prints "Try it" and all 4 "Going live" steps.**
    - Where: `crashes/scripts/install-crashes.mjs` ~109–128.
    - It prints them even when `content/crashes.json` `client.url` is already the live https server, as it is in Glyphtender.
    - It also says local port 1995, while the game's `crashes/wrangler.json` uses 1996.
-   - Fix: mark going live as done when client.url is an https address, and read the port from `crashes/wrangler.json`.
+   - **FIXED in the framework during the run:** going live counts as done once client.url is https, and the port is read from `crashes/wrangler.json` (a test went red first).
 4. **ui-kit 0.42.0 `startFullscreen()` with no `load` loses the "on for phones" default.**
    - Where: `ui-kit/kit/blocks/fullscreen.ts`.
    - When `load` is left out, it reads the raw settings slot with no row defaults.
    - So a phone that never opened Settings gets `fullscreen` undefined → full screen never starts on the first tap.
    - The header comment says leaving `load` out is fine.
    - Glyphtender's copy passes `{ load: () => loadSettings(settings) }`, so it's safe.
-   - Fix: `startFullscreen` takes the schema (or `load` becomes required), plus a test: "phone, nothing saved, first tap goes full screen".
-5. **crashes/UPGRADES.md 0.3.0 says only "delete untracked releases/\*/maps".** It should add: "and put back any tracked map a check build changed (`git status releases`, then `git restore`)" — see Hand fix 1.
+   - **FIXED in the framework (25f5f0e):**
+     - a setting that was never saved now gets the row's default (on for phones);
+     - `startFullscreen()` with no options no longer keeps an earlier call's `load`.
+5. **A check build overwrote a RELEASED, committed crash map.**
+   - The real repo shows the result today: `M releases/0.14.1.0/maps/assets/aiCheck.worker-DsyTDS4V.js.map`.
+   - Where (crashes ≤ 0.2.2): `src/crashes/vitePlugin.mjs` `configResolved` wrote every build's maps to `releases/<version>/maps/`. A check build and a release build share a version until the build number moves on. `moveMaps` (called from `closeBundle`) then copied over any map with the same name. A web worker's file name only changes when its code does, so the aiCheck worker map was overwritten while the main maps were added beside it.
+   - How 0.3.0 tells a check build apart: `crashes/kit/vitePlugin.mjs:83` — `release = options.release ?? process.env.CRASHES_MAPS === 'release'`. Only release.mjs sets that; every other build goes to `node_modules/.cache/crashes-maps/`. Proven: the whole final check:full left `releases/` untouched.
+   - Still open in 0.3.0: a second `CRASHES_MAPS=release` build of the same version, or anyone setting the variable by hand, still overwrites committed maps without a word.
+   - Suggested fix (wrap-up): `moveMaps` refuses to replace a map that's already under `releases/` (or one git tracks), and says so. Add a test: a release folder that already has maps + a second release build → nothing replaced.
+6. **crashes/UPGRADES.md 0.3.0 says only "delete untracked releases/\*/maps".** It should add: "and put back any tracked map a check build changed (`git status releases`, then `git restore`)" — see Hand fix 1.
 
 Also seen (cosmetic, already noted on 2026-10-29):
 - The Dev Kit installer lists `ColorTab.tsx` and `uiKit.ts` as "changed" when only their line endings differ.
@@ -84,7 +94,7 @@ Also seen (cosmetic, already noted on 2026-10-29):
   - All 4 are settings-like. None keeps a move list.
   - No game is kept on the device: online matches live on the room server (rooms module storage), and pass-and-play isn't saved.
 - **So the BREAKING step needs nothing from Glyphtender today.** All 23 golden-save tests passed straight after saves 0.9.0, with no replay handed in.
-- **Done anyway, so a future run save is covered** — `tests/saves/saves.test.ts` now has the starter's shape:
+- **Optional — done anyway (harmless), so a future run save is covered** — `tests/saves/saves.test.ts` now has the starter's shape:
   - RUNS' example line shows `replay: (data) => replay(rules, data.record)`.
   - `RUNS.map(({ run, sample, replay }) => ({ save: run.save, sample, replay }))`
   - `for (const { save, sample, replay } of everySave)` → `checkGoldenSave(save, copy, replay)`
@@ -129,7 +139,7 @@ Expected size: ~1 session, low risk. Every step below has been done once on the 
 2. 🤖 Dev Kit first: `install-module.mjs devkit .` (stamp only).
 3. 🤖 `ui-kit`, `version`, `rooms`, `ai`, `crashes`, `saves` with install-module, one commit each.
    - Then `audio`, `lint`, `table` (stamps only).
-   - Ignore version's "Settings version" step and crashes' "going live" steps: both are already done.
+   - Both false installer steps from this rehearsal are fixed in the framework, so neither should print.
 4. 🤖 `scripts/ports.mjs` ← `~/.claude/config/bmuz/templates/ports.mjs`.
 5. 🤖 `tests/saves/saves.test.ts`: the replay pass-through (3 lines + 2 comments) → golden saves 23/23.
 6. 🤖 The sprint 60 swaps as above:

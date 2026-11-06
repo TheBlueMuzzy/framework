@@ -54,6 +54,18 @@ describe('install-saves', () => {
     expect(readFileSync(join(game, 'tests/saves/saves.test.ts'), 'utf8')).toBe('// mine')
   })
 
+  it("names a game's old sample saves in tests/saves/ that aren't golden saves — the save test would misread them (F194 rehearsal: Goops)", () => {
+    const game = newGame()
+    mkdirSync(join(game, 'tests/saves'), { recursive: true })
+    writeFileSync(join(game, 'tests/saves/goops-progress-v1.json'), '{ "rank": 3, "xp": 120 }') // the game's own old format
+    writeFileSync(join(game, 'tests/saves/goops_progress-v2.json'), '{ "about": "v2", "stored": { "save": "goops:progress", "version": 2, "data": {} } }')
+    const lines = []
+    installSaves(game, { log: (l) => lines.push(l), dryRun: true })
+    const said = lines.join('\n')
+    expect(said).toMatch(/goops-progress-v1\.json/)
+    expect(said).not.toMatch(/goops_progress-v2\.json/)
+  })
+
   it('a game with its OWN src/saves/ (no VERSION — not ours) is refused in plain words, and nothing of it is touched', () => {
     const game = newGame()
     mkdirSync(join(game, 'src/saves'), { recursive: true })

@@ -65,6 +65,12 @@ export function installSaves(gameDir, { dryRun = false, log = console.log } = {}
   if (!changed.length && !removed.length) log('  already up to date')
   if (!hasUiKit) log(`  skipped ${UI_FOLDER} (the main menu's Continue hook — the game has no UI kit; use run.ts directly)`)
   starter.forEach((f) => log(`  starter ${f} (yours from now on — the installer never overwrites it)`))
+  // A game moving its own save onto the module may keep old sample files named <key>-vN.json in tests/saves/: the save
+  // test reads every such file as a golden save and misreads them (F194 rehearsal: Goops). A golden save has "stored".
+  const notGolden = listFiles(join(game, 'tests/saves')).filter((f) => /-v\d+\.json$/.test(f)).filter((f) => {
+    try { return !('stored' in JSON.parse(readFileSync(join(game, 'tests/saves', f), 'utf8'))) } catch { return true }
+  })
+  if (notGolden.length) log(`  ⚠ tests/saves/ has files the save test will read as golden saves, but they aren't (no "stored"): ${notGolden.join(', ')} — convert them (makeGoldenSave) or move them out (README: Moving a game's own save onto this module)`)
   if (dryRun) return { changed, removed, starter }
   for (const f of changed) {
     mkdirSync(dirname(join(target, f)), { recursive: true })
