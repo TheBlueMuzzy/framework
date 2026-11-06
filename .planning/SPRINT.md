@@ -3,7 +3,7 @@ Started 2026-11-06 · Milestone v0.38 · Features: F190, F191, F192, F193
 
 ## F190 🧱 Save check replays the moves
 Done when: a golden save whose moves no longer fit the game's rules fails the save check (it passed before); saves without moves (a progress save) are untouched; the starter's real golden saves still pass.
-- [ ] 🤖 1. Reproduce the gap on today's code (a tic-tac-toe move in a Nim save still passes) and write what really happens — saves/kit/oldSaves.ts
+- [x] 🤖 1. Reproduce the gap on today's code (a tic-tac-toe move in a Nim save still passes) and write what really happens — saves/kit/oldSaves.ts
 - [ ] 🤖 2. The golden-save check replays a save's moves through the game's rules — test red first — saves/kit/oldSaves.ts
 - [ ] 🤖 3. The starter wires its replay; its real golden saves still pass — saves/templates/tests/saves/saves.test.ts
 - [ ] 🤖 4. UPGRADES note + VERSION + README — saves/UPGRADES.md
@@ -42,3 +42,4 @@ Check: each case has a test; version tests green.
 - Claude's call: the update starter is handed the game's own registerSW, so a game without offline mode can still import the Version module.
 - Claude's call: the replay check only runs on saves that hold moves (Goops' progress save has none).
 - Claude's call: one helper per feature in its own worktree, side by side (different modules). Each bumps only its own module's VERSION; F191 and F192 both touch the UI kit, so F191 bumps it and F192 adds its line under the same version at merge (main bumps once).
+- F190 task 1 (reproduced 2026-11-06): a Nim run save (`record.moves`) holding the tic-tac-toe move `{ cell: 4 }` → `checkGoldenSave` returns no problems, so the game's "loads with today's code" test is green. Why: the check only loads the save (version, shape, `expect` values) — nothing plays its moves through the rules. In the game the same save fails only at Continue: `continueMatch` → `replay(rules, record)` throws "Move 1 (seat 0) is not allowed: …" from the main menu. Pinned as an `it.fails` test in saves/kit/oldSaves.test.ts (task 2 turns it into a plain test).

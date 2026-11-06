@@ -166,3 +166,21 @@ describe('a save from before the module that is plain text, not JSON (F166 — G
     expect(checkFullStorage(tutorial(knowsDone), { done: true })).toEqual([])
   })
 })
+
+// F190 — the gap the audit's Nim test found (audit 2026-11 §5): a golden save's moves were never played through the
+// rules, so a tic-tac-toe move ({ cell: 4 }) in a Nim save still "loaded with today's code".
+describe('a golden save whose moves no longer fit the game\'s rules (F190)', () => {
+  // Nim: a pile of 15 sticks, take 1, 2 or 3 a turn. Its run keeps the move record, as the starter's does.
+  interface NimMove { seat: number; action: { take?: number; cell?: number }; by: string }
+  interface NimRun { record: { setup: { firstSeat: number }; moves: NimMove[] } }
+  const nimRun = () => createRun<NimRun>({ key: 'nim:run', version: 1, onProblem: quiet, storage: null, page: null,
+    fresh: { record: { setup: { firstSeat: 0 }, moves: [] } } })
+  const goldenWith = (moves: NimMove[]) => ({
+    stored: { save: 'nim:run', version: 1, savedAt: '2026-11-04T01:36:00.000Z', data: { record: { setup: { firstSeat: 0 }, moves } } },
+  })
+  const ticTacToeMove = goldenWith([{ seat: 0, action: { cell: 4 }, by: 'seat' }])
+
+  it.fails('today: a tic-tac-toe move in a Nim save is not caught (the gap — F190 task 2 turns this into a plain test)', () => {
+    expect(checkGoldenSave(nimRun().save, ticTacToeMove)).not.toEqual([])
+  })
+})
