@@ -176,7 +176,8 @@ async function checkCredits(t) {
 // Hide emotes, Bot chatter…) once the game passes it on — what counts comes from the module's settings-rows.json (0.30.0).
 export const SETTINGS_FILE = 'content/ui/settings.json'
 export const SETTINGS_CHECK = 'every Settings row that\'s switched on is read by the game'
-export const KIT_ROWS = ['textSize', 'reduceMotion']
+// (fullscreen, F192: the Settings screen goes in and out itself — fullscreen.ts)
+export const KIT_ROWS = ['textSize', 'reduceMotion', 'fullscreen']
 export const AUDIO_ROWS = ['masterVolume', 'musicVolume', 'ambienceVolume', 'sfxVolume', 'uiVolume', 'sound', 'muteInBackground', 'mono']
 const AUDIO_WIRING = /\b(applyAudioSettings|useAudioSettings|readAudioSettings)\s*\(/
 // The modules' own rows (crashes, emotes, ai…) come from their settings-rows.json (0.30.0, F110) — see ROW_MANIFEST.
@@ -440,6 +441,16 @@ export function fileReadsRow(text, id) {
   if (new RegExp(`${q}\\s*[!=]==?\\s*${who}(?![\\w$])`).test(code)) return true
   if (new RegExp(`\\bcase\\s+${q}\\s*:`).test(code)) return true
   if (fileFeedsInfo(code, id)) return true
+  // a liveSetting's mapper (0.42.0): its parameter IS the settings, whatever it's called — liveSetting(s, (v) => v.tips)
+  // · (s: SettingsValues) => s?.tips · ({ tips }) => … (F194 rehearsal: Goops' gooStyle read as unread with (v))
+  // (an optional type argument: liveSetting<GooStyle>(…) — Goops writes it that way)
+  for (const m of code.matchAll(/\bliveSetting\s*(?:<[^>]*>)?\s*\([^,]*,\s*(?:\(\s*([A-Za-z_$][\w$]*)\s*(?::[^)]*)?\)|([A-Za-z_$][\w$]*))\s*=>/g)) {
+    const param = escapeRe(m[1] ?? m[2])
+    if (new RegExp(`\\b${param}\\s*\\??\\.\\s*${name}(?![\\w$])|\\b${param}\\s*\\??\\.?\\[\\s*${q}\\s*\\]`).test(code)) return true
+  }
+  for (const m of code.matchAll(/\bliveSetting\s*(?:<[^>]*>)?\s*\([^,]*,\s*\(\s*\{([^{}]*)\}/g)) {
+    if (m[1].split(',').map((part) => part.trim().split(/[\s:=]/)[0]).includes(id)) return true
+  }
   // a settings call named by the id: useSetting('tips') · getSetting('tips') · readPref('tips')
   return new RegExp(`[\\w$]*(?:setting|pref)[\\w$]*\\s*\\(\\s*${q}`, 'i').test(code)
 }

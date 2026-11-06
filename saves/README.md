@@ -4,11 +4,11 @@ The player's saves — settings, progress, a run in progress, save slots — kep
 
 **Frozen** (F186 — Slimmed framework): bug fixes only until a second game needs it. **0.8.0 slimmed it to what Glyphtender calls** — create, storage, old-save upgrades, golden checks, run resume. Archived (git tag `archive/saves-0.7.0`, nothing used them): save codes (`saveCode.ts`, the Save code screen), link codes (`cloud.ts`, `cloudRoutes.ts`, the cloud worker), the Daily leaderboard (`board.ts`, `boardRoutes.ts`, `BoardPanel`, the board worker), seed + move replay (`replay.ts`), any-platform storage (`platform.ts` / `openSaves`), save health (`health.ts`), the backup nudge (`nudge.ts`) and their Settings rows (`settingsRow.ts`). A game's copy keeps working until it updates.
 
-Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.8.0** (0.8.0, F186: slimmed — above) (0.7.0, F166: an old value that isn't JSON (Glyphtender's tutorial kept the plain text `done`) goes to `oldSave` as that text instead of being called damaged; a golden save's `stored` string is put in storage as that exact text; the game's `tests/saves/saves.test.ts` starter skips with "no saves listed yet" until the game's first createSave (`savesInCode`) — a game that already has the test copies the new top part by hand) (0.6.6, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.6.5: fetching another device's link code checks whether this device's own code is still live by the game's clock (`now`), not the computer's — a game passing its own clock could forget its code, so "Delete my data" missed it · 0.6.4, F150: proven in real Chromium, WebKit and Firefox — see *Proven in which browsers*; "quota exceeded" on an empty storage (Safari's old private window) now says "blocked", not "full"; `openSaves` knows a full disk by every engine's name for it · 0.6.3: a save code that only partly loads offers to reload the game, so what came back shows — `partlyLoaded()` · 0.6.2: the installer asks git once per run · 0.6.1: the v0.11.0 security review — body size, wrong tries per IPv6 /48). Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
+Design: `../.planning/design/saves.md` (research: `../.planning/research/saves.md`). Framework v0.10 (F86 = layers 0 + 1; F93 = layer 2, run resume; F94 = layer 3, seed + move log; F96 = layer 5, link codes; F98 = layer 7, checked leaderboards; F101 = the seams for layers 6 + 8 — one storage switch, saves opened from a slow storage, the format for any language; the platform backends F97 and the Unity port F99 wait for a real store build / Unity game). Kit **0.9.0** (0.9.0, F190: a golden save that keeps moves is played through the game's rules (`replay` handed in from `tests/saves/saves.test.ts`) — a move that no longer fits fails the test instead of a player's Continue; breaking for a game whose save holds moves: see UPGRADES.md) (0.8.0, F186: slimmed — above) (0.7.0, F166: an old value that isn't JSON (Glyphtender's tutorial kept the plain text `done`) goes to `oldSave` as that text instead of being called damaged; a golden save's `stored` string is put in storage as that exact text; the game's `tests/saves/saves.test.ts` starter skips with "no saves listed yet" until the game's first createSave (`savesInCode`) — a game that already has the test copies the new top part by hand) (0.6.6, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.6.5: fetching another device's link code checks whether this device's own code is still live by the game's clock (`now`), not the computer's — a game passing its own clock could forget its code, so "Delete my data" missed it · 0.6.4, F150: proven in real Chromium, WebKit and Firefox — see *Proven in which browsers*; "quota exceeded" on an empty storage (Safari's old private window) now says "blocked", not "full"; `openSaves` knows a full disk by every engine's name for it · 0.6.3: a save code that only partly loads offers to reload the game, so what came back shows — `partlyLoaded()` · 0.6.2: the installer asks git once per run · 0.6.1: the v0.11.0 security review — body size, wrong tries per IPv6 /48). Proven on scratch copies of Goops (progress) and Glyphtender (New Game choices; a game vs the AI continued after the tab closed — since 0.4.0 rebuilt by replay; a Daily game; since 0.5.0 its Daily board) — see *Proof* below.
 
 No library: localStorage and nothing else at run time.
 
-## What a game gets (0.8.0)
+## What a game gets (0.9.0)
 | File | Does |
 |---|---|
 | `index.ts` | The public API (below) — import from `src/saves` |
@@ -18,7 +18,7 @@ No library: localStorage and nothing else at run time.
 | `storage.ts` | Safe reads/writes of localStorage; `memoryStorage()` for tests (can be made full or blocked). **0.6.0:** `setSavesStorage(storage, { native? })` — one switch for the whole kit (every save and run); a save made before the switch follows it too |
 | `run.ts` | **Run resume (0.2.0).** `createRun` — a game in progress saved at the game's break points (`autosave`) and when the tab hides or closes, `pending()` for the Continue button without loading it, `resume()`, and `end()` that wipes every copy (backups and a newer build's too) so a finished game never comes back. A newer build's or damaged run → "This game can't be continued", wiped, never a crash. `continueLine` → "Turn 7 · 5 min ago" |
 | `ui/useContinue.ts` | The main menu's Continue (0.2.0): `{ onContinue, continueDetail }` for the UI kit's MainMenu when a run is waiting, `{}` when not; a can't-continue run → a toast and Continue goes. **Only installed when the game has the UI kit** |
-| `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage, and (0.2.0) `checkRunEnds` — used by the game's `tests/saves/saves.test.ts` |
+| `oldSaves.ts` | The test kit: golden saves, round trip, damaged saves, full storage, (0.2.0) `checkRunEnds`, and (0.9.0) a saved move list replayed through the game's rules — used by the game's `tests/saves/saves.test.ts` |
 | `config.ts` | `content/saves.json`: backups (default 2) |
 | `conformance.mjs` | Its check:framework checks |
 | `../FORMAT.md` | The save format for any language (keys, records, loading, saving, golden saves) — what a C# or other version is built from; `kit/format.test.ts` keeps it true |
@@ -27,12 +27,12 @@ No library: localStorage and nothing else at run time.
 From MODULE-CONTRACTS.md (`~/.claude/config/bmuz/`), "Saves":
 - **Every save goes through `createSave`** — its key starts with the game's name (`goops-progress`, `glyphtender:new-game`: itch.io games can share one storage). Game code doesn't read or write `localStorage` / `sessionStorage` itself. Allowed: the rooms module's ids (`rooms:` keys), and files listed in `content/saves.json` `"storageAllowed"` with why (e.g. a room code until F95).
 - **A default change that should reach old saves is an upgrade step**, not an edit of `fresh` (fresh only reaches NEW players: a player's saved value is never overwritten). Glyphtender's 2-letter fix is the example: `upgrades: { 2: (v1) => { delete v1.twoLetterWords; return v1 } }`.
-- **A golden save for every version** in `tests/saves/<key>-v<N>.json` (a `:` in the key becomes `_`), and each save listed in `tests/saves/saves.test.ts` (the installer's starter).
+- **A golden save for every version** in `tests/saves/<key>-v<N>.json` (a `:` in the key becomes `_`), and each save listed in `tests/saves/saves.test.ts` (the installer's starter). A save that keeps moves is listed with its `replay` (0.9.0).
 - Write `key` and `version` as plain values in `createSave` (or a `const` in the same file) so the check can read them.
 
 **How it's checked — `npm run check:framework`** (the Dev Kit's runner runs `kit/conformance.mjs`):
 - *every save has a golden copy for each version* — names each missing file (`tests/saves/goops-progress-v2.json`).
-- *the game's save tests pass* — runs `npx vitest run tests/saves/saves.test.ts`: every golden save loads with today's code (and its `expect` values), round trip, cut-off / wrong-type / empty saves fall back to the backup, full and blocked storage keep the game running; each run in `RUNS` ended with `end()` leaves no copy behind (`checkRunEnds`).
+- *the game's save tests pass* — runs `npx vitest run tests/saves/saves.test.ts`: every golden save loads with today's code (and its `expect` values) and its moves, if it keeps any, replay through today's rules (0.9.0), round trip, cut-off / wrong-type / empty saves fall back to the backup, full and blocked storage keep the game running; each run in `RUNS` ended with `end()` leaves no copy behind (`checkRunEnds`).
 - *a run cleared at the end never comes back* (0.2.0) — every `createRun` is named (`const matchRun = createRun(…)`), something in the game's code calls `matchRun.end()`, and the save test runs `checkRunEnds` on it (a starter from 0.1.0 has no `RUNS`: copy that part from `templates/tests/saves/saves.test.ts`).
 - *the game saves through the module, not straight into the browser's storage* — lists every line of game code that touches `localStorage` / `sessionStorage` (minus `rooms:` ids and `storageAllowed` files).
 
@@ -80,11 +80,23 @@ matchRun.end()                          // won, lost, left from the menu — and
 const resume = useContinue(matchRun, (match) => putBackOnTable(match))   // src/saves/ui/useContinue
 <MainMenu {...resume} onPlay={…} />     // or with items: { label: 'Continue', onClick: resume.onContinue, detail: resume.continueDetail }
 ```
-Then list it in `tests/saves/saves.test.ts` → `RUNS: [{ run: matchRun, sample }]` and add `tests/saves/glyphtender_run-v1.json` like any golden save.
+Then list it in `tests/saves/saves.test.ts` → `RUNS: [{ run: matchRun, sample }]` and add `tests/saves/glyphtender_run-v1.json` like any golden save. A run that keeps its moves also hands in `replay` (see *Golden saves*).
 - **Break points, not every change:** a break point is a moment the game's state is whole (a turn ended). The tab hiding (an app switch, a closed tab) saves `snapshot()` too, so a phone player mid-turn loses nothing; return null from it when the game isn't in a state worth saving.
 - **Only after `end()` is a run gone** — leaving the game from the menu is an end (abandoned); closing the tab is not (that's what Continue is for).
 - **A newer build's run or a damaged one** shows Continue with just its time; pressing it says "This game can't be continued…" (`RUN_WORDS.cantContinue`) and wipes it. Unlike progress, a newer build's run is not kept: while it sits there this build can't write the key at all, so no new run could ever be saved.
 - Online games aren't runs: the server holds the match (rejoin is F95).
+
+## Moving a game's own save onto this module (F194 rehearsal — Goops' progress, 2026-11-06)
+- **The stored shape changes.** Under a key the module writes a record — `{ save, version, savedAt, data }` — not the bare
+  object the game wrote before. Your old value is still read once (`oldSave` / an upgrade step turns it into `data`), but
+  any **test that reads or plants the key in browser storage directly** must now read `.data` / write the record (Goops:
+  14 reads in 10 e2e scripts). Grep the e2e folder for the key before switching.
+- **Old golden files can be misread.** The save test picks up every `<key>-vN.json` in `tests/saves/`; a file the game kept
+  there in its old bare format is read as a module golden save and fails. Rename or convert those first (one golden save
+  per version, in the module's record shape).
+- **"Nonsense value → a broken save" belongs in `oldSave`, not `clean`.** By the time `clean` runs, `fillMissing` has
+  already turned a wrong-type field into its default (so `clean` never sees it). To call a save with, say, text where XP
+  should be a number broken, check it in `oldSave` (return null) or in the upgrade step.
 
 ## Golden saves
 A real save from each version, committed as `tests/saves/<key>-v<N>.json` — several per version are fine (`goops-progress-v1-before-the-module.json`):
@@ -95,6 +107,8 @@ A real save from each version, committed as `tests/saves/<key>-v<N>.json` — se
 ```
 `stored` is the JSON as it is (an object), or the text as a string: `"stored": "done"` = the plain text `done` in storage (an old value that isn't JSON, 0.7.0).
 Get `stored` from DevTools → Application → Local Storage → the key, or `makeGoldenSave(save, data, about)` in a test. **Every release that changes a save's version adds the old version's golden save** — check:framework fails until it's there.
+
+**A save that keeps moves is replayed too (0.9.0, F190).** Loading only proves a save's shape: a tic-tac-toe move `{ cell: 4 }` in a Nim save loaded fine and broke only on the player's Continue. So a save whose data holds a move list (`moves` or `record.moves`) hands in the game's replay — the same call Continue makes — and every golden save is played through today's rules: `{ run: matchRun, sample, replay: (run) => replay(ticTacToe, run.record) }` (the starter). A move that no longer fits fails the test, naming it ("its moves don't replay with today's rules — Continue would fail: Move 2 (seat 1) is not allowed: …"); a save that holds moves with no replay handed in fails too, saying how to wire it. Saves without moves (settings, progress) need nothing.
 
 ## The public API
 ```ts
@@ -110,7 +124,7 @@ ui/useContinue(run, onResume, words?) → { onContinue?, continueDetail? } for t
 NOTES
 setSavesStorage(storage, { native? }) · savesStorage() · savesOnNativeStorage() · switchedStorage
 setSavesConfig(json) · readSavesConfig(json) · memoryStorage(start?) · mergeRecords(kind, fields, a, b) · fillMissing(saved, fresh)
-oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds · savesInCode
+oldSaves.ts: goldenFileName · missingGoldenVersions · goldenSavesFor · makeGoldenSave · checkGoldenSave(save, golden, replay?) · checkRoundTrip · checkDamagedSaves · checkFullStorage · checkRunEnds · savesInCode
 ```
 Every player-facing sentence (`NOTES`, `RUN_WORDS`, useContinue's `words`) can be replaced.
 

@@ -23,6 +23,7 @@ import { createServer } from 'vite'
 import { chromium, webkit } from 'playwright'
 import { screenIds } from '../gallery/menu.ts'
 import { findProblems } from '../kit/uiProblems.mjs'
+import { SIZES } from '../kit/conformance.mjs'
 import { pseudo } from '../kit/blocks/words.ts'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 import { recordLayout } from './compareEngines.mjs'
@@ -341,6 +342,14 @@ try {
     for (const preset of presetNames) {
       for (const id of keyScreens) await shoot(`screens/${id}-${preset}-${sizes.small.name}`, sizes.small, `?screen=${id}&preset=${preset}`)
       for (const id of landscapeScreens) await shoot(`screens/${id}-${preset}-${sizes.smallLandscape.name}`, sizes.smallLandscape, `?screen=${id}&preset=${preset}`)
+    }
+    // The "turn your phone" card (F192), both ways, at every size a game is checked at (conformance SIZES: phones both
+    // ways, a short landscape, laptop, desktop, HD), in every style — a tablet or a big phone shows it too, so its
+    // breathing room is checked everywhere. Just these: SHOOT_ONLY="upright-|sideways-" npm run shoot:all
+    for (const preset of presetNames) {
+      for (const id of ['upright', 'sideways']) {
+        for (const s of SIZES) await shoot(`screens/${id}-${preset}-${s.width}x${s.height}`, { ...s, name: `${s.width}x${s.height}` }, `?screen=${id}&preset=${preset}`)
+      }
     }
     // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
     await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',

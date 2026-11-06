@@ -159,6 +159,15 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     ])
     expect(r).toEqual({ name: SETTINGS_CHECK, ok: true, detail: '2 rows on: 2 read by the game, 0 handled by the kit / audio module' })
   })
+  it("a liveSetting's mapper reads the row, whatever its parameter is called (F194 rehearsal: Goops' gooStyle)", () => {
+    expect(fileReadsRow("export const gooStyle = liveSetting(settings, (v) => (v.gooStyle === 'Particle' ? 'particle' : 'jelly'))", 'gooStyle')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting(settings, (s: SettingsValues) => s?.wallKick === true)', 'wallKick')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting(settings, ({ wallKick }) => wallKick === true)', 'wallKick')).toBe(true)
+    expect(fileReadsRow("export const g = liveSetting(settings, (v) => v.gooStyleX)", 'gooStyle')).toBe(false)
+    // with a type argument and the mapper on the next line, as Goops writes it
+    expect(fileReadsRow("export const gooStyle = liveSetting<GooStyle>(settings, (v) => (v.gooStyle === 'Particle' ? 'particle' : 'jelly'))", 'gooStyle')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting<WallKickMode>(settings,\n  (v) => toMode(v.wallKick))', 'wallKick')).toBe(true)
+  })
   it('counts real reads only — not comments, words from a .json file, or a longer name that starts the same', () => {
     expect(fileReadsRow('// values.tips is read in tips.ts', 'tips')).toBe(false)
     expect(fileReadsRow("import text from '../../content/text/en.json'\nconst w = text.tutorial.tips", 'tips')).toBe(false)
@@ -229,11 +238,12 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
         { id: 'reduceMotion', type: 'toggle', label: 'Reduce motion' },
         { id: 'help', type: 'link', label: 'Help', url: 'https://muzzy.games/help' },
         { id: 'fullscreenTip', type: 'info', label: 'Full screen', default: 'Share → Add to Home Screen' },
+        { id: 'fullscreen', type: 'toggle', label: 'Full screen' }, // (F192: the kit's Settings goes in and out itself)
       ] },
       { id: 'audio', label: 'Audio', rows: [{ id: 'masterVolume', type: 'slider', label: 'Master volume' }, { id: 'mono', type: 'toggle', label: 'Mono' }] },
     ] }
     const wired = [{ path: 'src/game/sound.ts', text: 'applyAudioSettings(audio, values)' }]
-    expect(run(schema, wired)[0]).toMatchObject({ ok: true, detail: '6 rows on: 0 read by the game, 6 handled by the kit / audio module' })
+    expect(run(schema, wired)[0]).toMatchObject({ ok: true, detail: '7 rows on: 0 read by the game, 7 handled by the kit / audio module' })
     // the Audio rows count as handled only once the game hands the values to the audio module
     expect(settingsProblems(schema, []).dead.map((r) => r.id)).toEqual(['masterVolume', 'mono'])
   })

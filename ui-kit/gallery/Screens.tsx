@@ -14,7 +14,7 @@ import {
   askConfirm, Bar, Button, Grid, ConnectionDot, Countdown, Counter, Credits, EmptyState, GameOver, HowToPlay, Hud, HudText, kitScreens,
   ListRow, Loading, Lobby, MainMenu, ModeSelect, Panel, Pause, PinnedBox, PlayerChip, PlayerSeats, PostGame, presets, Rank, Reconnecting, Results,
   HandView, IdleWarning, rackLayout, RewardPopup, RoundIntro, Row, Score, Screen, ScrollArea, ScreenStack, screens, SeatPicker, Selector, Settings, Spinner, Stack, Stepper, Text,
-  TimerRing, Toggle, toast, Tooltip, TurnBanner, Victory, type HandPlace, type HandStage, type ToastPlace,
+  TimerRing, Toggle, toast, Tooltip, TurnBanner, UprightCard, Victory, type HandPlace, type HandStage, type ToastPlace,
 } from '../kit'
 
 const noop = () => {}
@@ -531,6 +531,9 @@ const samples: Record<string, ComponentType> = {
   howto: () => <HowToPlay pages={howPages} />,
   credits: () => <Credits people={people} assets={credits} />,
   settings: () => <Settings version="v0.1.0.12" onAction={(id) => toast(`Action: ${id}`)} />,
+  // F192: what a phone held the wrong way up sees (show: here on any screen; in a game it shows itself, on touch only)
+  upright: () => <UprightCard show orientation="portrait" />,
+  sideways: () => <UprightCard show orientation="landscape" />,
   hud: HudSample,
   huddock: HudDockSample,
   chips: PlayerChips,

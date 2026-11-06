@@ -3,7 +3,7 @@
 Every game shows its version the same way, from one file. Muzzy, 2026-10-20: "version number visibility is important in
 all games… should be a built in process". Built from Goops' own copy (its sprint 11), now one module for every game.
 
-Module **0.1.3** (0.1.3, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.1.2, F128: the installer asks git for the kit’s commit once per run, not on every install). Web (Vite) games.
+Module **0.2.0** (0.2.0, F193: `startUpdates(registerSW)` — the offline cache's update starter with Goops' fix, a returning player gets a new release on this visit and a first visit never reloads; `checkUpdateArrives` for a game's e2e/sw-update.mjs) (0.1.3, F159: the installer reads its version through the framework’s shared `scripts/kitVersion.mjs` (git asked once per run, in one place); the version line it writes is unchanged) (0.1.2, F128: the installer asks git for the kit’s commit once per run, not on every install). Web (Vite) games.
 
 ## What it does
 - **One source:** `version.json` — `{ "version": "X.Y.Z", "build": N }` (BMUZ versioning: `/save` bumps `build`,
@@ -42,14 +42,25 @@ installer, then its checks in the game). The installer copies `kit/` → `src/ve
 6. **Nothing else reads `version.json`** — `import { versionLabel } from '../version'` instead, so every place says the
    same thing (with the build number and the v).
 
-`npm run check:framework` checks all six (and, in the browser, that the page's meta tag equals `version.json`).
+7. **A game with an offline cache** (vite-plugin-pwa 1.3.0+) — its update line in `src/main.tsx` is the starter:
+   ```ts
+   import { registerSW } from 'virtual:pwa-register'
+   import { startUpdates } from './version'
+   startUpdates(registerSW)                              // worker file sw.js (vite-plugin-pwa's default)
+   startUpdates(registerSW, { worker: 'goops-sw.js' })   // a worker named in vite.config.ts VitePWA "filename"
+   ```
+   The game hands in its own `registerSW`, so the module never imports `virtual:pwa-register` (a game without an
+   offline cache imports the module the same as ever, and skips this step).
+
+`npm run check:framework` checks the first six (and, in the browser, that the page's meta tag equals `version.json`).
 
 ## The parts
 | File (in the game: `src/version/`) | What |
 |---|---|
-| `index.ts` | `appVersion` ("X.Y.Z.B") and `versionLabel` ("vX.Y.Z.B") — "dev" when the build had no plugin (a plain test run), never a made-up number |
+| `index.ts` | `appVersion` ("X.Y.Z.B") and `versionLabel` ("vX.Y.Z.B") — "dev" when the build had no plugin (a plain test run), never a made-up number; re-exports `startUpdates` |
+| `updates.ts` | `startUpdates(registerSW, { worker? })` — `registerSW({ immediate: true, onNeedReload })` + the browser's controllerchange; the page reloads (once) only if it already ran under the game's own worker. So: a returning player swaps to a new release on this visit (even when the new worker took over before registerSW was listening), a first visit never reloads — not even one coming from another worker address (Goops v1's /GOOPS/sw.js). Returns `{ returning, ourWorker, update }` |
 | `vitePlugin.mjs` | `versionPlugin({ root? })` — `define` `import.meta.env.APP_VERSION`, the meta tag, and a dev-server restart when `version.json` changes (so `/save` never leaves the page on the old number) |
-| `e2e.mjs` | `expectedVersion(gameDir?)` · `checkVersion(page, want?)` · `builtVersion(distDir?)` (for a deploy script: the version in `dist/index.html`) · `versionInHtml(html)` |
+| `e2e.mjs` | `expectedVersion(gameDir?)` · `checkVersion(page, want?)` · `builtVersion(distDir?)` (for a deploy script: the version in `dist/index.html`) · `versionInHtml(html)` · `nextVersion(label, build = 9999)` · `checkUpdateArrives(page, { url, next, publish, worker? })` — a game's e2e/sw-update.mjs: first visit = ONE page load under the game's worker, then `publish()` the next build, open again → the page shows `next` on this visit and settles (no loop); returns `{ ok, checks: [{ name, ok, detail }], … }` for the game to print |
 | `versionFile.mjs` | reads `version.json` (shared by the plugin and the e2e helper, so the build and the tests never disagree) |
 | `env.d.ts` | types `import.meta.env.APP_VERSION` for the game's TypeScript — nothing to add to the game's own types |
 | `conformance.mjs` | the module's checks for `check:framework` |

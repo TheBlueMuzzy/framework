@@ -8,11 +8,14 @@
 // Values are remembered in the browser, in a slot of the game's own (or pass your own load/save).
 // At start-up, call applyAccessibility(loadSettings(schema)) so text size and reduce motion apply
 // before Settings opens.
+// A row the GAME reads (a tray side, a goo style, a bot speed): liveSetting (liveSetting.ts, 0.42.0) — it follows this
+// screen the moment a row changes, with no onChange wiring.
 import { useEffect, useRef, useState } from 'react'
 import { Panel, Row, Screen } from '../layout'
 import { Button, ListRow, ScrollArea, Selector, Slider, Stepper, Tabs, Text, Toggle } from '../controls'
 import { screens } from '../screens'
 import { askConfirm } from './dialogs'
+import { fullscreenSetting, hiddenFullscreenRows, useFullscreen } from './fullscreen'
 import { MenuHeader } from './MenuHeader'
 import defaultSchema from './settings.default.json'
 
@@ -91,9 +94,23 @@ function withSaved(schema: SettingsSchema, saved: SettingsValues | null): Settin
   return values
 }
 
-// At start-up: applyAccessibility(loadSettings(schema)) — pass the same storageKey as <Settings>, if you gave it one.
-export function loadSettings(schema: SettingsSchema = defaultSchema, storageKey = settingsStorageKey()): SettingsValues {
-  return withSaved(schema, loadFromBrowser(storageKey))
+// At start-up: applyAccessibility(loadSettings(schema)) — pass the same storageKey as <Settings>, if you gave it one
+// (0.42.0: or the same load, for a game that keeps its settings with its own saves).
+export function loadSettings(schema: SettingsSchema = defaultSchema, storageKey = settingsStorageKey(),
+  load: () => SettingsValues | null = () => loadFromBrowser(storageKey)): SettingsValues {
+  return withSaved(schema, load())
+}
+
+// 0.42.0 (F191): every change the Settings screen makes (a row, or Reset) is told to these listeners once it's saved.
+// liveSetting (liveSetting.ts) listens here, so a game's live settings follow the screen with no onChange wiring.
+const changeListeners = new Set<(values: SettingsValues) => void>()
+export function onSettingsChange(listener: (values: SettingsValues) => void) {
+  changeListeners.add(listener)
+  return () => { changeListeners.delete(listener) }
+}
+/** Tell the listeners about a change saved somewhere else than the screen (full screen's own button, Esc). */
+export function tellSettingsChanged(values: SettingsValues) {
+  changeListeners.forEach((listener) => listener(values))
 }
 
 // Text size and reduce motion drive the kit itself: text is in rem, so the page's font size scales
@@ -140,8 +157,13 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
   const w = { ...settingsWords, ...words }
   const info: Record<string, string> = version ? { version, ...infoText } : infoText
   const [values, setValues] = useState(() => withSaved(schema, load()))
+  // Full screen (F192, fullscreen.ts): the row this device can't use is hidden, and a computer's Esc out of full screen
+  // (saved as off) is read again here, so this screen never saves an old "on" back over it
+  const { resaved } = useFullscreen()
+  const [resavesSeen, setResavesSeen] = useState(resaved)
+  if (resaved !== resavesSeen) { setResavesSeen(resaved); setValues(withSaved(schema, load())) }
   const tabs = schema.tabs
-    .map((tab) => ({ ...tab, rows: visibleRows(tab.rows, hide) }))
+    .map((tab) => ({ ...tab, rows: visibleRows(tab.rows, [...hide, ...hiddenFullscreenRows()]) }))
     .filter((tab) => tab.rows.length > 0) // (a tab of only headings has none left by now)
   const [tabId, setTabId] = useState<string | undefined>(tabs[0]?.id)
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0]
@@ -161,6 +183,8 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
     setValues(next)
     save(next)
     applyAccessibility(next)
+    tellSettingsChanged(next)
+    fullscreenSetting(next, changedId) // (flipping Full screen is a tap: the browser allows it now)
     onChange?.(next, changedId)
   }
   const set = (id: string) => (value: SettingValue) => update({ ...values, [id]: value }, id)

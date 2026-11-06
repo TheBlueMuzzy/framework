@@ -149,7 +149,7 @@ function nextTurn() {
   if (!match || match.state.over || match.state.turn !== BOT) return
   const started = paceNow()
   const thought = botMove(match.opponent, ticTacToe.viewFor(match.state, BOT), BOT, match.rng)
-  const delay = thinkDelay(paceFile, 'move', botSpeed(), thought.rng)
+  const delay = thinkDelay(paceFile, 'move', botSpeed.get(), thought.rng)
   log(`Bot: ${thought.note}`)
   // (the random position moves on only when the move is made — a snapshot taken mid-think restores the same think)
   cancelWait = botWait(waitLeft(delay.ms, paceNow() - started), () => {

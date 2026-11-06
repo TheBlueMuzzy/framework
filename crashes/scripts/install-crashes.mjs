@@ -70,6 +70,10 @@ export function wiringSteps(gameDir) {
   const inCode = (pattern) => code.some((c) => pattern.test(c))
   const viteConfig = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs'].find((f) => existsSync(join(gameDir, f)))
   const settingsRows = (() => { try { return JSON.parse(text('content/ui/settings.json')).tabs.flatMap((t) => t.rows ?? []) } catch { return [] } })()
+  // The game's own crash server port (its crashes/wrangler.json), and whether it's already live (client.url is an https
+  // address) — F195 rehearsal: Glyphtender, live on https with port 1996, was told 1995 and the go-live steps
+  const port = (() => { try { return JSON.parse(text(WRANGLER)).dev?.port ?? CRASHES_PORT } catch { return CRASHES_PORT } })()
+  const live = (() => { try { return /^https:\/\//.test(JSON.parse(text('content/crashes.json')).client?.url ?? '') } catch { return false } })()
   return [
     { done: Boolean(deps.wrangler) && Boolean(deps['source-map']), step: 'Packages: npm install -D wrangler source-map   (source-map turns the built code\'s lines back into yours, on the PC only)' },
     {
@@ -84,7 +88,7 @@ export function wiringSteps(gameDir) {
     {
       done: Boolean(viteConfig) && /\bcrashesMaps\s*\(/.test(withoutComments(text(viteConfig))),
       step: `${viteConfig ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ]
-       (every build makes hidden source maps and moves them to releases/<version>/maps/ — commit that folder; players never get them)`,
+       (every build makes hidden source maps and moves them out of the build, so players never get them; only the release build (CRASHES_MAPS=release, set by release.mjs) files them under releases/<version>/maps/ — commit that folder; checks and e2e builds keep theirs in node_modules/.cache/crashes-maps/)`,
     },
     {
       done: inCode(/\bstartCrashes\s*\(/),
@@ -106,15 +110,15 @@ export function wiringSteps(gameDir) {
       done: !inCode(/\bcreateRoot\s*\(/) || inCode(/\bcrashRootOptions\s*\(/),
       step: "React: createRoot(element, crashRootOptions())   (import { crashRootOptions } from './crashes/ui/crashRoot') — a broken screen shows \"Something broke · Reload\" instead of a blank page",
     },
-    // Always shown: how to try it, and the live steps (can't be checked from here)
+    // How to try it (always shown), and the live steps (done once content/crashes.json points at an https server)
     {
       done: false,
-      step: `Try it: npm run crashes:dev (port ${CRASHES_PORT}) with a test token in crashes/.dev.vars (CRASHES_TOKEN=<24+ characters>; .dev.vars is never committed),
-       content/crashes.json client.url = "http://localhost:${CRASHES_PORT}" + client.sendInDev = true, npm run dev, throw an error,
-       then CRASHES_TOKEN=<the same> npm run crashes -- --url=http://localhost:${CRASHES_PORT}`,
+      step: `Try it: npm run crashes:dev (port ${port}) with a test token in crashes/.dev.vars (CRASHES_TOKEN=<24+ characters>; .dev.vars is never committed),
+       content/crashes.json client.url = "http://localhost:${port}" + client.sendInDev = true, npm run dev, throw an error,
+       then CRASHES_TOKEN=<the same> npm run crashes -- --url=http://localhost:${port}`,
     },
     {
-      done: false,
+      done: live,
       step: `Going live (Muzzy's call — a public server that keeps anonymous error reports for content/crashes.json server.keepDays):
        1. a token, once:   node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"
           → save it on each machine (never in the repo) in a file named after the server's address in step 2:

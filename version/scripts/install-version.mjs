@@ -13,7 +13,7 @@ import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { kitVersion } from '../../scripts/kitVersion.mjs'
 import { adapterFile } from '../../devkit/kit/check-framework.mjs'
-import { adapterVersion, E2E_DIRS, E2E_EXTS, READS_VERSION_FILE, versionProps, withoutComments } from '../kit/conformance.mjs'
+import { adapterVersion, E2E_DIRS, E2E_EXTS, ownSpots, READS_VERSION_FILE, versionProps, withoutComments } from '../kit/conformance.mjs'
 
 const moduleDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const KIT_TARGET = 'src/version'
@@ -43,16 +43,24 @@ export function checkFrameworkStep(gameDir) {
 export function wiringSteps(gameDir) {
   const game = resolve(gameDir)
   const text = (file) => readText(join(game, file))
-  const src = listFiles(join(game, 'src'))
+  const all = listFiles(join(game, 'src'))
+  const src = all
     .filter((f) => /\.(m?[jt]sx?)$/.test(f) && !f.startsWith('version/') && !/\.(test|spec)\./.test(f))
     .map((f) => ({ path: `src/${f}`, text: text(`src/${f}`) }))
-  const gameCode = src.filter((f) => !/^src\/(devkit|devkit-game|ui\/kit|audio|table|ai\/kit|rooms|saves)\//.test(f.path))
+  // Module copies are every folder with a VERSION file (src/ui/kit, src/crashes, src/lint…), found rather than listed by
+  // hand — a hand list missed crashes and lint, whose words mention <Settings onChange> (F195 rehearsal, 2026-11-06).
+  // devkit-game is the game's own Dev Kit tabs: not where it shows its version.
+  const moduleDirs = all.filter((f) => /(^|\/)VERSION$/.test(f)).map((f) => `src/${f.replace(/VERSION$/, '')}`)
+  const gameCode = src.filter((f) => !f.path.startsWith('src/devkit-game/') && !moduleDirs.some((dir) => f.path.startsWith(dir)))
   const hasUiKit = existsSync(join(game, 'src/ui/kit/VERSION'))
   const hasDevKit = existsSync(join(game, 'src/devkit/VERSION'))
   const config = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs'].find((f) => existsSync(join(game, f))) ?? 'vite.config.ts'
-  const passesLabel = (tag) => {
+  // The kit's tag passes versionLabel — or, with no such tag, the game draws that screen itself and marks its spot
+  // (data-version-spot), the same rule as check:framework (F194 rehearsal: Goops' own main menu, its Console)
+  const passesLabel = (tag, spot) => {
     const uses = versionProps(gameCode, tag)
-    return uses.length > 0 && uses.every((u) => /\bversionLabel\b/.test(u.value ?? ''))
+    if (!uses.length) return ownSpots(gameCode, spot).length > 0
+    return uses.every((u) => /\bversionLabel\b/.test(u.value ?? ''))
   }
   const adapter = hasDevKit ? adapterFile(game) : null // the one registerDevKitGame names — not every file with a version: key
   const e2e = E2E_DIRS.flatMap((dir) => listFiles(join(game, dir)).filter((f) => E2E_EXTS.test(f)).map((f) => `${dir}/${f}`))
@@ -65,9 +73,9 @@ export function wiringSteps(gameDir) {
        (bakes version.json in as import.meta.env.APP_VERSION and puts <meta name="app-version" content="vX.Y.Z.B"> in the page)`,
     },
     hasUiKit
-      ? { done: passesLabel('MainMenu'), step: 'The main-menu footer: import { versionLabel } from \'../version\'   then   <MainMenu version={versionLabel} …>' }
+      ? { done: passesLabel('MainMenu', 'main-menu'), step: 'The main-menu footer: import { versionLabel } from \'../version\'   then   <MainMenu version={versionLabel} …>' }
       : { done: gameCode.some((f) => /\bversionLabel\b/.test(f.text)), step: 'Show versionLabel (import { versionLabel } from \'../version\') on the main menu and in Settings' },
-    ...(hasUiKit ? [{ done: passesLabel('Settings'), step: 'The bottom of every Settings tab: <Settings version={versionLabel} …> (UI kit 0.24.0+; an About → Version row fills itself from it too)' }] : []),
+    ...(hasUiKit ? [{ done: passesLabel('Settings', 'settings'), step: 'The bottom of every Settings tab: <Settings version={versionLabel} …> (UI kit 0.24.0+; an About → Version row fills itself from it too)' }] : []),
     ...(hasDevKit ? [{
       done: !!adapter && adapterVersion(text(adapter)).ok,
       step: 'The Dev Kit adapter (src/devkit-game/<game>Adapter.ts): import { versionLabel } from \'../version\'   then   version: versionLabel,   (snapshots + bug files)',
