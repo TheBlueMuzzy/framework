@@ -34,6 +34,10 @@ export interface Match {
 
 let match: Match | null = null
 let cancelWait: (() => void) | null = null
+// The tutorial holds the game while its words are up (src/tutorial-game: the runner's setSpeed): no taps on the board,
+// and a bot move that comes due waits until it lets go
+let held = false
+let heldMove: (() => void) | null = null
 const listeners = new Set<() => void>()
 const logListeners = new Set<(line: string) => void>()
 
@@ -42,7 +46,15 @@ function set(next: Match | null) {
   for (const listener of listeners) listener()
 }
 const log = (line: string) => { for (const listener of logListeners) listener(line) }
-const stopWaiting = () => { cancelWait?.(); cancelWait = null }
+const stopWaiting = () => { cancelWait?.(); cancelWait = null; heldMove = null }
+
+/** Hold the game (the tutorial's words are up) or let it go on — a bot move that came due meanwhile is made now. */
+export function holdMatch(on: boolean) {
+  held = on
+  const due = !on && heldMove
+  heldMove = null
+  if (due) due()
+}
 
 export const getMatch = () => match
 export const subscribeMatch = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener) } }
@@ -87,7 +99,7 @@ function begin(next: Match) {
 
 /** You tap a square. Anything that isn't allowed right now is simply ignored (the board only offers free squares). */
 export function playCell(cell: number) {
-  if (!match || match.state.turn !== YOU || ticTacToe.check(match.state, YOU, { cell })) return
+  if (!match || held || match.state.turn !== YOU || ticTacToe.check(match.state, YOU, { cell })) return
   move(YOU, { cell })
 }
 
@@ -154,8 +166,12 @@ function nextTurn() {
   // (the random position moves on only when the move is made — a snapshot taken mid-think restores the same think)
   cancelWait = botWait(waitLeft(delay.ms, paceNow() - started), () => {
     cancelWait = null
-    if (match) set({ ...match, rng: delay.rng })
-    move(BOT, thought.action)
+    const go = () => {
+      if (match) set({ ...match, rng: delay.rng })
+      move(BOT, thought.action)
+    }
+    if (held) heldMove = go
+    else go()
   })
 }
 

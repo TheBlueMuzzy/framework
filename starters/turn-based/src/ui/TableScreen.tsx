@@ -44,8 +44,8 @@ export function TableScreen() {
   const botName = personalityName(match.opponent.personality)
   const status = state.over ? text.table.over : state.turn === YOU ? text.table.yourTurn : fill(text.table.theirTurn, { name: botName })
   const seats = [
-    { id: seatId(YOU), name: text.table.you, score: match.series.you },
-    { id: seatId(BOT), name: botName, score: match.series.them },
+    { id: seatId(YOU), name: text.table.you, score: match.series.you, seatProps: { 'data-seat': 'you' } },
+    { id: seatId(BOT), name: botName, score: match.series.them, seatProps: { 'data-seat': 'bot' } }, // (the tutorial points here)
   ]
 
   return (

@@ -20,6 +20,7 @@
       "rows": [
         { "id": "secBots", "type": "heading", "label": "Computer players" },
         { "id": "botSpeed", "type": "selector", "label": "Bot speed", "options": ["Slow", "Normal", "Fast", "Instant"], "default": "Normal", "detail": "How long the computer thinks before it moves." },
+        { "id": "replayTutorial", "type": "button", "label": "Replay tutorial", "detail": "Starts a new game against the computer with the how-to-play steps." },
         { "id": "secDisplay", "type": "heading", "label": "Display" },
         { "id": "fullscreen", "type": "toggle", "label": "Full screen", "detail": "Hides the browser's bars. On phones, any tap goes full screen", "default": false },
         { "id": "fullscreenTip", "type": "info", "label": "Full screen", "default": "Share → Add to Home Screen" },

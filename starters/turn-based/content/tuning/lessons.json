@@ -1,0 +1,40 @@
+{
+  "_help": {
+    "_file": "How the first-game tutorial (content/lessons/first-game.json) is paced. Live in the Dev Kit's Tuning tab.",
+    "dismissArmSeconds": "A step's button only works after this long (s), so a quick tap can't close the words by accident.",
+    "betweenStepsSeconds": "A breath between one step and the next (s). 0 for a turn-based game: the rules switch the moment a step ends.",
+    "slowSpeed": "The game's speed while a step says 'slow' (0-1). The first-game lesson doesn't use it.",
+    "gatePollMs": "How often a step waiting on a number checks it (ms).",
+    "nudgeGlowSeconds": "A step waiting for a move: after this long with no move (s), what it points at glows.",
+    "nudgeWordsSeconds": "…and after this long (s), the words change to the nudge line (en.json lessons.shared.nudgeMove).",
+    "nudgeRepeat": "How many times the nudge words may show on one device visit."
+  },
+  "_labels": {
+    "dismissArmSeconds": "Button works after (s)",
+    "betweenStepsSeconds": "Between steps (s)",
+    "slowSpeed": "Slow speed",
+    "gatePollMs": "Number check every (ms)",
+    "nudgeGlowSeconds": "Nudge: glow after (s)",
+    "nudgeWordsSeconds": "Nudge: words after (s)",
+    "nudgeRepeat": "Nudge: times"
+  },
+  "_ranges": {
+    "dismissArmSeconds": [0, 2, 0.05],
+    "betweenStepsSeconds": [0, 2, 0.05],
+    "slowSpeed": [0.05, 1, 0.05],
+    "gatePollMs": [20, 1000, 10],
+    "nudgeGlowSeconds": [1, 30, 0.5],
+    "nudgeWordsSeconds": [2, 60, 0.5],
+    "nudgeRepeat": [0, 10, 1]
+  },
+  "_sections": {
+    "Tutorial": ["dismissArmSeconds", "betweenStepsSeconds", "nudgeGlowSeconds", "nudgeWordsSeconds", "nudgeRepeat", "slowSpeed", "gatePollMs"]
+  },
+  "dismissArmSeconds": 0.4,
+  "betweenStepsSeconds": 0,
+  "slowSpeed": 0.25,
+  "gatePollMs": 100,
+  "nudgeGlowSeconds": 6,
+  "nudgeWordsSeconds": 12,
+  "nudgeRepeat": 2
+}

@@ -19,7 +19,7 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode,
 import { createPortal } from 'react-dom'
 import { Row, Stack } from '../layout'
 import { Button, Text } from '../controls'
-import { calloutWords, placeCallout, placeKeepingClear, type CalloutKeepClear, type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
+import { besideWidths, calloutWords, placeCallout, placeKeepingClear, type CalloutKeepClear, type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
 import { focusRing } from '../keysOrPad'
 
 type Box = { left: number; top: number; right: number; bottom: number }
@@ -54,6 +54,7 @@ export type CalloutProps = {
 const sidesFor = (placement: CalloutPlacement): CalloutSide[] => placement === 'auto' ? ['top', 'bottom', 'right', 'left']
   : ({ top: ['top', 'bottom', 'right', 'left'], bottom: ['bottom', 'top', 'right', 'left'], left: ['left', 'right', 'top', 'bottom'], right: ['right', 'left', 'top', 'bottom'] } as const)[placement].slice()
 const overlaps = (a: Box, b: Box) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+const overlapArea = (a: Box, b: Box) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
 
 /** What the frame loop of a pointing bubble reads each frame (kept in a ref, so a new render never restarts it). */
 export type CalloutPlaceInput = {
@@ -70,7 +71,7 @@ export type CalloutPlaceInput = {
  *  late) it writes the layer's --kit-callout-* variables, data-side and data-ready — only when something changed. */
 export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble: RefObject<HTMLDivElement | null>, now: RefObject<CalloutPlaceInput>) {
   useLayoutEffect(() => {
-    let frame = 0, last = ''
+    let frame = 0, last = '', fitFor = ''
     const tellStuck = stuckTeller()
     const place = () => {
       const el = layer.current, box = bubble.current
@@ -89,17 +90,41 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       const space = parseFloat(pad.columnGap) || 0 // the spotlight's room round the target (gap-s)
       const hole = { left: found.left - space, top: found.top - space, right: found.right + space, bottom: found.bottom + space }
       const tipSize = tip.offsetWidth, reach = tipSize * Math.SQRT1_2 // a turned square sticks out half its diagonal
-      const size = { width: box.offsetWidth, height: box.offsetHeight }
-      // The pointer stays off the rounded corners: the corner's curve, plus half the pointer's width
-      const radius = parseFloat(getComputedStyle(box).borderTopLeftRadius) || 0
-      const tipInset = Math.min(Math.min(size.width, size.height) / 2, radius + reach)
-      const distance = reach + tipSize * 0.25
       // Keep clear (0.43.0): covering as little of the play area as it can, away from the live spot; else the asked side
       const keep = now.current.keepClear, area = keep && targetBox(keep.area)
+      // Narrower to fit beside (0.43.1, F201): worked out again only when the room, the target or the area changes
+      const fitKey = area ? [frameBox, hole, area].flatMap((b) => [b.left, b.top, b.right, b.bottom]).map(Math.round).join() : ''
+      const refit = fitKey !== fitFor
+      if (refit) { fitFor = fitKey; box.style.removeProperty('--kit-callout-fit-w') }
+      const measure = () => ({ width: box.offsetWidth, height: box.offsetHeight })
+      let size = measure()
+      // The pointer stays off the rounded corners: the corner's curve, plus half the pointer's width
+      const radius = parseFloat(getComputedStyle(box).borderTopLeftRadius) || 0
+      const insetFor = (s: typeof size) => Math.min(Math.min(s.width, s.height) / 2, radius + reach)
+      let tipInset = insetFor(size)
+      const distance = reach + tipSize * 0.25
       // (what it keeps off gets the same room round it as the target: a Spotlight's hole round it, and its outline)
       const keepOff = (keep?.avoid ?? []).flatMap((t) => { const b = targetBox(t); return b ? [{ left: b.left - space, top: b.top - space, right: b.right + space, bottom: b.bottom + space }] : [] })
-      let spot = area ? placeKeepingClear(hole, size, frameBox, distance, area, targetBox(keep.live), tipInset, keepOff)
-        : placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
+      const keepClearAt = (s: typeof size) => placeKeepingClear(hole, s, frameBox, distance, area!, targetBox(keep!.live), insetFor(s), keepOff)
+      let spot = area ? keepClearAt(size) : placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
+      // At its own width it covers the play area (no side holds it — a board as tall as the screen): it tries the room
+      // beside the target, never narrower than 10em, and keeps the width covering the least (besideWidths)
+      if (area && refit) {
+        // (the area with the pointer's room round it: a bubble squeezed against the area points INTO it)
+        const roomy = { left: area.left - distance, top: area.top - distance, right: area.right + distance, bottom: area.bottom + distance }
+        const coverOf = (s: typeof spot, z: typeof size) => overlapArea({ left: s.x, top: s.y, right: s.x + z.width, bottom: s.y + z.height }, roomy)
+        let best = { spot, size, cover: coverOf(spot, size), width: 0 }
+        const least = parseFloat(getComputedStyle(box).fontSize) * 10
+        for (const width of best.cover > 0 ? besideWidths(hole, frameBox, distance, size.width, least) : []) {
+          box.style.setProperty('--kit-callout-fit-w', `${width}px`)
+          const narrow = measure(), at = keepClearAt(narrow), cover = coverOf(at, narrow)
+          if (cover < best.cover) best = { spot: at, size: narrow, cover, width }
+        }
+        if (best.width) box.style.setProperty('--kit-callout-fit-w', `${best.width}px`)
+        else box.style.removeProperty('--kit-callout-fit-w')
+        ;({ spot, size } = best)
+        tipInset = insetFor(size)
+      }
       // Clear of the HUD: the first side (in the usual order) where it fits without covering anything to avoid
       const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target, box) : []
       const spotBox = (s: typeof spot) => ({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height })

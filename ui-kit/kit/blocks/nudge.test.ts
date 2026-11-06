@@ -1,5 +1,26 @@
-import { describe, expect, it } from 'vitest'
-import { nudgeClock, nudgeUsedUp } from './nudge'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { act, renderHook } from '@testing-library/react'
+import { nudgeClock, nudgeUsedUp, useNudge, type NudgeOptions } from './nudge'
+
+afterEach(() => { vi.useRealTimers() })
+
+// 0.43.1 (F201): the starter's tutorial — after its words had shown once, Replay tutorial came back to the same kind
+// and running, and the OLD spell's 'text' showed at once: a pause (running false) must start a new spell at 'none'
+describe('useNudge', () => {
+  it('a pause ends the spell: running again starts from none, even with the same kind', () => {
+    vi.useFakeTimers()
+    const base = { kind: 'move', glowAt: null, textAt: 2, repeat: 3 }
+    const { result, rerender } = renderHook((o: NudgeOptions) => useNudge(o), { initialProps: { ...base, running: true } })
+    act(() => { vi.advanceTimersByTime(2100) })
+    expect(result.current.stage).toBe('text')
+    rerender({ ...base, running: false })
+    expect(result.current.stage).toBe('none')
+    rerender({ ...base, running: true })
+    expect(result.current.stage).toBe('none')
+    act(() => { vi.advanceTimersByTime(2100) })
+    expect(result.current.stage).toBe('text')
+  })
+})
 
 describe('nudge clock', () => {
   const o = { glowAt: 10, textAt: 20 }

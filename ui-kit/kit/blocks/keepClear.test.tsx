@@ -3,8 +3,24 @@
 // and still flips / shifts to fit. Without keepClear nothing changes (teach.test.tsx, untouched).
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
-import { placeKeepingClear, type CalloutBox } from './callout'
+import { besideWidths, placeKeepingClear, type CalloutBox } from './callout'
 import { Callout } from './teach'
+
+// 0.43.1 (F201, the starter's tutorial on a phone on its side): a 22em bubble fits on no side of a board that fills the
+// screen's height, so it covered the board — while there was room beside it for a narrower one. The widths it may
+// narrow to: the room on each side beside the target, never under `least`, only when narrower than it is now
+describe('besideWidths — how narrow a bubble may get to fit beside its target', () => {
+  const sideFrame = { left: 16, top: 16, right: 828, bottom: 374 } // an 844×390 phone on its side, minus the edge room
+  const wideBoard = { left: 313, top: 64, right: 531, bottom: 282 }
+  it('the room on each side (minus the pointer\'s distance), widest first', () => {
+    expect(besideWidths(wideBoard, sideFrame, 12, 396, 180)).toEqual([285, 285])
+    expect(besideWidths({ ...wideBoard, left: 400, right: 618 }, sideFrame, 12, 396, 180)).toEqual([372, 198])
+  })
+  it('none under the least width, and none as wide as the bubble already is', () => {
+    expect(besideWidths({ ...wideBoard, left: 600, right: 818 }, sideFrame, 12, 396, 180)).toEqual([])
+    expect(besideWidths(wideBoard, sideFrame, 12, 250, 180)).toEqual([])
+  })
+})
 
 afterEach(cleanup)
 

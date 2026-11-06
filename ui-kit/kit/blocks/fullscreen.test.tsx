@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Settings, onSettingsChange, type SettingsSchema, type SettingsValues } from './Settings'
-import { fullscreenSetting, hiddenFullscreenRows, setFullscreen, startFullscreen, stopFullscreen, withFullscreenDefault } from './fullscreen'
+import { fullscreenSetting, hiddenFullscreenRows, raisePopovers, setFullscreen, startFullscreen, stopFullscreen, withFullscreenDefault } from './fullscreen'
 import { pretendDevice } from './phoneDevice.test-util'
 
 const tap = () => window.dispatchEvent(new Event('pointerup'))
@@ -133,5 +133,44 @@ describe('full screen on phones', () => {
     render(<Settings schema={rowsSchema()} />)
     expect(screen.queryByRole('switch', { name: 'Full screen' })).toBeNull()
     expect(screen.getByText('Share → Add to Home Screen')).toBeTruthy()
+  })
+})
+
+// F201 (the starter's tutorial on a phone): the first tap goes full screen, and the page's root then sits in the top
+// layer ABOVE every popover already showing — the tutorial's Spotlight + Callout, shown on that same tap, were hidden
+describe('popovers showing when the page goes full screen', () => {
+  const fakePopover = (className: string, calls: string[]) => {
+    const el = document.createElement('div')
+    el.className = className
+    Object.assign(el, { hidePopover: () => calls.push(`hide ${className}`), showPopover: () => calls.push(`show ${className}`) })
+    return el
+  }
+  it('are shown again on top — every bubble (Callout) after the rest, so a Spotlight never covers its words', () => {
+    const calls: string[] = []
+    const bubble = fakePopover('kit-callout-layer', calls), dim = fakePopover('kit-spot-layer', calls)
+    raisePopovers([bubble, dim])
+    expect(calls).toEqual(['hide kit-spot-layer', 'show kit-spot-layer', 'hide kit-callout-layer', 'show kit-callout-layer'])
+  })
+  it('keeps the focus where it was (a pausing bubble focused its button)', () => {
+    const button = document.createElement('button')
+    document.body.append(button)
+    button.focus()
+    const bubble = fakePopover('kit-callout-layer', [])
+    Object.assign(bubble, { showPopover: () => (document.activeElement as HTMLElement)?.blur() })
+    raisePopovers([bubble])
+    expect(document.activeElement).toBe(button)
+    button.remove()
+  })
+  it('happens when the page goes full screen, not when it leaves', () => {
+    const calls: string[] = []
+    vi.spyOn(document, 'querySelectorAll').mockReturnValue([fakePopover('kit-callout-layer', calls)] as unknown as NodeListOf<Element>)
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => document.documentElement })
+    document.dispatchEvent(new Event('fullscreenchange'))
+    expect(calls).toEqual(['hide kit-callout-layer', 'show kit-callout-layer'])
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => null })
+    document.dispatchEvent(new Event('fullscreenchange'))
+    expect(calls).toHaveLength(2)
+    vi.restoreAllMocks()
+    Reflect.deleteProperty(document, 'fullscreenElement')
   })
 })

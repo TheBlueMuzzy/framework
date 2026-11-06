@@ -105,4 +105,12 @@ export function placeKeepingClear(target: Box, size: Size, frame: Box, distance:
   return ranked[0]?.spot ?? placeCallout(target, size, frame, distance, order[0], tipInset)
 }
 
+/** NARROWER TO FIT BESIDE (0.43.1, F201): the widths a keep-clear bubble may narrow to so it fits beside its target
+ *  (left, right) — the room on each side minus the pointer's distance, widest first; never under `least`, and only
+ *  ones narrower than it is now (`width`). The Callout tries them when at its own width it covers the play area. */
+export function besideWidths(target: Box, frame: Box, distance: number, width: number, least: number): number[] {
+  return [target.left - distance - frame.left, frame.right - (target.right + distance)]
+    .map(Math.floor).filter((room) => room >= least && room < width).sort((a, b) => b - a)
+}
+
 export const calloutWords = { label: 'Tip' }

@@ -592,7 +592,7 @@
     visibility: hidden; pointer-events: none; }
   /* The bubble: as wide as its words up to 22em (never wider than the game picture), so it never changes width as it moves */
   .kit-callout { justify-self: start; align-self: start; display: grid; inline-size: max-content;
-    max-inline-size: min(22em, calc(var(--kit-frame-w, 100vw) - 2 * var(--gap-m)));
+    max-inline-size: min(22em, var(--kit-callout-fit-w, 22em), calc(var(--kit-frame-w, 100vw) - 2 * var(--gap-m))); /* fit-w: narrower to fit beside its target (0.43.1) */
     translate: var(--kit-callout-x, 0) var(--kit-callout-y, 0);
     transform-origin: var(--kit-callout-tip-x, 50%) var(--kit-callout-tip-y, 50%); /* its entrance grows out of the pointer */
     pointer-events: auto; visibility: hidden; }

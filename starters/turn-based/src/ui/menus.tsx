@@ -9,6 +9,7 @@ import { applySettings, settingsSchema } from '../game/settings'
 import { progressSave, settingsSave } from '../game/saves'
 import { isOnline, leaveOnline } from '../game/online'
 import { personalityName } from './names'
+import { replayTutorial } from '../tutorial-game/firstGame'
 
 export function PauseScreen() {
   return (
@@ -56,7 +57,7 @@ export function SettingsScreen() {
       load={() => settingsSave.load()}
       save={(values) => { settingsSave.save(values) }}
       onChange={(values) => applySettings(values)}
-      onAction={(id) => { if (id === 'credits') screens.push('credits') }}
+      onAction={(id) => { if (id === 'credits') screens.push('credits'); if (id === 'replayTutorial') replayTutorial() }}
     />
   )
 }

@@ -10,6 +10,7 @@ import { TableScreen } from './ui/TableScreen'
 import { ONLINE_RESULTS, OnlineResultsScreen, OnlineScreen, type OnlineStart } from './ui/OnlineScreen'
 import { CreditsScreen, PauseScreen, ResultsScreen, SettingsScreen } from './ui/menus'
 import { TableWorld } from './world/TableWorld'
+import { LessonView } from './ui/LessonView'
 
 const SCREENS = {
   pause: PauseScreen, results: ResultsScreen, settings: SettingsScreen, credits: CreditsScreen, [ONLINE_RESULTS]: OnlineResultsScreen,
@@ -32,6 +33,7 @@ export default function App() {
     <>
       {(online || match) && <TableWorld />}
       <ScreenStack screens={SCREENS}>{base}</ScreenStack>
+      {match && !online && <LessonView />}
       <ToastStack />
       {/* a phone held against content/ui/style.json "orientation" (this game: "any", so never) */}
       <UprightCard words={text.upright} />
