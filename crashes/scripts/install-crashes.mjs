@@ -88,7 +88,7 @@ export function wiringSteps(gameDir) {
     {
       done: Boolean(viteConfig) && /\bcrashesMaps\s*\(/.test(withoutComments(text(viteConfig))),
       step: `${viteConfig ?? 'vite.config.ts'}: import { crashesMaps } from './src/crashes/vitePlugin.mjs'   and add crashesMaps() to plugins: [ … ]
-       (every build makes hidden source maps and moves them to releases/<version>/maps/ — commit that folder; players never get them)`,
+       (every build makes hidden source maps and moves them out of the build, so players never get them; only the release build (CRASHES_MAPS=release, set by release.mjs) files them under releases/<version>/maps/ — commit that folder; checks and e2e builds keep theirs in node_modules/.cache/crashes-maps/)`,
     },
     {
       done: inCode(/\bstartCrashes\s*\(/),
