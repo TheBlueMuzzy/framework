@@ -12,7 +12,10 @@ Sprint 62 · 2026-11-06 · done on a throwaway copy of Glyphtender (`~/Documents
 - 8 things needed fixing by hand. One was a real gap: the player switches off a pause *before* the next step starts, and Glyphtender's "only this move is allowed" rule broke at that moment. That cost one round of fixing.
 - **Verdict: (c) each game keeps its own for now.** The trial proves Goops' player is ready to become a framework part, so it gets pulled out the day a **new game** needs a tutorial. Rewriting Glyphtender's working tutorial today would add code and risk and give players nothing.
 
-## Verdict
+## Decision (Muzzy 2026-11-06)
+**Build it now, as building blocks:** "the tutorial module can be brought into any game, and that game can utilize any of the elements from it. Sort of how you can load a library… build it now." The copy taught the same ("yes"). So the blocks list below (Claude, 2026-11-06) becomes v0.39 — Tutorial blocks: the step player, the lesson file (+ button words), hold the game, hints and retries, one teacher at a time, words per control type, spotlight + bubble placement in the UI kit, the Dev Kit Lessons tab. They go beside the UI kit's Callout, tips memory and nudge timer, which already exist. Glyphtender keeps its tutorial until he wants it redone. Goops swaps to the module in its own session.
+
+## Verdict (the trial helper's, before the decision)
 **(c) Each game keeps its own tutorial for now. Goops' lesson player is the proven future brick, extracted when a third game, or a rework of Glyphtender's tutorial, needs one.**
 
 **Weighed:**

@@ -1,16 +1,16 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 62 (F197 — Tutorial trial): task 1 done and checked** on `dev/tutorial-trial`. Verdict page: https://claude.ai/artifact/5H3vkAU5fKjwhVSajLUZim — pick (c) each game keeps its own tutorial; Goops' lesson player becomes the shared part when a new game needs one. Waiting on 🙋 Muzzy task 2: play the copy's first 3 steps (`.scratch/glyphtender-tutorial-trial`, `npx vite --host --port 5450`), does it teach the same, agree with the pick? Then: Checked line, /code-review (only the report changed here — a plan doc), ROADMAP ✅, F197: done, retro, archive.
+2026-11-06 — **F197 — Tutorial trial ✅** (Muzzy: the copy teaches the same; "build it now" as building blocks any game picks from). New milestone **v0.39 — Tutorial blocks** in ROADMAP: F198 — Tutorial module, F199 — Spotlight + bubble placement, F200 — Dev Kit Lessons tab, F201 — Starter teaches. Next: Sprint 63 (all four), F198 ∥ F199 by helpers first. Report: research/tutorial-trial.md (Decision section).
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
+Reviewed through: framework 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.38 (released; F197 left over)   Sprint: 62
-Doing: F197 — building   Branch: dev/tutorial-trial   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 62 (done)
+Doing: planning Sprint 63 (v0.39 — Tutorial blocks)   Branch: dev/tutorial-trial   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

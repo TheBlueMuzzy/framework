@@ -568,7 +568,7 @@ Goal (Muzzy 2026-11-06: "ok"; from F189 — Games list module candidates, `resea
 - ✅ F194 🔧 Goops catch-up rehearsal — on `.scratch/goops-catchup`: Goops to v0.39 + Saves, Crashes (its crash server set up on Muzzy's Cloudflare — Muzzy 2026-11-06: yes), Lint and F191–F193; every step timed, every hand fix noted; "Send crash reports" on by default (Muzzy 2026-11-06: ok) — must · needs: F190, F191, F192, F193
 - ✅ F195 🔧 Glyphtender catch-up rehearsal — the same on `.scratch/glyphtender-catchup`, with the rooms 0.15.0 server update it waits on — must · needs: F191, F192, F193
 - 🟢 F196 🔧 Test helpers — a Dev Kit "open this tab" helper for e2e (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`) — could
-- 🔨 F197 ❓ Tutorial trial — on a copy, rewrite Glyphtender's first 3 tutorial steps as Goops-style lesson files; verdict: one tutorial module, or each game keeps its own — should · sprint 62
+- ✅ F197 ❓ Tutorial trial — on a copy, rewrite Glyphtender's first 3 tutorial steps as Goops-style lesson files; verdict: one tutorial module, or each game keeps its own — should · sprint 62 · Muzzy 2026-11-06: build it now, as building blocks (→ v0.39)
 ```mermaid
 flowchart LR
   F190[✅ F190 Save check replays the moves]
@@ -578,7 +578,7 @@ flowchart LR
   F194[✅ F194 Goops catch-up rehearsal]
   F195[✅ F195 Glyphtender catch-up rehearsal]
   F196[🟢 F196 Test helpers]
-  F197[🔨 F197 Tutorial trial]
+  F197[✅ F197 Tutorial trial]
   F190 --> F194
   F191 --> F194
   F192 --> F194
@@ -586,6 +586,23 @@ flowchart LR
   F191 --> F195
   F192 --> F195
   F193 --> F195
+```
+
+## v0.39 — Tutorial blocks  ← current · planned 2026-11-06
+Goal (Muzzy 2026-11-06: "the tutorial module can be brought into any game, and that game can utilize any of the elements from it. Sort of how you can load a library… build it now"): a tutorial toolbox any game installs and uses only the parts it wants. Goops' lesson player is its heart (proven unchanged in Glyphtender by F197 — Tutorial trial); the UI kit's Callout, tips memory and nudge timer already exist and stay where they are. Each game keeps its own steps, words, "the player did X" checks, look and when-to-teach rules. Glyphtender keeps its tutorial until Muzzy wants it redone; Goops swaps in its own session.
+- 🟢 F198 🧱 Tutorial module — a new `tutorial/` brick from Goops' lesson player: steps from lesson files (+ button words: Next / Got it / Play), wait for a tap / an event / a number / time, hold the game (pause, slow, only some controls), hints and retries, one lesson at a time (a queue), words per control type (keys / mouse / phone); installer, README, tests, conformance — must
+- 🟢 F199 🧱 Spotlight + bubble placement — the UI kit gets Goops' spotlight (dim everything but the thing being taught) and Glyphtender's placement rule (the bubble covers as little of the play area as it can) as Callout options — must
+- ⏳ F200 🔧 Dev Kit Lessons tab — edit a game's lesson files live while it runs (from Goops' own tab), for any game with the tutorial module — should · needs: F198
+- ⏳ F201 🎮 Starter teaches — the turn-based starter gets a 3-step tutorial built from the module + kit blocks, so every new game starts with one and starter-check plays it — must · needs: F198, F199
+```mermaid
+flowchart LR
+  F198[🟢 F198 Tutorial module]
+  F199[🟢 F199 Spotlight + bubble placement]
+  F200[⏳ F200 Dev Kit Lessons tab]
+  F201[⏳ F201 Starter teaches]
+  F198 --> F200
+  F198 --> F201
+  F199 --> F201
 ```
 
 ## Later
