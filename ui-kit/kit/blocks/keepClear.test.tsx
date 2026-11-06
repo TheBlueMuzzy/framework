@@ -95,3 +95,11 @@ describe('Callout keepClear', () => {
     expect(document.querySelector('.kit-callout')?.textContent).toContain('Plant here.')
   })
 })
+
+describe('a screen box from getBoundingClientRect (a DOMRect: it has x AND left)', () => {
+  it('is read as the whole box, not a point at its corner', async () => {
+    const { targetBox } = await import('./teach')
+    const rect = { x: 10, y: 20, width: 30, height: 40, left: 10, top: 20, right: 40, bottom: 60 }
+    expect(targetBox(rect)).toEqual({ left: 10, top: 20, right: 40, bottom: 60 })
+  })
+})

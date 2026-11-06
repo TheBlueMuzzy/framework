@@ -30,7 +30,6 @@ export function TeachSample() {
   const [board, setBoard] = useState({ on: true, at: 0 }) // Board view: the lesson's step, and whether it's up
   const switcher = <Selector label="View" options={views} value={view} onChange={(v) => { setView(v); setPaused(true) }} />
   return (
-    // (Board view: no corner buttons — the board needs the room on a short screen)
     // (Board view: no corner buttons, and the view switcher up in the top slot — the room round the board is the
     // bubble's, so it never has to cover the switcher to keep off the board)
     <Screen label="Callouts" {...(view === 'Board' ? { top: <Row className="gallery-teach-switch">{switcher}</Row> } : slots)} bottom={dot}>

@@ -30,8 +30,9 @@ const clamp = (value: number, low: number, high: number) => Math.max(low, Math.m
 export function targetBox(target: CalloutTarget): Box | null {
   if (!target) return null
   if (typeof target === 'object' && !(target instanceof Element)) {
-    if ('x' in target) return { left: target.x, top: target.y, right: target.x, bottom: target.y }
-    return { left: target.left, top: target.top, right: target.right, bottom: target.bottom }
+    // a box first: a DOMRect (getBoundingClientRect) has x AND left
+    if ('left' in target) return { left: target.left, top: target.top, right: target.right, bottom: target.bottom }
+    return { left: target.x, top: target.y, right: target.x, bottom: target.y }
   }
   const el = typeof target === 'string' ? document.querySelector(target) : target
   if (!el || !el.isConnected) return null
