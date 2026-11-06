@@ -351,6 +351,21 @@ try {
         for (const s of SIZES) await shoot(`screens/${id}-${preset}-${s.width}x${s.height}`, { ...s, name: `${s.width}x${s.height}` }, `?screen=${id}&preset=${preset}`)
       }
     }
+    // The teach screen's Board view (F199, 0.43.0): the Spotlight (two holes, outlined) + a Callout keeping clear of
+    // the board, at every size a game is checked at, in every style; its other two steps (tap the bubble) in Clean.
+    // Just these: SHOOT_ONLY="teach-board" npm run shoot:all
+    const nextStep = (times) => async (page) => {
+      for (let i = 0; i < times; i++) {
+        await page.locator('.kit-callout').click()
+        await page.waitForSelector('.kit-callout-layer[data-ready]')
+      }
+    }
+    for (const preset of presetNames) {
+      for (const s of SIZES) await shoot(`screens/teach-board-${preset}-${s.width}x${s.height}`, { ...s, name: `${s.width}x${s.height}` }, `?screen=teach&teach=board&preset=${preset}`)
+    }
+    for (const step of [2, 3]) {
+      for (const s of SIZES) await shoot(`screens/teach-board${step}-clean-${s.width}x${s.height}`, { ...s, name: `${s.width}x${s.height}` }, '?screen=teach&teach=board&preset=clean', nextStep(step - 1))
+    }
     // Copy the room code: the toast shows (or, where the clipboard is refused, the code is selected) — no errors
     await shoot('screens/room-copied-cartoon-desktop', sizes.desktop, '?screen=room&preset=cartoon',
       (page) => page.getByRole('button', { name: said('Copy') }).click())

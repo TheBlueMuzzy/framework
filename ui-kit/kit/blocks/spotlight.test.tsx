@@ -4,7 +4,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { Spotlight } from './spotlight'
-import { clipBox, growBox, joinBoxes, outsidePath, outsideRects } from './spotlightMath'
+import { clipBox, growBox, holePath, joinBoxes, outsidePath, outsideRects } from './spotlightMath'
 import type { CalloutBox } from './callout'
 
 afterEach(cleanup)
@@ -50,6 +50,12 @@ describe('the spotlight dim (maths)', () => {
     expect(joinBoxes([{ left: 10, top: 10, right: 20, bottom: 20 }, { left: 60, top: 30, right: 80, bottom: 40 }])).toEqual({ left: 10, top: 10, right: 80, bottom: 40 })
     expect(joinBoxes([])).toBeNull()
   })
+  it('a hole is shaped like the style\'s controls: rounded (at most a pill) or bevelled', () => {
+    const b = { left: 0, top: 0, right: 40, bottom: 20 }
+    expect(holePath(b, 4)).toBe('M4 0H36A4 4 0 0 1 40 4V16A4 4 0 0 1 36 20H4A4 4 0 0 1 0 16V4A4 4 0 0 1 4 0Z')
+    expect(holePath(b, 999)).toContain('A10 10') // Cartoon's 999px: a pill, never more than half the short side
+    expect(holePath(b, 4, true)).toBe('M4 0H36L40 4V16L36 20H4L0 16V4L4 0Z')
+  })
 })
 
 // (jsdom: no layout, so the targets here are screen boxes, and selectors of elements with a size given by a stub)
@@ -65,7 +71,10 @@ describe('Spotlight', () => {
     expect(rings[1].hasAttribute('data-gone')).toBe(false)
     expect(rings[1].style.getPropertyValue('--kit-spot-x')).toBe('100px') // (jsdom has no gap-s: 0 room)
     expect(rings[1].style.getPropertyValue('--kit-spot-w')).toBe('40px')
-    expect(layer.querySelector<HTMLElement>('.kit-spot-dim')!.style.getPropertyValue('clip-path')).toContain('path(')
+    // the dim's mask has one hole per target, at the target (jsdom: no corner radius)
+    const holes = layer.querySelectorAll('.kit-spot-hole')
+    expect(holes).toHaveLength(2)
+    expect(holes[1].getAttribute('d')).toBe('M100 200H140A0 0 0 0 1 140 200V240A0 0 0 0 1 140 240H100A0 0 0 0 1 100 240V200A0 0 0 0 1 100 200Z')
   })
 
   it('looks a selector up every frame: a target that appears later gets its hole then', async () => {
@@ -100,10 +109,10 @@ describe('Spotlight', () => {
     const block = layerOf().querySelector<HTMLElement>('.kit-spot-block')!
     fireEvent.click(block)
     expect(onOutsideTap).toHaveBeenCalledOnce()
-    // the dim you see covers the passThrough part; the tap block doesn't (taps go through to it)
-    const dim = layerOf().querySelector<HTMLElement>('.kit-spot-dim')!.style.getPropertyValue('clip-path')
+    // the dim you see still covers the passThrough part (no hole there); the tap block doesn't (taps go through to it)
+    expect(layerOf().querySelectorAll('.kit-spot-hole')).toHaveLength(1)
     const tapBlock = block.style.getPropertyValue('clip-path')
-    expect(dim).toContain('V768')
+    expect(tapBlock).toContain('V500')
     expect(tapBlock).not.toContain('V768')
   })
 

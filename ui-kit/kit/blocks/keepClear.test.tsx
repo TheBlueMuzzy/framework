@@ -63,6 +63,26 @@ describe('placeKeepingClear', () => {
     expect(shared(boxOf(spot), wideBoard)).toBe(0)
   })
 
+  it('never covers what it is told to avoid (the button a Spotlight also lights), even where that covers less board', () => {
+    const wideFrame = { left: 16, top: 16, right: 828, bottom: 374 }
+    const wideBoard = { left: 260, top: 16, right: 828, bottom: 374 }
+    const target = { left: 270, top: 170, right: 320, bottom: 220 }
+    const button = { left: 100, top: 175, right: 200, bottom: 215 } // the Plant button, left of the board
+    const spot = placeKeepingClear(target, size, wideFrame, 12, wideBoard, null, 0, [button])
+    expect(spot.side).not.toBe('left')
+    expect(overlaps(boxOf(spot), button)).toBe(false)
+  })
+
+  it('slides along its side to get off what it avoids, the pointer still aimed at the target', () => {
+    const target = cell(7, 3) // bottom half → below
+    const button = { left: 230, top: 560, right: 330, bottom: 600 } // under the right half of where it would sit
+    const spot = placeKeepingClear(target, size, frame, 12, board, null, 20, [button])
+    expect(spot.side).toBe('bottom')
+    expect(overlaps(boxOf(spot), button)).toBe(false)
+    expect(spot.x + spot.tipX).toBe((target.left + target.right) / 2)
+    expect(spot.tipX).toBeGreaterThanOrEqual(20)
+  })
+
   it('nowhere fits: it still returns a spot (the side with the most room, like placeCallout)', () => {
     const big = { width: 400, height: 900 }
     expect(placeKeepingClear(cell(4, 3), big, frame, 12, board).side).toMatch(/top|bottom|left|right/)

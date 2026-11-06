@@ -95,7 +95,9 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       const distance = reach + tipSize * 0.25
       // Keep clear (0.43.0): covering as little of the play area as it can, away from the live spot; else the asked side
       const keep = now.current.keepClear, area = keep && targetBox(keep.area)
-      let spot = area ? placeKeepingClear(hole, size, frameBox, distance, area, targetBox(keep.live), tipInset)
+      // (what it keeps off gets the same room round it as the target: a Spotlight's hole round it, and its outline)
+      const keepOff = (keep?.avoid ?? []).flatMap((t) => { const b = targetBox(t); return b ? [{ left: b.left - space, top: b.top - space, right: b.right + space, bottom: b.bottom + space }] : [] })
+      let spot = area ? placeKeepingClear(hole, size, frameBox, distance, area, targetBox(keep.live), tipInset, keepOff)
         : placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
       // Clear of the HUD: the first side (in the usual order) where it fits without covering anything to avoid
       const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target, box) : []

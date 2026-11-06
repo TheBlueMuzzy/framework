@@ -654,7 +654,9 @@
   .kit-spot-layer:popover-open { display: grid; }
   .kit-spot-layer > * { grid-area: 1 / 1; visibility: hidden; }
   .kit-spot-layer[data-ready] > :not([data-gone]) { visibility: visible; }
-  .kit-spot-dim { pointer-events: none; }
+  .kit-spot-dim { inline-size: 100%; block-size: 100%; pointer-events: none; }
+  /* Never seen: the dim's holes read the style's control corners off it */
+  .kit-spot-probe { inline-size: 0; block-size: 0; border-radius: var(--radius-control); corner-shape: var(--corner-shape); }
   /* Catches taps on the dim (clip-path shapes where), so they stop there; taps in a hole reach what's under it */
   .kit-spot-block { pointer-events: auto; background: transparent; }
   .kit-spot-ring { justify-self: start; align-self: start; translate: var(--kit-spot-x, 0) var(--kit-spot-y, 0);
@@ -662,9 +664,11 @@
 }
 @layer kit-style {
   /* The same dark see-through screen as a dimmed Callout (game-shade is dark in every style); --kit-spot-dim = dimAmount */
-  .kit-spot-dim { background: color-mix(in srgb, var(--game-shade) var(--kit-spot-dim, 65%), transparent); animation: kit-fade var(--motion-normal) var(--ease); }
+  .kit-spot-shade { fill: color-mix(in srgb, var(--game-shade) var(--kit-spot-dim, 65%), transparent); }
+  .kit-spot-dim { animation: kit-fade var(--motion-normal) var(--ease); }
   /* The outline: the Callout's glow ring, steady; pulse = it breathes */
-  .kit-spot-ring { border-radius: var(--radius-control); corner-shape: var(--corner-shape); outline: 0.1875rem solid var(--accent); filter: var(--glow); }
+  .kit-spot-ring { border-radius: var(--radius-control); corner-shape: var(--corner-shape); outline: 0.1875rem solid var(--accent);
+    outline-offset: -0.1875rem; filter: var(--glow); } /* (inside the hole's edge: no dim sliver, room for a pointer) */
   .kit-spot-layer[data-pulse] .kit-spot-ring { animation: kit-callout-pulse calc(var(--motion-normal) * 5) ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) { :is(.kit-spot-dim, .kit-spot-ring) { animation: none !important; } }
   :root[data-reduce-motion] :is(.kit-spot-dim, .kit-spot-ring) { animation: none !important; }

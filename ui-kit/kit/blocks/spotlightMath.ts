@@ -38,6 +38,15 @@ export function outsideRects(boxes: CalloutBox[], w: number, h: number): Callout
   return out
 }
 
+/** One hole's outline as an SVG path, its corners like the style's controls: rounded by `radius` (at most half its
+ *  shorter side — a pill), or cut straight across when `bevel` (corner-shape: bevel — Neon, Pixel). */
+export function holePath(b: CalloutBox, radius: number, bevel = false): string {
+  const r = half(Math.max(0, Math.min(radius, (b.right - b.left) / 2, (b.bottom - b.top) / 2)))
+  const [l, t, rt, bt] = [b.left, b.top, b.right, b.bottom].map(half)
+  const corner = (x: number, y: number) => (bevel ? `L${x} ${y}` : `A${r} ${r} 0 0 1 ${x} ${y}`)
+  return `M${l + r} ${t}H${rt - r}${corner(rt, t + r)}V${bt - r}${corner(rt - r, bt)}H${l + r}${corner(l, bt - r)}V${t + r}${corner(l + r, t)}Z`
+}
+
 /** outsideRects as a CSS clip-path (it also shapes where taps land). Everything covered → nothing left. */
 export function outsidePath(boxes: CalloutBox[], w: number, h: number): string {
   const parts = outsideRects(boxes, w, h).map((b) => `M${half(b.left)} ${half(b.top)}H${half(b.right)}V${half(b.bottom)}H${half(b.left)}Z`)

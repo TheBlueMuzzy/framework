@@ -1,11 +1,12 @@
 // TEACH SAMPLE (?screen=teach) — Callout on targets in every corner, one at a time (each asks for a side that
 // doesn't fit, so it flips; tap it for the next), a pause (dim + pulse + Got it), and callouts aimed at a screen point and at a moving piece.
 // The corner tips use the tips memory: tap one and it's seen (gone until Reset tips); Tips off hides them all.
-// &teach=spotlight or &teach=point opens straight on that view (for the screenshots).
+// Board (0.43.0): the Spotlight (two holes) + a Callout keeping clear of the board.
+// &teach=spotlight, &teach=point or &teach=board opens straight on that view (for the screenshots).
 import { useEffect, useState } from 'react'
-import { Button, Callout, Panel, Row, Screen, Selector, Stack, Text, Toggle, useTips, type CalloutPoint } from '../kit'
+import { Button, Callout, Panel, Row, Screen, Selector, Spotlight, Stack, Text, Toggle, useTips, type CalloutPoint } from '../kit'
 
-const views = ['Edges', 'Spotlight', 'Point']
+const views = ['Edges', 'Spotlight', 'Point', 'Board']
 // Read once when the gallery loads (the gallery rewrites its link as it opens a screen, dropping &teach=)
 const askedView = new URLSearchParams(location.search).get('teach') ?? ''
 const firstView = () => views.find((v) => v.toLowerCase() === askedView.toLowerCase()) ?? 'Edges'
@@ -26,10 +27,12 @@ export function TeachSample() {
   const slots = Object.fromEntries(corners.map((c) => [c.slot, <Button key={c.id} variant="secondary" data-teach={c.id}>{c.label}</Button>]))
   // Point view: a dot in the bottom slot shows where the point is (the callout is only given its x, y)
   const dot = view === 'Point' ? <span className="gallery-teach-dot" data-teach="teach-dot" /> : undefined
+  const [board, setBoard] = useState({ on: true, at: 0 }) // Board view: the lesson's step, and whether it's up
   return (
-    <Screen label="Callouts" {...slots} bottom={dot}>
+    // (Board view: no corner buttons — the board needs the room on a short screen)
+    <Screen label="Callouts" {...(view === 'Board' ? {} : slots)} bottom={dot}>
       <Panel gap="s" className="gallery-teach">
-        <Text kind="heading">Callouts</Text>
+        {view !== 'Board' && <Text kind="heading">Callouts</Text>} {/* (Board: the room goes to the board on a short screen) */}
         <Selector label="View" options={views} value={view} onChange={(v) => { setView(v); setPaused(true) }} />
         {view === 'Edges' && <Row gap="s" justify="between">
           <Row gap="s"><Text kind="label">Tips</Text><Toggle label="Tips" on={tips.tipsOn} onChange={tips.setTipsOn} /></Row>
@@ -40,6 +43,12 @@ export function TeachSample() {
           <Button data-teach="teach-plant" onClick={() => setPaused(true)}>Plant · +5</Button>
         </Row>}
         {view === 'Point' && <Stack gap="s" className="gallery-teach-track"><span className="gallery-teach-mover" data-teach="teach-mover" /></Stack>}
+        {view === 'Board' && <Row gap="s" justify="center" className="gallery-teach-play">
+          <BoardGrid />
+          {/* Plant is in a hole: a tap reaches it (the next step). A tap on the dim ends the lesson; this brings it back */}
+          {board.on ? <Button data-teach="teach-plant" onClick={() => setBoard({ on: true, at: board.at + 1 })}>Plant</Button>
+            : <Button variant="secondary" onClick={() => setBoard({ on: true, at: 0 })}>Teach again</Button>}
+        </Row>}
       </Panel>
       {view === 'Edges' && nextTip && (
         <Callout key={nextTip.id} target={`[data-teach="${nextTip.id}"]`} placement={nextTip.placement} text={nextTip.text} onDismiss={() => tips.markSeen(nextTip.id)} />
@@ -49,8 +58,47 @@ export function TeachSample() {
           text="You can swap seeds you don’t want." action="Got it" onDismiss={() => setPaused(false)} />
       )}
       {view === 'Point' && <PointCallouts />}
+      {view === 'Board' && board.on && <BoardTeach at={board.at} next={() => setBoard({ on: true, at: board.at + 1 })} end={() => setBoard({ on: false, at: 0 })} />}
     </Screen>
   )
+}
+
+// BOARD (0.43.0, F199): a Spotlight lights two things at once — the cell being taught and the Plant button — and a
+// Callout keeps clear of the board (keepClear: as little of it covered as it can, away from the live cell, toward the
+// board's nearer edge). Tap the bubble or Plant (it's in a hole, so the tap reaches it) for the next step — each step
+// puts the cell and the live cell somewhere else; a tap on the dim ends the lesson (onOutsideTap).
+const boardSize = 6
+const boardSteps = [
+  { cell: [1, 2], live: [4, 2], text: 'I keep off the board.' },
+  { cell: [4, 4], live: null, text: 'Nearer edge: this way.' },
+  { cell: [2, 1], live: [0, 1], text: 'Glow above? Not up there.' },
+] as const
+const cellSel = ([r, c]: readonly [number, number]) => `[data-teach="cell-${r}-${c}"]`
+
+function BoardGrid() {
+  return (
+    <div className="gallery-teach-board" data-teach="teach-board">
+      {Array.from({ length: boardSize * boardSize }, (_, i) => {
+        const r = Math.floor(i / boardSize), c = i % boardSize
+        return <span key={i} className="gallery-teach-cell" data-teach={`cell-${r}-${c}`} />
+      })}
+    </div>
+  )
+}
+
+function BoardTeach({ at, next, end }: { at: number; next: () => void; end: () => void }) {
+  const step = boardSteps[at % boardSteps.length]
+  // The live cell glows (what the player is working on): a game draws its own; here a data attribute
+  useEffect(() => {
+    const el = step.live && document.querySelector(cellSel(step.live))
+    el?.setAttribute('data-live', '')
+    return () => el?.removeAttribute('data-live')
+  }, [step])
+  return <>
+    <Spotlight targets={[cellSel(step.cell), '[data-teach="teach-plant"]']} pulse onOutsideTap={end} />
+    <Callout key={at} target={cellSel(step.cell)} text={step.text} onDismiss={next}
+      keepClear={{ area: '[data-teach="teach-board"]', live: step.live ? cellSel(step.live) : null, avoid: ['[data-teach="teach-plant"]'] }} />
+  </>
 }
 
 // One callout aimed at a screen point (a point has no size: the dot's centre, measured once and on resize — the
