@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 61: both games' updates rehearsed on throwaway copies** (F194 — Goops catch-up rehearsal, F195 — Glyphtender catch-up rehearsal), on dev/v0-38-shared. Sprint 60 archived. Next: /develop.
+2026-11-06 11:18 — **Sprint 61 in flight** (F194 — Goops catch-up rehearsal, F195 — Glyphtender catch-up rehearsal) on dev/v0-38-shared. Two helpers work on throwaway clones: ~/Documents/dev/.scratch/goops-catchup (tasks 1–5 done; final check:full running, ~36 min) and ~/Documents/dev/.scratch/glyphtender-catchup (7–10 done; final check:full running). Each writes its report to .planning/research/2026-11-06-<game>-catchup.md (not yet committed). 9 framework finds already fixed + logged in SPRINT (tasks 13, 14). Left: task 12 — the saves installer warning for old bare-format golden files (F194 find), the reports reviewed + committed, framework check:fast, both games' real update sprints outlined from the reports. Real games untouched. Goops' crash server: Muzzy said yes (2026-11-06) — deploy in Goops' own sprint; measured ~0.15 ms CPU, 2–4 rows per report (free plan: 10 ms, 100k rows/day).
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
