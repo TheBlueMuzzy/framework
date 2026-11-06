@@ -159,6 +159,12 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
     ])
     expect(r).toEqual({ name: SETTINGS_CHECK, ok: true, detail: '2 rows on: 2 read by the game, 0 handled by the kit / audio module' })
   })
+  it("a liveSetting's mapper reads the row, whatever its parameter is called (F194 rehearsal: Goops' gooStyle)", () => {
+    expect(fileReadsRow("export const gooStyle = liveSetting(settings, (v) => (v.gooStyle === 'Particle' ? 'particle' : 'jelly'))", 'gooStyle')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting(settings, (s: SettingsValues) => s?.wallKick === true)', 'wallKick')).toBe(true)
+    expect(fileReadsRow('export const kick = liveSetting(settings, ({ wallKick }) => wallKick === true)', 'wallKick')).toBe(true)
+    expect(fileReadsRow("export const g = liveSetting(settings, (v) => v.gooStyleX)", 'gooStyle')).toBe(false)
+  })
   it('counts real reads only — not comments, words from a .json file, or a longer name that starts the same', () => {
     expect(fileReadsRow('// values.tips is read in tips.ts', 'tips')).toBe(false)
     expect(fileReadsRow("import text from '../../content/text/en.json'\nconst w = text.tutorial.tips", 'tips')).toBe(false)
