@@ -25,6 +25,8 @@ export const menu: MenuGroup[] = [
   ] },
   { title: 'Settings', entries: [
     { id: 'settings', name: 'Settings', about: 'Tabs from a list; remembers what you set' },
+    { id: 'upright', name: 'Turn your phone upright', about: 'A portrait game on a phone on its side: one card over everything (style.json "orientation")' },
+    { id: 'sideways', name: 'Turn your phone on its side', about: 'A landscape game on a phone held upright: the same card, the other way' },
   ] },
   { title: 'In game / HUD', entries: [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },

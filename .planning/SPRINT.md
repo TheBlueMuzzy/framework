@@ -20,7 +20,7 @@ Check: the new tests red before the helper, green after; ui-kit tests + starter-
 ## F192 🧱 Phone screen handling
 Done when: the UI kit has full screen on phones (a Settings → Display row, on for phones, off for computers — from Glyphtender src/ui/fullscreen.ts) and the "turn your phone upright" card (from Goops src/ui/App.tsx), shown when the screen is turned against content/ui/style.json "orientation"; a game with no orientation set never shows it.
 - [x] 🤖 9. Full screen on phones + its Settings row — ui-kit/kit/layout.tsx
-- [ ] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
+- [x] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
 - [ ] 🤖 11. Screenshots of the card at every size; the starter proves both — ui-kit/scripts/shoot.mjs
 - [ ] 🙋 12. Look at the card in the screenshots: does it read well? — ui-kit/scripts/shoot.mjs
 - [ ] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
