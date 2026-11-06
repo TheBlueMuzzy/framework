@@ -3,7 +3,7 @@ Started 2026-11-06 · Milestone v0.39 · Features: F198, F199, F201, F200 (in th
 
 ## F198 🧱 Tutorial module
 Done when: a new `tutorial/` brick installs into a game with `install-module.mjs tutorial <game>` and gives it Goops' lesson player as blocks it can pick from — steps from lesson files with button words (Next / Got it / Play), waiting for a tap / an event / a number / time, holding the game (pause, slow, only some controls), hints and retries, one lesson at a time, words per control type — with its README saying which block does what in plain words, and a rehearsal on a throwaway Goops copy swaps Goops' own player for it with Goops' checks green and unchanged.
-- [ ] 🤖 1. Queue Goops' lesson player for extraction (runner, lesson types, patterns + its tests), checks test + e2e:day — ~/.claude/config/bmuz/scripts/extract.mjs
+- [x] 🤖 1. Queue Goops' lesson player for extraction (runner, lesson types, patterns + its tests), checks test + e2e:day (X01, at Goops a334977; Goops untouched) — ~/.claude/config/bmuz/scripts/extract.mjs
 - [ ] 🤖 2. The brick: kit/ from Goops' runner, lessonTypes and patterns (the 2 tank patterns stay Goops'), VERSION 0.1.0, package.json `bmuz` folders + entry, its 23 runner tests green — ~/Documents/dev/games/goops/src/game/lessons/runner.ts
 - [ ] 🤖 3. Button words in the lesson format (Next / Got it / Play, and whether it dims) + the trial's order gap written into the contract ("setup decides a step's state; setSpeed may run between steps") — tests red first — ~/Documents/dev/games/goops/src/game/lessons/lessonTypes.ts
 - [ ] 🤖 4. Words per control type (`{ keys, mouse, phone }` → the right line for how the player plays) as its own block — tests — ~/Documents/dev/games/goops/src/game/lessons/lessonLine.ts
