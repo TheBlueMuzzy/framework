@@ -624,6 +624,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-11-06 — `extract.mjs swap --rehearse`: run a swap on a throwaway copy of a game (any folder name) without touching the real queue — F198's rehearsal had to swap by hand (Sprint 63 Notes).
 - 2026-11-06 — **A game's copied templates (scripts/ports.mjs, check-all.mjs) go stale silently** (F195 — Glyphtender catch-up rehearsal: its ports.mjs was behind; nothing said so): stamp templates with a version and let session start name a stale copy, like it does for modules.
 - 2026-11-06 — **A second release build of the same version overwrites its committed crash maps silently** (F195 — Glyphtender catch-up rehearsal): crashes' moveMaps could refuse to replace a map already under releases/ (or one git tracks), with a test. Rare — release.mjs bumps the version every time.
 - 2026-11-05 — **Report-only mode doesn't cover publishing a page** (F185 — Slimmed rule set): GE10 holds edits, commits, pushes and deploys after "assess / analyze…", but the claude-artifacts publish tools aren't wired to any hook — wiring them needs a new matcher in ~/.claude/settings.json (Muzzy's file).
