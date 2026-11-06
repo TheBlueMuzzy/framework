@@ -14,4 +14,5 @@ Notes:
 - Open bugs: no BUGS.md open P0/P1.
 - Task 1 (helper, checked by Claude 2026-11-06): Goops' runner went into the copy byte-identical (diff checked); e2e/ untouched (git diff empty); tutorial-rails 470 ok before and after; runner/railsLesson/lesson file line counts re-counted; real Glyphtender 5659b8c + its 9 known .map lines, Goops a334977 clean, at start and end (re-checked); phone 'lines' before/after and desktop draft1 shots looked at by Claude — same. Verdict proposed: (c) each game keeps its own; Goops' runner is the proven brick for the next game.
 - For Glyphtender's own update session: its check:devkit (the build it runs) writes .map files into releases/ — a check changing tracked files; same cause as the sprint 61 leftover.
+- Muzzy 2026-11-06, task 2: Q1 "yes" (the copy teaches the same). Q2 "i'm not sure. I think the idea I had for a tutorial module was that it has the building blocks, and each game uses it differently." — Claude laid out what that means in practice; waiting on his pick.
 - Format gap for a future brick: no field for button words (Next / Got it / Play); runner contract should say setup is where a step's state is decided.
