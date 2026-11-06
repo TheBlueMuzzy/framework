@@ -89,12 +89,14 @@ export function hiddenFullscreenRows(): string[] {
 
 let wanted = false // Settings → Full screen
 // The saved settings, as they are now, and how to save them (startFullscreen) — the kit's own browser slot by default
-let load: () => SettingsValues = () => {
+const kitLoad = (): SettingsValues => {
   try { return JSON.parse(localStorage.getItem(settingsStorageKey()) ?? '{}') ?? {} } catch { return {} }
 }
-let save: (values: SettingsValues) => void = (values) => {
+const kitSave = (values: SettingsValues) => {
   try { localStorage.setItem(settingsStorageKey(), JSON.stringify(values)) } catch { /* not remembered, still works */ }
 }
+let load = kitLoad
+let save = kitSave
 
 /** Settings changed (or loaded): Full screen on → go now (this is a tap), off → leave. Another row's change never
  *  goes full screen, but a change that turned it off (Reset) still leaves it, so Settings never says "off" while the
@@ -123,9 +125,12 @@ let stop = () => {}
  *  slot when left out — pass the same ones as <Settings load save>). */
 export function startFullscreen(options: { load?: () => SettingsValues; save?: (values: SettingsValues) => void } = {}) {
   stop()
-  if (options.load) load = options.load
-  if (options.save) save = options.save
-  wanted = load().fullscreen === true
+  load = options.load ?? kitLoad // (left out → the kit's own slot, never an earlier call's)
+  save = options.save ?? kitSave
+  // Never saved (a phone that hasn't opened Settings, with the kit's own slot): the row's default — on for phones,
+  // off for computers (withFullscreenDefault). F195 rehearsal: undefined read as "off", so a phone never went full screen.
+  const saved = load().fullscreen
+  wanted = saved === undefined ? isTouchDevice() : saved === true
   const changed = () => {
     setState({ on: fullscreenNow() })
     // A computer's Esc leaves full screen: the setting follows, so Settings never says "on" in a window

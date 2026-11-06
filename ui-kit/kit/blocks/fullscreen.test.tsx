@@ -51,6 +51,20 @@ describe('full screen on phones', () => {
     expect(off.requestFullscreen).not.toHaveBeenCalled()
   })
 
+  it('a phone that never opened Settings (nothing saved) still goes full screen on the first tap — startFullscreen() with no load (F195 rehearsal)', () => {
+    localStorage.clear()
+    const phone = pretendDevice({ touch: true })
+    startFullscreen()
+    tap()
+    expect(phone.requestFullscreen).toHaveBeenCalledTimes(1)
+    stopFullscreen()
+    localStorage.clear()
+    const computer = pretendDevice({ touch: false })
+    startFullscreen()
+    tap()
+    expect(computer.requestFullscreen).not.toHaveBeenCalled()
+  })
+
   it('a computer never goes full screen by itself, even with the setting saved on', () => {
     const pc = pretendDevice({ touch: false })
     startFullscreen({ load: () => ({ fullscreen: true }) })
