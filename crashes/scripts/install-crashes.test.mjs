@@ -94,6 +94,14 @@ describe('install-crashes', () => {
     expect(left[0]).toMatch(/^Try it/)
     expect(left[1]).toMatch(/Going live \(Muzzy's call/)
     expect(left[1]).toContain('goops-crashes.joebrogno.workers.dev')
+    // already live (client.url is its https server) → the live steps are done; "Try it" uses the game's own port
+    // (F195 rehearsal: Glyphtender is live on https and its crashes/wrangler.json says 1996, yet it was told 1995 + go live)
+    mkdirSync(join(root, 'content'), { recursive: true }); mkdirSync(join(root, 'crashes'), { recursive: true })
+    writeFileSync(join(root, 'content/crashes.json'), JSON.stringify({ client: { url: 'https://goops-crashes.joebrogno.workers.dev' } }))
+    writeFileSync(join(root, 'crashes/wrangler.json'), JSON.stringify({ name: 'goops-crashes', dev: { port: 1996 } }))
+    const live = wiringSteps(root).filter((w) => !w.done).map((w) => w.step)
+    expect(live).toHaveLength(1)
+    expect(live[0]).toMatch(/^Try it: npm run crashes:dev \(port 1996\)/)
   })
 
   it('.gitignore needs .dev.vars too (the test token), not only .wrangler/', () => {
