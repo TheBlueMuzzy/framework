@@ -565,8 +565,8 @@ Goal (Muzzy 2026-11-06: "ok"; from F189 — Games list module candidates, `resea
 - ✅ F191 🧱 Settings the game follows live — one small UI kit helper from Glyphtender's `src/ui/gameSettings.ts`; replaces Goops' three hand-written copies (gooStyle, wallKick, readoutSetting) — must
 - ✅ F192 🧱 Phone screen handling — full screen on phones (Glyphtender `src/ui/fullscreen.ts`) + the "turn your phone upright" card (Goops `src/ui/App.tsx`) in the UI kit, each switched per game — must
 - ✅ F193 🧱 New version on first visit, fixed — Goops' fix (`src/main.tsx` 16–28: the page could stay on the old version) goes into the Version module — must
-- 🔨 F194 🔧 Goops catch-up rehearsal — on `.scratch/goops-catchup`: Goops to v0.39 + Saves, Crashes (its crash server set up on Muzzy's Cloudflare — Muzzy 2026-11-06: yes), Lint and F191–F193; every step timed, every hand fix noted; "Send crash reports" on by default (Muzzy 2026-11-06: ok) — must · needs: F190, F191, F192, F193
-- 🔨 F195 🔧 Glyphtender catch-up rehearsal — the same on `.scratch/glyphtender-catchup`, with the rooms 0.15.0 server update it waits on — must · needs: F191, F192, F193
+- ✅ F194 🔧 Goops catch-up rehearsal — on `.scratch/goops-catchup`: Goops to v0.39 + Saves, Crashes (its crash server set up on Muzzy's Cloudflare — Muzzy 2026-11-06: yes), Lint and F191–F193; every step timed, every hand fix noted; "Send crash reports" on by default (Muzzy 2026-11-06: ok) — must · needs: F190, F191, F192, F193
+- ✅ F195 🔧 Glyphtender catch-up rehearsal — the same on `.scratch/glyphtender-catchup`, with the rooms 0.15.0 server update it waits on — must · needs: F191, F192, F193
 - 🟢 F196 🔧 Test helpers — a Dev Kit "open this tab" helper for e2e (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`) — could
 - 🟢 F197 ❓ Tutorial trial — on a copy, rewrite Glyphtender's first 3 tutorial steps as Goops-style lesson files; verdict: one tutorial module, or each game keeps its own — should
 ```mermaid
@@ -575,8 +575,8 @@ flowchart LR
   F191[✅ F191 Settings the game follows live]
   F192[✅ F192 Phone screen handling]
   F193[✅ F193 New version on first visit, fixed]
-  F194[🔨 F194 Goops catch-up rehearsal]
-  F195[🔨 F195 Glyphtender catch-up rehearsal]
+  F194[✅ F194 Goops catch-up rehearsal]
+  F195[✅ F195 Glyphtender catch-up rehearsal]
   F196[🟢 F196 Test helpers]
   F197[🟢 F197 Tutorial trial]
   F190 --> F194

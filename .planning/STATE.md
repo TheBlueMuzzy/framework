@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Sprint 61 built: both rehearsals green** — F194 — Goops catch-up rehearsal (report research/2026-11-06-goops-catchup.md) and F195 — Glyphtender catch-up rehearsal (research/2026-11-06-glyphtender-catchup.md); 14 framework finds, all fixed on dev/v0-38-shared. Waiting on Muzzy's OK. Then: retro → archive → /deliver v0.38 (Games take what both use; F196 — Test helpers and F197 — Tutorial trial are could/should, not musts) → each game's real update sprint, in its own session, from its report.
+2026-11-06 — **Sprint 61 ✅ approved by Muzzy** (F194 — Goops catch-up rehearsal, F195 — Glyphtender catch-up rehearsal; reports in research/2026-11-06-*-catchup.md). v0.38's musts are all done (F190–F195); F196 — Test helpers (could) and F197 — Tutorial trial (should) stay open. Next: /deliver v0.38 (Muzzy's go), then each game's real update in its own session from its report.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
@@ -9,7 +9,7 @@ Reviewed through: framework 0284f5a (sprint 61: /code-review low came back empty
 
 ## Where we are
 Stage: develop   Milestone: v0.38 Games take what both use   Sprint: 61
-Doing: sprint 61 (F194, F195)   Branch: dev/v0-38-shared   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
+Doing: F194, F195 — done; next /deliver v0.38   Branch: dev/v0-38-shared   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts

@@ -31,3 +31,8 @@ Checked: 2026-11-06 — by the helper, checked by Claude: copy's check:full 40/4
 - Claude's call: two helpers side by side, one per game; a framework fix either one needs goes on dev/v0-38-shared one at a time (the helper says so to main first).
 - Claude's call: the crash server only runs locally here; Goops' real deploy (Muzzy's yes, 2026-11-06) is Goops' own sprint.
 - Real games: both read-only. Glyphtender has uncommitted release .map files — never touched.
+
+Retro (Muzzy 2026-11-06: "approved" — Claude's draft, not changed by him):
+- Went well: both rehearsals green; Glyphtender took 2 hand fixes (none in code) against 9 last time.
+- Went wrong: the Credits bug got past every framework check — only Goops' own Credits test caught it.
+- Change: done — a kit screen with groups has a real-browser test (scrollFloor.test.tsx); next, the framework's screenshot run covers Credits with a long list.
