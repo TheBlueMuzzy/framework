@@ -13,10 +13,10 @@ Check: tutorial/ tests + type check + lint in framework check:fast; the copy's c
 
 ## F199 🧱 Spotlight + bubble placement
 Done when: the UI kit has a Spotlight (dims everything except one or more things being taught, with an outline) in every style, and the Callout can keep clear of a named play area (the bubble covers as little of it as it can, Glyphtender's rule) — both in the gallery's teach screen at every size, check:framework green; no game changes.
-- [ ] 🤖 7. Spotlight block from Goops' (several holes, outline, style names only — no colours or px) — tests — ~/Documents/dev/games/goops/src/game/lessons/Spotlight.tsx
-- [ ] 🤖 8. Callout "keep clear" placement option from Glyphtender's rule (away from the live spot; toward the nearer edge; flips to fit) — tests — ~/Documents/dev/games/glyphtender/src/tutorial/tipsPlace.ts
-- [ ] 🤖 9. Gallery teach screen shows both; screenshots 390x844, 360x780, 844x390, 768x343, ~1100 wide, 1440x900, 1920x1080, every style; Claude looks — ui-kit/kit/blocks/teach.tsx
-- [ ] 🤖 10. UI kit version + UPGRADES + CATALOG lines — ui-kit/UPGRADES.md
+- [x] 🤖 7. Spotlight block from Goops' (several holes, outline, style names only — no colours or px) — tests — ~/Documents/dev/games/goops/src/game/lessons/Spotlight.tsx
+- [x] 🤖 8. Callout "keep clear" placement option from Glyphtender's rule (away from the live spot; toward the nearer edge; flips to fit) — tests — ~/Documents/dev/games/glyphtender/src/tutorial/tipsPlace.ts
+- [x] 🤖 9. Gallery teach screen shows both; screenshots 390x844, 360x780, 844x390, 768x343, ~1100 wide, 1440x900, 1920x1080, every style; Claude looks — ui-kit/kit/blocks/teach.tsx
+- [x] 🤖 10. UI kit version + UPGRADES + CATALOG lines — ui-kit/UPGRADES.md
 Check: ui-kit tests + check:framework's UI checks green; Claude looks at the teach screen on phone + desktop in two styles (breathing room measured to the dim's edge).
 
 ## F201 🎮 Starter teaches
@@ -41,3 +41,6 @@ Check: devkit tests green; the starter e2e sees a live edit land; Save leaves th
 - Claude's call: Goops' real swap waits for Goops' own session (with its catch-up); this sprint only rehearses it on a copy. Glyphtender keeps its tutorial.
 - Claude's call: work branch `dev/v0-39-tutorial-blocks`; F198 and F199 by two helpers side by side (tutorial/ vs ui-kit/ — no shared files); the UI kit version is bumped only by the F199 helper.
 - Open bugs: no BUGS.md open P0/P1.
+- F199 helper (merged 353a987; GitHub Checks run 42295901379 green): kit Spotlight (SVG-mask dim, holes take the style's corners, outline drawn inside the hole, taps pass through holes, onOutsideTap) + Callout keepClear {area, live, avoid}; ui-kit 937 tests, check:fast 22/22; 67 teach shots 0 problems; a 147-combination sweep (7 sizes × 7 styles × 3 steps) finds the bubble never on a lit hole, the live cell or the switcher. Claude's review of the first shots sent back 2 problems (phone bubble over the board + switcher; Plant outline touching the grid) — fixed in 12bf854, Claude re-looked: both clear (Plant ≥ 15.3 px from the grid).
+- keepClear limit (helper): the bubble always sits right next to its target (fixed pointer length), so it can't use empty room far away — a game lays out so a side is free, or lists controls in `avoid`.
+- Possible small gap (helper, not fixed): the kit Callout's existing pulse ring may sit ~1.5 px from its pointer (same outside geometry the Spotlight had before its fix) — check when F201 — Starter teaches uses it.
