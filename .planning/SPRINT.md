@@ -18,6 +18,8 @@ Done when: a throwaway copy of Glyphtender (`~/Documents/dev/.scratch/glyphtende
 - [ ] 🤖 9. The Saves 0.9.0 hand step: its run save's replay wired; its real golden saves still pass — .planning/research/2026-11-06-glyphtender-catchup.md
 - [ ] 🤖 10. Swap in the shared parts: liveSetting for gameSettings.ts, the kit's full screen for src/ui/fullscreen.ts, startUpdates — .planning/research/2026-11-06-glyphtender-catchup.md
 - [ ] 🤖 11. check:full green on the copy; the report — .planning/research/2026-11-06-glyphtender-catchup.md
+- [x] 🤖 13. Rehearsal find: saves UPGRADES 0.9.0 named Glyphtender as holding moves — it holds none (5b01a82) — saves/UPGRADES.md
+- [x] 🤖 14. Rehearsal find: version's installer read crashes/lint copies as game code → a false "Still to wire" step; copies now found by their VERSION file, test red first (91b8f1b) — version/scripts/install-version.mjs
 Check: the copy's check:full green; its golden saves replay; the real Glyphtender's git status unchanged.
 
 ## Wrap-up
