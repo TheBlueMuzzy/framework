@@ -86,6 +86,18 @@ Then list it in `tests/saves/saves.test.ts` → `RUNS: [{ run: matchRun, sample 
 - **A newer build's run or a damaged one** shows Continue with just its time; pressing it says "This game can't be continued…" (`RUN_WORDS.cantContinue`) and wipes it. Unlike progress, a newer build's run is not kept: while it sits there this build can't write the key at all, so no new run could ever be saved.
 - Online games aren't runs: the server holds the match (rejoin is F95).
 
+## Moving a game's own save onto this module (F194 rehearsal — Goops' progress, 2026-11-06)
+- **The stored shape changes.** Under a key the module writes a record — `{ save, version, savedAt, data }` — not the bare
+  object the game wrote before. Your old value is still read once (`oldSave` / an upgrade step turns it into `data`), but
+  any **test that reads or plants the key in browser storage directly** must now read `.data` / write the record (Goops:
+  14 reads in 10 e2e scripts). Grep the e2e folder for the key before switching.
+- **Old golden files can be misread.** The save test picks up every `<key>-vN.json` in `tests/saves/`; a file the game kept
+  there in its old bare format is read as a module golden save and fails. Rename or convert those first (one golden save
+  per version, in the module's record shape).
+- **"Nonsense value → a broken save" belongs in `oldSave`, not `clean`.** By the time `clean` runs, `fillMissing` has
+  already turned a wrong-type field into its default (so `clean` never sees it). To call a save with, say, text where XP
+  should be a number broken, check it in `oldSave` (return null) or in the upgrade step.
+
 ## Golden saves
 A real save from each version, committed as `tests/saves/<key>-v<N>.json` — several per version are fine (`goops-progress-v1-before-the-module.json`):
 ```json
