@@ -109,8 +109,20 @@ Compared pixel by pixel, then looked at by eye (zoomed crops):
 ## Real games: untouched
 | | HEAD at start | HEAD at end | `git status --short` start → end |
 |---|---|---|---|
-| games/glyphtender | 5659b8c | (end) | 1 modified + 8 untracked `releases/0.14.1.0/maps/*.map` (known, sprint 61) → (end) |
-| games/goops | a334977 | (end) | clean → (end) |
+| games/glyphtender | 5659b8c | 5659b8c | 1 modified + 8 untracked `releases/0.14.1.0/maps/*.map` (known, sprint 61) → the same 9 lines, unchanged |
+| games/goops | a334977 | a334977 | clean → clean |
+
+Servers: the three e2e scripts start and close their own Vite servers (ports 5445, 5440, 5446). None was left listening at the end (`netstat -ano` showed none), so nothing needed `stop-servers.mjs`.
 
 ## Research: how tutorials are built
-(being filled in)
+Short web pass (~15 min). Done first-hand by me after the research helper didn't report back. Reference-level sources only: API pages, changelogs, library docs and one studio post. No talk transcripts.
+- **Unity Tutorial Framework** (Unity's own in-editor tutorials): a tutorial is a list of **pages**. A page moves on when its **criteria** are met, for example "a scene was added to the build" or "a tool was selected". Authors write a custom criterion as a small object with a yes/no check, so the player is generic and each project brings its own checks. Masking and highlighting are optional per page, and a page can point straight at the UI element to highlight. A tutorial only counts as finished when the last page's criteria are met. — [package manual](https://docs.unity3d.com/Packages/com.unity.learn.iet-framework@3.1/manual/index.html) · [API 5.0](https://docs.unity3d.com/Packages/com.unity.learn.iet-framework@5.0/api/Unity.Tutorials.Core.Editor.html) · [changelog 2.1](https://docs.unity3d.com/Packages/com.unity.learn.iet-framework@2.1/changelog/CHANGELOG.html)
+- **Shepherd.js** (web tours): each step has `attachTo` (an element + which side) and `advanceOn` (`{ selector, event }`: "move on when this element sends this event"). Same split as Goops' `pointer` + `advance: { on: "event" }`. — [Shepherd source / PR](https://github.com/shipshapecode/shepherd/pull/418/files) · [OHIF's tours built on it](https://docs.ohif.org/configuration/tours)
+- **driver.js** (web tours): steps with an element + a popover. It moves on by its own buttons, by `advanceOnClick` (click the highlighted thing), or by the app calling `moveNext()` from a hook, for example after loading data. Button words are settings (`nextBtnText`, `doneBtnText`), which is the field Goops' format lacks (hand fix 4). — [interactive tours](https://driverjs.com/docs/interactive-tours) · [configuration](https://driverjs.com/docs/configuration) · [async tour](https://driverjs.com/docs/async-tour)
+- **A mobile studio (Mighty Bear Games)** built its tutorial from a list of **triggers**: game values and state checks that start each part, set up and maintained by the designers (data, not code). — [Learning to Teach](https://medium.com/mighty-bear-games/learning-to-teach-a-step-by-step-guide-to-making-an-in-game-tutorial-d58b0c98288a)
+- **Indie design practice** puts teaching in context over a generic tool. Asher Vollmer's GDC 2014 talk (Threes) is "prime, teach, observe" for new mechanics, and each game's tutorial is shaped by its own mechanic. — [GDC Vault: Prime, Teach, Observe](https://gdcvault.com/play/1020512/Prime-Teach-Observe-Tutorializing-Innovative)
+
+**What this means for us:**
+- Every shared system I found is a **generic step player with game-supplied checks** (Unity criteria, Shepherd/driver.js events and hooks). That's exactly the split Goops' runner already has (`LessonGame`: setup / gate / setSpeed), and this trial proved it holds in a second game.
+- The **look and the checks stay per game** everywhere: Unity's masking styles and custom criteria, the web libraries' popovers on the app's own elements. So a brick would be the runner + format, and the bubble would come from the kit's `Callout`.
+- A shared player pays off for whoever makes **many** tutorials (Unity: dozens of templates; tour libraries: thousands of apps). With two games that already have tutorials, the payoff only comes with the next one.
