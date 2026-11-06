@@ -176,7 +176,8 @@ async function checkCredits(t) {
 // Hide emotes, Bot chatter…) once the game passes it on — what counts comes from the module's settings-rows.json (0.30.0).
 export const SETTINGS_FILE = 'content/ui/settings.json'
 export const SETTINGS_CHECK = 'every Settings row that\'s switched on is read by the game'
-export const KIT_ROWS = ['textSize', 'reduceMotion']
+// (fullscreen, F192: the Settings screen goes in and out itself — fullscreen.ts)
+export const KIT_ROWS = ['textSize', 'reduceMotion', 'fullscreen']
 export const AUDIO_ROWS = ['masterVolume', 'musicVolume', 'ambienceVolume', 'sfxVolume', 'uiVolume', 'sound', 'muteInBackground', 'mono']
 const AUDIO_WIRING = /\b(applyAudioSettings|useAudioSettings|readAudioSettings)\s*\(/
 // The modules' own rows (crashes, emotes, ai…) come from their settings-rows.json (0.30.0, F110) — see ROW_MANIFEST.

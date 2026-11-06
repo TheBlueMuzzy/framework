@@ -229,11 +229,12 @@ describe('Settings rows: every row that\'s switched on is read by the game', () 
         { id: 'reduceMotion', type: 'toggle', label: 'Reduce motion' },
         { id: 'help', type: 'link', label: 'Help', url: 'https://muzzy.games/help' },
         { id: 'fullscreenTip', type: 'info', label: 'Full screen', default: 'Share → Add to Home Screen' },
+        { id: 'fullscreen', type: 'toggle', label: 'Full screen' }, // (F192: the kit's Settings goes in and out itself)
       ] },
       { id: 'audio', label: 'Audio', rows: [{ id: 'masterVolume', type: 'slider', label: 'Master volume' }, { id: 'mono', type: 'toggle', label: 'Mono' }] },
     ] }
     const wired = [{ path: 'src/game/sound.ts', text: 'applyAudioSettings(audio, values)' }]
-    expect(run(schema, wired)[0]).toMatchObject({ ok: true, detail: '6 rows on: 0 read by the game, 6 handled by the kit / audio module' })
+    expect(run(schema, wired)[0]).toMatchObject({ ok: true, detail: '7 rows on: 0 read by the game, 7 handled by the kit / audio module' })
     // the Audio rows count as handled only once the game hands the values to the audio module
     expect(settingsProblems(schema, []).dead.map((r) => r.id)).toEqual(['masterVolume', 'mono'])
   })
