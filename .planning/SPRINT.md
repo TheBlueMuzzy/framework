@@ -28,7 +28,7 @@ Check: shots of the card at every size, looked at by Claude; full screen asked o
 
 ## F193 🧱 New version on first visit, fixed
 Done when: the Version module has one update starter with Goops' fix (a page that already ran under the game's worker swaps to the new version; a first visit never reloads), handed the game's own update hookup so a game without offline mode can still import the module; plus a test helper for each game's "new version arrives" check.
-- [ ] 🤖 14. Every case written down (first visit, returning player, a player from an older version's worker) and what Glyphtender, Goops and Roll Better each do today — version/kit/index.ts
+- [x] 🤖 14. Every case written down (first visit, returning player, a player from an older version's worker) and what Glyphtender, Goops and Roll Better each do today — version/kit/index.ts
 - [ ] 🤖 15. The update starter with Goops' fix — test red first — version/kit/index.ts
 - [ ] 🤖 16. The e2e helper for a game's sw-update check — version/kit/e2e.mjs
 - [ ] 🤖 17. UPGRADES note + VERSION + README — version/README.md
@@ -42,3 +42,12 @@ Check: each case has a test; version tests green.
 - Claude's call: the update starter is handed the game's own registerSW, so a game without offline mode can still import the Version module.
 - Claude's call: the replay check only runs on saves that hold moves (Goops' progress save has none).
 - Claude's call: one helper per feature in its own worktree, side by side (different modules). Each bumps only its own module's VERSION; F191 and F192 both touch the UI kit, so F191 bumps it and F192 adds its line under the same version at merge (main bumps once).
+- F193 cases (task 14, read 2026-11-06 from each game's main.tsx + vite.config.ts + node_modules/vite-plugin-pwa):
+  | Case | Should | Goops (registerSW immediate + onNeedReload guard + controllerchange) | Glyphtender (plain registerSW immediate, pwa 1.3.0) | Roll Better (plain registerSW immediate, pwa 1.2.0) |
+  |---|---|---|---|---|
+  | 1. First visit (no worker on the page) | never reload | no reload (hadWorker false) | no reload (workbox "activated" isUpdate false) | same as Glyphtender |
+  | 2. Returning player, our worker, new build out | swap to the new build once, on this visit | onNeedReload or controllerchange → one reload | registerSW reloads on "activated" — but when the new worker takes over before registerSW listens, the page stays old (what Goops' e2e caught) | same as Glyphtender |
+  | 3. Player from an older worker at another address (v1's /GOOPS/sw.js) | never reload: it's their first visit of this game | no reload (scriptURL ≠ goops-sw.js) | not met today (one worker address ever); registerSW would reload ("activated" isExternal) | same; and pwa 1.2.0 has no onNeedReload, so registerSW's own reload can't be stopped there |
+  | 4. No service worker in the browser | nothing breaks | `?.` guards | registerSW checks itself | same |
+  | 5. Both signals fire (onNeedReload + controllerchange) | one reload | `swapped` flag | — | — |
+- Claude's call: the starter is `startUpdates(registerSW, { worker })` in version/kit/updates.ts (exported from index.ts); `worker` = the game's worker file name (vite-plugin-pwa's default sw.js, Goops goops-sw.js), resolved against BASE_URL. Weighed: a separate file keeps index.ts (two constants every game reads) small; the game's own registerSW passed in = no virtual:pwa-register import in the module.
