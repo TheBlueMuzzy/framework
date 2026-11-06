@@ -5,7 +5,7 @@ Written by `node ~/.claude/config/bmuz/scripts/extract.mjs` (add · list · stat
 Status: queued → building → released <module>@<version> → swapped. While an entry is open, its files in the game get bug fixes only (each one logged under "Fixes while frozen").
 
 ## X01 · lesson player
-- Status: queued
+- Status: released tutorial@0.1.0
 - Game: games/goops
 - Commit: a334977
 - Files: `src/game/lessons/runner.ts`, `src/game/lessons/lessonTypes.ts`, `src/game/lessons/patterns.ts`, `tests/lessons/runner.test.ts`
