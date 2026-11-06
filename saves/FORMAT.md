@@ -16,11 +16,11 @@ A storage is a list of **keys → text**. Every value is JSON text.
 | `<key>~device` | this device's random id for that save (plain text, not JSON; never inside the record) |
 | `<key>/list` | slot saves only: the list of slots (itself a record whose data is `{ "slots": { "<id>": "<savedAt>" } }`) |
 | `<key>/<id>` | slot saves only: one slot (a record; its `save` field is `<key>`, not `<key>/<id>`) |
-| `__saves-copied__` | on a phone / desktop storage: `"1"` once the browser saves were copied over (platform.ts) |
 
 - `<key>` starts with the game's name and a separator (`glyphtender:run`, `goops-progress`) and has no `~`.
-- Other keys the kit keeps (each is an ordinary save of kind `settings`): `<game>:backup-nudge`, `<game>:link-code`,
-  `<game>:board`.
+- (Until 0.8.0 the kit also kept `<game>:backup-nudge`, `<game>:link-code`, `<game>:board` and, on a phone / desktop
+  storage, `__saves-copied__` — archived with the nudge, the cloud, the leaderboard and platform.ts: git tag
+  `archive/saves-0.7.0`. A game's old copies of those keys are simply left alone.)
 - Planned for desktop files (F97): a key and all its `~` copies in ONE file named after the key, so a game has a
   handful of files (Steam Cloud counts files).
 
@@ -87,9 +87,10 @@ copy's fields on top (a field only one copy has keeps that copy's value), then e
   are lists (otherwise the newer copy's value)
 - `newest` — the newer copy's value (the default for fields not listed)
 
-## 6. Runs kept as seed + moves (`replay.ts`)
-A run can be kept as `{ "rulesVersion": 3, "setup": { … the seed and table … }, "moves": [ … ] }` inside its data and
-rebuilt by replaying the moves with the game's rules. A record from another `rulesVersion` is refused, not upgraded.
+## 6. Runs kept as seed + moves
+Archived in 0.8.0 (`replay.ts`, git tag `archive/saves-0.7.0`): no game kept its runs that way. A game that rebuilds a
+run from its moves does it with its own rules (the turn-based starter: the Table module's `replay`) inside an ordinary
+run's data.
 
 ## 7. Golden saves — the shared test files
 One file per real save from each version, in the game's `tests/saves/`: `<key with odd characters as _>-v<N>.json`

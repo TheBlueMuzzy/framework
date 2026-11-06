@@ -2,8 +2,6 @@
 // Each save's key starts with the game's name. A default change that should reach old saves = a new version + an
 // upgrade step (never just a new `fresh`), and a golden copy per version in tests/saves/ (tests/saves/saves.test.ts).
 import { createRun, createSave } from '../saves'
-import { EMOTE_SAVE } from '../emotes'
-import { BANTER_SAVE } from '../ai/kit/save'
 import text from '../../content/text/en.json'
 import { fill, type SettingsValues } from '../ui/kit'
 import { personalityName } from '../ui/names'
@@ -45,9 +43,3 @@ export const matchRun = createRun<MatchRun>({
   // Continue's second line: "Move 4 vs Careless Cass"
   summary: (run) => fill(text.mainMenu.continueLine, { n: run.record.moves.length + 1, name: personalityName(run.opponent.personality) }),
 })
-
-/** The emotes module's: the "Hide everyone's emotes" switch + this match's mutes. */
-export const emoteSave = createSave({ ...EMOTE_SAVE, key: 'turn-based-starter:emotes', version: 1 })
-
-/** The AI module's: the "Bot chatter" level. */
-export const banterSave = createSave({ ...BANTER_SAVE, key: 'turn-based-starter:banter', version: 1 })

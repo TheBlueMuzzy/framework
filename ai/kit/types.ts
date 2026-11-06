@@ -8,7 +8,6 @@
 //     which moves to look at, and any decisions that sit outside the goal roll (Glyphtender: draft, refresh, "call it").
 // Personalities and skills are plain JSON (a game's content/ai/); the plug is code.
 // Design: framework .planning/design/ai.md.
-import type { MomentMap } from './banter'
 
 /** A trait's range, 0–100. Each turn the AI picks a value inside it, so a personality leans the same way but never
  *  plays exactly the same twice. */
@@ -47,7 +46,8 @@ export interface Personality {
    *  scores, so it misjudges those moves — Glyphtender's Scholar can't see a trap closing on it. */
   sight?: Record<string, number>
   shifts: Shift[]
-  /** 0–100: how likely it is to say something at a banter moment. */
+  /** 0–100: how chatty it is. The banter that read it was archived in 0.9.0 (git tag archive/emotes-0.4.2); kept so
+   *  personalities and the Dev Kit's AI tab (which edits it) stay as they are. */
   chattiness: number
   /** The name of its own (home) mode, for notes ("Focus"). Its own traits / goals / sight ARE that mode. */
   homeMode?: string
@@ -135,7 +135,7 @@ export interface Special<Action> {
   why: string
 }
 
-export interface GamePlug<View, Action, World = View, Event = unknown> {
+export interface GamePlug<View, Action, World = View> {
   goals: Goal<View, Action, World>[]
   /** What it feels right now, each 0–10 ("myDanger", "handQuality", "behind"…). */
   readings(view: View, seat: number): Record<string, number>
@@ -149,13 +149,6 @@ export interface GamePlug<View, Action, World = View, Event = unknown> {
   describe(action: Action, world: World): string
   /** Decisions outside the goal roll; null = no, use the goals. Runs after readings and the trait roll. */
   special?(ctx: Context<View, World>, rng: number): { special: Special<Action> | null; rng: number }
-  /** Banter (F22): the game's moment map — what one of its events means to this seat ("hitRival" for the one who did
-   *  it, "gotHit" for the one it happened to): one moment, a few (most important first) or nothing. The names are the
-   *  keys of content/ai/banter.json "chance"; the lines are content/text/en.json banter.<personality>.<moment>.
-   *  A moment may name who caused it: `{ moment, by }` (0.5.0). It answers what botBanter's MomentMap answers (0.8.2,
-   *  F154), so `botBanter({ moments: plug.moments! })` takes it as it is. A method (not `moments?: MomentMap<Event>`)
-   *  on purpose: a plug with its own Event still fits where the brain takes any plug (makeBrain's Event = unknown). */
-  moments?(event: Event, seat: number): ReturnType<MomentMap<Event>>
 }
 
 /** Why it did what it did — for the Dev Kit and bug reports, never shown to players. */

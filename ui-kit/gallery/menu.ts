@@ -8,7 +8,6 @@ export const menu: MenuGroup[] = [
   { title: 'Dialogs & feedback', entries: [
     { id: 'confirm', name: 'Confirm', about: '“Are you sure?” with the yes in danger red' },
     { id: 'rewards', name: 'Reward popup', about: 'A tile per reward, then Collect' },
-    { id: 'whatsnew', name: 'What’s new', about: 'Once after an update: 3–5 highlight lines from whats-new.json, Full notes, Got it' },
     { id: 'teach', name: 'Callouts', about: 'Speech-bubble tips pointing at a target: flips to fit, a dimmed pause, a point, a moving piece' },
     { id: 'talk', name: 'Talking bubble', about: 'A story line someone says: grows from its pointer, types out with rests, its outline fizzes as a speech wave and pops per syllable; tap for the next line' },
     { id: 'feedback', name: 'Toasts & tooltip', about: 'Toasts (one you tap to close), a tooltip, a spinner, an empty list' },
@@ -31,7 +30,6 @@ export const menu: MenuGroup[] = [
     { id: 'hud', name: 'HUD', about: 'Bars, score, timer, turns — numbers change live' },
     { id: 'huddock', name: 'HUD: one row + dock', about: 'oneRow top (fit status, compact score) · a dock panel of bars: label above / inside, thick, low = pulse, broken = flash' },
     { id: 'chips', name: 'Player chips', about: 'Beside each row: score counts up, dim, a goal chip' },
-    { id: 'emotes', name: 'Emotes', about: 'The tappable seat row (a muted rival’s mark on his portrait), speech bubbles by each seat (fixed size), your seat’s phrase picker, the cooldown ring, a rival’s mute menu' },
     { id: 'pinned', name: 'Pinned to the table', about: 'PinnedBox: xs chips beside rows, sized with the table' },
     { id: 'hand', name: 'Hand: rack', about: 'HandView: a hand of plain pieces — tap to hold, swap (shrink → grow), hide' },
     { id: 'pause', name: 'Pause', about: 'Over the HUD; Quit asks first' },

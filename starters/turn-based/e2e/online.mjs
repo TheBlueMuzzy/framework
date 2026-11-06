@@ -2,7 +2,7 @@
 // nothing is deployed).
 //   node e2e/online.mjs [outDir] [vitePort] [serverPort]          (npm run e2e:online)
 // Tab A: Play online → Create a room. Tab B: Play online → types A's code → Join. A starts the game. Each tab taps a
-// free square on its own turn until both show the result; A sends an emote and B sees its bubble. Screenshots of
+// free square on its own turn until both show the result. Screenshots of
 // both tabs (lobby, mid-game, results). A (the host) taps Play again: the results close on both tabs, the room kept, and
 // they play a second match. Then A presses Escape on its results and B the browser's Back on its own (F163):
 // each must land on the main menu (like the game against the computer, F160), having left the room the normal way
@@ -136,12 +136,6 @@ try {
   await a.locator('[data-board]').waitFor()
   await b.locator('[data-board]').waitFor()
   console.log('  both tabs see the board')
-
-  // A says hello from its own seat; B sees the bubble
-  await a.locator('[data-emote-mine]').first().click()
-  await a.getByRole('button', { name: 'Hello!' }).click()
-  await b.getByText('Hello!').first().waitFor({ timeout: 5000 })
-  console.log('  B saw A\'s emote')
 
   const moves = await playToEnd(true)
   if (!(await finished(a)) || !(await finished(b))) fail('the game never ended on both tabs')

@@ -2,7 +2,6 @@
 // once the Dev Kit is off (1.0). The adapter plugs the game into Snapshots, Bug capture, Pause and check:framework.
 import personalitiesFile from '../../content/ai/personalities.json'
 import skillsFile from '../../content/ai/skills.json'
-import banterJson from '../../content/ai/banter.json'
 import audioJson from '../../content/audio.json'
 import en from '../../content/text/en.json'
 import { registerDevKitGame } from '../devkit/devkitGame'
@@ -22,7 +21,6 @@ export const gameTabs: DevKitTab[] = [
     personalities: { path: 'content/ai/personalities.json', data: personalitiesFile, listKey: 'personalities' },
     skills: { path: 'content/ai/skills.json', data: skillsFile, listKey: 'skills' },
     bios: { path: 'content/text/en.json', data: en, at: (id) => ['ai', 'personality', id, 'bio'], nameAt: (id) => ['ai', 'personality', id, 'name'] },
-    banter: { path: 'content/text/en.json', data: en, moments: Object.keys(banterJson.chance) },
     readings: ['myDanger', 'myChance'],
     validate: (p) => personalityProblems(p as Parameters<typeof personalityProblems>[0], plug),
   }),

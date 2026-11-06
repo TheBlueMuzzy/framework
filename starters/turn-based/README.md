@@ -7,12 +7,22 @@ Two jobs:
   change, so a broken module is caught here before it reaches a real game.
 
 What's in it: a main menu, two computer opponents with different characters, a board, Pause, Results, Settings,
-Credits, placeholder sounds, emotes (and the bots' banter), saves (settings, progress, Continue), online play with
+Credits, placeholder sounds, saves (settings, progress, Continue), online play with
 room codes, crash catching, and the version on the menu and in Settings — all from the framework's modules.
+
+## First: put the modules in
+The starter commits only its own game — the module copies (`src/ui/kit`, `src/devkit`, `src/rooms`, … the folders in the
+table at the bottom) are not in git (`.gitignore`). A fresh copy has none, so **run this once after copying it**:
+```
+npm install
+npm run install-modules     → every module, fresh from ~/Documents/dev/framework (each module's own installer)
+```
+After that the copies are the game's own: update ONE module later with
+`node ~/.claude/config/bmuz/scripts/install-module.mjs <module> .` (it runs the module's checks first). A new game made
+from the starter deletes the module lines at the end of `.gitignore`, so its copies are committed like any game's.
 
 ## Run it
 ```
-npm install
 npm run dev              → http://localhost:6173  (press ` for the Dev Kit)
 npm run party:dev        → the room server for online play, on this computer (port 6499: wrangler.json dev.port — the page reads the same line) — nothing is deployed
 ```
@@ -42,7 +52,7 @@ Every script starts its own servers on 6xxx ports and stops them. Playwright: `p
 3. **The board and the table** — `src/ui/Board.tsx` (kit Buttons here; a real game draws its own board),
    `src/world/TableWorld.tsx` (the game's own world behind the HUD: a felt colour here, `tableColour` — the HUD's words
    are light with a dark halo, so they need a picture or a mid-to-dark colour behind them) and `content/tuning/board.json`.
-4. **The words** — `content/text/en.json` (every word a player reads, the bots' banter, the emotes).
+4. **The words** — `content/text/en.json` (every word a player reads).
 5. **Art and sound** — `content/ui/style.json` (the UI kit's look: Clean), the sounds in `content/audio.json` (the
    placeholders are made by `npm run sounds` from `content/audio-placeholders.json` with ZzFX — swap in real recordings
    with the Dev Kit's Sound tab), `content/credits.json` for anything not made by us.
@@ -59,10 +69,9 @@ Then the game's TDD says what's different and keeps the module contracts below t
 | Table (`src/table`) | the rules' contract, the move record, `selfTest` | `src/game/rules.ts`, `src/game/match.ts` |
 | Dev Kit (`src/devkit`) | live tuning (`content/tuning/*.json` + `content/ai/pace.json`), the rules + looks clocks, ⏸ / ◐ pause, snapshots, bug capture, AI · Sound · Text tabs | `vite.config.ts`, `src/main.tsx`, `src/devkit-game/` (adapter + tabs), `tests/devkit-live.test.ts` |
 | UI kit (`src/ui/kit`, Clean) | every screen: MainMenu, Hud, Pause, Results, Settings, Credits, Lobby | `src/ui/` (checked by `npm run check:ui`) |
-| AI (`src/ai/kit`) | Careful Cleo (never misses a win or a block) and Careless Cass (misses blocks, chats) — on the rules clock | `src/ai/`, `src/game/match.ts`, `party/rules.ts` |
+| AI (`src/ai/kit`) | Careful Cleo (never misses a win or a block) and Careless Cass (misses blocks) — on the rules clock | `src/ai/`, `src/game/match.ts`, `party/rules.ts` |
 | Audio (`src/audio`) | `playSound('mark.x')` etc.; the kit's buttons; Settings → Audio | `src/game/sound.ts`, `src/game/settings.ts` |
-| Emotes (`src/emotes`) | tap your seat for a phrase, a rival's to mute; bot banter is a bot pressing an emote; online through the room | `src/game/table.ts`, `src/ui/TableScreen.tsx`, `party/server.ts` |
-| Saves (`src/saves`) | settings, progress (wins / losses / draws), Continue (a game vs the computer, rebuilt from its moves), emote + banter saves; a golden save per version | `src/game/saves.ts`, `tests/saves/` |
+| Saves (`src/saves`) | settings, progress (wins / losses / draws), Continue (a game vs the computer, rebuilt from its moves); a golden save per version | `src/game/saves.ts`, `tests/saves/` |
 | Rooms (`src/rooms`) | Play online: room codes, the lobby, rejoin after closing the tab, a bot plays for someone who left | `src/ui/OnlineScreen.tsx`, `party/` |
 | Version (`src/version`) | `v0.1.0.0` on the main menu and at the bottom of Settings, stamped on snapshots; every e2e script refuses a stale build | `vite.config.ts`, `src/ui/`, `e2e/` |
 | Crashes (`src/crashes`) | errors caught from the start, "Something broke · Reload" instead of a blank page, Settings → Send crash reports. Not live (no server deployed — Muzzy's call) | `src/main.tsx`, `vite.config.ts`, `src/game/settings.ts` |
@@ -71,7 +80,7 @@ Then the game's TDD says what's different and keeps the module contracts below t
 - `src/main.tsx` — start-up, every module's start line, in order.
 - `src/App.tsx` — the screen stack over the base screen (main menu · a game vs the computer · online).
 - `src/game/` — the rules, the local match (`match.ts`: every move through the rules' one door, the bot's think time on
-  the rules clock), saves, settings, sound, emotes + banter.
+  the rules clock), saves, settings, sound.
 - A random player goes first; scripted checks get a fixed game (`import.meta.env.DEV && navigator.webdriver` → you go
   first; `?seed=7` → the bot's choices replay). Tests pass `startMatch(opponent, { firstSeat })`.
 - Decisions: `keepMatchDays` 7 (a live game) in `content/rooms.json`; rooms hold 2 seats; online, a player who goes idle

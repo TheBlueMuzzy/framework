@@ -1,5 +1,5 @@
 // @vitest-environment node
-// Card looks in a real browser, in all 5 styles (0.27.0): tone="success" keeps the card exactly the plain card's size
+// Card looks in a real browser, in all 7 styles (0.27.0): tone="success" keeps the card exactly the plain card's size
 // and paints its edge in the style's success colour. Cards are fixed size, so a highlight may never grow one.
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'

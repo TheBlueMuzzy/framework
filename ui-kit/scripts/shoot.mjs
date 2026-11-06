@@ -10,10 +10,12 @@
 // Reports what to fix: sideways overflow, controls clipped at a box edge, tap targets under 44px, console errors, a focus ring
 // showing without any keyboard use, and anything wrong with the screen stack (Esc, Back, covered screens).
 // Usage: npm run shoot
+// STYLES (F186): a routine run shoots only the styles real games use (GAME_STYLES below: Clean, Cozy, Neon, Cartoon).
+// Before a UI kit release, all seven: npm run shoot:all (= --all-styles; it works with --webkit and --pseudo too).
 // WEBKIT (F148): npm run shoot:webkit (= node scripts/shoot.mjs --webkit, or SHOOT_ENGINE=webkit) — iPhone's engine,
-// Playwright's own WebKit. Only the 18 key screens, in all 7 looks, on a 390×844 phone upright and an 844×390 one on
-// its side, at 100% and 200% text (504 shots, ~11 min), plus the screen stack and menu checks on the phone — saved to
-// screenshots-webkit/ with the same names as the Chromium shots.
+// Playwright's own WebKit. Only the 17 key screens, in the game styles (all 7 with --all-styles), on a 390×844 phone
+// upright and an 844×390 one on its side, at 100% and 200% text, plus the screen stack and menu checks on the phone —
+// saved to screenshots-webkit/ with the same names as the Chromium shots.
 // LAYOUTS (F149): every shot also writes <shots folder>/layout/<shot>.json — each text's line count and each part's
 // size — so npm run compare:engines lists what wraps or sizes differently between the two runs.
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
@@ -25,12 +27,18 @@ import { pseudo } from '../kit/blocks/words.ts'
 import { changedMessage, watchCodeChanges } from './codeChanges.mjs'
 import { recordLayout } from './compareEngines.mjs'
 
-// Preset names = the JSON files in kit/styles/
-const presetNames = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
+// Every style the kit has = the JSON files in kit/styles/
+const allPresets = readdirSync('kit/styles').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''))
+// The styles real games use (content/ui/style.json "preset"): Clean (the turn-based starter), Cozy (Glyphtender),
+// Neon (Goops), Cartoon (Roll Better). A game that picks another style → add it here, so routine runs shoot it too.
+const GAME_STYLES = ['clean', 'cozy', 'neon', 'cartoon']
+const ALL_STYLES = process.argv.includes('--all-styles')
+const presetNames = ALL_STYLES ? allPresets : allPresets.filter((preset) => GAME_STYLES.includes(preset))
+console.log(`Styles: ${presetNames.join(', ')}${ALL_STYLES ? ' (all of them — before a UI kit release)' : ' (the ones games use; npm run shoot:all for every style)'}`)
 // Shown in every style, for picking a style and catching a style that breaks one of them
-const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'emotes', 'talk', 'payslip', 'victoryreveal']
+const keyScreens = ['menu', 'settings', 'pause', 'results', 'endgame', 'endgamedim', 'lobby', 'room', 'seats', 'hud', 'huddock', 'chips', 'pinned', 'hand', 'talk', 'payslip', 'victoryreveal']
 // Also shot on a landscape phone (short screens squeeze these most), in every style
-const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk', 'whatsnew']
+const landscapeScreens = ['feedback', 'lobby', 'room', 'roomauto', 'endgame', 'endgamedim', 'chips', 'pinned', 'hand', 'hud', 'huddock', 'menu', 'talk']
 
 const sizes = {
   phone: { name: 'phone', width: 390, height: 844, mobile: true },
@@ -99,7 +107,6 @@ const knownShots = {
     // Claude 2026-10-27 (F161), accepted by Muzzy 2026-10-27 — what's left after the shared causes were fixed:
     // (the kit's own bubble warnings, the same as Muzzy's F145 / F147 talk calls above, now in the longer language)
     ...Object.fromEntries(['clean', 'cartoon', 'console', 'cozy', 'fantasy', 'neon'].map((look) => [`screens/talk-${look}-phone-text-200.png`, "Claude 2026-10-27 (F161): like Muzzy's F145 / F147 talk calls — at 200% in a ~40% longer language the demo line takes so many lines upright that no side of the ◀ ▶ pickers has room; the kit warns, the game makes room"])),
-    ...Object.fromEntries(presetNames.map((look) => [`screens/emotes-${look}-phone-landscape-text-200.png`, "Claude 2026-10-27 (F161): like the talk calls — at 200% text sideways in a ~40% longer language three speech bubbles on a 390 px-tall screen have no side left clear of each other; the kit warns, the game makes room"])),
     ...Object.fromEntries(['neon', 'pixel'].map((look) => [`screens/menu-${look}-phone-landscape-text-200.png`, `Claude 2026-10-27 (F161): one word ("Settings", ~40% longer, in ${look === 'neon' ? "Neon's wide Orbitron" : "Pixel's wide Silkscreen"} capitals) is wider than a half-width menu button at 200% text sideways — a word can't break, so it reaches the button's edge; a game picks a shorter word for that button`])),
     ...Object.fromEntries(['cozy', 'pixel'].map((look) => [`screens/pause-${look}-phone-landscape-text-200.png`, "Claude 2026-10-27 (F161): at 200% text sideways Pause's four buttons give up their padding to fit without scrolling — their line and border stay (F147, 0.35.4) — and an accent over a capital (Ŕ, Ǫ) reaches 1 px past the line; English has room. Keeping the padding would make Pause scroll in English too"])),
     'screens/results-pixel-phone-landscape-text-200.png': "Claude 2026-10-27 (F161): Pixel's title font (Silkscreen) draws an accent over a capital (Ŕ) far above the line; at 200% text sideways the title sits at the top of the card, so the mark meets the card's top edge — a real Ř/Č title in Pixel would need a line more of room",

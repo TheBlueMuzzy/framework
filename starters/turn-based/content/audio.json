@@ -537,19 +537,6 @@
       "cooldownMs": 40,
       "priority": 2
     },
-    "emote.pop": {
-      "files": [
-        "sfx/sfx_emote_pop_01.wav"
-      ],
-      "pick": "random",
-      "bus": "sfx",
-      "volumeDb": -8,
-      "randomPitch": 0.4,
-      "randomVolumeDb": 1,
-      "maxVoices": 3,
-      "cooldownMs": 40,
-      "priority": 1
-    },
     "game.win": {
       "files": [
         "stg/stg_game_win_01.wav"

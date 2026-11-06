@@ -53,7 +53,7 @@ export type CalloutPlaceInput = {
   avoid?: string
 }
 
-/** THE POINTING BUBBLE'S PLACEMENT — shared by Callout, SpeechBubble, EmotePicker and MuteMenu (same intention: words
+/** THE POINTING BUBBLE'S PLACEMENT — shared by Callout and TalkingBubble (same intention: words
  *  pointing at a thing → same maths). `layer` is a .kit-callout-layer holding a .kit-callout-frame; `bubble` a
  *  .kit-callout holding a .kit-callout-tip. Every frame while mounted (the target may move, scroll, resize or appear
  *  late) it writes the layer's --kit-callout-* variables, data-side and data-ready — only when something changed. */
@@ -131,7 +131,7 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
 }
 
 // The boxes of what a bubble must stay off (visible ones only), minus any that hold the target (its own seat's HUD)
-// and the bubble itself (a selector like .kit-speech names it too)
+// and the bubble itself (a selector like .kit-talk names it too)
 function avoidBoxes(selector: string, target: CalloutTarget, self: Element): { el: Element; box: Box }[] {
   const targetEl = typeof target === 'string' ? document.querySelector(target) : target instanceof Element ? target : null
   return [...document.querySelectorAll(selector)]
@@ -150,9 +150,9 @@ function nameOf(el: Element): string {
 }
 
 // Which part the bubble is, and what it points at: 'TalkingBubble at "The Veteran"'
-const PARTS: [string, string][] = [['kit-talk', 'TalkingBubble'], ['kit-speech', 'SpeechBubble'], ['kit-emote-picker', 'EmotePicker']]
+const PARTS: [string, string][] = [['kit-talk', 'TalkingBubble']]
 function bubbleName(box: Element, target: CalloutTarget): string {
-  const part = PARTS.find(([cls]) => box.classList.contains(cls))?.[1] ?? (box.classList.contains('kit-pointed') ? 'MuteMenu' : 'Callout')
+  const part = PARTS.find(([cls]) => box.classList.contains(cls))?.[1] ?? 'Callout'
   const el = typeof target === 'string' ? document.querySelector(target) : target instanceof Element ? target : null
   return el ? `${part} at "${nameOf(el)}"` : part
 }

@@ -23,7 +23,7 @@ setSavesConfig(savesJson) // backups and the "back up your save" nudge
 setPaceClock(rulesClock) // bots think on the rules clock: a pause (the game's own, or the Dev Kit's) holds a bot mid-think
 applyStyle(style) // content/ui/style.json → the UI kit's look (Clean)
 startSound() // made now, starts on the first tap
-applySettings(currentSettings()) // the player's saved Settings → text size, volumes, crash reports, emotes, bot chatter
+applySettings(currentSettings()) // the player's saved Settings → text size, volumes, crash reports
 
 // Dev Kit → Screens: this page is a PREVIEW inside the Dev Kit (dev only) — one screen with sample data, sandboxed
 if (import.meta.env.DEV && location.search.includes('devkit-preview=')) {

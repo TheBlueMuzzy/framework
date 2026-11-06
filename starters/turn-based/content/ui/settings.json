@@ -20,9 +20,6 @@
       "rows": [
         { "id": "secBots", "type": "heading", "label": "Computer players" },
         { "id": "botSpeed", "type": "selector", "label": "Bot speed", "options": ["Slow", "Normal", "Fast", "Instant"], "default": "Normal", "detail": "How long the computer thinks before it moves." },
-        { "id": "botChatter", "type": "selector", "label": "Bot chatter", "options": ["Off", "Some", "Lots"], "default": "Some", "detail": "How often the computer players talk." },
-        { "id": "secEmotes", "type": "heading", "label": "Emotes" },
-        { "id": "hideEmotes", "type": "toggle", "label": "Hide everyone's emotes", "default": false, "detail": "Opponents' phrases and bot chatter won't show." },
         { "id": "secCrashes", "type": "heading", "label": "Privacy" },
         { "id": "crashReports", "type": "toggle", "label": "Send crash reports", "default": true, "detail": "If the game breaks, it sends an anonymous report so it can be fixed. No name or IP is kept." }
       ]

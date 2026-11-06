@@ -1,7 +1,7 @@
 // @vitest-environment node
 // --kit-toasts-top (0.33.0, F119): room kept clear above top toasts — a bar of the page's own over the game (the
 // gallery's Menu + style bar: on a phone its toasts sat on those buttons). Unset: exactly where they were.
-// Real browser, all 5 styles.
+// Real browser, all 7 styles.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser } from 'playwright'
 import { presets } from '../styles'

@@ -1,0 +1,28 @@
+# Sprint 57 — Fewer false alarms, rules that carry their own reasons
+Started 2026-11-04 · Milestone v0.37 · Features: F185
+
+## F185 🔧 Slimmed rule set
+Done when: the approved rule verdicts (`research/audit-2026-11/rules.md` §5–§7, §10) are applied — the false alarms that cost ~1,000 retries are fixed, the dead rules work, the judgement rules that can be hooks are hooks, and CLAUDE.md + session start shrink to what judgement needs — with every real catch still caught (the audit's replayed refusals prove it).
+- [x] 🤖 1. Spike: can a hook rewrite a command on this Claude Code version (add `set -o pipefail` instead of refusing)? Decide the pipe rule's shape from the answer — ~/.claude/config/bmuz/hooks/guard-edits.mjs
+- [x] 🤖 2. Before-action false alarms: pipe rule (GE2), heredoc rule narrowed (GE3: quoted heredocs, sed patterns, scratch folders pass), shell variables aren't branch names (GG3), the same-line commit gates (GG8, GG13, …) left to git's own commit step — ~/.claude/config/bmuz/hooks/guard-git.mjs
+- [x] 🤖 3. After-edit and turn-end false alarms: lint at edit time = syntax + undefined names, the rest once at turn end (LE1); plan-lint's two-file rules at turn end (PL2, PL4–PL6); hand-off "did work" = a real edit or commit (HC1); sprint header near the top (HC3); Weighed source anywhere in its block (HC9); sprint line only for Fnn commits (SP1, Muzzy 2026-11-04); planner republish on card turns only (SP2); check:fast waits while a full check holds the lock (SC1) — ~/.claude/config/bmuz/hooks/handoff-check.mjs
+- [x] 🤖 4. Dead rules work: context checkpoint at the real compaction point (SM2); caps on RESUME HERE entries and Reviewed through (PL8) — ~/.claude/config/bmuz/hooks/session-moments.mjs
+- [x] 🤖 5. Judgement rules that become hooks: report-only mode ("assess / analyze / what's going on"), an idea really landed in ROADMAP Ideas, questions numbered everywhere, the same failure 3× → "reassess", a "Lesson →" line's file really changed, long paragraphs logged only (measure first) — ~/.claude/config/bmuz/hooks/plan-lint.mjs
+- [x] 🤖 6. CLAUDE.md ~20 KB → ~7.5 KB: judgement rules one line each, hook-carried rules become pointers, dated quotes move into their rule files' `why`; duplicate rule prose in the skills → pointers; longest skill descriptions trimmed — ~/.claude/CLAUDE.md
+- [x] 🤖 7. Proof: re-run the audit's replays + firing counts (fewer false alarms, every real catch still caught); whole hook + script suites green; push — .planning/research/audit-2026-11/tools/rules-replay.mjs
+Check: the audit's replayed false alarms now pass and its real catches are still refused (counts before/after); whole suites green; CLAUDE.md size before/after with every rule accounted for (kept, pointer, or moved into a rule file); a live session start under 2 KB in the framework and Goops.
+Checked: 2026-11-05 01:05 — tasks 1–5 + 7 by a fresh helper in a scratch copy, swapped in live; live suites hooks 786/786 (was 692), scripts 396/396; HOOKS.md regenerated. Claude re-ran the proof scripts himself: GE2 214 refusals → 187 rewritten with pipefail, 7 allowed, 20 refused by GE3, all 9 real cases still made safe; GE3 352 → 167 refused, 87 of 90 real still refused, the 3 now passing read by Claude — quoted heredocs and a .md sed, all safe; LE1 753 → 614 moved to turn end; HC1 15 fewer; SP1 ≤ 43 of 54; SP2 59 fewer; GG13 39 → 17 (the rest checked by git's own commit step). Session start: framework 16.9 → 1.6 KB, Goops 47.8 → 1.6 KB, Glyphtender 2.2 KB (its RESUME HERE is 1,534 chars — PL8 flags it at its next edit). CLAUDE.md 20,014 → ~9.6 KB with 5 lines now marked as enforced (report-only ①, ideas landed ②, three strikes ②, lesson landed ②, paragraphs logged). Pushed ~/.claude-config d85d286, f5e1b60. Two follow-ups in ROADMAP Ideas (2026-11-05). Approved by Muzzy 2026-11-05.
+
+## Notes
+- Open bugs: none open in the framework (BUGS.md has no open P0/P1).
+- Claude's call: one helper builds tasks 1–5 + 7 in a scratch copy of the hooks folder and swaps in at the end (as F184 — Hook rule runner did); Claude does task 6 (CLAUDE.md is Muzzy's words — moved, not lost) in parallel, since it touches no hook file.
+- Claude's call: helper briefs say never wait on a background notice (run long checks in the foreground or read their output), and send a status line every 45 min; main keeps a wake-up running while it waits (HC10).
+- Claude's call: "lists, not paragraphs" starts log-only — it sends nothing back until the firing log shows its false-alarm rate.
+- Done (task 6, Claude, 2026-11-04 23:40): CLAUDE.md 20,014 → 9,372 bytes — every rule kept as one line (checked rule by rule against the old text), its full old text + dated quotes saved word for word in ~/.claude/references/claude-md-why.md, gws block → references/gws.md; rule-kind finds no unmarked line; develop skill: 4 lines that only restated hooks removed, the hook list → one pointer to HOOKS.md; pushed ~/.claude-config 9067fd7. Claude's call: the 5 longest skill descriptions stay — they are mostly trigger words (when a skill gets used), trimming saves ~1 KB and risks skills not being used.
+- Task 1 spike (helper): a hook's updatedInput rewrites a Bash command on Claude Code 2.1.318 without skipping permission — proven live (`false | cat` → exit 1 after the hook prepended set -o pipefail).
+- Claude's call: making the lint module part of every game (audit §5 #9) waits for the games' update after v0.37 — games are paused.
+
+Retro (Muzzy 2026-11-05: "your pick" — Claude's draft):
+- Went well: about half of all false alarms gone, no real catch lost.
+- Went wrong: two helper reports arrived cut off or out of order — main read their files instead.
+- Change: helpers save their proof numbers to a file, not only their message.

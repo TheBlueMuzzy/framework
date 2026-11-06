@@ -527,6 +527,38 @@ flowchart LR
   F180[✅ F180 Sync knows its own pushes]
 ```
 
+## v0.37 — A lean, measured BMUZ  ✅ released 2026-11-06 (v0.39.0) · planned 2026-11-04
+Goal (Muzzy 2026-11-04: "this can't happen. we definitely need to avoid the inner-platform effect"): every BMUZ rule earns its place and is enforced by code where it can be (a "smart exe" — Muzzy), the framework keeps only proven parts, and one recipe says how parts move between games and the framework. Measured from the session history, not guessed. Feature freeze on the framework (bug fixes only) and games paused until it's done. After it: extract through the recipe, then games update (next milestone).
+- ✅ F181 🔧 Hook firing log — every hook writes one line when it fires (rule, project, blocked/warned, time) to a local log, so the audit and later checkups see what each rule really catches — must
+- ✅ F182 ❓ Rule inventory + verdicts — every rule in CLAUDE.md, the skills, PROJECT-FILES and the hooks: where it lives, ①②③, how often it fired in the past sessions, false alarms, a proposed verdict (keep · merge · make it a hook · delete) — a page Muzzy comments on; ✅ when he approves the verdicts
+- ✅ F183 ❓ Framework inventory + verdicts — every brick, plumbing piece and quality gate: size, proven by which game, used by which game today, a proposed verdict (keep · freeze · move back to its game · archive) + the inner-platform test (time to start a tiny game from the starter vs plain) — a page Muzzy comments on; ✅ when he approves
+- ✅ F184 🧱 Hook rule runner — one shared runner + one file per rule (id, what it checks, why with Muzzy's quote, its test, on/off), lint-tool style; today's big hooks split into rules with their tests kept — must · needs: F182
+- ✅ F185 🔧 Slimmed rule set — apply F182's verdicts: rules merged or deleted, judgement rules made hooks, CLAUDE.md down to the judgement-only lines with the dated quotes moved into rule files — must · needs: F182, F184
+- ✅ F186 🔧 Slimmed framework — apply F183's verdicts — must · needs: F183
+- ✅ F187 🔧 Bloat test both ways — every addition names what it replaces (or "nothing" and why); /checkup runs a monthly removal pass from the firing log — should · needs: F181, F185
+- ✅ F188 ❓ Module recipe — one page: what counts as a brick, plumbing or a gate; how a part comes out of a game; how it goes in; what proves it — needs: F186
+- ✅ F189 🎮 Games list module candidates — Glyphtender and Goops each list candidates against the recipe, nothing extracted yet — must · needs: F188
+```mermaid
+flowchart LR
+  F181[✅ F181 Hook firing log]
+  F182[✅ F182 Rule inventory + verdicts]
+  F183[✅ F183 Framework inventory + verdicts]
+  F184[✅ F184 Hook rule runner]
+  F185[✅ F185 Slimmed rule set]
+  F186[✅ F186 Slimmed framework]
+  F187[✅ F187 Bloat test both ways]
+  F188[✅ F188 Module recipe]
+  F189[✅ F189 Games list module candidates]
+  F182 --> F184
+  F182 --> F185
+  F184 --> F185
+  F183 --> F186
+  F181 --> F187
+  F185 --> F187
+  F186 --> F188
+  F188 --> F189
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -546,6 +578,9 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-11-05 — **Report-only mode doesn't cover publishing a page** (F185 — Slimmed rule set): GE10 holds edits, commits, pushes and deploys after "assess / analyze…", but the claude-artifacts publish tools aren't wired to any hook — wiring them needs a new matcher in ~/.claude/settings.json (Muzzy's file).
+- 2026-11-05 — **HC10 (wake-up rule) can read the Stop hook's own `background_tasks` list** (docs: code.claude.com/docs/en/hooks) instead of parsing the transcript — record one real Stop input first to see the field's shape, keep the transcript read as the fallback.
+- 2026-11-04 — **Golden-save check passes a save whose moves no longer fit the rules** (found by F183 — Framework inventory + verdicts' Nim test, `research/audit-2026-11/framework.md` §5): the starter's golden-save test still passed with a tic-tac-toe move (`{ cell: 4 }`) in a Nim save — it checks the save's shape, not that its moves replay; a game changing its moves finds out only when Continue throws. After the v0.37 freeze: replay the saved moves through the rules in the check.
 - 2026-11-03 — → F178. **The hand-back hook's check:fast runs beside a check:fast already going** (sprint 52, F171 — Checks notice a busy PC proof): stop-check-fast started its own run while a background one ran; both use crashes' node_modules/.cache/worker-typecheck and one deleted it under the other (TS5058, 1 red). Fix idea: framework check:fast takes a lock like check:full's (.check-lock) and a second run waits or says "a check is already running"; or the crashes test uses its own temp folder per run.
 - 2026-11-03 — → F179. **Rooms: the board and the room arrive in opposite orders** (found by F170 — Starter online test race's helper): at a match's start the server sends the new board (`view`) first, then the room (`phase: "playing"`); at its end, the room first, then the board (src/rooms/server/roomServer.ts handleStart → afterGameChanged, then sendRoomToEveryone). A game that draws from `room.phase` alone shows the last results over the new board for a beat (the starter now waits for both). Fix in the module: send the room before the board at start, or have `useRoom` apply both together — and say the rule in the rooms README.
 - 2026-11-03 — → F176 (sprint 51, Muzzy "yes"). **setup.sh overwrites newer local edits in ~/.claude** (sprint 51, F172 — Planner publish recognised from any chat): another session's start-up re-copied ~/.claude-config over ~/.claude at 13:17:59 and wiped a hook fix + its tests that weren't pushed yet — nothing warned. Fix idea: setup.sh / config-sync skips (and names) a file whose ~/.claude copy is newer than the last sync and differs, instead of overwriting it; or the PostToolUse hook copies each ~/.claude edit into ~/.claude-config at once. Workaround meanwhile: push each ~/.claude edit right after it lands.

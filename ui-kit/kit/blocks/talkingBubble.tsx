@@ -1,7 +1,7 @@
 // TALKING BUBBLE — a story line someone SAYS (framework F111, from Goops' sketch S9 "speaker bubble", the Veteran).
 //
 // <TalkingBubble target="#speaker" text="Found some scraps. Don't tell the screen." feel={tuning.talk} onConfirm={next} />
-//   Same intention as the emote SpeechBubble (words pointing at a thing) → the same Callout underneath: the same
+//   Same intention as a Callout (words pointing at a thing) → the same Callout underneath: the same
 //   placement maths (flips to fit, stays in the window or game picture, `avoid` = a CSS selector it stays clear of),
 //   the same pointer and the same colours in every style. What's new is how it TALKS:
 //   1. It grows open from its pointer's tip (320 ms, ease-out-back). No words while it grows.
@@ -30,7 +30,7 @@ import { useEffect, useLayoutEffect, useRef, type KeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Text } from '../controls'
 import { type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
-import { announce, liveRegion } from './emotes'
+import { announce, liveRegion } from './announce'
 import { reduceMotion } from './motion'
 import { useCalloutPlace, useShownPopover, type CalloutPlaceInput } from './teach'
 import { focusRing } from '../keysOrPad'

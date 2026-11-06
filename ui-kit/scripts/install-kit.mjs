@@ -1,6 +1,6 @@
 // INSTALL / UPDATE THE KIT IN A GAME — plain Node, no packages needed.
 // Usage: node scripts/install-kit.mjs <game-folder> [preset] [--dry-run]
-//   preset: clean (default) · cozy · cartoon · pixel · neon — only used when the game has no style.json yet
+//   preset: clean (default) · cozy · cartoon · pixel · neon · console · fantasy — only used when the game has no style.json yet
 //   --dry-run: only show what would change
 // What it does:
 //   1. copies kit/ → <game>/src/ui/kit/ (not the kit's tests: they run here, in the framework),
@@ -185,7 +185,7 @@ export function installKit(gameDir, { preset = 'clean', dryRun = false, log = co
   log(`  ${isUpdate ? 1 : 3}. Check the game's UI code keeps the rules: node src/ui/kit/check-ui.mjs src/ui --css src
      (--css src also warns about the game's CSS restyling kit parts — use the style file or a kit option instead)
   ${isUpdate ? 2 : 4}. Run the game's tests and build, and look at every screen on a phone and a desktop.`)
-  if (!isUpdate) log('  To try another look later, change "preset" in content/ui/style.json (clean, cozy, cartoon, pixel, neon).')
+  if (!isUpdate) log(`  To try another look later, change "preset" in content/ui/style.json (${presetNames.join(', ')}).`)
   // Vite's ESLint setup flags the kit's shared word lists (a fast-refresh hint, not a bug). The kit is
   // tested in the framework, so the game's linter should skip it, like any copied-in library.
   const eslintConfig = readdirSync(gameDir).find((f) => /^eslint\.config\./.test(f))

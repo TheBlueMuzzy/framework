@@ -1,13 +1,11 @@
 // THE TABLE — a game against the computer: the UI kit's Hud (whose turn it is + Pause), the board in its middle and the
-// seats along the bottom (tap your own seat for an emote, the bot's to mute it). Opening Pause pauses the game itself
-// (rulesClock.scale = 0): the bot stops thinking and the results wait.
+// seats along the bottom. Opening Pause pauses the game itself (rulesClock.scale = 0): the bot stops thinking and the
+// results wait.
 import { useEffect, useRef } from 'react'
 import text from '../../content/text/en.json'
-import { Hud, HudText, fill, screens, useScreens } from './kit'
-import { EmoteSeats } from '../emotes/ui/EmoteLayer'
+import { Hud, HudText, PlayerSeats, fill, screens, useScreens } from './kit'
 import { rulesClock } from '../devkit/gameClock'
-import { BOT, YOU, getMatch, leaveMatch, playCell, useMatch } from '../game/match'
-import { emotes, seatId } from '../game/table'
+import { BOT, YOU, getMatch, leaveMatch, playCell, seatId, useMatch } from '../game/match'
 import { Board } from './Board'
 import { personalityName } from './names'
 
@@ -56,7 +54,7 @@ export function TableScreen() {
       onPause={() => screens.push('pause')}
       words={{ pause: text.table.pause }}
       banner={<Board board={state.board} winLine={state.winLine} canPlay={!state.over && state.turn === YOU} onPlay={playCell} />}
-      actions={<EmoteSeats emotes={emotes} seats={seats} mine={seatId(YOU)} activeId={state.over ? undefined : seatId(state.turn)} avoid=".kit-hud-slot" />}
+      actions={<PlayerSeats players={seats} activeId={state.over ? undefined : seatId(state.turn)} />}
     />
   )
 }

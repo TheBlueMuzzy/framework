@@ -93,8 +93,8 @@ jobs:
             fi
           done
 
-  # The starters play today's modules (F65 — Framework test game): a starter holds COPIES of the modules made when they
-  # were installed, so scripts/starter-check.mjs copies it, installs every module fresh from this push into the copy and
+  # The starters play today's modules (F65 — Framework test game): a starter commits no module copies (F186), so
+  # scripts/starter-check.mjs copies it, installs every module fresh from this push into the copy (its install-modules) and
   # runs the starter's check:full there (unit tests, lint, build, UI rules, then two tabs online through a local room server,
   # the Dev Kit live, a smoke round, every module's promises, every screen at 7 sizes). A module change whose own tests
   # pass but that breaks a game turns this red — before any game takes the update.

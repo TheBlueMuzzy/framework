@@ -35,7 +35,7 @@ test('the guard spots a git call and lets a comment be', () => {
 
 test('no installer asks git for its version itself — they use scripts/kitVersion.mjs', () => {
   const files = installerFiles()
-  assert.ok(files.length >= 11, `found only ${files.length} installers: ${files.join(', ')}`)
+  assert.ok(files.length >= 10, `found only ${files.length} installers: ${files.join(', ')}`)
   const offenders = files.flatMap((file) => asksGitItself(readFileSync(join(root, file), 'utf8')).map((find) => `${file} ${find}`))
   assert.deepEqual(offenders, [], `use kitVersion(moduleDir, { watch: [...] }) from scripts/kitVersion.mjs instead:\n${offenders.join('\n')}`)
 })

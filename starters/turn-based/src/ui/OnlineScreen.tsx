@@ -1,17 +1,14 @@
 // ONLINE PLAY — the rooms module (src/rooms): make a room, share its 4-letter code, a friend joins, the host starts.
-// The server (party/) owns the game; this screen only shows the view it sends and sends your taps. Emotes go through
-// the room. Leave always goes through online.leave() (a closed tab keeps the seat: "Rejoin match" on the main menu).
+// The server (party/) owns the game; this screen only shows the view it sends and sends your taps. Leave always goes through online.leave() (a closed tab keeps the seat: "Rejoin match" on the main menu).
 // The results open on the kit's screen stack ('online-results'), like the game against the computer's, so Esc and a
 // phone's Back close them — and closing them leaves the room, like their Leave button (F163, F160's rule).
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from 'react'
 import text from '../../content/text/en.json'
-import { Hud, HudText, Lobby, Reconnecting, Results, fill, rejoinWords, screens, toast, useScreens, welcomeBackLine } from './kit'
+import { Hud, HudText, Lobby, PlayerSeats, Reconnecting, Results, fill, rejoinWords, screens, toast, useScreens, welcomeBackLine } from './kit'
 import { useRoom } from '../rooms/useRoom'
 import { cleanRoomCode, makeRoomCode } from '../rooms/roomCodes'
 import { getPlayerName, setPlayerName } from '../rooms/identity'
-import { EmoteSeats } from '../emotes/ui/EmoteLayer'
 import { playSound } from '../audio'
-import { emotes } from '../game/table'
 import { setOnline } from '../game/online'
 import type { Action, Event, Options, View } from '../../party/rules'
 import { Board } from './Board'
@@ -27,22 +24,16 @@ export function OnlineScreen({ start, onClose }: { start: OnlineStart; onClose: 
   const [joinError, setJoinError] = useState('')
   const online = useRoom<View, Action, Options, Event>(code, { name, create: creating, rejoin: rejoining }, {
     onEvent: playEventSound,
-    onEmote: (message) => emotes.receive(message),
   })
 
   const leave = () => { online.leave(); setCode(null); onClose() }
 
-  // While this screen is up the game is online: emotes go through the room, the Dev Kit's restore + pause are off
+  // While this screen is up the game is online: the Dev Kit's restore + pause are off
   const mySeatId = online.mySeat?.id ?? null
   useEffect(() => {
     setOnline(() => { online.leave(); onClose() })
-    emotes.setSend((_seat, id) => online.sendEmote(id))
-    return () => { setOnline(null); emotes.setSend(undefined) }
+    return () => { setOnline(null) }
   }, [online, onClose])
-  useEffect(() => {
-    emotes.setMine(mySeatId ? [mySeatId] : [])
-    emotes.setMatch(code ?? '')
-  }, [mySeatId, code])
 
   // Joined a friend's room: say we're ready (this game has no Ready button — Start only waits for two players)
   const phase = online.room?.phase
@@ -117,7 +108,7 @@ export function OnlineScreen({ start, onClose }: { start: OnlineStart; onClose: 
         onPause={() => screens.push('pause')}
         words={{ pause: text.table.pause }}
         banner={<Board board={game.board} winLine={game.winLine} canPlay={myTurn} onPlay={(cell) => { online.active(); online.send({ cell }) }} />}
-        actions={<EmoteSeats emotes={emotes} seats={seats} mine={mySeatId ?? []} activeId={game.over ? undefined : order[game.turn]} avoid=".kit-hud-slot" />}
+        actions={<PlayerSeats players={seats} activeId={game.over ? undefined : order[game.turn]} />}
       />
       {/* The room's phase alone is enough: rooms 0.15.0 sends the finished board BEFORE "over" and "playing" BEFORE a
           rematch's new board (F179), so the results never show over the wrong board. (Rooms 0.13 sent a rematch's

@@ -365,24 +365,19 @@ describe('module Settings rows register themselves: settings-rows.json (0.30.0, 
       expect(r.problems).toEqual(['Game → Dice skin ("diceSkin", a selector): nothing in the game reads it — it\'s the dice module\'s row: pass it on: applyDiceSetting(values) in the Settings onChange'])
     } finally { cleanUp() }
   })
-  it('the real crashes, emotes and ai manifests, where their installers put them, count their wiring', () => {
+  // (0.40.0, F186: the emotes module and the AI's banter were archived — the AI's manifest is there but names no rows)
+  it('the real crashes and ai manifests, where their installers put them, count their wiring', () => {
     try {
       const files = {
         'src/crashes/VERSION': '0.2.0\n', 'src/crashes/settings-rows.json': real('crashes'),
-        'src/emotes/VERSION': '0.4.0\n', 'src/emotes/settings-rows.json': real('emotes'),
-        'src/ai/kit/VERSION': '0.8.0\n', 'src/ai/kit/settings-rows.json': real('ai'),
+        'src/ai/kit/VERSION': '0.9.0\n', 'src/ai/kit/settings-rows.json': real('ai'),
       }
-      const rows = tab([
-        { id: 'crashReports', type: 'toggle', label: 'Send crash reports' },
-        { id: 'hideEmotes', type: 'toggle', label: 'Hide everyone\'s emotes' },
-        { id: 'botChatter', type: 'selector', label: 'Bot chatter', options: ['Off', 'Some', 'Lots'] },
-      ])
-      const wired = ['applyCrashSetting(values)\napplyEmoteSetting(emotes, values)\napplyBanterSetting(banter, values)']
-      expect(runIn(files, rows, wired)).toMatchObject({ ok: true, detail: '3 rows on: 0 read by the game, 3 handled by the kit / audio module' })
-      const r = runIn(files, rows, ['applyCrashSetting(values)'])
-      expect(r.problems).toHaveLength(2)
-      expect(r.problems[0]).toMatch(/"hideEmotes".*it's the emotes module's row: pass it to the emotes module: applyEmoteSetting/)
-      expect(r.problems[1]).toMatch(/"botChatter".*it's the ai module's row: pass it to the bots' voice: applyBanterSetting/)
+      const rows = tab([{ id: 'crashReports', type: 'toggle', label: 'Send crash reports' }])
+      expect(runIn(files, rows, ['applyCrashSetting(values)'])).toMatchObject({ ok: true, detail: '1 rows on: 0 read by the game, 1 handled by the kit / audio module' })
+      const r = runIn(files, rows, ['nothing here'])
+      expect(r.problems).toHaveLength(1)
+      expect(r.problems[0]).toMatch(/"crashReports".*it's the crashes module's row/)
+      expect(JSON.parse(real('ai')).rows).toEqual([])
     } finally { cleanUp() }
   })
   it('an older module copy without a manifest passes through the one-release fallback (as before 0.30.0)', () => {
@@ -396,9 +391,10 @@ describe('module Settings rows register themselves: settings-rows.json (0.30.0, 
       expect(runIn(old, rows, ['setOn(true); emotes.setHideAll(false); banter.setChatter("Lots")'])).toMatchObject({ ok: true, detail: '3 rows on: 0 read by the game, 3 handled by the kit / audio module' })
       // still red when an old copy's row isn't passed on — and the line names the module
       const r = runIn(old, rows, ['setOn(true); banter.setChatter("Lots")'])
-      expect(r.problems).toEqual([`Game → Hide everyone's emotes ("hideEmotes", a toggle): nothing in the game reads it — it's the emotes module's row: ${JSON.parse(real('emotes')).rows[0].hint}`])
-      // the fallback's hints are the manifests' own, word for word
-      for (const module of ['crashes', 'emotes', 'ai']) expect(OLD_MODULE_ROWS[module].map((row) => row.hint)).toEqual(JSON.parse(real(module)).rows.map((row) => row.hint))
+      expect(r.problems).toEqual([`Game → Hide everyone's emotes ("hideEmotes", a toggle): nothing in the game reads it — it's the emotes module's row: ${OLD_MODULE_ROWS.emotes[0].hint}`])
+      // the fallback's hints are the manifest's own, word for word (crashes — emotes and the AI's banter row were
+      // archived in 0.40.0, so their old copies keep the fallback's words)
+      expect(OLD_MODULE_ROWS.crashes.map((row) => row.hint)).toEqual(JSON.parse(real('crashes')).rows.map((row) => row.hint))
     } finally { cleanUp() }
   })
   it('the fallback is only for an installed copy: no module folder → its row is just a row the game must read', () => {

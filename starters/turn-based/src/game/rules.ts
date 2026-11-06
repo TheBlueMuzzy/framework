@@ -29,7 +29,7 @@ export interface Action {
 }
 
 // placed: `threat` = the mover now has two in a row with the third square free · `blocked` = it stopped the other
-// seat's two in a row. (The sounds and the bots' banter use them.)
+// seat's two in a row. (The sounds and the Dev Kit's event log use them.)
 export type Event =
   | { type: 'placed'; seen: 'all'; seat: Seat; cell: number; threat: boolean; blocked: boolean }
   | { type: 'won'; seen: 'all'; seat: Seat; line: number[] }
