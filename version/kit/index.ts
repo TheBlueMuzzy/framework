@@ -11,3 +11,7 @@ export const appVersion: string = import.meta.env.APP_VERSION ?? 'dev'
 
 /** What every place shows: "vX.Y.Z.B" (or "dev"). */
 export const versionLabel: string = appVersion === 'dev' ? 'dev' : `v${appVersion}`
+
+// The offline cache's updates (F193): a returning player gets a new release on this visit, a first visit never reloads.
+// The game hands in its own registerSW — this module never imports 'virtual:pwa-register'. updates.ts says how.
+export { startUpdates, type RegisterSWOptions, type ServiceWorkerLike, type StartedUpdates, type UpdateOptions } from './updates'
