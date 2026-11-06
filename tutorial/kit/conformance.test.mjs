@@ -52,6 +52,11 @@ describe('the runner\'s clock', () => {
     const files = [{ path: 'src/lessons.ts', text: "// createLessonRunner({ clock: wallClock })\nexport const runner = createLessonRunner({\n  clock: rulesClock, // the rules clock\n  timing: () => t,\n})\n" }]
     expect(runnerClocks(files)).toEqual([{ where: 'src/lessons.ts:2', clock: 'rulesClock' }])
   })
+
+  it('a definition isn\'t a call (the F198 swap rehearsal: Goops\' old runner.ts is still there when the checks run)', () => {
+    const old = { path: 'src/game/lessons/runner.ts', text: 'export function createLessonRunner(o: { game: LessonGame; clock: LessonClock }) {\n}\n' }
+    expect(runnerClocks([old])).toEqual([])
+  })
 })
 
 describe('check', () => {

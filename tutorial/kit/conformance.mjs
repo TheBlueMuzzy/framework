@@ -77,6 +77,8 @@ export function runnerClocks(files) {
     const call = /\bcreateLessonRunner\s*\(/g
     let m
     while ((m = call.exec(code))) {
+      // (a definition isn't a call — a game's own old lesson player, still there mid-swap, defines one)
+      if (/\bfunction\s*$/.test(code.slice(Math.max(0, m.index - 30), m.index))) continue
       const line = code.slice(0, m.index).split('\n').length
       const clock = code.slice(m.index, m.index + 600).match(/\bclock\s*:\s*([A-Za-z_$][\w$.]*)/)?.[1] ?? null
       found.push({ where: `${path}:${line}`, clock })
