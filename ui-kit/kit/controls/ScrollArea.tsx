@@ -73,8 +73,12 @@ export function measureContents(el: HTMLElement) {
   // a lone wrapper (a Stack or Grid); the second row is the first thing that starts below the first (a grid's row of
   // cards counts once). Its own padding isn't added: the rows scroll under it, and two 2rem rows keep today's 4rem.
   // One row only: its contents are the floor.
+  // A first row that is itself a group (a Stack: Credits' heading + names) counts as its lines, not one tall row —
+  // F194 rehearsal: Credits' people group (~1000 px) was the "row", so the list couldn't shrink. A card or a Row stays
+  // one row (only a kit Stack is opened).
   let rows = Array.from(el.children)
   while (rows.length === 1) rows = Array.from(rows[0].children)
+  while (rows[0]?.classList.contains('kit-stack') && rows[0].children.length > 1) rows = [...Array.from(rows[0].children), ...rows.slice(1)]
   const boxes = rows.map((r) => r.getBoundingClientRect()).filter((r) => r.height > 0)
   const second = boxes.find((r) => r.top >= boxes[0].bottom - 1)
   const two = second ? `${Math.ceil(second.bottom - boxes[0].top)}px` : tall

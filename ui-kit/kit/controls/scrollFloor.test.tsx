@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright'
 import { openBrowser, showInStyle } from '../stylePage.test-util.mjs'
-import { Panel } from '../layout'
+import { Panel, Stack } from '../layout'
 import { measureContents, ScrollArea } from './ScrollArea'
 
 let browser: Browser, page: Page
@@ -49,6 +49,20 @@ describe('A ScrollArea in a card keeps a floor', () => {
       const { list, rem } = await measure()
       expect(list, size).toBeCloseTo(4 * rem, 0)
     }
+  })
+
+  // F194 rehearsal (2026-11-06): Credits is a list of GROUPS (a Stack of Stacks: a heading + its names). The first
+  // "row" was the whole people group (~1000 px), so the list couldn't shrink and the whole card scrolled. Its rows are
+  // the lines inside a group.
+  it('a list of groups (Credits) keeps two of its lines, not a whole group', async () => {
+    const groups = `<div style="display: flex; flex-direction: column; block-size: 300px">${renderToStaticMarkup(
+      <Panel gap="m"><div style={{ blockSize: '260px', flexShrink: 0 }}>Big words</div>
+        <ScrollArea label="Credits"><Stack gap="l">{[0, 1].map((g) => <Stack key={g} gap="xs"><div style={{ blockSize: '2rem' }}>Group {g}</div>
+          {Array.from({ length: 20 }, (_, i) => <div key={i} style={{ blockSize: '2rem' }}>Name {i}</div>)}</Stack>)}</Stack></ScrollArea>
+      </Panel>)}</div>`
+    await showInStyle(page, 'clean', groups)
+    const { list, rem } = await measure()
+    expect(list).toBeLessThan(8 * rem)
   })
 
   it('a short list is never held taller than its rows', async () => {
