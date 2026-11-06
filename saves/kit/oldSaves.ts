@@ -23,17 +23,24 @@ export interface GoldenSave {
   expect?: Record<string, unknown>
 }
 
-/** One save the game's test checks, with a sample of real-looking data (not just fresh) for the round trip. */
+/** The game's rules rebuilding a loaded save from its moves, as Continue does — throws (in plain words) at a move that
+ *  doesn't fit today's rules. The starter's: (run) => replay(ticTacToe, run.record). (F190) */
+export type ReplayMoves = (data: any) => unknown // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
+
+/** One save the game's test checks, with a sample of real-looking data (not just fresh) for the round trip.
+ *  A save that keeps moves (a move record) also hands in `replay`, so its golden saves are played through the rules. */
 export interface SaveUnderTest {
   save: Save<any> | SlotSaves<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's saves
   sample?: unknown
+  replay?: ReplayMoves
 }
 
 /** A run the game's test checks (createRun): its save is tested like any other (golden saves, round trip…), and on
- *  top, that a run ended with end() never comes back. */
+ *  top, that a run ended with end() never comes back. A run that keeps moves hands in `replay` (as above). */
 export interface RunUnderTest {
   run: Run<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- any of the game's runs
   sample?: unknown
+  replay?: ReplayMoves
 }
 
 /** The file name of a golden save: glyphtender:new-game, 2 → "glyphtender_new-game-v2.json". */
@@ -93,8 +100,17 @@ function testable(save: SaveUnderTest['save'], storage: MemoryStorage): Save<unk
 /** Same data? (compared as JSON — what a save really is) */
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
-/** A golden save loads with today's code: from the save itself (not a fallback), and with its expected values. */
-export function checkGoldenSave(save: SaveUnderTest['save'], golden: GoldenSave): string[] {
+/** Does this loaded save keep moves? (a move record: `moves` or `record.moves` — what the table module's records hold) */
+function holdsMoves(data: unknown): boolean {
+  if (!data || typeof data !== 'object') return false
+  const d = data as { moves?: unknown; record?: { moves?: unknown } }
+  return Array.isArray(d.moves) || Array.isArray(d.record?.moves)
+}
+
+/** A golden save loads with today's code: from the save itself (not a fallback), and with its expected values.
+ *  With `replay` (the game's rules), its moves are played again as Continue would — a move that no longer fits fails
+ *  here, not on a player's Continue. A save that keeps moves but has no replay handed in fails too, saying so. (F190) */
+export function checkGoldenSave(save: SaveUnderTest['save'], golden: GoldenSave, replay?: ReplayMoves): string[] {
   const storage = memoryStorage()
   const target = testable(save, storage)
   // a string is the stored text exactly (a plain old value like done, or a record copied from DevTools as text)
@@ -106,6 +122,15 @@ export function checkGoldenSave(save: SaveUnderTest['save'], golden: GoldenSave)
   else if (report.from !== 'save') problems.push(`it didn't load — the game started fresh instead (${report.problems.join('; ') || 'nothing readable'})`)
   for (const [field, value] of Object.entries(golden.expect ?? {})) {
     if (!same(loaded?.[field], value)) problems.push(`"${field}" loaded as ${JSON.stringify(loaded?.[field])}, expected ${JSON.stringify(value)}`)
+  }
+  if (report.from === 'save' && !report.newer) {
+    if (replay) {
+      try { replay(loaded) } catch (error) {
+        problems.push(`its moves don't replay with today's rules — Continue would fail: ${(error as Error)?.message ?? error}`)
+      }
+    } else if (holdsMoves(loaded)) {
+      problems.push('it holds moves but nothing replays them — hand the game\'s replay to its line in tests/saves/saves.test.ts ({ run, sample, replay: (data) => replay(rules, data.record) })')
+    }
   }
   return problems
 }

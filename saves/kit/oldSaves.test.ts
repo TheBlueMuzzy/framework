@@ -180,7 +180,49 @@ describe('a golden save whose moves no longer fit the game\'s rules (F190)', () 
   })
   const ticTacToeMove = goldenWith([{ seat: 0, action: { cell: 4 }, by: 'seat' }])
 
-  it.fails('today: a tic-tac-toe move in a Nim save is not caught (the gap — F190 task 2 turns this into a plain test)', () => {
-    expect(checkGoldenSave(nimRun().save, ticTacToeMove)).not.toEqual([])
+  // the game's replay: its rules rebuild the game from the record, throwing in plain words at a move that doesn't fit
+  // (the starter's is table/core's replay(rules, record), the same one Continue uses)
+  const replayNim = (run: NimRun) => {
+    let sticks = 15
+    run.record.moves.forEach(({ seat, action }, i) => {
+      const take = action.take
+      if (typeof take !== 'number' || !Number.isInteger(take) || take < 1 || take > 3 || take > sticks) {
+        throw new Error(`Move ${i + 1} (seat ${seat}) is not allowed: take 1, 2 or 3 sticks`)
+      }
+      sticks -= take
+    })
+  }
+
+  it('a tic-tac-toe move in a Nim save fails the check, naming the move (it passed before F190)', () => {
+    const problems = checkGoldenSave(nimRun().save, ticTacToeMove, replayNim)
+    expect(problems).toEqual(['its moves don\'t replay with today\'s rules — Continue would fail: Move 1 (seat 0) is not allowed: take 1, 2 or 3 sticks'])
+  })
+
+  it('moves that fit the rules pass', () => {
+    const fine = goldenWith([{ seat: 0, action: { take: 3 }, by: 'seat' }, { seat: 1, action: { take: 2 }, by: 'bot' }])
+    expect(checkGoldenSave(nimRun().save, fine, replayNim)).toEqual([])
+  })
+
+  it('a save holding moves with no replay handed in fails, saying how to wire it (so the gap can\'t stay open quietly)', () => {
+    const problems = checkGoldenSave(nimRun().save, ticTacToeMove)
+    expect(problems).toHaveLength(1)
+    expect(problems[0]).toContain('it holds moves but nothing replays them')
+  })
+
+  it('a replay that throws something odd still comes back as a problem, never a crash', () => {
+    expect(checkGoldenSave(nimRun().save, ticTacToeMove, () => { throw 'nope' })).toEqual(['its moves don\'t replay with today\'s rules — Continue would fail: nope'])
+  })
+
+  it('a save with no moves (a progress or settings save) is untouched: no replay needed, none run', () => {
+    let ran = 0
+    expect(checkGoldenSave(choices, { stored: { save: 'glyphtender:new-game', version: 2, savedAt: '', data: { players: 3, twoLetterWords: true } } })).toEqual([])
+    expect(checkGoldenSave(choices, { stored: { save: 'glyphtender:new-game', version: 2, savedAt: '', data: { players: 3, twoLetterWords: true } } }, () => { ran++ })).toEqual([])
+    expect(ran).toBe(1) // handed one anyway → it runs (a game may check more than moves); not handed one → nothing asked
+  })
+
+  it('a golden save that didn\'t load isn\'t replayed too (one problem, the real one)', () => {
+    const problems = checkGoldenSave(nimRun().save, { stored: '{{{' }, replayNim)
+    expect(problems).toHaveLength(1)
+    expect(problems[0]).toContain('didn\'t load')
   })
 })
