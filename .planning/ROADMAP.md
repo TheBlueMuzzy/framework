@@ -559,6 +559,35 @@ flowchart LR
   F188 --> F189
 ```
 
+## v0.38 — Games take what both use  · planned 2026-11-06
+Goal (Muzzy 2026-11-06: "ok"; from F189 — Games list module candidates, `research/module-candidates/README.md`): the parts both games already wrote go into the modules they belong to, Goops takes Saves + Crashes + Lint (so they stop being frozen), and each game's update is rehearsed on a throwaway copy first — the real updates then run in each game's own session. No new module.
+- 🟢 F190 🧱 Save check replays the moves — the golden-save check replays every saved game's moves through the rules, so a save that no longer fits is caught (the 2026-11-04 gap; before Goops' progress moves onto Saves) — must
+- 🟢 F191 🧱 Settings the game follows live — one small UI kit helper from Glyphtender's `src/ui/gameSettings.ts`; replaces Goops' three hand-written copies (gooStyle, wallKick, readoutSetting) — must
+- 🟢 F192 🧱 Phone screen handling — full screen on phones (Glyphtender `src/ui/fullscreen.ts`) + the "turn your phone upright" card (Goops `src/ui/App.tsx`) in the UI kit, each switched per game — must
+- 🟢 F193 🧱 New version on first visit, fixed — Goops' fix (`src/main.tsx` 16–28: the page could stay on the old version) goes into the Version module — must
+- ⏳ F194 🔧 Goops catch-up rehearsal — on `.scratch/goops-catchup`: Goops to v0.39 + Saves, Crashes (its crash server set up on Muzzy's Cloudflare — Muzzy 2026-11-06: yes), Lint and F191–F193; every step timed, every hand fix noted; "Send crash reports" on by default (Muzzy 2026-11-06: ok) — must · needs: F190, F191, F192, F193
+- ⏳ F195 🔧 Glyphtender catch-up rehearsal — the same on `.scratch/glyphtender-catchup`, with the rooms 0.15.0 server update it waits on — must · needs: F191, F192, F193
+- 🟢 F196 🔧 Test helpers — a Dev Kit "open this tab" helper for e2e (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`) — could
+- 🟢 F197 ❓ Tutorial trial — on a copy, rewrite Glyphtender's first 3 tutorial steps as Goops-style lesson files; verdict: one tutorial module, or each game keeps its own — should
+```mermaid
+flowchart LR
+  F190[🟢 F190 Save check replays the moves]
+  F191[🟢 F191 Settings the game follows live]
+  F192[🟢 F192 Phone screen handling]
+  F193[🟢 F193 New version on first visit, fixed]
+  F194[⏳ F194 Goops catch-up rehearsal]
+  F195[⏳ F195 Glyphtender catch-up rehearsal]
+  F196[🟢 F196 Test helpers]
+  F197[🟢 F197 Tutorial trial]
+  F190 --> F194
+  F191 --> F194
+  F192 --> F194
+  F193 --> F194
+  F191 --> F195
+  F192 --> F195
+  F193 --> F195
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -578,7 +607,6 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-11-06 — **Next milestone: games take what both use** (from F189 — Games list module candidates, `research/module-candidates/README.md`; Claude's pick, Muzzy "go auto"): Goops takes Saves + Crashes + Lint (unfreezes Saves + Crashes; Saves needs an upgrade step + an old-save golden test for Goops' progress); UI kit gets the live game-settings helper + phone screen handling (full screen + upright card); Version gets Goops' first-visit update fix; test helpers (Dev Kit tab opener, screenshot check) if room; tutorial player = a trial only. Then Glyphtender + Goops update to v0.39. Crash server for Goops on Muzzy's Cloudflare: yes (Muzzy 2026-11-06). → /define.
 - 2026-11-05 — **Report-only mode doesn't cover publishing a page** (F185 — Slimmed rule set): GE10 holds edits, commits, pushes and deploys after "assess / analyze…", but the claude-artifacts publish tools aren't wired to any hook — wiring them needs a new matcher in ~/.claude/settings.json (Muzzy's file).
 - 2026-11-05 — **HC10 (wake-up rule) can read the Stop hook's own `background_tasks` list** (docs: code.claude.com/docs/en/hooks) instead of parsing the transcript — record one real Stop input first to see the field's shape, keep the transcript read as the fallback.
 - 2026-11-04 — **Golden-save check passes a save whose moves no longer fit the rules** (found by F183 — Framework inventory + verdicts' Nim test, `research/audit-2026-11/framework.md` §5): the starter's golden-save test still passed with a tic-tac-toe move (`{ cell: 4 }`) in a Nim save — it checks the save's shape, not that its moves replay; a game changing its moves finds out only when Continue throws. After the v0.37 freeze: replay the saved moves through the rules in the check.

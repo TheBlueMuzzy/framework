@@ -1,15 +1,14 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **Released v0.39.0 — v0.37 A lean, measured BMUZ ✅** (library: tag v0.39.0 on GitHub). The freeze is lifted. Next: /define the next milestone — games take what both use (ROADMAP Ideas 2026-11-06, from the F189 page https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv), then Glyphtender + Goops update.
-- Muzzy 2026-11-06: "yes" — Goops gets its own small crash server on his Cloudflare (like Glyphtender's), for Crashes in Goops.
-- Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git — the commit check now says so).
+2026-11-06 — **Roadmap ready: v0.38 Games take what both use** (F190–F197; Muzzy "ok"). 6 features can start now (F190–F193, F196, F197); the two rehearsals (F194 Goops, F195 Glyphtender) follow. Released before it: v0.39.0. Next: /sprint.
+- Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
 Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
-Stage: deliver   Milestone: — (v0.37 released; next: /define)   Sprint: — (59 archived)
+Stage: develop   Milestone: v0.38 Games take what both use   Sprint: — (next: 60)
 Doing: nothing — v0.39.0 released   Branch: main   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
