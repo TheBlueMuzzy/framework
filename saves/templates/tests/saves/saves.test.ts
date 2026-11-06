@@ -2,6 +2,7 @@
 // List every save the game makes (each createSave) in SAVES below, with a sample of real-looking data.
 // For every save this proves:
 //   - every golden save in this folder (a real save from each version: <key>-v<N>.json) loads with today's code
+//     — and a save that keeps moves (a move record) replays them through today's rules: hand its `replay` in below
 //   - a save → load round trip gives back the same data
 //   - damaged saves (cut off, the wrong type, empty) fall back to the backup and never crash
 //   - full or blocked storage never stops the game
@@ -15,6 +16,8 @@ import {
 } from '../../src/saves/oldSaves'
 // import { progressSave } from '../../src/progress/save'
 // import { matchRun } from '../../src/game/run'
+// import { replay } from '../../src/table/core'
+// import { rules } from '../../src/game/rules'
 
 const SAVES: SaveUnderTest[] = [
   // { save: progressSave, sample: { totalXp: 1200, unlocks: ['hat'] } },
@@ -22,6 +25,8 @@ const SAVES: SaveUnderTest[] = [
 
 const RUNS: RunUnderTest[] = [
   // { run: matchRun, sample: { turn: 7, scores: [12, 9] } },
+  // a run that keeps its moves: its golden saves are played again as Continue would (a move that no longer fits fails)
+  // { run: matchRun, sample: { record: { setup, moves: [] } }, replay: (data) => replay(rules, data.record) },
 ]
 
 const golden = import.meta.glob('./*.json', { eager: true, import: 'default' })
@@ -39,15 +44,15 @@ if (!madeIn.length && !SAVES.length && !RUNS.length) {
 }
 
 // a run's save is tested like any other save
-const everySave: SaveUnderTest[] = [...SAVES, ...RUNS.map(({ run, sample }) => ({ save: run.save, sample }))]
+const everySave: SaveUnderTest[] = [...SAVES, ...RUNS.map(({ run, sample, replay }) => ({ save: run.save, sample, replay }))]
 
-for (const { save, sample } of everySave) {
+for (const { save, sample, replay } of everySave) {
   describe(`save "${save.key}" (version ${save.version})`, () => {
     it('has a golden save for every version', () => {
       expect(missingGoldenVersions(save.key, save.version, Object.keys(golden)), 'missing tests/saves/ files for these versions').toEqual([])
     })
     for (const { file, golden: copy } of goldenSavesFor(save.key, golden)) {
-      it(`${file} loads with today's code`, () => expect(checkGoldenSave(save, copy)).toEqual([]))
+      it(`${file} loads with today's code`, () => expect(checkGoldenSave(save, copy, replay)).toEqual([]))
     }
     it('round trip: what is saved is what loads', () => expect(checkRoundTrip(save, sample)).toEqual([]))
     it('damaged saves fall back to the backup, never crash', () => expect(checkDamagedSaves(save, sample)).toEqual([]))
