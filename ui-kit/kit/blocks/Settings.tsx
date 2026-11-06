@@ -108,6 +108,10 @@ export function onSettingsChange(listener: (values: SettingsValues) => void) {
   changeListeners.add(listener)
   return () => { changeListeners.delete(listener) }
 }
+/** Tell the listeners about a change saved somewhere else than the screen (full screen's own button, Esc). */
+export function tellSettingsChanged(values: SettingsValues) {
+  changeListeners.forEach((listener) => listener(values))
+}
 
 // Text size and reduce motion drive the kit itself: text is in rem, so the page's font size scales
 // every word (gaps and 44px targets stay put), and data-reduce-motion stops animations (blocks.css).
@@ -179,7 +183,7 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
     setValues(next)
     save(next)
     applyAccessibility(next)
-    changeListeners.forEach((listener) => listener(next))
+    tellSettingsChanged(next)
     fullscreenSetting(next, changedId) // (flipping Full screen is a tap: the browser allows it now)
     onChange?.(next, changedId)
   }

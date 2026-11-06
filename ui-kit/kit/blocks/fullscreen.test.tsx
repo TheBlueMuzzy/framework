@@ -1,8 +1,8 @@
 // FULL SCREEN ON PHONES (F192, from Glyphtender's fullscreen.ts) — switched per game by its Settings → Full screen row.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Settings, type SettingsSchema, type SettingsValues } from './Settings'
-import { fullscreenSetting, hiddenFullscreenRows, startFullscreen, stopFullscreen, withFullscreenDefault } from './fullscreen'
+import { Settings, onSettingsChange, type SettingsSchema, type SettingsValues } from './Settings'
+import { fullscreenSetting, hiddenFullscreenRows, setFullscreen, startFullscreen, stopFullscreen, withFullscreenDefault } from './fullscreen'
 import { pretendDevice } from './phoneDevice.test-util'
 
 const tap = () => window.dispatchEvent(new Event('pointerup'))
@@ -67,6 +67,24 @@ describe('full screen on phones', () => {
     expect(d.exitFullscreen).toHaveBeenCalledTimes(1)
     fullscreenSetting({ fullscreen: true }, 'brightness')
     expect(d.requestFullscreen).toHaveBeenCalledTimes(1)
+  })
+
+  it('Reset (or any change) that turns Full screen off leaves full screen, so Settings never says off while it stays (review, sprint 60)', () => {
+    const d = pretendDevice({ touch: false })
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: document.documentElement })
+    fullscreenSetting({ fullscreen: false }, undefined) // Reset: no single row changed
+    expect(d.exitFullscreen).toHaveBeenCalledTimes(1)
+  })
+
+  it("full screen's own button and a computer's Esc tell live settings too (review, sprint 60)", () => {
+    pretendDevice({ touch: false })
+    const told: unknown[] = []
+    const stopListening = onSettingsChange((values) => told.push(values.fullscreen))
+    startFullscreen({ load: () => ({ fullscreen: true }), save: () => {} })
+    setFullscreen(false)
+    act(() => { document.dispatchEvent(new Event('fullscreenchange')) })
+    stopListening()
+    expect(told[0]).toBe(false)
   })
 
   it("a computer's Esc out of full screen turns the setting off (saved), so Settings never says on in a window", () => {

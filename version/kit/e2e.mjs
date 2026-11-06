@@ -46,7 +46,10 @@ export function builtVersion(distDir = 'dist') {
 // loop). The page must be in a fresh browser context, served like the real site (a release build).
 
 /** The same version with another build number: "v0.11.0.4" → "v0.11.0.9999" (a "next release" for an update test). */
-export const nextVersion = (label, build = 9999) => `${label.slice(0, label.lastIndexOf('.'))}.${build}`
+export const nextVersion = (label, build = 9999) => {
+  const dot = label.lastIndexOf('.')
+  return dot < 0 ? `${label}.${build}` : `${label.slice(0, dot)}.${build}` // ("dev" has no build part: add one)
+}
 
 /** What the page's version tag says right now (null while it's between pages or has none). */
 export const shownVersion = (page) => page.locator(META_SELECTOR).first().getAttribute('content', { timeout: 2_000 }).catch(() => null)

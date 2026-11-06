@@ -18,7 +18,7 @@
 // The Settings screen does the rest itself: flipping the row is a tap, so it goes in / comes out at once.
 import { useSyncExternalStore } from 'react'
 import { gameOrientation } from '../orientation'
-import { settingsStorageKey, type SettingsSchema, type SettingsValues } from './Settings'
+import { settingsStorageKey, tellSettingsChanged, type SettingsSchema, type SettingsValues } from './Settings'
 
 type FsDocument = Document & { webkitFullscreenEnabled?: boolean; webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => Promise<void> }
 type FsElement = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }
@@ -96,11 +96,15 @@ let save: (values: SettingsValues) => void = (values) => {
   try { localStorage.setItem(settingsStorageKey(), JSON.stringify(values)) } catch { /* not remembered, still works */ }
 }
 
-/** Settings changed (or loaded): Full screen on → go now (this is a tap), off → leave. Other rows never touch it.
- *  (The Settings screen calls it on every change.) */
+/** Settings changed (or loaded): Full screen on → go now (this is a tap), off → leave. Another row's change never
+ *  goes full screen, but a change that turned it off (Reset) still leaves it, so Settings never says "off" while the
+ *  page stays full screen. (The Settings screen calls it on every change.) */
 export function fullscreenSetting(values: SettingsValues, changed?: string) {
   wanted = values.fullscreen === true
-  if (changed !== 'fullscreen') return
+  if (changed !== 'fullscreen') {
+    if (!wanted) exitFullscreen()
+    return
+  }
   if (wanted) enterFullscreen()
   else exitFullscreen()
 }
@@ -109,6 +113,7 @@ export function fullscreenSetting(values: SettingsValues, changed?: string) {
 export function setFullscreen(on: boolean) {
   const next = { ...load(), fullscreen: on }
   save(next)
+  tellSettingsChanged(next) // a live setting reading Full screen follows it too
   fullscreenSetting(next, 'fullscreen')
 }
 
@@ -126,7 +131,9 @@ export function startFullscreen(options: { load?: () => SettingsValues; save?: (
     // A computer's Esc leaves full screen: the setting follows, so Settings never says "on" in a window
     if (!fullscreenNow() && wanted && !isTouchDevice()) {
       wanted = false
-      save({ ...load(), fullscreen: false })
+      const next = { ...load(), fullscreen: false }
+      save(next)
+      tellSettingsChanged(next)
       setState({ resaved: state.resaved + 1 })
     }
   }

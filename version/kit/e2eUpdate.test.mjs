@@ -59,6 +59,9 @@ describe('nextVersion', () => {
     expect(nextVersion('v0.11.0.4')).toBe('v0.11.0.9999')
     expect(nextVersion('v0.11.0.4', 99)).toBe('v0.11.0.99')
   })
+  it('a label with no build part ("dev") gets one added, not a letter cut off (review, sprint 60)', () => {
+    expect(nextVersion('dev')).toBe('dev.9999')
+  })
 })
 
 describe('checkUpdateArrives', () => {
