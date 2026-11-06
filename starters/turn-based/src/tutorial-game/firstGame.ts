@@ -51,7 +51,7 @@ subscribeMatch(() => {
   if (m.record.setup !== setupSeen) {
     setupSeen = m.record.setup
     heard = m.record.moves.length
-    if (!heard && !runner.view().lessonId && due()) { replay = false; runner.start(lesson) }
+    if (!heard && lesson() && !runner.view().lessonId && due()) { replay = false; runner.start(lesson) }
     return
   }
   for (; heard < m.record.moves.length; heard++) runner.event('placed', { by: m.record.moves[heard].seat === YOU ? 'you' : 'bot' })
