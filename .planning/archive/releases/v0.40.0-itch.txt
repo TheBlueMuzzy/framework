@@ -1,0 +1,22 @@
+v0.40.0 — 2026-11-06
+
+Games take what both use. The parts Glyphtender and Goops each built for themselves are now shared: settings the game follows the moment they change, full screen on phones with a "turn your phone" card, and a fix so returning players always get the new version. The save check now replays every saved game's moves, and both games' updates were rehearsed on copies — every problem found was fixed in the framework first.
+
+BREAKING
+• Saves 0.9.0: a game whose save keeps a list of moves must hand its save test the replay (the call Continue makes) — saves/UPGRADES.md has the 3 lines. Glyphtender's and Goops' saves hold no moves today, so for them this is nothing.
+
+NEW
+• UI kit 0.42.0: liveSetting + useLiveSetting — one line per setting the game reads; it follows the Settings screen at once and keeps its value across a reload.
+• UI kit 0.42.0: full screen on phones (a Settings → Display row, on for phones, off for computers) and the "turn your phone upright / on its side" card, from the game's style.json orientation. Both are opt-in.
+• Version 0.2.0: startUpdates(registerSW) — a returning player gets a new release on this visit, a first visit never reloads; plus a test helper that checks a new version really arrives.
+• Saves 0.9.0: the golden-save check replays a saved game's moves through today's rules, so a save that no longer fits fails the test instead of a player's Continue.
+• The Saves README says how a game moves its own save onto the module; its installer warns about old sample saves that the save test would misread.
+
+FIXED
+• The Credits screen: its list scrolls inside the card again, instead of the whole card scrolling with the list touching its edge.
+• Full screen comes on at the first tap for a phone player who never opened Settings.
+• Reset in Settings leaves full screen when it turns the row off.
+• The UI kit's check counts a setting read through liveSetting, whatever the mapper's parameter is called and with a type argument.
+• The Version installer no longer reads other modules as the game's code, and accepts a main menu the game draws itself.
+• The Crashes installer knows when a game's crash server is already live, uses the game's own port, and says correctly where crash maps go.
+• The Crashes upgrade note says how to put back a released crash map an old check build overwrote.

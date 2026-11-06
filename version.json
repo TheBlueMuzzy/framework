@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.39.0",
-  "build": 1,
+  "version": "0.40.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -247,6 +247,11 @@
       "version": "0.39.0",
       "date": "2026-11-06",
       "summary": "A lean, measured BMUZ"
+    },
+    {
+      "version": "0.40.0",
+      "date": "2026-11-06",
+      "summary": "Games take what both use"
     }
   ]
 }
