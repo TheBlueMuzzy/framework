@@ -3,7 +3,7 @@ Started 2026-11-05 · Milestone v0.37 · Features: F189
 
 ## F189 🎮 Games list module candidates
 Done when: Glyphtender and Goops each have a list of their own parts checked against the module recipe §2 (structure · named by a player · would the other game use it), plus which frozen modules the other game could take; one combined page ranks what passes and says in one line why the rest stay in their game; Muzzy picks what the next milestone extracts. Read-only: nothing moved, nothing extracted.
-- [ ] 🤖 1. Prove the cleanup still stands: framework check:fast, hook + script suites green, first-hand — scripts/check-modules.mjs
+- [x] 🤖 1. Prove the cleanup still stands: framework check:fast, hook + script suites green, first-hand — scripts/check-modules.mjs
 - [x] 🤖 2. Glyphtender's list: its own parts (not module copies) against recipe §2, and which frozen modules Goops could take — .planning/research/module-candidates/glyphtender.md
 - [x] 🤖 3. Goops's list: its own parts (input, ladder, progress, goo, view…) against recipe §2, and which modules Glyphtender lacks that Goops proves — .planning/research/module-candidates/goops.md
 - [x] 🤖 4. One combined page: candidates that pass the two-game rule, ranked; one line per part that stays; published — .planning/research/module-candidates/README.md (page: https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv)
