@@ -643,6 +643,33 @@
   60% { box-shadow: 0 0 0 0.75rem color-mix(in srgb, var(--kit-pulse, var(--accent)) 0%, transparent); }
 }
 
+/* ───────────── Spotlight (spotlight.tsx, 0.43.0): dims everything but the things being taught ─────────────
+   One popover over the whole window (the top layer, like the Callout). The dim and the see-through tap block are cut
+   by clip-paths spotlight.tsx writes every frame (one hole per target, grown by gap-s); each outline is moved into
+   place from --kit-spot-x / -y / -w / -h. column-gap on the layer is never seen: it is the room round each target. */
+@layer kit-base {
+  .kit-spot-layer { inset: 0; inline-size: auto; block-size: auto; max-inline-size: none; max-block-size: none;
+    margin: 0; padding: 0; border: 0; background: none; overflow: hidden; display: none; pointer-events: none;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr); column-gap: var(--gap-s); }
+  .kit-spot-layer:popover-open { display: grid; }
+  .kit-spot-layer > * { grid-area: 1 / 1; visibility: hidden; }
+  .kit-spot-layer[data-ready] > :not([data-gone]) { visibility: visible; }
+  .kit-spot-dim { pointer-events: none; }
+  /* Catches taps on the dim (clip-path shapes where), so they stop there; taps in a hole reach what's under it */
+  .kit-spot-block { pointer-events: auto; background: transparent; }
+  .kit-spot-ring { justify-self: start; align-self: start; translate: var(--kit-spot-x, 0) var(--kit-spot-y, 0);
+    inline-size: var(--kit-spot-w, 0); block-size: var(--kit-spot-h, 0); pointer-events: none; }
+}
+@layer kit-style {
+  /* The same dark see-through screen as a dimmed Callout (game-shade is dark in every style); --kit-spot-dim = dimAmount */
+  .kit-spot-dim { background: color-mix(in srgb, var(--game-shade) var(--kit-spot-dim, 65%), transparent); animation: kit-fade var(--motion-normal) var(--ease); }
+  /* The outline: the Callout's glow ring, steady; pulse = it breathes */
+  .kit-spot-ring { border-radius: var(--radius-control); corner-shape: var(--corner-shape); outline: 0.1875rem solid var(--accent); filter: var(--glow); }
+  .kit-spot-layer[data-pulse] .kit-spot-ring { animation: kit-callout-pulse calc(var(--motion-normal) * 5) ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { :is(.kit-spot-dim, .kit-spot-ring) { animation: none !important; } }
+  :root[data-reduce-motion] :is(.kit-spot-dim, .kit-spot-ring) { animation: none !important; }
+}
+
 
 /* ───────────── Talking bubble (talkingBubble.tsx, 0.31.0): a story line someone says ─────────────
    A Callout underneath (placed by teach.tsx's useCalloutPlace, the same pointer maths) — but its outline is DRAWN

@@ -1,10 +1,12 @@
 // CALLOUT MATHS — where a Callout's bubble and pointer go (plain maths, no page needed), its types and words.
 // The component itself is in teach.tsx.
 export type CalloutPoint = { x: number; y: number }
-export type CalloutTarget = Element | string | CalloutPoint | null | undefined
+/** A box on screen, in page px (left / top / right / bottom), e.g. from getBoundingClientRect(). */
+export type CalloutBox = { left: number; top: number; right: number; bottom: number }
+export type CalloutTarget = Element | string | CalloutPoint | CalloutBox | null | undefined
 export type CalloutSide = 'top' | 'bottom' | 'left' | 'right'
 export type CalloutPlacement = 'auto' | CalloutSide
-type Box = { left: number; top: number; right: number; bottom: number }
+type Box = CalloutBox
 type Size = { width: number; height: number }
 export type CalloutSpot = { side: CalloutSide; x: number; y: number; tipX: number; tipY: number }
 
@@ -52,5 +54,34 @@ export function placeCallout(target: Box, size: Size, frame: Box, distance: numb
   return { side, x, y, tipX, tipY }
 }
 
+/** "Keep clear" (0.43.0): the play area the bubble should cover as little of, and the live spot (what the player is
+ *  working on right now — the glowing hex, the piece in hand) it should stay away from. Each one an Element, a CSS
+ *  selector (looked up every frame) or a screen box. */
+export type CalloutKeepClear = { area: CalloutTarget; live?: CalloutTarget }
+
+// KEEP CLEAR — Glyphtender's tutorial rule (src/tutorial/tipsPlace.ts, made general): the bubble covers as little of
+// the play area as it can. Of the sides it fits on (placeCallout's own flips and shifts), it picks — in this order of
+// importance — one that doesn't cover the live spot, one that isn't toward the live spot (when the live spot isn't the
+// target itself), the one covering the least of the play area (so: toward the area's nearer edge), and last the usual
+// order: toward the nearer top / bottom edge, the other one, toward the nearer left / right edge, the other one.
+export function placeKeepingClear(target: Box, size: Size, frame: Box, distance: number, area: Box, live: Box | null = null, tipInset = 0): CalloutSpot {
+  const midY = (b: Box) => (b.top + b.bottom) / 2, midX = (b: Box) => (b.left + b.right) / 2
+  const vertical: CalloutSide = midY(target) < midY(area) ? 'top' : 'bottom'
+  const sideways: CalloutSide = midX(target) < midX(area) ? 'left' : 'right'
+  const order: CalloutSide[] = [vertical, opposite[vertical], sideways, opposite[sideways]]
+  // Toward the live spot = its middle lies past the target's edge on that side (a live spot that is the target, or
+  // sits inside it, is toward no side)
+  const toward = (side: CalloutSide) => !!live && (side === 'top' ? midY(live) < target.top : side === 'bottom' ? midY(live) > target.bottom
+    : side === 'left' ? midX(live) < target.left : midX(live) > target.right)
+  const shared = (a: Box, b: Box) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+  const ranked = order.map((side, i) => ({ side, i, spot: placeCallout(target, size, frame, distance, side, tipInset) }))
+    .filter(({ side, spot }) => spot.side === side) // it really fits there (else placeCallout moved it: that side gets its own turn)
+    .map(({ side, i, spot }) => {
+      const box = { left: spot.x, top: spot.y, right: spot.x + size.width, bottom: spot.y + size.height }
+      return { spot, rank: [live && shared(box, live) > 0 ? 1 : 0, toward(side) ? 1 : 0, Math.round(shared(box, area)), i] }
+    })
+    .sort((a, b) => a.rank.reduce((d, n, k) => d || n - b.rank[k], 0))
+  return ranked[0]?.spot ?? placeCallout(target, size, frame, distance, order[0], tipInset)
+}
 
 export const calloutWords = { label: 'Tip' }

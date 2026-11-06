@@ -3,8 +3,11 @@
 // They know nothing about any game: the game decides WHEN a callout shows and what it says.
 //
 // <Callout target="#plant" text="Happy? Tap Plant." onDismiss={hide} />
-//   target     an Element, a CSS selector (looked up every frame, so it can appear later) or a screen point { x, y }
+//   target     an Element, a CSS selector (looked up every frame, so it can appear later), a screen point { x, y }
+//              or a screen box { left, top, right, bottom }
 //   placement  'auto' (default: above, else below, right, left) or a side to try first — it flips / shifts to fit
+//   keepClear  { area, live? } (0.43.0), instead of placement: covers as little of the play area as it can — away from
+//              the live spot, toward the area's nearer edge (Glyphtender's rule, callout.ts placeKeepingClear); still fits
 //   title      a bold line above the text · action  a button label ("Got it") — then only the button closes it
 //   dim        darkens everything but the target (a cut-out spotlight; taps still reach the target through the hole)
 //   pulse      the target glows · dimAmount  how dark the dim is, 0–1 (default 0.65)
@@ -16,16 +19,20 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode,
 import { createPortal } from 'react-dom'
 import { Row, Stack } from '../layout'
 import { Button, Text } from '../controls'
-import { calloutWords, placeCallout, type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
+import { calloutWords, placeCallout, placeKeepingClear, type CalloutKeepClear, type CalloutPlacement, type CalloutSide, type CalloutTarget } from './callout'
 import { focusRing } from '../keysOrPad'
 
 type Box = { left: number; top: number; right: number; bottom: number }
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(value, Math.max(low, high)))
 
-// The target's rectangle on screen right now, or null when it isn't there (not on the page, or hidden)
-function targetBox(target: CalloutTarget): Box | null {
+/** The target's rectangle on screen right now, or null when it isn't there (not on the page, or hidden). A target is
+ *  an Element, a CSS selector (looked up now), a screen point { x, y } or a screen box { left, top, right, bottom }. */
+export function targetBox(target: CalloutTarget): Box | null {
   if (!target) return null
-  if (typeof target === 'object' && 'x' in target && !(target instanceof Element)) return { left: target.x, top: target.y, right: target.x, bottom: target.y }
+  if (typeof target === 'object' && !(target instanceof Element)) {
+    if ('x' in target) return { left: target.x, top: target.y, right: target.x, bottom: target.y }
+    return { left: target.left, top: target.top, right: target.right, bottom: target.bottom }
+  }
   const el = typeof target === 'string' ? document.querySelector(target) : target
   if (!el || !el.isConnected) return null
   const r = el.getBoundingClientRect()
@@ -39,6 +46,7 @@ export type CalloutProps = {
   onDismiss?: () => void; onOutsideTap?: () => void
   dim?: boolean; pulse?: boolean; dimAmount?: number
   label?: string // what a screen reader calls it when it has no title (default "Tip")
+  keepClear?: CalloutKeepClear // cover as little of a play area as it can, away from a live spot (0.43.0)
 }
 
 // Every side's order to try, first to last (placeCallout's own order)
@@ -51,6 +59,8 @@ export type CalloutPlaceInput = {
   target: CalloutTarget; placement: CalloutPlacement
   /** A CSS selector of things the bubble must not cover (the HUD); one that holds the target itself doesn't count. */
   avoid?: string
+  /** Cover as little of a play area as it can, away from a live spot (0.43.0) — `placement` is then not used. */
+  keepClear?: CalloutKeepClear
 }
 
 /** THE POINTING BUBBLE'S PLACEMENT — shared by Callout and TalkingBubble (same intention: words
@@ -83,7 +93,10 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       const radius = parseFloat(getComputedStyle(box).borderTopLeftRadius) || 0
       const tipInset = Math.min(Math.min(size.width, size.height) / 2, radius + reach)
       const distance = reach + tipSize * 0.25
-      let spot = placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
+      // Keep clear (0.43.0): covering as little of the play area as it can, away from the live spot; else the asked side
+      const keep = now.current.keepClear, area = keep && targetBox(keep.area)
+      let spot = area ? placeKeepingClear(hole, size, frameBox, distance, area, targetBox(keep.live), tipInset)
+        : placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
       // Clear of the HUD: the first side (in the usual order) where it fits without covering anything to avoid
       const avoid = now.current.avoid ? avoidBoxes(now.current.avoid, now.current.target, box) : []
       const spotBox = (s: typeof spot) => ({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height })
@@ -191,12 +204,12 @@ export function useShownPopover(layer: RefObject<HTMLDivElement | null>) {
   }, [layer])
 }
 
-export function Callout({ target, text, title, action, placement = 'auto', onDismiss, onOutsideTap, dim, pulse, dimAmount, label }: CalloutProps) {
+export function Callout({ target, text, title, action, placement = 'auto', onDismiss, onOutsideTap, dim, pulse, dimAmount, label, keepClear }: CalloutProps) {
   const layer = useRef<HTMLDivElement>(null)
   const bubble = useRef<HTMLDivElement>(null)
   // The latest props for the frame loop, without restarting it on every render
-  const now = useRef<CalloutPlaceInput>({ target, placement })
-  useLayoutEffect(() => { now.current = { target, placement } })
+  const now = useRef<CalloutPlaceInput>({ target, placement, keepClear })
+  useLayoutEffect(() => { now.current = { target, placement, keepClear } })
 
   // Show the popover while mounted (above the game and any open screen)
   useShownPopover(layer)

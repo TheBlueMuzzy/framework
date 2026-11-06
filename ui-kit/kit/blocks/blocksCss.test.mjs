@@ -52,3 +52,18 @@ describe('blocks.css 0.35.4 (F147)', () => {
     expect(rule('.kit-menu-header > .kit-button[data-icon] {')).toContain('calc(var(--target-min) - var(--border-width))')
   })
 })
+
+// Style names only (STATE rules: no colours, px sizes or fonts in parts) — the Spotlight's CSS
+describe('blocks.css 0.43.0 (F199): the Spotlight uses style names only', () => {
+  const spot = css.split(/\r?\n/).filter((line) => line.includes('.kit-spot'))
+  it('has its rules, none with a px size, a colour or a font', () => {
+    expect(spot.length).toBeGreaterThan(5)
+    for (const line of spot) {
+      expect(line).not.toMatch(/\d+px/)
+      expect(line).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i)
+      expect(line).not.toMatch(/font-family/)
+    }
+    expect(css).toContain('var(--game-shade) var(--kit-spot-dim, 65%)')
+    expect(css).toContain('.kit-spot-ring { border-radius: var(--radius-control)')
+  })
+})
