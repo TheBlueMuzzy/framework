@@ -48,7 +48,8 @@
   /* Board view (0.43.0): a stand-in 6 × 6 board, square, as big as the screen's height allows; the live cell glows */
   .gallery-teach-play { align-items: center; }
   .gallery-teach-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap-s); aspect-ratio: 1;
-    inline-size: min(100vw - 6rem, 16rem, max(6rem, 100dvh - 12rem)); }
+    inline-size: min(100vw - 14rem, 16rem, max(6rem, 100dvh - 14rem)); }
+  .gallery-teach-play { flex-wrap: nowrap; } /* Plant beside the board, gap-l apart (clear of its outline) */
   .gallery-teach:has(.gallery-teach-board) { inline-size: auto; }
   .gallery-teach-cell { border-radius: var(--radius-control); background: var(--bg); outline: var(--border-width) solid var(--border); }
   .gallery-teach-cell[data-live] { background: var(--accent); }

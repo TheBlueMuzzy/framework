@@ -28,12 +28,15 @@ export function TeachSample() {
   // Point view: a dot in the bottom slot shows where the point is (the callout is only given its x, y)
   const dot = view === 'Point' ? <span className="gallery-teach-dot" data-teach="teach-dot" /> : undefined
   const [board, setBoard] = useState({ on: true, at: 0 }) // Board view: the lesson's step, and whether it's up
+  const switcher = <Selector label="View" options={views} value={view} onChange={(v) => { setView(v); setPaused(true) }} />
   return (
     // (Board view: no corner buttons — the board needs the room on a short screen)
-    <Screen label="Callouts" {...(view === 'Board' ? {} : slots)} bottom={dot}>
+    // (Board view: no corner buttons, and the view switcher up in the top slot — the room round the board is the
+    // bubble's, so it never has to cover the switcher to keep off the board)
+    <Screen label="Callouts" {...(view === 'Board' ? { top: <Row className="gallery-teach-switch">{switcher}</Row> } : slots)} bottom={dot}>
       <Panel gap="s" className="gallery-teach">
-        {view !== 'Board' && <Text kind="heading">Callouts</Text>} {/* (Board: the room goes to the board on a short screen) */}
-        <Selector label="View" options={views} value={view} onChange={(v) => { setView(v); setPaused(true) }} />
+        {view !== 'Board' && <Text kind="heading">Callouts</Text>}
+        {view !== 'Board' && switcher}
         {view === 'Edges' && <Row gap="s" justify="between">
           <Row gap="s"><Text kind="label">Tips</Text><Toggle label="Tips" on={tips.tipsOn} onChange={tips.setTipsOn} /></Row>
           <Button variant="secondary" onClick={tips.resetTips}>{`Reset (${tips.seenIds.length} seen)`}</Button>
@@ -43,7 +46,7 @@ export function TeachSample() {
           <Button data-teach="teach-plant" onClick={() => setPaused(true)}>Plant · +5</Button>
         </Row>}
         {view === 'Point' && <Stack gap="s" className="gallery-teach-track"><span className="gallery-teach-mover" data-teach="teach-mover" /></Stack>}
-        {view === 'Board' && <Row gap="s" justify="center" className="gallery-teach-play">
+        {view === 'Board' && <Row gap="l" justify="center" className="gallery-teach-play">
           <BoardGrid />
           {/* Plant is in a hole: a tap reaches it (the next step). A tap on the dim ends the lesson; this brings it back */}
           {board.on ? <Button data-teach="teach-plant" onClick={() => setBoard({ on: true, at: board.at + 1 })}>Plant</Button>
@@ -69,9 +72,9 @@ export function TeachSample() {
 // puts the cell and the live cell somewhere else; a tap on the dim ends the lesson (onOutsideTap).
 const boardSize = 6
 const boardSteps = [
-  { cell: [1, 2], live: [4, 2], text: 'I keep off the board.' },
-  { cell: [4, 4], live: null, text: 'Nearer edge: this way.' },
-  { cell: [2, 1], live: [0, 1], text: 'Glow above? Not up there.' },
+  { cell: [0, 0], live: [3, 0], text: 'I keep off the board.' },
+  { cell: [5, 0], live: null, text: 'Nearer edge: off it.' },
+  { cell: [3, 1], live: [1, 1], text: 'Not toward the glow.' },
 ] as const
 const cellSel = ([r, c]: readonly [number, number]) => `[data-teach="cell-${r}-${c}"]`
 
@@ -97,7 +100,7 @@ function BoardTeach({ at, next, end }: { at: number; next: () => void; end: () =
   return <>
     <Spotlight targets={[cellSel(step.cell), '[data-teach="teach-plant"]']} pulse onOutsideTap={end} />
     <Callout key={at} target={cellSel(step.cell)} text={step.text} onDismiss={next}
-      keepClear={{ area: '[data-teach="teach-board"]', live: step.live ? cellSel(step.live) : null, avoid: ['[data-teach="teach-plant"]'] }} />
+      keepClear={{ area: '[data-teach="teach-board"]', live: step.live ? cellSel(step.live) : null, avoid: ['[data-teach="teach-plant"]', '.gallery-teach-switch'] }} />
   </>
 }
 
