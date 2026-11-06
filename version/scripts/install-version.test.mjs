@@ -77,4 +77,20 @@ describe('wiringSteps', () => {
     const own = wiringSteps(game({ ...wired, 'src/ui/About.tsx': "import file from '../../version.json'\nexport const v = file.version" })).filter((w) => !w.done)
     expect(own.map((w) => w.step)).toEqual([expect.stringContaining('src/ui/About.tsx')])
   })
+
+  it("another module's copy is never read as game code (F195 rehearsal: crashes' words named <Settings onChange>)", () => {
+    const wired = {
+      ...kits,
+      'vite.config.ts': "import { versionPlugin } from './src/version/vitePlugin.mjs'\nexport default { plugins: [versionPlugin()] }",
+      'src/ui/menus.tsx': "import { versionLabel } from '../version'\nconst a = <MainMenu title=\"G\" version={versionLabel} />\nconst b = <Settings version={versionLabel} />",
+      'src/devkit-game/tabs.ts': "import { g } from './gAdapter'\nregisterDevKitGame(g)",
+      'src/devkit-game/gAdapter.ts': "import { versionLabel } from '../version'\nexport const g = { version: versionLabel }",
+      'tests/start.mjs': "import { checkVersion } from '../src/version/e2e.mjs'\nawait checkVersion(page)",
+      'src/crashes/VERSION': '0.3.0',
+      'src/crashes/conformance.mjs': "// the game's <Settings onChange={...}> passes the row on\nconst words = 'wire <Settings onChange={applyCrashSetting}>'",
+      'src/lint/VERSION': '0.4.0',
+      'src/lint/rules.mjs': "const example = '<Settings onChange={x} />'",
+    }
+    expect(wiringSteps(game(wired)).filter((w) => !w.done)).toEqual([])
+  })
 })

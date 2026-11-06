@@ -43,10 +43,15 @@ export function checkFrameworkStep(gameDir) {
 export function wiringSteps(gameDir) {
   const game = resolve(gameDir)
   const text = (file) => readText(join(game, file))
-  const src = listFiles(join(game, 'src'))
+  const all = listFiles(join(game, 'src'))
+  const src = all
     .filter((f) => /\.(m?[jt]sx?)$/.test(f) && !f.startsWith('version/') && !/\.(test|spec)\./.test(f))
     .map((f) => ({ path: `src/${f}`, text: text(`src/${f}`) }))
-  const gameCode = src.filter((f) => !/^src\/(devkit|devkit-game|ui\/kit|audio|table|ai\/kit|rooms|saves)\//.test(f.path))
+  // Module copies are every folder with a VERSION file (src/ui/kit, src/crashes, src/lint…), found rather than listed by
+  // hand — a hand list missed crashes and lint, whose words mention <Settings onChange> (F195 rehearsal, 2026-11-06).
+  // devkit-game is the game's own Dev Kit tabs: not where it shows its version.
+  const moduleDirs = all.filter((f) => /(^|\/)VERSION$/.test(f)).map((f) => `src/${f.replace(/VERSION$/, '')}`)
+  const gameCode = src.filter((f) => !f.path.startsWith('src/devkit-game/') && !moduleDirs.some((dir) => f.path.startsWith(dir)))
   const hasUiKit = existsSync(join(game, 'src/ui/kit/VERSION'))
   const hasDevKit = existsSync(join(game, 'src/devkit/VERSION'))
   const config = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs'].find((f) => existsSync(join(game, f))) ?? 'vite.config.ts'
