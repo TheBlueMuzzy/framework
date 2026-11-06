@@ -1,14 +1,16 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 — **F189 — Games list module candidates ✅** (Muzzy: "go auto"; page https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv). Delivering v0.39.0 — v0.37 A lean, measured BMUZ. Next milestone (Claude's pick, Muzzy's "go auto"): Goops takes Saves + Crashes + Lint; UI kit gets the live game-settings helper + phone screen handling; Version gets Goops' first-visit fix; test helpers if room; tutorial = trial only. Ask Muzzy: OK to run a small crash server on Cloudflare for Goops? (when that milestone is planned)
+2026-11-06 — **Released v0.39.0 — v0.37 A lean, measured BMUZ ✅** (library: tag v0.39.0 on GitHub). The freeze is lifted. Next: /define the next milestone — games take what both use (ROADMAP Ideas 2026-11-06, from the F189 page https://claude.ai/artifact/DdPjzuDHUEUB7j9cyC5wyv), then Glyphtender + Goops update.
+- Ask Muzzy: OK to run a small crash server on Cloudflare for Goops? (needed for Crashes in Goops)
+- Laptop: after pulling, run `npm run install-modules` in starters/turn-based once (its module copies are no longer in git — the commit check now says so).
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
 Reviewed through: framework ea26e62 + ~/.claude-config 0a370b0 (F189: research pages + plan files only; the one code change, the removal-pass test fix, read by Claude — nothing found, scripts 409/409) · ~/.claude-config 76bff5a (F187: helper proof file + Claude checked the removal pass, marked 4 guards rare) · f5e1b60 (F185) · framework 0913562 (F186: checked by Claude, check:fast 22/22) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.37 A lean, measured BMUZ   Sprint: 59
-Doing: F189 — done; delivering v0.39.0   Branch: dev/v0-37-audit   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
+Stage: deliver   Milestone: — (v0.37 released; next: /define)   Sprint: — (59 archived)
+Doing: nothing — v0.39.0 released   Branch: dev/v0-37-audit   Version: 0.39.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.41.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.8.0 · version 0.1.3 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -16,7 +18,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - **One session for BMUZ + the framework (Muzzy 2026-11-04: "yes")**: BMUZ work (~/.claude) stays planned in this roadmap and built from this session — BMUZ has no planner of its own, many fixes cross both, and BMUZ runs live in every session (weighed 2026-11-04: the split was only faster). Revisit only if BMUZ needs its own milestones alongside the framework's — give it a planner first.
 - **Games wait for the framework (Muzzy 2026-11-03):** "we'll do framework updates to games after we're at a really good, solid spot with the framework and bmuz audits" — don't plan or push module updates into Glyphtender (or any game) until then; Muzzy works on Glyphtender in its own session. Waiting for it: rooms 0.15.0 (a server redeploy), templates/ports.mjs, the starter's online pattern.
 - **Engineering calls are Claude's (Muzzy 2026-11-04: "remember, i don't really understand this level of technical decisions")** — decide how things are built (including code-audit verdicts), log the why in SPRINT Notes / TDD, tell him in plain words what he'll see; ask him only about what he sees, plays or wants (hand-off template rule, ~/.claude-config ded89a6).
-- **Audit first: feature freeze + games paused (Muzzy 2026-11-04: "yes")** — until v0.37 A lean, measured BMUZ is done, the framework and BMUZ take bug fixes only (no new modules, parts or rules outside v0.37), and no game session extracts or updates modules (Goops parked; Glyphtender stops after its current task). Order (Muzzy OK): audit → rebuild → module recipe → games list candidates → extract → update. Each phase's report is a page Muzzy comments on.
+- **Freeze LIFTED 2026-11-06 (v0.39.0 released).** Was: **Audit first: feature freeze + games paused (Muzzy 2026-11-04: "yes")** — until v0.37 A lean, measured BMUZ is done, the framework and BMUZ take bug fixes only (no new modules, parts or rules outside v0.37), and no game session extracts or updates modules (Goops parked; Glyphtender stops after its current task). Order (Muzzy OK): audit → rebuild → module recipe → games list candidates → extract → update. Each phase's report is a page Muzzy comments on.
 - Muzzy 2026-10-20 (**being revisited by F183 — Framework inventory + verdicts**: it let the framework run far ahead of the games using it): build the framework as solid as possible BEFORE putting it into a game, then change it as games teach us ("having it ready and then modifying it as needed as we learn things is okay with me") — scratch-copy proofs are the norm; don't push to take a real game through each layer. Parts that hang on outside versions/accounts (store backends, Unity C#) still wait until a real build uses them.
 - The Game Framework (BMUZ-PLAN step 2): reusable modules that games copy in with a version stamp; improvements get harvested back. Plan: `~/.claude/config/bmuz/BMUZ-PLAN.md`.
 - Modules are copied into games (a framework change never breaks a finished game). UI kit copy goes to a game's `src/ui/kit/`.
