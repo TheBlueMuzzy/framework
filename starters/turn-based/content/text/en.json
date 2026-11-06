@@ -4,6 +4,12 @@
     "title": "Tic-tac-toe",
     "subtitle": "Three in a row wins"
   },
+  "upright": {
+    "upright": "Turn your phone upright",
+    "uprightMessage": "Tic-tac-toe plays with your phone held upright.",
+    "sideways": "Turn your phone on its side",
+    "sidewaysMessage": "Tic-tac-toe plays with your phone on its side."
+  },
   "mainMenu": {
     "play": "Play {name}",
     "online": "Play online",

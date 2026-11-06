@@ -20,12 +20,13 @@ Check: the new tests red before the helper, green after; ui-kit tests + starter-
 
 ## F192 🧱 Phone screen handling
 Done when: the UI kit has full screen on phones (a Settings → Display row, on for phones, off for computers — from Glyphtender src/ui/fullscreen.ts) and the "turn your phone upright" card (from Goops src/ui/App.tsx), shown when the screen is turned against content/ui/style.json "orientation"; a game with no orientation set never shows it.
-- [ ] 🤖 9. Full screen on phones + its Settings row — ui-kit/kit/layout.tsx
-- [ ] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
-- [ ] 🤖 11. Screenshots of the card at every size; the starter proves both — ui-kit/scripts/shoot.mjs
+- [x] 🤖 9. Full screen on phones + its Settings row — ui-kit/kit/layout.tsx
+- [x] 🤖 10. The upright card, from style.json "orientation" — ui-kit/kit/layout.tsx
+- [x] 🤖 11. Screenshots of the card at every size; the starter proves both — ui-kit/scripts/shoot.mjs
 - [ ] 🙋 12. Look at the card in the screenshots: does it read well? — ui-kit/scripts/shoot.mjs
-- [ ] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md
+- [x] 🤖 13. UPGRADES note + VERSION + README — ui-kit/UPGRADES.md (VERSION left to F191: lines under "- NEXT:")
 Check: shots of the card at every size, looked at by Claude; full screen asked only on a tap, never on a computer by default; ui-kit tests + starter-check green.
+Checked (2026-11-06, helper): new tests red first (no module), then green — fullscreen 9, upright 7, starter phoneScreen 3; ui-kit 56 files / 899 tests; check-ui 176 files pass; card shots 98 (2 ways × 7 sizes × 7 styles), 0 problems, looked at (breathing room on every side, nothing touching an edge) — ~/Documents/dev/.scratch/framework-f192/; live in Chromium (starter): phone 390×844 not full screen before its tap, full screen after; computer 1440×900 never after a click; no card (style "any"); starter check:fast 5/5; framework check:fast 22/22. Task 12 (Muzzy looks) still open.
 
 ## F193 🧱 New version on first visit, fixed
 Done when: the Version module has one update starter with Goops' fix (a page that already ran under the game's worker swaps to the new version; a first visit never reloads), handed the game's own update hookup so a game without offline mode can still import the module; plus a test helper for each game's "new version arrives" check.

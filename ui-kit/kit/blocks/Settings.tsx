@@ -15,6 +15,7 @@ import { Panel, Row, Screen } from '../layout'
 import { Button, ListRow, ScrollArea, Selector, Slider, Stepper, Tabs, Text, Toggle } from '../controls'
 import { screens } from '../screens'
 import { askConfirm } from './dialogs'
+import { fullscreenSetting, hiddenFullscreenRows, useFullscreen } from './fullscreen'
 import { MenuHeader } from './MenuHeader'
 import defaultSchema from './settings.default.json'
 
@@ -152,8 +153,13 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
   const w = { ...settingsWords, ...words }
   const info: Record<string, string> = version ? { version, ...infoText } : infoText
   const [values, setValues] = useState(() => withSaved(schema, load()))
+  // Full screen (F192, fullscreen.ts): the row this device can't use is hidden, and a computer's Esc out of full screen
+  // (saved as off) is read again here, so this screen never saves an old "on" back over it
+  const { resaved } = useFullscreen()
+  const [resavesSeen, setResavesSeen] = useState(resaved)
+  if (resaved !== resavesSeen) { setResavesSeen(resaved); setValues(withSaved(schema, load())) }
   const tabs = schema.tabs
-    .map((tab) => ({ ...tab, rows: visibleRows(tab.rows, hide) }))
+    .map((tab) => ({ ...tab, rows: visibleRows(tab.rows, [...hide, ...hiddenFullscreenRows()]) }))
     .filter((tab) => tab.rows.length > 0) // (a tab of only headings has none left by now)
   const [tabId, setTabId] = useState<string | undefined>(tabs[0]?.id)
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0]
@@ -174,6 +180,7 @@ export function Settings({ schema = defaultSchema, onChange, onAction, info: inf
     save(next)
     applyAccessibility(next)
     changeListeners.forEach((listener) => listener(next))
+    fullscreenSetting(next, changedId) // (flipping Full screen is a tap: the browser allows it now)
     onChange?.(next, changedId)
   }
   const set = (id: string) => (value: SettingValue) => update({ ...values, [id]: value }, id)

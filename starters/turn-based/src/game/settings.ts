@@ -2,12 +2,14 @@
 // saves module (settingsSave). applySettings passes every row on to the module or code that reads it — at start-up
 // and every time the player changes one. A row that's switched on must be read somewhere (check:framework checks it).
 import settingsJson from '../../content/ui/settings.json'
-import { applyAccessibility, defaultValues, liveSetting, type SettingsSchema, type SettingsValues } from '../ui/kit'
+import { applyAccessibility, defaultValues, liveSetting, withFullscreenDefault, type SettingsSchema, type SettingsValues } from '../ui/kit'
 import { applyAudioSettings, getAudio } from '../audio'
 import { applyCrashSetting } from '../crashes'
 import { settingsSave } from './saves'
 
-export const settingsSchema = settingsJson as SettingsSchema
+// Gameplay → Full screen starts on for phones, off for computers (the UI kit's Settings goes in and out itself; a phone
+// goes full screen on its first tap — startFullscreen in main.tsx)
+export const settingsSchema = withFullscreenDefault(settingsJson as SettingsSchema)
 
 /** The player's settings right now: their saved choices on top of every row's default. */
 export const currentSettings = (): SettingsValues => ({ ...defaultValues(settingsSchema), ...settingsSave.load() })

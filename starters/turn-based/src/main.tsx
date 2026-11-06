@@ -9,7 +9,8 @@ import { readCrashesConfig, startCrashes } from './crashes'
 import { crashRootOptions } from './crashes/ui/crashRoot'
 import { versionLabel } from './version'
 import { setSavesConfig } from './saves'
-import { applyStyle } from './ui/kit'
+import { applyStyle, startFullscreen } from './ui/kit'
+import { settingsSave } from './game/saves'
 import { setPaceClock } from './ai/kit/pace'
 import { rulesClock } from './devkit/gameClock'
 import { startSound } from './game/sound'
@@ -24,6 +25,8 @@ setPaceClock(rulesClock) // bots think on the rules clock: a pause (the game's o
 applyStyle(style) // content/ui/style.json → the UI kit's look (Clean)
 startSound() // made now, starts on the first tap
 applySettings(currentSettings()) // the player's saved Settings → text size, volumes, crash reports
+// Full screen (Settings → Gameplay → Full screen): a phone goes full screen on its first tap; a computer only from the toggle
+startFullscreen({ load: currentSettings, save: (values) => { settingsSave.save(values) } })
 
 // Dev Kit → Screens: this page is a PREVIEW inside the Dev Kit (dev only) — one screen with sample data, sandboxed
 if (import.meta.env.DEV && location.search.includes('devkit-preview=')) {
