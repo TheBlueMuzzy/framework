@@ -37,6 +37,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-06 — F199 — Spotlight + bubble placement done (Muzzy approved): the UI kit can dim everything but what's being taught, and its pointer bubble keeps off the play area. F198 — Tutorial module is on its last check.
 - 2026-11-06 — F197 — Tutorial trial done: Goops' lesson player taught Glyphtender's first 3 steps on a copy, unchanged, and Muzzy says it teaches the same. He chose to build a tutorial toolbox now that any game picks from — planned as v0.39 — Tutorial blocks.
 - 2026-11-06 — v0.38 Games take what both use: the parts both games built are shared (live settings, full screen + the turn-your-phone card, the new-version fix); the save check replays moves; both games' updates rehearsed green on copies, 15 framework finds fixed first.
 - 2026-11-06 — BMUZ: a wording slip in a hand-off (labels, feature names, the clock) is no longer sent back — Muzzy saw every such message twice ("why do I get double messages like this?"); it reaches Claude with his next message instead (session-moments SM5). Substance (wake-up, weighing, proof, dead links) is still sent back. ~/.claude-config d438540; hooks 808 + HOOKS.md.
@@ -46,4 +47,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-03 — Released v0.38.0 (v0.36 A sync that knows its own work): the PC ↔ laptop sync stops refusing pushes for this machine's own changes; the no-fixed-wait test rule covers every test file.
 - 2026-11-03 — Released v0.37.0 (v0.35 Steadier rooms and checks): online games never flash old results over a new board (rooms 0.15.0); two framework checks at once take turns.
 - 2026-11-03 — Released v0.36.0 (v0.34 Checks that don't cry wolf): a red check means a real problem — port tools see every server, the starter's online test stops racing, a busy PC re-runs timed-out checks alone.
-- 2026-11-03 — Sprint 52 built (v0.34 Checks that don't cry wolf): stop-servers + the port pre-flight now see servers netstat leaves out and ignore closing connections; the starter's online results no longer linger over a rematch; a busy PC re-runs timed-out checks alone instead of going red. Waiting on Muzzy's approval.
