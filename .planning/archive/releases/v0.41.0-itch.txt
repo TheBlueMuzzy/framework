@@ -1,0 +1,16 @@
+v0.41.0 — 2026-11-07
+
+Tutorial blocks. A game can now load a tutorial toolbox like a library and use only the blocks it wants: a step player that plays a tutorial from data files, button words, words for keyboard, mouse or phone, a spotlight that dims everything but what's being taught, and a bubble that keeps off the play area. Every new game from the turn-based starter opens with a 3-step "how to play" built from these blocks, and the Dev Kit's new Lessons tab edits a game's lessons — words included — while it runs. Nothing an existing game has to change.
+
+NEW
+• Tutorial 0.1.1 (new module): Goops' lesson player as a framework brick — steps from content/lessons/*.json, waiting for a tap, an event, a number or time, holding the game (pause, slow, only some controls), hints, retries, interrupts, one lesson at a time, button words (Next / Got it / Play) and words per control type. Its README lists every block in the toolbox, the UI kit's included. Proven by swapping it into a copy of Goops with every Goops check green.
+• UI kit 0.43.1: Spotlight — dims everything except one or more things being taught, with an outline, in every style; taps on a lit thing go through to it.
+• UI kit 0.43.1: Callout keepClear — the bubble covers as little of a named play area as it can, never the live spot or the controls it's told to avoid, and narrows to fit beside its target on a small sideways screen.
+• Dev Kit 0.30.0: a Lessons tab for any game with the Tutorial module — every step's fields, ▶ play from any step, Save that changes only what was edited. A step's words are typed right in the tab (one box per control type), and a game that reads its words live sees them change on screen at once (optional, two lines).
+• The turn-based starter opens with a 3-step tutorial (once per device, Settings → Replay tutorial), with a check that plays it at four screen sizes. Adding a step is one entry in the lesson file and one line of words.
+
+FIXED
+• A tip bubble or spotlight shown on a phone's first tap no longer hides behind full screen.
+• The nudge timer starts from nothing after a pause, instead of jumping straight to its words.
+• The Dev Kit panel stays on top when a game's tutorial dim opens while it's open.
+• Lint 0.4.1 leaves the Tutorial module's folder out of a game's own lint, and a check now catches any module folder missing from that list.

@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 — **Sprint 63 (v0.39 — Tutorial blocks) done**: F199 ✅ · F198 ✅ · F201 ✅ · F200 ✅ (Muzzy approved). Sprint archived with Claude's draft retro (Muzzy can change it). Next: `/deliver` v0.39 — merge dev/v0-39-tutorial-blocks, release (tutorial 0.1.1 · UI kit 0.43.1 · Dev Kit 0.30.0 · lint 0.4.1). Goops' real swap (X01) in its own session.
+2026-11-07 — **Released v0.41.0** (v0.39 Tutorial blocks ✅): tutorial 0.1.1 · UI kit 0.43.1 · Dev Kit 0.30.0 · lint 0.4.1. Next: /sprint (or /roadmap) — F196 — Test helpers is the one ready feature. Goops swaps to the Tutorial module (X01) in its own session: `extract.mjs swap X01`, rehearsed green on a copy.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -9,8 +9,8 @@
 Reviewed through: framework 472387c (F200 task 22: /code-review low — nothing found; LessonsTab.tsx covered by tests + e2e) · d82b14b (F200 — Dev Kit Lessons tab: /code-review low empty in 20 s — Claude read the Save path) · 6922ca9 (F201 — Starter teaches: /code-review low — 1 suspect, checked: not a bug) · e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
-Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: — (63 archived)
-Doing: F201 — done, F200 — done; next /deliver v0.39   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Stage: deliver   Milestone: — (v0.39 released)   Sprint: — (63 archived)
+Doing: delivered v0.41.0   Branch: main   Version: 0.41.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.30.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -37,6 +37,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-07 — Released v0.41.0 (v0.39 Tutorial blocks): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words.
 - 2026-11-07 — Sprint 63 done (v0.39 — Tutorial blocks, Muzzy approved all four): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words. Ready for /deliver.
 - 2026-11-07 — Lessons tab: a step's words are typed right in the Dev Kit and change the tutorial bubble on screen at once (Muzzy's ask); Save touches only those words.
 - 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.

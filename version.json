@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.40.0",
-  "build": 8,
+  "version": "0.41.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -252,6 +252,11 @@
       "version": "0.40.0",
       "date": "2026-11-06",
       "summary": "Games take what both use"
+    },
+    {
+      "version": "0.41.0",
+      "date": "2026-11-07",
+      "summary": "Tutorial blocks"
     }
   ]
 }
