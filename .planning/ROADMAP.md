@@ -588,7 +588,7 @@ flowchart LR
   F193 --> F195
 ```
 
-## v0.39 — Tutorial blocks  ← current · planned 2026-11-06
+## v0.39 — Tutorial blocks  ✅ released 2026-11-07 (v0.41.0) · planned 2026-11-06
 Goal (Muzzy 2026-11-06: "the tutorial module can be brought into any game, and that game can utilize any of the elements from it. Sort of how you can load a library… build it now"): a tutorial toolbox any game installs and uses only the parts it wants. Goops' lesson player is its heart (proven unchanged in Glyphtender by F197 — Tutorial trial); the UI kit's Callout, tips memory and nudge timer already exist and stay where they are. Each game keeps its own steps, words, "the player did X" checks, look and when-to-teach rules. Glyphtender keeps its tutorial until Muzzy wants it redone; Goops swaps in its own session.
 - ✅ F198 🧱 Tutorial module — a new `tutorial/` brick from Goops' lesson player: steps from lesson files (+ button words: Next / Got it / Play), wait for a tap / an event / a number / time, hold the game (pause, slow, only some controls), hints and retries, one lesson at a time (a queue), words per control type (keys / mouse / phone); installer, README, tests, conformance — must · sprint 63
 - ✅ F199 🧱 Spotlight + bubble placement — the UI kit gets Goops' spotlight (dim everything but the thing being taught) and Glyphtender's placement rule (the bubble covers as little of the play area as it can) as Callout options — must · sprint 63
