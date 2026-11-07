@@ -11,9 +11,9 @@ Check: the scratch copy with a raised build number: shots check green; the versi
 
 ## F205 🐞 Starter's screen check follows the game's orientation
 Done when: the starter's e2e/screens.mjs shoots only the sizes content/ui/style.json's orientation allows (portrait: no sideways phones, landscape: no upright phones, any: all 7), the same way the shots check chooses them.
-- [ ] 🤖 5. screens.mjs reads the orientation and picks its sizes like shots.mjs — starters/turn-based/e2e/screens.mjs
-- [ ] 🤖 6. Prove it on a scratch copy set to "portrait" (5 sizes, no sideways shots) and on the starter ("any", 7 sizes) — starters/turn-based/e2e/screens.mjs
-- [ ] 🤖 7. Every other copy that promises "the 7 sizes" (the starter's README, check-all's comment) says "the sizes the game plays at" — starters/turn-based/README.md
+- [x] 🤖 5. screens.mjs reads the orientation and picks its sizes like shots.mjs — starters/turn-based/e2e/screens.mjs
+- [x] 🤖 6. Prove it on a scratch copy set to "portrait" (5 sizes, no sideways shots) and on the starter ("any", 7 sizes) — starters/turn-based/e2e/screens.mjs
+- [x] 🤖 7. Every other copy that promises "the 7 sizes" (the starter's README, check-all's comment) says "the sizes the game plays at" — starters/turn-based/README.md
 Check: the portrait scratch copy shoots 5 sizes; the starter's screens check is still green at 7.
 
 ## Notes
@@ -24,3 +24,4 @@ Check: the portrait scratch copy shoots 5 sizes; the starter's screens check is 
 - F204 task 3: no screen code changed — the starter's menu + Settings already pass versionLabel. The starter took version 0.3.0 (install-module), shots template → 2 (~/.claude/config/bmuz/templates/shots.mjs + TEMPLATES.md; the starter's copy too), before set re-recorded (menu + Settings now show v0.0.0.0 — looked at menu@1440x900), then `VERSION_BUILD=99 node e2e/shots.mjs check` → all 56 match, 0 pixels (was 12 red).
 - F204 task 1 (proof, no copy needed — the version module reads VERSION_BUILD): `VERSION_BUILD=99 node e2e/shots.mjs check` in the starter → 12 of 56 red, all ~250 px: menu at all 7 sizes, Settings at 5 (upright-phone Settings shows the line off-screen). The starter's node_modules on this PC predated F196 (no pixelmatch) — `npm install` there first.
 - Claude's call (F204, read version/kit/index.ts + conformance.mjs): hold `versionLabel` itself still under `?freeze-version` (dev server only) instead of a new `shownVersion` name — games change no screen code and check:framework's `version={versionLabel}` rule stays as is; `appVersion` and the meta tag keep the real number for checkVersion. Only a Dev Kit snapshot taken inside a screenshot run would say v0.0.0.0.
+- F205: screens.mjs reads style.json orientation like shots.mjs (same size lists). Starter ("any"): SCREENS OK — 8 screens × 7 sizes; with style.json set to "portrait" for one run: 8 screens × 5 sizes, shots only at 390x844 · 360x780 · 1100x800 · 1440x900 · 1920x1080 (in ~/Documents/dev/.scratch/framework-f205), then put back. README (3 lines) + check-all's comment no longer promise "7 sizes".
