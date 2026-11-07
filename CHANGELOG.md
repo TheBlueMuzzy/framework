@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.42.0 — 2026-11-07
+
+Checks any game can reuse. A game's test scripts can now open the Dev Kit and any of its tabs with one line that waits for the panel itself, and every game can copy a before/after screenshot check that shows each screen at the game's sizes side by side, with changed pixels in red. A game also hears at session start when the test scripts it copied have fallen behind, and a module swap can be rehearsed on a throwaway copy of a game first. Nothing an existing game has to change.
+
+### New
+- Dev Kit 0.31.0: test helpers for a game's browser scripts — open the Dev Kit, open a tab by its name (even one on another page of the tab row on a phone), close it. They wait for the Dev Kit to arrive instead of a set time, and name the tabs there are when one is misspelled.
+- A before/after screenshot check any game can copy: record the screens once, then each check shoots them again at every size the game plays at (upright-only and sideways-only games skip the sizes they never use) and opens a page with before, now and the changes in red.
+- The turn-based starter uses both: its Dev Kit test opens tabs with the new helpers, and its full check includes the screenshot check.
+- Copied test scripts (check-all, ports, slow-tests, the screenshot check) carry a version line, and session start names a game's copy that's behind — the same way it does for modules.
+- A module swap can be rehearsed on a throwaway copy of a game (any folder name) without touching the real list of modules waiting to be swapped.
+
+### Fixed
+- The Dev Kit installer no longer copies its own test helper files (a stand-in tuning file, test pages) into a game.
+
 ## v0.41.0 — 2026-11-07
 
 Tutorial blocks. A game can now load a tutorial toolbox like a library and use only the blocks it wants: a step player that plays a tutorial from data files, button words, words for keyboard, mouse or phone, a spotlight that dims everything but what's being taught, and a bubble that keeps off the play area. Every new game from the turn-based starter opens with a 3-step "how to play" built from these blocks, and the Dev Kit's new Lessons tab edits a game's lessons — words included — while it runs. Nothing an existing game has to change.

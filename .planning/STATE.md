@@ -10,7 +10,7 @@ Reviewed through: ~/.claude-config eeda1e4 (F203 — Stale template warning: Cla
 
 ## Where we are
 Stage: deliver   Milestone: v0.40 — Checks any game can reuse ✅ released   Sprint: — (64 archived)
-Doing: Released v0.42.0; next /sprint   Branch: main   Version: 0.41.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: Released v0.42.0; next /sprint   Branch: main   Version: 0.42.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.42.0
 
 ## Key facts
