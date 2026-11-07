@@ -32,11 +32,14 @@ export const runner = createLessonRunner({
 
 const checkRun = () => import.meta.env.DEV && navigator.webdriver && new URLSearchParams(location.search).get('tutorial') !== 'fresh'
 let replay = false
+let replayAt = 0
 const due = () => replay || (!checkRun() && tipsMemory().shouldShow(LESSON))
 
-/** Settings → Replay tutorial: close the screens and start a new game against the computer, with the lesson. */
-export function replayTutorial() {
+/** Settings → Replay tutorial: close the screens and start a new game against the computer, with the lesson.
+ *  `at` = the step to start from (0 = the first) — the Dev Kit's Lessons tab ▶ uses it. */
+export function replayTutorial(at = 0) {
   replay = true
+  replayAt = at
   runner.stop()
   while (screens.current.length) screens.pop()
   startMatch(getMatch()?.opponent ?? opponents()[0])
@@ -51,7 +54,7 @@ subscribeMatch(() => {
   if (m.record.setup !== setupSeen) {
     setupSeen = m.record.setup
     heard = m.record.moves.length
-    if (!heard && lesson() && !runner.view().lessonId && due()) { replay = false; runner.start(lesson) }
+    if (!heard && lesson() && !runner.view().lessonId && due()) { replay = false; runner.start(lesson, replayAt); replayAt = 0 }
     return
   }
   for (; heard < m.record.moves.length; heard++) runner.event('placed', { by: m.record.moves[heard].seat === YOU ? 'you' : 'bot' })
