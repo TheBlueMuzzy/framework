@@ -593,13 +593,13 @@ Goal (Muzzy 2026-11-06: "the tutorial module can be brought into any game, and t
 - ✅ F198 🧱 Tutorial module — a new `tutorial/` brick from Goops' lesson player: steps from lesson files (+ button words: Next / Got it / Play), wait for a tap / an event / a number / time, hold the game (pause, slow, only some controls), hints and retries, one lesson at a time (a queue), words per control type (keys / mouse / phone); installer, README, tests, conformance — must · sprint 63
 - ✅ F199 🧱 Spotlight + bubble placement — the UI kit gets Goops' spotlight (dim everything but the thing being taught) and Glyphtender's placement rule (the bubble covers as little of the play area as it can) as Callout options — must · sprint 63
 - 🔨 F200 🔧 Dev Kit Lessons tab — edit a game's lesson files live while it runs (from Goops' own tab), for any game with the tutorial module — should · needs: F198 · sprint 63
-- 🎛️ F201 🎮 Starter teaches — the turn-based starter gets a 3-step tutorial built from the module + kit blocks, so every new game starts with one and starter-check plays it — must · needs: F198, F199 · sprint 63
+- ✅ F201 🎮 Starter teaches — the turn-based starter gets a 3-step tutorial built from the module + kit blocks, so every new game starts with one and starter-check plays it — must · needs: F198, F199 · sprint 63
 ```mermaid
 flowchart LR
   F198[✅ F198 Tutorial module]
   F199[✅ F199 Spotlight + bubble placement]
   F200[🔨 F200 Dev Kit Lessons tab]
-  F201[🎛️ F201 Starter teaches]
+  F201[✅ F201 Starter teaches]
   F198 --> F200
   F198 --> F201
   F199 --> F201

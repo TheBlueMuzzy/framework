@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 — **Sprint 63 (v0.39 — Tutorial blocks) all built** on `dev/v0-39-tutorial-blocks`: F199 ✅ · F198 ✅ · F201 — Starter teaches 🎛️ and F200 — Dev Kit Lessons tab 🎛️ (task 22: words typed right in the Lessons tab, live; Dev Kit 0.30.0) — both wait on Muzzy's "approved". Then: retro → archive → /deliver v0.39. Versions on the branch: tutorial 0.1.1 · UI kit 0.43.1 · Dev Kit 0.30.0 · lint 0.4.1. Goops' real swap (X01) in its own session.
+2026-11-07 — **Sprint 63 (v0.39 — Tutorial blocks) done**: F199 ✅ · F198 ✅ · F201 ✅ · F200 ✅ (Muzzy approved). Sprint archived with Claude's draft retro (Muzzy can change it). Next: `/deliver` v0.39 — merge dev/v0-39-tutorial-blocks, release (tutorial 0.1.1 · UI kit 0.43.1 · Dev Kit 0.30.0 · lint 0.4.1). Goops' real swap (X01) in its own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -10,7 +10,7 @@ Reviewed through: framework 472387c (F200 task 22: /code-review low — nothing 
 
 ## Where we are
 Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 63
-Doing: F201 + F200 — waiting on Muzzy's "approved"   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Doing: F201 — done, F200 — done; next /deliver v0.39   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
