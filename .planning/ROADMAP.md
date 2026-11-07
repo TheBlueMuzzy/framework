@@ -646,7 +646,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-11-07 — **The starter's online e2e flaked on GitHub again** (sprint 65, run 42412069026: `FAIL locator.click: Timeout 30000ms exceeded` in online, nothing online-related changed; the next push was green) — the third time since the v0.30 look-back noted it; find what the click waits on (a second tab not seated yet?) and wait for that instead.
+- 2026-11-07 — **The starter's online e2e flaked on GitHub again** (sprint 65, run 42412069026: `FAIL locator.click: Timeout 30000ms exceeded` in online, nothing online-related changed; the next push was green) — the v0.30 look-back noted the same timeout on main; find what the click waits on (a second tab not seated yet?) and wait for that instead.
 - 2026-11-07 — → F205. **The starter's e2e/screens.mjs ignores the game's orientation** (F196 — Test helpers' helper): it always shoots the 7 sizes; a portrait game copying it would shoot sideways sizes — read content/ui/style.json orientation like templates/shots.mjs does.
 - 2026-11-06 — → F202. `extract.mjs swap --rehearse`: run a swap on a throwaway copy of a game (any folder name) without touching the real queue — F198's rehearsal had to swap by hand (Sprint 63 Notes).
 - 2026-11-06 — → F203. **A game's copied templates (scripts/ports.mjs, check-all.mjs) go stale silently** (F195 — Glyphtender catch-up rehearsal: its ports.mjs was behind; nothing said so): stamp templates with a version and let session start name a stale copy, like it does for modules.
