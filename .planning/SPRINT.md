@@ -27,3 +27,9 @@ Checked: 2026-11-07 — portrait (style.json for one run): 8 screens × 5 sizes,
 - F204 task 1 (proof, no copy needed — the version module reads VERSION_BUILD): `VERSION_BUILD=99 node e2e/shots.mjs check` in the starter → 12 of 56 red, all ~250 px: menu at all 7 sizes, Settings at 5 (upright-phone Settings shows the line off-screen). The starter's node_modules on this PC predated F196 (no pixelmatch) — `npm install` there first.
 - Claude's call (F204, read version/kit/index.ts + conformance.mjs): hold `versionLabel` itself still under `?freeze-version` (dev server only) instead of a new `shownVersion` name — games change no screen code and check:framework's `version={versionLabel}` rule stays as is; `appVersion` and the meta tag keep the real number for checkVersion. Only a Dev Kit snapshot taken inside a screenshot run would say v0.0.0.0.
 - F205: screens.mjs reads style.json orientation like shots.mjs (same size lists). Starter ("any"): SCREENS OK — 8 screens × 7 sizes; with style.json set to "portrait" for one run: 8 screens × 5 sizes, shots only at 390x844 · 360x780 · 1100x800 · 1440x900 · 1920x1080 (in ~/Documents/dev/.scratch/framework-f205), then put back. README (3 lines) + check-all's comment no longer promise "7 sizes".
+- Muzzy 2026-11-07: typed /develop after "Approve F204 + F205?" — taken as yes for both.
+
+Retro (Claude's draft 2026-11-07 — Muzzy's words win; he can change it any time):
+- went well: both checks proven red-then-green on real runs (12 of 56 pictures red on a raised build → 0; 7 sizes → 5 for an upright game), and the starter's full check passed first time.
+- went wrong: F206 re-planned work F190 had finished two days before — the Idea line was never marked, and the planning grep looked at code words, not finished features; a helper spent ~4 min finding out.
+- change: when planning from Ideas, grep the ROADMAP's ✅ features for the Idea's words too (landed in the sprint skill).

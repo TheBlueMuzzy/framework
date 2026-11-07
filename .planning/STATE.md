@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 — **Sprint 65 (v0.41 — Checks that hold still) started** on `dev/v0-41-hold-still` — F204 — Version label holds still in screenshots · F205 — Starter's screen check follows the game's orientation · F206 — Golden saves replay their moves (Muzzy: "your pick"). v0.42.0 released earlier today. Glyphtender + Goops: their next session names 3 stale test scripts each. Muzzy: Goops swaps to the Tutorial module (X01) in its own session — `extract.mjs swap X01 --rehearse` in a clone first, then `swap X01`.
+2026-11-07 — **Sprint 65 (v0.41 — Checks that hold still) done** — F204 — Version label holds still in screenshots ✅ · F205 — Starter's screen check follows the game's orientation ✅ (Muzzy: /develop after "approve both?"); F206 dropped (a duplicate of F190 — Save check replays the moves). Next: `/deliver` v0.41 on `dev/v0-41-hold-still` (version module 0.3.0 + shots template 2). Games: Glyphtender can drop its own freeze.ts version line once it takes version 0.3.0 + shots template 2. Muzzy: Goops swaps to the Tutorial module (X01) in its own session — `extract.mjs swap X01 --rehearse` in a clone first, then `swap X01`.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -10,7 +10,7 @@ Reviewed through: b47cf95 (F204 — Version label holds still in screenshots + F
 
 ## Where we are
 Stage: develop   Milestone: v0.41 — Checks that hold still   Sprint: 65
-Doing: F204 — building   Branch: dev/v0-41-hold-still   Version: 0.42.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: Sprint 65 done; next /deliver v0.41   Branch: dev/v0-41-hold-still   Version: 0.42.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.42.0
 
 ## Key facts
