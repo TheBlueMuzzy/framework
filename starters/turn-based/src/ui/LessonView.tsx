@@ -3,9 +3,12 @@
 // off the board. Words per control type ("Click" / "Tap") from content/text/en.json "lessons". A step that waits for a
 // move gets the kit's nudge timer: after a while the lit thing glows, later the words say "Go on…"
 // (content/tuning/lessons.json). Hidden while Pause or Settings is open over the game.
+// Live words (Dev Kit 0.30.0, optional wiring): the words come through liveFile('text/en', …) and the bubble redraws on
+// every "text/en" edit — so words typed in the Dev Kit's Lessons or Text tab change a bubble already on screen.
 import { useEffect, useSyncExternalStore } from 'react'
-import text from '../../content/text/en.json'
+import en from '../../content/text/en.json'
 import timing from '../../content/tuning/lessons.json'
+import { liveFile } from '../devkit/tuning/liveTuning'
 import { Callout, Spotlight, fill, useNudge, useScreens } from './kit'
 import { lessonLine } from '../tutorial'
 import { controls, runner } from '../tutorial-game/firstGame'
@@ -13,8 +16,11 @@ import { useMatch } from '../game/match'
 import { useTuningEdits } from './hooks'
 import { personalityName } from './names'
 
+const text = liveFile('text/en', en) // reads the Dev Kit's latest words edit (just the file in a release build)
+
 export function LessonView() {
   useTuningEdits('lessons')
+  useTuningEdits('text/en')
   const view = useSyncExternalStore(runner.subscribe, runner.view)
   const match = useMatch()
   const covered = useScreens().length > 0

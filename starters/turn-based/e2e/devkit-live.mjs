@@ -8,6 +8,8 @@
 //      game when step 2 starts; Save would change only that value in content/lessons/first-game.json — the save request
 //      is caught and written the Save endpoint's way (formatJson on the file's text) WITHOUT touching the file: the
 //      other e2e scripts' dev servers watch it, and a write reloads their pages mid-round (smoke failed that way).
+//      0.30.0: step 1's words TYPED in the tab change the bubble already on screen at once; Save writes only that
+//      value into content/text/en.json (caught the same way — every other byte as it was).
 // Starts its OWN dev server (port 6402) and closes only that one. Writes no file of the game.
 import { mkdirSync, readFileSync } from 'node:fs'
 import { createServer } from 'vite'
@@ -18,6 +20,7 @@ const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6402)
 mkdirSync(OUT, { recursive: true })
 const LESSON_TEXT = readFileSync(new URL('../content/lessons/first-game.json', import.meta.url), 'utf8')
+const EN_TEXT = readFileSync(new URL('../content/text/en.json', import.meta.url), 'utf8')
 let failures = 0
 const fail = (why) => { failures++; console.log(`  FAIL ${why}`) }
 const pass = (what) => console.log(`  ok   ${what}`)
@@ -88,6 +91,7 @@ try {
 
   async function lessonsTab() {
     const NEW_WORDS = 'Dev Kit words: three in a row wins!'
+    const NEW_BOARD = 'Typed in the Dev Kit: click a square.'
     const callout = page.locator('.kit-callout')
     if (!(await devkit.isVisible())) await page.keyboard.press('`')
     await devkit.getByRole('tab', { name: 'Lessons' }).click()
@@ -104,7 +108,13 @@ try {
     }, null, { timeout: 1000 }).then(() => true, () => false)
     if (onTop) pass('Lessons tab → the panel stays on top of the lesson\'s dim and bubble')
     else fail('the lesson\'s dim or bubble covers the Dev Kit panel')
-    const words = devkit.getByLabel('threeInARow: Words (text id, or the words)')
+    // 0.30.0 (F200 task 22): step 1's words typed in the tab → the bubble ALREADY on screen changes at once (live words:
+    // the starter's LessonView reads en.json through liveFile('text/en') and redraws on its edits)
+    await devkit.getByLabel('board: Words (mouse)').fill(NEW_BOARD)
+    await callout.filter({ hasText: NEW_BOARD }).waitFor({ timeout: 3000 })
+      .then(() => pass('Lessons tab → step 1\'s words typed in the tab change the bubble on screen at once (not saved)'))
+      .catch(async () => fail(`the bubble on screen still says "${(await callout.textContent().catch(() => '')) ?? ''}", not the typed words`))
+    const words = devkit.getByLabel('threeInARow: Words id')
     await words.fill(NEW_WORDS)
     await page.screenshot({ path: `${OUT}/devkit-live-lessons-tab.png` })
     await page.keyboard.press('Escape') // close the panel; the lesson goes on
@@ -117,9 +127,11 @@ try {
     // endpoint's way (the game's own vite-plugins/devkit formatJson + keepHelp on the file's text), not to disk.
     const { formatJson, keepHelp } = await server.ssrLoadModule('/vite-plugins/devkit/devkitVite.ts')
     let now = null
+    let enNow = null
     await page.route('**/__devkit/save', async (route) => {
       const { path, data } = route.request().postDataJSON()
       if (path === 'content/lessons/first-game.json') now = formatJson(keepHelp(JSON.parse(LESSON_TEXT), data), LESSON_TEXT)
+      if (path === 'content/text/en.json') enNow = formatJson(keepHelp(JSON.parse(EN_TEXT), data), EN_TEXT)
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, path }) })
     })
     await page.keyboard.press('`')
@@ -130,6 +142,10 @@ try {
     const expected = LESSON_TEXT.replace('"message": "threeInARow"', `"message": ${JSON.stringify(NEW_WORDS)}`)
     if (expected !== LESSON_TEXT && now === expected) pass('Lessons tab → Save: only step 2\'s words changed in first-game.json, the rest byte-for-byte')
     else fail(`Lessons tab → Save: first-game.json isn't the old file with just step 2's words changed:\n${now}`)
+    const oldBoard = JSON.parse(EN_TEXT).lessons['first-game'].board.mouse
+    const enExpected = EN_TEXT.replace(JSON.stringify(oldBoard), JSON.stringify(NEW_BOARD))
+    if (enExpected !== EN_TEXT && enNow === enExpected) pass('Lessons tab → Save: only step 1\'s typed words changed in en.json, every other byte as it was')
+    else fail(`Lessons tab → Save: en.json isn't the old file with just step 1's words changed:\n${enNow}`)
   }
 } catch (error) {
   fail(error.message)
@@ -138,5 +154,5 @@ try {
   await browser.close()
   await server.close()
 }
-console.log(failures ? `\nDEVKIT-LIVE FAILED — ${failures} problem(s)` : '\nDEVKIT-LIVE OK — a Tuning edit changed the running game; both pauses held the bot; a Lessons tab edit reached the running tutorial and Save changed only it')
+console.log(failures ? `\nDEVKIT-LIVE FAILED — ${failures} problem(s)` : '\nDEVKIT-LIVE OK — a Tuning edit changed the running game; both pauses held the bot; a Lessons tab edit reached the running tutorial, typed words changed the bubble on screen, and Save changed only them')
 process.exit(failures ? 1 : 0)

@@ -1,12 +1,16 @@
 // THE LESSONS TAB (Dev Kit 0.29.0, framework F200 — Goops' own Lessons tab, made general). Shows when the game has the
 // Tutorial module (src/tutorial/VERSION) — its lesson files, content/lessons/*.json, step by step:
-//   - each step's words id (with the words it stands for in en.json), button, while (run / pause / slow), dim, when its
-//     words show, its hint's wait, what it points at, and the whole step as JSON for anything else
+//   - each step's words (0.30.0: typed right here — one box, or one per control type — in en.json where the Tutorial
+//     module looks; shared with the Text tab through text/textStore.ts, live as "text/en"), its words id under them,
+//     button, while (run / pause / slow), dim, when its words show, its hint's wait, what it points at, and the whole
+//     step as JSON for anything else
 //   - every edit is LIVE: the game's lesson file follows it (the Vite plugin), and the runner asks for the lesson again
 //     at every step — so a change shows the next time its step starts (▶ it to see it now)
 //   - ▶ plays the lesson from a step (or again) — needs the game's runner in its adapter: `lessons: { runner }`
 //   - Save writes ONLY the keys you changed into the file as it is on disk (lessonLogic.ts) — everything else in it,
 //     notes, set-ups, a hand edit made meanwhile, comes back byte-for-byte. Copy for Claude on the live link.
+//     The same Save writes the changed words into en.json the Text tab's way (text/textEdits.ts) — each file only if
+//     something in it changed.
 // The step the running lesson is on is marked "now". Shared timings (button delay, between steps, nudges) are in the
 // Tuning tab: content/tuning/lessons.json.
 import { useContext, useState, useSyncExternalStore, type ReactNode } from 'react'
@@ -300,7 +304,7 @@ function WordsField({ stepId, where, savedText, onSet }: { stepId: string; where
   const box = (kind: ControlKindName | null, value: string, was: string | undefined) => {
     const missing = was === undefined ? [] : missingPlaceholders(was, value)
     return (
-      <div key={kind ?? 'plain'} className="lessons-words-line">
+      <div key={kind ?? 'plain'} className={`lessons-words-line${kind ? '' : ' is-plain'}`}>
         {kind && <span className="lessons-kind">{kind}</span>}
         <textarea className="tx-box lessons-words-box" rows={1} spellCheck value={value} aria-label={`${stepId}: Words${kind ? ` (${kind})` : ''}`}
           placeholder={entry === undefined ? 'Type the words…' : undefined}

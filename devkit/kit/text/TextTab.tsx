@@ -54,6 +54,7 @@ function takeJustSaved(file: string): Status | null {
   justSaved.delete(file)
   return kept && Date.now() - kept.at < 5000 ? kept.status : null
 }
+const keepJustSaved = (file: string, status: Status) => justSaved.set(file, { status, at: Date.now() })
 
 // The file as it is on disk right now (saveContent.ts — the Lessons tab reads its files the same way)
 const readFresh = readContentFile
@@ -98,7 +99,7 @@ export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
           ? `Saved ${file}, but ${lost.join(', ')} isn't in the file any more — not written.`
           : `Saved ${file} — the game reloads its words.`,
       }
-      justSaved.set(file, { status: done, at: Date.now() })
+      keepJustSaved(file, done)
       setStatus(done)
     } catch (e) {
       setStatus({ kind: 'error', text: `Couldn't save: ${(e as Error).message}` })

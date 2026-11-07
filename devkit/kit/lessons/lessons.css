@@ -21,6 +21,7 @@
 .lessons-words { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .lessons-words-line { display: grid; grid-template-columns: auto 1fr; align-items: start; column-gap: 6px; min-width: 0; }
 .lessons-words-line .tx-box { grid-column: -2 / -1; }
+.lessons-words-line.is-plain { grid-template-columns: 1fr; } /* one line for everyone: the box full width */
 .lessons-words-line .tx-warn { grid-column: 1 / -1; }
 .lessons-kind { padding: 7px 0 0; min-width: 44px; font: 11px ui-monospace, Consolas, monospace; color: #9a9bab; }
 .lessons-words-btns { display: flex; flex-wrap: wrap; gap: 6px; }
