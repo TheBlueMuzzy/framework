@@ -607,12 +607,12 @@ flowchart LR
 ## v0.40 — Checks any game can reuse  ← current · planned 2026-11-07
 Goal (auto mode, Muzzy 2026-11-07: "/sprint auto mode"): the test tools games keep writing for themselves come from one place — a Dev Kit helper for e2e scripts, a before/after screenshot check, a swap rehearsal on a throwaway copy — and a game hears when its copied templates fall behind, like it does for modules.
 - 🔨 F196 🔧 Test helpers — a Dev Kit "open the Dev Kit / open this tab" helper for e2e that waits for the panel (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`), both used by the turn-based starter — could · sprint 64
-- 🔨 F202 🔧 Swap rehearsal mode — `extract.mjs swap <id> --rehearse` runs a swap in a throwaway copy of a game (any folder name) without touching the real queue, so a module's swap is proven before the real game takes it — should · sprint 64
+- 🎛️ F202 🔧 Swap rehearsal mode — `extract.mjs swap <id> --rehearse` runs a swap in a throwaway copy of a game (any folder name) without touching the real queue, so a module's swap is proven before the real game takes it — should · sprint 64
 - 🔨 F203 🔧 Stale template warning — the BMUZ templates a game copies (check-all.mjs, ports.mjs, checks.yml, slow-tests.mjs, shots.mjs) carry a version line, and session start names a game's copy that's behind, like modules — should · needs: ~F196 · sprint 64
 ```mermaid
 flowchart LR
   F196[🔨 F196 Test helpers]
-  F202[🔨 F202 Swap rehearsal mode]
+  F202[🎛️ F202 Swap rehearsal mode]
   F203[🔨 F203 Stale template warning]
   F196 -.-> F203
 ```
