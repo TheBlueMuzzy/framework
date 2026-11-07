@@ -18,7 +18,7 @@ One page. If a step here and another doc disagree, this page wins and the other 
 
 ## 3. The way out — a game's part becomes a brick
 **When:** only when a **second** game needs something the first game already built (or Muzzy asks for it). A part one game uses stays in that game.
-1. **List it** — the game says what it has that the other game needs (F189 — Games list module candidates does this for Glyphtender + Goops).
+1. **List it** — the game says what it has that the other game needs (F189 — Games list module candidates does this for Glyphtender + Goops). When Muzzy asks for a module, list the **blocks** it would hold (already in the framework · to add · stays in each game) and ask "is this the toolbox you picture?" before any verdict (v0.39 look-back: the F197 — Tutorial trial verdict judged "move a game over" when he meant a toolbox each game picks from).
 2. **Check it against §2** — structure? named by a player? used by two games? If not, it stays in the game.
 3. **Queue it** — in the game: `node ~/.claude/config/bmuz/scripts/extract.mjs add <files> --what="…" --checks=<the game's scripts that prove it>`. Its files in the game are now bug-fixes-only, each fix logged (`extract.mjs fix`). ① (guard-edits warns on an edit to a queued file)
 4. **Build the brick** in the framework, on a work branch: `kit/` + `VERSION` + an installer + README + `UPGRADES.md` + tests + its conformance pack; wire it into the starter so `starter-check` plays it. Its commit says what it replaces ("Replaces: Glyphtender's own …"). ② (F187 — Bloat test both ways: git's commit step asks for the "Replaces:" line)
