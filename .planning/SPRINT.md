@@ -18,10 +18,11 @@ Check: devkit tests; the starter's devkit-live e2e green; a hand-made request re
 
 ## F209 🔧 Release maps never overwritten
 Done when: a release build (CRASHES_MAPS=release) refuses to replace a map already under releases/<version>/maps/ (or one git tracks), with a plain message, and a test proves it; check builds are unchanged.
-- [ ] 🤖 8. moveMaps refuses an existing release map, plain message naming the folder — tests — crashes/kit/vitePlugin.mjs
-- [ ] 🤖 9. README + UPGRADES note, crashes version bump — crashes/README.md
-- [ ] 🤖 10. release.mjs still works on a game (a dry run against a scratch copy of the starter) — crashes/kit/vitePlugin.mjs
+- [x] 🤖 8. moveMaps refuses an existing release map, plain message naming the folder — tests — crashes/kit/vitePlugin.mjs
+- [x] 🤖 9. README + UPGRADES note, crashes version bump — crashes/README.md
+- [x] 🤖 10. release.mjs still works on a game (a dry run against a scratch copy of the starter) — crashes/kit/vitePlugin.mjs
 Check: crashes tests; a second release build of the same version refused, the first one fine.
+Checked: 2026-11-07 — helper (0b4f43d, crashes 0.3.1): crashes 168/168, lint + typecheck clean; a minimal game in .scratch/framework-f209 built with the real `vite build`: 1st CRASHES_MAPS=release build → 1 map filed, 2nd → exit 1 with the plain message, the filed map's sha1 unchanged; 2 check builds → both fine (node_modules cache). Claude: the new test is red on the old plugin (1 failed | 6 passed) and green on the new (7/7); read the diff (checks before moving anything, release only).
 
 ## F210 🐞 Hand-off check reads the right project
 Done when: the hand-off check names features from the project the turn's tools worked in (the repo of the files edited / commands run), not the folder the chat started in — a framework-started chat working in Glyphtender gets Glyphtender's feature names; tested.
@@ -34,3 +35,4 @@ Check: the hooks' tests (incl. the new one) green; config pushed.
 - Muzzy 2026-11-07: "auto mode… take over this development process while I'm gone" (~5 h, at a party). Claude plans, merges, checks, reviews, saves; features wait for Muzzy's OK; no /deliver.
 - Muzzy's question on F208 (laptop + desktop both use the Dev Kit): answered — the secret is in every page the dev server serves, so any browser that opened the game works (laptop, desktop, phone); only a request that never opened the page is refused. Muzzy: "ok".
 - Open bugs: no BUGS.md.
+- F209 (helper): release.mjs called the refused build "the build failed — make them by hand", wrong advice here → Claude added a branch in ~/.claude/config/bmuz/scripts/release.mjs that says the filed maps stand (syntax-checked; no release.mjs tests exist). A refused build leaves its new .map files in dist/ — harmless, a failed release build is never deployed.
