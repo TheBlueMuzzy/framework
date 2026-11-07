@@ -21,6 +21,11 @@
 //      0.29.0: content/lessons/*.json too (liveLessonName — the Lessons tab).
 //   3. The Sound tab's two endpoints, dev server only (audioSave.ts): POST /__devkit/save-audio (a dropped-in sound →
 //      MP3 in public/audio/<folder>/, nowhere else) and POST /__devkit/add-credit (appends to content/credits.json).
+//   7. The Dev Kit key (0.32.0, F208): every endpoint above wants the key this dev server put in the page it served
+//      (<meta name="devkit-key">, sent back as the X-Devkit-Key header). Any browser that opened the game has it —
+//      desktop, laptop, phone, at localhost or the LAN address; a hand-made request (curl from another device on the
+//      Wi-Fi, which can fake Origin and leave out Sec-Fetch-Site) doesn't, and is refused with a plain message.
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { dirname, extname, join, resolve, sep } from 'node:path'
@@ -33,6 +38,30 @@ import { formatJson } from './formatJson'
 export { formatJson }
 
 export const SAVE_URL = '/__devkit/save'
+
+// ---- 7. The Dev Kit key (0.32.0, F208) ----
+/** The <meta name> the key is in, in every page the dev server serves; the Dev Kit sends it back in this header. */
+export const DEVKIT_KEY_META = 'devkit-key'
+export const DEVKIT_KEY_HEADER = 'X-Devkit-Key'
+/** What a request without the right key is told. */
+export const NO_KEY_MESSAGE = 'Refused: this request didn’t come from the game page this dev server served (no Dev Kit key). ' +
+  'Use the Dev Kit in the game’s page — if the dev server was restarted, reload the page first.'
+
+/** This dev server's key: 32 random bytes (crypto), made once per run of the dev server (kept on globalThis, so a
+ *  vite.config.ts edit — which reloads the plugin — doesn't change it under an open page). Never logged. */
+export function devkitKey(): string {
+  const run = globalThis as { __bmuzDevkitKey?: string }
+  run.__bmuzDevkitKey ??= randomBytes(32).toString('base64url')
+  return run.__bmuzDevkitKey
+}
+
+/** Is `sent` (the request's X-Devkit-Key) this run's key? Compared in constant time (both hashed to the same length
+ *  first), so the answer's timing says nothing about how much of a guess was right. */
+export function keyMatches(sent: unknown, key = devkitKey()): boolean {
+  if (typeof sent !== 'string' || sent === '') return false
+  const digest = (text: string) => createHash('sha256').update(text).digest()
+  return timingSafeEqual(digest(sent), digest(key))
+}
 
 /** Folders the Save endpoint makes if missing: Snapshots' files, and Bug capture's (where /bug looks). */
 export const MADE_ON_FIRST_SAVE = ['content/snapshots', '.planning/bugs']
@@ -186,6 +215,11 @@ export function devkit(): Plugin {
     configResolved(config) {
       root = config.root
     },
+    // 7. The key goes in every page the dev server serves (ctx.server: dev only — a build's pages never get one)
+    transformIndexHtml(_html, ctx) {
+      if (!ctx.server) return
+      return [{ tag: 'meta', attrs: { name: DEVKIT_KEY_META, content: devkitKey() }, injectTo: 'head-prepend' }]
+    },
     // 2. The Save endpoint (configureServer only runs for the dev server)
     configureServer(server) {
       // "null" or junk in the Origin header → no host, so the request is refused instead of crashing
@@ -205,6 +239,7 @@ export function devkit(): Plugin {
         const host = req.headers.host
         if (!origin || !host || originHost(origin) !== host) return [403, 'Save only from the game page']
         if (!String(req.headers['content-type'] ?? '').startsWith(contentType)) return [415, `${contentType} only`]
+        if (!keyMatches(req.headers[DEVKIT_KEY_HEADER.toLowerCase()])) return [403, NO_KEY_MESSAGE]
         return null
       }
 
@@ -294,6 +329,7 @@ export function devkit(): Plugin {
         }
         if (req.method !== 'GET') return reply(405, { error: 'GET only' })
         if (otherSite(req)) return reply(403, { error: 'Only from the game page' })
+        if (!keyMatches(req.headers[DEVKIT_KEY_HEADER.toLowerCase()])) return reply(403, { error: NO_KEY_MESSAGE })
         if (url.pathname === '/file') {
           const found = libraryPathFile(roots, url.searchParams.get('path'))
           if ('refused' in found) return reply(400, { error: `Not allowed: ${found.refused}` })
