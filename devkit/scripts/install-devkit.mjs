@@ -36,7 +36,9 @@ export const RELEASE_SWITCH = {
 const CHECK_SCRIPT = 'node src/devkit/check-devkit.mjs'
 export const FRAMEWORK_CHECK_SCRIPT = 'node src/devkit/check-framework.mjs'
 
-const isTest = (path) => /\.test\./.test(path)
+// a test (x.test.ts) or a test's helper file (x.test-stub.ts, x.test-page.html) — 0.31.0: the helpers' ".test-" names
+// were promised to stay out of games but were copied (the tuning stub sat in every game's src/devkit/tuning/)
+const isTest = (path) => /\.test[.-]/.test(path)
 const readText = (path) => readFileSync(path, 'utf8')
 const writeText = (path, text) => { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, text) }
 const copyFile = (from, to) => { mkdirSync(dirname(to), { recursive: true }); copyFileSync(from, to) }
