@@ -21,6 +21,11 @@ describe('install-devkit', () => {
     expect(existsSync(join(kit, 'color/ColorTab.tsx'))).toBe(true)
     expect(existsSync(join(kit, 'DevKit.test.tsx'))).toBe(false)
     expect(existsSync(join(kit, 'color/colorLogic.test.ts'))).toBe(false)
+    // the e2e helpers (0.31.0) go with it — a game's e2e imports ../src/devkit/e2e.mjs — but not their test page
+    expect(existsSync(join(kit, 'e2e.mjs'))).toBe(true)
+    expect(existsSync(join(kit, 'e2e.test-page.html'))).toBe(false)
+    expect(existsSync(join(kit, 'e2e.test-tabs.tsx'))).toBe(false)
+    expect(existsSync(join(kit, 'tuning/tuningFiles.test-stub.ts'))).toBe(false)
     expect(readFileSync(join(kit, 'VERSION'), 'utf8')).toMatch(/^\d+\.\d+\.\d+\ncommit /)
     expect(existsSync(join(game, 'vite-plugins/devkit/devkitVite.ts'))).toBe(true)
     expect(existsSync(join(game, 'vite-plugins/devkit/devkitVite.test.ts'))).toBe(false)
