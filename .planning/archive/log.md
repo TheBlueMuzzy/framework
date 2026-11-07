@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-11-03 — Released v0.37.0 (v0.35 Steadier rooms and checks): online games never flash old results over a new board (rooms 0.15.0); two framework checks at once take turns.
 - 2026-11-03 — Released v0.36.0 (v0.34 Checks that don't cry wolf): a red check means a real problem — port tools see every server, the starter's online test stops racing, a busy PC re-runs timed-out checks alone.
 - 2026-11-03 — Sprint 52 built (v0.34 Checks that don't cry wolf): stop-servers + the port pre-flight now see servers netstat leaves out and ignore closing connections; the starter's online results no longer linger over a rematch; a busy PC re-runs timed-out checks alone instead of going red. Waiting on Muzzy's approval.
 - 2026-11-03 — Released v0.35.0 (v0.33 Releases that don't need babysitting): crash maps only from the release build, built with the deploy's settings and checked against the live page; slow unit tests flagged before GitHub times them out; test-only fixes keep the security review; releases stop looping on the planner and on Muzzy's server deploy; /sync never wipes unpushed edits.
