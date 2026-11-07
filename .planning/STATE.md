@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 — **Released v0.43.0 (v0.41 — Checks that hold still)** — version module 0.3.0 (the label holds still under ?freeze-version), shots template 2, the starter's screen check follows the orientation. Next: /sprint (or /roadmap). Games: Glyphtender can drop its own freeze.ts version line once it takes version 0.3.0 + shots template 2. Muzzy: Goops swaps to the Tutorial module (X01) in its own session — `extract.mjs swap X01 --rehearse` in a clone first, then `swap X01`.
+2026-11-07 — **Sprint 66 (v0.42 — Steadier and safer) running in auto mode** (Muzzy at a party ~5 h) on `dev/v0-42-steadier` — F207 — Starter's online test stops flaking · F208 — Dev Kit pages need a pass · F209 — Release maps never overwritten · F210 — Hand-off check reads the right project; one helper each, side by side. Features wait for Muzzy's OK; no /deliver. Ideas list cleaned up today (46 lines marked). Muzzy: Goops swaps to the Tutorial module (X01) in its own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -9,8 +9,8 @@
 Reviewed through: b47cf95 (F204 — Version label holds still in screenshots + F205 — Starter's screen check follows the game's orientation: Claude read bf97af2..b47cf95; /code-review low empty in 8 s) · ~/.claude-config eeda1e4 (F203 — Stale template warning: Claude read session-start + ran the check) · older: archive/log.md
 
 ## Where we are
-Stage: deliver   Milestone: v0.41 — Checks that hold still ✅ released   Sprint: — (65 archived)
-Doing: Released v0.43.0; next /sprint   Branch: main   Version: 0.43.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Stage: develop   Milestone: v0.42 — Steadier and safer   Sprint: 66
+Doing: F207–F210 — building (auto mode, side by side)   Branch: dev/v0-42-steadier   Version: 0.43.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts

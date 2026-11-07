@@ -1,0 +1,36 @@
+# Sprint 66 — Steadier and safer
+Started 2026-11-07 · Milestone v0.42 · Features: F207, F208, F209, F210 (all four side by side — their files don't overlap)
+
+## F207 🐞 Starter's online test stops flaking
+Done when: the starter's online e2e waits for what each click really needs (both tabs seated, the button there and enabled) instead of a bare click, and passes 10 runs in a row here — the GitHub click timeout (runs 42412069026 and two before) has a named cause.
+- [ ] 🤖 1. Find what the timed-out click waits on (read GitHub's failed run log + the script; reproduce under load if needed) and write the cause in Notes — starters/turn-based/e2e/online.mjs
+- [ ] 🤖 2. Wait for that thing instead (never a set time) — starters/turn-based/e2e/online.mjs
+- [ ] 🤖 3. 10 runs in a row green here (plus 3 under a busy PC), and GitHub green after the push — starters/turn-based/e2e/online.mjs
+Check: 10/10 local runs green; GitHub's Checks green on the branch.
+
+## F208 🔧 Dev Kit pages need a pass
+Done when: the dev server hands each page it serves a per-session secret, the Dev Kit sends it with every call to its dev-server routes (save, font library, add font…), and a request without it is refused — so the desktop, a second browser, another machine pointed at it and the phone all keep working, but a hand-made request from another device on the Wi-Fi is refused.
+- [ ] 🤖 4. The dev server makes a secret per run and puts it in the page it serves — tests — devkit/vite/devkitVite.ts
+- [ ] 🤖 5. Every Dev Kit call to its dev-server routes sends it — devkit/kit/DevKit.tsx
+- [ ] 🤖 6. Routes refuse a request without it (plain message), keeping the existing path checks — tests — devkit/vite/devkitVite.ts
+- [ ] 🤖 7. Prove in the starter: Save from the Dev Kit works (page opened by 127.0.0.1 and by the LAN address); a curl to the same route is refused; README + UPGRADES — devkit/README.md
+Check: devkit tests; the starter's devkit-live e2e green; a hand-made request refused; a page opened by the LAN address saves.
+
+## F209 🔧 Release maps never overwritten
+Done when: a release build (CRASHES_MAPS=release) refuses to replace a map already under releases/<version>/maps/ (or one git tracks), with a plain message, and a test proves it; check builds are unchanged.
+- [ ] 🤖 8. moveMaps refuses an existing release map, plain message naming the folder — tests — crashes/kit/vitePlugin.mjs
+- [ ] 🤖 9. README + UPGRADES note, crashes version bump — crashes/README.md
+- [ ] 🤖 10. release.mjs still works on a game (a dry run against a scratch copy of the starter) — crashes/kit/vitePlugin.mjs
+Check: crashes tests; a second release build of the same version refused, the first one fine.
+
+## F210 🐞 Hand-off check reads the right project
+Done when: the hand-off check names features from the project the turn's tools worked in (the repo of the files edited / commands run), not the folder the chat started in — a framework-started chat working in Glyphtender gets Glyphtender's feature names; tested.
+- [ ] 🤖 11. Reproduce: a test where the session folder and the worked-in repo differ gets the wrong names today — ~/.claude/config/bmuz/hooks/rules/handoff-check/HC2.feature-names.mjs
+- [ ] 🤖 12. Pick the project from the turn's tool calls (edited file paths, a cd in Bash), falling back to the session folder — tests — ~/.claude/config/bmuz/hooks/handoff-check.mjs
+- [ ] 🤖 13. The hooks' own tests green; pushed to ~/.claude-config — ~/.claude/config/bmuz/hooks/tests/
+Check: the hooks' tests (incl. the new one) green; config pushed.
+
+## Notes
+- Muzzy 2026-11-07: "auto mode… take over this development process while I'm gone" (~5 h, at a party). Claude plans, merges, checks, reviews, saves; features wait for Muzzy's OK; no /deliver.
+- Muzzy's question on F208 (laptop + desktop both use the Dev Kit): answered — the secret is in every page the dev server serves, so any browser that opened the game works (laptop, desktop, phone); only a request that never opened the page is refused. Muzzy: "ok".
+- Open bugs: no BUGS.md.

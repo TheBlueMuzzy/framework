@@ -627,6 +627,20 @@ flowchart LR
   F205[✅ F205 Screen check follows orientation]
 ```
 
+## v0.42 — Steadier and safer  ← current · planned 2026-11-07
+Goal (Muzzy 2026-11-07: "1 yes", then auto mode): the starter's checks stop crying wolf on GitHub, the Dev Kit's dev-server pages answer only pages the game served, a release's crash maps can't be overwritten, and the hand-off check names features from the right project.
+- 🔨 F207 🐞 Starter's online test stops flaking — the online e2e waits for what each click needs (both tabs seated) instead of a bare click; 10 runs in a row green — should · sprint 66
+- 🔨 F208 🔧 Dev Kit pages need a pass — dev-server pages answer only pages the game served: a per-session secret in the served page, sent with every Dev Kit call; a hand-made request from the Wi-Fi is refused, every browser that opened the game still works — should · sprint 66
+- 🔨 F209 🔧 Release maps never overwritten — a release build refuses to replace a crash map already under releases/ — should · sprint 66
+- 🔨 F210 🐞 Hand-off check reads the right project — feature names from the repo the turn worked in, not the chat's start folder — should · sprint 66
+```mermaid
+flowchart LR
+  F207[🔨 F207 Online test stops flaking]
+  F208[🔨 F208 Dev Kit pages need a pass]
+  F209[🔨 F209 Release maps never overwritten]
+  F210[🔨 F210 Hand-off check reads the right project]
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
