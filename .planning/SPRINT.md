@@ -11,8 +11,8 @@ Check: devkit tests + the starter's check:full green with the new helper and sho
 
 ## F202 🔧 Swap rehearsal mode
 Done when: `node ~/.claude/config/bmuz/scripts/extract.mjs swap <id> --rehearse` run inside a throwaway copy of a game (any folder name) installs the released module, re-points the imports, deletes the old files and runs the entry's checks — exactly as a real swap — but never writes to the framework's queue or the real game, and says so; F198's Goops rehearsal re-run with it comes out green.
-- [ ] 🤖 5. Tests red first: --rehearse in a copy with another folder name works; the real queue file is byte-for-byte unchanged after it; without --rehearse a copy is still refused — ~/.claude/config/bmuz/scripts/test-scripts.mjs
-- [ ] 🤖 6. extract.mjs swap --rehearse (finds the entry by the copy's git history / origin, prints "REHEARSAL — nothing recorded") + the module recipe and PROJECT-FILES say when to use it — ~/.claude/config/bmuz/scripts/extract.mjs
+- [x] 🤖 5. Tests red first: --rehearse in a copy with another folder name works; the real queue file is byte-for-byte unchanged after it; without --rehearse a copy is still refused — ~/.claude/config/bmuz/scripts/test-scripts.mjs
+- [x] 🤖 6. extract.mjs swap --rehearse (finds the entry by the copy's git history / origin, prints "REHEARSAL — nothing recorded") + the module recipe and PROJECT-FILES say when to use it — ~/.claude/config/bmuz/scripts/extract.mjs
 - [ ] 🤖 7. Proof: a fresh Goops copy, `swap X01 --rehearse`, its checks green; the real Goops and the queue untouched — .planning/design/module-recipe.md
 Check: test-scripts green with the new tests; the Goops copy swap green; extractions.md and the real Goops' git status unchanged.
 
