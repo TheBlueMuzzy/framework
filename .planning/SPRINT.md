@@ -35,10 +35,12 @@ Checked: 2026-11-06 — helper: tutorial e2e (port 6405) at 390x844, 1440x900, 8
 
 ## F200 🔧 Dev Kit Lessons tab
 Done when: any game with the tutorial module gets a Lessons tab in the Dev Kit that edits its lesson files live while the game runs (Goops' own tab, made general), and the starter shows it.
-- [ ] 🤖 15. The tab in the Dev Kit, shown only when the game has the tutorial module — from Goops' tab — ~/Documents/dev/games/goops/src/devkit-game/LessonsTab.tsx
-- [ ] 🤖 16. Edits apply live (module contract) and Save writes only the lesson file's own keys — tests — devkit/kit/saveContent.ts
-- [ ] 🤖 17. The starter shows the tab; an e2e moves a step's words and sees them change in the running game — starters/turn-based/e2e
+- [x] 🤖 15. The tab in the Dev Kit, shown only when the game has the tutorial module — from Goops' tab — ~/Documents/dev/games/goops/src/devkit-game/LessonsTab.tsx
+- [x] 🤖 16. Edits apply live (module contract) and Save writes only the lesson file's own keys — tests — devkit/kit/saveContent.ts
+- [x] 🤖 17. The starter shows the tab; an e2e moves a step's words and sees them change in the running game — starters/turn-based/e2e
+- [x] 🤖 21. Found by the new e2e: a lesson's dim + bubble opened over the Dev Kit panel — the panel now lifts itself back on top when a game popover opens (every game); an e2e never writes the game's files (one Save reloaded smoke's page mid-round) — devkit/kit/DevKit.tsx
 Check: devkit tests green; the starter e2e sees a live edit land; Save leaves the rest of the lesson file byte-for-byte.
+Checked: 2026-11-07 — helper: devkit 556/556 (21 new), tsc + lint clean; starter check:full 11/11 twice; framework check:fast 24/24; GitHub Checks 42320385857 green on d82b14b; devkit-live e2e step 5 (port 6402): ▶ step 1 plays, the panel stays over the dim, new step-2 words show in the game, Save changes only that value (request caught in memory, file never written). Claude after the merge: starter modules reinstalled, framework check:fast 24/24; looked at desktop (Lessons tab beside the running tutorial, panel above the dim) and phone (tab fits, buttons wrap, footer fits); /code-review low came back empty in 20 s, so Claude read the Save path: changes are applied to the file as it is on disk and written in the file's own layout (formatJson) — tested on Goops' real first-day.json, byte-for-byte.
 
 ## Notes
 - Muzzy 2026-11-06: "the tutorial module can be brought into any game, and that game can utilize any of the elements from it. Sort of how you can load a library… build it now."
@@ -51,6 +53,8 @@ Check: devkit tests green; the starter e2e sees a live edit land; Save leaves th
 - F198 helper (merged fe83629): extract.mjs swap refuses a copy of a game (the folder must be games/goops) and writes to the real queue, so the rehearsal swapped by hand (install-module + imports re-pointed) — a `--rehearse` mode is in ROADMAP Ideas. Swap order trap: a module's promise checks run while the game's old files are still there; the clock check read the old runner's definition as a call — fixed with a test (56bb239).
 - Ask Muzzy (F201, from the helper): 1. are the 3 steps' words and order right ("This is your board. Tap a square to place your ✕." · "Three in a row wins — across, down or corner to corner." · "Now beat {name}!")? 2. the nudge: glow at 6 s, "Go on — tap any empty square." at 12 s, at most twice — right? 3. Replay tutorial starts a new game straight away (helper's pick) — ok? 4. step 1 dims Pause too (Esc still pauses) — ok?
 - Claude noticed (F201 shots, not changed): under step 2 the status line still says "Careless Cass is thinking…" while the bot is held; at 768x343 the lit seat's outline sits ~3 px from the "You" chip. Both small — for Muzzy's look.
+- Ask Muzzy (F200, from the helper): 1. editing a step's words changes the bubble the next time the step starts (or ▶) — should it change while it's on screen? (needs a Tutorial module change) 2. the words field edits the words' id; the words themselves are in the Text tab — want them editable right in the Lessons tab? 3. steps start open only when a lesson has 6 or fewer — right cut-off?
+- Lesson (F200) → the BMUZ check-all template now says an e2e never writes the game's files (~/.claude/config/bmuz/templates/check-all.mjs header).
 - Before releasing UI kit 0.43.1 (a LOOK CHANGE where a keep-clear bubble used to cover the play area): a full `npm run shoot` — the helper's was cut at ~434 shots by its time limit (clean so far). Run it after F200's checks, not alongside.
 - Muzzy 2026-11-06: the dim's strength feels right ("1 yes").
 - keepClear limit (helper): the bubble always sits right next to its target (fixed pointer length), so it can't use empty room far away — a game lays out so a side is free, or lists controls in `avoid`.
