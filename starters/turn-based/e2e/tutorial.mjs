@@ -50,7 +50,8 @@ const overlap = (a, b) => Math.min(a.right, b.right) - Math.max(a.left, b.left) 
 async function checkStep(page, size, n, words, lit) {
   const bubble = page.locator('.kit-callout-layer[data-ready] .kit-callout')
   await bubble.waitFor({ timeout: 8000 })
-  await page.getByText(words, { exact: true }).waitFor({ timeout: 4000 }).catch(async () => fail(`step ${n}: the words "${words}" don't show (got "${(await bubble.innerText()).trim()}")`))
+  // (in the bubble: the Dev Kit's hidden Lessons tab holds the same words in its boxes — Dev Kit 0.30.0)
+  await bubble.getByText(words, { exact: true }).waitFor({ timeout: 4000 }).catch(async () => fail(`step ${n}: the words "${words}" don't show (got "${(await bubble.innerText()).trim()}")`))
   await page.waitForTimeout(400) // (the bubble and the outline settle on their places)
   // The spotlight's outline goes round what's taught: it holds the thing, with room round it
   const ring = page.locator('.kit-spot-ring:not([data-gone])')
@@ -77,7 +78,7 @@ async function checkStep(page, size, n, words, lit) {
 const press = (size, locator) => (size.mobile ? locator.tap() : locator.click())
 /** A step's button (it only works after dismissArmSeconds: pressed until the words change). */
 async function pressButton(page, size, name, words) {
-  for (let tries = 0; tries < 20 && (await page.getByText(words, { exact: true }).count()); tries++) {
+  for (let tries = 0; tries < 20 && (await page.locator('.kit-callout').getByText(words, { exact: true }).count()); tries++) {
     await press(size, page.locator('.kit-callout').getByRole('button', { name }))
     await page.waitForTimeout(150)
   }
@@ -132,7 +133,7 @@ try {
     await page.getByRole('button', { name: 'Back' }).waitFor()
     await press(size, (await tab.isVisible()) ? tab : page.getByRole('button', { name: 'Next Settings' }))
     await press(size, page.getByRole('button', { name: 'Replay tutorial' }))
-    await page.getByText(size.mobile ? WORDS.board.phone : WORDS.board.mouse, { exact: true }).waitFor({ timeout: 5000 })
+    await page.locator('.kit-callout').getByText(size.mobile ? WORDS.board.phone : WORDS.board.mouse, { exact: true }).waitFor({ timeout: 5000 })
       .then(() => console.log('  Replay tutorial ✓ step 1 again'), () => fail('Replay tutorial: step 1 didn\'t show'))
     check(await page.locator('[data-board] [data-mark=""]').count() === 9, 'Replay tutorial: the board isn\'t a new one')
 

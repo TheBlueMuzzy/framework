@@ -140,6 +140,32 @@ export function wordsFor(text: unknown, lessonId: string, id: unknown): string |
   return null
 }
 
+/** The ways a player plays, for words written per control type (the Tutorial module's ControlKind). */
+export const CONTROL_KINDS = ['keys', 'mouse', 'phone'] as const
+export type ControlKindName = (typeof CONTROL_KINDS)[number]
+
+/** Where a step's words live in en.json, by the Tutorial module's lookup (lessonLine): the lesson's own line, else a
+ *  shared one; not there yet → where it would go (the lesson's own block). `entry` = the line (a string, or one per
+ *  control type), undefined = no words yet. null = the step has no words id. 0.30.0 (F200 task 22). */
+export type WordsEntry = { path: string[]; entry: unknown; shared: boolean }
+export function wordsEntry(text: unknown, lessonId: string, id: unknown): WordsEntry | null {
+  if (typeof id !== 'string' || id === '') return null
+  const book = isObject(text) && isObject(text.lessons) ? text.lessons : {}
+  const own = isObject(book[lessonId]) ? book[lessonId][id] : undefined
+  if (own !== undefined) return { path: ['lessons', lessonId, id], entry: own, shared: false }
+  const shared = isObject(book.shared) ? book.shared[id] : undefined
+  if (shared !== undefined) return { path: ['lessons', 'shared', id], entry: shared, shared: true }
+  return { path: ['lessons', lessonId, id], entry: undefined, shared: false }
+}
+
+/** The line a control type falls back to when it has none (the Tutorial module's wordsFor: keys → mouse → phone). */
+export function fallbackWords(entry: unknown): string {
+  if (typeof entry === 'string') return entry
+  if (!isObject(entry)) return ''
+  const line = entry.keys ?? entry.mouse ?? entry.phone
+  return typeof line === 'string' ? line : ''
+}
+
 /** Search: does this step match every word typed? (its id, words id, button, the words, what it points at) */
 export function stepSearchTexts(step: LessonStepData, words: string | null): string[] {
   return [step.id, String(step.message ?? ''), String(step.button ?? ''), words ?? '', typeof step.pointer === 'string' ? step.pointer : '', String(step.pattern ?? '')]
