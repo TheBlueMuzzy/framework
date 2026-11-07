@@ -33,13 +33,13 @@ one, type its code in the other. (A phone on the same Wi-Fi reaches it too: open
 | Command | What |
 |---|---|
 | `npm run check:fast` | unit tests · type check + build · lint · the UI kit's rules · every module's promises (code part) |
-| `npm run check:framework` | every module's promises in the running game (live tuning, both pauses, snapshots, the UI at 7 sizes…) |
+| `npm run check:framework` | every module's promises in the running game (live tuning, both pauses, snapshots, the UI at every size the orientation allows…) |
 | `npm run smoke` | loads, plays one round against the computer at phone + desktop size, console clean |
 | `npm run e2e:devkit-live` | the Dev Kit's main promise: a Tuning edit changes the running board; ⏸ / ◐ / the game's own Pause hold the bot; a Lessons tab edit shows in the running tutorial and Save changes only it |
-| `npm run e2e:screens` | every screen (menu, board, Pause, Settings, Credits, results, lobby) at 7 sizes, checked with the UI kit's page check |
+| `npm run e2e:screens` | every screen (menu, board, Pause, Settings, Credits, results, lobby) at every size the game plays at (content/ui/style.json orientation — all 7 for "any"), checked with the UI kit's page check |
 | `npm run e2e:online` | two browser tabs play a whole game, a rematch, then Escape / Back on the results → main menu, through `wrangler dev` (on the game's room port, wrangler.json dev.port = 6499, with its own storage folder) |
 | `npm run e2e:tutorial` | a brand-new device's first game: the 3 tutorial steps at 4 sizes (words, spotlight, the bubble off the board), the nudge, Replay tutorial, none on a second load |
-| `npm run check:shots` | before / after screenshots (`e2e/shots.mjs`, the BMUZ template): the menus, the board, Pause, the results of a fixed game (`?seed=7`) and the tutorial's first step at the 7 sizes, compared pixel by pixel with `e2e/shots-before/<platform>/` → `e2e-shots/report.html` (before · now · changed in red). A change meant to look different: `npm run shots:record`, look, commit. Recorded on Windows; on GitHub's Linux the screens are shot but not compared (text draws differently there) |
+| `npm run check:shots` | before / after screenshots (`e2e/shots.mjs`, the BMUZ template): the menus, the board, Pause, the results of a fixed game (`?seed=7`) and the tutorial's first step at every size the game plays at, compared pixel by pixel with `e2e/shots-before/<platform>/` → `e2e-shots/report.html` (before · now · changed in red). A change meant to look different: `npm run shots:record`, look, commit. Recorded on Windows; on GitHub's Linux the screens are shot but not compared (text draws differently there) |
 | `npm run check:full` | all of the above, side by side → `e2e-shots/checks.html` |
 
 Every script starts its own servers on 6xxx ports and stops them. Playwright: `playwright-core` is pinned to 1.63.0

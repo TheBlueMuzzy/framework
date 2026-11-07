@@ -57,13 +57,19 @@ installer, then its checks in the game). The installer copies `kit/` → `src/ve
 ## The parts
 | File (in the game: `src/version/`) | What |
 |---|---|
-| `index.ts` | `appVersion` ("X.Y.Z.B") and `versionLabel` ("vX.Y.Z.B") — "dev" when the build had no plugin (a plain test run), never a made-up number; re-exports `startUpdates` |
+| `index.ts` | `appVersion` ("X.Y.Z.B") and `versionLabel` ("vX.Y.Z.B") — "dev" when the build had no plugin (a plain test run), never a made-up number; on the dev server with `?freeze-version` in the address `versionLabel` is `FROZEN_LABEL` ("v0.0.0.0") — see "Screenshots" below; re-exports `startUpdates` |
 | `updates.ts` | `startUpdates(registerSW, { worker? })` — `registerSW({ immediate: true, onNeedReload })` + the browser's controllerchange; the page reloads (once) only if it already ran under the game's own worker. So: a returning player swaps to a new release on this visit (even when the new worker took over before registerSW was listening), a first visit never reloads — not even one coming from another worker address (Goops v1's /GOOPS/sw.js). Returns `{ returning, ourWorker, update }` |
 | `vitePlugin.mjs` | `versionPlugin({ root? })` — `define` `import.meta.env.APP_VERSION`, the meta tag, and a dev-server restart when `version.json` changes (so `/save` never leaves the page on the old number) |
 | `e2e.mjs` | `expectedVersion(gameDir?)` · `checkVersion(page, want?)` · `builtVersion(distDir?)` (for a deploy script: the version in `dist/index.html`) · `versionInHtml(html)` · `nextVersion(label, build = 9999)` · `checkUpdateArrives(page, { url, next, publish, worker? })` — a game's e2e/sw-update.mjs: first visit = ONE page load under the game's worker, then `publish()` the next build, open again → the page shows `next` on this visit and settles (no loop); returns `{ ok, checks: [{ name, ok, detail }], … }` for the game to print |
 | `versionFile.mjs` | reads `version.json` (shared by the plugin and the e2e helper, so the build and the tests never disagree) |
 | `env.d.ts` | types `import.meta.env.APP_VERSION` for the game's TypeScript — nothing to add to the game's own types |
 | `conformance.mjs` | the module's checks for `check:framework` |
+
+**Screenshots (0.3.0):** every `/save` raises the build number, and the menu and Settings show it — so a before/after
+screenshot check went red on those screens after every save. With `?freeze-version` in the page's address (dev server
+only) every place that shows `versionLabel` says `v0.0.0.0` instead. The BMUZ screenshot template (`e2e/shots.mjs`,
+template 2+) adds it to every page by itself; nothing to change in the game's screens. `appVersion` and the
+`<meta name="app-version">` tag keep the real version, so `checkVersion` still catches a stale page.
 
 **Update tests:** `VERSION_BUILD=<n>` overrides the build number for one build or test run (the plugin and
 `expectedVersion` both read it) — a "next release" without touching `version.json`.
