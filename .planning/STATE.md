@@ -10,7 +10,7 @@ Reviewed through: b47cf95 (F204 — Version label holds still in screenshots + F
 
 ## Where we are
 Stage: deliver   Milestone: v0.41 — Checks that hold still ✅ released   Sprint: — (65 archived)
-Doing: Released v0.43.0; next /sprint   Branch: main   Version: 0.42.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: Released v0.43.0; next /sprint   Branch: main   Version: 0.43.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts

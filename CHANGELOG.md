@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.43.0 — 2026-11-07
+
+Checks that hold still. A game's before/after screenshot check no longer goes red on the main menu and Settings every time a save raises the build number — the version shown there is held at v0.0.0.0 while the check runs. The turn-based starter's screen check now shoots only the sizes a game plays at. Nothing an existing game has to change.
+
+### New
+- Version 0.3.0: while a screenshot check holds the page still (`?freeze-version` in the address, dev server only), every place that shows the version says v0.0.0.0. The real version is still what the page's version tag, the version check and crash reports carry, and a release build always shows the real one.
+- The screenshot check template (version 2) adds that switch to every page by itself; the turn-based starter uses it, with its before pictures re-recorded.
+- The turn-based starter's screen check follows the game's orientation: an upright-only game is checked at the 2 upright phone sizes and 3 desktop sizes, a sideways-only game skips the upright phones, and a game that plays any way keeps all 7.
+
 ## v0.42.0 — 2026-11-07
 
 Checks any game can reuse. A game's test scripts can now open the Dev Kit and any of its tabs with one line that waits for the panel itself, and every game can copy a before/after screenshot check that shows each screen at the game's sizes side by side, with changed pixels in red. A game also hears at session start when the test scripts it copied have fallen behind, and a module swap can be rehearsed on a throwaway copy of a game first. Nothing an existing game has to change.
