@@ -128,8 +128,12 @@ try {
     const { formatJson, keepHelp } = await server.ssrLoadModule('/vite-plugins/devkit/devkitVite.ts')
     let now = null
     let enNow = null
+    // (Dev Kit 0.32.0, F208: every save carries the page's key — the dev server refuses one without it)
+    const pageKey = await page.locator('meta[name="devkit-key"]').getAttribute('content')
+    const savesWithoutKey = []
     await page.route('**/__devkit/save', async (route) => {
       const { path, data } = route.request().postDataJSON()
+      if (!pageKey || route.request().headers()['x-devkit-key'] !== pageKey) savesWithoutKey.push(path)
       if (path === 'content/lessons/first-game.json') now = formatJson(keepHelp(JSON.parse(LESSON_TEXT), data), LESSON_TEXT)
       if (path === 'content/text/en.json') enNow = formatJson(keepHelp(JSON.parse(EN_TEXT), data), EN_TEXT)
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, path }) })
@@ -144,6 +148,8 @@ try {
     const enExpected = EN_TEXT.replace(JSON.stringify(oldBoard), JSON.stringify(NEW_BOARD))
     if (enExpected !== EN_TEXT && enNow === enExpected) pass('Lessons tab → Save: only step 1\'s typed words changed in en.json, every other byte as it was')
     else fail(`Lessons tab → Save: en.json isn't the old file with just step 1's words changed:\n${enNow}`)
+    if (pageKey && savesWithoutKey.length === 0 && now !== null) pass('Lessons tab → Save sent the Dev Kit key the page was served (F208)')
+    else fail(pageKey ? `Save went without the page's Dev Kit key: ${savesWithoutKey.join(', ')}` : 'the page has no <meta name="devkit-key"> — the dev server didn\'t put the key in it')
   }
 } catch (error) {
   fail(error.message)

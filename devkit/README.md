@@ -22,6 +22,7 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Screens (previews) | **Dev only.** Screens that are normally gated (an end screen, a handoff, a lobby with 4 players, an error) listed by group, one button per variant (2 / 3 / 4 players, host / guest…). Picking one opens it **in a sandbox over the game**: a full-window overlay badged PREVIEW with the variants, a size switch (fit / phone 390×844 / desktop 1440×900, scaled to fit), ↻ Replay, what the sandbox blocked (those in a dot carousel when they don't fit — on a phone, a row of their own), and ✕ Close (or Esc, or the phone's Back). Closing leaves the real game exactly as it was. Needs `src/devkit-game/previews.tsx` + one line in main.tsx (below) |
 | Sound endpoints | `npm run dev` only (`vite/audioSave.ts`): `POST /__devkit/save-audio?folder=&stem=&bus=&ext=` (raw bytes) converts with ffmpeg and writes ONLY `public/audio/<sfx·ui·amb·mus·stg>/<stem>_NN.mp3` — the stem `category_object_action`, lower case, starting with its folder; the next free number, never overwriting; up to 80 MB. `POST /__devkit/add-credit` `{ entry }` appends a sound's credit to `content/credits.json`. Same-page only, like Save. ffmpeg = `FFMPEG_PATH` or `ffmpeg` on the PATH; missing → "install ffmpeg: winget install Gyan.FFmpeg". 0.22.0: also levels the file to its folder's target loudness with the game's `src/audio/loudness.mjs` and keeps the dropped file in `audio-originals/<folder>/` |
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note **and how it was written** (`vite/formatJson.ts`: what was on one line stays on one line, `1.0` stays `1.0`; new parts: short objects / lists of plain values on one line if they fit 120 characters) — so saving a hand-written file unchanged leaves `git diff` empty; no page reload for its own writes |
+| Dev Kit key | **0.32.0** (F208). Every `/__devkit/` route (Save, save-audio, add-credit, the font library's list / file / add) wants the key the dev server put in the page it served — `<meta name="devkit-key">`, 32 random bytes made fresh each `npm run dev`, sent back as the `X-Devkit-Key` header (`devkitKeyHeaders()` in `saveContent.ts`). Any browser that opened the game has it — desktop, laptop, phone, at localhost or the LAN address — with nothing to set up; a hand-made request (curl from another device on the Wi-Fi) hasn't, and gets 403 "Refused: this request didn’t come from the game page…". On top of the older checks (POST only, Origin = Host, content type, Sec-Fetch-Site, the path checks), never instead of them. A page left open across a dev-server restart: reload it |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
 | Release check | `npm run check:devkit` builds the game both ways and checks each in a browser (/deliver runs it) |
 | E2E helpers | **0.31.0.** `src/devkit/e2e.mjs` for the game's Playwright scripts: `openDevKit(page)`, `openTab(page, name)`, `closeDevKit(page)` — they wait for the Dev Kit to arrive and for the tab to be in view (any page of a phone's tab row), never a set time (*E2E helpers*, below) |
@@ -501,6 +502,15 @@ await closeDevKit(page)                        // the ✕ button; waits for the 
   too); a file needs the dev server. "Save to file" puts one in `content/snapshots/` so Claude and tests share it.
 - **Bug captures go to `.planning/bugs/`, the one place outside `content/` the Save endpoint may write** — that's where /bug
   keeps them (its SKILL.md). Only `capture-*.json`-style names directly in that folder; nothing else in `.planning/`.
+- **The dev server's routes want a key from the page, not just a same-site Origin** (0.32.0, F208 — Glyphtender v0.12.0's
+  security review). `server.host: true` puts the dev server on the Wi-Fi, and Origin / Sec-Fetch-Site are only promises a
+  browser keeps: curl can fake Origin and leave Sec-Fetch-Site out, so anyone on the network could write `content/` or read
+  the font folders. The key lives only in the page the dev server serves, which another site's page can't read (same-origin
+  rule; Vite's host check stops DNS rebinding), so only a page that opened the game has it. Why a key in the page and not a
+  password or a token file: Muzzy uses the Dev Kit on a laptop, a desktop and a phone — the page carries it to every one of
+  them with no setup. It's compared in constant time (both sides hashed, then `timingSafeEqual`), 32 crypto-random bytes
+  (no guessing), new each run, and never written to the log. A font preview fetches the file itself (a `url()` in a
+  FontFace can't send a header). A game's own code calling a `/__devkit/` route spreads `devkitKeyHeaders()` into its headers.
 - **The capture log is a rolling window, not a recording.** Events and states older than 60 s are dropped as new ones
   arrive (and at most 500 events), so leaving ● Record on all session costs nothing. Marks are kept until Send/Clear.
   Copy for Claude leaves out the every-5-seconds states to stay pasteable; the saved file has them.
@@ -629,4 +639,10 @@ await closeDevKit(page)                        // the ✕ button; waits for the 
   desktop); the installer test checks it's copied and its test page isn't; a test checks no kit file imports it.
   Fixed on the way: a test's helper file named `x.test-y` (`tuning/tuningFiles.test-stub.ts`) was copied into every
   game despite saying it wasn't — the installer now leaves out `.test-` names too (an update removes the stub).
-- **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).
+- 0.32.0 (framework F208, Glyphtender v0.12.0 security review): **the Dev Kit key** — every `/__devkit/` route wants the
+  key the dev server put in the page it served (`<meta name="devkit-key">`, 32 crypto-random bytes per run, compared in
+  constant time, never logged); the Dev Kit sends it as `X-Devkit-Key` on every call (`devkitKeyHeaders()`). A curl
+  from another device on the Wi-Fi could fake Origin and skip Sec-Fetch-Site; now it gets a plain 403. Proven in the
+  starter: pages opened at the LAN address and at 127.0.0.1 save; curl to every route at the LAN address is refused.
+  Font previews fetch the file (with the key) instead of a FontFace `url()`.
+- **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab). A game's code calling one of the Dev Kit's own `/__devkit/` routes spreads `devkitKeyHeaders()` into its headers (0.32.0).
