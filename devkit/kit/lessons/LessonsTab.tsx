@@ -12,27 +12,36 @@
 import { useContext, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { useDevKitGame, type DevKitLessonRunner } from '../devkitGame'
 import { CAN_SAVE, copyText, readContentFile, saveContentFile } from '../saveContent'
+import { applyTextEdits, getAt, pathKey, textEdits, type TextEdit } from '../text/textEdits'
+import { missingPlaceholders, missingWarning } from '../text/textLogic'
+import { editText, editedText, knowText, savedText, textSaved, undoText, useTextStore } from '../text/textStore'
 import { Highlight, SearchCount, Section, SectionIndex } from '../search/Section'
 import { DevKitSearch } from '../search/searchContext'
 import { matchesAll, searchTerms } from '../search/searchLogic'
 import { gameText, lessonFiles, notLessons, type LessonFile } from './lessonFiles'
 import {
-  applyLessonChanges, describeAdvance, describeChanges, isLesson, lessonChanges, lessonPath, setStepField, stepField, stepSearchTexts, wordsFor,
-  type LessonStepData,
+  CONTROL_KINDS, applyLessonChanges, describeAdvance, describeChanges, fallbackWords, isLesson, lessonChanges, lessonPath, setStepField, stepField,
+  stepSearchTexts, wordsEntry, wordsFor, type ControlKindName, type LessonStepData, type WordsEntry,
 } from './lessonLogic'
 import { editLesson, editedLesson, knowLesson, lessonSaved, savedLesson, useLessonStore } from './lessonStore'
 import '../tuning/tuning.css'
+import '../text/text.css'
 import './lessons.css'
 
-type Props = { query?: string; files?: LessonFile[]; text?: unknown }
+// text = the game's en.json as saved; textFile = where it is (the step's words are edited there, shared with the Text tab)
+type Props = { query?: string; files?: LessonFile[]; text?: unknown; textFile?: string }
 type Status = { tone: '' | 'is-ok' | 'is-error'; text: string }
 
 const BUTTONS = ['next', 'gotIt', 'play']
 const IDLE_VIEW = { lessonId: null, stepIndex: -1 }
+const TEXT_FILE = 'content/text/en.json'
 const noRunner: DevKitLessonRunner = { view: () => IDLE_VIEW, subscribe: () => () => {}, start: () => {} }
 
-export function LessonsTab({ query = '', files = lessonFiles, text = gameText }: Props) {
+export function LessonsTab({ query = '', files = lessonFiles, text = gameText, textFile = TEXT_FILE }: Props) {
   useLessonStore()
+  useTextStore()
+  const hasText = text !== null && typeof text === 'object' && !Array.isArray(text)
+  if (hasText) knowText(textFile, text)
   const search = useContext(DevKitSearch)
   const game = useDevKitGame()
   const lessons = game?.lessons
@@ -55,6 +64,16 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
   const lessonId = typeof lesson.id === 'string' ? lesson.id : file
   const changes = lessonChanges(saved, lesson)
   const terms = searchTerms(query)
+  // the words: the shared text memory (textStore.ts) — only its "lessons" block is this tab's
+  const textNow = hasText ? editedText(textFile) : null
+  const textThen = hasText ? savedText(textFile) : null
+  const wordEdits: TextEdit[] = hasText ? textEdits(textThen, textNow).filter((e) => e.path[0] === 'lessons') : []
+  const lostHoles = wordEdits.some((e) => linesOf(e.value).some((line) => linesOf(e.was).some((was) => missingPlaceholders(was, line).length > 0)))
+  const unsaved = changes.length + wordEdits.length
+  const setWords = (path: (string | number)[], value: unknown) => {
+    editText(textFile, path, value)
+    setStatus({ tone: '', text: 'Words changed — live in the game. Not saved yet.' })
+  }
 
   const setStep = (index: number, next: LessonStepData) => {
     editLesson(file, { ...lesson, steps: lesson.steps.map((s, i) => (i === index ? next : s)) })
@@ -73,32 +92,58 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
       setStatus({ tone: 'is-error', text: `Couldn’t start it: ${(e as Error).message}` })
     }
   }
+  const forClaude = () => [
+    ...(changes.length ? [`Lesson changes (${lessonPath(file)}):`, ...describeChanges(file, changes)] : []),
+    ...(wordEdits.length ? [`Words changes (${textFile}):`, ...wordEdits.map((e) => `${pathKey(e.path)}: ${show(e.was)} → ${show(e.value)}`)] : []),
+  ].join('\n')
+  // One Save for both files, each only if it changed: the lesson's own keys onto the lesson file as it is on disk, the
+  // changed words onto en.json as it is on disk (the Text tab's way: it reloads the game's words) — the rest of each as it was
   const save = async () => {
-    if (!changes.length) return setStatus({ tone: '', text: 'Nothing to save — no changes.' })
+    if (!unsaved) return setStatus({ tone: '', text: 'Nothing to save — no changes.' })
+    if (lostHoles) return
     if (!CAN_SAVE) {
-      const lines = [`Lesson changes (${lessonPath(file)}):`, ...describeChanges(file, changes)].join('\n')
-      const ok = await copyText(lines)
+      const ok = await copyText(forClaude())
       return setStatus(ok ? { tone: 'is-ok', text: 'Copied — paste it to Claude.' } : { tone: 'is-error', text: 'The browser refused the copy.' })
     }
+    const done: string[] = []
     try {
-      const fresh = await readContentFile(lessonPath(file))
-      if (!isLesson(fresh)) throw new Error(`couldn’t read ${lessonPath(file)} as it is now`)
-      const merged = applyLessonChanges(fresh, changes)
-      await saveContentFile(lessonPath(file), merged)
-      lessonSaved(file, merged)
-      setStatus({ tone: 'is-ok', text: `Saved ${lessonPath(file)} — ${changes.length} change${changes.length === 1 ? '' : 's'}, the rest of the file as it was.` })
+      if (changes.length) {
+        const fresh = await readContentFile(lessonPath(file))
+        if (!isLesson(fresh)) throw new Error(`couldn’t read ${lessonPath(file)} as it is now`)
+        const merged = applyLessonChanges(fresh, changes)
+        await saveContentFile(lessonPath(file), merged)
+        lessonSaved(file, merged)
+        done.push(`${lessonPath(file)} — ${changes.length} change${changes.length === 1 ? '' : 's'}`)
+      }
+      let lost: TextEdit[] = []
+      if (wordEdits.length) {
+        const fresh = (await readContentFile(textFile)) ?? textThen!
+        const merged = applyTextEdits(fresh, wordEdits)
+        lost = merged.lost
+        await saveContentFile(textFile, merged.data, { reload: true })
+        textSaved(textFile, merged.data)
+        const n = wordEdits.length - lost.length
+        done.push(`${textFile} — ${n} line${n === 1 ? '' : 's'}`)
+      }
+      setStatus(lost.length
+        ? { tone: 'is-error', text: `Saved ${done.join(', and ')}, but ${lost.map((e) => pathKey(e.path)).join(', ')} isn’t in en.json any more — not written.` }
+        : { tone: 'is-ok', text: `Saved ${done.join(', and ')}; the rest of ${done.length > 1 ? 'both files' : 'the file'} as it was.` })
     } catch (e) {
-      setStatus({ tone: 'is-error', text: `Couldn’t save: ${(e as Error).message}` })
+      setStatus({ tone: 'is-error', text: `Couldn’t save: ${(e as Error).message}${done.length ? ` (saved first: ${done.join(', ')})` : ''}` })
     }
   }
   const copy = async () => {
-    const ok = await copyText([`Lesson changes (${lessonPath(file)}):`, ...describeChanges(file, changes)].join('\n'))
+    const ok = await copyText(forClaude())
     setStatus(ok ? { tone: 'is-ok', text: 'Copied the changes for Claude.' } : { tone: 'is-error', text: 'The browser refused the copy.' })
   }
-  const undo = () => { editLesson(file, saved); setStatus({ tone: '', text: 'Back to the saved lesson.' }) }
+  const undo = () => {
+    editLesson(file, saved)
+    if (hasText) undoText(textFile, (path) => path[0] === 'lessons')
+    setStatus({ tone: '', text: 'Back to the saved lesson and words.' })
+  }
 
   const steps = lesson.steps
-    .map((step, index) => ({ step, index, words: wordsFor(text, lessonId, step.message) }))
+    .map((step, index) => ({ step, index, words: wordsFor(hasText ? textNow : text, lessonId, step.message) }))
     .filter(({ step, words }) => matchesAll(terms, stepSearchTexts(step, words)))
   const sectionId = (step: LessonStepData) => `lessons:${file}:${step.id}`
   const playingHere = view.lessonId === lessonId
@@ -134,8 +179,11 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
                 <button type="button" className="devkit-btn" disabled={!lessons} onClick={() => play(index)} aria-label={`Play from step ${index + 1} (${step.id})`}>▶ Play from here</button>
                 <button type="button" className="devkit-btn" disabled={!stepChanged} onClick={() => before && setStep(index, before)}>↺ Step back to saved</button>
               </div>
-              <TextField label="Words (text id, or the words)" path={['message']} step={step} before={before} terms={terms} onChange={(v) => setField(index, ['message'], v)}
-                help={words !== null ? `“${words}”` : step.message ? 'Not in en.json "lessons" — the game shows it as written.' : 'No words: the step only points.'} />
+              {hasText
+                ? <WordsField stepId={step.id} where={wordsEntry(textNow, lessonId, step.message)} savedText={textThen} onSet={setWords} />
+                : <Row label="Words" changed={false} help={words !== null ? `“${words}”` : 'No en.json "lessons" — the game shows the words id as written.'}><span /></Row>}
+              <TextField label="Words id" path={['message']} step={step} before={before} terms={terms} small onChange={(v) => setField(index, ['message'], v)}
+                help={step.message ? 'The words’ name in en.json "lessons" (or the words themselves, shown as written). Another id = another line.' : 'No words: the step only points. Type an id to give it some.'} />
               <TextField label="Button" path={['button']} step={step} before={before} terms={terms} list="lessons-buttons" onChange={(v) => setField(index, ['button'], v)}
                 help="next · gotIt · play, or any text id. Empty = the game’s default word." />
               <ChoiceField label="While its words show" path={['while']} step={step} before={before} options={['run', 'pause', 'slow']} onChange={(v) => setField(index, ['while'], v)} />
@@ -160,10 +208,10 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
       })}
       <datalist id="lessons-buttons">{BUTTONS.map((b) => <option key={b} value={b} />)}</datalist>
       <div className="devkit-footer">
-        <button type="button" className="devkit-btn devkit-btn-main" onClick={save} disabled={!changes.length}>{CAN_SAVE ? 'Save' : 'Copy for Claude'}</button>
-        {CAN_SAVE && <button type="button" className="devkit-btn" onClick={copy} disabled={!changes.length}>Copy for Claude</button>}
-        <button type="button" className="devkit-btn" onClick={undo} disabled={!changes.length}>Undo unsaved</button>
-        {changes.length > 0 && <p className="devkit-status lessons-count">{changes.length} unsaved change{changes.length === 1 ? '' : 's'}.</p>}
+        <button type="button" className="devkit-btn devkit-btn-main" onClick={save} disabled={!unsaved || lostHoles}>{CAN_SAVE ? 'Save' : 'Copy for Claude'}</button>
+        {CAN_SAVE && <button type="button" className="devkit-btn" onClick={copy} disabled={!unsaved}>Copy for Claude</button>}
+        <button type="button" className="devkit-btn" onClick={undo} disabled={!unsaved}>Undo unsaved</button>
+        {unsaved > 0 && <p className="devkit-status lessons-count">{unsaved} unsaved change{unsaved === 1 ? '' : 's'}.{lostHoles && ' Save waits: a line lost a {placeholder} (⚠ above).'}</p>}
         {status.text && <p className={`devkit-status ${status.tone}`} role="status">{status.text}</p>}
       </div>
     </div>
@@ -175,9 +223,9 @@ type FieldProps = { label: string; path: string[]; step: LessonStepData; before:
 const differs = (step: LessonStepData, before: LessonStepData | undefined, path: string[]) =>
   JSON.stringify(stepField(step, path)) !== JSON.stringify(stepField(before, path))
 
-function Row({ label, changed, help, children, terms = [] }: { label: string; changed: boolean; help?: string; children: ReactNode; terms?: string[] }) {
+function Row({ label, changed, help, children, terms = [], small }: { label: string; changed: boolean; help?: string; children: ReactNode; terms?: string[]; small?: boolean }) {
   return (
-    <div className="tt-row lessons-row">
+    <div className={`tt-row lessons-row${small ? ' lessons-row-small' : ''}`}>
       <span className="tt-name">{changed && <span className="tt-dot" title="Changed, not saved yet" />}<span className="tt-label">{label}</span></span>
       {children}
       {help && <p className="tt-row-help"><Highlight text={help} terms={terms} /></p>}
@@ -185,11 +233,11 @@ function Row({ label, changed, help, children, terms = [] }: { label: string; ch
   )
 }
 
-function TextField({ label, path, step, before, help, list, terms, onChange }: FieldProps & { help?: string; list?: string; terms: string[]; onChange: (v: string | undefined) => void }) {
+function TextField({ label, path, step, before, help, list, terms, small, onChange }: FieldProps & { help?: string; list?: string; terms: string[]; small?: boolean; onChange: (v: string | undefined) => void }) {
   const value = stepField(step, path)
   return (
-    <Row label={label} changed={differs(step, before, path)} help={help} terms={terms}>
-      <input className="tt-number lessons-text" type="text" value={typeof value === 'string' ? value : ''} list={list} aria-label={`${step.id}: ${label}`}
+    <Row label={label} changed={differs(step, before, path)} help={help} terms={terms} small={small}>
+      <input className={`tt-number lessons-text${small ? ' lessons-small' : ''}`} type="text" value={typeof value === 'string' ? value : ''} list={list} aria-label={`${step.id}: ${label}`}
         onChange={(e) => onChange(e.target.value === '' ? undefined : e.target.value)} />
     </Row>
   )
@@ -228,6 +276,64 @@ function BoolField({ label, path, step, before, onChange }: FieldProps & { onCha
       <input type="checkbox" className="lessons-check" checked={value === true} aria-label={`${step.id}: ${label}`}
         // unticked: false if the file said false, else the key is taken out (not set = no dim)
         onChange={(e) => onChange(e.target.checked ? true : was === false ? false : undefined)} />
+    </Row>
+  )
+}
+
+// ---- a step's words (0.30.0, F200 task 22) ----
+const show = (v: unknown) => (v === undefined ? '(not set)' : JSON.stringify(v))
+/** Every word line in a value: a string, or the strings of a per-control-type line. */
+const linesOf = (v: unknown): string[] =>
+  typeof v === 'string' ? [v] : v !== null && typeof v === 'object' ? Object.values(v).filter((x): x is string => typeof x === 'string') : []
+
+/** The step's words, typed right here: one box for a plain line, one per control type when the line has them. They
+ *  live in en.json where the Tutorial module looks (the lesson's own line, else "shared"); an id with no words yet →
+ *  typing makes its line in the lesson's own block. Edits go to the shared text memory: live, and the Text tab agrees. */
+function WordsField({ stepId, where, savedText, onSet }: { stepId: string; where: WordsEntry | null; savedText: unknown; onSet: (path: (string | number)[], value: unknown) => void }) {
+  if (!where) return null
+  const { path, entry, shared } = where
+  const then = getAt(savedText, path)
+  const at = `en.json ${path.join('.')}`
+  const help = shared
+    ? `Shared line (${at}) — other lessons use it too: a change here changes theirs.`
+    : entry === undefined ? `No words yet — typing puts them in ${at}.` : `In ${at}.`
+  const box = (kind: ControlKindName | null, value: string, was: string | undefined) => {
+    const missing = was === undefined ? [] : missingPlaceholders(was, value)
+    return (
+      <div key={kind ?? 'plain'} className="lessons-words-line">
+        {kind && <span className="lessons-kind">{kind}</span>}
+        <textarea className="tx-box lessons-words-box" rows={1} spellCheck value={value} aria-label={`${stepId}: Words${kind ? ` (${kind})` : ''}`}
+          placeholder={entry === undefined ? 'Type the words…' : undefined}
+          onChange={(e) => {
+            const v = e.target.value
+            if (kind) onSet([...path, kind], v)
+            else onSet(path, v === '' && then === undefined ? undefined : v) // a new line typed back to nothing: no line
+          }} />
+        {missing.map((name) => <p key={name} className="tx-warn" role="alert">⚠ {missingWarning(name)}</p>)}
+      </div>
+    )
+  }
+  const perKind = entry !== null && typeof entry === 'object' && !Array.isArray(entry) ? entry as Record<string, unknown> : null
+  return (
+    <Row label="Words" changed={JSON.stringify(entry) !== JSON.stringify(then)} help={help}>
+      <div className="lessons-words">
+        {perKind
+          ? CONTROL_KINDS.filter((k) => typeof perKind[k] === 'string').map((k) => {
+              const was = then !== null && typeof then === 'object' ? (then as Record<string, unknown>)[k] : then
+              return box(k, perKind[k] as string, typeof was === 'string' ? was : undefined)
+            })
+          : box(null, typeof entry === 'string' ? entry : '', typeof then === 'string' ? then : undefined)}
+        <div className="lessons-words-btns">
+          {perKind && CONTROL_KINDS.filter((k) => typeof perKind[k] !== 'string').map((k) => (
+            <button key={k} type="button" className="devkit-btn lessons-mini" aria-label={`${stepId}: + ${k} line`} title={`Words for players on ${k}`}
+              onClick={() => onSet([...path, k], fallbackWords(entry))}>+ {k} line</button>
+          ))}
+          {typeof entry === 'string' && (
+            <button type="button" className="devkit-btn lessons-mini" aria-label={`${stepId}: one line per control type`}
+              onClick={() => onSet(path, Object.fromEntries(CONTROL_KINDS.map((k) => [k, entry])))}>Split: keys · mouse · phone</button>
+          )}
+        </div>
+      </div>
     </Row>
   )
 }

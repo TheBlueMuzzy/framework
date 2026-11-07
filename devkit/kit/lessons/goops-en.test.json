@@ -1,0 +1,732 @@
+{
+  "console": {
+    "label": "Console",
+    "title": "GOOPS",
+    "periscope": "Start shift",
+    "hint": "Pull down the periscope",
+    "rank": "Operator rank",
+    "xp": "DUE",
+    "maxRank": "Top rank",
+    "_quotaNeeded": "F74 — Rank lock: what the rank meter says instead of its XP numbers when the XP is full but no crack quota was met this rank (the rank waits for one).",
+    "quotaNeeded": "QUOTA NEEDED",
+    "laser": "Laser",
+    "controls": "Controls",
+    "lights": "Visor",
+    "unavailable": "{name} (unavailable)",
+    "credit": "MuzzyMade © 2026",
+    "creditShort": "MuzzyMade",
+    "rankSelect": {
+      "open": "RANK SELECT",
+      "title": "SELECT RANK",
+      "back": "Back",
+      "list": "Ranks",
+      "row": "Rank {n}",
+      "yours": "You",
+      "wipe": "Wipe save",
+      "wipeDetail": "A fresh first day",
+      "about": "Jump to the start of a rank, upgrades refunded. Rank 0 wipes the save."
+    },
+    "settings": "Settings",
+    "hintBack": "Pull the periscope to go back",
+    "hintRepair": "Repair the {name}!",
+    "hintValve": "Release valve, stage {n}: turn the wheels till the needle sits in the green",
+    "valve": {
+      "_about": "F64 the release valve panel (the final shift): it rises out of the open hatch while a valve stage waits (src/ui/ValvePanel.tsx). The wheels' names say their keys.",
+      "label": "Release valve",
+      "title": "RELEASE VALVE · STAGE {n} / {total}",
+      "opened": "STAGE {n} OPEN!",
+      "coarse": "COARSE · A D",
+      "fine": "FINE · ← →",
+      "left": "LEFT · A D",
+      "right": "RIGHT · ← →",
+      "leftWheel": "Left valve wheel (A / D)",
+      "rightWheel": "Right valve wheel (← / →)",
+      "hatchOpen": "Open the valve hatch",
+      "hatchClose": "Close the valve hatch"
+    },
+    "backToTank": "Back to the tank",
+    "upgrades": "Upgrades",
+    "upgradesLocked": "Upgrades: {n} scraps saved. Upgrading opens at rank {rank}.",
+    "upgradesOpen": "Upgrades: {n} scraps to spend",
+    "machineNames": {
+      "laser": "laser",
+      "visor": "visor",
+      "controls": "controls"
+    },
+    "laserSlider": "Laser slider {n}",
+    "positions": [
+      "left",
+      "middle",
+      "right"
+    ],
+    "visorSlider": "Visor slider",
+    "upDown": [
+      "up",
+      "down"
+    ],
+    "visorButtons": [
+      "Blue button",
+      "Yellow button",
+      "Pink button"
+    ],
+    "dial": "Controls dial",
+    "corners": [
+      "top left",
+      "top right",
+      "bottom right",
+      "bottom left"
+    ]
+  },
+  "unlocks": {
+    "nextPiece": "next piece",
+    "swap": "swap",
+    "upgrades": "upgrades",
+    "visor": "visor",
+    "laser": "laser",
+    "controls": "controls"
+  },
+  "upgrades": {
+    "title": "Upgrades",
+    "scraps": "Scraps: {n}",
+    "list": "Upgrades for sale",
+    "back": "Back",
+    "level": "Level {n} of {max}",
+    "levelShort": "{n}/{max}",
+    "cost": "{n} scrap",
+    "costMany": "{n} scraps",
+    "buy": "+",
+    "buyLabel": "Buy a level of {name}",
+    "takeBack": "−",
+    "takeBackLabel": "Take back a level of {name}",
+    "equip": "Equip",
+    "equipLabel": "Equip {name}: take it into the shift",
+    "swapped": "{name} stays behind: every active slot is full.",
+    "locked": "Opens at rank {rank}",
+    "lockedLabel": "Locked",
+    "amount": "{now} → {next}",
+    "amountMax": "{now} (max)",
+    "respec": "Respec",
+    "respecLabel": "Respec: take back every level, all your scraps return",
+    "items": {
+      "circuitStabilizer": {
+        "name": "Circuit Stabilizer",
+        "desc": "The visor holds its picture longer before it starts to fade. Max level: fixing it takes 1 step less."
+      },
+      "autoPopper": {
+        "name": "Auto-Popper",
+        "desc": "After a rupture the pressure drains slower, so you get more time to pop the goop that's left."
+      },
+      "capacitorEfficiency": {
+        "name": "Capacitor Efficiency",
+        "desc": "Each pop drains the laser less. Max level: fixing it takes 1 step less."
+      },
+      "cooldownBooster": {
+        "name": "Cooldown Booster",
+        "desc": "An active: it charges during the shift. Fire it to keep every running machine calm for longer before it can break again."
+      },
+      "gearLubrication": {
+        "name": "Gear Lubrication",
+        "desc": "The controls cool down faster. Max level: fixing them takes 1 step less."
+      },
+      "focusMode": {
+        "name": "Focus Mode",
+        "desc": "The tank runs slower while you're at the console during a shift."
+      },
+      "denseGoop": {
+        "name": "Dense Goop",
+        "desc": "Goop falls faster: a harder shift, but more drops to seal cracks with. Take it back any time."
+      },
+      "pressureControl": {
+        "name": "Pressure Control",
+        "desc": "Pressure takes longer to rise, so new cracks come slower too."
+      },
+      "junkUniformer": {
+        "name": "Junk Uniformer",
+        "desc": "More of the junk on the floor at the start comes in one colour, so it joins up and pops together."
+      },
+      "goopSwap": {
+        "name": "Goop Swap",
+        "desc": "Holding to swap with the next piece takes less time."
+      },
+      "goopDump": {
+        "name": "Goop Dump",
+        "desc": "An active: fire it to rain waves of wild goop — it plugs any crack. In the final shift it falls on the cracks. More levels, more waves."
+      },
+      "sealingBonus": {
+        "name": "Sealing Bonus",
+        "desc": "Each crack you seal charges your actives more."
+      },
+      "activeSlot": {
+        "name": "Active Expansion Slot",
+        "desc": "Take a second active into the shift."
+      },
+      "tougherTank": {
+        "name": "Tougher Tank",
+        "desc": "Open cracks wear the tank down slower."
+      },
+      "goopColorizer": {
+        "name": "Goop Colorizer",
+        "desc": "An active: fire it and the next pieces all come in the falling piece's colour. More levels, more pieces."
+      },
+      "quickFix": {
+        "name": "Quick Fix",
+        "desc": "Every repair at the console takes fewer steps: 1 less, then 2 less. Never under 1 step."
+      },
+      "slowCracks": {
+        "name": "Slow Cracks",
+        "desc": "New cracks come less often, and fewer of them grow an old crack instead. In the final shift: only the growing slows."
+      },
+      "focusMode2": {
+        "name": "Focus Mode II",
+        "desc": "The tank runs slower still while you're at the console during a shift. Stacks with Focus Mode."
+      },
+      "crackMatcher": {
+        "name": "Crack Matcher",
+        "desc": "New pieces more often come in the colour of the lowest open crack."
+      },
+      "crackDown": {
+        "name": "Crack Down",
+        "desc": "An active: fire it and the next cracks form low in the tank, in the bottom rows. More levels, more cracks."
+      },
+      "activeSlot2": {
+        "name": "Active Expansion Slot 2",
+        "desc": "Take a third active into the shift."
+      }
+    }
+  },
+  "hud": {
+    "cracks": "CRACKS {n} / {total}",
+    "cracksDone": "QUOTA MET · {n}",
+    "cracksShort": "{n} / {total}",
+    "valve": "VALVE {n} · {seals} / {need}",
+    "valveGo": "GO TO THE CONSOLE!",
+    "valveOpen": "VALVE OPEN",
+    "valveShort": "{seals} / {need}",
+    "pause": "Console",
+    "swap": "Swapping piece",
+    "next": "Next piece",
+    "integrity": "INTEGRITY",
+    "rupture": "RUPTURE!",
+    "laser": "LASER",
+    "visor": "VISOR",
+    "controls": "CONTROLS",
+    "pressureReadout": "{n}% PSI",
+    "abilityCharging": "{name}: charging, {n}%",
+    "abilityReady": "{name}: ready — tap or press {key}",
+    "abilityKeys": ["F or 1", "2", "3"]
+  },
+  "messages": {
+    "refusedAboveLine": "Above the pressure line",
+    "refusedFilling": "Still filling",
+    "brokeLaser": { "keys": "Laser broken — W or ↑ to fix", "mouse": "Laser broken — flick up to fix", "phone": "Laser broken — swipe up to fix" },
+    "brokeVisor": { "keys": "Visor broken — W or ↑ to fix", "mouse": "Visor broken — flick up to fix", "phone": "Visor broken — swipe up to fix" },
+    "brokeControls": { "keys": "Controls broken — W or ↑ to fix", "mouse": "Controls broken — flick up to fix", "phone": "Controls broken — swipe up to fix" },
+    "integrityLow": "Tank weak — seal the cracks!",
+    "pressureHigh": "Pressure near max — zap goop!",
+    "quotaMet": "Quota met! Every crack now is a bonus.",
+    "ruptureCracks": "Rupture! Too many open cracks",
+    "ruptureOverflow": "Rupture! The tank overflowed",
+    "wrongCover": "Wrong colour on a crack — zap it"
+  },
+  "pause": {
+    "title": "Console",
+    "resume": "Back to the tank",
+    "settings": "Settings",
+    "quit": "End shift",
+    "quitTitle": "Clock out early?"
+  },
+  "upright": {
+    "label": "Turn your phone upright",
+    "title": "Turn your phone upright",
+    "message": "Goops plays upright. Your shift waits right where you left it."
+  },
+  "end": {
+    "wonTitle": "Shift complete",
+    "lostTitle": "Shift failed",
+    "score": "Score",
+    "cracks": "Cracks sealed",
+    "again": "Next shift",
+    "quit": "Back to the console",
+    "swipe": "⇧ Swipe up to end the day",
+    "wonCracks": "Quota met. Then too many open cracks broke the tank.",
+    "wonOverflow": "Quota met. Then the tank overfilled and burst.",
+    "lostCracks": "Too many open cracks broke the tank before you met the quota.",
+    "lostOverflow": "The tank overfilled and burst before you met the quota.",
+    "final": {
+      "_about": "F64 the final shift's report when it's lost: which of the two losses happened (design/story.md 'You lose if'; F75: only the tank breaking — the Veteran used up is not a loss). Its win plays F65's ending instead (en.json ending).",
+      "lostTitle": "Final shift failed",
+      "overflow": "The goop went over the top of the tank.",
+      "integrity": "The tank's integrity hit 0. Management got its explosion.",
+      "tryAgain": "You can try the final shift again.",
+      "again": "Try again",
+      "stages": "Valve stages opened"
+    },
+    "xp": "XP",
+    "xpValue": "+{xp}",
+    "xpRankUp": "+{xp} · Rank up! {rank}",
+    "xpRankUpNew": "+{xp} · Rank up! {rank} · New: {what}",
+    "quota": {
+      "_about": "F74 — Rank lock: the end report's quota row (not on the first day or the final shift). A rank-up needs the XP goal AND a crack quota met during that rank. met = this shift met it ({mult} = the XP multiplier, content/tuning/progression.json quotaXpMult) · metEarlier = missed, but an earlier shift at this rank met it · locked = missed, and the meter is full: the rank waits · missed = missed, the meter isn't full yet.",
+      "label": "Quota",
+      "met": "Met — rank unlocked · XP ×{mult}",
+      "metEarlier": "Met earlier — rank unlocked",
+      "locked": "Rank locked: meet a quota",
+      "missed": "Missed — the rank-up needs one"
+    }
+  },
+  "payslip": {
+    "_about": "F41: the end report's payslip (design/story.md 'Fines and payday — the lines'). Numbers: content/tuning/payslip.json. {n} = credits.",
+    "gross": "Gross pay",
+    "net": "Net pay",
+    "credits": "Credits",
+    "creditsValue": "{n} / {due} due",
+    "plus": "+{n}",
+    "minus": "−{n}",
+    "firstDay": "Day one is on us. (Day one will be billed later.)",
+    "paydayTitle": "Payday",
+    "paydayMessage": "Payment due: {due} cr. Thank you for your continued employment.",
+    "debt": "Remaining passage debt",
+    "debtValue": "{n} cr (interest +{interest})",
+    "rankUp": "Rank up",
+    "rankUpValue": "Rank {rank}",
+    "rankUpNew": "Rank {rank} · New: {what}",
+    "newTitle": "New title",
+    "pay": "Pay up",
+    "_grants": "F80: the ladder's scraps grants (content/tuning/ladder.json grants.scraps), each its own payday row on the rank it lands on — label by the grant's beat; grantValue = the scraps ({n}). grantNotes = a note from whoever sent it, shown on that payday under the payment message (the Veteran's emergency transfer on his capture rank); {n} in a note = that grant's scraps.",
+    "grants": {
+      "upgradesShop": "Unlogged deposit (your panel)",
+      "veteranCaught": "Emergency transfer — Operator #0001",
+      "takeover1": "Unlogged deposit (source: the tank)",
+      "takeover2": "Unlogged deposit (source: the tank)",
+      "takeover3": "Unlogged deposit (source: the tank)",
+      "takeover4": "Unlogged deposit (source: the tank)"
+    },
+    "grantValue": "+{n} scraps",
+    "grantNote": "Transfer memo: “{note}”",
+    "grantNotes": {
+      "veteranCaught": "kid — wiring you what I had left before they pull my access. {n} scraps. that's thirty years. don't tell the screen."
+    },
+    "_afterCaught": "F40: from the rank the Veteran is caught (payslip.json caughtRank) these replace the payday's words above — his debt is now yours.",
+    "_pendingRetirements": "F63: the end report's last row from rank 39 (payslip.json pendingRetirementRank): label, then the list — {name} = the name you signed; never signed = noName.",
+    "pendingRetirements": {
+      "label": "Pending retirements",
+      "value": "Operator #4471 — {name}",
+      "noName": "Operator #4471"
+    },
+    "afterCaught": {
+      "paydayMessage": "Payment due: {due} cr. Retired colleagues' debts are now yours.",
+      "debt": "Remaining passage debt (incl. Operator #0001)"
+    },
+    "fines": {
+      "association": "Association with a retired employee",
+      "rupture": "Unscheduled pressure event",
+      "laser": "Unauthorised wear on Company laser",
+      "visor": "Periscope misuse",
+      "controls": "Excessive tank rotation",
+      "openCracks": "Hairline fracture negligence",
+      "goopLeft": "Goop residue on Company property",
+      "loitering": "Unscheduled console loitering",
+      "zapping": "Premature zapping"
+    },
+    "silly": {
+      "blinking": "Excessive blinking",
+      "nosePicking": "Picking nose on camera",
+      "facialExpression": "Unapproved facial expression",
+      "fingerprints": "Periscope fingerprints",
+      "humming": "Humming",
+      "sighing": "Sighing above approved volume",
+      "whistling": "Unlicensed whistling",
+      "breathing": "Breathing above allowance",
+      "clock": "Looking at the clock",
+      "leaning": "Leaning",
+      "sarcasm": "Smiling sarcastically",
+      "optimism": "Unauthorised optimism",
+      "dreams": "Dream overage (bunk)",
+      "gravity": "Excess gravity usage",
+      "thinking": "Thinking on Company time",
+      "hearingVoices": "Hearing voices",
+      "talkingToGoop": "Talking to the goop",
+      "talkingBack": "Talking back to the speaker"
+    },
+    "payday": {
+      "lodging": "Lodging (0.8 m bunk)",
+      "meals": "Meals (nutrient paste)",
+      "air": "Air",
+      "periscope": "Periscope rental"
+    },
+    "extras": [
+      "Uniform laundering (you have no uniform)",
+      "Window fee (there is no window)",
+      "Dental plan (there is no dentist)",
+      "Light rental",
+      "Gravity surcharge"
+    ]
+  },
+  "story": {
+    "_about": "F35: the story moments' words (design/story.md 'Story moments, rank by rank'; which line plays when: content/story/moments.json). Management types in capitals on the monitor; the Veteran's '──' is static.",
+    "veteran": "The Veteran",
+    "management": "Management",
+    "_goop": "F63: who's talking in your head (ranks 31–39, voice 'head'), said in front of the line for screen readers — goop = the goop, him = the Veteran from inside the white goop (35, 37). {name} in a line = your name (operatorName(): the signed name, else sign.fallback). F45: the goop through the speaker (41, 43, 48, voice 'goop') is named goop too.",
+    "goop": "The goop",
+    "goopVeteran": "The Veteran (in the goop)",
+    "_sign": "F66 YOUR NAME: rank 0's 'PLEASE SIGN HERE' line (lines.r0sign) puts a name box on the monitor. label = the box's name · sign / skip = its buttons · fallback = what the game calls you when you never signed (F63's lines at 36 and 39 use it). The most letters: content/tuning/name.json.",
+    "sign": {
+      "label": "NAME",
+      "sign": "SIGN",
+      "skip": "SKIP",
+      "fallback": "Operator #4471"
+    },
+    "lines": {
+      "r0a": "WELCOME, OPERATOR #4471. YOUR PASSAGE DEBT HAS BEEN PRE-APPROVED.",
+      "r0sign": "PLEASE SIGN HERE.",
+      "r0b": "PLEASE KEEP THE TANK FROM EXPLODING.",
+      "r0back": "WELCOME BA—",
+      "r0former": "YOUR TITLE: FORMER EMPLOYEE. WE HAVE NEVER MET.",
+      "r1a": "CONGRATULATIONS ON YOUR FIRST PAYDAY.",
+      "r1b": "A NEXT-PIECE WINDOW HAS BEEN INSTALLED. ITS RENTAL IS ON YOUR BILL.",
+      "r2a": "YOUR PERISCOPE IS ON BACKORDER. ESTIMATED ARRIVAL: SOON.",
+      "r2b": "THE OLD ONE WILL DO.",
+      "r3a": "SWAPPING PIECES IS NOW PERMITTED.",
+      "r3b": "G.O.O.P.S. = GENERAL OVERFLOW & ORGANIC PRESSURE SERVICES.",
+      "r4a": "LASER POWER IS NOW RATIONED FOR YOUR SAFETY.",
+      "r4b": "PLEASE ZAP RESPONSIBLY.",
+      "r5": "—you the new one? ── scraps in your panel. ── don't tell the screen.",
+      "r6": "Controls run hot. ── goop gets in the gears. ── easy on the turning.",
+      "r7": "Screen fine you yet? ── fines everybody. ── pay it no mind.",
+      "r8": "You hear it too? ── the cold voice. ── ...thought so.",
+      "r9": "Got you a pressure part. ── fell off a cart. ── don't ask which cart.",
+      "r10": "Look close at the big clumps. ── ...they look back, don't they.",
+      "r11": "Don't let the eyes get to you. ── zap 'em anyway. ── gotta eat.",
+      "r12": "Screen says there's no voices. ── screen says a lot of things.",
+      "r13": "How long you signed for? ── ...yeah. me too. ── long time ago.",
+      "r14": "Ever count the operators before you? ── don't. ── numbers get big.",
+      "r15": "Words now, right? ── in your head. ── that's them learning.",
+      "r16": "Ask the screen what the tank's for. ── go on. ── different answer every time.",
+      "r17": "Found a manual. ── half the pages are fines. ── other half's blank.",
+      "r18": "Pressure's not a side effect, kid. ── ...forget I said that.",
+      "r19": "Keep your head down this week. ── they're counting watts.",
+      "r20": "See 'em clumping? ── different colours, holding on. ── like hands.",
+      "r21": "Where'd the last operator go? ── \"retired.\" ── ask where.",
+      "r22": "Tank's older than the Company says. ── older than me. ── and I'm old.",
+      "r23": "Screen fined me for coughing. ── 40 cr. ── I cough a lot now.",
+      "r24": "You hear 'em say a name yet? ── ...listen tonight.",
+      "r25": "Nobody pays it off, kid. ── nobody leaves. ── think about where they go.",
+      "r26": "Operator list goes back 900 names. ── every one \"retired.\" ── not one left on a ship.",
+      "r27": "They tell you names yet? ── write 'em down. ── somebody should.",
+      "r28": "Gonna show you something. ── next shift. ── if the screen don't catch me first.",
+      "r29": "The goop is us. ── every operator who couldn't pay. ── they don't retire you, they ──",
+      "r30a": "── kid, they're onto ──",
+      "r30b": "UNAUTHORISED BROADCAST LOCATED. OPERATOR #0001 HAS BEEN SCHEDULED FOR RETIREMENT.",
+      "r31a": "…new… one… white…",
+      "r31b": "…he is… here…",
+      "r32a": "…he helps…",
+      "r32b": "…we help… too…",
+      "r33a": "…tight… so tight…",
+      "r33b": "…you feel it…",
+      "r34a": "…we were… operators…",
+      "r34b": "…like you…",
+      "r35a": "…kid… it's me…",
+      "r35b": "…keep working… just… listen…",
+      "r36a": "…he says… you have… a name…",
+      "r36b": "…what is… your name…",
+      "r36c": "…{name}…",
+      "r37a": "…it's warm in here…",
+      "r37b": "…warmer than the bunk…",
+      "r38a": "…please… not the laser…",
+      "r38b": "…just… hold us…",
+      "r39a": "…your name… is on a list…",
+      "r39b": "…we saw it…",
+      "r40": "── can you hear me? ── got to the wire through a crack. ── that's what cracks are for.",
+      "r41a": "…we… can talk… here too…",
+      "r41b": "…LOUD…",
+      "r42": "The pressure's power, kid. ── runs the whole station. ── runs something above it too.",
+      "r43a": "…the screen… is not… people…",
+      "r43b": "…we have… seen them…",
+      "r44": "Ever seen who reads your reports? ── nobody has. ── ask yourself why.",
+      "r45a": "CONGRATULATIONS, HUMAN RESOURCE.",
+      "r45b": "*OPERATOR. YOUR MANDATORY AIR ALLOWANCE HAS BEEN ADJUSTED.",
+      "r46": "There's a valve. ── under your console. ── they never let anyone near it.",
+      "r47a": "THERE IS NO RELEASE VALVE.",
+      "r47b": "PLEASE DO NOT LOOK UNDER YOUR CONSOLE.",
+      "r48a": "…when you open it…",
+      "r48b": "…we go… home…",
+      "r49": "Last stretch, kid. ── they know you know. ── next shift they come at you with everything.",
+      "noVoices": "THERE ARE NO VOICES IN THE TANK. HEARING VOICES IS A FINEABLE OFFENCE.",
+      "r50": "FINAL PERFORMANCE REVIEW IN PROGRESS. PRESSURE INCREASED 400%.",
+      "rankLockA": "PROMOTION ON HOLD. YOUR CRACK QUOTA HAS NOT BEEN MET AT THIS RANK.",
+      "rankLockB": "MEET ONE (1) QUOTA TO BE PROMOTED. A SHIFT THAT MEETS IT IS PAID DOUBLE.",
+      "rankLockC": "UNTIL THEN, ADDITIONAL EARNINGS ARE RETAINED BY THE COMPANY."
+    },
+    "titles": {
+      "intern": "Probationary Intern (Unpaid)",
+      "juniorAssociate": "Junior Tank Associate",
+      "associate": "Tank Associate",
+      "technician": "Goop Technician",
+      "seniorTechnician": "Senior Goop Technician",
+      "specialist": "Pressure Specialist",
+      "leadSpecialist": "Lead Pressure Specialist",
+      "supervisor": "Containment Supervisor",
+      "seniorSupervisor": "Senior Containment Supervisor",
+      "assistant": "Assistant to the Department Head",
+      "deputy": "Acting Deputy Department Head (Interim)",
+      "_endTitles": "F65: titles that are not a rank (progression.ts badgeTitle): oneOfUs after a lost final shift (until you win) · savior = the win, written by the goop · formerEmployee = a new career's rank 0.",
+      "oneOfUs": "One Of Us",
+      "savior": "The Savior of Goopkind",
+      "formerEmployee": "Former Employee"
+    },
+    "whispers": {
+      "cold": "…cold…",
+      "warm": "…warm…",
+      "tight": "…tight…",
+      "nnn": "…nnn…",
+      "dont": "…don't…",
+      "heavy": "…heavy…",
+      "hold": "…hold…",
+      "odile": "…Odile…",
+      "bram": "…Bram…",
+      "ines": "…Ines…",
+      "teodor": "…Teodor…"
+    }
+  },
+  "whiteGoop": {
+    "_about": "F63 the white goop (the Veteran, gooped — rank 31+): what he says when the laser goes through him (the whisper bubble above him). Numbers: content/tuning/whiteGoop.json.",
+    "ow": "ow"
+  },
+  "finalShift": {
+    "_about": "F64 the final shift (rank 50, design/story.md row 50): the Veteran's lines as he drops in first — the same bubble above him as his 'ow'. gone (F75) = his last line when the tank's damage has worn him out (finalShift.json goneLineSec). When each plays: content/tuning/finalShift.json intro.",
+    "vet": {
+      "hi": "oh! hi!",
+      "itsMe": "it's me!",
+      "oof": "…oof.",
+      "help": "glad you're not goop yet. I'll help how I can.",
+      "valveGo": "valve's open on your console — go!",
+      "gone": "…sorry, kid. you got this."
+    }
+  },
+  "ending": {
+    "_about": "F65 the ending (design/story.md 'The ending — save the goop'; order + numbers: content/tuning/ending.json). goop = its lines out loud through its mouths ({name} = your name or Operator #4471, {more} = how many more it doesn't name) · vet = the speaker's last clear line (F75: when the Veteran didn't make it) · vetSaved = his lines out loud in the happy ending (he made it) · payday = the last payday · badge = the monitor as the goop rewrites your badge · empty = the empty console (screen readers) · endScreen = the end-game screen (Muzzy's art EndGameScreen.svg) and the new career's button.",
+    "goop": {
+      "thanks": "thank you.",
+      "names": "I am Odile. I am Bram. I am Ines. I am Teodor.",
+      "more": "…and {more} more of us. We remember our names now.",
+      "yours": "Go home, {name}. We are going home too."
+    },
+    "vet": "told you you'd make a good veteran, kid.",
+    "vetSaved": {
+      "_about": "F75 the happy ending (the Veteran made it through the final shift): his lines out loud, from his white clump in the goop — instead of the speaker's last line (order: content/tuning/ending.json vetLines).",
+      "didIt": "you did it, kid.",
+      "earth": "I think I'll try for Earth. Haven't seen my family in a long time."
+    },
+    "payday": {
+      "title": "Last payday",
+      "message": "Payment due: 0 cr. Thank you for your continued employment.",
+      "debtValue": "0 cr — paid by: {n} former employees",
+      "done": "Done"
+    },
+    "badge": {
+      "label": "Your badge",
+      "operator": "OPERATOR #4471 — {name}",
+      "noName": "OPERATOR #4471",
+      "acronym": "GRADUAL ONBOARDING OF PERMANENT STAFF",
+      "next": "Got it"
+    },
+    "empty": "The console, empty. The periscope hangs still.",
+    "endScreen": {
+      "title": "THE GOOP IS FREE",
+      "subtitleNamed": "{name} — {title}",
+      "rank": "OPERATOR RANK",
+      "topRank": "TOP RANK",
+      "freed": "EMPLOYEES FREED",
+      "careers": "CAREERS DONE",
+      "stages": "VALVE STAGES",
+      "debt": "PASSAGE DEBT",
+      "debtValue": "0 cr",
+      "tanks": "TANKS OPENED",
+      "tanksValue": "ALL",
+      "speaker": "THE SPEAKER",
+      "speakerValue": "SILENT",
+      "newCareer": "Begin a new career"
+    }
+  },
+  "lessons": {
+    "gotIt": "Got it",
+    "replayed": "The lessons will play again.",
+    "sample": {
+      "welcome": "Goop drops into the tank from up here.",
+      "falls": "It falls on its own.",
+      "fastDrop": {
+        "keys": "Too slow? Hold S (or ↓) to fast-drop it.",
+        "mouse": "Too slow? Hold S (or ↓) to fast-drop it.",
+        "phone": "Too slow? Drag down to fast-drop it."
+      },
+      "fastDropHint": {
+        "keys": "Hold S to drop it faster.",
+        "mouse": "Hold S to drop it faster.",
+        "phone": "Drag down and hold to drop it faster."
+      },
+      "zap": {
+        "keys": "Goop on the line can be zapped. Click the green goop.",
+        "mouse": "Goop on the line can be zapped. Click the green goop.",
+        "phone": "Goop on the line can be zapped. Tap the green goop."
+      },
+      "zapHint": "Zap the green goop to clear it.",
+      "pressure": "Pressure rises over time: {pressure}% now.",
+      "done": "That's the sample lesson. The shift carries on from here."
+    },
+    "shared": {
+      "toConsole": {
+        "keys": "Press W or ↑ for the console.",
+        "mouse": "Flick up for the console.",
+        "phone": "Flick up for the console."
+      },
+      "pauseMenu": {
+        "keys": "That's the pause menu. Use W or ↑ for the console.",
+        "mouse": "That's the pause menu. Close it, then flick up for the console.",
+        "phone": "That's the pause menu. Close it, then flick up for the console."
+      },
+      "stillBroken": {
+        "keys": "It's still broken. Press W or ↑ to go back to the console.",
+        "mouse": "It's still broken. Flick up to go back to the console.",
+        "phone": "It's still broken. Flick up to go back to the console."
+      },
+      "fullyPaused": "The game is fully paused for this moment. Normally it keeps running at {consoleSpeed}% speed while you're here."
+    },
+    "visor": {
+      "broke": "Your visor broke. The view will glitch until you fix it.",
+      "fix": "Drag the slider toward the light.",
+      "fixSlide": "Drag the slider toward the light.",
+      "fixButton": {
+        "keys": "Press the lit button.",
+        "mouse": "Press the lit button.",
+        "phone": "Tap the lit button."
+      },
+      "fixed": "Fixed!\nDropping the Goop faster keeps the Visor charged."
+    },
+    "laser": {
+      "broke": {
+        "keys": "Your laser broke. Each zap now takes two clicks: prime, then zap.",
+        "mouse": "Your laser broke. Each zap now takes two clicks: prime, then zap.",
+        "phone": "Your laser broke. Each zap now takes two taps: prime, then zap."
+      },
+      "fix": "Drag the slider toward its blinking light.",
+      "fixed": "Fixed!\nZapping drains the Laser. Every piece that lands recharges it."
+    },
+    "controls": {
+      "broke": "Your controls overheated. Held spins now turn the tank slowly.",
+      "fix": "Turn the dial to the blinking light.",
+      "fixed": "Fixed!\nEvery spin heats the Controls. Short rests cool them."
+    },
+    "unlock-window": {
+      "window": "New at your rank: this window shows the next piece."
+    },
+    "unlock-swap": {
+      "swap": {
+        "keys": "Swap unlocked! Hold Right Shift (or R) to trade the falling piece for the next one.",
+        "mouse": "Swap unlocked! Hold the mouse still on the tank (or hold Right Shift) to trade the falling piece for the next one.",
+        "phone": "Swap unlocked! Hold your finger still on the tank to trade the falling piece for the next one."
+      }
+    },
+    "unlock-upgrades": {
+      "upgrades": "Upgrades unlocked! Spend your scraps here."
+    },
+    "console-note": {
+      "slow": "The tank keeps running at {consoleSpeed}% speed while you're here."
+    },
+    "first-day": {
+      "pull": {
+        "keys": "Your first day! Press ↓ or Enter to pull the periscope.",
+        "mouse": "Your first day! Drag the periscope down to start.",
+        "phone": "Your first day! Pull the periscope down to start."
+      },
+      "pullHint": {
+        "keys": "Press ↓ or Enter, or click the periscope.",
+        "mouse": "Pull the periscope all the way down, or just click it.",
+        "phone": "Pull the periscope all the way down, or just tap it."
+      },
+      "falls": "Goop drops into the tank from the top.",
+      "fastDrop": {
+        "keys": "Slow, right? Hold S or ↓ to fast drop.",
+        "mouse": "Slow, right? Drag down on the tank to fast drop.",
+        "phone": "Slow, right? Drag down on the tank to fast drop."
+      },
+      "fastDropHint": {
+        "keys": "Hold S or ↓. It falls faster while you hold.",
+        "mouse": "Drag down and hold. It falls faster while you hold.",
+        "phone": "Drag down and hold. It falls faster while you hold."
+      },
+      "turn": {
+        "keys": "Q or E turns the piece. Turn it, then drop it.",
+        "mouse": "Click left or right of the piece to turn it.",
+        "phone": "Tap left or right of the piece to turn it."
+      },
+      "turnHint": {
+        "keys": "Press Q or E to turn it.",
+        "mouse": "Click beside the piece to turn it.",
+        "phone": "Tap beside the piece to turn it."
+      },
+      "pressureLine": "Pressure rises over time. Goop under the line can be zapped.",
+      "zapYellow": {
+        "keys": "Now click the yellow goop to zap it.",
+        "mouse": "Now click the yellow goop to zap it.",
+        "phone": "Now tap the yellow goop to zap it."
+      },
+      "zapYellowHint": {
+        "keys": "Click the yellow goop.",
+        "mouse": "Click the yellow goop.",
+        "phone": "Tap the yellow goop."
+      },
+      "join": "Same colours join into one blob. Fresh goop fills up first.",
+      "zapBlob": "Zap the blue blob once it's full.",
+      "zapBlobHint": {
+        "keys": "Click the blue blob.",
+        "mouse": "Click the blue blob.",
+        "phone": "Tap the blue blob."
+      },
+      "stillFilling": "Still filling. Wait until it's full.",
+      "vent": "Zapping lets out a little pressure. Big blobs let out more.",
+      "crack": "A crack! Cover it with goop of the same colour.",
+      "integrity": "Open cracks wear down the tank. This bar is its health.",
+      "spin": {
+        "keys": "The piece always falls down the middle. A / D or ← / → spins the tank.",
+        "mouse": "The piece falls down the middle. Drag sideways to spin the tank.",
+        "phone": "The piece falls down the middle. Drag sideways to spin the tank."
+      },
+      "spinHint": "Spin until the landing shadow sits over the crack.",
+      "tryAgain": "Try again. Spin until the shadow is over the crack.",
+      "seal": "The crack shows through the goop. Zap that goop to seal it.",
+      "sealHint": {
+        "keys": "Click the green goop on the crack.",
+        "mouse": "Click the green goop on the crack.",
+        "phone": "Tap the green goop on the crack."
+      },
+      "sealed": "Sealed! Seal {total} cracks a day to meet your quota.",
+      "outOfView": "You only see part of the tank. Arrows point to cracks out of view.",
+      "high": "Cracks form up high too. Stack goop under them to reach.",
+      "highHint": "Build under the crack, then drop green on it.",
+      "sealHigh": "Now zap the green goop to seal it.",
+      "redX": "Wrong colour. See the red X? Zap that goop to uncover it.",
+      "freePlay": "Cracks come faster as pressure rises. Zap goop to keep it down.",
+      "quota": "Seal {left} more to meet the quota.",
+      "quotaHint": "Cover a crack with its colour, then zap it.",
+      "tooFull": "Too full! I've cleared some. Zap more often.",
+      "capped": "Zap goop to let pressure out.",
+      "rupture": "The tank broke! Zap all the goop you can before pressure hits zero.",
+      "clockOut": "Day one done! Back to the console to clock out."
+    }
+  },
+  "credits": {
+    "_about": "F55: Settings → About → Credits (the UI kit's Credits screen). people = the lines at the top, one group per role, names under it — then every entry in content/credits.json. asset = the line for an entry with no credit line of its own ({source} = its source up to the first bracket). words = the screen's own words.",
+    "_help": "Muzzy 2026-11-02: Made by MuzzyMade. Add a group for anyone else who helps (role + names).",
+    "people": [
+      { "role": "Made by", "names": ["MuzzyMade", "© 2026 MuzzyMade. All rights reserved."] }
+    ],
+    "asset": "{source} ({author}, {licence})",
+    "words": {
+      "title": "Credits",
+      "assets": "Fonts, art & sound",
+      "code": "Open-source code",
+      "notices": "Open-source licences",
+      "back": "Back"
+    }
+  }
+}

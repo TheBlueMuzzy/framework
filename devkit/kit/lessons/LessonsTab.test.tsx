@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { allTabs, type DevKitTab } from '../DevKit'
 import { registerDevKitGame, type DevKitGame, type DevKitLessonRunner } from '../devkitGame'
 import { TUNING_EVENT } from '../tuning/liveTuning'
+import { TextTab } from '../text/TextTab'
 import { LessonsTab } from './LessonsTab'
 import { resetLessonStore } from './lessonStore'
 import type { LessonData } from './lessonLogic'
@@ -64,8 +65,8 @@ describe('the Lessons tab', () => {
   it('lists the steps with their fields, and the words each words id stands for', () => {
     render(<LessonsTab files={FILES} text={TEXT} />)
     expect(titles()).toEqual(['1 · board', '2 · threeInARow'])
-    expect(field('board', 'Words (text id, or the words)').value).toBe('board')
-    expect(screen.getByText('“This is your board.”')).toBeTruthy()
+    expect(field('board', 'Words id').value).toBe('board')
+    expect((screen.getByLabelText('board: Words') as HTMLTextAreaElement).value).toBe('This is your board.') // 0.30.0: typed right here
     expect(field('threeInARow', 'Button').value).toBe('gotIt')
     expect((screen.getByLabelText('threeInARow: While its words show') as HTMLSelectElement).value).toBe('pause')
     expect(field('board', 'Dim everything else').checked).toBe(true)
@@ -78,14 +79,14 @@ describe('the Lessons tab', () => {
     window.addEventListener(TUNING_EVENT, listen)
     try {
       render(<LessonsTab files={FILES} text={TEXT} />)
-      fireEvent.change(field('threeInARow', 'Words (text id, or the words)'), { target: { value: 'Line them up!' } })
+      fireEvent.change(field('threeInARow', 'Words id'), { target: { value: 'Line them up!' } })
     } finally {
       window.removeEventListener(TUNING_EVENT, listen)
     }
     expect(heard.at(-1)!.file).toBe('lessons/first-game')
     expect(heard.at(-1)!.data.steps[1].message).toBe('Line them up!')
     expect(heard.at(-1)!.data.steps[0]).toEqual(LESSON.steps[0])
-    expect(screen.getByText('Not in en.json "lessons" — the game shows it as written.')).toBeTruthy()
+    expect(screen.getByText('No words yet — typing puts them in en.json lessons.first-game.Line them up!.')).toBeTruthy()
     expect(screen.getByText('1 unsaved change.')).toBeTruthy()
   })
 
@@ -158,6 +159,122 @@ describe('the Lessons tab', () => {
   it('no lesson files → a plain line where they go', () => {
     render(<LessonsTab files={[]} text={TEXT} />)
     expect(screen.getByText(/No lessons yet/)).toBeTruthy()
+  })
+})
+
+// 0.30.0 (F200 task 22, Muzzy 2026-11-07): a step's WORDS typed right in the tab
+describe('the Lessons tab — a step’s words', () => {
+  const EN = 'content/text/en.json'
+  const WORDS_TEXT = {
+    menu: { play: 'Play' },
+    lessons: {
+      'first-game': { board: { mouse: 'Click a square.', phone: 'Tap a square.' }, threeInARow: 'Three in a row wins.' },
+      shared: { gotIt: 'Got it', nudge: 'Go on.' },
+    },
+  }
+  const LESSON3: LessonData = { ...LESSON, steps: [...LESSON.steps, { id: 'nudge', message: 'nudge', pointer: '[data-board]' }, { id: 'fresh', message: 'freshLine', pointer: '[data-board]' }] }
+  const FILES3 = [{ file: 'first-game', data: LESSON3 }]
+  const words = (step: string, kind?: string) => screen.getByLabelText(`${step}: Words${kind ? ` (${kind})` : ''}`) as HTMLTextAreaElement
+  const heardText = () => {
+    const heard: { file: string; data: typeof WORDS_TEXT }[] = []
+    const listen = (e: Event) => { if ((e as CustomEvent).detail.file === 'text/en') heard.push((e as CustomEvent).detail) }
+    window.addEventListener(TUNING_EVENT, listen)
+    return { heard, stop: () => window.removeEventListener(TUNING_EVENT, listen) }
+  }
+
+  it('shows the words as boxes: one for a plain line, one per control type; the words id stays, under them', () => {
+    render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+    expect(words('threeInARow').value).toBe('Three in a row wins.')
+    expect(words('board', 'mouse').value).toBe('Click a square.')
+    expect(words('board', 'phone').value).toBe('Tap a square.')
+    expect(screen.getByRole('button', { name: 'board: + keys line' })).toBeTruthy()
+    expect(field('board', 'Words id').value).toBe('board')
+    expect(screen.getAllByText(/en\.json lessons\.first-game\.board/).length).toBeGreaterThan(0)
+  })
+
+  it('typing the words sends the whole edited en.json to the game at once, as "text/en" (the same live text the Text tab sends)', () => {
+    const { heard, stop } = heardText()
+    try {
+      render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+      fireEvent.change(words('board', 'mouse'), { target: { value: 'Click any square.' } })
+    } finally { stop() }
+    expect(heard.at(-1)!.data.lessons['first-game'].board).toEqual({ mouse: 'Click any square.', phone: 'Tap a square.' })
+    expect(heard.at(-1)!.data.menu).toEqual({ play: 'Play' })
+    expect(screen.getByText('1 unsaved change.')).toBeTruthy()
+  })
+
+  it('a shared line says so (other lessons use it) and edits lessons.shared', () => {
+    const { heard, stop } = heardText()
+    try {
+      render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+      expect(screen.getByText(/Shared line .*lessons\.shared\.nudge.*other lessons/)).toBeTruthy()
+      fireEvent.change(words('nudge'), { target: { value: 'Go on, then.' } })
+    } finally { stop() }
+    expect(heard.at(-1)!.data.lessons.shared.nudge).toBe('Go on, then.')
+  })
+
+  it('an id with no words yet: typing makes the line under the lesson’s own block', () => {
+    const { heard, stop } = heardText()
+    try {
+      render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+      expect(words('fresh').value).toBe('')
+      fireEvent.change(words('fresh'), { target: { value: 'Brand new words.' } })
+    } finally { stop() }
+    expect((heard.at(-1)!.data.lessons['first-game'] as Record<string, unknown>).freshLine).toBe('Brand new words.')
+  })
+
+  it('a plain line splits into one per control type; a missing control type can be added', () => {
+    render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+    fireEvent.click(screen.getByRole('button', { name: 'threeInARow: one line per control type' }))
+    expect(words('threeInARow', 'keys').value).toBe('Three in a row wins.')
+    expect(words('threeInARow', 'phone').value).toBe('Three in a row wins.')
+    fireEvent.click(screen.getByRole('button', { name: 'board: + keys line' }))
+    expect(words('board', 'keys').value).toBe('Click a square.') // starts as the line it fell back to
+  })
+
+  it('the Text tab and the Lessons tab agree — an edit in one shows in the other', () => {
+    const { unmount } = render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+    fireEvent.change(words('threeInARow'), { target: { value: 'Line them up.' } })
+    unmount()
+    render(<TextTab file={EN} data={WORDS_TEXT} query="threeInARow" />)
+    expect((document.getElementById('tx:lessons.first-game.threeInARow') as HTMLTextAreaElement).value).toBe('Line them up.')
+    fireEvent.change(document.getElementById('tx:lessons.first-game.threeInARow')!, { target: { value: 'Line up three.' } })
+    cleanup()
+    render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+    expect(words('threeInARow').value).toBe('Line up three.')
+  })
+
+  it('one Save: only the changed words go into en.json (on the file as it is on disk); the lesson file only if the lesson changed', async () => {
+    const enOnDisk = structuredClone(WORDS_TEXT) as typeof WORDS_TEXT & { credits?: string }
+    enOnDisk.credits = 'a neighbour’s hand edit'
+    const saves: { path: string; data: Record<string, unknown>; reload?: boolean }[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === '/__devkit/save') { saves.push(JSON.parse(String(init!.body))); return new Response('{"ok":true}', { status: 200 }) }
+      return new Response(JSON.stringify(url.endsWith(EN) ? enOnDisk : LESSON3), { status: 200 })
+    }))
+    render(<LessonsTab files={FILES3} text={WORDS_TEXT} />)
+    fireEvent.change(words('board', 'phone'), { target: { value: 'Tap any square.' } })
+    await act(async () => { fireEvent.click(button('Save')) })
+    expect(saves.map((s) => s.path)).toEqual([EN]) // the lesson didn't change: its file isn't written
+    const expected = structuredClone(enOnDisk)
+    expected.lessons['first-game'].board.phone = 'Tap any square.'
+    expect(saves[0].data).toEqual(expected)
+    expect(screen.getByText(/Saved content\/text\/en\.json/)).toBeTruthy()
+    expect(screen.queryByText(/unsaved change/)).toBeNull()
+    // now a lesson change AND a words change → both files
+    fireEvent.change(field('board', 'Words show after (s)'), { target: { value: '1' } })
+    fireEvent.change(words('threeInARow'), { target: { value: 'Three wins.' } })
+    expect(screen.getByText('2 unsaved changes.')).toBeTruthy()
+    await act(async () => { fireEvent.click(button('Save')) })
+    expect(saves.map((s) => s.path).slice(1).sort()).toEqual([EN, 'content/lessons/first-game.json'].sort())
+  })
+
+  it('a line that loses a {placeholder} the game fills in warns, and Save waits', () => {
+    const text = { lessons: { 'first-game': { board: 'Beat {name}!' } } }
+    render(<LessonsTab files={FILES} text={text} />)
+    fireEvent.change(words('board'), { target: { value: 'Beat them!' } })
+    expect(screen.getByRole('alert').textContent).toContain('{name} is missing')
+    expect(button('Save').disabled).toBe(true)
   })
 })
 

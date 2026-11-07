@@ -17,3 +17,14 @@
 .lessons-json-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
 .lessons-json-btns .devkit-status { width: auto; }
 .lessons-tab .devkit-footer .devkit-status { margin: 0; }
+/* 0.30.0: a step's words, typed right here (one box, or one per control type), and the words id under them, smaller */
+.lessons-words { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lessons-words-line { display: grid; grid-template-columns: auto 1fr; align-items: start; column-gap: 6px; min-width: 0; }
+.lessons-words-line .tx-box { grid-column: -2 / -1; }
+.lessons-words-line .tx-warn { grid-column: 1 / -1; }
+.lessons-kind { padding: 7px 0 0; min-width: 44px; font: 11px ui-monospace, Consolas, monospace; color: #9a9bab; }
+.lessons-words-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.lessons-words-btns:empty { display: none; }
+.lessons-mini { padding: 3px 8px; font-size: 12px; }
+.lessons-row-small .tt-label { font-weight: 400; font-size: 12px; color: #9a9bab; }
+.lessons-small { font-size: 12px !important; max-width: 260px; }
