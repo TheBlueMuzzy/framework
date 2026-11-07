@@ -1,4 +1,4 @@
-// template: shots.mjs 1 (2026-11-07) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
+// template: shots.mjs 2 (2026-11-07) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
 // BEFORE / AFTER SCREENSHOTS — proof that a change "looks the same" everywhere it should (framework F196, from
 // Glyphtender's e2e/shots.mjs, its F29 safety net).
 // TEMPLATE (~/.claude/config/bmuz/templates/shots.mjs). To use it in a game:
@@ -31,7 +31,8 @@
 // GitHub to compare too can record there: run `node e2e/shots.mjs record` on Linux and commit e2e/shots-before/linux/.)
 //
 // Holding the screen still (so every run is identical): every page opens with FREEZE_QUERY (the game's own switch for
-// fixed "random" numbers — a seed — and nothing moving by itself) and the browser's "reduce motion" on. Before each
+// fixed "random" numbers — a seed — and nothing moving by itself), freeze-version (the version module 0.3.0+ then shows
+// v0.0.0.0 on the menu and Settings, so a /save's new build number isn't a change) and the browser's "reduce motion" on. Before each
 // picture: the fonts and images are loaded, the game says it's still (STILL), every animation that ends has ended,
 // anything that loops forever is held at its start (Playwright's animations: 'disabled'; SVG <animate> paused), the
 // mouse is moved off everything — and a picture is kept only once two in a row come out the same.
@@ -138,6 +139,12 @@ const SIZES = [
   ...DESKTOPS,
 ]
 
+// Every page's address: FREEZE_QUERY + the journey's query + freeze-version (the version module holds its label still, F204)
+const address = (journey) => {
+  const query = `${FREEZE_QUERY}${journey.query ?? ''}`
+  return `${query}${query.includes('?') ? '&' : '?'}freeze-version`
+}
+
 const OUT = MODE === 'record' ? BEFORE : NOW
 // Start clean, so a screen that's gone doesn't linger
 for (const dir of MODE === 'record' ? [BEFORE] : [NOW, DIFF]) {
@@ -199,7 +206,7 @@ try {
       page.on('pageerror', (e) => problem(`${size.width}x${size.height} ${journey.name}: page error: ${e.message}`))
       const tap = (loc) => (size.mobile ? loc.tap() : loc.click())
       try {
-        await page.goto(`http://127.0.0.1:${PORT}/${FREEZE_QUERY}${journey.query ?? ''}`)
+        await page.goto(`http://127.0.0.1:${PORT}/${address(journey)}`)
         await journey.run({ page, size, tap, shot: (name) => shoot(page, size, name) })
       } catch (e) {
         problem(`${size.width}x${size.height} ${journey.name}: ${e.message.split('\n')[0]}`)

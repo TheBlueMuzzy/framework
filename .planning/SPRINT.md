@@ -1,11 +1,11 @@
 # Sprint 65 — Checks that hold still
-Started 2026-11-07 · Milestone v0.41 · Features: F204, F205, F206 (in this order)
+Started 2026-11-07 · Milestone v0.41 · Features: F204, F205 (in this order; F206 dropped — a duplicate of F190)
 
 ## F204 🔧 Version label holds still in screenshots
 Done when: while a check holds the screen still (the screenshot check's freeze switch), the menu and Settings show one fixed version label, so raising a game's build number leaves the before/after screenshot check green — the real version is still what checkVersion and the crash reports see; the starter and the shots template use it.
 - [x] 🤖 1. Prove it: a scratch copy of the starter with its build number raised turns the shots check red on menu + Settings — .scratch (proof only) · starters/turn-based/e2e/shots.mjs
 - [x] 🤖 2. The version module shows a fixed label ("v0.0.0.0") while the page is held still; versionLabel stays the real one for checkVersion and crash reports — tests — version/kit/index.ts
-- [ ] 🤖 3. The starter's menu and Settings use it, and the shots template + the starter's copy hold it still — starters/turn-based/src/ui/MainMenuScreen.tsx
+- [x] 🤖 3. The starter's menu and Settings use it, and the shots template + the starter's copy hold it still — starters/turn-based/src/ui/MainMenuScreen.tsx
 - [x] 🤖 4. README + upgrade note (how a game turns it on; Glyphtender's own freeze.ts can go) — version/README.md
 Check: the scratch copy with a raised build number: shots check green; the version module's tests; the starter's check:full green.
 
@@ -16,18 +16,11 @@ Done when: the starter's e2e/screens.mjs shoots only the sizes content/ui/style.
 - [ ] 🤖 7. Every other copy that promises "the 7 sizes" (the starter's README, check-all's comment) says "the sizes the game plays at" — starters/turn-based/README.md
 Check: the portrait scratch copy shoots 5 sizes; the starter's screens check is still green at 7.
 
-## F206 🔧 Golden saves replay their moves
-Done when: the saves check replays every golden save's moves through the game's rules (a hook the game gives), so a golden save with a move the rules refuse fails the check with the save's name and the move — and the starter wires it in.
-- [ ] 🤖 8. Reproduce on today's code: a tic-tac-toe move in the starter's golden run save still passes — starters/turn-based/tests/saves/saves.test.ts
-- [ ] 🤖 9. The saves module's golden-save check replays the moves through a rules hook the game gives — tests — saves/kit/oldSaves.ts
-- [ ] 🤖 10. The starter gives its rules to the check; the bad save goes red, the real one green — starters/turn-based/src/game/saves.ts
-- [ ] 🤖 11. README + upgrade note — saves/README.md
-- [ ] 🤖 12. The starter's check:full green; the module's conformance names the new hook — saves/kit/conformance.mjs
-Check: the bad-move golden save fails with its name and move; the starter's real golden saves pass; saves tests + the starter's check:full green.
-
 ## Notes
 - Plan picked by Muzzy 2026-11-07 ("your pick").
 - Read before planning: the version module bakes the real version in on the dev server too (version/kit/vitePlugin.mjs DEFINE_KEY), and the starter's own version.json hasn't changed since F151, so the starter never showed the break — a game whose /save raises its build does. Crash maps by script already landed (F174 — Crash maps by the release script), so that Idea isn't in this sprint.
 - Open bugs: no BUGS.md open P0/P1.
+- F206 — Golden saves replay their moves: **dropped, a duplicate of F190 — Save check replays the moves** (✅ v0.38, released in v0.40.0 on 2026-11-06), which closed the same 2026-11-04 Idea — but that Idea line was never marked "→ F190", and Claude's planning grep looked at the code words, not the ✅ features. The F206 helper reproduced it on today's code: two bad copies of `turn-based-starter_run-v1.json` (move 2 on the taken square 4; a Nim move `{ pile: 0, take: 2 }`) each fail "<file> loads with today's code", naming the move; the real golden saves pass (saves 136/136, starter check:fast green). Nothing built (helper commit eb0c092 only touched this file; not merged — its notes are here). Lesson → ~/.claude/skills/sprint/SKILL.md step 2.
+- F204 task 3: no screen code changed — the starter's menu + Settings already pass versionLabel. The starter took version 0.3.0 (install-module), shots template → 2 (~/.claude/config/bmuz/templates/shots.mjs + TEMPLATES.md; the starter's copy too), before set re-recorded (menu + Settings now show v0.0.0.0 — looked at menu@1440x900), then `VERSION_BUILD=99 node e2e/shots.mjs check` → all 56 match, 0 pixels (was 12 red).
 - F204 task 1 (proof, no copy needed — the version module reads VERSION_BUILD): `VERSION_BUILD=99 node e2e/shots.mjs check` in the starter → 12 of 56 red, all ~250 px: menu at all 7 sizes, Settings at 5 (upright-phone Settings shows the line off-screen). The starter's node_modules on this PC predated F196 (no pixelmatch) — `npm install` there first.
 - Claude's call (F204, read version/kit/index.ts + conformance.mjs): hold `versionLabel` itself still under `?freeze-version` (dev server only) instead of a new `shownVersion` name — games change no screen code and check:framework's `version={versionLabel}` rule stays as is; `appVersion` and the meta tag keep the real number for checkVersion. Only a Dev Kit snapshot taken inside a screenshot run would say v0.0.0.0.
