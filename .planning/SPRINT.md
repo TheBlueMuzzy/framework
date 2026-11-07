@@ -3,10 +3,11 @@ Started 2026-11-07 · Milestone v0.42 · Features: F207, F208, F209, F210 (all f
 
 ## F207 🐞 Starter's online test stops flaking
 Done when: the starter's online e2e waits for what each click really needs (both tabs seated, the button there and enabled) instead of a bare click, and passes 10 runs in a row here — the GitHub click timeout (runs 42412069026 and two before) has a named cause.
-- [ ] 🤖 1. Find what the timed-out click waits on (read GitHub's failed run log + the script; reproduce under load if needed) and write the cause in Notes — starters/turn-based/e2e/online.mjs
-- [ ] 🤖 2. Wait for that thing instead (never a set time) — starters/turn-based/e2e/online.mjs
-- [ ] 🤖 3. 10 runs in a row green here (plus 3 under a busy PC), and GitHub green after the push — starters/turn-based/e2e/online.mjs
+- [x] 🤖 1. Find what the timed-out click waits on (read GitHub's failed run log + the script; reproduce under load if needed) and write the cause in Notes — starters/turn-based/e2e/online.mjs
+- [x] 🤖 2. Wait for that thing instead (never a set time) — starters/turn-based/e2e/online.mjs
+- [x] 🤖 3. 10 runs in a row green here (plus 3 under a busy PC), and GitHub green after the push — starters/turn-based/e2e/online.mjs
 Check: 10/10 local runs green; GitHub's Checks green on the branch.
+Checked: 2026-11-07 — helper (e5e5fb8): cause reproduced, not guessed — a tab tapped again on its own stale view before the server's reply (slow round trip), the reply landed mid-click, its squares closed and the click waited 30 s for a turn only the other tab (queued behind it in the same loop) could give: a test copy delaying every server message 30–250 ms gave "over after 30 moves" for a 7-move game and GitHub's exact timeout at 120 ms; the fixed script 5/5 green under the same delays. Also matches runs 42412069026 + 41705632114 (41967106787: an older form of it; 42251517736 + 42315340271 were other checks). 10/10 green here, 3/3 under load, starter check:fast all pass, GitHub run 42421945232 13/13 jobs green. Claude read the change: tap a named square, wait for its mark on both tabs; a fixed 400 ms wait replaced by waiting for the results to close — fine.
 
 ## F208 🔧 Dev Kit pages need a pass
 Done when: the dev server hands each page it serves a per-session secret, the Dev Kit sends it with every call to its dev-server routes (save, font library, add font…), and a request without it is refused — so the desktop, a second browser, another machine pointed at it and the phone all keep working, but a hand-made request from another device on the Wi-Fi is refused.
@@ -36,4 +37,5 @@ Check: the hooks' tests (incl. the new one) green; config pushed.
 - Muzzy 2026-11-07: "auto mode… take over this development process while I'm gone" (~5 h, at a party). Claude plans, merges, checks, reviews, saves; features wait for Muzzy's OK; no /deliver.
 - Muzzy's question on F208 (laptop + desktop both use the Dev Kit): answered — the secret is in every page the dev server serves, so any browser that opened the game works (laptop, desktop, phone); only a request that never opened the page is refused. Muzzy: "ok".
 - Open bugs: no BUGS.md.
+- F207 (helper): the room server always uses port 6499 (wrangler.json), so only one online e2e can run on this PC at a time.
 - F209 (helper): release.mjs called the refused build "the build failed — make them by hand", wrong advice here → Claude added a branch in ~/.claude/config/bmuz/scripts/release.mjs that says the filed maps stand (syntax-checked; no release.mjs tests exist). A refused build leaves its new .map files in dist/ — harmless, a failed release build is never deployed.
