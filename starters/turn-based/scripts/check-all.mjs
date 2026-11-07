@@ -36,6 +36,7 @@ const FAST = [
 ]
 // e2e: [name, script, args] — every one on its own ports (see each script's header for what it checks)
 const E2E = [
+  ['screenshots', 'e2e/shots.mjs', 'check'], // every screen at the orientation's sizes vs e2e/shots-before/ (F196; port 6406) → report.html
   ['framework', 'src/devkit/check-framework.mjs', '--port 6409'], // every module's promises in the running game (= npm run check:framework)
   ['online', 'e2e/online.mjs', 'e2e-shots 6403 6499'], // two browser tabs play each other through wrangler dev
   ['screens', 'e2e/screens.mjs', 'e2e-shots 6404'], // every screen at the 7 sizes, the UI kit's page check on each
