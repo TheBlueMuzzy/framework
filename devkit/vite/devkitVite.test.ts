@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { TUNING_FILES_MODULE, devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveExtraName, liveLessonName, liveTuningName, readTuningFileList, tuningFilesModule } from './devkitVite'
+import { DEVKIT_KEY_HEADER, NO_KEY_MESSAGE, TUNING_FILES_MODULE, devkit, devkitKey, keyMatches, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveExtraName, liveLessonName, liveTuningName, readTuningFileList, tuningFilesModule } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -117,7 +117,7 @@ describe('the plugin in a real Vite dev server', () => {
   const save = (body: object, headers: Record<string, string> = {}) =>
     fetch(`${url}/__devkit/save`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Origin: url, ...headers },
+      headers: { 'Content-Type': 'application/json', Origin: url, [DEVKIT_KEY_HEADER]: devkitKey(), ...headers },
       body: JSON.stringify(body),
     })
 
@@ -203,10 +203,11 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     await server.close()
     rmSync(base, { recursive: true, force: true, ...STILL_LETTING_GO })
   })
-  const fontFile = (path: string) => fetch(`${url}/__devkit/font-library/file?path=${encodeURIComponent(path)}`)
+  const withKey = { [DEVKIT_KEY_HEADER]: devkitKey() }
+  const fontFile = (path: string) => fetch(`${url}/__devkit/font-library/file?path=${encodeURIComponent(path)}`, { headers: withKey })
 
   it('lists the library and serves one font file — nothing outside it, nothing for another site', async () => {
-    const list = await (await fetch(`${url}/__devkit/font-library`)).json()
+    const list = await (await fetch(`${url}/__devkit/font-library`, { headers: withKey })).json()
     expect(list).toMatchObject({ found: true, more: false, fonts: [{ path: 'folder:pixel/Tiny Font.ttf', name: 'Tiny Font', folder: 'pixel', file: 'pixel/Tiny Font.ttf' }] })
     const file = await fontFile('folder:pixel/Tiny Font.ttf')
     expect(file.headers.get('content-type')).toBe('font/ttf')
@@ -215,7 +216,7 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     expect((await fontFile('pixel/Tiny Font.ttf')).status).toBe(400) // no root named
     expect((await fontFile('folder:pixel/licence.txt')).status).toBe(400)
     expect((await fontFile('installed1:../../secret.ttf')).status).toBe(400)
-    expect((await fetch(`${url}/__devkit/font-library`, { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
+    expect((await fetch(`${url}/__devkit/font-library`, { headers: { ...withKey, 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
   })
   it('a page on another name for this server (DNS rebinding: Host evil.example, same "origin") gets nothing', async () => {
     // Vite's own host check runs before the Dev Kit's endpoints (Vite 6+) — this keeps it that way. fetch can't set Host.
@@ -230,7 +231,7 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     expect(existsSync(join(game, 'public/fonts'))).toBe(false)
   })
   it('lists the computer\'s installed fonts too (one row per family) — and the off switch hides them', async () => {
-    const list = await (await fetch(`${url}/__devkit/font-library`)).json()
+    const list = await (await fetch(`${url}/__devkit/font-library`, { headers: withKey })).json()
     expect(list.installed).toMatchObject({ on: true, more: false })
     expect(list.installed.fonts.every((f: { path: string }) => /^installed\d+:/.test(f.path))).toBe(true)
     if (list.installed.fonts.length > 0) { // (a computer with installed fonts — every desktop)
@@ -239,13 +240,13 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
       expect(first.headers.get('content-type')).toMatch(/^font\//)
     }
     writeFileSync(join(game, 'devkit.local.json'), JSON.stringify({ fontLibrary: join(base, 'library'), installedFonts: false }))
-    const off = await (await fetch(`${url}/__devkit/font-library`)).json()
+    const off = await (await fetch(`${url}/__devkit/font-library`, { headers: withKey })).json()
     expect(off.installed).toEqual({ on: false, folders: [], fonts: [], more: false, skipped: {}, platform: process.platform })
     expect(off.fonts).toHaveLength(1)
   })
   it('Add to game copies it + its licence into public/fonts/ and lists it — only from the game page', async () => {
     const add = (headers: Record<string, string>) => fetch(`${url}/__devkit/font-library/add`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ path: 'folder:pixel/Tiny Font.ttf' }),
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...withKey, ...headers }, body: JSON.stringify({ path: 'folder:pixel/Tiny Font.ttf' }),
     })
     expect((await add({ Origin: 'http://evil.example' })).status).toBe(403)
     const res = await add({ Origin: url })
@@ -254,6 +255,98 @@ describe('the font library in a real Vite dev server (the Fonts tab)', () => {
     expect(readFileSync(join(game, 'public/fonts/pixel/licence.txt'), 'utf8')).toBe('free')
     expect(JSON.parse(readFileSync(join(game, 'content/ui/fonts.json'), 'utf8')).fonts).toHaveLength(1)
     expect(JSON.parse(readFileSync(join(game, 'content/credits.json'), 'utf8'))[0].light).toBe('🔴')
+  })
+})
+
+describe('the Dev Kit key — only a page this dev server served may use its routes (0.32.0, F208)', () => {
+  let game: string
+  let server: ViteDevServer
+  let url: string
+  const logged: string[] = []
+  beforeEach(async () => {
+    game = mkdtempSync(join(tmpdir(), 'devkit-key-'))
+    mkdirSync(join(game, 'content/ui'), { recursive: true })
+    writeFileSync(join(game, 'index.html'), '<!doctype html><html><head><title>game</title></head><body></body></html>')
+    writeFileSync(join(game, 'content/ui/table.json'), '{ "rows": "#000000" }\n')
+    writeFileSync(join(game, 'content/credits.json'), '[]\n')
+    writeFileSync(join(game, 'devkit.local.json'), JSON.stringify({ fontLibrary: join(game, 'no-library'), installedFonts: false }))
+    const note = (msg: string) => { logged.push(msg) }
+    const customLogger = { info: note, warn: note, warnOnce: note, error: note, clearScreen: () => {}, hasErrorLogged: () => false, hasWarned: false }
+    server = await createServer({ root: game, configFile: false, customLogger, plugins: [devkit()], server: { port: 0, host: '127.0.0.1' } })
+    await server.listen()
+    url = server.resolvedUrls!.local[0].replace(/\/$/, '')
+  })
+  afterEach(async () => {
+    await server.close()
+    rmSync(game, { recursive: true, force: true, ...STILL_LETTING_GO })
+  })
+  /** The key as a browser gets it: from the page the dev server served. */
+  const pageKey = async () => {
+    const html = await (await fetch(`${url}/`)).text()
+    return html.match(/<meta name="devkit-key" content="([^"]+)"/)?.[1]
+  }
+  /** A hand-made request (curl): any headers it likes — a faked Origin, no Sec-Fetch-Site — but not the page. */
+  const handMade = (method: string, path: string, headers: Record<string, string>, body?: string) =>
+    fetch(`${url}${path}`, { method, headers: { Origin: url, ...headers }, body })
+  const routes: [string, string, string, string?][] = [
+    ['POST', '/__devkit/save', 'application/json', JSON.stringify({ path: 'content/ui/table.json', data: { rows: '#666666' } })],
+    ['POST', '/__devkit/add-credit', 'application/json', JSON.stringify({ entry: { paths: ['public/a.png'], source: 'own', licence: 'own work' } })],
+    ['POST', '/__devkit/save-audio?folder=sfx&stem=sfx_x_y&bus=sfx&ext=wav', 'application/octet-stream', 'RIFF'],
+    ['POST', '/__devkit/font-library/add', 'application/json', JSON.stringify({ path: 'folder:pixel/Tiny Font.ttf' })],
+    ['GET', '/__devkit/font-library', ''],
+    ['GET', `/__devkit/font-library/file?path=${encodeURIComponent('folder:pixel/Tiny Font.ttf')}`, ''],
+  ]
+
+  it('every page the dev server serves carries the key: 32 random bytes, the same all run', async () => {
+    const key = await pageKey()
+    expect(key).toBe(devkitKey())
+    expect(key).toMatch(/^[A-Za-z0-9_-]{43}$/) // 32 bytes, base64url
+    expect(await pageKey()).toBe(key) // a second browser / the phone gets the same one
+  })
+  it('a build\'s page never gets one (the hook only adds it for the dev server)', () => {
+    const plugin = devkit() as { transformIndexHtml: (html: string, ctx: object) => unknown }
+    expect(plugin.transformIndexHtml('<html></html>', { path: '/index.html', filename: 'index.html' })).toBeUndefined()
+  })
+  it('refuses every route to a hand-made request — no key, or a wrong one — with a plain message, and writes nothing', async () => {
+    const wrong = devkitKey().slice(0, -1) + (devkitKey().endsWith('A') ? 'B' : 'A') // same length, one letter off
+    for (const [method, path, type, body] of routes) {
+      for (const extra of [{}, { [DEVKIT_KEY_HEADER]: wrong }, { [DEVKIT_KEY_HEADER]: '' }] as Record<string, string>[]) {
+        const res = await handMade(method, path, type ? { 'Content-Type': type, ...extra } : extra, body)
+        expect(res.status, `${method} ${path}`).toBe(403)
+        expect((await res.json()).error, `${method} ${path}`).toBe(NO_KEY_MESSAGE)
+      }
+    }
+    expect(readFileSync(join(game, 'content/ui/table.json'), 'utf8')).toBe('{ "rows": "#000000" }\n')
+    expect(readFileSync(join(game, 'content/credits.json'), 'utf8')).toBe('[]\n')
+    expect(existsSync(join(game, 'public'))).toBe(false)
+  })
+  it('the page\'s key opens them (Save writes), and still only from the page\'s own origin', async () => {
+    const key = (await pageKey())!
+    const res = await handMade('POST', '/__devkit/save', { 'Content-Type': 'application/json', [DEVKIT_KEY_HEADER]: key }, routes[0][3])
+    expect(res.status).toBe(200)
+    expect(JSON.parse(readFileSync(join(game, 'content/ui/table.json'), 'utf8'))).toEqual({ rows: '#666666' })
+    expect((await handMade('GET', '/__devkit/font-library', { [DEVKIT_KEY_HEADER]: key })).status).toBe(200)
+    // another site's page, even holding the key, is still refused by the older checks
+    expect((await handMade('POST', '/__devkit/save', { Origin: 'http://evil.example', 'Content-Type': 'application/json', [DEVKIT_KEY_HEADER]: key }, routes[0][3])).status).toBe(403)
+    expect((await handMade('GET', '/__devkit/font-library', { 'Sec-Fetch-Site': 'cross-site', [DEVKIT_KEY_HEADER]: key })).status).toBe(403)
+  })
+  it('the key never reaches the dev server\'s log', async () => {
+    const key = (await pageKey())!
+    await handMade('POST', '/__devkit/save', { 'Content-Type': 'application/json', [DEVKIT_KEY_HEADER]: key }, routes[0][3])
+    await handMade('POST', '/__devkit/save', { 'Content-Type': 'application/json' }, routes[0][3])
+    expect(logged.some((line) => line.includes('saved content/ui/table.json'))).toBe(true)
+    expect(logged.some((line) => line.includes(key))).toBe(false)
+  })
+})
+
+describe('keyMatches — the key compare', () => {
+  it('only the exact key, as a string', () => {
+    expect(keyMatches('abc', 'abc')).toBe(true)
+    expect(keyMatches('abd', 'abc')).toBe(false)
+    expect(keyMatches('abcd', 'abc')).toBe(false) // different lengths: no throw, just no
+    expect(keyMatches('', 'abc')).toBe(false)
+    expect(keyMatches(undefined, 'abc')).toBe(false)
+    expect(keyMatches(['abc'], 'abc')).toBe(false) // a header sent twice
   })
 })
 

@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { encodeArgs, FFMPEG_MISSING, findFfmpeg, findOnsetSec, LOUDNESS_MISSING, nextFileName, readAudioTarget, readCreditEntry, saveAudioFile } from './audioSave'
-import { devkit } from './devkitVite'
+import { DEVKIT_KEY_HEADER, devkit, devkitKey } from './devkitVite'
 // The audio module's loudness matcher — in a game it sits at src/audio/loudness.mjs (the tests copy it there)
 // @ts-expect-error: a plain JS file with no type declarations (fine for a test)
 import * as loudness from '../../audio/kit/loudness.mjs'
@@ -145,13 +145,13 @@ describe('the sound endpoints in a real Vite dev server', () => {
   const upload = (query: string, body: Buffer, headers: Record<string, string> = {}) =>
     fetch(`${url}/__devkit/save-audio?${query}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream', Origin: url, ...headers },
+      headers: { 'Content-Type': 'application/octet-stream', Origin: url, [DEVKIT_KEY_HEADER]: devkitKey(), ...headers },
       body: new Uint8Array(body),
     })
   const credit = (entry: object, headers: Record<string, string> = {}) =>
     fetch(`${url}/__devkit/add-credit`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Origin: url, ...headers },
+      headers: { 'Content-Type': 'application/json', Origin: url, [DEVKIT_KEY_HEADER]: devkitKey(), ...headers },
       body: JSON.stringify({ entry }),
     })
 
