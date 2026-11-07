@@ -1,16 +1,16 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-06 (auto mode — Muzzy at dinner) — **Sprint 63 (v0.39 — Tutorial blocks)** on `dev/v0-39-tutorial-blocks`: F199 ✅ · F198 ✅ · **F201 — Starter teaches built + checked, 🎛️ waiting on Muzzy's look** (4 Ask Muzzy lines in SPRINT Notes; UI kit 0.43.1 + tutorial 0.1.1 from bugs it found). Now: a helper builds F200 — Dev Kit Lessons tab. Then: merge, check:fast, review, a full UI kit `npm run shoot` (0.43.1 look change), morning-style report with links.
+2026-11-07 (auto mode — Muzzy at dinner) — **Sprint 63 (v0.39 — Tutorial blocks) all built** on `dev/v0-39-tutorial-blocks`: F199 ✅ · F198 ✅ · **F201 — Starter teaches 🎛️ and F200 — Dev Kit Lessons tab 🎛️ built + checked, waiting on Muzzy's look** (7 Ask Muzzy lines in SPRINT Notes). Versions on the branch: tutorial 0.1.1 · UI kit 0.43.1 · Dev Kit 0.29.0 · lint 0.4.1. UI kit shoot:all 1077 shots clean (2026-11-07). Next: Muzzy plays the starter (`npm run dev -- --host` in starters/turn-based) → approvals → retro → archive → /deliver v0.39. Goops' real swap (X01) in its own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework 6922ca9 (F201 — Starter teaches: /code-review low — 1 suspect, checked: not a bug) · e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
+Reviewed through: framework d82b14b (F200 — Dev Kit Lessons tab: /code-review low empty in 20 s — Claude read the Save path) · 6922ca9 (F201 — Starter teaches: /code-review low — 1 suspect, checked: not a bug) · e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.39 — Tutorial blocks   Sprint: 63
-Doing: F200 — building (helper); F201 waits on Muzzy's look   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
+Doing: F201 + F200 — waiting on Muzzy's look   Branch: dev/v0-39-tutorial-blocks   Version: 0.40.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.42.0 · Dev Kit 0.28.2 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.0)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -37,6 +37,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.
 - 2026-11-06 — F201 — Starter teaches built: every new game from the starter opens with a 3-step how-to-play made only from the tutorial blocks; adding a step is one line of data. Waiting on Muzzy's look.
 - 2026-11-06 — F198 — Tutorial module done (Muzzy approved): a tutorial toolbox any game loads like a library; Goops' own lesson player swapped for it on a copy with every Goops check green.
 - 2026-11-06 — F199 — Spotlight + bubble placement done (Muzzy approved): the UI kit can dim everything but what's being taught, and its pointer bubble keeps off the play area. F198 — Tutorial module is on its last check.
@@ -46,4 +47,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-06 — v0.37 A lean, measured BMUZ done: both games listed what the other could use (F189 — Games list module candidates) — no new module needed yet; Goops taking Saves + Crashes would unfreeze both. Cleanup checks re-run green; one outdated script test fixed.
 - 2026-11-04 — Sprint 55 built overnight (v0.37 A lean, measured BMUZ): every hook answer is now logged (F181 — Hook firing log); two audit pages measure every BMUZ rule (F182 — Rule inventory + verdicts) and every framework part (F183 — Framework inventory + verdicts) with proposed verdicts for Muzzy; session start stops printing Goops' old notes.
 - 2026-11-04 — BMUZ: decisions from every side — a decision question from Muzzy gets a weighing brief before Claude answers, and a pick without a Weighed block (why it is this way · long term · standards · his goals · against the pick) is sent back (hooks session-moments + handoff-check, 630/630 hook tests; ~/.claude-config f2c6056).
-- 2026-11-03 — Released v0.38.0 (v0.36 A sync that knows its own work): the PC ↔ laptop sync stops refusing pushes for this machine's own changes; the no-fixed-wait test rule covers every test file.
