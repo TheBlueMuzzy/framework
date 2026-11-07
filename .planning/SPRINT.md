@@ -10,11 +10,12 @@ Check: 10/10 local runs green; GitHub's Checks green on the branch.
 
 ## F208 🔧 Dev Kit pages need a pass
 Done when: the dev server hands each page it serves a per-session secret, the Dev Kit sends it with every call to its dev-server routes (save, font library, add font…), and a request without it is refused — so the desktop, a second browser, another machine pointed at it and the phone all keep working, but a hand-made request from another device on the Wi-Fi is refused.
-- [ ] 🤖 4. The dev server makes a secret per run and puts it in the page it serves — tests — devkit/vite/devkitVite.ts
-- [ ] 🤖 5. Every Dev Kit call to its dev-server routes sends it — devkit/kit/DevKit.tsx
-- [ ] 🤖 6. Routes refuse a request without it (plain message), keeping the existing path checks — tests — devkit/vite/devkitVite.ts
-- [ ] 🤖 7. Prove in the starter: Save from the Dev Kit works (page opened by 127.0.0.1 and by the LAN address); a curl to the same route is refused; README + UPGRADES — devkit/README.md
+- [x] 🤖 4. The dev server makes a secret per run and puts it in the page it serves — tests — devkit/vite/devkitVite.ts
+- [x] 🤖 5. Every Dev Kit call to its dev-server routes sends it — devkit/kit/DevKit.tsx
+- [x] 🤖 6. Routes refuse a request without it (plain message), keeping the existing path checks — tests — devkit/vite/devkitVite.ts
+- [x] 🤖 7. Prove in the starter: Save from the Dev Kit works (page opened by 127.0.0.1 and by the LAN address); a curl to the same route is refused; README + UPGRADES — devkit/README.md
 Check: devkit tests; the starter's devkit-live e2e green; a hand-made request refused; a page opened by the LAN address saves.
+Checked: 2026-11-07 — helper (80bddfd, 61433d8, Dev Kit 0.32.0): devkit 585/585, typecheck clean, lint 0 errors; starter check:fast 5/5, devkit-live OK incl. "Save sent the Dev Kit key the page was served", check:framework PASS (52 kept, 1 skipped); framework check:fast 24/24. Proof on the starter (port 6303): a page at http://192.168.1.152:6303/ and one at 127.0.0.1 each saved a file; 7 curl calls to the LAN address (save, wrong key, font list, font file, add-credit, save-audio, font add) all 403 with the plain message, nothing written, the key in 0 log lines. Claude read the key code: 32 random bytes per dev-server run, sha256 + timingSafeEqual, only pages the dev server serves (ctx.server), checked after every older check — fine.
 
 ## F209 🔧 Release maps never overwritten
 Done when: a release build (CRASHES_MAPS=release) refuses to replace a map already under releases/<version>/maps/ (or one git tracks), with a plain message, and a test proves it; check builds are unchanged.
