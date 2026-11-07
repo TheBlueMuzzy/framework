@@ -46,8 +46,23 @@ export function findMaps(folder, under = folder) {
   return found
 }
 
-/** Moves every .map in `outDir` to `mapsDir`, keeping its path. → the paths moved. */
-export function moveMaps(outDir, mapsDir) {
+/** Every file under a folder, any kind (paths relative to it). */
+function filesUnder(folder, under = folder) {
+  let entries = []
+  try { entries = readdirSync(folder, { withFileTypes: true }) } catch { return [] }
+  return entries.flatMap(e => e.isDirectory() ? filesUnder(join(folder, e.name), under) : [relative(under, join(folder, e.name)).split('\\').join('/')])
+}
+
+/** Moves every .map in `outDir` to `mapsDir`, keeping its path. → the paths moved.
+ *  0.3.1 (F209): `release` → refuses, BEFORE moving anything, when mapsDir already holds a file: those are the maps of
+ *  what players run, and a second release build of the same version would silently replace them. */
+export function moveMaps(outDir, mapsDir, { release = false } = {}) {
+  if (release) {
+    const there = filesUnder(mapsDir)
+    if (there.length) {
+      throw new Error(`crashesMaps: this version's maps are already filed in ${mapsDir} (${there.length} file(s), e.g. ${there[0]}) — a second release build of the same version would replace the maps of what players run. Nothing was moved. Bump the build or delete the folder if you mean it.`)
+    }
+  }
   const moved = []
   for (const file of findMaps(outDir)) {
     const from = join(outDir, file)
@@ -70,6 +85,7 @@ export function moveMaps(outDir, mapsDir) {
 export function crashesMaps(options = {}) {
   let outDir = null
   let mapsDir = null
+  let release = false
   let log = console.log
   return {
     name: 'framework-crashes-maps',
@@ -80,7 +96,7 @@ export function crashesMaps(options = {}) {
     configResolved(config) {
       const root = resolve(options.root ?? config.root)
       outDir = resolve(config.root, config.build.outDir)
-      const release = options.release ?? process.env.CRASHES_MAPS === 'release'
+      release = options.release ?? process.env.CRASHES_MAPS === 'release'
       mapsDir = join(root, release ? MAPS_FOLDER : CHECK_MAPS_FOLDER, options.version ?? readGameVersion(root), 'maps')
       log = (message) => config.logger.info(message)
     },
@@ -91,7 +107,7 @@ export function crashesMaps(options = {}) {
       order: 'post',
       sequential: true,
       handler() {
-        const moved = moveMaps(outDir, mapsDir)
+        const moved = moveMaps(outDir, mapsDir, { release })
         if (moved.length) log(`crashes: ${moved.length} source map(s) moved out of the build → ${relative(process.cwd(), mapsDir) || mapsDir}`)
       },
     },

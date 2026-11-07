@@ -8,8 +8,9 @@ export declare const CHECK_MAPS_FOLDER: 'node_modules/.cache/crashes-maps'
 export declare function readGameVersion(root: string, env?: Record<string, string | undefined>): string
 /** Every .map file under a folder (relative paths). */
 export declare function findMaps(folder: string): string[]
-/** Moves every .map in outDir to mapsDir, keeping its path. → the paths moved. */
-export declare function moveMaps(outDir: string, mapsDir: string): string[]
+/** Moves every .map in outDir to mapsDir, keeping its path. → the paths moved. release: throws (moving nothing) when
+ *  mapsDir already holds a file — a released version's maps are never replaced (0.3.1). */
+export declare function moveMaps(outDir: string, mapsDir: string, options?: { release?: boolean }): string[]
 /** root = the game folder (default: Vite's root); version = what to file the maps under (default: version.json);
  *  release = the build players get (default: CRASHES_MAPS=release) → releases/, else the check cache. */
 export declare function crashesMaps(options?: { root?: string; version?: string; release?: boolean }): Plugin
