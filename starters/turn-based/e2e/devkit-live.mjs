@@ -5,9 +5,11 @@
 //   2. ⏸ Full pause right after your move: the bot stops thinking — 2.5 s later it still hasn't moved. Resume → it moves.
 //   3. ◐ Half pause the same way: the bot stops (rules clock), resume → it moves.
 //   5. Lessons tab (Dev Kit 0.29.0): ▶ step 1 plays the tutorial; step 2's words changed in the tab show in the running
-//      game when step 2 starts; Save changes only that value in content/lessons/first-game.json (put back afterwards).
-// Starts its OWN dev server (port 6402) and closes only that one. Only step 5 saves, and its file is put back at the end.
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+//      game when step 2 starts; Save would change only that value in content/lessons/first-game.json — the save request
+//      is caught and written the Save endpoint's way (formatJson on the file's text) WITHOUT touching the file: the
+//      other e2e scripts' dev servers watch it, and a write reloads their pages mid-round (smoke failed that way).
+// Starts its OWN dev server (port 6402) and closes only that one. Writes no file of the game.
+import { mkdirSync, readFileSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium } from 'playwright-core'
 import { checkVersion } from '../src/version/e2e.mjs'
@@ -15,9 +17,7 @@ import { checkVersion } from '../src/version/e2e.mjs'
 const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6402)
 mkdirSync(OUT, { recursive: true })
-// step 5 saves the lesson file through the Dev Kit — put back as it was at the end, whatever happens
-const LESSON_FILE = new URL('../content/lessons/first-game.json', import.meta.url)
-const LESSON_TEXT = readFileSync(LESSON_FILE, 'utf8')
+const LESSON_TEXT = readFileSync(new URL('../content/lessons/first-game.json', import.meta.url), 'utf8')
 let failures = 0
 const fail = (why) => { failures++; console.log(`  FAIL ${why}`) }
 const pass = (what) => console.log(`  ok   ${what}`)
@@ -96,11 +96,12 @@ try {
       .then(() => pass('Lessons tab → ▶ step 1: the tutorial plays in a fresh game'))
       .catch(() => fail('Lessons tab → ▶ step 1: the first step\'s words never showed'))
     // the lesson's dim and bubble (popovers that opened after the panel) must not cover the panel (Dev Kit 0.29.0 lifts it)
-    const onTop = await page.evaluate(() => {
+    await page.locator('.kit-spot-layer').waitFor({ state: 'attached', timeout: 3000 }).catch(() => {}) // the dim is up
+    const onTop = await page.waitForFunction(() => {
       const box = document.querySelector('#devkit-root aside, #devkit-root .devkit')?.getBoundingClientRect()
       if (!box) return false
       return [[0.5, 0.5], [0.1, 0.9], [0.9, 0.3]].every(([x, y]) => !!document.elementFromPoint(box.left + box.width * x, box.top + box.height * y)?.closest('#devkit-root'))
-    })
+    }, null, { timeout: 1000 }).then(() => true, () => false)
     if (onTop) pass('Lessons tab → the panel stays on top of the lesson\'s dim and bubble')
     else fail('the lesson\'s dim or bubble covers the Dev Kit panel')
     const words = devkit.getByLabel('threeInARow: Words (text id, or the words)')
@@ -112,12 +113,20 @@ try {
       .then(() => pass('Lessons tab → step 2\'s new words show in the running game (no reload, not saved)'))
       .catch(async () => fail(`step 2 shows "${(await callout.textContent().catch(() => '')) ?? ''}", not the tab's new words`))
     await page.screenshot({ path: `${OUT}/devkit-live-lessons-live.png` })
-    // Save: only that one value in the file changes, every other byte as it was
+    // Save: only that one value in the file changes, every other byte as it was. The request is caught and written the
+    // endpoint's way (the game's own vite-plugins/devkit formatJson + keepHelp on the file's text), not to disk.
+    const { formatJson, keepHelp } = await server.ssrLoadModule('/vite-plugins/devkit/devkitVite.ts')
+    let now = null
+    await page.route('**/__devkit/save', async (route) => {
+      const { path, data } = route.request().postDataJSON()
+      if (path === 'content/lessons/first-game.json') now = formatJson(keepHelp(JSON.parse(LESSON_TEXT), data), LESSON_TEXT)
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, path }) })
+    })
     await page.keyboard.press('`')
     await devkit.getByRole('tab', { name: 'Lessons' }).click()
     await devkit.getByRole('button', { name: 'Save', exact: true }).click()
     await devkit.getByText(/Saved content\/lessons\/first-game\.json/).waitFor({ timeout: 5000 }).catch(() => {})
-    const now = readFileSync(LESSON_FILE, 'utf8')
+    await page.unroute('**/__devkit/save')
     const expected = LESSON_TEXT.replace('"message": "threeInARow"', `"message": ${JSON.stringify(NEW_WORDS)}`)
     if (expected !== LESSON_TEXT && now === expected) pass('Lessons tab → Save: only step 2\'s words changed in first-game.json, the rest byte-for-byte')
     else fail(`Lessons tab → Save: first-game.json isn't the old file with just step 2's words changed:\n${now}`)
@@ -128,7 +137,6 @@ try {
 } finally {
   await browser.close()
   await server.close()
-  if (readFileSync(LESSON_FILE, 'utf8') !== LESSON_TEXT) writeFileSync(LESSON_FILE, LESSON_TEXT) // the lesson file back as it was
 }
 console.log(failures ? `\nDEVKIT-LIVE FAILED — ${failures} problem(s)` : '\nDEVKIT-LIVE OK — a Tuning edit changed the running game; both pauses held the bot; a Lessons tab edit reached the running tutorial and Save changed only it')
 process.exit(failures ? 1 : 0)

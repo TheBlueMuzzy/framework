@@ -141,15 +141,23 @@ export function DevKit({ tabs = allTabs(KIT_TABS, gameTabs) }: { tabs?: DevKitTa
       el.showPopover()
       focused?.focus({ preventScroll: true }) // (a box being typed in keeps the caret)
     }
+    // beforetoggle fires at once inside the game's showPopover() (toggle comes a task later, and a hide + show in one go
+    // may not send one): lift in a microtask — once the game's code that opened it (and re-stacked its own) is done
+    let queued = false
     const onToggle = (e: Event) => {
       const target = e.target as HTMLElement | null
       if ((e as ToggleEvent).newState !== 'open' || !target || target === panel.current || target.closest?.('.devkit, .devkit-pause-badge')) return
-      lift()
+      if (queued) return
+      queued = true
+      queueMicrotask(() => { queued = false; lift() })
     }
     document.addEventListener('fullscreenchange', lift)
-    document.addEventListener('toggle', onToggle, true) // (toggle doesn't bubble: heard on the way down)
+    // (neither bubbles: heard on the way down)
+    document.addEventListener('beforetoggle', onToggle, true)
+    document.addEventListener('toggle', onToggle, true)
     return () => {
       document.removeEventListener('fullscreenchange', lift)
+      document.removeEventListener('beforetoggle', onToggle, true)
       document.removeEventListener('toggle', onToggle, true)
     }
   }, [])

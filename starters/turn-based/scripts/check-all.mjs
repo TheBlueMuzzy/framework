@@ -6,6 +6,8 @@
 //   npm run check:full -- game online   only these e2e scripts (an "area" check: the scripts for what you touched)
 // Each e2e script gets its OWN port (and the online ones their own wrangler port + storage), so they can run side by
 // side; `--jobs 3` sets how many run at once (default 3 — more makes the animation-timed scripts flaky on a busy PC).
+// An e2e script never WRITES the game's files (a Dev Kit Save included — catch the request with page.route): every
+// side-by-side dev server watches them, and one write reloads the other scripts' pages mid-play (F200: smoke failed so).
 // PORT PRE-FLIGHT (F118): before anything starts, a full run checks every port it will use is free — a port another
 // server holds fails the run at once, naming who holds it and the line that frees it (a busy port used to fail one
 // script deep in the run as a vague timeout). The ports a run uses:
