@@ -1,12 +1,13 @@
 // EVERY SCREEN AT EVERY SIZE — the main menu, the board, Pause, Settings, Credits, the results, the main menu again
-// after Escape on the results (F160) and the online lobby, at the 7 sizes the UI kit checks
-// (390×844 · 360×780 · 844×390 · 768×343 · 1100×800 · 1440×900 · 1920×1080).
+// after Escape on the results (F160) and the online lobby, at every size the game plays at — content/ui/style.json
+// "orientation" picks them like e2e/shots.mjs (F205): upright phones 390×844 · 360×780, sideways phones 844×390 · 768×343,
+// desktops 1100×800 · 1440×900 · 1920×1080; "portrait" drops the sideways phones, "landscape" the upright ones, "any" all 7.
 //   node e2e/screens.mjs [outDir] [port]          (npm run e2e:screens)
 // Each one is checked with the UI kit's own page check (src/ui/kit/uiProblems.mjs: wider than the screen, too small to
 // tap, clipped, overlapping, faint, touching its box's edge, growing) and shot to outDir/screens-<size>-<screen>.png.
 // (check:framework checks the first screen and live play; this adds the screens you only reach by tapping.)
 // Starts its OWN dev server (port 6404) and closes only that one.
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium } from 'playwright-core'
 import { checkVersion } from '../src/version/e2e.mjs'
@@ -15,8 +16,12 @@ import { findProblems } from '../src/ui/kit/uiProblems.mjs'
 const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6404)
 mkdirSync(OUT, { recursive: true })
+const ORIENTATION = (() => {
+  try { return JSON.parse(readFileSync('content/ui/style.json', 'utf8')).orientation ?? 'any' } catch { return 'any' }
+})()
 const SIZES = [
-  ['390x844', 390, 844, true], ['360x780', 360, 780, true], ['844x390', 844, 390, true], ['768x343', 768, 343, true],
+  ...(ORIENTATION === 'landscape' ? [] : [['390x844', 390, 844, true], ['360x780', 360, 780, true]]),
+  ...(ORIENTATION === 'portrait' ? [] : [['844x390', 844, 390, true], ['768x343', 768, 343, true]]),
   ['1100x800', 1100, 800, false], ['1440x900', 1440, 900, false], ['1920x1080', 1920, 1080, false],
 ]
 let failures = 0
@@ -85,5 +90,5 @@ try {
   await browser.close()
   await server.close()
 }
-console.log(failures ? `\nSCREENS FAILED — ${failures} problem(s)` : '\nSCREENS OK — 8 screens × 7 sizes, no problems')
+console.log(failures ? `\nSCREENS FAILED — ${failures} problem(s)` : `\nSCREENS OK — 8 screens × ${SIZES.length} sizes (${ORIENTATION}), no problems`)
 process.exit(failures ? 1 : 0)
