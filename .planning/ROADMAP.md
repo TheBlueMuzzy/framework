@@ -617,7 +617,7 @@ flowchart LR
   F196 -.-> F203
 ```
 
-## v0.41 — Checks that hold still  ← current · planned 2026-11-07
+## v0.41 — Checks that hold still  ✅ released 2026-11-07 (v0.43.0) · planned 2026-11-07
 Goal (Muzzy 2026-11-07: "your pick"): checks go red only when something really broke — a game's screenshots don't break on every /save, and the starter's screen check shoots only the sizes the game plays at.
 - ✅ F204 🔧 Version label holds still in screenshots — while a check holds the screen still, the version module shows a fixed label (the real version is still checked), so the before/after screenshot check doesn't go red on menu + Settings after every /save (Glyphtender's freeze.ts shownVersion, moved into the module) — should · sprint 65
 - ✅ F205 🐞 Starter's screen check follows the game's orientation — starters/turn-based/e2e/screens.mjs reads content/ui/style.json orientation like the shots check, so an upright-only game copying it doesn't shoot sideways sizes — could · sprint 65
