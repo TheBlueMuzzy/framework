@@ -3,10 +3,10 @@ Started 2026-11-07 · Milestone v0.41 · Features: F204, F205, F206 (in this ord
 
 ## F204 🔧 Version label holds still in screenshots
 Done when: while a check holds the screen still (the screenshot check's freeze switch), the menu and Settings show one fixed version label, so raising a game's build number leaves the before/after screenshot check green — the real version is still what checkVersion and the crash reports see; the starter and the shots template use it.
-- [ ] 🤖 1. Prove it: a scratch copy of the starter with its build number raised turns the shots check red on menu + Settings — .scratch (proof only) · starters/turn-based/e2e/shots.mjs
-- [ ] 🤖 2. The version module shows a fixed label ("v0.0.0.0") while the page is held still; versionLabel stays the real one for checkVersion and crash reports — tests — version/kit/index.ts
+- [x] 🤖 1. Prove it: a scratch copy of the starter with its build number raised turns the shots check red on menu + Settings — .scratch (proof only) · starters/turn-based/e2e/shots.mjs
+- [x] 🤖 2. The version module shows a fixed label ("v0.0.0.0") while the page is held still; versionLabel stays the real one for checkVersion and crash reports — tests — version/kit/index.ts
 - [ ] 🤖 3. The starter's menu and Settings use it, and the shots template + the starter's copy hold it still — starters/turn-based/src/ui/MainMenuScreen.tsx
-- [ ] 🤖 4. README + upgrade note (how a game turns it on; Glyphtender's own freeze.ts can go) — version/README.md
+- [x] 🤖 4. README + upgrade note (how a game turns it on; Glyphtender's own freeze.ts can go) — version/README.md
 Check: the scratch copy with a raised build number: shots check green; the version module's tests; the starter's check:full green.
 
 ## F205 🐞 Starter's screen check follows the game's orientation
@@ -29,3 +29,5 @@ Check: the bad-move golden save fails with its name and move; the starter's real
 - Plan picked by Muzzy 2026-11-07 ("your pick").
 - Read before planning: the version module bakes the real version in on the dev server too (version/kit/vitePlugin.mjs DEFINE_KEY), and the starter's own version.json hasn't changed since F151, so the starter never showed the break — a game whose /save raises its build does. Crash maps by script already landed (F174 — Crash maps by the release script), so that Idea isn't in this sprint.
 - Open bugs: no BUGS.md open P0/P1.
+- F204 task 1 (proof, no copy needed — the version module reads VERSION_BUILD): `VERSION_BUILD=99 node e2e/shots.mjs check` in the starter → 12 of 56 red, all ~250 px: menu at all 7 sizes, Settings at 5 (upright-phone Settings shows the line off-screen). The starter's node_modules on this PC predated F196 (no pixelmatch) — `npm install` there first.
+- Claude's call (F204, read version/kit/index.ts + conformance.mjs): hold `versionLabel` itself still under `?freeze-version` (dev server only) instead of a new `shownVersion` name — games change no screen code and check:framework's `version={versionLabel}` rule stays as is; `appVersion` and the meta tag keep the real number for checkVersion. Only a Dev Kit snapshot taken inside a screenshot run would say v0.0.0.0.
