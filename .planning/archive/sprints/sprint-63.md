@@ -62,3 +62,8 @@ Checked: 2026-11-07 — helper: devkit 556/556 (21 new), tsc + lint clean; start
 - Muzzy 2026-11-06: the dim's strength feels right ("1 yes").
 - keepClear limit (helper): the bubble always sits right next to its target (fixed pointer length), so it can't use empty room far away — a game lays out so a side is free, or lists controls in `avoid`.
 - Possible small gap (helper, not fixed): the kit Callout's existing pulse ring may sit ~1.5 px from its pointer (same outside geometry the Spotlight had before its fix) — check when F201 — Starter teaches uses it.
+
+Retro (Claude's draft 2026-11-07 — Muzzy's words win; he can change it any time):
+- went well: four features in one evening, Muzzy's "toolbox like a library" built as asked; building the starter's tutorial found 5 real bugs in the blocks before any game hit them.
+- went wrong: Claude told Muzzy the Text tab was already live — it wasn't; the helper caught it, not Claude.
+- change: before telling Muzzy how something behaves today, check it in the code (or say it's a guess).
