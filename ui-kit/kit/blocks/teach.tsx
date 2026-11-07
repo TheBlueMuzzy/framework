@@ -108,13 +108,13 @@ export function useCalloutPlace(layer: RefObject<HTMLDivElement | null>, bubble:
       const keepClearAt = (s: typeof size) => placeKeepingClear(hole, s, frameBox, distance, area!, targetBox(keep!.live), insetFor(s), keepOff)
       let spot = area ? keepClearAt(size) : placeCallout(hole, size, frameBox, distance, now.current.placement, tipInset)
       // At its own width it covers the play area (no side holds it — a board as tall as the screen): it tries the room
-      // beside the target, never narrower than 10em, and keeps the width covering the least (besideWidths)
+      // beside the target, never narrower than 8em, and keeps the width covering the least (besideWidths)
       if (area && refit) {
         // (the area with the pointer's room round it: a bubble squeezed against the area points INTO it)
         const roomy = { left: area.left - distance, top: area.top - distance, right: area.right + distance, bottom: area.bottom + distance }
         const coverOf = (s: typeof spot, z: typeof size) => overlapArea({ left: s.x, top: s.y, right: s.x + z.width, bottom: s.y + z.height }, roomy)
         let best = { spot, size, cover: coverOf(spot, size), width: 0 }
-        const least = parseFloat(getComputedStyle(box).fontSize) * 10
+        const least = parseFloat(getComputedStyle(box).fontSize) * 8
         for (const width of best.cover > 0 ? besideWidths(hole, frameBox, distance, size.width, least) : []) {
           box.style.setProperty('--kit-callout-fit-w', `${width}px`)
           const narrow = measure(), at = keepClearAt(narrow), cover = coverOf(at, narrow)

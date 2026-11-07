@@ -518,7 +518,7 @@ gallery's `npm run shoot` uses the same one.
   `kit/blocks/fullscreen.ts`) — a phone's first tap goes full screen, and a Spotlight + Callout shown on that tap were
   hidden under the page; every open manual popover is shown again on top (Callouts last), the focus kept. A Callout
   with `keepClear` that covers the play area at its full width narrows to fit beside its target (`besideWidths`,
-  never under 10em) when that covers less. `useNudge`: a pause starts the next spell from `none`, same kind or not.
+  never under 8em) when that covers less. `useNudge`: a pause starts the next spell from `none`, same kind or not.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and
