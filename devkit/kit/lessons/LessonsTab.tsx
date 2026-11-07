@@ -102,7 +102,7 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
     .filter(({ step, words }) => matchesAll(terms, stepSearchTexts(step, words)))
   const sectionId = (step: LessonStepData) => `lessons:${file}:${step.id}`
   const playingHere = view.lessonId === lessonId
-  const running = view.lessonId ? `Playing now: ${view.lessonId} · step ${view.stepIndex + 1}` : 'No lesson playing.'
+  const running = view.lessonId ? `Playing now: ${view.lessonId} · step ${view.stepIndex + 1}` : 'No lesson playing'
 
   return (
     <div className="tt lessons-tab">
@@ -118,7 +118,7 @@ export function LessonsTab({ query = '', files = lessonFiles, text = gameText }:
       </div>
       <p className="tt-legend">
         {lessons ? running : <>▶ needs the game's lesson runner: add <code>lessons: {'{ runner }'}</code> to the adapter (src/devkit-game/). Edits and Save work without it.</>}
-        {' '}{lessonPath(file)} · {steps.length === lesson.steps.length ? `${lesson.steps.length} steps` : ''}
+        {' · '}{lessonPath(file)} · {lesson.steps.length} step{lesson.steps.length === 1 ? '' : 's'}
       </p>
       <SearchCount query={query} found={steps.length} what="step" where="Lessons" />
       {!terms.length && <SectionIndex label="Steps" sections={lesson.steps.map((s, i) => ({ id: sectionId(s), title: `${i + 1} · ${s.id}`, count: Object.keys(s).length }))} />}

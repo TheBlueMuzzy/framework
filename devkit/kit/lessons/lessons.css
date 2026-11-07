@@ -16,3 +16,4 @@
 .lessons-json-box { height: 160px; box-sizing: border-box; margin-top: 4px; color: #e6e6ee; resize: vertical; }
 .lessons-json-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
 .lessons-json-btns .devkit-status { width: auto; }
+.lessons-tab .devkit-footer .devkit-status { margin: 0; }

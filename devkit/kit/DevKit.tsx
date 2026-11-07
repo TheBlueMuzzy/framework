@@ -130,15 +130,28 @@ export function DevKit({ tabs = allTabs(KIT_TABS, gameTabs) }: { tabs?: DevKitTa
 
   // A game that goes full screen on a tap (a phone's first tap) puts the page in the browser's top layer ABOVE the
   // open panel, hiding it. Showing the popover again lifts it back on top.
+  // 0.29.0 (F200): so does a game popover that opens WHILE the panel is open — the Lessons tab's ▶ starts a lesson whose
+  // Spotlight dim and bubble (UI kit popovers) covered the panel and dimmed it. Lifted the same way, after them.
   useEffect(() => {
     const lift = () => {
       const el = panel.current
       if (!openRef.current || !el?.showPopover || !el.matches(':popover-open')) return
+      const focused = el.contains(document.activeElement) ? (document.activeElement as HTMLElement) : null
       el.hidePopover()
       el.showPopover()
+      focused?.focus({ preventScroll: true }) // (a box being typed in keeps the caret)
+    }
+    const onToggle = (e: Event) => {
+      const target = e.target as HTMLElement | null
+      if ((e as ToggleEvent).newState !== 'open' || !target || target === panel.current || target.closest?.('.devkit, .devkit-pause-badge')) return
+      lift()
     }
     document.addEventListener('fullscreenchange', lift)
-    return () => document.removeEventListener('fullscreenchange', lift)
+    document.addEventListener('toggle', onToggle, true) // (toggle doesn't bubble: heard on the way down)
+    return () => {
+      document.removeEventListener('fullscreenchange', lift)
+      document.removeEventListener('toggle', onToggle, true)
+    }
   }, [])
 
   // ` toggles, Esc closes
