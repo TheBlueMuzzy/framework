@@ -567,7 +567,7 @@ Goal (Muzzy 2026-11-06: "ok"; from F189 — Games list module candidates, `resea
 - ✅ F193 🧱 New version on first visit, fixed — Goops' fix (`src/main.tsx` 16–28: the page could stay on the old version) goes into the Version module — must
 - ✅ F194 🔧 Goops catch-up rehearsal — on `.scratch/goops-catchup`: Goops to v0.39 + Saves, Crashes (its crash server set up on Muzzy's Cloudflare — Muzzy 2026-11-06: yes), Lint and F191–F193; every step timed, every hand fix noted; "Send crash reports" on by default (Muzzy 2026-11-06: ok) — must · needs: F190, F191, F192, F193
 - ✅ F195 🔧 Glyphtender catch-up rehearsal — the same on `.scratch/glyphtender-catchup`, with the rooms 0.15.0 server update it waits on — must · needs: F191, F192, F193
-- 🟢 F196 🔧 Test helpers — a Dev Kit "open this tab" helper for e2e (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`) — could
+- → F196 🔧 Test helpers — moved to v0.40 — Checks any game can reuse (2026-11-07)
 - ✅ F197 ❓ Tutorial trial — on a copy, rewrite Glyphtender's first 3 tutorial steps as Goops-style lesson files; verdict: one tutorial module, or each game keeps its own — should · sprint 62 · Muzzy 2026-11-06: build it now, as building blocks (→ v0.39)
 ```mermaid
 flowchart LR
@@ -577,7 +577,6 @@ flowchart LR
   F193[✅ F193 New version on first visit, fixed]
   F194[✅ F194 Goops catch-up rehearsal]
   F195[✅ F195 Glyphtender catch-up rehearsal]
-  F196[🟢 F196 Test helpers]
   F197[✅ F197 Tutorial trial]
   F190 --> F194
   F191 --> F194
@@ -605,6 +604,19 @@ flowchart LR
   F199 --> F201
 ```
 
+## v0.40 — Checks any game can reuse  ← current · planned 2026-11-07
+Goal (auto mode, Muzzy 2026-11-07: "/sprint auto mode"): the test tools games keep writing for themselves come from one place — a Dev Kit helper for e2e scripts, a before/after screenshot check, a swap rehearsal on a throwaway copy — and a game hears when its copied templates fall behind, like it does for modules.
+- 🔨 F196 🔧 Test helpers — a Dev Kit "open the Dev Kit / open this tab" helper for e2e that waits for the panel (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`), both used by the turn-based starter — could · sprint 64
+- 🔨 F202 🔧 Swap rehearsal mode — `extract.mjs swap <id> --rehearse` runs a swap in a throwaway copy of a game (any folder name) without touching the real queue, so a module's swap is proven before the real game takes it — should · sprint 64
+- 🔨 F203 🔧 Stale template warning — the BMUZ templates a game copies (check-all.mjs, ports.mjs, checks.yml, slow-tests.mjs, shots.mjs) carry a version line, and session start names a game's copy that's behind, like modules — should · needs: ~F196 · sprint 64
+```mermaid
+flowchart LR
+  F196[🔨 F196 Test helpers]
+  F202[🔨 F202 Swap rehearsal mode]
+  F203[🔨 F203 Stale template warning]
+  F196 -.-> F203
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
@@ -624,8 +636,8 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
-- 2026-11-06 — `extract.mjs swap --rehearse`: run a swap on a throwaway copy of a game (any folder name) without touching the real queue — F198's rehearsal had to swap by hand (Sprint 63 Notes).
-- 2026-11-06 — **A game's copied templates (scripts/ports.mjs, check-all.mjs) go stale silently** (F195 — Glyphtender catch-up rehearsal: its ports.mjs was behind; nothing said so): stamp templates with a version and let session start name a stale copy, like it does for modules.
+- 2026-11-06 — → F202. `extract.mjs swap --rehearse`: run a swap on a throwaway copy of a game (any folder name) without touching the real queue — F198's rehearsal had to swap by hand (Sprint 63 Notes).
+- 2026-11-06 — → F203. **A game's copied templates (scripts/ports.mjs, check-all.mjs) go stale silently** (F195 — Glyphtender catch-up rehearsal: its ports.mjs was behind; nothing said so): stamp templates with a version and let session start name a stale copy, like it does for modules.
 - 2026-11-06 — **A second release build of the same version overwrites its committed crash maps silently** (F195 — Glyphtender catch-up rehearsal): crashes' moveMaps could refuse to replace a map already under releases/ (or one git tracks), with a test. Rare — release.mjs bumps the version every time.
 - 2026-11-05 — **Report-only mode doesn't cover publishing a page** (F185 — Slimmed rule set): GE10 holds edits, commits, pushes and deploys after "assess / analyze…", but the claude-artifacts publish tools aren't wired to any hook — wiring them needs a new matcher in ~/.claude/settings.json (Muzzy's file).
 - 2026-11-05 — **HC10 (wake-up rule) can read the Stop hook's own `background_tasks` list** (docs: code.claude.com/docs/en/hooks) instead of parsing the transcript — record one real Stop input first to see the field's shape, keep the transcript read as the fallback.
