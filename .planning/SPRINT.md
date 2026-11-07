@@ -8,6 +8,7 @@ Done when: while a check holds the screen still (the screenshot check's freeze s
 - [x] 🤖 3. The starter's menu and Settings use it, and the shots template + the starter's copy hold it still — starters/turn-based/src/ui/MainMenuScreen.tsx
 - [x] 🤖 4. README + upgrade note (how a game turns it on; Glyphtender's own freeze.ts can go) — version/README.md
 Check: the scratch copy with a raised build number: shots check green; the version module's tests; the starter's check:full green.
+Checked: 2026-11-07 — before the fix `VERSION_BUILD=99 node e2e/shots.mjs check` → 12/56 red (menu ×7, Settings ×5); after (version 0.3.0 + template 2, before set re-recorded, menu@1440x900 looked at: footer v0.0.0.0) → 56/56 same, 0 px. Version tests 5/5 (freeze on dev → v0.0.0.0, release build ignores it, no switch → real). Starter check:full 12/12 ALL PASS (1.9 min, incl. screenshots + framework). Review: Claude read the diff (label frozen only on DEV + the param; the meta tag + appVersion stay real; address() joins ? / & right) — fine; /code-review low empty in 8 s.
 
 ## F205 🐞 Starter's screen check follows the game's orientation
 Done when: the starter's e2e/screens.mjs shoots only the sizes content/ui/style.json's orientation allows (portrait: no sideways phones, landscape: no upright phones, any: all 7), the same way the shots check chooses them.
@@ -15,6 +16,7 @@ Done when: the starter's e2e/screens.mjs shoots only the sizes content/ui/style.
 - [x] 🤖 6. Prove it on a scratch copy set to "portrait" (5 sizes, no sideways shots) and on the starter ("any", 7 sizes) — starters/turn-based/e2e/screens.mjs
 - [x] 🤖 7. Every other copy that promises "the 7 sizes" (the starter's README, check-all's comment) says "the sizes the game plays at" — starters/turn-based/README.md
 Check: the portrait scratch copy shoots 5 sizes; the starter's screens check is still green at 7.
+Checked: 2026-11-07 — portrait (style.json for one run): 8 screens × 5 sizes, no sideways shots; the starter (any): 8 screens × 7 sizes OK; check:full 12/12 ALL PASS. Review: same read as F204.
 
 ## Notes
 - Plan picked by Muzzy 2026-11-07 ("your pick").
