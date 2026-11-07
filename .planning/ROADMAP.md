@@ -606,12 +606,12 @@ flowchart LR
 
 ## v0.40 — Checks any game can reuse  ← current · planned 2026-11-07
 Goal (auto mode, Muzzy 2026-11-07: "/sprint auto mode"): the test tools games keep writing for themselves come from one place — a Dev Kit helper for e2e scripts, a before/after screenshot check, a swap rehearsal on a throwaway copy — and a game hears when its copied templates fall behind, like it does for modules.
-- 🔨 F196 🔧 Test helpers — a Dev Kit "open the Dev Kit / open this tab" helper for e2e that waits for the panel (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`), both used by the turn-based starter — could · sprint 64
+- 🎛️ F196 🔧 Test helpers — a Dev Kit "open the Dev Kit / open this tab" helper for e2e that waits for the panel (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`), both used by the turn-based starter — could · sprint 64
 - 🎛️ F202 🔧 Swap rehearsal mode — `extract.mjs swap <id> --rehearse` runs a swap in a throwaway copy of a game (any folder name) without touching the real queue, so a module's swap is proven before the real game takes it — should · sprint 64
 - 🔨 F203 🔧 Stale template warning — the BMUZ templates a game copies (check-all.mjs, ports.mjs, checks.yml, slow-tests.mjs, shots.mjs) carry a version line, and session start names a game's copy that's behind, like modules — should · needs: ~F196 · sprint 64
 ```mermaid
 flowchart LR
-  F196[🔨 F196 Test helpers]
+  F196[🎛️ F196 Test helpers]
   F202[🎛️ F202 Swap rehearsal mode]
   F203[🔨 F203 Stale template warning]
   F196 -.-> F203
@@ -636,6 +636,7 @@ flowchart LR
 - Next modules (BMUZ-PLAN step 2): inventory all projects for candidates — Roll Better's online rooms, drag-to-zone, physics dice
 
 ## Ideas
+- 2026-11-07 — **The starter's e2e/screens.mjs ignores the game's orientation** (F196 — Test helpers' helper): it always shoots the 7 sizes; a portrait game copying it would shoot sideways sizes — read content/ui/style.json orientation like templates/shots.mjs does.
 - 2026-11-06 — → F202. `extract.mjs swap --rehearse`: run a swap on a throwaway copy of a game (any folder name) without touching the real queue — F198's rehearsal had to swap by hand (Sprint 63 Notes).
 - 2026-11-06 — → F203. **A game's copied templates (scripts/ports.mjs, check-all.mjs) go stale silently** (F195 — Glyphtender catch-up rehearsal: its ports.mjs was behind; nothing said so): stamp templates with a version and let session start name a stale copy, like it does for modules.
 - 2026-11-06 — **A second release build of the same version overwrites its committed crash maps silently** (F195 — Glyphtender catch-up rehearsal): crashes' moveMaps could refuse to replace a map already under releases/ (or one git tracks), with a test. Rare — release.mjs bumps the version every time.
