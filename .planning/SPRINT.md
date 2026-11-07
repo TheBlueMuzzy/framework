@@ -20,11 +20,12 @@ Checked: 2026-11-07 — helper: extract suite 42 → 49 (5 of the 7 new seen red
 
 ## F203 🔧 Stale template warning
 Done when: every BMUZ template a game copies carries a `template: <name> <version>` line, a game's copy that's behind (or has none) is named at session start with the one-line fix, like a module that's behind — and each game's current copies are reported (Glyphtender's ports.mjs was behind).
-- [ ] 🤖 8. A version line in each copied template (check-all.mjs, ports.mjs, checks.yml, slow-tests.mjs, the F196 shots template) + a changelog line per template — ~/.claude/config/bmuz/templates/ports.mjs
-- [ ] 🤖 9. A script lists a game's template copies against the templates (behind · no version line · fine), tests red first — ~/.claude/config/bmuz/scripts/lib.mjs
-- [ ] 🤖 10. Session start names the stale ones (one line each, with the copy command), quiet when all are current — ~/.claude/config/bmuz/session-start.sh
-- [ ] 🤖 11. Run it on Glyphtender, Goops and the starter (read-only) and list what's behind in Notes; the starter's copies brought current — starters/turn-based/scripts/ports.mjs
+- [x] 🤖 8. A version line in each copied template (check-all.mjs, ports.mjs, checks.yml, slow-tests.mjs, the F196 shots template) + a changelog line per template — ~/.claude/config/bmuz/templates/ports.mjs
+- [x] 🤖 9. A script lists a game's template copies against the templates (behind · no version line · fine), tests red first — ~/.claude/config/bmuz/scripts/lib.mjs
+- [x] 🤖 10. Session start names the stale ones (one line each, with the copy command), quiet when all are current — ~/.claude/config/bmuz/session-start.sh
+- [x] 🤖 11. Run it on Glyphtender, Goops and the starter (read-only) and list what's behind in Notes; the starter's copies brought current — starters/turn-based/scripts/ports.mjs
 Check: hook + script tests green; session start in the framework names nothing; a scratch game with an old ports.mjs gets the line; the real games read-only.
+Checked: 2026-11-07 — helper: a `template: <name> <N>` line on the 5 copied templates (check-all 4, ports 2, slow-tests 1, shots 1, checks.yml 2 — numbered from the template history) + templates/TEMPLATES.md (what each version added, where a game keeps its copy, copy or merge); scripts/templates-check.mjs (suite `templates` 10 red → 19/19; 2 tests written after the code, never seen red: "the project's own file" and "word for word = current"); session start runs it in a game (5 s limit, errors hidden; hook tests 2 red → 9/9; Glyphtender session start 6.87 s → 6.94 s); whole suites scripts 435/435, hooks 814/814; the starter's copies current (fe8df90); session start in framework + starter names nothing. Claude: pushed ~/.claude-config eeda1e4; ran the check in Glyphtender read-only — it names check-all.mjs, ports.mjs and shots.mjs with their fix lines (Glyphtender's 9 known .map lines unchanged); read the session-start lines — fine.
 
 ## Notes
 - Auto mode (Muzzy 2026-11-07: "/sprint auto mode"): Claude plans and builds; taste calls → Ask Muzzy lines.
@@ -35,4 +36,5 @@ Check: hook + script tests green; session start in the framework names nothing; 
 - Claude's call (F202, the helper's Ask): a rehearsal stays OPTIONAL before a real swap — the recipe says "rehearse first", and a real swap already puts the game back exactly as it was on red; a required gate would add a record to keep for little safety.
 - Claude's calls (F196, the helper's Asks): 1. the compare's 0.1 colour tolerance stays — a change only visible under a dim cover (Pause, Results) still shows on the undimmed screens, and Glyphtender's lesson is "never touch the tolerance"; 2. GitHub reaches and shoots every screen but skips the compare (one before set per platform) — a Linux set would need re-recording on GitHub after every meant change.
 - Found (not changed): the starter's e2e/screens.mjs says "7 sizes" but ignores orientation — fine for the starter ("any"), a portrait game copying it would shoot sideways sizes → ROADMAP Ideas 2026-11-07.
+- F203 read-only run: Glyphtender behind on check-all.mjs (≈ v3, no slow-test warning), ports.mjs (v1 — lacks F177's port knock), shots.mjs (the original) · Goops behind on ports.mjs (v1), checks.yml (v1 — lacks F158's browser cache), check-all.mjs (≈ v3) — each game's next session sees the lines and brings them current.
 - X01's queue line moved to tutorial@0.1.1 (it said 0.1.0; the framework has 0.1.1 since F201's fix).

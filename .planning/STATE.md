@@ -1,16 +1,16 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 (auto mode) — **Sprint 64 started (v0.40 — Checks any game can reuse)** on `dev/v0-40-checks`: F196 — Test helpers ∥ F202 — Swap rehearsal mode by two helpers, then F203 — Stale template warning. Next: check each helper's report first-hand, merge, check:fast, review; push every ~/.claude edit to ~/.claude-config. Muzzy: Goops swaps to the Tutorial module (X01) in its own session — `extract.mjs swap X01`.
+2026-11-07 (auto mode, Muzzy asleep) — **Sprint 64 (v0.40 — Checks any game can reuse) all built** on `dev/v0-40-checks`: F196 — Test helpers 🎛️ · F202 — Swap rehearsal mode 🎛️ · F203 — Stale template warning 🎛️ — each checked by Claude, all waiting on Muzzy's look. Next: his "approved" → retro → archive → /deliver v0.40. Glyphtender + Goops: their next session names 3 stale test scripts each (F203). Muzzy: Goops swaps to the Tutorial module (X01) in its own session — rehearse first: `extract.mjs swap X01 --rehearse` in a clone, then `swap X01`.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: framework 70a3522 (F196 — Test helpers: review empty in 15 s — Claude read e2e.mjs + the installer fix) · ~/.claude-config 6f8696f (F202 — Swap rehearsal mode: Claude read the extract.mjs diff) · framework 472387c (F200 task 22: /code-review low — nothing found; LessonsTab.tsx covered by tests + e2e) · d82b14b (F200 — Dev Kit Lessons tab: /code-review low empty in 20 s — Claude read the Save path) · 6922ca9 (F201 — Starter teaches: /code-review low — 1 suspect, checked: not a bug) · e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
+Reviewed through: ~/.claude-config eeda1e4 (F203 — Stale template warning: Claude read session-start + ran the check) · framework fe8df90 · 70a3522 (F196 — Test helpers: review empty in 15 s — Claude read e2e.mjs + the installer fix) · ~/.claude-config 6f8696f (F202 — Swap rehearsal mode: Claude read the extract.mjs diff) · framework 472387c (F200 task 22: /code-review low — nothing found; LessonsTab.tsx covered by tests + e2e) · d82b14b (F200 — Dev Kit Lessons tab: /code-review low empty in 20 s — Claude read the Save path) · 6922ca9 (F201 — Starter teaches: /code-review low — 1 suspect, checked: not a bug) · e31ef3e (F198 — Tutorial module: /code-review low empty in 25 s — Claude read the new code; + lint 0.4.1) · 63c7329 (F199 — Spotlight + bubble placement: /code-review low 7f3dcf5..ddb194c — 1 real bug fixed, e0243f6) · 227c7fd (F197 — Tutorial trial: plan + research files only, no code — Claude read the whole diff) · 4854ea4 (sprint 61: /code-review low came back empty in 7 s — Claude read the diff incl. 4854ea4's two-pattern change, fine) · cb6f089 (sprint 60, 3 bugs fixed) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.40 — Checks any game can reuse   Sprint: 64
-Doing: F203 — building (helper); F196 + F202 wait on Muzzy's look   Branch: dev/v0-40-checks   Version: 0.41.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.30.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F196, F202, F203 — waiting on Muzzy's look   Branch: dev/v0-40-checks   Version: 0.41.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.30.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.2.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.31.0
 
 ## Key facts
@@ -37,6 +37,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-07 — Sprint 64 built overnight (v0.40 — Checks any game can reuse): a Dev Kit helper for test scripts, a before/after screenshot check any game copies, a swap rehearsal on a throwaway copy, and session start naming a game's out-of-date test scripts. Waiting on Muzzy's look.
 - 2026-11-07 — Released v0.41.0 (v0.39 Tutorial blocks): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words.
 - 2026-11-07 — Sprint 63 done (v0.39 — Tutorial blocks, Muzzy approved all four): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words. Ready for /deliver.
 - 2026-11-07 — Lessons tab: a step's words are typed right in the Dev Kit and change the tutorial bubble on screen at once (Muzzy's ask); Save touches only those words.
