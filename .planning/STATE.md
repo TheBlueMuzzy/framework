@@ -6,7 +6,7 @@
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
 
-Reviewed through: b47cf95 (F204 — Version label holds still in screenshots + F205 — Starter's screen check follows the game's orientation: Claude read bf97af2..b47cf95; /code-review low empty in 8 s) · ~/.claude-config eeda1e4 (F203 — Stale template warning: Claude read session-start + ran the check) · older: archive/log.md
+Reviewed through: 80d7e85 (sprint 66: F207 + F208 + F209 — Claude read each diff, F208's key code in full; /code-review low db2962d..80d7e85 empty in 7 s) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: v0.42 — Steadier and safer   Sprint: 66
