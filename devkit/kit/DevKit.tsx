@@ -22,6 +22,8 @@ import { Carousel } from './carousel/Carousel'
 import { ColorTab } from './color/ColorTab'
 import { styleStore } from './color/uiKit'
 import { FontsTab } from './fonts/FontsTab'
+import { LessonsTab } from './lessons/LessonsTab'
+import { tutorialVersion } from './lessons/lessonFiles'
 import { CAN_SAVE } from './saveContent'
 import { SearchBar } from './search/SearchBar'
 import { DevKitSearch } from './search/searchContext'
@@ -68,6 +70,8 @@ const KIT_TABS: DevKitTab[] = [
   ...(styleStore ? [{ id: 'fonts', label: 'Fonts', Panel: FontsTab }] : []),
   // Only when the game has content/tuning/*.json files
   ...(tuningFiles.length > 0 ? [{ id: 'tuning', label: 'Tuning', Panel: TuningTab }] : []),
+  // Only when the game has the Tutorial module (src/tutorial/VERSION) — its content/lessons/*.json, live (0.29.0, F200)
+  ...(tutorialVersion ? [{ id: 'lessons', label: 'Lessons', Panel: LessonsTab }] : []),
   // These two need the game's adapter (registerDevKitGame, devkitGame.ts); without it they say how to add it
   { id: 'snapshots', label: 'Snapshots', Panel: SnapshotsTab },
   { id: 'bugs', label: 'Bugs', Panel: CaptureTab },
@@ -99,7 +103,11 @@ function isTextBox(target: EventTarget | null) {
   return el.tagName === 'INPUT' && !['range', 'checkbox', 'radio', 'button', 'color'].includes((el as HTMLInputElement).type)
 }
 
-export function DevKit({ tabs = [...KIT_TABS, ...gameTabs] }: { tabs?: DevKitTab[] }) {
+/** The kit's tabs, then the game's — a game tab with a kit tab's id takes that kit tab's place (0.29.0: Goops keeps its
+ *  own Lessons tab until it moves to the kit's). */
+export const allTabs = (kit: DevKitTab[], game: DevKitTab[]): DevKitTab[] => [...kit.filter((t) => !game.some((g) => g.id === t.id)), ...game]
+
+export function DevKit({ tabs = allTabs(KIT_TABS, gameTabs) }: { tabs?: DevKitTab[] }) {
   const [open, setOpen] = useState(false)
   const [tabId, setTabId] = useState(tabs[0]?.id)
   const [query, setQuery] = useState('')

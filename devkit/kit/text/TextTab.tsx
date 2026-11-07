@@ -14,7 +14,7 @@ import { useContext, useState } from 'react'
 import { DevKitPick } from '../select/pickContext'
 import { coveredBy } from '../select/selectMap'
 import { copyForClaudeText } from '../color/colorLogic'
-import { CAN_SAVE, copyText, saveContentFile } from '../saveContent'
+import { CAN_SAVE, copyText, readContentFile, saveContentFile } from '../saveContent'
 import { Highlight, SearchCount, Section, SectionIndex } from '../search/Section'
 import { DevKitSearch } from '../search/searchContext'
 import { searchTerms } from '../search/searchLogic'
@@ -56,16 +56,8 @@ function takeJustSaved(file: string): Status | null {
   return kept && Date.now() - kept.at < 5000 ? kept.status : null
 }
 
-/** The file as it is on disk right now (the dev server serves it as is), or null if it can't be read. */
-async function readFresh(file: string): Promise<object | null> {
-  try {
-    const res = await fetch(`${import.meta.env.BASE_URL ?? '/'}${file}`, { cache: 'no-store' })
-    const data: unknown = res.ok ? await res.json() : null
-    return data !== null && typeof data === 'object' && !Array.isArray(data) ? data : null
-  } catch {
-    return null
-  }
-}
+// The file as it is on disk right now (saveContent.ts — the Lessons tab reads its files the same way)
+const readFresh = readContentFile
 
 export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
   const search = useContext(DevKitSearch)
