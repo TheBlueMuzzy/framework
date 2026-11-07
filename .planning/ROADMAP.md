@@ -604,7 +604,7 @@ flowchart LR
   F199 --> F201
 ```
 
-## v0.40 — Checks any game can reuse  ← current · planned 2026-11-07
+## v0.40 — Checks any game can reuse  ✅ released 2026-11-07 (v0.42.0) · planned 2026-11-07
 Goal (auto mode, Muzzy 2026-11-07: "/sprint auto mode"): the test tools games keep writing for themselves come from one place — a Dev Kit helper for e2e scripts, a before/after screenshot check, a swap rehearsal on a throwaway copy — and a game hears when its copied templates fall behind, like it does for modules.
 - ✅ F196 🔧 Test helpers — a Dev Kit "open the Dev Kit / open this tab" helper for e2e that waits for the panel (Glyphtender `e2e/devkit-tabs.mjs`) + the before/after screenshot check as a BMUZ template (Glyphtender `e2e/shots.mjs`), both used by the turn-based starter — could · sprint 64
 - ✅ F202 🔧 Swap rehearsal mode — `extract.mjs swap <id> --rehearse` runs a swap in a throwaway copy of a game (any folder name) without touching the real queue, so a module's swap is proven before the real game takes it — should · sprint 64
