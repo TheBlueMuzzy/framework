@@ -21,6 +21,7 @@
     "e2e:devkit-live": "node e2e/devkit-live.mjs",
     "e2e:online": "node e2e/online.mjs",
     "e2e:screens": "node e2e/screens.mjs",
+    "e2e:tutorial": "node e2e/tutorial.mjs",
     "sounds": "node scripts/make-sounds.mjs",
     "audio:check": "node src/audio/audio-check.mjs",
     "ai:arena": "node src/ai/kit/ai-arena.mjs",

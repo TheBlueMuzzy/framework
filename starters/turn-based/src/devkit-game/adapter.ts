@@ -5,6 +5,7 @@ import type { DevKitGame } from '../devkit/devkitGame'
 import { versionLabel } from '../version'
 import { getMatch, matchSnapshot, onMatchLog, restoreMatch } from '../game/match'
 import { isOnline } from '../game/online'
+import { LESSON, replayTutorial, runner } from '../tutorial-game/firstGame'
 
 export const ticTacToeAdapter: DevKitGame = {
   name: 'Tic-tac-toe starter',
@@ -20,6 +21,8 @@ export const ticTacToeAdapter: DevKitGame = {
     if (!m) return 'main menu'
     return `${m.opponent.personality} · move ${m.record.moves.length + 1}${m.state?.over ? ' · over' : ''}`
   },
+  // The Lessons tab's ▶ (Dev Kit 0.29.0): a fresh game against the computer, with the lesson from that step
+  lessons: { runner, start: (id, at) => id === LESSON && (replayTutorial(at), true) },
   conformance: {
     // From the main menu to live play: start a game against Careless Cass (you go first in the checks' fixed mode)
     startPlay: async () => {

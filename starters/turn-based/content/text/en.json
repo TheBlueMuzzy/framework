@@ -66,6 +66,19 @@
     "rematch": "Play again",
     "leave": "Leave"
   },
+  "lessons": {
+    "first-game": {
+      "board": { "mouse": "This is your board. Click a square to place your ✕.", "phone": "This is your board. Tap a square to place your ✕." },
+      "threeInARow": "Three in a row wins — across, down or corner to corner.",
+      "beatThem": "Now beat {name}!"
+    },
+    "shared": {
+      "nudgeMove": { "mouse": "Go on — click any empty square.", "phone": "Go on — tap any empty square." },
+      "next": "Next",
+      "gotIt": "Got it",
+      "play": "Play"
+    }
+  },
   "ai": {
     "personality": {
       "careful": { "name": "Careful Cleo", "bio": "Never misses a block. Never misses a win." },

@@ -6,6 +6,8 @@
 //   npm run check:full -- game online   only these e2e scripts (an "area" check: the scripts for what you touched)
 // Each e2e script gets its OWN port (and the online ones their own wrangler port + storage), so they can run side by
 // side; `--jobs 3` sets how many run at once (default 3 — more makes the animation-timed scripts flaky on a busy PC).
+// An e2e script never WRITES the game's files (a Dev Kit Save included — catch the request with page.route): every
+// side-by-side dev server watches them, and one write reloads the other scripts' pages mid-play (F200: smoke failed so).
 // PORT PRE-FLIGHT (F118): before anything starts, a full run checks every port it will use is free — a port another
 // server holds fails the run at once, naming who holds it and the line that frees it (a busy port used to fail one
 // script deep in the run as a vague timeout). The ports a run uses:
@@ -37,6 +39,7 @@ const E2E = [
   ['framework', 'src/devkit/check-framework.mjs', '--port 6409'], // every module's promises in the running game (= npm run check:framework)
   ['online', 'e2e/online.mjs', 'e2e-shots 6403 6499'], // two browser tabs play each other through wrangler dev
   ['screens', 'e2e/screens.mjs', 'e2e-shots 6404'], // every screen at the 7 sizes, the UI kit's page check on each
+  ['tutorial', 'e2e/tutorial.mjs', 'e2e-shots 6405'], // a new device's first game: the 3-step lesson at 4 sizes, Replay, not twice
   ['devkit-live','e2e/devkit-live.mjs', 'e2e-shots 6402'], // a Tuning edit changes the running game; a pause stops the bot
   ['smoke', 'e2e/smoke.mjs', 'e2e-shots 6401'], // loads, plays one round vs the computer, console clean
 ]

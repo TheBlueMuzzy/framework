@@ -17,7 +17,8 @@
 //   4. The Fonts tab's font library, dev server only (fontLibrary.ts — the designer's font folder + the computer's
 //      installed fonts, 0.27.0): GET /__devkit/font-library (list),
 //      GET /__devkit/font-library/file?path= (one font, for a preview), POST /__devkit/font-library/add (copy one into the game).
-//   5. Live tuning by default (0.18.0): content/tuning/*.json imports come back live (liveTuningName / liveJsonModule).
+//   5. Live tuning by default (0.18.0): content/tuning/*.json imports come back live (liveTuningName / liveJsonModule);
+//      0.29.0: content/lessons/*.json too (liveLessonName — the Lessons tab).
 //   3. The Sound tab's two endpoints, dev server only (audioSave.ts): POST /__devkit/save-audio (a dropped-in sound →
 //      MP3 in public/audio/<folder>/, nowhere else) and POST /__devkit/add-credit (appends to content/credits.json).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -84,6 +85,18 @@ export function liveTuningName(id: string, root: string): string | null {
   if (!path.toLowerCase().startsWith(base.toLowerCase())) return null // (Windows: the drive letter's case varies)
   const rest = path.slice(base.length)
   return /^[^/]+\.json$/.test(rest) ? rest.slice(0, -'.json'.length) : null
+}
+
+/** 0.29.0 (F200): "<root>/content/lessons/first-game.json" → "lessons/first-game" — a Tutorial lesson file, live like a
+ *  tuning file, so the Lessons tab's edits reach the running lesson (the runner asks for the lesson again every step).
+ *  Only files directly in content/lessons/, with no query. */
+export function liveLessonName(id: string, root: string): string | null {
+  if (id.includes('?') || id.startsWith('\0')) return null
+  const base = `${root.replace(/\\/g, '/').replace(/\/$/, '')}/content/lessons/`.toLowerCase()
+  const path = id.replace(/\\/g, '/')
+  if (!path.toLowerCase().startsWith(base)) return null
+  const rest = path.slice(base.length)
+  return /^[^/]+\.json$/.test(rest) ? `lessons/${rest.slice(0, -'.json'.length)}` : null
 }
 
 /** The module a live tuning file becomes: the file's data, handed back through liveFile. */
@@ -359,7 +372,8 @@ export function devkit(): Plugin {
       order: 'post',
       handler(_code, id) {
         // (a listed extra file is live too — read the list only for .json files, so other files cost nothing)
-        const name = liveTuningName(id, root) ?? (/\.json$/i.test(id) ? liveExtraName(id, root, readTuningFileList(root).files) : null)
+        // (0.29.0: a lesson file too — content/lessons/<name>.json → "lessons/<name>", the Lessons tab's edits)
+        const name = liveTuningName(id, root) ?? liveLessonName(id, root) ?? (/\.json$/i.test(id) ? liveExtraName(id, root, readTuningFileList(root).files) : null)
         const live = join(root, ...LIVE_TUNING_MODULE.split('/'))
         if (!name || !existsSync(live)) return null
         const file = id.replace(/[?#].*$/, '')

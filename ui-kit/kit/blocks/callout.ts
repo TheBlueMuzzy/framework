@@ -1,10 +1,12 @@
 // CALLOUT MATHS — where a Callout's bubble and pointer go (plain maths, no page needed), its types and words.
 // The component itself is in teach.tsx.
 export type CalloutPoint = { x: number; y: number }
-export type CalloutTarget = Element | string | CalloutPoint | null | undefined
+/** A box on screen, in page px (left / top / right / bottom), e.g. from getBoundingClientRect(). */
+export type CalloutBox = { left: number; top: number; right: number; bottom: number }
+export type CalloutTarget = Element | string | CalloutPoint | CalloutBox | null | undefined
 export type CalloutSide = 'top' | 'bottom' | 'left' | 'right'
 export type CalloutPlacement = 'auto' | CalloutSide
-type Box = { left: number; top: number; right: number; bottom: number }
+type Box = CalloutBox
 type Size = { width: number; height: number }
 export type CalloutSpot = { side: CalloutSide; x: number; y: number; tipX: number; tipY: number }
 
@@ -52,5 +54,63 @@ export function placeCallout(target: Box, size: Size, frame: Box, distance: numb
   return { side, x, y, tipX, tipY }
 }
 
+/** "Keep clear" (0.43.0): the play area the bubble should cover as little of, and the live spot (what the player is
+ *  working on right now — the glowing hex, the piece in hand) it should stay away from. Each one an Element, a CSS
+ *  selector (looked up every frame) or a screen box. `avoid` = more things it must not cover, like the live spot (the
+ *  other things a Spotlight lights — the button the step is about). */
+export type CalloutKeepClear = { area: CalloutTarget; live?: CalloutTarget; avoid?: CalloutTarget[] }
+
+// KEEP CLEAR — Glyphtender's tutorial rule (src/tutorial/tipsPlace.ts, made general): the bubble covers as little of
+// the play area as it can. Of the sides it fits on (placeCallout's own flips and shifts), it picks — in this order of
+// importance — one that doesn't cover the live spot or anything in `avoid` (on each side it first slides along, the
+// pointer still on the target, to get off them; when no side is clear, the least covered), one that isn't toward the
+// live spot (when the live spot isn't the target itself), the one covering the least of the play area (so: toward the
+// area's nearer edge), and last the usual order: toward the nearer top / bottom edge, the other one, toward the nearer
+// left / right edge, the other one.
+export function placeKeepingClear(target: Box, size: Size, frame: Box, distance: number, area: Box, live: Box | null = null, tipInset = 0, avoid: Box[] = []): CalloutSpot {
+  const keepOff = live ? [live, ...avoid] : avoid
+  const midY = (b: Box) => (b.top + b.bottom) / 2, midX = (b: Box) => (b.left + b.right) / 2
+  const vertical: CalloutSide = midY(target) < midY(area) ? 'top' : 'bottom'
+  const sideways: CalloutSide = midX(target) < midX(area) ? 'left' : 'right'
+  const order: CalloutSide[] = [vertical, opposite[vertical], sideways, opposite[sideways]]
+  // Toward the live spot = its middle lies past the target's edge on that side (a live spot that is the target, or
+  // sits inside it, is toward no side)
+  const toward = (side: CalloutSide) => !!live && (side === 'top' ? midY(live) < target.top : side === 'bottom' ? midY(live) > target.bottom
+    : side === 'left' ? midX(live) < target.left : midX(live) > target.right)
+  const shared = (a: Box, b: Box) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+  const boxOf = (s: CalloutSpot) => ({ left: s.x, top: s.y, right: s.x + size.width, bottom: s.y + size.height })
+  const covered = (s: CalloutSpot) => keepOff.reduce((sum, k) => sum + shared(boxOf(s), k), 0)
+  // Slide along its side (inside the frame, the pointer still reaching the target) to just past each thing it covers;
+  // the smallest slide that clears them all — else it stays put
+  const slideOff = (s: CalloutSpot): CalloutSpot => {
+    if (!covered(s)) return s
+    const along = s.side === 'top' || s.side === 'bottom'
+    const aim = along ? midX(target) : midY(target), length = along ? size.width : size.height
+    const [low, high] = along ? [frame.left, frame.right - length] : [frame.top, frame.bottom - length]
+    const at = along ? s.x : s.y
+    const tries = keepOff.flatMap((k) => (along ? [k.left - length, k.right] : [k.top - length, k.bottom]))
+      .filter((p) => p >= low && p <= high && aim - p >= tipInset && aim - p <= length - tipInset)
+      .map((p) => (along ? { ...s, x: p, tipX: aim - p } : { ...s, y: p, tipY: aim - p }))
+      .filter((t) => !covered(t))
+      .sort((a, b) => Math.abs((along ? a.x : a.y) - at) - Math.abs((along ? b.x : b.y) - at))
+    return tries[0] ?? s
+  }
+  const ranked = order.map((side, i) => ({ side, i, spot: placeCallout(target, size, frame, distance, side, tipInset) }))
+    .filter(({ side, spot }) => spot.side === side) // it really fits there (else placeCallout moved it: that side gets its own turn)
+    .map(({ side, i, spot: first }) => {
+      const spot = slideOff(first), box = boxOf(spot)
+      return { spot, rank: [Math.round(covered(spot)), toward(side) ? 1 : 0, Math.round(shared(box, area)), i] }
+    })
+    .sort((a, b) => a.rank.reduce((d, n, k) => d || n - b.rank[k], 0))
+  return ranked[0]?.spot ?? placeCallout(target, size, frame, distance, order[0], tipInset)
+}
+
+/** NARROWER TO FIT BESIDE (0.43.1, F201): the widths a keep-clear bubble may narrow to so it fits beside its target
+ *  (left, right) — the room on each side minus the pointer's distance, widest first; never under `least`, and only
+ *  ones narrower than it is now (`width`). The Callout tries them when at its own width it covers the play area. */
+export function besideWidths(target: Box, frame: Box, distance: number, width: number, least: number): number[] {
+  return [target.left - distance - frame.left, frame.right - (target.right + distance)]
+    .map(Math.floor).filter((room) => room >= least && room < width).sort((a, b) => b - a)
+}
 
 export const calloutWords = { label: 'Tip' }

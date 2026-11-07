@@ -158,3 +158,22 @@ export function startFullscreen(options: { load?: () => SettingsValues; save?: (
 
 /** Undo startFullscreen (tests; a game never needs it). */
 export const stopFullscreen = () => stop()
+
+// POPOVERS STAY ON TOP (0.43.1, F201). Going full screen puts the page's root in the top layer ABOVE every popover
+// already showing: on a phone the first tap goes full screen, so a tutorial's Spotlight + Callout shown on that same tap
+// (the starter's first game) were hidden under the page. So each one showing is shown again, on top — the bubbles
+// (Callouts) last, as the Spotlight keeps them — and the focus stays where it was. Any way into full screen, kit or not.
+const openPopovers = (): HTMLElement[] => {
+  try { return [...document.querySelectorAll<HTMLElement>('[popover="manual"]:popover-open')] } catch { return [] } // (no popovers here)
+}
+export function raisePopovers(open: HTMLElement[] = openPopovers()) {
+  const focused = document.activeElement
+  const bubble = (el: HTMLElement) => el.classList.contains('kit-callout-layer')
+  for (const el of [...open.filter((el) => !bubble(el)), ...open.filter(bubble)]) { el.hidePopover(); el.showPopover() }
+  if (focused instanceof HTMLElement && focused !== document.activeElement) focused.focus({ preventScroll: true })
+}
+if (typeof document !== 'undefined') {
+  const raised = () => { if (fullscreenNow()) raisePopovers() }
+  document.addEventListener('fullscreenchange', raised)
+  document.addEventListener('webkitfullscreenchange', raised)
+}

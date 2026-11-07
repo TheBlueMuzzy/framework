@@ -1,0 +1,23 @@
+{
+  "name": "game-tutorial",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "install-tutorial": "node scripts/install-tutorial.mjs"
+  },
+  "bmuz": {
+    "folders": ["src/tutorial"],
+    "entry": "src/tutorial/index.ts",
+    "check": "tutorial"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}

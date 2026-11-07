@@ -14,14 +14,13 @@ import { useContext, useState } from 'react'
 import { DevKitPick } from '../select/pickContext'
 import { coveredBy } from '../select/selectMap'
 import { copyForClaudeText } from '../color/colorLogic'
-import { CAN_SAVE, copyText, saveContentFile } from '../saveContent'
+import { CAN_SAVE, copyText, readContentFile, saveContentFile } from '../saveContent'
 import { Highlight, SearchCount, Section, SectionIndex } from '../search/Section'
 import { DevKitSearch } from '../search/searchContext'
 import { searchTerms } from '../search/searchLogic'
 import { setSectionsOpen } from '../search/sectionState'
 import {
   allFields,
-  changedKeys,
   countFields,
   flattenText,
   listTextChanges,
@@ -30,10 +29,10 @@ import {
   sectionIdsTo,
   textSections,
   textValues,
-  withTexts,
   type TextSection,
-  type TextValues,
 } from './textLogic'
+import { applyTextEdits, pathKey, textEdits, type Key } from './textEdits'
+import { editText, editedText, knowText, savedText, textSaved, undoText, useTextStore } from './textStore'
 import { ReadOnlyRow, TextRow } from './TextRow'
 import '../tuning/tuning.css'
 import './text.css'
@@ -55,58 +54,52 @@ function takeJustSaved(file: string): Status | null {
   justSaved.delete(file)
   return kept && Date.now() - kept.at < 5000 ? kept.status : null
 }
+const keepJustSaved = (file: string, status: Status) => justSaved.set(file, { status, at: Date.now() })
 
-/** The file as it is on disk right now (the dev server serves it as is), or null if it can't be read. */
-async function readFresh(file: string): Promise<object | null> {
-  try {
-    const res = await fetch(`${import.meta.env.BASE_URL ?? '/'}${file}`, { cache: 'no-store' })
-    const data: unknown = res.ok ? await res.json() : null
-    return data !== null && typeof data === 'object' && !Array.isArray(data) ? data : null
-  } catch {
-    return null
-  }
-}
+// The file as it is on disk right now (saveContent.ts — the Lessons tab reads its files the same way)
+const readFresh = readContentFile
 
 export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
   const search = useContext(DevKitSearch)
   const picking = useContext(DevKitPick)
-  const [leaves, setLeaves] = useState(() => flattenText(data)) // the file's shape (what Save writes the words into)
-  const [{ notes, sections }, setSections] = useState(() => textSections(data))
-  const [loaded] = useState(() => textValues(leaves)) // as the page loaded — Copy for Claude starts from this
-  const [saved, setSaved] = useState(loaded) // what's in the file
-  const [values, setValues] = useState(loaded) // what's in the boxes
+  // The file as saved and as edited live in textStore.ts — shared with the Lessons tab (a step's words), so the two
+  // agree, and every edit goes to the game live ("text/en"; a game that listens redraws its words at once)
+  useTextStore()
+  knowText(file, data)
+  const savedData = savedText(file)!
+  const editedData = editedText(file)!
+  const { notes, sections } = textSections(editedData)
+  const [loaded] = useState(() => textValues(flattenText(savedData))) // as the tab opened — Copy for Claude starts from this
+  const saved = textValues(flattenText(savedData)) // what's in the file
+  const values = textValues(flattenText(editedData)) // what's in the boxes
   const [status, setStatus] = useState<Status | null>(() => takeJustSaved(file))
   const [copyFallback, setCopyFallback] = useState<string | null>(null) // shown if the clipboard is blocked
 
-  const unsaved = changedKeys(values, saved)
+  const edits = textEdits(savedData, editedData)
+  const unsaved = edits.map((e) => pathKey(e.path))
   const problems = placeholderProblems(values, saved)
   const problemCount = Object.keys(problems).length
-  const change = (key: string, words: string) => setValues((v) => ({ ...v, [key]: words }))
+  // (a line the file doesn't have yet — one the Lessons tab started — put back to nothing is taken out again)
+  const change = (f: { key: string; path: Key[] }, words: string) =>
+    editText(file, f.path, !(f.key in saved) && words === '' ? undefined : words)
 
   async function save() {
     if (problemCount > 0) return
     setStatus({ kind: 'info', text: 'Saving…' })
     try {
       // The file fresh from disk (another tab may have saved words in it since the page loaded), with these edits on top
-      const fresh = (await readFresh(file)) ?? withTexts(leaves, saved)
-      const freshLeaves = flattenText(fresh)
-      const edits: TextValues = Object.fromEntries(unsaved.map((key) => [key, values[key]]))
-      const next = withTexts(freshLeaves, edits)
+      const fresh = (await readFresh(file)) ?? savedData
+      const { data: next, lost: lostEdits } = applyTextEdits(fresh, edits)
       await saveContentFile(file, next, { reload: true })
-      const nextLeaves = flattenText(next)
-      const nextValues = textValues(nextLeaves)
-      setLeaves(nextLeaves)
-      setSections(textSections(next))
-      setSaved(nextValues)
-      setValues(nextValues)
-      const lost = unsaved.filter((key) => !(key in nextValues))
+      textSaved(file, next)
+      const lost = lostEdits.map((e) => pathKey(e.path))
       const done: Status = {
         kind: lost.length ? 'error' : 'ok',
         text: lost.length
           ? `Saved ${file}, but ${lost.join(', ')} isn't in the file any more — not written.`
           : `Saved ${file} — the game reloads its words.`,
       }
-      justSaved.set(file, { status: done, at: Date.now() })
+      keepJustSaved(file, done)
       setStatus(done)
     } catch (e) {
       setStatus({ kind: 'error', text: `Couldn't save: ${(e as Error).message}` })
@@ -148,7 +141,7 @@ export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
         {s.notes.map((note) => <p key={note} className="tt-help tx-note"><Highlight text={note} terms={terms} /></p>)}
         {s.fields.map((f) =>
           f.kind === 'text' ? (
-            <TextRow key={f.key} field={f} value={values[f.key]} savedValue={saved[f.key]} terms={terms} onChange={(w) => change(f.key, w)} />
+            <TextRow key={f.key} field={f} value={values[f.key]} savedValue={saved[f.key] ?? ''} terms={terms} onChange={(w) => change(f, w)} />
           ) : (
             <ReadOnlyRow key={f.key} field={f} terms={terms} />
           ),
@@ -173,7 +166,7 @@ export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
       <button className={CAN_SAVE ? 'devkit-btn' : 'devkit-btn devkit-btn-main'} onClick={copyForClaude}>
         Copy for Claude
       </button>
-      <button className="devkit-btn" disabled={unsaved.length === 0} onClick={() => setValues(saved)} title="Put every text back to what's saved">
+      <button className="devkit-btn" disabled={unsaved.length === 0} onClick={() => undoText(file)} title="Put every text back to what's saved">
         {CAN_SAVE ? 'Undo unsaved' : 'Undo changes'}
       </button>
       {status && <p className={`devkit-status is-${status.kind}`} role="status">{status.text}</p>}
@@ -197,7 +190,7 @@ export function TextTab({ file, data, label = 'Text', query = '' }: Props) {
           changed={rows.some(({ f }) => values[f.key] !== saved[f.key])}
         >
           {rows.map(({ f }) => (
-            <TextRow key={f.key} field={{ ...f, label: f.key }} value={values[f.key]} savedValue={saved[f.key]} terms={[]} onChange={(w) => change(f.key, w)} />
+            <TextRow key={f.key} field={{ ...f, label: f.key }} value={values[f.key]} savedValue={saved[f.key] ?? ''} terms={[]} onChange={(w) => change(f, w)} />
           ))}
         </Section>
         {footer}

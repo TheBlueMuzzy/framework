@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { TUNING_FILES_MODULE, devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveExtraName, liveTuningName, readTuningFileList, tuningFilesModule } from './devkitVite'
+import { TUNING_FILES_MODULE, devkit, devkitInReleaseBuilds, isAllowedBugCapturePath, isAllowedContentPath, keepHelp, liveExtraName, liveLessonName, liveTuningName, readTuningFileList, tuningFilesModule } from './devkitVite'
 
 describe('isAllowedContentPath — the Dev Kit may only write JSON inside content/', () => {
   it('allows content JSON files', () => {
@@ -302,6 +302,31 @@ describe('live tuning by default — content/tuning imports come back live (0.18
     expect(mod.tank.speed).toBe(5)
     expect(mod.tank.look.glow).toBe(0.9)
     expect({ ...mod.tank }).toEqual({ speed: 5, look: { glow: 0.9 } })
+  })
+  it('lesson files (content/lessons/<name>.json) are named "lessons/<name>"; nothing else in content/ is', () => {
+    expect(liveLessonName('C:/game/content/lessons/first-game.json', 'C:/game')).toBe('lessons/first-game')
+    expect(liveLessonName('c:/game/content/lessons/first-game.json', 'C:\\game')).toBe('lessons/first-game')
+    expect(liveLessonName('C:/game/content/lessons/first-game.json?devkit-file', 'C:/game')).toBeNull()
+    expect(liveLessonName('C:/game/content/lessons/old/a.json', 'C:/game')).toBeNull()
+    expect(liveLessonName('C:/game/content/tuning/tank.json', 'C:/game')).toBeNull()
+  })
+  it('F200: a lesson file the game finds with import.meta.glob follows the Lessons tab’s edits (its steps are asked for again)', async () => {
+    mkdirSync(join(game, 'content', 'lessons'), { recursive: true })
+    writeFileSync(join(game, 'content', 'lessons', 'first-game.json'), '{ "id": "first-game", "steps": [{ "id": "board", "message": "board" }] }')
+    writeFileSync(join(game, 'src', 'lessons.ts'), [
+      "const files = import.meta.glob('../content/lessons/*.json', { eager: true, import: 'default' })",
+      "export const lesson = () => files['../content/lessons/first-game.json'] as { steps: { message: string }[] }",
+    ].join('\n'))
+    const mod = await server.ssrLoadModule('/src/lessons.ts') as { lesson: () => { steps: { message: string }[] } }
+    const live = await server.ssrLoadModule('/src/devkit/tuning/liveTuning.ts') as { sendTuning: (f: string, d: unknown) => void }
+    expect(mod.lesson().steps[0].message).toBe('board')
+    ;(globalThis as { window?: unknown }).window = new EventTarget()
+    try {
+      live.sendTuning('lessons/first-game', { id: 'first-game', steps: [{ id: 'board', message: 'Your board!' }] })
+    } finally {
+      delete (globalThis as { window?: unknown }).window
+    }
+    expect(mod.lesson().steps[0].message).toBe('Your board!')
   })
 })
 

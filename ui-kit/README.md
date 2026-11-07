@@ -507,6 +507,18 @@ gallery's `npm run shoot` uses the same one.
   **The "turn your phone" card** (`kit/blocks/upright.tsx`, from Goops) — `UprightCard`, `useWrongWayUp`,
   `wrongWayUp`, `uprightWords`, from style.json `"orientation"` (`applyStyle` remembers it: `kit/orientation.ts`).
   Gallery `?screen=upright` · `?screen=sideways`; the shoot takes both at the 7 checked sizes in every style.
+- 0.43.0 (F199 — Spotlight + bubble placement): **`Spotlight`** (`kit/blocks/spotlight.tsx` + `spotlightMath.ts`, from
+  Goops' lesson spotlight) — dims everything but one or more targets (Element, selector, screen box), an accent outline
+  just inside each hole, holes shaped like the style's controls; taps reach the targets through their holes, taps on the
+  dim stop there (`onOutsideTap`), `passThrough` lets them through elsewhere. **Callout `keepClear={{ area, live?,
+  avoid? }}`** (`placeKeepingClear` in `callout.ts`, Glyphtender's tutorial rule made general) — covers as little of the
+  play area as it can, away from the live spot, off anything in `avoid`; a Callout without it places as before.
+  Gallery `?screen=teach&teach=board`; the shoot takes it at the 7 checked sizes in every style.
+- 0.43.1 (F201 — Starter teaches): popovers stay on top when the page goes full screen (`raisePopovers` in
+  `kit/blocks/fullscreen.ts`) — a phone's first tap goes full screen, and a Spotlight + Callout shown on that tap were
+  hidden under the page; every open manual popover is shown again on top (Callouts last), the focus kept. A Callout
+  with `keepClear` that covers the play area at its full width narrows to fit beside its target (`besideWidths`,
+  never under 8em) when that covers less. `useNudge`: a pause starts the next spell from `none`, same kind or not.
 - **Hand-over for the Goops session (F103, 2026-10-20)** — the three kit nits it logged are fixed; proven in a scratch
   copy (`.scratch/goops-f103`, `e2e/f103-proof.mjs`, portrait only). To take them, on a Goops work branch:
   1. Update the kits: `node ~/.claude/config/bmuz/scripts/install-module.mjs ui-kit .` (0.17.1 → 0.25.0) and

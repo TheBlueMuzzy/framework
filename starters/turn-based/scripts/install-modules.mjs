@@ -22,7 +22,7 @@ const named = args.includes('--framework') ? args[args.indexOf('--framework') + 
 // The game folder each module's copy lives in (the same list as install-module.mjs) — used to see what's already here
 const FOLDERS = {
   devkit: 'src/devkit', 'ui-kit': 'src/ui/kit', audio: 'src/audio', table: 'src/table', ai: 'src/ai/kit', rooms: 'src/rooms',
-  saves: 'src/saves', version: 'src/version', crashes: 'src/crashes', lint: 'src/lint',
+  saves: 'src/saves', version: 'src/version', crashes: 'src/crashes', lint: 'src/lint', tutorial: 'src/tutorial',
 }
 
 const isFramework = (folder) => folder && existsSync(join(folder, 'ui-kit', 'kit', 'VERSION'))

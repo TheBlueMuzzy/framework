@@ -1,0 +1,29 @@
+{
+  "id": "first-game",
+  "start": { "youGoFirst": true },
+  "steps": [
+    {
+      "id": "board",
+      "message": "board",
+      "pointer": "[data-board]",
+      "dim": true,
+      "advance": { "on": "event", "event": "placed", "where": { "by": "you" } }
+    },
+    {
+      "id": "threeInARow",
+      "message": "threeInARow",
+      "pointer": "[data-board]",
+      "dim": true,
+      "while": "pause",
+      "button": "gotIt"
+    },
+    {
+      "id": "beatThem",
+      "message": "beatThem",
+      "pointer": "[data-seat=bot]",
+      "dim": true,
+      "while": "pause",
+      "button": "play"
+    }
+  ]
+}

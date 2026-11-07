@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { addRules, countFinds, installLint, MARK } from './install-lint.mjs'
+import { addRules, countFinds, installLint, MARK, NOT_GAME_CODE } from './install-lint.mjs'
 
 const STARTER_CONFIG = `import js from '@eslint/js'
 import { defineConfig, globalIgnores } from 'eslint/config'
@@ -227,5 +227,18 @@ describe('installLint', () => {
     const own = makeGame({ 'eslint.config.js': STARTER_CONFIG, 'src/lint/mine.ts': 'export {}\n' })
     expect((await installLint(own, { log: quiet })).refused).toMatch(/game's own files/)
     expect(readFileSync(join(own, 'eslint.config.js'), 'utf8')).toBe(STARTER_CONFIG)
+  })
+})
+
+// A module that names its folders in its package.json ("bmuz": { "folders" }) is framework code in a game, never the
+// game's own: every one must be in NOT_GAME_CODE (the Tutorial module, F198, was the first one the list missed).
+describe('every framework module folder is skipped', () => {
+  it('lists each module\'s own "bmuz" folders', async () => {
+    const { readdirSync } = await import('node:fs')
+    const framework = join(import.meta.dirname, '..', '..')
+    const folders = readdirSync(framework, { withFileTypes: true }).filter((d) => d.isDirectory())
+      .flatMap((d) => { try { return JSON.parse(readFileSync(join(framework, d.name, 'package.json'), 'utf8')).bmuz?.folders ?? [] } catch { return [] } })
+    expect(folders.length).toBeGreaterThan(0)
+    for (const f of folders) expect(NOT_GAME_CODE).toContain(f)
   })
 })

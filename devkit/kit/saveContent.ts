@@ -27,6 +27,18 @@ export async function saveContentFile(path: string, data: object, options: { rel
   if (!res.ok) throw new Error(body.error ?? `the dev server said ${res.status}`)
 }
 
+/** A content/ JSON file as it is on disk right now (the dev server serves it as is), or null if it can't be read.
+ *  The Text and Lessons tabs read it just before Save, so only their own edits go on top of it. */
+export async function readContentFile(path: string): Promise<object | null> {
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL ?? '/'}${path}`, { cache: 'no-store' })
+    const data: unknown = res.ok ? await res.json() : null
+    return data !== null && typeof data === 'object' && !Array.isArray(data) ? data : null
+  } catch {
+    return null
+  }
+}
+
 /** Copy text to the clipboard. Returns false if the browser refused (e.g. a phone on http://) */
 export async function copyText(text: string): Promise<boolean> {
   try {

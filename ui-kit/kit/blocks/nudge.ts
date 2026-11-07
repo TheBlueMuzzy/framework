@@ -56,7 +56,11 @@ export function useNudge({ kind, running, glowAt, textAt, repeat, counts: shared
       if (now.next !== null) timer = setTimeout(tick, Math.max(0, now.next * 1000))
     }
     timer = setTimeout(tick, (glowAt ?? textAt) * 1000)
-    return () => { if (timer) clearTimeout(timer) }
+    return () => {
+      if (timer) clearTimeout(timer)
+      // the spell is over (a pause, a new kind, a poke): coming back to the same kind starts again from 'none' (0.43.1)
+      setReached((r) => (r.key === spellKey ? { key: '', stage: 'none' } : r))
+    }
   }, [kind, running, glowAt, textAt, repeat, counts, spellKey])
 
   const resetCounts = useCallback(() => counts.clear(), [counts])

@@ -45,6 +45,29 @@ export interface DevKitGame {
    * (src/devkit/check-framework.mjs). Without it, the checks that need live play say exactly what to add here.
    */
   conformance?: DevKitConformance
+  /**
+   * Optional (0.29.0, F200): the Lessons tab's ▶ buttons — play a lesson from a step while you edit it. The tab itself
+   * (edit + Save) needs nothing: it shows when the game has the Tutorial module and content/lessons/*.json.
+   *   lessons: { runner }                                   // the game's createLessonRunner(…) — ▶ = runner.start(lesson, step)
+   *   lessons: { runner, start: (id, at) => myStart(id, at) } // the game's own way in (a fresh match first…); false = can't now
+   */
+  lessons?: DevKitLessons
+}
+
+/** What the Lessons tab needs from the game's lesson runner (the Tutorial module's createLessonRunner gives all of it). */
+export interface DevKitLessonRunner {
+  view(): { lessonId: string | null; stepIndex: number }
+  subscribe(listener: () => void): () => void
+  start(getLesson: () => unknown, at?: number): void
+  stop?(): void
+}
+
+export interface DevKitLessons {
+  runner: DevKitLessonRunner
+  /** Optional: start lesson `lessonId` at step `at` (0 = its first) the game's own way — set the game up for it first
+   *  (a new match, a training shift). Return false when it can't right now (said in the tab). Left out: the tab calls
+   *  runner.start with the lesson as it is in the tab (unsaved edits included), on whatever is on screen. */
+  start?: (lessonId: string, at: number) => boolean | void
 }
 
 /** The game's help for the framework checks. Runs in the page. */

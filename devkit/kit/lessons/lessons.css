@@ -1,0 +1,31 @@
+/* THE LESSONS TAB (Dev Kit 0.29.0) — the Tuning tab's rows (tuning.css), plus a few of its own */
+.lessons-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.lessons-top .tt-select { width: auto; flex: 1 1 140px; }
+.lessons-name { flex: 1 1 140px; font-size: 13px; }
+.lessons-tab .tt-legend code { color: #e8e8ee; }
+.lessons-step { padding: 2px 0 8px; }
+.lessons-step[data-now] { box-shadow: inset 3px 0 0 #7bd88f; padding-left: 8px; }
+.lessons-step-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.lessons-row { grid-template-columns: 1fr; } /* name on its line, the box under it — fits a phone-width panel */
+.lessons-row .tt-name { grid-column: auto; }
+.lessons-text, .lessons-num { font-family: inherit !important; }
+.lessons-num { max-width: 110px; }
+.lessons-check { justify-self: start; margin: 2px 0; }
+.lessons-json { margin-top: 6px; font-size: 12px; }
+.lessons-json summary { cursor: pointer; color: #9a9bab; }
+.lessons-json-box { height: 160px; box-sizing: border-box; margin-top: 4px; color: #e6e6ee; resize: vertical; }
+.lessons-json-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.lessons-json-btns .devkit-status { width: auto; }
+.lessons-tab .devkit-footer .devkit-status { margin: 0; }
+/* 0.30.0: a step's words, typed right here (one box, or one per control type), and the words id under them, smaller */
+.lessons-words { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lessons-words-line { display: grid; grid-template-columns: auto 1fr; align-items: start; column-gap: 6px; min-width: 0; }
+.lessons-words-line .tx-box { grid-column: -2 / -1; }
+.lessons-words-line.is-plain { grid-template-columns: 1fr; } /* one line for everyone: the box full width */
+.lessons-words-line .tx-warn { grid-column: 1 / -1; }
+.lessons-kind { padding: 7px 0 0; min-width: 44px; font: 11px ui-monospace, Consolas, monospace; color: #9a9bab; }
+.lessons-words-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.lessons-words-btns:empty { display: none; }
+.lessons-mini { padding: 3px 8px; font-size: 12px; }
+.lessons-row-small .tt-label { font-weight: 400; font-size: 12px; color: #9a9bab; }
+.lessons-small { font-size: 12px !important; max-width: 260px; }
