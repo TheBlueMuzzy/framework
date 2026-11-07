@@ -1,3 +1,4 @@
+// template: ports.mjs 2 (2026-11-03) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
 // WHO HOLDS THIS PORT? (F118) — one lookup for check-all's port pre-flight and stop-servers.mjs.
 // TEMPLATE (~/.claude/config/bmuz/templates/ports.mjs) — copy to <game>/scripts/ports.mjs next to check-all.mjs (it imports
 // it). stop-servers.mjs imports this same file, so there is one lookup, not two. Plain Node, no packages.

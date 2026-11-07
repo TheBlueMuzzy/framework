@@ -1,3 +1,4 @@
+// template: shots.mjs 1 (2026-11-07) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
 // BEFORE / AFTER SCREENSHOTS — proof that a change "looks the same" everywhere it should (framework F196, from
 // Glyphtender's e2e/shots.mjs, its F29 safety net).
 // TEMPLATE (~/.claude/config/bmuz/templates/shots.mjs). To use it in a game:

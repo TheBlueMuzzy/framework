@@ -1,3 +1,4 @@
+// template: slow-tests.mjs 1 (2026-11-03) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
 // SLOW TESTS WITH NO TIME LIMIT OF THEIR OWN (F175 — Test-only commits + slow tests). A vitest reporter that check-all
 // adds to the unit-test run: a test that took over 1 s here and still has vitest's default limit (5 s) may time out
 // on GitHub's runner, measured ~4× slower than the PC (Glyphtender v0.14.0: a 3-whole-game save test took 1.3 s here

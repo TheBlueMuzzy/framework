@@ -1,3 +1,4 @@
+// template: check-all.mjs 4 (2026-11-03) — keep this line: the session start compares it with templates/TEMPLATES.md (F203)
 // CHECK EVERYTHING, SIDE BY SIDE — the BMUZ check tiers in one command (BMUZ "Checks", PROJECT-FILES.md).
 // The turn-based starter's copy of the BMUZ template (~/.claude/config/bmuz/templates/check-all.mjs), FAST and E2E filled in.
 // First proven in Glyphtender (19 checks: ~12 min side by side vs ~31 min one at a time). Put the slowest scripts FIRST in E2E.
