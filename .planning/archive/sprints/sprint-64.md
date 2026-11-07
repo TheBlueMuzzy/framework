@@ -38,3 +38,8 @@ Checked: 2026-11-07 — helper: a `template: <name> <N>` line on the 5 copied te
 - Found (not changed): the starter's e2e/screens.mjs says "7 sizes" but ignores orientation — fine for the starter ("any"), a portrait game copying it would shoot sideways sizes → ROADMAP Ideas 2026-11-07.
 - F203 read-only run: Glyphtender behind on check-all.mjs (≈ v3, no slow-test warning), ports.mjs (v1 — lacks F177's port knock), shots.mjs (the original) · Goops behind on ports.mjs (v1), checks.yml (v1 — lacks F158's browser cache), check-all.mjs (≈ v3) — each game's next session sees the lines and brings them current.
 - X01's queue line moved to tutorial@0.1.1 (it said 0.1.0; the framework has 0.1.1 since F201's fix).
+
+Retro (Claude's draft 2026-11-07 — Muzzy's words win; he can change it any time):
+- went well: three tools built overnight by helpers side by side, each proven on real copies (Goops' swap, a screenshot change caught, Glyphtender's stale scripts named) with the real games untouched.
+- went wrong: the review tool came back empty in seconds twice again, so Claude read the code by hand each time — the quick review isn't earning its keep on small diffs.
+- change: on a diff this size, Claude reads it by hand first and runs the quick review only as a second look.
