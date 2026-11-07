@@ -24,6 +24,7 @@ Developer tools that live **inside** a web game (React + Vite). Press **`** (or 
 | Save endpoint | `npm run dev` only: writes `content/**.json` — plus bug captures in `.planning/bugs/`, nothing else; makes `content/snapshots/` and `.planning/bugs/` the first time (other missing folders are refused); keeps a file's `_help` note **and how it was written** (`vite/formatJson.ts`: what was on one line stays on one line, `1.0` stays `1.0`; new parts: short objects / lists of plain values on one line if they fit 120 characters) — so saving a hand-written file unchanged leaves `git diff` empty; no page reload for its own writes |
 | Release switch | `content/devkit.json` `"inReleaseBuilds"`: `true` through beta (friends can open it on the live link, Copy for Claude only), `false` at 1.0 = no Dev Kit code in the live game at all |
 | Release check | `npm run check:devkit` builds the game both ways and checks each in a browser (/deliver runs it) |
+| E2E helpers | **0.31.0.** `src/devkit/e2e.mjs` for the game's Playwright scripts: `openDevKit(page)`, `openTab(page, name)`, `closeDevKit(page)` — they wait for the Dev Kit to arrive and for the tab to be in view (any page of a phone's tab row), never a set time (*E2E helpers*, below) |
 | Framework check | **0.19.0.** `npm run check:framework` runs every installed module's promise checks on the real game and says what to wire where (*What a game must provide*, below) |
 
 ## What a game must provide
@@ -429,6 +430,24 @@ to search sets `searchable: false` (no box).
 - Open/closed sections are kept in localStorage under `devkit-sections:<game name>`.
 - The Snapshots tab reads `content/snapshots/*.json` and saves there. Bug capture: `KEEP_MS` (60 s) and `STATE_EVERY_MS` (5 s) in `kit/capture/captureLog.ts`.
 
+## E2E helpers (a game's Playwright scripts) — 0.31.0
+`src/devkit/e2e.mjs` (plain Node, copied with the kit; nothing in the kit imports it, so a build never bundles it):
+```js
+import { openDevKit, openTab, closeDevKit, devkitPanel } from '../src/devkit/e2e.mjs'
+const panel = await openDevKit(page)           // waits for the Dev Kit to arrive, presses `, waits for the panel; open already → left open
+const tuning = await openTab(page, 'Tuning')   // opens the panel if needed; the tab's whole label; returns its tabpanel
+await tuning.getByRole('button', { name: 'Expand all' }).click()
+await closeDevKit(page)                        // the ✕ button; waits for the panel to hide
+```
+- **Never a set wait.** The Dev Kit mounts a moment after the page (much later on a busy PC): a ` pressed before it
+  arrives does nothing. `openDevKit` waits for the panel to be attached, then visible (up to 60 s; `{ timeout }` changes it).
+- **Any tab, on any page.** On a phone the tab row is a carousel: `openTab` focuses the tab (the carousel turns to its
+  page), waits until it's what's under its own centre and the row has stopped sliding, clicks it and waits for its
+  panel (Glyphtender B030's `pickTab`, without its 250 ms slide waits).
+- **A focused text box in the game** (where ` is a letter) is blurred first. An unknown tab name fails at once with the
+  list of tabs there are.
+- Tested on the real Dev Kit in Chromium (`kit/e2e.test.mjs`: a Dev Kit arriving 2 s late, a phone whose tab row pages, a desktop).
+
 ## Decisions
 - **Live by default, through the Vite plugin, not by wrapping every import (0.18.0).** Goops shipped with its tuning
   imported straight from the JSON, so every slider did nothing until a reload — wrapping each import by hand is
@@ -604,4 +623,10 @@ to search sets `searchable: false` (no box).
   opts in to see them at once (*Live words — optional*; the starter's LessonView does). One Save writes the changed
   words into en.json (only those — `text/textEdits.ts`, tested on Goops' real en.json: one line changed, every other
   byte as it was) and the lesson file only if the lesson changed. The words id stays, smaller, under the words.
+- 0.31.0 (framework F196): **e2e helpers** `openDevKit` / `openTab` / `closeDevKit` in `kit/e2e.mjs` (*E2E helpers*) —
+  Glyphtender's `e2e/devkit-tabs.mjs` (B030) made the kit's, so every game opens the panel and its tabs one way,
+  waiting for the thing itself. Tested against the real panel in Chromium (a late mount, a paged phone tab row, a
+  desktop); the installer test checks it's copied and its test page isn't; a test checks no kit file imports it.
+  Fixed on the way: a test's helper file named `x.test-y` (`tuning/tuningFiles.test-stub.ts`) was copied into every
+  game despite saying it wasn't — the installer now leaves out `.test-` names too (an update removes the stub).
 - **A game's tab plug that calls its own dev-server endpoint** (`/__something`) must check `CAN_SAVE` (saveContent.ts) first and reject with a plain reason on the live build — else every player's console gets a 404 on load (Glyphtender v0.9.0 Words tab).

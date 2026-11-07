@@ -1,6 +1,7 @@
 // THE DEV KIT'S MAIN PROMISE, END TO END — it changes the RUNNING game (MODULE-CONTRACTS "Dev Kit").
 //   node e2e/devkit-live.mjs [outDir] [port]          (npm run e2e:devkit-live)
-// In a game against Careless Cass (desktop 1440×900), through the real Dev Kit panel (the ` key):
+// In a game against Careless Cass (desktop 1440×900), through the real Dev Kit panel — opened, and its tabs picked, with
+// the Dev Kit's own e2e helpers (src/devkit/e2e.mjs, Dev Kit 0.31.0: they wait for the panel itself, never a set time):
 //   1. Tuning tab → "Board: square size" 96 → 60: the squares on the board shrink at once, no reload.
 //   2. ⏸ Full pause right after your move: the bot stops thinking — 2.5 s later it still hasn't moved. Resume → it moves.
 //   3. ◐ Half pause the same way: the bot stops (rules clock), resume → it moves.
@@ -15,6 +16,7 @@ import { mkdirSync, readFileSync } from 'node:fs'
 import { createServer } from 'vite'
 import { chromium } from 'playwright-core'
 import { checkVersion } from '../src/version/e2e.mjs'
+import { closeDevKit, devkitPanel, openTab } from '../src/devkit/e2e.mjs' // (Dev Kit 0.31.0: they wait for the panel, never a set time)
 
 const OUT = process.argv[2] ?? 'e2e-shots'
 const PORT = Number(process.argv[3] ?? 6402)
@@ -41,10 +43,9 @@ try {
 
   // 1. A Tuning edit reaches the running game
   const before = await cellWidth()
-  await page.keyboard.press('`')
-  const devkit = page.locator('#devkit-root')
-  await devkit.getByRole('tab', { name: 'Tuning' }).or(devkit.getByRole('button', { name: 'Tuning', exact: true })).first().click()
-  await devkit.getByRole('button', { name: 'Expand all' }).click()
+  const devkit = devkitPanel(page)
+  const tuning = await openTab(page, 'Tuning')
+  await tuning.getByRole('button', { name: 'Expand all' }).click()
   const box = devkit.locator('input[aria-label="cellSize"]')
   await box.fill('60')
   await box.press('Tab')
@@ -70,7 +71,7 @@ try {
       .catch(() => fail(`${mode} pause: after resume the bot never moved`))
   }
   // 4. The game's OWN pause (the HUD's ❚❚ → Pause) holds the bot the same way (rulesClock.scale = 0)
-  await page.keyboard.press('Escape') // close the Dev Kit panel
+  await closeDevKit(page)
   if (await page.getByRole('heading', { name: /win|draw/i }).count()) pass('(the round ended before the game-pause step — skipped)')
   else {
     const start = await marks()
@@ -93,9 +94,8 @@ try {
     const NEW_WORDS = 'Dev Kit words: three in a row wins!'
     const NEW_BOARD = 'Typed in the Dev Kit: click a square.'
     const callout = page.locator('.kit-callout')
-    if (!(await devkit.isVisible())) await page.keyboard.press('`')
-    await devkit.getByRole('tab', { name: 'Lessons' }).click()
-    await devkit.getByRole('button', { name: 'Play from step 1 (board)' }).click()
+    const lessons = await openTab(page, 'Lessons')
+    await lessons.getByRole('button', { name: 'Play from step 1 (board)' }).click()
     await callout.filter({ hasText: 'This is your board' }).waitFor({ timeout: 5000 })
       .then(() => pass('Lessons tab → ▶ step 1: the tutorial plays in a fresh game'))
       .catch(() => fail('Lessons tab → ▶ step 1: the first step\'s words never showed'))
@@ -117,7 +117,7 @@ try {
     const words = devkit.getByLabel('threeInARow: Words id')
     await words.fill(NEW_WORDS)
     await page.screenshot({ path: `${OUT}/devkit-live-lessons-tab.png` })
-    await page.keyboard.press('Escape') // close the panel; the lesson goes on
+    await closeDevKit(page) // the lesson goes on
     await page.locator('[data-board] [data-mark=""]').first().click() // your move → step 2 starts, asking for the lesson again
     await callout.filter({ hasText: NEW_WORDS }).waitFor({ timeout: 5000 })
       .then(() => pass('Lessons tab → step 2\'s new words show in the running game (no reload, not saved)'))
@@ -134,9 +134,7 @@ try {
       if (path === 'content/text/en.json') enNow = formatJson(keepHelp(JSON.parse(EN_TEXT), data), EN_TEXT)
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, path }) })
     })
-    await page.keyboard.press('`')
-    await devkit.getByRole('tab', { name: 'Lessons' }).click()
-    await devkit.getByRole('button', { name: 'Save', exact: true }).click()
+    await (await openTab(page, 'Lessons')).getByRole('button', { name: 'Save', exact: true }).click()
     await devkit.getByText(/Saved content\/lessons\/first-game\.json/).waitFor({ timeout: 5000 }).catch(() => {})
     await page.unroute('**/__devkit/save')
     const expected = LESSON_TEXT.replace('"message": "threeInARow"', `"message": ${JSON.stringify(NEW_WORDS)}`)

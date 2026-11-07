@@ -23,7 +23,7 @@ One page. If a step here and another doc disagree, this page wins and the other 
 3. **Queue it** — in the game: `node ~/.claude/config/bmuz/scripts/extract.mjs add <files> --what="…" --checks=<the game's scripts that prove it>`. Its files in the game are now bug-fixes-only, each fix logged (`extract.mjs fix`). ① (guard-edits warns on an edit to a queued file)
 4. **Build the brick** in the framework, on a work branch: `kit/` + `VERSION` + an installer + README + `UPGRADES.md` + tests + its conformance pack; wire it into the starter so `starter-check` plays it. Its commit says what it replaces ("Replaces: Glyphtender's own …"). ② (F187 — Bloat test both ways: git's commit step asks for the "Replaces:" line)
 5. **Release it** — `extract.mjs status <id> released <brick>@<version>`; `npm run check:fast` green in the framework.
-6. **Swap it into the first game** — `extract.mjs swap <id>`: installs the brick, points the game's imports at it, deletes the old files, runs the game's own checks unchanged. Red → the game goes back exactly as it was. ①
+6. **Swap it into the first game** — `extract.mjs swap <id>`: installs the brick, points the game's imports at it, deletes the old files, runs the game's own checks unchanged. Red → the game goes back exactly as it was. ① Rehearse first: `extract.mjs swap <id> --rehearse` in a throwaway clone of the game does the same swap there and records nothing (F202 — Swap rehearsal mode). ①
 7. **Install it in the second game** — the way in (§4). Now two games use it: it isn't frozen.
 
 ## 4. The way in — a brick goes into a game
