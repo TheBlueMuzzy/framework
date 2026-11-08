@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-08 — **Sprint 66 (v0.42 — Steadier and safer) done** — F207 — Starter's online test stops flaking ✅ · F208 — Dev Kit pages need a pass ✅ · F209 — Release maps never overwritten ✅ · F210 — Hand-off check reads the right project ✅ (Muzzy: "approved"). Next: `/deliver` v0.42 on `dev/v0-42-steadier` (Dev Kit 0.32.0 + crashes 0.3.1 + hooks). HC10 now needs Claude's own wake-up on any hand-back that says work goes on by itself (the 5-hour wait, 2026-11-07). Muzzy: Goops swaps to the Tutorial module (X01) in its own session.
+2026-11-08 — **Sprint 66 (v0.42 — Steadier and safer) done**, all four approved; v0.42 NOT released yet (`/deliver` on `dev/v0-42-steadier`). **Open discussion (Muzzy is restarting it in a fresh chat): BMUZ as "a smart, flexible exe"** — read `.planning/research/2026-11-08-exe-process.md` first (findings, Gemini's take, Claude's 4-step pick: deliver v0.42 → F211 hooks tested before every push → a Workflow trial for auto mode → a hook diet from 102 rules). Nothing decided yet. HC10 now needs Claude's own ≤20-min wake-up on any "work goes on" hand-back. Muzzy: Goops swaps to the Tutorial module (X01) in its own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
