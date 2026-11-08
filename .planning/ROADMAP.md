@@ -641,6 +641,44 @@ flowchart LR
   F210[✅ F210 Hand-off check reads the right project]
 ```
 
+## BMUZ 1.0 — The rebuild  ← current · planned 2026-11-08
+Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, develop, and deliver what I'm looking for from BMUZ"): BMUZ becomes a plugin whose steps are data run by an engine inside Claude Code — every process repeatable like an exe, Claude the judgement inside each step. Vision: `research/bmuz-vision/VISION.md` · how: `ARCHITECTURE.md` · plan: `REBUILD-PLAN.md` · proof: `proof-results.md`. Code lives in its own repo (dev/bmuz); planned here until BMUZ gets its own planner (F213–F218).
+- 🔨 F211 🧱 BMUZ engine core — the proof's mod made real: pipeline format, journal, lock, doctor, checkpoints + undo list, band, watchdog, retries, tool limits, the 7 live must-fixes — must:bmuz-1.0 · sprint 67
+- 🔨 F212 🧱 BMUZ plugin on both machines — one plugin from BMUZ's own repo, installed for real on the PC and the laptop, Claude Code version pinned — must:bmuz-1.0 · needs: F211 · sprint 67
+- ⏳ F213 🧱 Engine-written hand-off card — the card, one numbered question list, open questions + decisions lists, taste questions ask first — must:bmuz-1.0 · needs: F211
+- ⏳ F214 🔧 Save and sync pipelines — /save and sync run through the engine (first switch-over) — must:bmuz-1.0 · needs: F212
+- ⏳ F215 🔧 Bug pipeline — report → reproduce as a failing test → fix → keep the test → matching places, the same way every time — must:bmuz-1.0 · needs: F212, F213
+- ⏳ F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
+- ⏳ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213
+- ⏳ F218 🔧 Define pipeline — GDD, TDD, feature map and scope, with a plan-check flow — must:bmuz-1.0 · needs: F217
+- ⏳ F219 🔧 Deliver pipeline — a release flow per platform, security scans and review, live check — must:bmuz-1.0 · needs: F216
+- ⏳ F220 🔧 Milestone review pipeline — a retro flow that turns lessons into proposals Muzzy approves — must:bmuz-1.0 · needs: F216
+- ⏳ F221 🔧 First setup — tools and accounts detected and walked through, at install or as a sidequest — must:bmuz-1.0 · needs: F212
+- ⏳ F222 🧱 BMUZ for anyone — Muzzy's paths, accounts and machines into a profile; style rules sorted everyone / just me — must:bmuz-1.0 · needs: F221
+- ⏳ F223 🔧 Hook diet — keep the safety hooks, retire the rest as pipelines take over — must:bmuz-1.0 · needs: F214, F215, F216, F219
+- ⏳ F224 🔧 Journey tests — journeys J1–J8 as scripted runs before every BMUZ update; the finish line — must:bmuz-1.0 · needs: F223, F222
+```mermaid
+flowchart LR
+  F211[🔨 F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
+  F211 --> F213[⏳ F213 Hand-off card]
+  F212 --> F214[⏳ F214 Save + sync]
+  F212 --> F215[⏳ F215 Bug pipeline]
+  F213 --> F215
+  F215 --> F216[⏳ F216 Develop pipeline]
+  F213 --> F217[⏳ F217 Discover pipeline]
+  F217 --> F218[⏳ F218 Define pipeline]
+  F216 --> F219[⏳ F219 Deliver pipeline]
+  F216 --> F220[⏳ F220 Milestone review]
+  F212 --> F221[⏳ F221 First setup]
+  F221 --> F222[⏳ F222 BMUZ for anyone]
+  F214 --> F223[⏳ F223 Hook diet]
+  F215 --> F223
+  F216 --> F223
+  F219 --> F223
+  F223 --> F224[⏳ F224 Journey tests]
+  F222 --> F224
+```
+
 ## Later
 - 💤 F57 🔧 3D picker — click a 3D thing in the game to tune it (raycast + 3D outline, same Select tab) — could · needs: F55 · when a 3D game needs it
 - 💤 F105 🧱 Crash reports, round 2 — reports kept while offline across sessions, a private web page (mark fixed, "came back" flags), freeze / long-stall signals, the rate-limit binding — could · needs: F89
