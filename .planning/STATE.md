@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-07 — **Sprint 66 (v0.42 — Steadier and safer) running in auto mode** (Muzzy at a party ~5 h) on `dev/v0-42-steadier` — F207 — Starter's online test stops flaking · F208 — Dev Kit pages need a pass · F209 — Release maps never overwritten · F210 — Hand-off check reads the right project; one helper each, side by side. Features wait for Muzzy's OK; no /deliver. Ideas list cleaned up today (46 lines marked). Muzzy: Goops swaps to the Tutorial module (X01) in its own session.
+2026-11-08 — **Sprint 66 (v0.42 — Steadier and safer) done** — F207 — Starter's online test stops flaking ✅ · F208 — Dev Kit pages need a pass ✅ · F209 — Release maps never overwritten ✅ · F210 — Hand-off check reads the right project ✅ (Muzzy: "approved"). Next: `/deliver` v0.42 on `dev/v0-42-steadier` (Dev Kit 0.32.0 + crashes 0.3.1 + hooks). HC10 now needs Claude's own wake-up on any hand-back that says work goes on by itself (the 5-hour wait, 2026-11-07). Muzzy: Goops swaps to the Tutorial module (X01) in its own session.
 - Games' real updates still to do, each in its own session from its report (research/2026-11-06-goops-catchup.md · …-glyphtender-catchup.md); Muzzy redeploys Glyphtender's room server, first-deploys Goops' crash server.
 - Laptop: after pulling, run `npm run install-modules -- --all` in starters/turn-based once.
 - Root `npm install` once on each machine for the framework linter (root eslint.config.js).
@@ -10,7 +10,7 @@ Reviewed through: 80d7e85 (sprint 66: F207 + F208 + F209 — Claude read each di
 
 ## Where we are
 Stage: develop   Milestone: v0.42 — Steadier and safer   Sprint: 66
-Doing: F207–F210 — building (auto mode, side by side)   Branch: dev/v0-42-steadier   Version: 0.43.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: Sprint 66 done; next /deliver v0.42   Branch: dev/v0-42-steadier   Version: 0.43.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.31.0 · crashes 0.3.0 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
