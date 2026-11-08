@@ -28,14 +28,16 @@ Checked: 2026-11-07 — helper (0b4f43d, crashes 0.3.1): crashes 168/168, lint +
 
 ## F210 🐞 Hand-off check reads the right project
 Done when: the hand-off check names features from the project the turn's tools worked in (the repo of the files edited / commands run), not the folder the chat started in — a framework-started chat working in Glyphtender gets Glyphtender's feature names; tested.
-- [ ] 🤖 11. Reproduce: a test where the session folder and the worked-in repo differ gets the wrong names today — ~/.claude/config/bmuz/hooks/rules/handoff-check/HC2.feature-names.mjs
-- [ ] 🤖 12. Pick the project from the turn's tool calls (edited file paths, a cd in Bash), falling back to the session folder — tests — ~/.claude/config/bmuz/hooks/handoff-check.mjs
-- [ ] 🤖 13. The hooks' own tests green; pushed to ~/.claude-config — ~/.claude/config/bmuz/hooks/tests/
+- [x] 🤖 11. Reproduce: a test where the session folder and the worked-in repo differ gets the wrong names today — ~/.claude/config/bmuz/hooks/rules/handoff-check/HC2.feature-names.mjs
+- [x] 🤖 12. Pick the project from the turn's tool calls (edited file paths, a cd in Bash), falling back to the session folder — tests — ~/.claude/config/bmuz/hooks/handoff-check.mjs
+- [x] 🤖 13. The hooks' own tests green; pushed to ~/.claude-config — ~/.claude/config/bmuz/hooks/tests/
 Check: the hooks' tests (incl. the new one) green; config pushed.
+Checked: 2026-11-07 — helper: cause = the project was always the git repo of the chat's start folder (handoff-check _hook.mjs); new `workedProject()` in rules/handoff-check/_shared.mjs picks the repo the turn edited/committed in (else the one it cd'd into, else the start folder), used by HC2 + HC8; 7 new tests, reproduced first (6 red before the fix). Claude's re-run then showed 9 handoff-check tests red; the helper fixed them but went quiet before reporting the cause (not known — the fix is in the files). Claude, 23:30: the whole hooks suite 824/0 twice in a row; config pushed (~/.claude-config d8530d1).
 
 ## Notes
 - Muzzy 2026-11-07: "auto mode… take over this development process while I'm gone" (~5 h, at a party). Claude plans, merges, checks, reviews, saves; features wait for Muzzy's OK; no /deliver.
 - Muzzy's question on F208 (laptop + desktop both use the Dev Kit): answered — the secret is in every page the dev server serves, so any browser that opened the game works (laptop, desktop, phone); only a request that never opened the page is refused. Muzzy: "ok".
 - Open bugs: no BUGS.md.
+- **Went wrong (auto mode):** the F210 helper's last word was ~18:18 ("a monitor will wake me"); nothing woke either of us and main sat ~5 h until Muzzy came home at 23:17 — Muzzy: "i thought we had something in place… so you didn't wait for five hours". Cause: HC10 only looked at progress lines containing the word "waiting"; Claude's said "wakes me" / "I keep going", and main had no wake-up of its own. Lesson → ~/.claude/config/bmuz/hooks/rules/handoff-check/HC10.wake-up.mjs: any hand-back that says work goes on by itself (a progress line or "nothing to type") is sent back unless Claude's own wake-up (a background command or Monitor) is running — 3 new tests, suite 824/0. Also: the clock times in Claude's progress lines were made up (16:20 for a 17:25 start) — read `date` before writing one.
 - F207 (helper): the room server always uses port 6499 (wrangler.json), so only one online e2e can run on this PC at a time.
 - F209 (helper): release.mjs called the refused build "the build failed — make them by hand", wrong advice here → Claude added a branch in ~/.claude/config/bmuz/scripts/release.mjs that says the filed maps stand (syntax-checked; no release.mjs tests exist). A refused build leaves its new .map files in dist/ — harmless, a failed release build is never deployed.
