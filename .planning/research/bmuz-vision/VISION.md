@@ -15,7 +15,7 @@ Status: **draft**. Each item is a promise. When it's signed off, a change to the
 - You can always see: working / done / waiting on you. Questions come in one list.
 - Approved things stay approved; answered questions stay answered.
 - Anyone can use it, on several machines; only Muzzy changes it.
-- "Done" = the 10 scenarios in section H pass while Muzzy watches.
+- "Done" = a creative's whole life with BMUZ works end to end: first idea → shipped → second game, plus an update from Muzzy (section H).
 
 ---
 
@@ -102,20 +102,21 @@ From the 64 caught-again items, grouped:
 15. Hooks crying wolf (about half of 2,180 firings) → V13
 16. Bad links: test links opened the wrong state, a link that wouldn't open → V35
 
-## H. Definition of done for the core (draft)
+## H. Definition of done for the core (draft 2)
 
-The core is done when all of these pass, watched by Muzzy, not just reported by Claude:
-- **S1 New user:** a fresh account and a fresh machine. Install BMUZ, say "I have an idea", and get Discover with no setup questions about BMUZ itself.
-- **S2 Overnight:** a 3-feature sprint in auto mode finishes with no questions or prompts. It stops at the approval gate with a report.
-- **S3 Hang:** a helper is deliberately frozen mid-run. It's caught and recovered within 20 minutes, and the log shows it.
-- **S4 Detour:** mid-sprint, "fix this button first". It gets fixed, and BMUZ returns to the exact step it left.
-- **S5 Crash:** the window is killed mid-sprint. A new window resumes at the right step.
-- **S6 Assess:** "assess X" gets a report and zero file changes.
-- **S7 Memory:** a question answered in project A's decisions list is not asked again.
-- **S8 Status:** at random moments, working / done / waiting is clear within one glance.
-- **S9 Protection:** a change that would alter an approved behaviour gets stopped or flagged.
-- **S10 Real use:** Muzzy runs one small new game from idea to a live link without once correcting the process.
-- All 16 groups in G have a test that passes.
+Done is not "the recent bugs are fixed". Done is a creative's whole life with BMUZ working, end to end, with **every V item covered by at least one step below**. The caught-again list (G) is extra regression tests on top.
+
+The test: someone who isn't Muzzy (or Muzzy acting as a new user on a fresh machine) lives through all of these, watched, with zero process corrections:
+- **J1 First contact.** Install, then "I have an idea". Setup sidequests cover whatever's missing, then it's straight into Discover. (V1, V2, V2b, V4)
+- **J2 Shaping the game.** Discover → Define: a GDD, an engineering plan, a feature map with dependencies, scope per release. Sketches prove a feel. Taste calls are asked; engineering calls aren't. (V1b, V14, V15, V17, V40)
+- **J3 Building it.** Sprints with approvals at the gates. The PPP stays true. Tuning happens in the Dev Kit, and saved values hold. Approved things stay approved. Status is always clear. (V7, V8, V18, V22, V28, V35–V39, V41)
+- **J4 Real life in the middle.** Sidequests, stray ideas, a crash, a context clear, a switch to the second machine, an overnight auto run, an "assess". Each one is handled, and the work comes back to the exact step. (V9, V10, V23–V27, V31)
+- **J5 Shipping.** Release to the web and as a phone app, with the explicit OK, then a live link. (V25, Q3)
+- **J6 Learning.** A milestone review. Game lessons go in the game. Studio lessons go to Muzzy as proposals. (V21, V19)
+- **J7 The update.** Muzzy changes BMUZ and ships an update. The user's next session gets it, and their projects don't break. (V3, V11, V13)
+- **J8 The second game.** It feels the same as the first and starts further ahead. (V6, V5)
+
+Every V item gets a ✔ beside the journey step that proves it. Any V item with no step means this list is still too narrow.
 
 ---
 
