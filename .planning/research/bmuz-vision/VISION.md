@@ -82,6 +82,15 @@ Status: **draft**. Each item is a promise. When it's signed off, a change to the
 - **V40** Claude leads on the technical side: it recommends the sturdier way unprompted, and weighs it from every side, including the case against. (×5)
 - **V41** BMUZ sets up each project so every framework module and tool works in it, with one way per module. (×4)
 
+## F2. Security and safety
+
+- **V42** Secrets are never committed or published: API keys, passwords, account files. A check runs before every push. (Firebase, Cloudflare and the stores all have keys.)
+- **V43** Before anything goes to a public place (a public repo, a live site, a store), BMUZ checks it holds nothing private: personal chats, emails, names, private files. (Real case, 2026-11-08: these vision files quote private chats, and a safety check stopped the push to the public repo.)
+- **V44** Auto mode is free to work but walled in. It never deletes data, rewrites history, force-pushes or publishes without the explicit OK. It never touches files outside the project and BMUZ. (V25; today's guard-git does part of this.)
+- **V45** Anything downloaded (packages, assets, other people's code) is treated as untrusted. Packages come from known sources and get a security check.
+- **V46** Games keep players safe: saves and crash reports store no more than they need, multiplayer servers can't be abused, and store rules on privacy and age are met before release.
+- **V47** A BMUZ update can't harm a user's machine or projects, and only Muzzy can publish updates.
+
 ## G. Things he caught again (each becomes a permanent test)
 
 From the 64 caught-again items, grouped:
@@ -110,11 +119,20 @@ The test: someone who isn't Muzzy (or Muzzy acting as a new user on a fresh mach
 - **J1 First contact.** Install, then "I have an idea". Setup sidequests cover whatever's missing, then it's straight into Discover. (V1, V2, V2b, V4)
 - **J2 Shaping the game.** Discover → Define: a GDD, an engineering plan, a feature map with dependencies, scope per release. Sketches prove a feel. Taste calls are asked; engineering calls aren't. (V1b, V14, V15, V17, V40)
 - **J3 Building it.** Sprints with approvals at the gates. The PPP stays true. Tuning happens in the Dev Kit, and saved values hold. Approved things stay approved. Status is always clear. (V7, V8, V18, V22, V28, V35–V39, V41)
-- **J4 Real life in the middle.** Sidequests, stray ideas, a crash, a context clear, a switch to the second machine, an overnight auto run, an "assess". Each one is handled, and the work comes back to the exact step. (V9, V10, V23–V27, V31)
-- **J5 Shipping.** Release to the web and as a phone app, with the explicit OK, then a live link. (V25, Q3)
+- **J4 Real life in the middle.** Every interruption in the catalogue below is handled, and the work comes back to the exact step. (V9, V10, V23–V27, V31)
+- **J5 Shipping.** Release to the web and as a phone app, with the explicit OK and the security checks, then a live link. (V25, V42–V46, Q3)
 - **J6 Learning.** A milestone review. Game lessons go in the game. Studio lessons go to Muzzy as proposals. (V21, V19)
-- **J7 The update.** Muzzy changes BMUZ and ships an update. The user's next session gets it, and their projects don't break. (V3, V11, V13)
+- **J7 The update.** Muzzy changes BMUZ and ships an update. The user's next session gets it, and their projects don't break. (V3, V11, V13, V47)
 - **J8 The second game.** It feels the same as the first and starts further ahead. (V6, V5)
+
+**Rule for every journey:** its list is a **catalogue**, not a few examples. It's built from everything in the record, and anything new we hit gets added to it. A journey passes only when every case in its catalogue passes.
+
+**J4 catalogue (from the record so far):**
+- the user's side: a sidequest ("fix this first"), a stray idea, a new feature hijacking the active milestone, a bug found mid-feature, a design pivot, "assess / talk it through / just a comment" (no action, and running work isn't cut short), "catch me up", "where were we?", an answer to an old question
+- the user's own edits: Dev Kit saves, Obsidian edits, file changes between sessions
+- sessions: a context clear, compaction, a crash or a frozen window, a restart, a switch to the other machine, a sync failure, two windows open at once (another window changing BMUZ while this one works)
+- running alone: an overnight auto run, a hung or silent helper, a helper's question, a permission prompt, a usage limit
+- the world: a service shuts down or changes (e.g. PartyKit), checks going red because the PC is busy, checks passing on Windows but failing on GitHub's Linux machines, flaky tests
 
 Every V item gets a ✔ beside the journey step that proves it. Any V item with no step means this list is still too narrow.
 
