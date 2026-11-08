@@ -132,3 +132,27 @@ Do each step, then check what you see before the next one. These run in PowerShe
 3. `node ..\tests\setup.mjs fresh`, then `claude`, then type `bmuz go`.
    - PASS: the same band as in L1.
 4. Undo: `claude plugin uninstall bmuz-proof@bmuz-proof-market`, then `claude plugin marketplace remove bmuz-proof-market`.
+
+## Live checks with Muzzy (2026-11-08, 08:27–08:58, PowerShell window, `claude --plugin-dir ..\plugin`)
+Claude read the project journal after each step, so every result below is backed by the journal, not by screenshots alone.
+
+| Live | Checks | Result | What happened |
+|---|---|---|---|
+| L1 | 1, 2, 5 | **PASS** | The band showed in a real window ("ready" → "step 4 of 5 · hello · working" → green "all 5 steps done"). The engine started each step itself, handing Claude only that step's craft note. The name question came with buttons. At the gate, nothing moved for **96 s** with no answer (journal: `step.start approve` and nothing after; no plan.json, no hello.html). **Design flaw found:** Approve is the first, pre-selected option, so one stray Enter approved it on the first try (journal: answer 12 s after the gate opened). |
+| L2 | 10 | **PASS** | Closing the window with X at the gate, then starting a new window: the Approve question came back by itself (journal: `resume approve`; the name step was not redone). Gap: no `crash.detected` line, because a lock that says "waiting" isn't read as a crash. |
+| L3 | 4 | **PASS** | The watchdog stopped each frozen helper at about 25 s and relaunched it (this works live; it failed only under `-p`). After 3 attempts it marked the step **BLOCKED** and rolled back hello.html. The helper counters froze once stopped (no tokens burning). **Findings:** (a) each relaunch showed in the chat as if the user had typed it, so Claude narrated and offered to stop runs; (b) the band stayed at "working" after BLOCKED, because it only refreshes at the end of a turn. |
+| L4 | 11 | **PASS** | In plan mode: "change Moon Goat to Sun Goat" left hello.html unchanged; Write and the route out of plan mode were both refused. **Finding:** plan mode and the engine jam: Claude couldn't even hand in its verdict. |
+| L5 | 14 (background part), 15 | 14: **PASS for background** · 15: **FAIL** | The mod loaded inside the `claude --bg` session (lock.json carries the background session's id; band shown). But **AskUserQuestion isn't available in a background session**, so Claude asked "red or blue?" in plain text and **stopped to wait**. colour.txt and done.txt were never written. That is exactly the overnight stall the never-stall settings were meant to stop. |
+| — | (seen in L1) | **finding** | Claude Code's own "workflows use a lot of tokens" confirmation appeared before the Workflow ran. Overnight, that would wait for an answer too. |
+| L6 | 14 (installed copy) | not run | It would add a marketplace to Muzzy's own settings; it gets tested in R2 instead. |
+
+**Final tally: 14 of 16 pass** (1–13, 16). Check 14 passes for the background session; the installed copy gets tested in R2. **Check 15 fails.**
+
+**The verdict stands: the mod is the engine.** Live testing added these must-fixes to R1 and R6:
+1. **Auto mode never asks.** Any question becomes an "Ask Muzzy" line plus the default choice, and the engine continues at the end of the turn. Craft notes for auto runs forbid asking. This fixes the check 15 failure, and it's retested in R6.
+2. **Pre-answer Claude Code's own confirmations** (the workflow cost warning) in BMUZ's settings for auto runs.
+3. **A gate never pre-selects Approve.** The safe choice comes first, or approving needs typing.
+4. **Engine actions are labelled as the engine's own** (relaunches, step prompts), and Claude is told not to narrate them.
+5. **The band refreshes on every engine event,** not only at the end of a turn.
+6. **One plan-mode rule:** plan mode is switched off for pipeline steps, or the engine allows plan mode's own plan file.
+7. **A lock that says "waiting" plus a dead session is journaled as a crash** before the resume.
