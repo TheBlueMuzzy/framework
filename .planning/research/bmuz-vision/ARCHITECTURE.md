@@ -122,7 +122,7 @@ Fail on 1–6 → switch the motor to B and re-run the same test. Fail on 8 → 
 - 2026-11-08 — **Inside Claude Code, not outside** (Muzzy: "inside is good"). An outside program like GSD-2 is the strictest, but it would mean rebuilding the chat, an unclear login position, and a big app to maintain. Fallback order if the proof fails: mod → hook engine (B) → outside program, after checking Anthropic's login rules. The pipeline files carry over to each one.
 - 2026-11-08 — **Paid Claude account required** (Muzzy) → Workflows are part of the core.
 - 2026-11-08 — **Taste questions ask the creative's view first** (Muzzy: "your pick") → VISION V32b. **Throwaway proof approved** (Muzzy: "yes /develop").
-- 2026-11-08 — **The engine proof passed** (`proof-results.md`, code in `proof/`): 10 of 16 checks pass, 4 partly pass (the headless limits), and 2 need a live window. Claude re-ran both automatic test sets: 7/7 plugin tests and 12/12 no-Claude tests. **The mod is the engine, and motor B stays as the fallback.** Three rules the proof forced:
+- 2026-11-08 — **The engine proof passed** (`proof-results.md`, code in `proof/`): 9 of 16 checks pass outright; 3 more (2, 5, 11) pass in the test kit or headless but still need watching live; 3 partly pass (4, 10, 14); 1 is untested (15). Claude re-ran both automatic test sets: 7/7 plugin tests and 12/12 no-Claude tests. **The mod is the engine, and motor B stays as the fallback.** Three rules the proof forced:
   1. the engine acts at the end of a turn;
   2. workflows start through saved plugin workflow commands, with their inputs pinned (a mod can't call the Workflow tool directly; the host refuses it);
   3. every guard refuses on its own error, and a gate never treats silence as an answer.

@@ -1,6 +1,6 @@
 # BMUZ rebuild — plan DRAFT (2026-11-08, for Muzzy's OK)
 
-Built on: `VISION.md` (what), `ARCHITECTURE.md` (how), `proof-results.md` (the engine works: 10 of 16 checks pass, 4 partly, 2 need a live window). Proof code to start from: `proof/`.
+Built on: `VISION.md` (what), `ARCHITECTURE.md` (how), `proof-results.md` (the engine works: 9 of 16 checks pass outright, 3 pass but still need watching live, 3 partly pass, 1 untested). Proof code to start from: `proof/`.
 Nothing here is started. The order and features need Muzzy's OK, and then the 6 live checks in the morning.
 
 ## Ground rules for the rebuild
