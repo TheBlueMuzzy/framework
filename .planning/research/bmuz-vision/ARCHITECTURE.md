@@ -64,6 +64,32 @@ Talk = engine + gates · Flow = workflow · Script = script. "Better?" = does mo
 
 What this does to the ~97 hook rules: the hand-off card is written by the engine from step data, so most wording checks (the HC group) aren't needed; step-order checks become pipeline steps; "is it done" checks move into each flow's done-check. Hooks keep the safety set (git, secrets, publishing, report-only).
 
+## Ideas taken from the wider research (2026-11-08)
+Sources: `scout-community.md`, `scout-official.md`, `scout-wider.md`. Nobody has an engine *inside* the chat with gates and a status band, so BMUZ would be first. The pattern of steps as data run by a program matches what works elsewhere (GSD-2, Archon, Nick Tune, Statewright).
+
+Each pipeline step carries:
+- `kind` (talk / flow / script / gate), `needs` (steps before it), and the **tools it may use** (a review step can't edit code) — Archon, Statewright.
+- a **done-check**; on a failure, **2 retries max** (the failure message says how to fix it), then roll back to the checkpoint and mark it BLOCKED — Stripe, 12-Factor Agents.
+- its own short **craft note**: Claude gets only the current step's instructions, never the whole process — BMAD, Nick Tune.
+
+The engine keeps:
+- a **journal** in the project (git): every finished step, every deviation, the step times. A finished step is never redone, and a gate is always its own step, so resuming can't repeat a commit or publish — LangGraph's lesson.
+- a **lock file** (current step + start time) to spot a crash, a **doctor** that rebuilds "where are we" from the files, and a "what went wrong" view — GSD-2.
+- a **checkpoint** at every step and gate, with a plain-words undo list ("go back to before the tutorial") — Replit, Lovable.
+- a **5-line plan card** before each feature (what the player sees · done when · not doing · needs from you · off-limits); the done-check tests the card, and tweaks skip it — Kiro, Devin, Factory.
+
+Shipping and running:
+- Ship through **Anthropic's plugin directory**: users there get updates automatically. Not supported: a top-level `bin/` when installed through claude.ai.
+- The partner rules travel as a **forced output style + the plugin's agent** (a plugin can't ship CLAUDE.md). The agent's start prompt runs "resume here" every session.
+- Never-stall settings: `askUserQuestionTimeout`, `permissions.denyInsteadOfPrompting`, the retry watchdog. Overnight runs can use **background sessions** (`claude --bg`).
+- The engine starts **saved workflow commands** (the "use a workflow" opt-in only counts when a human types it).
+- Rename `/bug` and `/checkup`, which clash with built-in commands.
+- Don't build on the built-in task list (it's off by default on current models).
+
+Quality for BMUZ itself:
+- A **no-Claude test** of every pipeline (engine logic checked like normal software) and `claude plugin test` / `validate` for the mod.
+- **Process tests** before any BMUZ update ships: scripted creative journeys (section H of the Vision) run in a scratch project and are checked against the journal — what keeps V11 true.
+
 ## Converting what exists
 - Scripts → move as they are.
 - Skills → the step lists come out (into pipeline files); the craft stays.
@@ -82,6 +108,14 @@ A tiny mod + one small pipeline in a scratch folder. It passes only if, watched:
 7. a helper's answer comes back to the engine;
 8. the engine starts a workflow with an input (e.g. a tiny "task flow" for one fake task), waits, and gets its result back — the whole plan now leans on this link, so it's tested first;
 9. the engine runs a script step directly and reads its result.
+10. a killed window resumes correctly even while waiting at a gate or inside a loop (Archon's known bug);
+11. Claude's plan mode can't go around the engine (Nick Tune's finding);
+12. a step's tool limit holds (a review step can't edit);
+13. a failed done-check retries twice, then rolls back and marks BLOCKED;
+14. the mod loads when the plugin is installed from the directory / account sync, and inside a background session;
+15. a fake overnight task never waits on a prompt or question (the never-stall settings);
+16. for motor B: a skill line that runs `bmuz next` gets the right step on Windows.
+Proofs 1, 2, 6 and 12 run automatically with `claude plugin test`.
 Fail on 1–6 → switch the motor to B and re-run the same test. Fail on 8 → a hook or the user's command starts the workflow instead; re-test.
 
 ## Decisions
