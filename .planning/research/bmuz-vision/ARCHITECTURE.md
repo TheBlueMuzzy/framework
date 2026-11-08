@@ -121,3 +121,4 @@ Fail on 1–6 → switch the motor to B and re-run the same test. Fail on 8 → 
 ## Decisions
 - 2026-11-08 — **Inside Claude Code, not outside** (Muzzy: "inside is good"). An outside program like GSD-2 is the strictest, but it would mean rebuilding the chat, an unclear login position, and a big app to maintain. Fallback order if the proof fails: mod → hook engine (B) → outside program, after checking Anthropic's login rules. The pipeline files carry over to each one.
 - 2026-11-08 — **Paid Claude account required** (Muzzy) → Workflows are part of the core.
+- 2026-11-08 — **Taste questions ask the creative's view first** (Muzzy: "your pick") → VISION V32b. **Throwaway proof approved** (Muzzy: "yes /develop").
