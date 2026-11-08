@@ -1,7 +1,7 @@
 {
   "name": "Game Framework",
-  "version": "0.43.0",
-  "build": 7,
+  "version": "0.44.0",
+  "build": 0,
   "history": [
     {
       "version": "0.10.0",
@@ -267,6 +267,11 @@
       "version": "0.43.0",
       "date": "2026-11-07",
       "summary": "Checks that hold still"
+    },
+    {
+      "version": "0.44.0",
+      "date": "2026-11-08",
+      "summary": "Steadier and safer"
     }
   ]
 }
