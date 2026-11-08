@@ -83,3 +83,7 @@ A tiny mod + one small pipeline in a scratch folder. It passes only if, watched:
 8. the engine starts a workflow with an input (e.g. a tiny "task flow" for one fake task), waits, and gets its result back — the whole plan now leans on this link, so it's tested first;
 9. the engine runs a script step directly and reads its result.
 Fail on 1–6 → switch the motor to B and re-run the same test. Fail on 8 → a hook or the user's command starts the workflow instead; re-test.
+
+## Decisions
+- 2026-11-08 — **Inside Claude Code, not outside** (Muzzy: "inside is good"). An outside program like GSD-2 is the strictest, but it would mean rebuilding the chat, an unclear login position, and a big app to maintain. Fallback order if the proof fails: mod → hook engine (B) → outside program, after checking Anthropic's login rules. The pipeline files carry over to each one.
+- 2026-11-08 — **Paid Claude account required** (Muzzy) → Workflows are part of the core.
