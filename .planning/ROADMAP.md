@@ -627,7 +627,7 @@ flowchart LR
   F205[✅ F205 Screen check follows orientation]
 ```
 
-## v0.42 — Steadier and safer  ← current · planned 2026-11-07
+## v0.42 — Steadier and safer  ✅ released 2026-11-08 (v0.44.0) · planned 2026-11-07
 Goal (Muzzy 2026-11-07: "1 yes", then auto mode): the starter's checks stop crying wolf on GitHub, the Dev Kit's dev-server pages answer only pages the game served, a release's crash maps can't be overwritten, and the hand-off check names features from the right project.
 - ✅ F207 🐞 Starter's online test stops flaking — the online e2e waits for what each click needs (both tabs seated) instead of a bare click; 10 runs in a row green — should · sprint 66
 - ✅ F208 🔧 Dev Kit pages need a pass — dev-server pages answer only pages the game served: a per-session secret in the served page, sent with every Dev Kit call; a hand-made request from the Wi-Fi is refused, every browser that opened the game still works — should · sprint 66
