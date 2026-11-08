@@ -1,0 +1,5 @@
+{
+  "name": "bmuz-proof-market",
+  "owner": { "name": "Muzzy (proof)" },
+  "plugins": [{ "name": "bmuz-proof", "source": "./plugin", "description": "BMUZ engine proof mod" }]
+}

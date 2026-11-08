@@ -82,7 +82,8 @@ async function openTab(name, width, height) {
 
 // After Escape / Back on the results: still on the game's page, at the main menu, having left the room cleanly
 async function expectMainMenu(page, name, key) {
-  await page.waitForTimeout(400) // a polling step: the results close
+  // The results close (a busy machine may take a while); still up after 5 s = the key did nothing, failed below
+  await page.getByRole('heading', { name: /win|draw/i }).first().waitFor({ state: 'detached', timeout: 5000 }).catch(() => {})
   await page.screenshot({ path: `${OUT}/online-${name}-results-${key.toLowerCase()}.png` })
   const where = page.url().startsWith(`http://127.0.0.1:${PORT}`) ? null : page.url()
   const results = where ? 0 : await finished(page)
@@ -94,15 +95,21 @@ async function expectMainMenu(page, name, key) {
   else console.log(`  ${key} on ${name}'s results → main menu, room left`)
 }
 
-// Each tab taps a free square on its own turn until both show the result; returns how many moves it took
+// Each tab taps a free square on its own turn until both show the result; returns how many moves it took.
+// A tab's turn = a free square it may tap (Board: aria-disabled unless it's your turn). After each tap the script
+// waits until BOTH tabs show that mark — the server took the move and each tab's view caught up — before looking
+// for the next turn (F207). Without that wait a slow round trip left the tapper's old view up ("Your turn", squares
+// open): it tapped again, the move landed mid-click, its squares closed, and the click waited 30 s for a turn only
+// the other tab — queued behind that click in this same loop — could give back (GitHub: "locator.click: Timeout").
 async function playToEnd(shoot) {
   let moves = 0
   for (let step = 0; step < 300 && !(await finished(a) && await finished(b)); step++) {
     for (const page of [a, b]) {
-      if (!(await page.getByText('Your turn').count())) continue
       const free = page.locator('[data-board] [data-mark=""]:not([aria-disabled])')
       if (await free.count()) {
-        await free.first().click()
+        const cell = await free.first().getAttribute('data-cell')
+        await page.locator(`[data-board] [data-cell="${cell}"]`).click()
+        for (const tab of [a, b]) await tab.locator(`[data-board] [data-cell="${cell}"]:not([data-mark=""])`).waitFor()
         moves++
         if (shoot && moves === 3) {
           await a.screenshot({ path: `${OUT}/online-A-game.png` })

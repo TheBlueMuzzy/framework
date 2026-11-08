@@ -2,6 +2,7 @@
 //   uploadSound  → POST /__devkit/save-audio (vite/audioSave.ts): the file becomes an MP3 in public/audio/<folder>/
 //   addCredit    → POST /__devkit/add-credit: one entry appended to content/credits.json
 //   loadWaveform → fetch + decode a file once (cached), for the waveform drawing
+import { devkitKeyHeaders } from '../saveContent'
 import type { creditEntry } from './soundLogic'
 
 export type SavedSound = { path: string; file: string; trimmedMs: number; loudness?: string }
@@ -17,7 +18,7 @@ export async function uploadSound(file: Blob, target: { folder: string; stem: st
   const query = new URLSearchParams(target).toString()
   let res: Response
   try {
-    res = await fetch(`/__devkit/save-audio?${query}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: file })
+    res = await fetch(`/__devkit/save-audio?${query}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', ...devkitKeyHeaders() }, body: file })
   } catch {
     throw new Error('the dev server is not reachable (is npm run dev still running?)')
   }
@@ -27,7 +28,7 @@ export async function uploadSound(file: Blob, target: { folder: string; stem: st
 export async function addCredit(entry: ReturnType<typeof creditEntry>): Promise<void> {
   let res: Response
   try {
-    res = await fetch('/__devkit/add-credit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entry }) })
+    res = await fetch('/__devkit/add-credit', { method: 'POST', headers: { 'Content-Type': 'application/json', ...devkitKeyHeaders() }, body: JSON.stringify({ entry }) })
   } catch {
     throw new Error('the dev server is not reachable (is npm run dev still running?)')
   }

@@ -90,4 +90,30 @@ describe('crashesMaps', () => {
     expect(existsSync(join(root, 'releases'))).toBe(false)
     expect(findMaps(join(root, CHECK_MAPS_FOLDER, '0.2.0.3', 'maps'))).toContain('stray.js.map')
   }, 60_000)
+
+  it('0.3.1 (F209): a second release build of the same version is refused, plainly, and moves nothing', async () => {
+    // (F195 rehearsal: the second build silently replaced the committed maps of what players run)
+    const root = gameAt('0.4.0', 2)
+    process.env.CRASHES_MAPS = 'release'
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] })
+    const maps = join(root, 'releases', '0.4.0.2', 'maps')
+    const first = findMaps(maps).sort()
+    const before = Object.fromEntries(first.map((f) => [f, readFileSync(join(maps, f), 'utf8')]))
+    writeFileSync(join(root, 'src', 'main.js'), 'export const changed = window.x + 1\nconsole.log(changed)\n')
+    await expect(build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] }))
+      .rejects.toThrow(/this version's maps are already filed in .*0\.4\.0\.2.*Nothing was moved\. Bump the build or delete the folder/s)
+    expect(findMaps(maps).sort()).toEqual(first)
+    for (const f of first) expect(readFileSync(join(maps, f), 'utf8')).toBe(before[f])
+    expect(findMaps(join(root, 'dist')).length).toBeGreaterThan(0) // left where they were, not half-moved
+  }, 60_000)
+
+  it('0.3.1: a release build into an empty or missing maps folder is fine; check builds still replace their cache freely', async () => {
+    const root = gameAt('0.5.0', 0)
+    mkdirSync(join(root, 'releases', '0.5.0.0', 'maps'), { recursive: true }) // empty folder: nothing to protect
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps({ release: true })] })
+    expect(findMaps(join(root, 'releases', '0.5.0.0', 'maps'))).toContain('stray.js.map')
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] })
+    await build({ root, configFile: false, logLevel: 'silent', plugins: [crashesMaps()] }) // twice: no refusal
+    expect(findMaps(join(root, CHECK_MAPS_FOLDER, '0.5.0.0', 'maps'))).toContain('stray.js.map')
+  }, 60_000)
 })

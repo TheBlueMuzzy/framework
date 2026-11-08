@@ -1,0 +1,8 @@
+{
+  "name": "bmuz-proof",
+  "version": "0.1.0",
+  "description": "Throwaway proof: a mod that runs a BMUZ pipeline file step by step",
+  "license": "UNLICENSED",
+  "author": { "name": "Muzzy (proof)" },
+  "types": "./types/index.d.ts"
+}

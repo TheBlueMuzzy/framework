@@ -1,7 +1,7 @@
 // The Fonts tab's line to the dev server's font library (vite/fontLibrary.ts). Dev only: a live build has no dev
 // server, so the tab doesn't ask (CAN_SAVE) and shows no Library section.
 import type { KitFont } from '../color/uiKit'
-import { CAN_SAVE } from '../saveContent'
+import { CAN_SAVE, devkitKeyHeaders } from '../saveContent'
 
 /** path = "<root key>:<file>" — sent back as is; file = the readable part; styles = how many files the family has (installed fonts) */
 export type LibraryFont = { path: string; name: string; folder: string; file?: string; styles?: number }
@@ -16,7 +16,7 @@ export async function loadLibrary(refresh = false): Promise<LibraryList> {
   if (!CAN_SAVE) throw new Error('the font library needs npm run dev')
   let res: Response
   try {
-    res = await fetch(refresh ? `${URL_BASE}?refresh=1` : URL_BASE)
+    res = await fetch(refresh ? `${URL_BASE}?refresh=1` : URL_BASE, { headers: devkitKeyHeaders() })
   } catch {
     throw new Error('the dev server is not reachable (is npm run dev still running?)')
   }
@@ -32,7 +32,7 @@ export const libraryFontUrl = (path: string) => `${URL_BASE}/file?path=${encodeU
 export async function addLibraryFont(path: string): Promise<{ font: KitFont; wrote: string[]; already: boolean }> {
   let res: Response
   try {
-    res = await fetch(`${URL_BASE}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) })
+    res = await fetch(`${URL_BASE}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...devkitKeyHeaders() }, body: JSON.stringify({ path }) })
   } catch {
     throw new Error('the dev server is not reachable (is npm run dev still running?)')
   }
@@ -41,9 +41,12 @@ export async function addLibraryFont(path: string): Promise<{ font: KitFont; wro
   return body
 }
 
-/** Load a font file under a family name so the page can draw with it (a library preview). */
+/** Load a font file under a family name so the page can draw with it (a library preview). The file is fetched here,
+ *  not by url(…) in the FontFace, so the request carries the Dev Kit key (F208 — the dev server refuses it without). */
 export async function previewFont(name: string, url: string): Promise<void> {
-  const face = new FontFace(name, `url("${url}")`)
+  const res = await fetch(url, { headers: devkitKeyHeaders() })
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `the dev server said ${res.status}`)
+  const face = new FontFace(name, await res.arrayBuffer())
   document.fonts.add(face)
   await face.load()
 }
