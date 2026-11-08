@@ -36,6 +36,6 @@ Views (/ppp, /roadmap, /sprint, /gdd, /tdd), /play and /sketch move over inside 
 ## The finish line
 The core is done when R14's journeys J1–J8 all pass, watched, with zero process corrections (VISION section H). Then the framework gets its refit pass, then games resume.
 
-## Open (for Muzzy)
-- The order above: OK, or should something come earlier?
-- The BMUZ repo: private or public?
+## Decided (2026-11-08)
+- The order R1 → R14: OK (Muzzy: "yes").
+- The BMUZ repo: public for now; to be revisited after the rebuild is done.
