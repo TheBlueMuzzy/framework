@@ -1,9 +1,9 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-08 12:21 — **Sprint 67: every 🤖 task done; waiting on Muzzy.** Engine repo: `~/Documents/dev/bmuz` (github TheBlueMuzzy/bmuz, branch `dev/bmuz-1-0`); details per task in SPRINT.md Notes.
-- **Next — F211 task 7 (Muzzy):** (1) `cd C:\Users\Muzzy\Documents\dev\bmuz\project`, `claude`, accept trust, `/exit` → Claude runs `node tests/headless.mjs nightly` in dev/bmuz (the last of 14 checks); (2) live re-check one step at a time (`node ..\tests\setup.mjs fresh`, `claude --plugin-dir ..\plugin`): band, gate buttons, close-at-gate crash, watchdog (setup stall), plan mode. Approved → `F211: done`.
-- **F212:** tasks 1 + 5 done. Task 2 (Muzzy, PC): `claude plugin marketplace add C:/Users/Muzzy/Documents/dev/bmuz` then `claude plugin install bmuz@bmuz`; then Claude's task 3; task 4 = laptop, same lines after pulling.
+2026-11-08 15:17 — **Sprint 67: all 🤖 work done; two 🙋 steps left.** Engine repo: `~/Documents/dev/bmuz` (github TheBlueMuzzy/bmuz, branch `dev/bmuz-1-0`); details per task in SPRINT.md Notes. Headless 14/14, check:fast green (bmuz 82e6c1d). BMUZ plugin is INSTALLED on the PC (user scope, `bmuz@bmuz`, read from dev/bmuz/plugin) — it only acts in folders with a bmuz.json.
+- **Next — F211 task 7 (Muzzy, live, ~10 min, one step at a time):** in `C:\Users\Muzzy\Documents\dev\bmuz\project`: `node ..\tests\setup.mjs fresh`, then `claude` (installed plugin, no --plugin-dir needed; trust prompt once): band ticks, gate buttons with "Change the name" first, close window at gate → next start logs crash.detected, `setup.mjs stall` → watchdog relaunch labelled as the engine's + band turns red on BLOCKED, plan mode hands in its plan. Approved → `F211: done`.
+- **F212 task 4 (laptop):** pull dev/bmuz (clone it into Documents/dev/bmuz if missing), then `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`.
 - Ask Muzzy: may any gate go ahead overnight with a default? Pick: no (V25).
 - On hold: games' updates (research/2026-11-06-*-catchup.md). Laptop once: `npm run install-modules -- --all` in starters/turn-based; root `npm install`.
 
@@ -11,7 +11,7 @@ Reviewed through: bmuz abd7d8a (F211 — BMUZ engine core: fresh-eyes review hel
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F211 — BMUZ engine core — built, waiting on Muzzy (task 7)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F211 — BMUZ engine core — built, waiting on Muzzy's live re-check (task 7)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
