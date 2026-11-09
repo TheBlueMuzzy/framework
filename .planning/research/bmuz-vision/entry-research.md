@@ -25,6 +25,8 @@ Written 2026-11-09 by Claude, from Muzzy's live-look notes (SPRINT Notes 17:50).
 | Something written: notes, a pitch, a rulebook or a GDD | point at files or paste | read → proposed |
 | A prototype I've played (paper or digital) | describe it + any playtest notes | read → proposed (often Design) |
 
+Built (F225, 2026-11-09): 4 options because AskUserQuestion allows 4; options 1+2 merged ("Nothing yet, or just a spark — a theme, a mechanism, a feeling or a what-if"), same destination.
+
 ## Question 2 (only after the last three) — "What do you want from this pass?"
 | Option | Stage |
 |---|---|
