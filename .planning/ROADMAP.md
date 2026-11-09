@@ -650,7 +650,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F215 🔧 Bug pipeline — report → reproduce as a failing test → fix → keep the test → matching places, the same way every time — must:bmuz-1.0 · needs: F212, F213
 - ⏳ F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
 - ✅ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
-- ⏳ F218 🔧 Define pipeline — GDD, TDD, feature map and scope, with a plan-check flow — must:bmuz-1.0 · needs: F217
+- 🟢 F218 🔧 Define pipeline — GDD, TDD, feature map and scope, with a plan-check flow — must:bmuz-1.0 · needs: F217
 - ⏳ F219 🔧 Deliver pipeline — a release flow per platform, security scans and review, live check — must:bmuz-1.0 · needs: F216
 - ⏳ F220 🔧 Milestone review pipeline — a retro flow that turns lessons into proposals Muzzy approves — must:bmuz-1.0 · needs: F216
 - ⏳ F221 🔧 First setup — tools and accounts detected and walked through, at install or as a sidequest — must:bmuz-1.0 · needs: F212
@@ -658,7 +658,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F223 🔧 Hook diet — keep the safety hooks, retire the rest as pipelines take over — must:bmuz-1.0 · needs: F214, F215, F216, F219
 - ⏳ F224 🔧 Journey tests — journeys J1–J8 as scripted runs before every BMUZ update; the finish line — must:bmuz-1.0 · needs: F223, F222
 - ⏳ F225 🔧 Start from what you have — a "what do you have?" check before Discover; existing notes, rulebooks or a GDD go through an intake that fills the Discover shelves (each brick sourced), lists the gaps, asks only what the material can't answer, then hands to Define; first real test: the Escape Pod Scramble remake (Muzzy 2026-11-09) — must:bmuz-1.0 · needs: F217, F218
-- ⏳ F226 🔧 Five stages, one meaning each — discover · define · design · develop · release (Muzzy 2026-11-09: "your pick"); /deliver renamed /release; Design gets its own stage and command — concept, rules, sketches, paper playtests → the complete GDD, "the north star for decision making, a source of truth… the communication between you and me… a blueprint that you regularly update to be more and more reflective of the final product" (Muzzy) — must:bmuz-1.0 · needs: F217
+- 🟢 F226 🔧 Five stages, one meaning each — discover · define · design · develop · release (Muzzy 2026-11-09: "your pick"); /deliver renamed /release; Design gets its own stage and command — concept, rules, sketches, paper playtests → the complete GDD, "the north star for decision making, a source of truth… the communication between you and me… a blueprint that you regularly update to be more and more reflective of the final product" (Muzzy) — must:bmuz-1.0 · needs: F217
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
@@ -668,7 +668,7 @@ flowchart LR
   F213 --> F215
   F215 --> F216[⏳ F216 Develop pipeline]
   F213 --> F217[✅ F217 Discover pipeline]
-  F217 --> F218[⏳ F218 Define pipeline]
+  F217 --> F218[🟢 F218 Define pipeline]
   F216 --> F219[⏳ F219 Deliver pipeline]
   F216 --> F220[⏳ F220 Milestone review]
   F212 --> F221[⏳ F221 First setup]
@@ -681,7 +681,7 @@ flowchart LR
   F222 --> F224
   F217 --> F225[⏳ F225 Start from what you have]
   F218 --> F225
-  F217 --> F226[⏳ F226 Five stages]
+  F217 --> F226[🟢 F226 Five stages]
 ```
 
 ## Later
