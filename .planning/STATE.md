@@ -1,8 +1,8 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-09 13:15 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ (approved 2026-11-09) · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
-- **Next:** F218 — Define pipeline + F226 — Five stages, one meaning each are 🟢 ready. Offered Muzzy `/sprint` to pull F218 in while the laptop step waits — answer pending.
+2026-11-09 13:25 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ (approved 2026-11-09) · F218 — Define pipeline 🔨 pulled in (Muzzy "ok") · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
+- **Next:** F218 task 1 — research Define (a research helper → .planning/research/bmuz-vision/define-research.md), then task 2 a proposal page, then Muzzy's OK (task 3) before any building. F226 — Five stages, one meaning each stays 🟢 next; task 1's research feeds it.
 - **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check. Then sprint retro + archive.
 - Open Ask Muzzy: discover's three research rounds vs one; keep all on-ice ideas. Not judged yet: card questions under "Your to-dos"; DISCOVER.md size.
 - Decided 2026-11-09: five stages discover · define · design · develop · release (VISION V48, F226); existing material → F225 — Start from what you have. Card rules: templates/handoff.md. BGG mechanics list = private vocabulary only.
@@ -12,7 +12,7 @@ Reviewed through: bmuz df171ce (F217 tasks 7–12 — Claude read engine.js + re
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F212 — BMUZ plugin on both machines waits on the laptop (task 4) · F211 + F213 + F217 done 2026-11-09   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F218 — Define pipeline (task 1, research) · F212 — BMUZ plugin on both machines waits on the laptop (task 4) · F211 + F213 + F217 done 2026-11-09   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
