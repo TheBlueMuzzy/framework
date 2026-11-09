@@ -2,7 +2,7 @@
 
 ## ▶ RESUME HERE
 2026-11-09 13:25 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ (approved 2026-11-09) · F218 — Define pipeline 🔨 pulled in (Muzzy "ok") · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
-- **Next:** F218 task 1 — research Define (a research helper → .planning/research/bmuz-vision/define-research.md), then task 2 a proposal page, then Muzzy's OK (task 3) before any building. F226 — Five stages, one meaning each stays 🟢 next; task 1's research feeds it.
+- **Next:** F218 tasks 1–2 done (research define-research.md + proposal https://claude.ai/artifact/W5rEQTjkUncfucdzfBh41B). **Muzzy: task 3 — read the proposal, answer its 4 questions** (Define/Design line; mechanisms one vs lead + backup; story yours first vs drafts; pillars as feelings). Then task 4 builds define.json from research §5 (15 steps). If the line is approved, REBUILD-PLAN R8's wording changes (plan-check flow moves to Design's close) and F226 — Five stages, one meaning each gets the build plan.
 - **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check. Then sprint retro + archive.
 - Open Ask Muzzy: discover's three research rounds vs one; keep all on-ice ideas. Not judged yet: card questions under "Your to-dos"; DISCOVER.md size.
 - Decided 2026-11-09: five stages discover · define · design · develop · release (VISION V48, F226); existing material → F225 — Start from what you have. Card rules: templates/handoff.md. BGG mechanics list = private vocabulary only.
