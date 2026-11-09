@@ -41,6 +41,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-09 — Discover on the BMUZ engine approved after your live look ("it worked really well"): each step now shows you one short line instead of a wall of grey instructions. Next idea noted: tell you which stage you're in and when you're ready for the next.
 - 2026-11-09 — Overnight: BMUZ's discover run built from real Double Diamond research — it frames your goal, checks your hopes, fears and beliefs, researches through four lenses with every link checked, and ends with one card. Waiting on your live look.
 - 2026-11-09 — The BMUZ engine now writes the hand-off card itself: same shape every time, one numbered question list, answers by number remembered so nothing is asked twice, and the card is the last thing on screen.
 - 2026-11-09 — BMUZ engine passed Muzzy's live check: labelled messages, Approve never pre-picked, a closed window caught as a crash, the band (yellow / green / red), the watchdog restarting a frozen step, and plan mode handing in its plan. Four rough edges he found were fixed the same night.
@@ -50,4 +51,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-07 — Released v0.41.0 (v0.39 Tutorial blocks): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words.
 - 2026-11-07 — Sprint 63 done (v0.39 — Tutorial blocks, Muzzy approved all four): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words. Ready for /deliver.
 - 2026-11-07 — Lessons tab: a step's words are typed right in the Dev Kit and change the tutorial bubble on screen at once (Muzzy's ask); Save touches only those words.
-- 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.
