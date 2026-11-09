@@ -643,7 +643,7 @@ flowchart LR
 
 ## BMUZ 1.0 — The rebuild  ← current · planned 2026-11-08
 Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, develop, and deliver what I'm looking for from BMUZ"): BMUZ becomes a plugin whose steps are data run by an engine inside Claude Code — every process repeatable like an exe, Claude the judgement inside each step. Vision: `research/bmuz-vision/VISION.md` · how: `ARCHITECTURE.md` · plan: `REBUILD-PLAN.md` · proof: `proof-results.md`. Code lives in its own repo (dev/bmuz); planned here until BMUZ gets its own planner (F213–F218).
-- 🔨 F211 🧱 BMUZ engine core — the proof's mod made real: pipeline format, journal, lock, doctor, checkpoints + undo list, band, watchdog, retries, tool limits, the 7 live must-fixes — must:bmuz-1.0 · sprint 67
+- ✅ F211 🧱 BMUZ engine core — the proof's mod made real: pipeline format, journal, lock, doctor, checkpoints + undo list, band, watchdog, retries, tool limits, the 7 live must-fixes — must:bmuz-1.0 · sprint 67
 - 🔨 F212 🧱 BMUZ plugin on both machines — one plugin from BMUZ's own repo, installed for real on the PC and the laptop, Claude Code version pinned — must:bmuz-1.0 · needs: F211 · sprint 67
 - ⏳ F213 🧱 Engine-written hand-off card — the card, one numbered question list, open questions + decisions lists, taste questions ask first — must:bmuz-1.0 · needs: F211
 - ⏳ F214 🔧 Save and sync pipelines — /save and sync run through the engine (first switch-over) — must:bmuz-1.0 · needs: F212
@@ -659,7 +659,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F224 🔧 Journey tests — journeys J1–J8 as scripted runs before every BMUZ update; the finish line — must:bmuz-1.0 · needs: F223, F222
 ```mermaid
 flowchart LR
-  F211[🔨 F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
+  F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
   F211 --> F213[⏳ F213 Hand-off card]
   F212 --> F214[⏳ F214 Save + sync]
   F212 --> F215[⏳ F215 Bug pipeline]
@@ -699,6 +699,7 @@ flowchart LR
 
 ## Ideas
 Marks (audit 2026-11-07): ○ OPEN still true · ◐ PARTLY · ✅ DONE by a feature · ✗ STALE · → GAME a game’s own session · → F## a feature took it. An unmarked line was already marked before.
+- 2026-11-09 — ○ OPEN (noted 2026-11-09, for R6 — Develop + overnight runs). **Overnight gates: a bedtime check.** Muzzy: "the whole point of doing an overnight run is that it works while I sleep… maybe there's a way to pre-mortem, and KNOW what it might ask for, and ask for pre approval?" Claude's pick: gates are written in the pipeline file, so before an overnight run the engine lists every gate it could hit with its default; Muzzy says yes/no per gate once. Taste gates (name, look, plan card) take the default + an Ask Muzzy line; hard-to-undo gates (publish, release, delete) always wait; surprises BLOCK and the run moves on to the next feature. Until then every gate waits (V25). Decide when R6 is planned — not before.
 - 2026-11-07 — ○ OPEN (noted 2026-11-07). **The starter's first bot-speed settings test is flagged slow** (check:full's slow-test warning, sprint 66: src/game/settings.test.ts "starts at the row default, Normal" 1.8 s in the full run, ~0.8 s alone): the first `await import('./settings')` after resetModules loads the module graph cold — a one-time load, not game logic; GitHub has passed it so far. Fix when it bites: warm the import in a beforeAll (or give that one test `{ timeout: 20_000 }` with the reason).
 - 2026-11-07 — → F207 — Starter's online test stops flaking (sprint 66). **The starter's online e2e flaked on GitHub again** (sprint 65, run 42412069026: `FAIL locator.click: Timeout 30000ms exceeded` in online, nothing online-related changed; the next push was green) — the v0.30 look-back noted the same timeout on main; find what the click waits on (a second tab not seated yet?) and wait for that instead.
 - 2026-11-07 — → F205. **The starter's e2e/screens.mjs ignores the game's orientation** (F196 — Test helpers' helper): it always shoots the 7 sizes; a portrait game copying it would shoot sideways sizes — read content/ui/style.json orientation like templates/shots.mjs does.

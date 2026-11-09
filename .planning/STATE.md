@@ -1,17 +1,17 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-08 15:17 — **Sprint 67: all 🤖 work done; two 🙋 steps left.** Engine repo: `~/Documents/dev/bmuz` (github TheBlueMuzzy/bmuz, branch `dev/bmuz-1-0`); details per task in SPRINT.md Notes. Headless 14/14, check:fast green (bmuz 82e6c1d). BMUZ plugin is INSTALLED on the PC (user scope, `bmuz@bmuz`, read from dev/bmuz/plugin) — it only acts in folders with a bmuz.json.
-- **Next — F211 task 7 (Muzzy, live, ~10 min, one step at a time):** in `C:\Users\Muzzy\Documents\dev\bmuz\project`: `node ..\tests\setup.mjs fresh`, then `claude` (installed plugin, no --plugin-dir needed; trust prompt once): band ticks, gate buttons with "Change the name" first, close window at gate → next start logs crash.detected, `setup.mjs stall` → watchdog relaunch labelled as the engine's + band turns red on BLOCKED, plan mode hands in its plan. Approved → `F211: done`.
-- **F212 task 4 (laptop):** pull dev/bmuz (clone it into Documents/dev/bmuz if missing), then `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`.
-- Ask Muzzy: may any gate go ahead overnight with a default? Pick: no (V25).
+2026-11-09 00:30 — **Sprint 67: F211 — BMUZ engine core is DONE (Muzzy's live re-check passed); one 🙋 step left: F212 task 4 on the laptop.** Engine repo: `~/Documents/dev/bmuz` (github TheBlueMuzzy/bmuz, branch `dev/bmuz-1-0`, last e51b984); details in SPRINT.md Notes. The live check found 4 things, all fixed + tested (29 plugin tests, check:fast green): Esc on a question ≠ unattended run (0278a69), a flow try asked once per session (0278a69), "bmuz go" outside a BMUZ project says BMUZ is off there (2e3ed08), a flow retry says "try N of 3 … start this fresh one" + the band clock counts only while working (e51b984). BMUZ plugin INSTALLED on the PC (user scope, `bmuz@bmuz`, read from dev/bmuz/plugin; only acts in folders with a bmuz.json).
+- **Next — F212 task 4 (laptop, Muzzy, one step at a time):** pull dev/bmuz (clone into Documents/dev/bmuz if missing), then `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`; then a fresh test project shows the band (cd …muzproject, `node ..	estssetup.mjs fresh`, `claude`, `bmuz go`). Done → sprint 67 complete → /deliver of the bmuz work branch is NOT yet (milestone BMUZ 1.0 continues: R3 next per REBUILD-PLAN).
+- Overnight-gate question parked in ROADMAP Ideas (2026-11-09, bedtime check, decide at R6) — don't re-ask before then (Muzzy found the repeat confusing).
+- Small follow-ups (Claude's, not blocking): the band shows twice (above the input + the status line) — weigh dropping the status-line copy; handoff-check HC11 looks for "Noted in Ideas" in the cwd project's ROADMAP, but BMUZ's plan lives in ../framework → fix at R13.
 - On hold: games' updates (research/2026-11-06-*-catchup.md). Laptop once: `npm run install-modules -- --all` in starters/turn-based; root `npm install`.
 
-Reviewed through: bmuz abd7d8a (F211 — BMUZ engine core: fresh-eyes review helper read engine.js + register.tsx in full over a8b5c98..aebcf01, 13 findings, 12 fixed in abd7d8a, #13 unconfirmed; Claude wrote every line and re-read the fixes) · before: 80d7e85 (sprint 66: F207 + F208 + F209 — Claude read each diff, F208's key code in full; /code-review low db2962d..80d7e85 empty in 7 s) · older: archive/log.md
+Reviewed through: bmuz e51b984 (F211 live-check fixes 0278a69 · 2e3ed08 · e51b984 — Claude wrote every line and read each diff; tests added for each) · before: bmuz abd7d8a (F211 — BMUZ engine core: fresh-eyes review helper read engine.js + register.tsx in full over a8b5c98..aebcf01, 13 findings, 12 fixed in abd7d8a, #13 unconfirmed; Claude wrote every line and re-read the fixes) · before: 80d7e85 (sprint 66: F207 + F208 + F209 — Claude read each diff, F208's key code in full; /code-review low db2962d..80d7e85 empty in 7 s) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F211 — BMUZ engine core — built, waiting on Muzzy's live re-check (task 7)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F212 — BMUZ plugin on both machines — laptop install left (task 4); F211 done 2026-11-09   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
@@ -38,6 +38,7 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - Dev Kit: `devkit/` — `npm test`; install with `node devkit/scripts/install-devkit.mjs <game>` (--dry-run first on updates). Game-side check: `npm run check:devkit`.
 
 ## Log
+- 2026-11-09 — BMUZ engine passed Muzzy's live check: labelled messages, Approve never pre-picked, a closed window caught as a crash, the band (yellow / green / red), the watchdog restarting a frozen step, and plan mode handing in its plan. Four rough edges he found were fixed the same night.
 - 2026-11-08 — BMUZ engine built in its own repo (dev/bmuz): pipeline files are checked, the engine keeps a log it can rebuild from, offers an undo list and a retry for stuck steps, overnight runs never stop to ask, and Approve is never the pre-selected button. 13 of 14 real-session checks pass; the last needs Muzzy to trust the test folder, then the live re-check.
 - 2026-11-08 — Released v0.44.0 (v0.42 Steadier and safer): the starter's online test stops flaking, Dev Kit dev-server calls need the key from the page the game served, a release's crash maps can't be overwritten, and the hand-off check reads feature names from the right project.
 - 2026-11-07 — Sprint 64 built overnight (v0.40 — Checks any game can reuse): a Dev Kit helper for test scripts, a before/after screenshot check any game copies, a swap rehearsal on a throwaway copy, and session start naming a game's out-of-date test scripts. Waiting on Muzzy's look.
@@ -47,4 +48,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.
 - 2026-11-06 — F201 — Starter teaches built: every new game from the starter opens with a 3-step how-to-play made only from the tutorial blocks; adding a step is one line of data. Waiting on Muzzy's look.
 - 2026-11-06 — F198 — Tutorial module done (Muzzy approved): a tutorial toolbox any game loads like a library; Goops' own lesson player swapped for it on a copy with every Goops check green.
-- 2026-11-06 — F199 — Spotlight + bubble placement done (Muzzy approved): the UI kit can dim everything but what's being taught, and its pointer bubble keeps off the play area. F198 — Tutorial module is on its last check.
