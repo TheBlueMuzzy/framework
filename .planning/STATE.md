@@ -1,7 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-09 01:10 — **Sprint 67: F211 — BMUZ engine core ✅ and F213 — Engine-written hand-off card ✅ (Muzzy approved after 2 live looks); only F212 — BMUZ plugin on both machines task 4 left (the laptop, at work).** Engine repo: `~/Documents/dev/bmuz` (branch `dev/bmuz-1-0`). The engine writes the hand-off card from a hand-off step's data (docs/handoff-card.md), keeps one numbered open-questions list (parked after 2 cards), records answers by number in .bmuz/decisions.md and refuses a decided question; taste questions ask "What's your view?". In a folder with bmuz.json the old handoff-check stands aside (the card is the last thing on screen — Muzzy).
+2026-11-09 01:10 — **Sprint 67: F211 — BMUZ engine core ✅ and F213 — Engine-written hand-off card ✅ (Muzzy approved after 2 live looks); F212 — BMUZ plugin on both machines task 4 waits for the laptop. **OVERNIGHT 2026-11-09: F217 — Discover pipeline being built by a helper (SPRINT.md F217 section); morning: Muzzy's live look (task 6).** Engine repo: `~/Documents/dev/bmuz` (branch `dev/bmuz-1-0`). The engine writes the hand-off card from a hand-off step's data (docs/handoff-card.md), keeps one numbered open-questions list (parked after 2 cards), records answers by number in .bmuz/decisions.md and refuses a decided question; taste questions ask "What's your view?". In a folder with bmuz.json the old handoff-check stands aside (the card is the last thing on screen — Muzzy).
 - **Next — F212 task 4 (laptop, Muzzy, one step at a time):** pull dev/bmuz (clone into Documents/dev/bmuz if missing), then `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`; then a fresh test project shows the band (cd …muzproject, `node ..	estssetup.mjs fresh`, `claude`, `bmuz go`). Done → retro + archive sprint 67 → sprint 68: F214 — Save and sync pipelines (+ F217 — Discover pipeline is 🟢 too).
 - Overnight-gate question parked in ROADMAP Ideas (bedtime check, decide at F216 — Develop pipeline) — don't re-ask before then.
 - Small follow-ups (Claude's, not blocking): the band shows twice (above the input + the status line); a line starting with an open question's number counts as its answer (kept on purpose); handoff-check HC11 looks in the cwd project's ROADMAP but BMUZ's plan lives in ../framework → fix at F223 — Hook diet.
@@ -11,7 +11,7 @@ Reviewed through: bmuz (F213 fixes after review: 8a22b24 + the show-once commit 
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F212 — BMUZ plugin on both machines — laptop install left (task 4); F211 + F213 done 2026-11-09   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F217 — Discover pipeline (overnight run 2026-11-09) · F212 — BMUZ plugin on both machines waits on the laptop (task 4) · F211 + F213 done 2026-11-09   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
