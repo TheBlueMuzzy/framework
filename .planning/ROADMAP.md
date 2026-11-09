@@ -649,7 +649,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F214 🔧 Save and sync pipelines — /save and sync run through the engine (first switch-over) — must:bmuz-1.0 · needs: F212
 - ⏳ F215 🔧 Bug pipeline — report → reproduce as a failing test → fix → keep the test → matching places, the same way every time — must:bmuz-1.0 · needs: F212, F213
 - ⏳ F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
-- 🔨 F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
+- ✅ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
 - ⏳ F218 🔧 Define pipeline — GDD, TDD, feature map and scope, with a plan-check flow — must:bmuz-1.0 · needs: F217
 - ⏳ F219 🔧 Deliver pipeline — a release flow per platform, security scans and review, live check — must:bmuz-1.0 · needs: F216
 - ⏳ F220 🔧 Milestone review pipeline — a retro flow that turns lessons into proposals Muzzy approves — must:bmuz-1.0 · needs: F216
@@ -667,7 +667,7 @@ flowchart LR
   F212 --> F215[⏳ F215 Bug pipeline]
   F213 --> F215
   F215 --> F216[⏳ F216 Develop pipeline]
-  F213 --> F217[🔨 F217 Discover pipeline]
+  F213 --> F217[✅ F217 Discover pipeline]
   F217 --> F218[⏳ F218 Define pipeline]
   F216 --> F219[⏳ F219 Deliver pipeline]
   F216 --> F220[⏳ F220 Milestone review]
@@ -704,6 +704,7 @@ flowchart LR
 
 ## Ideas
 Marks (audit 2026-11-07): ○ OPEN still true · ◐ PARTLY · ✅ DONE by a feature · ✗ STALE · → GAME a game’s own session · → F## a feature took it. An unmarked line was already marked before.
+- 2026-11-09 — ○ OPEN (noted 2026-11-09 at F217's approval, fits F226 — Five stages, one meaning each). **Say which stage you're in, and when you're ready for the next.** Muzzy: "it should sort of tell you when you're in a specific stage of the process. and when you're ready to move on to the next one, unless there are revisions or something." Claude's pick: the band names the stage as well as the step ("Discover · step 4 of 11 · theme dig"), and every stage's last card ends with a ready line ("Discover is done: ready for Define — `bmuz go`") unless revisions are open, in which case it names them instead. Plan it with F226.
 - 2026-11-09 — ○ OPEN (noted 2026-11-09, for R6 — Develop + overnight runs). **Overnight gates: a bedtime check.** Muzzy: "the whole point of doing an overnight run is that it works while I sleep… maybe there's a way to pre-mortem, and KNOW what it might ask for, and ask for pre approval?" Claude's pick: gates are written in the pipeline file, so before an overnight run the engine lists every gate it could hit with its default; Muzzy says yes/no per gate once. Taste gates (name, look, plan card) take the default + an Ask Muzzy line; hard-to-undo gates (publish, release, delete) always wait; surprises BLOCK and the run moves on to the next feature. Until then every gate waits (V25). Decide when R6 is planned — not before.
 - 2026-11-07 — ○ OPEN (noted 2026-11-07). **The starter's first bot-speed settings test is flagged slow** (check:full's slow-test warning, sprint 66: src/game/settings.test.ts "starts at the row default, Normal" 1.8 s in the full run, ~0.8 s alone): the first `await import('./settings')` after resetModules loads the module graph cold — a one-time load, not game logic; GitHub has passed it so far. Fix when it bites: warm the import in a beforeAll (or give that one test `{ timeout: 20_000 }` with the reason).
 - 2026-11-07 — → F207 — Starter's online test stops flaking (sprint 66). **The starter's online e2e flaked on GitHub again** (sprint 65, run 42412069026: `FAIL locator.click: Timeout 30000ms exceeded` in online, nothing online-related changed; the next push was green) — the v0.30 look-back noted the same timeout on main; find what the click waits on (a second tab not seated yet?) and wait for that instead.

@@ -43,8 +43,9 @@ Done when: in a test project, "bmuz go" on the discover pipeline talks through t
 - [x] 🤖 8. One Discover document per project (.planning/DISCOVER.md): shelves that only grow + one section per run; the creative's words kept verbatim — ~/Documents/dev/bmuz/plugin/scripts
 - [x] 🤖 9. Wrap up any time: after each step "keep going or wrap up?"; wrapping up saves what's collected and jumps to the brick board (engine: a way out of the middle of a pipeline) — ~/Documents/dev/bmuz/plugin/hooks/engine.js
 - [x] 🤖 12. (live look) A talk step shows the creative one line; the step's instructions go to Claude as hidden context — ~/Documents/dev/bmuz/plugin/hooks/register.tsx
-- [ ] 🙋 6. Live look: a discover run on a small idea of yours, in a test project (~10 min)
+- [x] 🙋 6. Live look: a discover run on a small idea of yours, in a test project (~10 min) — approved 2026-11-09 ("it worked really well"; one fix on the way: task 12)
 Check: check:fast green · check:pipelines passes discover.json · headless discover run ends with the engine's card and a research file whose every source answers · Muzzy's live look.
+Checked: check:fast green (96 node + 42 plugin, check:pipelines passes discover.json) at bmuz df171ce · check:headless 27/27 (12:21–12:55; discover in 2005 s: 11 creative steps in order, 3 reports with every link answering, DISCOVER.md filled, brick board card, nothing written outside .planning) · Muzzy's live look approved 2026-11-09.
 
 Ask Muzzy:
 Notes: Plan stays in the framework roadmap until BMUZ has its own planner (Key facts rule, 2026-11-04). The new engine only acts in projects with a BMUZ pipeline file, so today's BMUZ keeps working untouched while it's built.
