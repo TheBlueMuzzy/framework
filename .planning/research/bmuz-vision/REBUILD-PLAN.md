@@ -23,7 +23,7 @@ Nothing here is started. The order and features need Muzzy's OK, and then the 6 
 | R5 | **Bug pipeline + bug flow** (reproduce as a failing test → fix → keep the test → check matching places) | `/bug` (new name: it clashes with a built-in) runs the same way every time | R2, R3 |
 | R6 | **Develop: the task flow + the sprint loop + overnight runs** (separate reviewer, plan card, never-stall settings) | sprints run the same way every time; overnight runs don't stall | R5, live checks L3 + L5 |
 | R7 | **Discover + the research flow** | research arrives the same way every time, with sources checked | R3 |
-| R8 | **Define + the plan-check flow + scope** | GDD, TDD and feature map checked against each other before building | R7 |
+| R8 | **Define + the concept check + scope** (changed 2026-11-09, Muzzy "yes": Define writes GDD Part 1, the one-page concept; the plan-check flow — GDD, TDD and feature map checked against each other — moves to the end of Design, F226 — Five stages, one meaning each; define-research.md §3) | the concept page checked for fit (pillars ↔ feelings ↔ first-release musts) before Design starts | R7 |
 | R9 | **Deliver: release flow per platform + security scans + security review** | release in one go after your OK; secrets and private text can never go out | R6 |
 | R10 | **Milestone review: retro flow → lesson proposals to Muzzy** | lessons arrive as proposals you approve | R6 |
 | R11 | **First setup + setup sidequests** (git, npm, adb, Firebase… detected and walked through) | a new user goes from install to "I have an idea" with no help | R2 |

@@ -330,6 +330,12 @@ define.json: digest(script) → direction(talk, wrapTo write) → story(talk) �
 
 ## 6. Risks and open questions
 
+### Muzzy's answers (2026-11-09, on the proposal page) — these win over anything below
+1. **The Define/Design line: yes.** Define writes GDD Part 1 (the concept); Design writes GDD Part 2 (the game); the TDD (the tech spec) and the feature map (ROADMAP) are separate files, written at the end of Design.
+2. **Mechanisms: the creative's idea first.** Ask whether they already have a mechanism in mind for each core verb; offer the shelf's candidates only as options beside that. A backup mechanism is offered, never required ("it's possible the designer already has an idea of what it could be").
+3. **The 3–5 line story: their choice of route.** First a short explanation of what the story is, with an example written for a well-known game, then two options: "write your own" or "be guided" (Claude asks a few prompts and drafts from the answers). Muzzy: "it might not be something people are used to."
+4. **Pillars: any kind that settles arguments.** A feeling ("every moment should feel like a quiet rescue"), a theme rule (thematic games), or an abstract situation ("I'm trapped and have to get out of a sticky situation"). The step explains the kinds with one short example each and lets the creative pick; the test for every pillar stays "which argument does it settle?"
+
 ### For Muzzy (taste only)
 1. **Mechanisms:** Define picks a lead and a backup per core verb, and Design's paper test settles it. Or should Define pick one and move on? (My lean, if asked: lead + backup. Thornton: you can't know "without testing".)
 2. **The story:** you always write the 3–5 lines first, and Claude drafts only when you ask. Or would you rather react to 2–3 drafts? (My lean: you first, matching V32b.)
