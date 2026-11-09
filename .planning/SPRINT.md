@@ -60,7 +60,7 @@ Check: check:fast green · check:pipelines passes define.json · headless define
 
 ## F225 🔧 Where are you starting? (pulled in 2026-11-09 from Muzzy's live-look notes; F218's live look waits on it)
 Done when: "bmuz go" in a new folder opens with a short self-selecting question (plus an upload/point-at-files option), the engine reads what was shared and proposes the real entry point (any stage, any step) for the creative to confirm, each stage opens with a short paragraph (stage, goal, what you'll do), steps already answered by their material are one-tap "keep", and a stage's end hands over to the next stage in the same folder — the same pipeline every time, entered at different spots.
-- [ ] 🤖 1. The opening questions + stage intro paragraphs, proposed to Muzzy (critical thinking + a short check of how designers describe where an idea stands) — .planning/research/bmuz-vision/entry-research.md
+- [x] 🤖 1. The opening questions + stage intro paragraphs, proposed to Muzzy (critical thinking + a short check of how designers describe where an idea stands) — .planning/research/bmuz-vision/entry-research.md
 - [ ] 🙋 2. Say yes or what to change to the opening questions and intros
 - [ ] 🤖 3. Engine: one project runs the stages in order (bmuz.json names the stage; a stage's end offers the next, its record kept, not refused) and a pipeline can start at a named step — ~/Documents/dev/bmuz/plugin/hooks/engine.js
 - [ ] 🤖 4. The start pipeline: the opening question, reading what's shared, the proposed entry point and the creative's OK — ~/Documents/dev/bmuz/plugin/pipelines
