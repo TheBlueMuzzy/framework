@@ -91,6 +91,7 @@ Status: **draft**. Each item is a promise. When it's signed off, a change to the
 - **V45** Anything downloaded (packages, assets, other people's code) is treated as untrusted. Packages come from known sources and get a security check.
 - **V46** Games keep players safe: saves and crash reports store no more than they need, multiplayer servers can't be abused, and store rules on privacy and age are met before release.
 - **V47** A BMUZ update can't harm a user's machine or projects, and only Muzzy can publish updates.
+- **V48** Five stages, one meaning each: discover (collect the bricks) · define (choose them, the 3–5 line story, scope) · design (put them together into the complete GDD) · develop (build it in code and refine) · release (put it out). The GDD is the north star: "a source of truth… the communication between you and me… a blueprint that you regularly update to be more and more reflective of the final product" (Muzzy, 2026-11-09). A project can start from what it already has (F225 — Start from what you have).
 
 ## G. Things he caught again (each becomes a permanent test)
 
