@@ -1,15 +1,12 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-09 13:10 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ (Muzzy approved 2026-11-09: "it worked really well") · F212 — BMUZ plugin on both machines waits on the laptop (task 4, Muzzy "later").** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0). Only F212 task 4 is left in the sprint → then retro + archive.
-- F217 at done: live-look fix — talk steps show one line, instructions travel as hidden prompt context (bmuz 50ea621); review fixes df171ce (headless discover now uses .scratch/bmuz-discover-headless, never the live-look folder). Open Ask Muzzy (in the card 2026-11-09, unanswered): three research rounds vs one; keep all on-ice ideas. Not judged at the live look: the card's questions under "Your to-dos", 248+ bricks a lot to read (Muzzy didn't read DISCOVER.md).
-- New idea (ROADMAP Ideas 2026-11-09): say which stage you're in and when you're ready for the next — plan with F226 — Five stages, one meaning each.
-- **Next:** F218 — Define pipeline and F226 — Five stages, one meaning each are 🟢 ready (F217 done). Offered Muzzy `/sprint` to pull F218 in while F212's laptop step waits — his answer pending.
-- Design sources: framework/.planning/research/bmuz-vision/discover-creative-research.md §6 (steps, 34 questions, DISCOVER.md layout) + discover-research.md (heuristics H1–H26). Proposal page for Muzzy: https://claude.ai/artifact/Dh2SMtXQuTakXSuqLYqMiZ
-- Decided 2026-11-09 (Muzzy): five stages discover · define · design · develop · release (VISION V48, F226 — Five stages, one meaning each); Design is its own stage — the GDD is the north star; existing material (rulebooks/notes/GDD) gets its own intake → F225 — Start from what you have (first test: the Escape Pod Scramble remake). Experience first in Discover; the 3–5 line story is a GDD section filled in during Define; discover always runs a short research; one Discover document per project; card shows top 1–2 probes.
-- Muzzy's card rules (templates/handoff.md): the card is the last thing on screen; the latest card stands alone — the link to what he reviews + every open question in it, never "see above". BGG mechanics list = private vocabulary only (memory + SPRINT).
-- **Next — F212 task 4 (laptop):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check.
-- Follow-ups (Claude's): flow verdict out of the prompt hook (≤3 min hold); band shows twice; a line starting with an open question's number counts as its answer; HC11 looks in the cwd project's ROADMAP (BMUZ's lives in ../framework) → F223 — Hook diet.
+2026-11-09 13:15 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ (approved 2026-11-09) · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
+- **Next:** F218 — Define pipeline + F226 — Five stages, one meaning each are 🟢 ready. Offered Muzzy `/sprint` to pull F218 in while the laptop step waits — answer pending.
+- **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check. Then sprint retro + archive.
+- Open Ask Muzzy: discover's three research rounds vs one; keep all on-ice ideas. Not judged yet: card questions under "Your to-dos"; DISCOVER.md size.
+- Decided 2026-11-09: five stages discover · define · design · develop · release (VISION V48, F226); existing material → F225 — Start from what you have. Card rules: templates/handoff.md. BGG mechanics list = private vocabulary only.
+- Follow-ups (Claude's) → F223 — Hook diet: flow verdict out of the prompt hook; band shows twice; numbered-answer lines; HC11 looks in the cwd ROADMAP.
 
 Reviewed through: bmuz df171ce (F217 tasks 7–12 — Claude read engine.js + register.tsx diffs f64203c..551561e in full (wrap-up, recap, null holes, journal rebuild) and discover-doc.mjs's path handling; /code-review low f64203c..50ea621 empty in 7 s (too quick to count); 2 fixes in df171ce) · older: archive/log.md
 
