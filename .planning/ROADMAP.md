@@ -658,7 +658,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F223 🔧 Hook diet — keep the safety hooks, retire the rest as pipelines take over — must:bmuz-1.0 · needs: F214, F215, F216, F219
 - ⏳ F224 🔧 Journey tests — journeys J1–J8 as scripted runs before every BMUZ update; the finish line — must:bmuz-1.0 · needs: F223, F222
 - ⏳ F225 🔧 Start from what you have — a "what do you have?" check before Discover; existing notes, rulebooks or a GDD go through an intake that fills the Discover shelves (each brick sourced), lists the gaps, asks only what the material can't answer, then hands to Define; first real test: the Escape Pod Scramble remake (Muzzy 2026-11-09) — must:bmuz-1.0 · needs: F217, F218
-- ⏳ F226 ❓ Five stages, one meaning each — un-clash the idea flow and the coding flow: discover · define · design · develop · release (proposal 2026-11-09, waiting on Muzzy) — must:bmuz-1.0 · needs: F217
+- ⏳ F226 🔧 Five stages, one meaning each — discover · define · design · develop · release (Muzzy 2026-11-09: "your pick"); /deliver renamed /release; Design gets its own stage and command — concept, rules, sketches, paper playtests → the complete GDD, "the north star for decision making, a source of truth… the communication between you and me… a blueprint that you regularly update to be more and more reflective of the final product" (Muzzy) — must:bmuz-1.0 · needs: F217
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
