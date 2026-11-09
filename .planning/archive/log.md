@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-11-06 — F201 — Starter teaches built: every new game from the starter opens with a 3-step how-to-play made only from the tutorial blocks; adding a step is one line of data. Waiting on Muzzy's look.
 - 2026-11-06 — F198 — Tutorial module done (Muzzy approved): a tutorial toolbox any game loads like a library; Goops' own lesson player swapped for it on a copy with every Goops check green.
 - 2026-11-06 — F199 — Spotlight + bubble placement done (Muzzy approved): the UI kit can dim everything but what's being taught, and its pointer bubble keeps off the play area. F198 — Tutorial module is on its last check.
 - 2026-11-06 — F197 — Tutorial trial done: Goops' lesson player taught Glyphtender's first 3 steps on a copy, unchanged, and Muzzy says it teaches the same. He chose to build a tutorial toolbox now that any game picks from — planned as v0.39 — Tutorial blocks.

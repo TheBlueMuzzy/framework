@@ -49,4 +49,3 @@ Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framewo
 - 2026-11-07 — Sprint 63 done (v0.39 — Tutorial blocks, Muzzy approved all four): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words. Ready for /deliver.
 - 2026-11-07 — Lessons tab: a step's words are typed right in the Dev Kit and change the tutorial bubble on screen at once (Muzzy's ask); Save touches only those words.
 - 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.
-- 2026-11-06 — F201 — Starter teaches built: every new game from the starter opens with a 3-step how-to-play made only from the tutorial blocks; adding a step is one line of data. Waiting on Muzzy's look.
