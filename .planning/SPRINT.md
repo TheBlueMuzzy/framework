@@ -43,7 +43,7 @@ Done when: in a test project, "bmuz go" on the discover pipeline talks through t
 - [x] 🤖 5. Tests: pipeline check + node tests for the source check + plugin tests + a headless discover run in a scratch project on a small topic — ~/Documents/dev/bmuz/tests/headless.mjs
 - [ ] 🤖 7. Creative steps (Muzzy approved 2026-11-09, experience first): spark → experience & fantasy → theme dig → simulation breakdown (nouns with states, verbs as theme word + outcome, verb × noun grid) → mechanism shelf → prior art & twists → brick board — ~/Documents/dev/bmuz/plugin/pipelines/discover.json
 - [ ] 🤖 8. One Discover document per project (.planning/DISCOVER.md): shelves that only grow + one section per run; the creative's words kept verbatim — ~/Documents/dev/bmuz/plugin/scripts
-- [ ] 🤖 9. Wrap up any time: after each step "keep going or wrap up?"; wrapping up saves what's collected and jumps to the brick board (engine: a way out of the middle of a pipeline) — ~/Documents/dev/bmuz/plugin/hooks/engine.js
+- [x] 🤖 9. Wrap up any time: after each step "keep going or wrap up?"; wrapping up saves what's collected and jumps to the brick board (engine: a way out of the middle of a pipeline) — ~/Documents/dev/bmuz/plugin/hooks/engine.js
 - [ ] 🤖 10. Craft notes + research prompts from discover-creative-research.md §6 (question bank, a few at a time; BGG mechanics list never shown as a resource); the card links the Discover document and repeats every open question — ~/Documents/dev/bmuz/plugin/craft
 - [ ] 🤖 11. Tests: pipeline check, DISCOVER.md shelves grow and never trim, wrap-up mid-run, headless run on a small game idea in auto mode — ~/Documents/dev/bmuz/tests/headless.mjs
 - [ ] 🙋 6. Live look: a discover run on a small idea of yours, in a test project (~10 min)
