@@ -2,7 +2,7 @@
 
 Research for F217 (the discover pipeline's research flow). 2026-11-09.
 
-**How first-hand this is:** every claim below carries a URL. Most quotes came from web-search excerpts of the named pages (Design Council, NN/g, IDEO.org, Strategyzer, SAFe, the MDA paper), not from reading each page top to bottom. Full-page fetches were attempted but their reports did not come back in time. Treat exact wording as "quoted in search excerpts of that page"; the facts are consistent across several sources each.
+**How first-hand this is:** (sections 1–6) every claim below carries a URL. Most quotes came from web-search excerpts of the named pages (Design Council, NN/g, IDEO.org, Strategyzer, SAFe, the MDA paper), not from reading each page top to bottom. Full-page fetches were attempted but their reports did not come back in time. Treat exact wording as "quoted in search excerpts of that page"; the facts are consistent across several sources each.
 
 ---
 
@@ -98,50 +98,205 @@ The Council warns methods "shouldn't be used in isolation" — explore with a se
 
 ---
 
-## 5. Proposed shape for the BMUZ discover pipeline
+## 5. Proposed shape for the BMUZ discover pipeline — built from the heuristics
 
-Principle: **the designer supplies the "people" part, helpers do desk research, the merge separates fact from guess, Define does the choosing.**
+Each step names the heuristics from section 6 (H1–H24) it puts into practice. **The topic type (tech / aesthetic / design) does not pick the angles.** The heuristics pick the *lenses*; the topic only changes *where the evidence lives* (see "Topic only changes the sources", below). That's the fix for "reference games / players / what's fun", which was a topic list wearing a process costume.
 
-### Talk steps (few — three, maybe four)
-1. **What are we discovering?** One sentence in Muzzy's words + the engine's classification: *tech / aesthetic / design* (Claude proposes, Muzzy confirms). Also: which MDA layer it lives in.
-2. **What do you already believe or want?** His hunches, references he already loves, the feeling he's after. These are recorded as **assumptions**, not facts (NN/g discovery mindset; Strategyzer). Any solution he arrives with is written down and put "on ice".
-3. **What must it work within?** Constraints only he knows: platform, the game it's for, must-keep things, deal-breakers. (Tech topics lean on this.)
-4. *(Optional, after the report)* **What surprised you / what's missing?** One reaction pass — the Council's loop back, not a new phase.
+Where this section applies a heuristic beyond its source's own setting (e.g. a human brainstorming finding applied to AI helpers), it says so — that part is this report's reasoning, not a cited fact.
 
-### How the research flow picks its angles
-- An **angle-planner** step (one helper) reads talk steps 1–3 and writes 3 angles + the question each answers + why that angle, from the menu for the topic type (section 4). Always:
-  - one angle on **what already exists** (prior art / references / precedents),
-  - one angle on **how it works or fails** (techniques, breakdowns, failure stories, constraints),
-  - one **wildcard/analogous** angle outside the obvious field (IDEO analogous inspiration) — the unknown-unknowns slot.
-- Angles are shown to Muzzy in one line each before running (cheap, catches "that's the wrong question").
-- A helper may flag "this can only be answered by a spike / sketch / Muzzy playing" — that becomes a next step, not a guess.
+### Stage A — Frame (talk steps, 3 questions)
+Purpose: question the brief before anyone searches (H6), and turn Muzzy's hunches into testable assumptions (H9) and research questions (H10).
 
-### What the merged report contains
-- **The question** (talk step 1) and the type/MDA layer.
-- **Findings** — each with source URL; unsourced claims dropped (already F217's rule).
-- **Options / references** found, side by side, each with "why it's relevant" and evidence.
-- **Assumptions check** — each of Muzzy's step-2 beliefs marked *supported / contradicted / no evidence*.
-- **Surprises** — things nobody asked about (unknown unknowns).
-- **Open questions** — what desk research couldn't answer, with the method that could (spike, sketch, playtest, ask Muzzy).
-- **Parked ideas** — solutions that came up, on ice for Define.
-- **Disagreements** — where sources or helpers disagreed.
-- No recommendation of one answer, no HMW, no scope.
+1. **"What's this about, in your words — and what would having it give you?"**
+   - The second half is a short "why" chain (H7, 2–3 whys at most, stop when the answer is a feeling or a goal, not a thing). It gets from the thing asked for to the goal behind it, the reframe move in H6 (Wedell-Wedellsborg's window example: "open the window" was really "fresh air").
+   - Claude reflects back one line: *the brief as said* and *the goal underneath*. Muzzy confirms or corrects.
+2. **"What do you already believe, love, or suspect about it?"**
+   - Everything said is written as an **assumption**, not a fact (H8 discovery mindset, H9).
+   - Any ready-made solution is written down and put **on ice** (H2) — kept, credited, not pursued.
+   - Muzzy marks each assumption *important / not* (only he can judge importance; the evidence column is filled by research — H9).
+3. **"What must it fit, and what's off the table?"** Platform, the game it serves, deal-breakers. These bound the search (H10: goals and constraints choose the method).
 
-### The hand-off card
-- One line: what was discovered (the question).
-- Top 3–5 findings (one line each, sources in the report).
-- Assumptions: N supported · N contradicted · N unknown.
-- Open questions + the suggested probe for each (spike / sketch / playtest).
-- Numbered questions for Muzzy: "Anything surprising or missing?" and "Ready to lock this in?"
-- Next command: `/sketch` when an open question is about feel, else `/define`.
+Then Claude writes **3–5 research questions** (H10), each tied to an important assumption or an open part of the goal, and shows them as one line each. Muzzy can veto or add one (H21 collaborate, H19 communicate visually). Few questions on purpose: overloading a study with goals lowers the quality per goal (NN/g, H10).
 
-### What belongs to Define (not the discover pipeline)
-- Picking the option / direction / visual style (mood board *consensus* — NN/g).
-- The problem statement and "How might we" questions (DC: synthesis is Define; NN/g: HMW at the hand-off).
-- Scope (must/should/could/won't), GDD/TDD entries, feature map, dependencies.
-- Experience *targets* as commitments (Discover lists candidates; Define fixes them).
+### Stage B — Diverge (the research flow)
+Purpose: widen, independently, with evidence.
+
+- **Independent helpers, merged after** (H5). Each helper works alone on its lens, never seeing the others' notes until the merge. Basis: groups that generate together produce fewer and less varied ideas than the same number working alone, mostly from "production blocking" (Diehl & Stroebe); NN/g's diverge-converge has people analyse independently first "to limit bias". Applying this to AI helpers is an analogy, not a tested result.
+- **Lenses are fixed by heuristic, not by topic.** Every run uses these four; the research questions are split across them:
+  1. **Mainstream** — how this is usually done / what most examples share (H12 mainstreams).
+  2. **Extremes and failures** — the most extreme cases, edge cases, and documented failures or post-mortems (H12 extremes; failures are where assumptions break).
+  3. **Outside the field** — the same activity or feeling in an unrelated domain (H11 analogous inspiration; H24 unknown-unknowns slot).
+  4. **Disconfirm** — look specifically for evidence *against* Muzzy's important assumptions (H9 + H14; counters the confirmation bias NN/g warns of — H8). This lens is this report's proposal; the sources support the aim, not this exact role.
+- **Rules every helper follows:**
+  - Quantity before judgement: collect widely, don't rank or recommend (H3, H2).
+  - Two columns: *what the source says / shows* vs *what I think it means* (H13).
+  - Every claim carries its source; unsourced claims are dropped (F217's rule; H14 needs it).
+  - Stop at saturation: when the last few sources added nothing new, stop and say so; a hard cap keeps the run bounded (H15 — the "nothing new" signal is the cited part; the cap is a practical addition).
+  - Flag what reading can't answer and name the probe that could (spike, sketch, playtest, ask Muzzy) (H22, H20).
+
+### Stage C — Converge-lite (the merge)
+Purpose: organise, check strength, keep disagreements — **not** choose (choosing is Define).
+
+- **Cluster** findings into themes (affinity grouping, H13's partner — NN/g) under each research question.
+- **Strength by triangulation** (H14): each claim marked *several independent sources / one source / helper's interpretation only*.
+- **Contradictions kept, not averaged** (H23): show both, note whether the sources were looking at different contexts.
+- **Assumption scoreboard** (H9): each of Muzzy's important assumptions → *supported / contradicted / no evidence*, with the evidence.
+- **Surprises** (H24): findings that answer a question nobody asked.
+- **Open questions → probes** (H22): each with the method that would answer it.
+- **On ice** (H2): solutions and ideas that came up, kept for Define.
+- **"So what" lines** per theme (H16) marked *draft for Define* — an observation plus why it might matter. Not insight statements yet; IDEO puts those in the next phase.
+
+### Stage D — Hand-off card
+Purpose: a shared picture Muzzy can react to in a minute (H19), and the decision to loop back or move on (H22).
+- The brief as said → the goal underneath (from A1).
+- Top 3–5 findings, each with its strength mark.
+- Assumption scoreboard: N supported · N contradicted · N unknown — contradicted ones listed by name.
+- 1–2 surprises.
+- Open questions with their probe.
+- Numbered questions: "1. Anything surprising or missing? 2. Loop back on one question, or lock it in?"
+- Next command: `/sketch` if an open question is about feel; another discover pass if a contradicted assumption changes the goal; else `/define`.
+
+### What belongs to Define (not here)
+- Choosing an option, direction, or visual style.
+- Insight statements, the problem statement, and "How might we" questions (H16–H18). The merge may list draft HMWs at the hand-off (NN/g's timing), but Define picks and rewrites them.
+- Scope, GDD/TDD entries, feature map, experience targets as commitments.
+
+### Topic only changes the sources
+The lenses stay the same; where each lens looks changes:
+
+| Lens | Tech | Aesthetic (look/feel/sound/juice) | Design |
+|---|---|---|---|
+| Mainstream | Official docs, common libraries, usual architecture | Common treatments in games of that kind | Standard mechanics for that experience |
+| Extremes & failures | Issue trackers, post-mortems, limits/benchmarks | The most extreme examples of the feeling; where it tips into "too much" | Edge players, degenerate strategies, failed designs |
+| Outside the field | Other industries solving the same technical problem | Film, animation, product design, music with the same feeling | Sports, toys, social rituals with the same dynamic |
+| Disconfirm | Evidence the favoured option won't fit our constraints | Evidence the favoured reference doesn't produce the target feeling | Evidence the favoured mechanic doesn't create the wanted behaviour |
+
+MDA's "Aesthetics" (player feelings) is a different word from Muzzy's "aesthetic" topics (mostly MDA Sensation + Swink's polish). Keep them apart in prompts (see section 4).
 
 ---
+
+## 6. Heuristics catalogue
+
+General mechanisms that make Discover work, for any topic. "Apply" = how a talk step (T) or an AI research/merge step (R) uses it.
+
+### Shape of the process
+**H1 — Diverge, then converge; understand before solving**
+- What: open the problem up widely before narrowing. "The two diamonds represent a process of exploring an issue more widely or deeply (divergent thinking) and then taking focused action (convergent thinking)." — [DC Framework for Innovation](https://www.designcouncil.org.uk/resources/framework-for-innovation/)
+- Why: the first diamond "helps people understand, rather than simply assume, what the problem is." — [DC](https://www.designcouncil.org.uk/resources/the-double-diamond/)
+- Apply: R — the research flow only widens; the merge organises but does not pick.
+
+**H2 — Defer judgement; no early convergence**
+- What: no criticism or ranking while generating. IDEO's first brainstorming rule is "Defer judgment." — [IDEO U, 7 Simple Rules of Brainstorming](https://ideou.com/blogs/inspiration/7-simple-rules-of-brainstorming); rules go back to Osborn's *Applied Imagination* ([Sage encyclopedia summary](https://sk.sagepub.com/ency/edvol/embed/giftedness/chpt/brainstorming)). In research: solution-first goals cause "anchoring and confirmation bias"; write solution ideas down and put them "on ice". — [NN/g Discovery Mindset](https://www.nngroup.com/articles/discovery-mindset/)
+- Why: judging early narrows the field before it's been seen.
+- Apply: T — solutions Muzzy brings are logged "on ice". R — helpers don't rank or recommend.
+
+**H3 — Go for quantity**
+- What: more ideas/sources raise the odds of a strong one. IDEO rule "Go for quantity." — [IDEO U](https://ideou.com/blogs/inspiration/7-simple-rules-of-brainstorming)
+- Why: quality comes from choosing among many, and choosing is the next phase.
+- Apply: R — each helper gathers widely before it summarises (bounded by H15).
+
+**H4 — Build on others**
+- What: use one idea as the base for the next ("and", not "but"). IDEO rule. — [IDEO U](https://ideou.com/blogs/inspiration/7-simple-rules-of-brainstorming)
+- Why: combinations find what no single line of thought does.
+- Apply: R — the merge combines helpers' findings into themes; T — Claude extends Muzzy's ideas rather than replacing them.
+
+**H5 — Work independently first, combine after**
+- What: in Diehl & Stroebe's experiments, people brainstorming alone ("nominal groups") out-produced the same number in a live group; "production blocking accounted for most of the productivity loss." — [Diehl & Stroebe 1987, JPSP](https://www.uni-muenster.de/imperia/md/content/psyifp/aeechterhoff/wintersemester2011-12/seminarthemenfelderdersozialpsychologie/08_diehl_stoebe_productivityloss-brainstorming_jpsp1987.pdf). NN/g's diverge-converge: analyse independently first, then share and combine. — [NN/g, Diverge-and-Converge](https://www.nngroup.com/articles/diverge-converge/)
+- Why: independent work avoids blocking and groupthink, and gives more varied results.
+- Apply: R — parallel helpers that can't see each other until the merge. (Applying it to AI helpers is an analogy.)
+- Disagreement: a later meta-analysis (Mullen, Johnson & Salas) argued blocking isn't the main cause; the nominal-group advantage itself is not disputed. — [Productivity Loss in Brainstorming, summary/commentary](https://homepages.se.edu/cvonbergen/files/2013/01/Productivity-Loss-In-Brainstorming_Toward-the-Solution-of-a-Riddle.pdf)
+
+### Framing the question
+**H6 — Question the brief / reframe the problem**
+- What: before solving, ask whether this is the right problem. Wedell-Wedellsborg: organisations are good at solving problems and weak at choosing which ones; practices include "questioning the objective" and "analyzing positive exceptions". — [HBR 2017, "Are You Solving the Right Problems?" (PDF)](https://www.aspeninstitute.org/wp-content/uploads/2026/06/Are-You-Solving-the-Right-Problems_-Thomas-Wedell-Wedellsborg.pdf). DC: discovery insight "can help you to define the challenge in a different way." — [DC](https://www.designcouncil.org.uk/resources/the-double-diamond/). NN/g: ask what problem a preferred solution is meant to solve. — [NN/g Discovery Mindset](https://www.nngroup.com/articles/discovery-mindset/)
+- Why: the brief as first stated often names a means, not the goal.
+- Apply: T — talk step A1 asks "what would having it give you?" and reflects back *brief as said → goal underneath*.
+
+**H7 — The 5 Whys**
+- What: "asking why repeatedly whenever a problem is encountered in order to get beyond the obvious symptoms to discover the root cause." — [Lean Enterprise Institute, 5 Whys](https://www.lean.org/lexicon-terms/5-whys/)
+- Why: each why moves a level down from symptom/means toward cause/goal.
+- Caveats: LEI itself says "the specific number five is not the point" — keep asking until the root cause is reached ([LEI](https://www.lean.org/lexicon-terms/5-whys/)); an LEI coach notes two whys work best in some cases ([LEI, How Many Whys Should I Ask?](https://www.lean.org/the-lean-post/articles/how-many-whys-should-i-ask/)); Ohno's own example unpacks to seven ([Lean Blog 2026](https://www.leanblog.org/2026/04/ohno-5-whys-actually-seven/)).
+- Apply: T — 2–3 whys in A1, stopping at a feeling or a goal. Don't interrogate an artist with five.
+
+**H8 — Beginner's mind / discovery mindset**
+- What: set aside what you think you know. d.school: designers "carry baggage" about problems; a beginner's mindset sets those biases aside. — [d.school Design Thinking Bootleg](https://dschool.stanford.edu/resources/design-thinking-bootleg). NN/g: be "open to learning that [your] assumptions are wrong." — [NN/g Discovery Mindset](https://www.nngroup.com/articles/discovery-mindset/)
+- Why: expertise and hunches filter what you notice.
+- Apply: R — helpers are told the brief and the assumptions, and told to treat the assumptions as things to test.
+
+**H9 — Surface assumptions; map importance × evidence**
+- What: list beliefs, plot each by importance and existing evidence, test important/low-evidence first; Strategyzer sorts them into desirability, feasibility, viability. — [Strategyzer, Assumptions Mapping](https://www.strategyzer.com/library/how-assumptions-mapping-can-focus-your-teams-on-running-experiments-that-matter). NN/g: unknowns can be "crucial to explore because you might take on a lot of risk if you don't". — [NN/g Discovery Mindset](https://www.nngroup.com/articles/discovery-mindset/)
+- Why: aims research at the beliefs that would hurt most if wrong.
+- Apply: T — Muzzy's beliefs logged as assumptions, he marks importance. R — research fills the evidence; merge shows the scoreboard.
+
+**H10 — Research questions before searching**
+- What: write goals/questions first; they pick the method. NN/g: research plans list "research questions, goals, or hypotheses" ([Research Plans](https://www.nngroup.com/articles/pm-research-plan/)); compose goals before the interview guide and don't change them mid-study ([User Interviews 101](https://www.nngroup.com/articles/user-interviews/)); too many goals lowers insight per goal, and goals determine method ([Checklist for Planning Usability Studies](https://www.nngroup.com/articles/usability-test-checklist/)). With AI: draft many questions, then group, dedupe and reword. — [NN/g, Planning Research with Generative AI](https://www.nngroup.com/articles/plan-research-ai/)
+- Why: without questions, desk research drifts to whatever is easy to find.
+- Apply: T→R — 3–5 questions written after the talk steps, shown to Muzzy, then split across helpers.
+
+### Where to look
+**H11 — Look outside the field (analogous inspiration)**
+- What: study the same activity, behaviour or emotion in a different setting to get "a fresh perspective". — [IDEO.org Analogous Inspiration](https://www.designkit.org/methods/analogous-inspiration.html). DC principle: "get inspired by what others are doing." — [DC Framework for Innovation](https://www.designcouncil.org.uk/resources/framework-for-innovation/)
+- Why: the obvious field shares the same blind spots.
+- Apply: R — one lens always looks outside games/the tech's own domain.
+
+**H12 — Extremes and mainstreams**
+- What: research both people "squarely in the middle of your target audience" and extreme users, so the result works for everyone. — [IDEO, Extremes and Mainstreams](https://designthinking.ideo.com/resources/extremes-and-mainstreams-design-toolkit-by-ideo-org)
+- Why: the middle shows the norm; extremes exaggerate needs and failures the middle hides.
+- Apply: R — one lens for the mainstream, one for extremes and failures. For desk research, "extreme users" become extreme cases, edge cases and failure reports (this report's adaptation).
+
+**H13 — Separate observation from interpretation**
+- What: record what was seen apart from what it's taken to mean; e.g. "a stuffed animal on the sofa" vs "a child lives here". — [National Louis University, Observation, Interpretation and Analysis](https://nl.edu/ctle/managing-your-course/teaching-your-course/best-practices-for-educators/instructor-resources-to-support-student-writing/writing-across-disciplines/observation-interpretation-and-analysis/). Keep notes and interpretations in separate columns. — [LibreTexts, Interpretation and Evaluation](https://socialsci.libretexts.org/Courses/Pittsburg_State_University/The_Developing_Child/05%3A_Observation/5.07%3A_Interpretation_and_Evaluation). Committing to a view before researching tends to blur the two (same NLU page). NN/g's affinity diagramming then clusters the observations into themes. — [NN/g Affinity Diagramming](https://www.nngroup.com/articles/affinity-diagram/)
+- Why: lets the reader (and Define) re-interpret; stops a helper's opinion posing as a finding.
+- Apply: R — two columns per helper; the merge's strength mark distinguishes "source says" from "helper thinks".
+
+### Knowing it's true, knowing when to stop
+**H14 — Triangulation**
+- What: "using multiple sources of data or multiple approaches to analyzing data, to enhance the credibility of a research study"; all methods are limited, so combine them. — [NN/g Triangulation](https://www.nngroup.com/articles/triangulation-better-research-results-using-multiple-ux-methods/)
+- Why: agreement across independent sources is stronger than any one source.
+- Apply: R — merge marks each claim by how many independent sources back it.
+
+**H15 — Saturation (when to stop)**
+- What: stop when new data adds no new themes. Guest, Bunce & Johnson found saturation "within the first twelve interviews", with basic themes present at six. — [Guest et al. 2006, Field Methods](https://studysites.sagepub.com/green_thorogood3e/study/Further%20reading/Field%20Methods-2006-Guest-59-82.pdf)
+- Caveat: the 12 came from a homogeneous sample and a focused question; don't use it as a universal minimum. — [FHI 360, How many interviews are enough?](https://researchforevidence.fhi360.org/riddle-me-this-how-many-interviews-or-focus-groups-are-enough)
+- Apply: R — a helper stops when its last few sources added nothing new and reports that, plus a hard cap. Applying an interview finding to desk sources is an analogy.
+
+**H23 — Keep contradictions; check the contexts**
+- What: when findings conflict, check whether the studies looked at different people or settings before choosing; use mixed methods. — [NN/g, Interpreting Contradictory UX Research Findings](https://www.nngroup.com/articles/interpreting-research-findings/)
+- Why: contradictions often mark exactly where the answer depends on context.
+- Apply: R — the merge shows both sides and the context of each; it never averages them away.
+
+**H24 — Leave room for unknown unknowns**
+- What: discovery should turn up things the team "hadn't expected to learn". — [NN/g Discovery Mindset](https://www.nngroup.com/articles/discovery-mindset/)
+- Why: research only on the questions you thought to ask confirms your frame.
+- Apply: R — the outside-the-field lens and a "Surprises" section in the merge.
+
+### Turning findings into a hand-off
+**H16 — Insight = observation + why it matters**
+- What: insight statements are "succinct sentences that will point the way forward", plucked from "the huge body of information you've gathered"; IDEO places this in the Ideation phase. — [IDEO.org, Create Insight Statements](https://designkit.org/methods/create-insight-statements.html). A course guide citing Design Kit says a good one mixes context, motivations, tension and impact. — [BYU-I Design Thinking, Define](https://byuidesignthinking.github.io/course_guide/slides/define.html)
+- Apply: R — merge writes a draft "so what" line per theme, marked for Define.
+
+**H17 — "How might we" at the hand-off**
+- What: HMWs are written from the top research findings at the end of discovery, before ideation; they shouldn't embed a solution. — [NN/g, Using "How Might We" Questions](https://www.nngroup.com/articles/how-might-we-questions/). IDEO's field guide turns insight statements into HMWs. — [IDEO.org, Create Insight Statements](https://designkit.org/methods/create-insight-statements.html)
+- Apply: hand-off may list drafts; Define owns them.
+
+**H18 — Problem statements with no solution in them**
+- What: a concise description of the problem; leave solutions out because "the best solution is not obvious" early on; one problem per discovery. — [NN/g, Problem Statements](https://www.nngroup.com/articles/problem-statements/)
+- Apply: T — A1's reflected "goal underneath" must not name a solution. The formal problem statement is Define's.
+
+### The Design Council's principles, as working rules
+— all from [DC Framework for Innovation](https://www.designcouncil.org.uk/resources/framework-for-innovation/)
+
+**H19 — Communicate visually and inclusively** — "Help people gain a shared understanding of the problem and ideas." Apply: the card, one-line question lists, reference images/clips, sketches instead of paragraphs.
+
+**H20 — Put people first** — "Start with an understanding of the people using a service, their needs, strengths and aspirations." Apply: Muzzy's own goal and feelings are first-class input; real players are a "needs Muzzy" probe, never simulated by a helper.
+
+**H21 — Collaborate and co-create** — "Work together and get inspired by what others are doing." Apply: Muzzy sees and can edit the research questions before the flow runs; the card asks what's missing.
+
+**H22 — Iterate, iterate, iterate** — "spot errors early, avoid risk and build confidence in your ideas"; the process "is not linear… [it] can send them back to the beginning." — [DC](https://www.designcouncil.org.uk/resources/the-double-diamond/). Apply: the card offers "loop back on one question" as a normal choice, and open questions route to a spike/sketch/playtest.
+
+### Not found / weakly sourced
+- d.school's official Bootleg page is cited by URL; its exact wording was seen only via unofficial copies.
+- The "disconfirm" lens, the four-lens set, and treating extreme *cases* as extreme *users* are this report's design, built from H9, H12, H14 and H8 — not a named method in any source.
 
 ## Sources
 - Design Council — The Double Diamond: https://www.designcouncil.org.uk/resources/the-double-diamond/
@@ -166,5 +321,30 @@ Principle: **the designer supplies the "people" part, helpers do desk research, 
 - Hunicke, LeBlanc, Zubek (2004) — MDA: https://users.cs.northwestern.edu/~hunicke/MDA.pdf
 - Swink — Game Feel: The Secret Ingredient (Game Developer): https://www.gamedeveloper.com/design/game-feel-the-secret-ingredient
 - Fullerton — Game Design Workshop excerpt (Game Developer): https://gamedeveloper.com/design/book-excerpt-game-design-workshop
+- Design Council — Systemic Design Framework: https://www.designcouncil.org.uk/resources/systemic-design-framework/
+- IDEO U — 7 Simple Rules of Brainstorming: https://ideou.com/blogs/inspiration/7-simple-rules-of-brainstorming
+- Sage Encyclopedia — Brainstorming (Osborn's rules): https://sk.sagepub.com/ency/edvol/embed/giftedness/chpt/brainstorming
+- Diehl & Stroebe (1987), Productivity Loss in Brainstorming Groups, JPSP 53: https://www.uni-muenster.de/imperia/md/content/psyifp/aeechterhoff/wintersemester2011-12/seminarthemenfelderdersozialpsychologie/08_diehl_stoebe_productivityloss-brainstorming_jpsp1987.pdf
+- Commentary on brainstorming productivity loss (Mullen et al. debate): https://homepages.se.edu/cvonbergen/files/2013/01/Productivity-Loss-In-Brainstorming_Toward-the-Solution-of-a-Riddle.pdf
+- NN/g — The Diverge-and-Converge Technique: https://www.nngroup.com/articles/diverge-converge/
+- Wedell-Wedellsborg (2017), Are You Solving the Right Problems? (HBR, PDF): https://www.aspeninstitute.org/wp-content/uploads/2026/06/Are-You-Solving-the-Right-Problems_-Thomas-Wedell-Wedellsborg.pdf
+- Lean Enterprise Institute — 5 Whys: https://www.lean.org/lexicon-terms/5-whys/
+- Lean Enterprise Institute — How Many Whys Should I Ask?: https://www.lean.org/the-lean-post/articles/how-many-whys-should-i-ask/
+- Lean Blog — Ohno's 5 Whys is actually seven: https://www.leanblog.org/2026/04/ohno-5-whys-actually-seven/
+- d.school — Design Thinking Bootleg: https://dschool.stanford.edu/resources/design-thinking-bootleg
+- NN/g — Research Plans: https://www.nngroup.com/articles/pm-research-plan/
+- NN/g — User Interviews 101: https://www.nngroup.com/articles/user-interviews/
+- NN/g — Checklist for Planning Usability Studies: https://www.nngroup.com/articles/usability-test-checklist/
+- NN/g — Planning Research with Generative AI: https://www.nngroup.com/articles/plan-research-ai/
+- IDEO — Extremes and Mainstreams: https://designthinking.ideo.com/resources/extremes-and-mainstreams-design-toolkit-by-ideo-org
+- National Louis University — Observation, Interpretation and Analysis: https://nl.edu/ctle/managing-your-course/teaching-your-course/best-practices-for-educators/instructor-resources-to-support-student-writing/writing-across-disciplines/observation-interpretation-and-analysis/
+- LibreTexts — Interpretation and Evaluation: https://socialsci.libretexts.org/Courses/Pittsburg_State_University/The_Developing_Child/05%3A_Observation/5.07%3A_Interpretation_and_Evaluation
+- NN/g — Affinity Diagramming: https://www.nngroup.com/articles/affinity-diagram/
+- NN/g — Triangulation: https://www.nngroup.com/articles/triangulation-better-research-results-using-multiple-ux-methods/
+- NN/g — Interpreting Contradictory UX Research Findings: https://www.nngroup.com/articles/interpreting-research-findings/
+- Guest, Bunce & Johnson (2006), How Many Interviews Are Enough?, Field Methods 18(1): https://studysites.sagepub.com/green_thorogood3e/study/Further%20reading/Field%20Methods-2006-Guest-59-82.pdf
+- FHI 360 — How many interviews are enough?: https://researchforevidence.fhi360.org/riddle-me-this-how-many-interviews-or-focus-groups-are-enough
+- IDEO.org Design Kit — Create Insight Statements: https://designkit.org/methods/create-insight-statements.html
+- BYU-I Design Thinking — Define slides: https://byuidesignthinking.github.io/course_guide/slides/define.html
 
 Not found / not used: d.school Bootcamp Bootleg (only unofficial copies surfaced); the Council's 2007 "Eleven lessons" study; game-industry writing that applies the Double Diamond by name (searches returned only UX/product sources — so the game adaptation in section 4 is this report's synthesis, built on MDA, Swink and Fullerton, not a cited practice).
