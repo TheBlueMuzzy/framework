@@ -5,7 +5,7 @@
 - **Next:** F218 tasks 1–2 done (research define-research.md + proposal https://claude.ai/artifact/W5rEQTjkUncfucdzfBh41B). **Muzzy: task 3 — read the proposal, answer its 4 questions** (Define/Design line; mechanisms one vs lead + backup; story yours first vs drafts; pillars as feelings). Then task 4 builds define.json from research §5 (15 steps). If the line is approved, REBUILD-PLAN R8's wording changes (plan-check flow moves to Design's close) and F226 — Five stages, one meaning each gets the build plan.
 - **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check. Then sprint retro + archive.
 - Open Ask Muzzy: discover's three research rounds vs one; keep all on-ice ideas. Not judged yet: card questions under "Your to-dos"; DISCOVER.md size.
-- Decided 2026-11-09: five stages discover · define · design · develop · release (VISION V48, F226); existing material → F225 — Start from what you have. Card rules: templates/handoff.md. BGG mechanics list = private vocabulary only.
+- Decided 2026-11-09: five stages (VISION V48); existing material → F225 — Start from what you have. BGG mechanics list = private vocabulary only.
 - Follow-ups (Claude's) → F223 — Hook diet: flow verdict out of the prompt hook; band shows twice; numbered-answer lines; HC11 looks in the cwd ROADMAP.
 
 Reviewed through: bmuz df171ce (F217 tasks 7–12 — Claude read engine.js + register.tsx diffs f64203c..551561e in full (wrap-up, recap, null holes, journal rebuild) and discover-doc.mjs's path handling; /code-review low f64203c..50ea621 empty in 7 s (too quick to count); 2 fixes in df171ce) · older: archive/log.md
