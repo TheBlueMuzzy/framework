@@ -42,7 +42,7 @@ Status: **draft**. Each item is a promise. When it's signed off, a change to the
 
 ## C. Stages and planning
 
-- **V14** A new project goes discover → define (GDD, engineering plan, feature map with dependencies, must/should/could/won't per release) → develop in sprints → deliver. Big work gets no code until define is agreed. (×3)
+- **V14** A project goes through the five stages of V48 — discover (material) → define (the blocks: the one-page concept, must/should/could/won't per release) → design (assembled into the full GDD, closed by the engineering plan and a feature map with dependencies) → develop in sprints → release — entering at whichever stage fits what already exists (F225 — Where are you starting?). Big work gets no code until the design is agreed. (×3; updated 2026-11-09 for V48)
 - **V15** A project with existing material gets analysed first, and then BMUZ walks the user through filling the gaps. (×1)
 - **V16** A remake keeps everything from the original, improved. Nothing goes missing. (×5)
 - **V17** Feature dependencies decide the order of work. (×4)

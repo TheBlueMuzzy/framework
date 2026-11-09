@@ -5,7 +5,7 @@ Nothing here is started. The order and features need Muzzy's OK, and then the 6 
 
 ## Ground rules for the rebuild
 - **BMUZ becomes its own project**: `Documents/dev/bmuz/`, one GitHub repo, shipped as one plugin. Today's BMUZ in `~/.claude` keeps running until each process is switched over: no big-bang switch, and no day where nothing works.
-- **One process at a time.** Each goes through four stages: built as a pipeline → its journey checks pass → switched on for Muzzy → the old skill text and hooks for it are retired.
+- **One process at a time.** Each goes through four rollout steps (not the five game stages of VISION V48): built as a pipeline → its journey checks pass → switched on for Muzzy → the old skill text and hooks for it are retired.
 - **The step logic stays in a plain file** (`engine.js`, as in the proof), so the motor can be swapped to motor B or an outside program without touching pipelines.
 - **The three rules from the proof:**
   1. The engine acts when a turn ends.
@@ -25,7 +25,8 @@ Nothing here is started. The order and features need Muzzy's OK, and then the 6 
 | R7 | **Discover + the research flow** | research arrives the same way every time, with sources checked | R3 |
 | R8 | **Define + the concept check + scope** (changed 2026-11-09, Muzzy "yes": Define writes GDD Part 1, the one-page concept; the plan-check flow — GDD, TDD and feature map checked against each other — moves to the end of Design, F227 — Design pipeline; define-research.md §3) | the concept page checked for fit (pillars ↔ feelings ↔ first-release musts) before Design starts | R7 |
 | R8a | **Where are you starting?** (added 2026-11-09, F225, Muzzy's live look): one short opening puts the designer in at any stage of the same pipeline; the engine reads what's shared and proposes the real entry point; each stage opens with a short intro; one project moves stage to stage | an experienced designer reaches real work in two taps; nobody is asked what they've already written | R7, R8 |
-| R8b | **Design + the build plan + the plan-check flow** (added 2026-11-09, F227): assemble the blocks into GDD Part 2 (rules, systems, sketches, paper playtests), then the TDD and feature map, checked against the GDD | the blueprint Develop builds from, checked before building | R8, F226 |
+| R8b | **Design + the build plan + the plan-check flow** (added 2026-11-09, F227): assemble the blocks into GDD Part 2 (rules, systems, sketches, paper playtests), then the TDD and feature map, checked against the GDD; today's define stages/design.md + build-plan.md move here | the blueprint Develop builds from, checked before building | R8, R8c |
+| R8c | **Five stages, one meaning each** (F226, added 2026-11-09): the stage names, commands and meanings in every daily skill, doc, hook and the PPP — /deliver → /release with the main-branch guard changed in the same commit, a Design state in the planner, the GDD template split into Part 1 (concept) and Part 2 (design); the full list: stage-audit-2026-11-09.md | every page and command tells the same five-stage story | R7 |
 | R9 | **Release (was Deliver): release flow per platform + security scans + security review** | release in one go after your OK; secrets and private text can never go out | R6 |
 | R10 | **Milestone review: retro flow → lesson proposals to Muzzy** | lessons arrive as proposals you approve | R6 |
 | R11 | **First setup + setup sidequests** (git, npm, adb, Firebase… detected and walked through) | a new user goes from install to "I have an idea" with no help | R2 |
@@ -33,7 +34,7 @@ Nothing here is started. The order and features need Muzzy's OK, and then the 6 
 | R13 | **Hook diet**: keep the safety set (git, secrets, publishing, report-only), retire the rest as the pipelines take over | fewer false alarms and repeat messages | after R4–R10 each |
 | R14 | **Process tests**: journeys J1–J8 as scripted runs in a scratch project, run before every BMUZ update | "done" = they pass while you watch | grows with each feature; the final gate |
 
-Views (/ppp, /roadmap, /sprint, /gdd, /tdd), /play and /sketch move over inside R3–R8 as their processes do.
+Views (/ppp, /roadmap, /sprint, /gdd, /tdd), /play and /sketch move over inside R3–R8b as their processes do (/gdd, /tdd and /sketch with R8b — Design).
 
 ## The finish line
 The core is done when R14's journeys J1–J8 all pass, watched, with zero process corrections (VISION section H). Then the framework gets its refit pass, then games resume.

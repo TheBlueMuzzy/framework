@@ -23,7 +23,7 @@ The steps are **data** (a pipeline file per process); a small **engine** runs th
 ## The rulebook — where each kind of rule lives (V12)
 | Kind of rule | Lives in | Example |
 |---|---|---|
-| The ORDER of steps, the gates, what "done" means for a step | **pipeline file** (data) | Define → GDD → TDD → feature map → gate "approve the plan" |
+| The ORDER of steps, the gates, what "done" means for a step | **pipeline file** (data) | Design → GDD Part 2 → TDD → feature map → gate "approve the plan" (updated 2026-11-09: the build plan closes Design, VISION V48) |
 | Running the pipeline, status band, asking at gates, watchdog, deviation log, refusing out-of-order, writing the hand-off card from the step's data | **engine** (the mod) | "Step 3 of 7 · working · 01:52" |
 | A job that needs thinking, in a fixed order, with no questions to the user | **workflow** (takes inputs, e.g. platform = Play Store) | build one task, fix one bug, a release build, a security review |
 | A job done the same way every time | **script** | save, release, merge, sync, install a module |
@@ -47,7 +47,8 @@ Talk = engine + gates · Flow = workflow · Script = script. "Better?" = does mo
 |---|---|---|---|---|
 | **First setup / setup sidequests** | what's missing, accounts the user must create | — | detect + verify each tool | yes — V2b becomes a checklist, not memory |
 | **Discover** | the idea, players, references | **research flow** (input: topic): several helpers research, one merges, sources checked | — | yes — the helper fan-out done by hand tonight becomes standard (V7, V40) |
-| **Define** | scope, design calls, gate "approve the plan" | **plan-check flow**: GDD/TDD/feature map checked against each other and dependencies | plan-file shape (plan-lint) | yes — gaps found before building (V14, V17) |
+| **Define** | the blocks: story, feelings, pillars, core verbs, scope; gate "lock the concept" | **fit-check + concept-review flows**: choices checked against each other and the material | concept lint, stage | yes — the concept hangs together before Design (V14, V48) |
+| **Design** | assembling the blocks, playtest calls, gate "approve the plan" | **plan-check flow**: GDD/TDD/feature map checked against each other and dependencies | plan-file shape (plan-lint) | yes — gaps found before building (V14, V17; F227) |
 | **Sketch** | what to prove, presets feedback | **sketch flow** (input: the question): build → knobs check → screenshot → add the tab | publish tab | yes, small — same shape every time |
 | **Develop — one task** | approval gate after the sprint | **task flow** (input: task): build → tests → checks → screenshots → a *separate* reviewer → fix → done-check | checks (lint, types, tests) | **yes, the biggest win** — this is the 35 KB develop skill where drift happens; an independent reviewer every time (V7, V35, V36, V39) |
 | **Develop — overnight sprint** | report at the gate in the morning | **sprint flow**: runs the task flow for each task in order | save after each | yes — no stalls, no questions (V23, V24) |
