@@ -66,7 +66,7 @@ Done when: "bmuz go" in a new folder opens with a short self-selecting question 
 - [x] 🤖 4. The start pipeline: the opening question, reading what's shared, the proposed entry point and the creative's OK — ~/Documents/dev/bmuz/plugin/pipelines
 - [x] 🤖 5. Intake: notes, rulebook or GDD fill the Discover shelves (marked "from your material") with a gap map; answered steps become one-tap keep — ~/Documents/dev/bmuz/plugin/scripts
 - [x] 🤖 6. Stage intros + one vocabulary (Discover gathers material, Define makes blocks, Design assembles them, Develop the production model, Release the public): each stage's first message is a short paragraph from the engine; Discover's own words (craft notes, DISCOVER.md heading, cards) say "material", not "bricks"; Define's say it makes the blocks from that material — ~/Documents/dev/bmuz/plugin/hooks/engine.js
-- [ ] 🤖 7. Tests: node + plugin tests, headless runs entering at Discover, at Define (from a loose concept) and from a rulebook — ~/Documents/dev/bmuz/tests/headless.mjs
+- [x] 🤖 7. Tests: node + plugin tests, headless runs entering at Discover, at Define (from a loose concept) and from a rulebook — ~/Documents/dev/bmuz/tests/headless.mjs
 - [ ] 🙋 8. Live look: start from scratch with your own idea, entering where you choose (~15 min)
 Check: check:fast green · headless entries at three spots reach their stage's card · Muzzy's live look feels light for an experienced designer.
 
