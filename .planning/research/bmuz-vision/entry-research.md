@@ -39,12 +39,13 @@ Written 2026-11-09 by Claude, from Muzzy's live-look notes (SPRINT Notes 17:50).
 - **Where I'd start you:** stage and step, with one line of why. If their Question 2 answer is later than the material supports: "Design needs pillars and a first-release scope; I'll ask those two in a short catch-up first."
 - Options: "Start there" · "Start earlier: <the earlier stage>" · "Somewhere else".
 
-## The stage intros (shown once, at a stage's first step; 2–3 sentences)
-- **Discover:** We're in Discover. Here we collect building blocks for your game (how it should feel, its theme, what you could do in it, games like it) without choosing anything yet. A few questions at a time, research in between, and you can wrap up whenever you have enough.
-- **Define:** We're in Define. Here you choose from what's been collected: the one or two feelings that matter, a 3–5 line story, the pillars, and what goes in the first release. It ends with one page, the concept, which the whole design builds on.
-- **Design:** We're in Design. Here the concept becomes rules and systems; the risky parts get tested with sketches and paper playtests, and the full design document gets written. It ends with the build plan.
-- **Develop:** We're in Develop. I build the game in short sprints from the build plan; you play each piece and approve it before the next.
-- **Release:** We're in Release. Checks, polish and putting it out where players can get it, ending with a live link.
+## The stage intros (shown once, at a stage's first step; 2–3 sentences) — Muzzy's wording 2026-11-09
+Muzzy: Discover collects the MATERIAL for building blocks (before blocks exist) · Define MAKES the blocks from it · Design ASSEMBLES them (cutting some, tweaking others) · Develop makes the PRODUCTION MODEL from the blueprints · Release lets the PUBLIC experience it.
+- **Discover:** We're in Discover: gathering the raw material for the game — how it should feel, its theme, things you might do in it, games like it. Nothing is shaped or chosen yet. A few questions at a time, research in between, and you can wrap up whenever you have enough.
+- **Define:** We're in Define: turning that material into the game's building blocks — the feelings that matter, a 3–5 line story, the pillars, the core verbs, and what goes in the first release. It ends with one page, the concept.
+- **Design:** We're in Design: assembling the blocks in whatever way feels right — cutting some, tweaking others — into rules and systems, tested with sketches and paper playtests. It ends with the blueprint: the full design and the build plan.
+- **Develop:** We're in Develop: building the production model from the blueprint, in short sprints you play and approve one piece at a time.
+- **Release:** We're in Release: letting the public start experiencing it — final checks, polish, and a live link.
 
 ## Weighed
 - **Why it's this way now:** every run starts at Discover's spark because Discover was the first pipeline built; nothing else existed to enter.
@@ -57,7 +58,10 @@ Written 2026-11-09 by Claude, from Muzzy's live-look notes (SPRINT Notes 17:50).
   3. The engine overriding the label could feel presumptuous. Answer: it proposes with a one-line why, and "Start there" is the creative's tap.
   4. Reading Google Docs or PDFs needs more than a file read. Answer: the first version takes files in the folder or pasted text; Drive links come later.
 
-## Questions for Muzzy
+## Muzzy's answers (2026-11-09)
+1. The five Question 1 options: yes. 2. Keep Question 2. 3. The intros: reworded to his material → blocks → assembly → production model → public (above; VISION V48).
+
+## Questions for Muzzy (answered)
 1. Are these the right five options for Question 1? Add or drop any?
 2. Keep Question 2, or let the engine infer the goal from the material alone?
 3. Do the stage intros read right, short enough, and in the right voice?
