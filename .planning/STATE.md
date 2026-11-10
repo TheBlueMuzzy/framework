@@ -1,10 +1,10 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-09 17:55 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ · F218 — Define pipeline 🔨 built (bmuz c1715e5, headless 37/37), live look PAUSED · F225 — Where are you starting? 🔨 pulled in · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
-- **Why:** Muzzy's live look: Discover/Define feel "thick and cludgey for someone of my experience" → a self-selecting entry point into the same pipeline at any stage, the engine reading what's shared to set the real entry point, and a SHORT intro paragraph per stage (his 5 answers: SPRINT Notes 17:50).
-- **Next:** F225 task 1 — the opening questions + stage intros proposed to Muzzy (entry-research.md), then his OK (task 2), then build (tasks 3–7). F218's live look resumes through F225's entry point.
-- Live-look fixes today: talk steps' hidden instructions were lost when a window resumed from a timer (fixed c1715e5); commands for Muzzy's terminal are PowerShell (global CLAUDE.md). Test folders: .scratch/bmuz-test (fresh, "discover"); bmuz-define-test (old, delete when its window is closed).
+2026-11-09 19:15 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ · F218 — Define pipeline 🔨 built, live look via F225 · F225 — Where are you starting? 🔨 built (bmuz 9e2f239 + review fix fd8eb6a), waiting on Muzzy's live look (task 8) · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
+- **Next:** Muzzy's live look: `.scratch/bmuz-live` (empty) → `claude` → `bmuz new` (opening → proposal → stage intro). Then judge F225 + F218 together (approve both, or fix). A full headless run (log in the session scratchpad headless3.txt) was in flight at 19:10 on fd8eb6a — re-run `MSYS_NO_PATHCONV=1 node tests/headless.mjs` if its result is lost; record `Last full check:` + `Reviewed through: bmuz fd8eb6a` at done.
+- Decided today (Muzzy): five stage meanings — Discover gathers material · Define makes the blocks · Design assembles them · Develop the production model · Release the public (VISION V48); Question 1 has 4 options (AskUserQuestion max; "Nothing yet, or just a spark" merged — Claude's call, same destination); F227 — Design pipeline is its own feature; order after F225: F226 — Five stages, one meaning each (renames), then F227. Coherence audit: research/bmuz-vision/stage-audit-2026-11-09.md (~90 places, sorted into F225/F226/F227).
+- Rules learned: commands for Muzzy's terminal are PowerShell (global CLAUDE.md); talk steps never start from a timer (hidden instructions need the prompt hook at turn.complete).
 - **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check.
 - Follow-ups (Claude's) → F223 — Hook diet: flow verdict out of the prompt hook; band shows twice; numbered-answer lines; HC11 looks in the cwd ROADMAP; the session-start checkup reminder leaks into BMUZ step replies.
 
@@ -12,7 +12,7 @@ Reviewed through: bmuz df171ce (F217 tasks 7–12 — Claude read engine.js + re
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F225 — Where are you starting? (task 1, the opening questions) · F218 — Define pipeline live look paused on it · F212 — BMUZ plugin on both machines waits on the laptop   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F225 — Where are you starting? (task 8, Muzzy's live look) · F218 — Define pipeline live look through it · F212 — BMUZ plugin on both machines waits on the laptop   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
