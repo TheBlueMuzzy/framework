@@ -651,15 +651,18 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ⏳ F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
 - ✅ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
 - 🔨 F218 🔧 Define pipeline — makes the blocks from Discover's material: the one-page concept (GDD Part 1 — story, feelings, pillars, core verbs, scope per release, risks), a concept check, lock → Design (changed 2026-11-09: the TDD, feature map and plan-check moved to F227 — Design pipeline) — must:bmuz-1.0 · needs: F217 · sprint 67
-- ⏳ F219 🔧 Release pipeline (was "Deliver"; renamed with F226 — Five stages, one meaning each) — where the public starts experiencing it: a release flow per platform, security scans and review, live check — must:bmuz-1.0 · needs: F216
+- ⏳ F219 🔧 Deliver pipeline — (2026-11-10: Deliver and Release are separate stages again, Muzzy) the finished product made ready to hand over: final checks, polish, versions, a build per platform, security scans and review, store submission — must:bmuz-1.0 · needs: F216
 - ⏳ F220 🔧 Milestone review pipeline — a retro flow that turns lessons into proposals Muzzy approves — must:bmuz-1.0 · needs: F216
 - ⏳ F221 🔧 First setup — tools and accounts detected and walked through, at install or as a sidequest — must:bmuz-1.0 · needs: F212
 - ⏳ F222 🧱 BMUZ for anyone — Muzzy's paths, accounts and machines into a profile; style rules sorted everyone / just me — must:bmuz-1.0 · needs: F221
 - ⏳ F223 🔧 Hook diet — keep the safety hooks, retire the rest as pipelines take over — must:bmuz-1.0 · needs: F214, F215, F216, F219
 - ⏳ F224 🔧 Journey tests — journeys J1–J8 as scripted runs before every BMUZ update; the finish line — must:bmuz-1.0 · needs: F223, F222
 - 🔨 F225 🔧 Where are you starting? — (was "Start from what you have"; widened 2026-11-09 after Muzzy's F218 live look: "thick and cludgey for someone of my experience") one short self-selecting opening (what you have · what you want from this pass) puts the designer in at ANY stage of the same pipeline — even a full idea back through Discover; the engine reads what they share and sets the real entry point even if their label is off; existing notes, rulebooks or a GDD go through an intake that fills the Discover shelves (each piece of material sourced) and lists the gaps; steps their material already answers are one-tap "keep"; every stage opens with a SHORT paragraph (which stage, its goal, what you'll do); "I don't know where to start" = Discover's spark (the experience question is the seed); never different behaviour by experience level; first real test: the Escape Pod Scramble remake — must:bmuz-1.0 · needs: F217, F218 · sprint 67
-- 🟢 F226 🔧 Five stages, one meaning each — discover · define · design · develop · release (Muzzy 2026-11-09: "your pick"); /deliver renamed /release; Design gets its own stage and command — concept, rules, sketches, paper playtests → the complete GDD, "the north star for decision making, a source of truth… the communication between you and me… a blueprint that you regularly update to be more and more reflective of the final product" (Muzzy) — scope narrowed 2026-11-09: the names, commands and meanings everywhere (material → blocks → assembly → production model → public, VISION V48; old /discover /define /deliver skills pointed at the stages); the stage hand-over moved into F225 — Where are you starting?, the Design pipeline itself into F227 — Design pipeline. Scope from the 2026-11-09 audit (research/bmuz-vision/stage-audit-2026-11-09.md, ~50 places): /deliver → /release everywhere WITH the main-branch guard (guard-git _shared.mjs deliverRan) and settings.json permissions changed in the same commit, or every release merge is refused; a Design state + colour in the planner (plan-reader, build-ppp, BMUZ-PLAN) and STATE's Stage values listed (discover/define/design/develop/release, kept apart from release stages prototype/alpha/beta/1.0); the daily skills route a new project to the F225 opening instead of "start with /discover"; "Double Diamond stage N" headings out; Discover stops creating GDD.md; command counts — must:bmuz-1.0 · needs: F217
+- 🟢 F226 🔧 Six stages, one meaning each — (2026-11-10, Muzzy: "Ideate > Define > Design > Develop > Deliver > Release with research being callable anywhere"; research/bmuz-vision/stages.md) the names, commands and meanings in every daily skill, doc, hook and the planner: /discover → /ideate, a /design and a /release, /deliver kept; a Design and an Ideate state + colour in the planner; STATE Stage values listed; the daily skills route a new project to the F225 opening; "Double Diamond stage N" headings out; the full list of places: research/bmuz-vision/stage-audit-2026-11-09.md (written for five stages: /deliver now stays) — must:bmuz-1.0 · needs: F217
 - ⏳ F227 🔧 Design pipeline — assembles the blocks in whatever way feels right (cutting some, tweaking others): GDD Part 2 (rules, systems, numbers via proto sims, sketches and paper playtests that settle the concept's risks and lead/backup choices, look and sound), then the build plan that closes Design — the TDD, the feature map, and the plan-check flow (GDD, TDD and feature map checked against each other; moved from R8, define-research.md §3). Also from the 2026-11-09 audit: a /design command and skill; today's define stages/design.md + build-plan.md move here and leave /define; the GDD template split into Part 1 (concept, Define) and Part 2 (design); /roadmap, /sprint, /tdd, /proto, PROJECT-FILES and MODULE-CONTRACTS point at Design for the TDD and feature map; GG13's build-plan commit check fixed (it never matched the skills' own commit names — broken before 2026-11-09) — must:bmuz-1.0 · needs: F218, F226
+- 🔨 F228 🔧 Ideate pipeline — (2026-11-10, replaces Discover as the first stage; evidence: research/bmuz-vision/discover-live-review-2026-11-09.md) gather the material: "show me what you have" (every file and Drive folder read), "the game so far" written back per need (fixed · ideas · open), a few gap questions in gather mode (never "which one?", never the creative's answer read back as options, no fiction questions for a fictionless game), frame first; no research by default; ends sharper than the creative walked in — must:bmuz-1.0 · needs: F225 · sprint 67
+- ⏳ F229 🔧 Research, callable anywhere — (2026-11-10) the sourced research flow built for F217 — Discover pipeline, started from any stage on a trigger (a creative block, a worry about being unique, something never built, a rule that doesn't work, something to improve, a risk to test, prior art before the concept locks); findings come back as "does this change anything?", never as a menu — must:bmuz-1.0 · needs: F217
+- ⏳ F230 🔧 Release pipeline — (2026-11-10) the public experiences it: launch, the live link and live check, players' first reactions — must:bmuz-1.0 · needs: F219
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
@@ -670,7 +673,7 @@ flowchart LR
   F215 --> F216[⏳ F216 Develop pipeline]
   F213 --> F217[✅ F217 Discover pipeline]
   F217 --> F218[🔨 F218 Define pipeline]
-  F216 --> F219[⏳ F219 Release pipeline]
+  F216 --> F219[⏳ F219 Deliver pipeline]
   F216 --> F220[⏳ F220 Milestone review]
   F212 --> F221[⏳ F221 First setup]
   F221 --> F222[⏳ F222 BMUZ for anyone]
@@ -682,7 +685,10 @@ flowchart LR
   F222 --> F224
   F217 --> F225[🔨 F225 Where are you starting?]
   F218 --> F225
-  F217 --> F226[🟢 F226 Five stages]
+  F217 --> F226[🟢 F226 Six stages]
+  F225 --> F228[🔨 F228 Ideate pipeline]
+  F217 --> F229[⏳ F229 Research anywhere]
+  F219 --> F230[⏳ F230 Release pipeline]
   F218 --> F227[⏳ F227 Design pipeline]
   F226 --> F227
 ```
