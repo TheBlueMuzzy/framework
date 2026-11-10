@@ -1,18 +1,17 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-09 19:15 — **Sprint 67: F211 — BMUZ engine core ✅ · F213 — Engine-written hand-off card ✅ · F217 — Discover pipeline ✅ · F218 — Define pipeline 🔨 built, live look via F225 · F225 — Where are you starting? 🔨 built (bmuz 9e2f239 + review fix fd8eb6a), waiting on Muzzy's live look (task 8) · F212 — BMUZ plugin on both machines waits on the laptop.** Engine repo `~/Documents/dev/bmuz` (branch dev/bmuz-1-0).
-- **Next:** Muzzy's live look: `.scratch/bmuz-live` (empty) → `claude` → `bmuz new` (opening → proposal → stage intro). Then judge F225 + F218 together (approve both, or fix). A full headless run (log in the session scratchpad headless3.txt) was in flight at 19:10 on fd8eb6a — re-run `MSYS_NO_PATHCONV=1 node tests/headless.mjs` if its result is lost; record `Last full check:` + `Reviewed through: bmuz fd8eb6a` at done.
-- Decided today (Muzzy): five stage meanings — Discover gathers material · Define makes the blocks · Design assembles them · Develop the production model · Release the public (VISION V48); Question 1 has 4 options (AskUserQuestion max; "Nothing yet, or just a spark" merged — Claude's call, same destination); F227 — Design pipeline is its own feature; order after F225: F226 — Five stages, one meaning each (renames), then F227. Coherence audit: research/bmuz-vision/stage-audit-2026-11-09.md (~90 places, sorted into F225/F226/F227).
-- Rules learned: commands for Muzzy's terminal are PowerShell (global CLAUDE.md); talk steps never start from a timer (hidden instructions need the prompt hook at turn.complete).
+2026-11-10 00:30 — **OVERNIGHT (Muzzy: "go auto").** Stages decided: **Ideate > Define > Design > Develop > Deliver > Release, research callable anywhere** (research/bmuz-vision/stages.md). Sprint 67: F211 ✅ · F213 ✅ · F217 ✅ · F218 — Define pipeline 🔨 (task 8: questions on the needs spine) · F225 — Where are you starting? 🔨 built, live look via Ideate · **F228 — Ideate pipeline 🔨 being built by one builder helper (tasks 1–4 + F218 task 8)** · F212 waits on the laptop.
+- **Why:** Muzzy's Discover live run was "a pretty huge waste of time" (discover-live-review-2026-11-09.md: 15 of 33 questions fed nothing); the rework evidence (design-gaps-evidence.md, 51 cases) says frame, rules and look, never research.
+- **Next (overnight, main chat):** wait for the builder → review (timer rule, file safety, gather-mode questions) → check:fast + full headless → STATE `Last full check:` + `Reviewed through:` → /save. Morning: Muzzy's live look on Xong (F228 task 5) with his Drive folder; 2 Ask Muzzy lines in SPRINT (Deliver vs Release meaning; /ideate replaces /discover).
 - **Muzzy, laptop (F212 task 4):** pull dev/bmuz, `claude plugin marketplace add C:/Users/joebr/Documents/dev/bmuz` + `claude plugin install bmuz@bmuz`, band check.
-- Follow-ups (Claude's) → F223 — Hook diet: flow verdict out of the prompt hook; band shows twice; numbered-answer lines; HC11 looks in the cwd ROADMAP; the session-start checkup reminder leaks into BMUZ step replies.
+- Follow-ups (Claude's) → F223 — Hook diet: flow verdict out of the prompt hook; band shows twice; numbered-answer lines; HC11 cwd ROADMAP; session-start checkup reminder leaks into BMUZ steps.
 
 Reviewed through: bmuz df171ce (F217 tasks 7–12 — Claude read engine.js + register.tsx diffs f64203c..551561e in full (wrap-up, recap, null holes, journal rebuild) and discover-doc.mjs's path handling; /code-review low f64203c..50ea621 empty in 7 s (too quick to count); 2 fixes in df171ce) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F225 — Where are you starting? (task 8, Muzzy's live look) · F218 — Define pipeline live look through it · F212 — BMUZ plugin on both machines waits on the laptop   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F228 — Ideate pipeline (overnight builder) · F218 — Define pipeline task 8 · F225 — Where are you starting? live look via Ideate · F212 waits on the laptop   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
