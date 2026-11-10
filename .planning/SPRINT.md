@@ -66,6 +66,7 @@ Done when: in a test project, the start's "Nothing yet, or just a spark" / "A co
 - [x] 🤖 3. Engine fixes from the live run: a question written as plain chat instead of the question box stalls the run (18.6 min) → the step is told and the engine notices; a question hidden behind the question box — ~/Documents/dev/bmuz/plugin/hooks/register.tsx
 - [x] 🤖 4. Tests: node + plugin, headless Ideate from "nothing yet", from a pasted concept, from a rulebook, each reaching the game so far and the offer of Define — ~/Documents/dev/bmuz/tests/headless.mjs
 - [ ] 🙋 5. Live look: Xong again, Drive folder shared, ~20 min
+- [x] 🤖 5a. From the live look (Muzzy 2026-11-10: four screens of "I'll paste it", never a field to paste into): no option ever stands in for typing — the engine refuses such a box (engine.js fakeTypeOptionProblem, every live talk step told), the opening / Ideate show / Define prior-art questions say "type or paste it in 'Type something' below", one or more links, two real options, no filler — ~/Documents/dev/bmuz/plugin/craft/start-opening.md
 Check: check:fast green · headless Ideate entries pass · the game so far names fixed/ideas/open per need · Muzzy's live look on Xong.
 
 ## F225 🔧 Where are you starting? (pulled in 2026-11-09 from Muzzy's live-look notes; F218's live look waits on it)
