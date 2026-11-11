@@ -647,7 +647,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - 🔨 F212 🧱 BMUZ plugin on both machines — one plugin from BMUZ's own repo, installed for real on the PC and the laptop, Claude Code version pinned — must:bmuz-1.0 · needs: F211 · sprint 67
 - ✅ F213 🧱 Engine-written hand-off card — the card, one numbered question list, open questions + decisions lists, taste questions ask first — must:bmuz-1.0 · needs: F211 · sprint 67
 - ⏳ F214 🔧 Save and sync pipelines — /save and sync run through the engine (first switch-over) — must:bmuz-1.0 · needs: F212
-- ⏳ F215 🔧 Bug pipeline — report → reproduce as a failing test → fix → keep the test → matching places, the same way every time — must:bmuz-1.0 · needs: F212, F213
+- 🔨 F215 🔧 Bug pipeline — report → reproduce as a failing test → fix → keep the test → matching places, the same way every time — must:bmuz-1.0 · needs: F212, F213
 - ⏳ F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
 - ✅ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
 - 🔨 F218 🔧 Define pipeline — makes the blocks from Discover's material: the one-page concept (GDD Part 1 — story, feelings, pillars, core verbs, scope per release, risks), a concept check, lock → Design (changed 2026-11-09: the TDD, feature map and plan-check moved to F227 — Design pipeline) — must:bmuz-1.0 · needs: F217 · sprint 67
@@ -670,7 +670,7 @@ flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
   F211 --> F213[✅ F213 Hand-off card]
   F212 --> F214[⏳ F214 Save + sync]
-  F212 --> F215[⏳ F215 Bug pipeline]
+  F212 --> F215[🔨 F215 Bug pipeline]
   F213 --> F215
   F215 --> F216[⏳ F216 Develop pipeline]
   F213 --> F217[✅ F217 Discover pipeline]

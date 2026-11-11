@@ -3,7 +3,7 @@
 ## ▶ RESUME HERE
 2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
 - **Order (SPRINT.md "Overnight order"):** F232 — BMUZ follows the script ✅ → F227 — Design pipeline ✅ (tasks 1–5; bmuz ..bfca394; history in archive/log.md) → F215 — Bug pipeline → F216 — Develop pipeline → F219 — Deliver pipeline → F230 — Release pipeline. Each: /sprint, one fresh helper, commit per task, fresh review, /save; taste calls → "Ask Muzzy:"; stuck 3× → BLOCKED; nothing public.
-- **Next action:** /sprint F215 — Bug pipeline. Helper briefs say: every test in the foreground with a timeout, never wait for an alert.
+- **Next action:** F215 — Bug pipeline sprinted (SPRINT.md section); a fresh helper builds tasks 1–5. Helper briefs say: every test in the foreground with a timeout, never wait for an alert.
 - **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd C:UsersMuzzyDocumentsdev.scratchmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6). Laptop: F212 task 4 install line.
 
 Reviewed through: bmuz ae5c1f8 (F227 — Design pipeline + F232 — BMUZ follows the script: fresh helper read cdee535..ae5c1f8 → 8 bugs, fixed through bfca394, checked by tests + check:fast + headless) · older: archive/log.md
