@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMUZ Design Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* layout: a book — chapters (stages) in one readable column, steps as cards, a chapter map as the spine */
+  --paper: #f5f6f8;
+  --page: #ffffff;
+  --ink: #17202e;
+  --muted: #5b6575;
+  --line: #dde1e8;
+  --accent: #1f4fd1;
+  --accent-soft: #e6ecfb;
+  --empty: #c9ced8;
+  --loose: #e8a33a;
+  --chosen: #1f4fd1;
+  --worked: #7a4fd1;
+  --built: #1f9d6a;
+  --warn: #b5442f;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10141b; --page: #171c25; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2a3140;
+    --accent: #7d9cff; --accent-soft: #1d2740; --empty: #3a4252; --loose: #f0b45a; --chosen: #7d9cff;
+    --worked: #b08cff; --built: #4cc895; --warn: #ff8a73; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10141b; --page: #171c25; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2a3140;
+  --accent: #7d9cff; --accent-soft: #1d2740; --empty: #3a4252; --loose: #f0b45a; --chosen: #7d9cff;
+  --worked: #b08cff; --built: #4cc895; --warn: #ff8a73; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 16px/1.6 var(--body); }
+main { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 2.4rem; font-weight: 800; }
+h2 { font-size: 1.7rem; font-weight: 800; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+h4 { font-size: 1.08rem; font-weight: 600; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+a { color: var(--accent); }
+.sub { color: var(--muted); }
+.block { background: var(--page); border: 1px solid var(--line); border-radius: 10px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; }
+.lead { font-size: 1.08rem; max-width: 65ch; }
+.toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 20px; }
+.toc a { text-decoration: none; }
+.stage { display: flex; flex-direction: column; gap: 14px; }
+.stage-head { border-left: 6px solid var(--accent); padding: 4px 0 4px 16px; display: flex; flex-direction: column; gap: 6px; }
+.stage-head .eyebrow { font: 500 .8rem var(--mono); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.stage-head .for { max-width: 65ch; }
+.ends { font-size: .95rem; color: var(--muted); }
+.step { background: var(--page); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.step header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.num { font: 500 .85rem var(--mono); color: var(--muted); min-width: 2.4em; }
+.kind { font: 500 .72rem var(--mono); padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); margin-left: auto; white-space: nowrap; }
+.kind.you { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.kind.gate { background: var(--warn); color: #fff; border-color: transparent; }
+.step .what { font-style: italic; color: var(--muted); max-width: 65ch; }
+.step dl { display: grid; grid-template-columns: 88px 1fr; gap: 6px 14px; margin: 0; }
+.step dt { font: 500 .78rem var(--mono); color: var(--muted); text-transform: uppercase; padding-top: 3px; }
+.step dd { margin: 0; }
+.q { display: block; }
+.q::before { content: "“"; color: var(--muted); }
+.q::after { content: "”"; color: var(--muted); }
+.fills { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 .75rem var(--mono); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line); white-space: nowrap; }
+.chip i { font-style: normal; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.m-empty i { background: var(--empty); } .m-loose i { background: var(--loose); } .m-chosen i { background: var(--chosen); }
+.m-worked i { background: var(--worked); } .m-built i { background: var(--built); }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+th { font: 500 .75rem var(--mono); color: var(--muted); text-transform: uppercase; }
+td.dot { text-align: center; }
+.d { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+.d.e { background: var(--empty); } .d.l { background: var(--loose); } .d.c { background: var(--chosen); } .d.w { background: var(--worked); } .d.b { background: var(--built); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.callout { border-left: 4px solid var(--loose); background: var(--page); padding: 12px 16px; border-radius: 0 8px 8px 0; display: flex; flex-direction: column; gap: 6px; }
+.against { border-left-color: var(--warn); }
+.mock { font: 500 .85rem/1.5 var(--mono); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; white-space: pre-wrap; overflow-x: auto; }
+.qs ol { gap: 8px; }
+.cut { text-decoration: line-through; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) {
+  .step dl { grid-template-columns: 1fr; gap: 2px; }
+  .step dt { padding-top: 8px; }
+  h1 { font-size: 1.9rem; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<header class="block">
+  <span class="sub" style="font: 500 .8rem var(--mono)">BMUZ · design document · draft 1 · 2026-11-10</span>
+  <h1>BMUZ Design Document</h1>
+  <p class="lead">This is the plan for how BMUZ takes a game from a loose idea to players' hands. It covers every stage and every step: what each step is for, what it asks you, how it gets its answer, and which part of the game's documents it fills. Comment on anything. Nothing here is built yet.</p>
+  <p class="sub">Built from: your stage decision (Ideate › Define › Design › Develop › Deliver › Release), the vision (V1–V48), the review of the Xong runs (33 questions, 15 of no use), 51 rework cases from Glyphtender, Goops and Roll Better, the design-method research (Fullerton, Schell, MDA, Ryan, Cerny, Meier and others) and today's live looks.</p>
+  <nav class="toc" aria-label="Contents">
+    <a href="#idea">1 · The one big idea</a>
+    <a href="#book">2 · The Game Book: 16 chapters</a>
+    <a href="#map">3 · How each chapter grows</a>
+    <a href="#feel">4 · What every step feels like</a>
+    <a href="#s0">Stage 0 · Your Starting Point</a>
+    <a href="#s1">Stage 1 · Ideate</a>
+    <a href="#s2">Stage 2 · Define</a>
+    <a href="#s3">Stage 3 · Design</a>
+    <a href="#s4">Stage 4 · Develop</a>
+    <a href="#s5">Stage 5 · Deliver</a>
+    <a href="#s6">Stage 6 · Release</a>
+    <a href="#research">Research, any time</a>
+    <a href="#how">5 · How it's built</a>
+    <a href="#against">6 · The case against</a>
+    <a href="#order">7 · Build order</a>
+    <a href="#questions">8 · Questions for you</a>
+  </nav>
+</header>
+
+<section class="block" id="idea">
+  <h2>1 · The one big idea</h2>
+  <p class="lead">One document, the <b>Game Book</b> (the GDD), with the same 16 chapters from the first minute to the launch. Every stage writes into those chapters, one level deeper than the stage before.</p>
+  <ul>
+    <li><b>Ideate</b> fills every chapter <b>loosely</b>: your words, your ideas, what's still open. Nothing is chosen.</li>
+    <li><b>Define</b> <b>chooses</b> within the first eight chapters, the one-page concept.</li>
+    <li><b>Design</b> <b>works out</b> the other chapters, tests the risky ones with sketches, then writes the build plan (the TDD and the feature map).</li>
+    <li><b>Develop</b> marks chapters <b>built</b> as the game gets made, and keeps the book true.</li>
+    <li><b>Deliver</b> and <b>Release</b> check the book against the finished game and the first players.</li>
+  </ul>
+  <p>You always see the book as a page (the planner page, grown up): every chapter with its level, from grey to green. That's the "document I'm organising" link you asked for, at every stage.</p>
+  <div class="legend" aria-label="Chapter levels">
+    <span class="chip m-empty"><i></i>Empty</span>
+    <span class="chip m-loose"><i></i>Loose · Ideate</span>
+    <span class="chip m-chosen"><i></i>Chosen · Define</span>
+    <span class="chip m-worked"><i></i>Worked out · Design</span>
+    <span class="chip m-built"><i></i>Built · Develop</span>
+  </div>
+  <div class="callout">
+    <b>Why this and not today's way</b>
+    <ul>
+      <li>Today Ideate writes IDEATE.md with 9 headings, Discover wrote DISCOVER.md with 14 shelves, and Define writes GDD Part 1 with 8 others: three filing systems for one game. That's why Ideate's results didn't look like the start of the GDD.</li>
+      <li>The research agrees on loose → tight in passes: Cerny's macro design before micro, Fullerton's prototype right after brainstorming, Ryan's concept before the full spec.</li>
+      <li>Your words: "GDD › Project Planner Page › actually working through things", and the GDD as "a blueprint that you regularly update to be more and more reflective of the final product".</li>
+    </ul>
+  </div>
+</section>
+
+<section class="block" id="book">
+  <h2>2 · The Game Book: 16 chapters</h2>
+  <p>The order is the order the rework evidence says to settle them in: the frame first (10 of 51 rework cases), rules written like a rulebook before any code (8), look and feel sketched before the full build (6+4), numbers late, teaching last.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Chapter</th><th>What it holds</th><th>Why it's its own chapter</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>The Frame</b></td><td>platform, which way up, players, online (leaving, joining, idle), match length, controls</td><td>costliest rework: Roll Better's 5-phase sideways milestone, Glyphtender's month, Goops' drift</td></tr>
+      <tr><td>2</td><td><b>The Pitch</b></td><td>one line · the game in 3–5 lines written to "you" · the hook and the anchor · games it's like</td><td>Ryan's concept doc; Zukowski's hook + anchor</td></tr>
+      <tr><td>3</td><td><b>The Feelings</b></td><td>1–2 primary feelings in players' words · "we'll know when…" · key moments · not this game</td><td>MDA; Fullerton's experience goals</td></tr>
+      <tr><td>4</td><td><b>The Pillars</b></td><td>3 rules that settle arguments</td><td>Maine, Keenan; a filter, so made after the ideas exist</td></tr>
+      <tr><td>5</td><td><b>The Core Loop</b></td><td>what you do, over and over, in verbs (3 core verbs at most)</td><td>Anthropy, Crawford; Ryan's "is each verb fun?"</td></tr>
+      <tr><td>6</td><td><b>Things in Play</b></td><td>the pieces, the states they can be in, who sees what and when</td><td>hidden-info rework (Glyphtender G16, G17)</td></tr>
+      <tr><td>7</td><td><b>The Rules</b></td><td>written like a rulebook: a turn or a moment, scoring, how it ends</td><td>Goops' tutorial rewritten 3× around a rule that flipped 3×</td></tr>
+      <tr><td>8</td><td><b>Decisions &amp; the Real Skill</b></td><td>the choices players make, why they're hard, what a good player does better</td><td>Meier; Glyphtender's 15 awards thrown out</td></tr>
+      <tr><td>9</td><td><b>Opponents &amp; People</b></td><td>the computer player's personality · online people problems</td><td>new need from the evidence (G9, G10, R3)</td></tr>
+      <tr><td>10</td><td><b>Change Over Time</b></td><td>what changes in a match and between matches · progression · pacing</td><td>Goops' ranks 51 → 31 over 3 sprints</td></tr>
+      <tr><td>11</td><td><b>Look &amp; Sound</b></td><td>style, references, UI tone, audio mood</td><td>Goops' soft-body look: 85 commits, never proved at phone size</td></tr>
+      <tr><td>12</td><td><b>Screens &amp; What You See</b></td><td>the screen map · the HUD · names of things</td><td>new needs: screens map, HUD, names (G13–G15, P2, P7)</td></tr>
+      <tr><td>13</td><td><b>Teaching</b></td><td>how a new player learns it</td><td>always last: it teaches rules that have stopped moving</td></tr>
+      <tr><td>14</td><td><b>Scope</b></td><td>smallest version worth playing · must / should / could per release · won't, with reasons</td><td>MoSCoW; Derek Yu's "small sloppy game first"</td></tr>
+      <tr><td>15</td><td><b>Risks &amp; Tests</b></td><td>what could stop it being great · the cheapest test for each · what would make us rethink</td><td>Game Outcomes Project: risk management 0.57, design docs under 0.2</td></tr>
+      <tr><td>16</td><td><b>Product</b></td><td>release path, business model, what success looks like</td><td>Ryan's proposal; your release targets</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="sub">Plus three running lists at the back: <b>Open questions</b>, <b>Decisions</b> (answered once, never asked again: V38) and <b>Changes</b>. Two more books open in Design: the <b>Build Book</b> (the TDD, Claude's) and the <b>Feature Map</b> (the roadmap).</p>
+</section>
+
+<section class="block" id="map">
+  <h2>3 · How each chapter grows, stage by stage</h2>
+  <p>This is the progress you'd watch on the page. A dot means the stage leaves that chapter at that level.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Chapter</th><th>Ideate</th><th>Define</th><th>Design</th><th>Develop</th></tr></thead>
+    <tbody>
+      <tr><td>1 The Frame</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>2 The Pitch</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>3 The Feelings</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>4 The Pillars</td><td class="dot"><span class="d e"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>5 The Core Loop</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>6 Things in Play</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>7 The Rules</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>8 Decisions &amp; Skill</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>9 Opponents &amp; People</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>10 Change Over Time</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>11 Look &amp; Sound</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>12 Screens &amp; What You See</td><td class="dot"><span class="d e"></span></td><td class="dot"><span class="d e"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>13 Teaching</td><td class="dot"><span class="d e"></span></td><td class="dot"><span class="d e"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>14 Scope</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>15 Risks &amp; Tests</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d w"></span></td><td class="dot"><span class="d b"></span></td></tr>
+      <tr><td>16 Product</td><td class="dot"><span class="d l"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d c"></span></td><td class="dot"><span class="d b"></span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="sub">"Loose" in Ideate means whatever you have, even one line. A chapter with nothing says so plainly ("open: nothing yet"), so a gap is visible, never hidden. Pillars stay empty in Ideate on purpose: they're a filter, made in Define once the ideas exist.</p>
+</section>
+
+<section class="block" id="feel">
+  <h2>4 · What every step feels like</h2>
+  <p>Every step opens like a page in a book, the way you described it:</p>
+  <div class="mock">Define · step 3 of 9 · The Pitch          ● Frame ● Feelings ○ Pitch ○ Pillars …
+
+THE PITCH
+The game in a few lines, so anyone gets it in ten seconds.
+This becomes chapter 2 of your Game Book. We already have:
+"standard pong, but then things get weird" (your words).
+
+  1. In 3–5 lines, written to "you": what does a match feel like?
+     e.g. Pong: "You're a paddle. The ball speeds up every hit…"</div>
+  <ul>
+    <li><b>Title</b>: the step's name, the same word as its chapter where it fills one.</li>
+    <li><b>What it's for</b>: one or two sentences, shown once.</li>
+    <li><b>What we already have</b>: your own words from the book, so nothing is asked twice.</li>
+    <li><b>The questions</b>: 1–3 at a time, each with its context and an example from a well-known game.</li>
+    <li><b>The band</b> under the chat names the stage, the step and which chapters are done.</li>
+    <li><b>The end of every stage</b> is one card with a link to the Game Book page, what changed, and the one decision it needs.</li>
+  </ul>
+  <div class="callout">
+    <b>Rules every question follows</b>
+    <ul>
+      <li>Fixed questions (Where's your game? This pass?) are asked by BMUZ itself, instantly, without waiting 3–9 seconds for Claude to write them.</li>
+      <li>Never your first answer read back as options (Xong review: 6 of 33 questions did that).</li>
+      <li>Never a fiction question for an abstract game ("You are a…" for Pong).</li>
+      <li>Taste calls: your view first, then the best case for each option. Engineering calls: never asked; Claude decides and says so in plain words.</li>
+      <li>Links and long text: Claude asks in your words ("Share your links — paste them with Alt+V…") and your next message is the answer.</li>
+      <li>Several answers can be right? The question lets you pick several.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ STAGE 0 ============ -->
+<section class="stage" id="s0">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 0 · about 3 minutes</span>
+    <h2>Your Starting Point</h2>
+    <p class="for">BMUZ finds out where your game is, reads everything you already have, and puts you in at the right step. Nothing you've already said is asked again later.</p>
+    <p class="ends">Ends with: the Game Book started (every chapter your material touches marked loose) and your starting stage.</p>
+  </div>
+
+  <article class="step">
+    <header><span class="num">0.1</span><h4>Where's Your Game?</h4><span class="kind you">you · 2 taps</span></header>
+    <p class="what">Sorts the game, never the person.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">Where's your game right now?</span> nothing yet / a concept / something written / a prototype · then, if something exists, <span class="q">What do you want from this pass?</span> open it up / pin it down / work it out / build it</dd>
+      <dt>How</dt><dd>asked by BMUZ itself (instant). Your stage decision of 2026-11-09.</dd>
+      <dt>Fills</dt><dd>nothing yet: routing</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">0.2</span><h4>Share Your Material</h4><span class="kind you">you · paste</span></header>
+    <p class="what">One message with everything: links, paths, or the idea in your own words.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">Share your links — paste them with Alt+V. I can read Google Drive folder and/or doc links, GitHub links, and even folder and file links from your computer. If you don't want to share any links, just say "never mind".</span></dd>
+      <dt>How</dt><dd>your wording, as built today (round 5). Only here: Ideate never asks again.</dd>
+      <dt>Fills</dt><dd>the material list</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">0.3</span><h4>Reading Everything</h4><span class="kind">script</span></header>
+    <p class="what">Reads all of it, the same way every time.</p>
+    <dl>
+      <dt>How</dt><dd>a script reads files, Drive, GitHub and folders on your PC (read only; key files skipped), then Claude sorts every line into the 16 chapters as fixed / ideas / open, your words quoted and checked against the source.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>every chapter the material touches</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">0.4</span><h4>Your Starting Point</h4><span class="kind gate">gate</span></header>
+    <p class="what">One screen: what I read, which chapters it covers, where I'd start you.</p>
+    <dl>
+      <dt>Shows</dt><dd>the Game Book page for the first time · a plain line: <span class="q">You picked Work it out. Your material covers the frame and the rules loosely; the feelings and scope are open. I'd start you in Ideate's gaps, then Define.</span></dd>
+      <dt>Asks</dt><dd>Start there · Start earlier · Somewhere else</dd>
+      <dt>Ends</dt><dd>the stage you chose, entered at its first step your material doesn't already answer</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 1 ============ -->
+<section class="stage" id="s1">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 1 · Ideate · 15–20 minutes</span>
+    <h2>Ideate: The Game So Far</h2>
+    <p class="for">Gathering the material: your loose idea, captured and made visible. Every chapter gets what you have, your ideas, and what's still open. Nothing gets chosen here; that's Define.</p>
+    <p class="ends">Ends with: the Game Book, version 1: every chapter loose or plainly open, sharper than what you walked in with.</p>
+  </div>
+
+  <article class="step">
+    <header><span class="num">1.1</span><h4>The Idea in One Breath</h4><span class="kind you">you · only if the material hasn't said it</span></header>
+    <p class="what">In the Xong run, this one free answer held nearly everything by minute 3.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">In one breath: what's the idea, in your own words? A rough half-memory is fine.</span></dd>
+      <dt>How</dt><dd>free text, no options (Xong review §3). Skipped when 0.2 gave a concept.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>wherever it touches</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">1.2</span><h4>The Game So Far</h4><span class="kind">Claude · shows the page</span></header>
+    <p class="what">You see your own game back, organised, before any question.</p>
+    <dl>
+      <dt>Shows</dt><dd>the Game Book page: each chapter's fixed / ideas / open, your words in quotes, Claude's readings marked "my reading"</dd>
+      <dt>How</dt><dd>reflect back first (Design Council's "brief as said → goal underneath"); the open lines become the gap list for 1.3–1.5.</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">1.3</span><h4>The Frame</h4><span class="kind you">you · 1–3 questions</span></header>
+    <p class="what">Where and how it's played, settled first because everything built on it gets more expensive to change.</p>
+    <dl>
+      <dt>Asks</dt><dd>only the frame gaps: <span class="q">Phone, desktop or both? Which way up?</span> · <span class="q">Who plays: one vs the computer, two online, same screen?</span> · <span class="q">Online: what happens when someone leaves, idles or joins late?</span> · <span class="q">How long is a match?</span></dd>
+      <dt>How</dt><dd>rework evidence: frame gaps were 10 of 51 cases and the costliest. Several answers allowed.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>1 The Frame</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">1.4</span><h4>Filling the Gaps</h4><span class="kind you">you · a few at a time</span></header>
+    <p class="what">One gap at a time, the costliest first, each question saying which chapter it fills.</p>
+    <dl>
+      <dt>Asks</dt><dd>gathering questions, never "which one?": <span class="q">What do 2 to 10 do: anything you remember, even half an idea?</span> · <span class="q">How does a match end?</span> · <span class="q">What would a player tell a friend afterwards?</span> · <span class="q">What do you hope it becomes, and what would disappoint you?</span></dd>
+      <dt>How</dt><dd>the 19 gap questions from the rework evidence, mapped to chapters; Fullerton's experience goals; hopes and fears (Design Council) with fears kept as risks; Meier's interesting decisions. You can wrap up any time.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>3 Feelings</span><span class="chip m-loose"><i></i>5 Core Loop</span><span class="chip m-loose"><i></i>6 Things</span><span class="chip m-loose"><i></i>7 Rules</span><span class="chip m-loose"><i></i>8 Decisions</span><span class="chip m-loose"><i></i>10 Change</span><span class="chip m-loose"><i></i>11 Look</span><span class="chip m-loose"><i></i>14 Scope</span><span class="chip m-loose"><i></i>15 Risks</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">1.5</span><h4>Quick Probe</h4><span class="kind">optional · sketch or research</span></header>
+    <p class="what">When words can't answer, a quick try can: "is the toy fun?", "can you read the ball when the screen spins?".</p>
+    <dl>
+      <dt>How</dt><dd>offered only when a gap is about feel (a <b>sketch</b>: one page, knobs, 3 presets, Copy values) or about something nobody knows (a <b>research</b> pass, sourced). Never by default: the Xong run spent 17 minutes on research that fed one question.</dd>
+      <dt>Fills</dt><dd>a loose chapter gets "tried: …"</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">1.6</span><h4>Ideate Wrap-Up</h4><span class="kind gate">gate</span></header>
+    <p class="what">The book so far, and the questions that matter most for Define.</p>
+    <dl>
+      <dt>Shows</dt><dd>the Game Book page, version 1 · what changed since you started · the 3 open questions that matter most</dd>
+      <dt>Asks</dt><dd>On to Define · One more gap first</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 2 ============ -->
+<section class="stage" id="s2">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 2 · Define · 30–45 minutes</span>
+    <h2>Define: The Concept</h2>
+    <p class="for">Making the blocks: for each part of the game, which one is it? What's fixed is one tap to keep, your ideas are the options, and only what's open is asked. It ends with one page you could pin on a wall.</p>
+    <p class="ends">Ends with: chapters 1–5, 8, 14–16 chosen (the concept page), locked by you.</p>
+  </div>
+
+  <article class="step">
+    <header><span class="num">2.1</span><h4>The Frame, Locked</h4><span class="kind you">you · keep or change</span></header>
+    <p class="what">Ideate's frame shown back; one tap to keep it.</p>
+    <dl>
+      <dt>Asks</dt><dd>Keep / Change, for anything Ideate left open: one answer each</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>1 The Frame</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.2</span><h4>The Feelings</h4><span class="kind you">you</span></header>
+    <p class="what">The one or two feelings that ARE this game, and how we'd see them in a player.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">Which feeling is this game about, above all?</span> (your ideas as options; MDA's eight words shown only after you answer) · <span class="q">How will we know a player feels it? Something we could watch.</span> · <span class="q">What should it never become?</span></dd>
+      <dt>How</dt><dd>MDA (Hunicke, LeBlanc, Zubek); Schell's Lens #1 and #12. "We'll know when" must be watchable: "asks for a rematch within 10 seconds".</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>3 The Feelings</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.3</span><h4>The Pitch</h4><span class="kind you">you · write or be guided</span></header>
+    <p class="what">The game in a few lines, so anyone gets it in ten seconds.</p>
+    <dl>
+      <dt>Asks</dt><dd>first an example from a well-known game, then <span class="q">write your own</span> or <span class="q">be guided</span> · <span class="q">One line: what is it, and what makes it different?</span> · <span class="q">What's familiar about it, and what has nobody seen?</span> · once: <span class="q">Look at the closest games first?</span></dd>
+      <dt>How</dt><dd>Tim Ryan's concept doc (written to "you"); Zukowski's hook + anchor; prior art only on a yes, as "here's what I found, does it change anything?"</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>2 The Pitch</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.4</span><h4>The Core</h4><span class="kind you">you</span></header>
+    <p class="what">What you do over and over, and where the skill is.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">The core loop in up to 3 verbs.</span> · then for each: <span class="q">Is this fun on its own?</span> · <span class="q">What does a good player do that a new one doesn't?</span> · per verb, your mechanism idea first, a backup offered, never required</dd>
+      <dt>How</dt><dd>Ryan's verb check; Anthropy's verbs and objects; Meier's interesting decisions; Cook's skill atoms. Exact numbers wait for Design.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>5 The Core Loop</span><span class="chip m-chosen"><i></i>8 Decisions &amp; Skill</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.5</span><h4>The Pillars</h4><span class="kind you">you</span></header>
+    <p class="what">Three rules that settle arguments later ("does this new idea belong?").</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">Three rules for this game, and the argument each one settles.</span> Any kind: a feeling, a theme rule, a situation.</dd>
+      <dt>How</dt><dd>Maine, Keenan (Duskers); Wagar's warning: not system names, not features.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>4 The Pillars</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.6</span><h4>Does It Hang Together?</h4><span class="kind">helpers, then you</span></header>
+    <p class="what">Separate reviewers look for clashes; you settle each one.</p>
+    <dl>
+      <dt>How</dt><dd>helpers check: the story uses the core verbs; pillars and feelings trace both ways; theme pasted on? (Juul); decisions with real trade-offs (Meier); every idea against the pillars. They choose nothing.</dd>
+      <dt>Asks</dt><dd>for each clash: <span class="q">These pull apart: keep both, change one, or park one?</span></dd>
+      <dt>Fills</dt><dd>Decisions list</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.7</span><h4>The Scope</h4><span class="kind you">you</span></header>
+    <p class="what">The smallest version that still gives the main feeling, and what waits.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">What's the smallest version that still feels like this game?</span> · must / should / could for the first release · <span class="q">What will it never have, and why?</span></dd>
+      <dt>How</dt><dd>MoSCoW (if it's missing, would you cancel?); Derek Yu's small sloppy game first; Claude gives a size read (small / medium / big) as a fact, never a question.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>14 Scope</span><span class="chip m-chosen"><i></i>16 Product</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.8</span><h4>Risks &amp; Tests</h4><span class="kind you">you</span></header>
+    <p class="what">What could stop it being great, and the cheapest way to find out early.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">What could stop it being great?</span> (your fears from Ideate shown first) · <span class="q">What's the cheapest test for each?</span> · <span class="q">What result would make you rethink it?</span></dd>
+      <dt>How</dt><dd>risk-first: Schell Lens #14, Cerny, Kumar. Each test becomes Design's first job.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>15 Risks &amp; Tests</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">2.9</span><h4>The Concept, Locked</h4><span class="kind gate">gate</span></header>
+    <p class="what">One page, checked, then your OK.</p>
+    <dl>
+      <dt>How</dt><dd>a script checks counts (3–5 story lines, 1–2 feelings, 3 pillars, every won't has a reason, every risk a test); reviewers check meaning; findings become numbered questions you can answer.</dd>
+      <dt>Shows</dt><dd>the concept page (Part 1 of the Game Book) · what's still open, by chapter name</dd>
+      <dt>Asks</dt><dd>Not yet: change something · Lock it: on to Design</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 3 ============ -->
+<section class="stage" id="s3">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 3 · Design · a few sittings</span>
+    <h2>Design: The Blueprint</h2>
+    <p class="for">Assembling the blocks: cutting some, tweaking others, into rules and systems you've seen working. Risky parts get a sketch or a paper play before they're written down as settled. It ends with the blueprint: the full Game Book, then the build plan.</p>
+    <p class="ends">Ends with: every chapter worked out, the Build Book (TDD), the Feature Map with dependencies, and the planner page, approved by you.</p>
+  </div>
+
+  <article class="step">
+    <header><span class="num">3.1</span><h4>Test the Risks</h4><span class="kind">sketch / sim, then you</span></header>
+    <p class="what">Define's risks, tested cheapest first, before anything is built on them.</p>
+    <dl>
+      <dt>How</dt><dd>per risk: a <b>sketch</b> for feel and look (knobs, 3 presets, your values copied back), a <b>sim or the math</b> for numbers ("do the math this time" when it's simple), a <b>paper play</b> for rules.</dd>
+      <dt>Asks</dt><dd><span class="q">Did it feel like [the target]?</span> · <span class="q">Keep, change, or rethink?</span></dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>15 Risks &amp; Tests (results)</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.2</span><h4>The Rulebook</h4><span class="kind you">you · Claude drafts</span></header>
+    <p class="what">The rules written like a real rulebook, so the code and the tutorial follow one truth.</p>
+    <dl>
+      <dt>Asks</dt><dd>Claude drafts from the chosen core; you correct: <span class="q">Is this how a turn goes?</span> · <span class="q">What happens when…?</span> (edge cases) · the pieces and their states · who sees what</dd>
+      <dt>How</dt><dd>rule shapes now, exact numbers late (rework: Goops' ranks); proto sims for odds (Roll Better's 53% first-player edge).</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>6 Things in Play</span><span class="chip m-worked"><i></i>7 The Rules</span><span class="chip m-worked"><i></i>8 Decisions</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.3</span><h4>Opponents &amp; People</h4><span class="kind you">you</span></header>
+    <p class="what">The computer player's personality, and what online play does with real people.</p>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">How should the computer play: who is it, what does it go for?</span> · <span class="q">Someone leaves mid-match: what happens?</span></dd>
+      <dt>How</dt><dd>the ai-opponent personality model (Glyphtender); the online rework (Roll Better R3: an 8-phase milestone after shipping).</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>9 Opponents &amp; People</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.4</span><h4>Change Over Time</h4><span class="kind you">you</span></header>
+    <p class="what">What changes in a match and between matches, and the pace of it.</p>
+    <dl>
+      <dt>How</dt><dd>game-economy flow models for anything earned or spent; MDA dynamics (runaway leader, stalemate) checked; numbers stay in tuning files you can change.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>10 Change Over Time</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.5</span><h4>Look &amp; Sound</h4><span class="kind you">you · sketch at phone size</span></header>
+    <p class="what">The look, proved where it'll be played, before the full build.</p>
+    <dl>
+      <dt>Asks</dt><dd>references, then 2–3 look sketches side by side · the UI style (one of seven) · the audio mood</dd>
+      <dt>How</dt><dd>sketch at the real size (rework: Goops' soft-body look, 85 commits never proved at phone size); stand-ins first, polish later.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>11 Look &amp; Sound</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.6</span><h4>Screens &amp; What You See</h4><span class="kind you">you · mock-ups</span></header>
+    <p class="what">Every screen, what's on it, and the names of things.</p>
+    <dl>
+      <dt>How</dt><dd>a screen map; mock-ups from the UI kit; the HUD: what the player must see at every moment; names settled once.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>12 Screens &amp; What You See</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.7</span><h4>Teaching</h4><span class="kind you">you</span></header>
+    <p class="what">How a new player learns it, written now that the rules have stopped moving.</p>
+    <dl>
+      <dt>How</dt><dd>teaching last (rework: Goops' tutorial rewritten 3×); the tutorial toolbox's step format.</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>13 Teaching</span></div></dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.8</span><h4>The Build Plan</h4><span class="kind">Claude · you're told</span></header>
+    <p class="what">How it's built: Claude's call, told to you in plain words.</p>
+    <dl>
+      <dt>How</dt><dd>the Build Book (TDD): stack, modules, data files you can edit, budgets, safety; each mechanic traced to a feeling (MDA); then the Feature Map: every feature with its type, scope and what it needs first.</dd>
+      <dt>Fills</dt><dd>Build Book · Feature Map · planner page</dd>
+    </dl>
+  </article>
+
+  <article class="step">
+    <header><span class="num">3.9</span><h4>The Blueprint, Approved</h4><span class="kind gate">gate</span></header>
+    <dl>
+      <dt>Shows</dt><dd>the Game Book (all chapters worked out), the feature map as a picture, the first sprint it would start with</dd>
+      <dt>Asks</dt><dd>Not yet: change something · Approve: start building</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 4 ============ -->
+<section class="stage" id="s4">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 4 · Develop · sprints</span>
+    <h2>Develop: Building It</h2>
+    <p class="for">The production model, built from the blueprint in short sprints you play and approve one piece at a time. The Game Book stays true as things change.</p>
+    <p class="ends">Ends with: every must for the release built and approved; chapters marked built.</p>
+  </div>
+  <article class="step">
+    <header><span class="num">4.1</span><h4>Plan the Sprint</h4><span class="kind gate">gate</span></header>
+    <dl>
+      <dt>Shows</dt><dd>a plan card per feature: what you'll see · done when · not doing · needs from you</dd>
+      <dt>How</dt><dd>features whose needs are done, in dependency order (Replit / Kiro plan cards; sized to the work: a tweak gets no card)</dd>
+    </dl>
+  </article>
+  <article class="step">
+    <header><span class="num">4.2</span><h4>Build &amp; Prove</h4><span class="kind">Claude</span></header>
+    <dl><dt>How</dt><dd>tests for rules, screenshots at every size, a separate skeptical review; checkpoints and a plain-words undo; stuck twice → it stops and says so.</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">4.3</span><h4>Play It &amp; Approve</h4><span class="kind you">you</span></header>
+    <dl>
+      <dt>Asks</dt><dd><span class="q">Did [moment] feel like [target]?</span> · Approve / change</dd>
+      <dt>Fills</dt><dd><div class="fills"><span class="chip m-built"><i></i>the feature's chapters</span></div> · 3 Feelings' "seen?" column</dd>
+    </dl>
+  </article>
+  <article class="step">
+    <header><span class="num">4.4</span><h4>Tune It</h4><span class="kind you">you · Dev Kit</span></header>
+    <dl><dt>How</dt><dd>MDA diagnose: name the feeling → watch what players do → feel, readability, dynamic, or the rule itself → one knob at a time, live in the Dev Kit. Your saved values are decisions.</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">4.5</span><h4>Sprint Look-Back</h4><span class="kind you">you · 3 lines</span></header>
+    <dl><dt>How</dt><dd>went well · went wrong · change; game lessons into the game's books, BMUZ lessons to you as proposals.</dd></dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 5 ============ -->
+<section class="stage" id="s5">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 5 · Deliver</span>
+    <h2>Deliver: Ready to Hand Over</h2>
+    <p class="for">The finished product made ready: every must in, polished enough, safe, and built for each platform.</p>
+    <p class="ends">Ends with: a ready build per platform and your OK to release.</p>
+  </div>
+  <article class="step">
+    <header><span class="num">5.1</span><h4>Release Check</h4><span class="kind">script</span></header>
+    <dl><dt>How</dt><dd>exit criteria as data: alpha = every must in and no P0 bug; beta and 1.0 the same with their own musts (game stage-gates).</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">5.2</span><h4>Polish Pass</h4><span class="kind you">you</span></header>
+    <dl><dt>Asks</dt><dd>stand-ins shown first: <span class="q">Good enough for this release?</span> (rework: 40 sounds hunted that weren't needed)</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">5.3</span><h4>Safety &amp; Legal</h4><span class="kind">Claude</span></header>
+    <dl><dt>How</dt><dd>security review, no secrets, privacy page, store age and data forms, every asset's licence.</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">5.4</span><h4>Builds &amp; Smoke Test</h4><span class="kind gate">gate</span></header>
+    <dl><dt>Asks</dt><dd>Release it · Not yet</dd></dl>
+  </article>
+</section>
+
+<!-- ============ STAGE 6 ============ -->
+<section class="stage" id="s6">
+  <div class="stage-head">
+    <span class="eyebrow">Stage 6 · Release</span>
+    <h2>Release: In Players' Hands</h2>
+    <p class="for">The public starts experiencing it: the launch, the live link, and what players actually feel.</p>
+    <p class="ends">Ends with: the game live, first reactions read against the feelings you chose, and lessons kept.</p>
+  </div>
+  <article class="step">
+    <header><span class="num">6.1</span><h4>Go Live</h4><span class="kind">Claude</span></header>
+    <dl><dt>How</dt><dd>merge, version, deploy per platform, live check; nothing public without your explicit OK.</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">6.2</span><h4>The Store Page</h4><span class="kind you">you</span></header>
+    <dl><dt>How</dt><dd>built from chapter 2 (The Pitch): hook, anchor, box facts (players, length, platform).</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">6.3</span><h4>First Reactions</h4><span class="kind you">you</span></header>
+    <dl><dt>How</dt><dd>playtest notes against chapter 3's "we'll know when": seen ✅ / partly ⚠️ / not ❌; anything off becomes a tuning question.</dd></dl>
+  </article>
+  <article class="step">
+    <header><span class="num">6.4</span><h4>Look Back</h4><span class="kind you">you</span></header>
+    <dl><dt>How</dt><dd>the milestone review: what this game teaches the next one.</dd></dl>
+  </article>
+</section>
+
+<section class="block" id="research">
+  <h2>Research, any time</h2>
+  <p>Research is a tool, not a stage: started when it's useful, never by default.</p>
+  <ul>
+    <li><b>When:</b> a creative block · a worry it's been done · something we've never built · a rule that doesn't work · before locking the concept (offered once).</li>
+    <li><b>How:</b> sourced, every claim with a working link; independent helpers, merged.</li>
+    <li><b>Comes back as:</b> "Here's what I found: does it change anything?", never a menu.</li>
+  </ul>
+</section>
+
+<section class="block" id="how">
+  <h2>5 · How it's built</h2>
+  <p>The parts that make the above happen the same way every time.</p>
+  <ul>
+    <li><b>The Game Book is one file</b> (GDD.md) with the 16 chapters as fixed headings. Each chapter carries its level (empty / loose / chosen / worked out / built) in a line BMUZ reads, so the page and the band can show progress.</li>
+    <li><b>Every step names the chapter it fills.</b> A step's result is written into its chapter by a script, never by hand, so your edits and Obsidian edits are kept (V37).</li>
+    <li><b>The page</b> is built from the book by a script and republished after every step: Game · Plan · Sketches · Open questions. Your planner page, grown up.</li>
+    <li><b>Each stage is a fixed list of steps</b> held by the engine: you · Claude · script · helpers · gate. Claude thinks inside a step; any change of plan is logged where you can see it.</li>
+    <li><b>Fixed questions are asked by the engine</b> (instant). Claude writes only the questions that depend on your game.</li>
+    <li><b>"Nobody's here" mode</b> only switches on when the window really can't ask (a background run), never because Claude wrote a bad question. Today's Define ran without you for that reason.</li>
+    <li><b>What gets cut:</b> <span class="cut">IDEATE.md</span>, <span class="cut">DISCOVER.md</span>, <span class="cut">the 14 Discover shelves</span>, <span class="cut">Discover's theme dig, mechanism shelf and twists</span> (now research on request). Raw reads stay in research/ as working files.</li>
+  </ul>
+</section>
+
+<section class="block" id="against">
+  <h2>6 · The case against (and the answers)</h2>
+  <div class="callout against">
+    <b>Fixed chapters can make a loose idea look finished too early.</b>
+    <p>Answer: the level dots. A loose chapter is amber and says "loose", and open ones say "open: nothing yet". Ideate never fills a chapter with Claude's guess dressed as yours.</p>
+  </div>
+  <div class="callout against">
+    <b>16 chapters is a lot for a small game.</b>
+    <p>Answer: a chapter the game doesn't need is marked "not in this game" in one tap (no opponents in a solo puzzle). The chapters come from real rework, so each one has cost a real game before.</p>
+  </div>
+  <div class="callout against">
+    <b>Design docs barely predict success (Game Outcomes: under 0.2); risk management does (0.57).</b>
+    <p>Answer: that's why Risks &amp; Tests is a chapter and Design starts by testing them. The book is the shared truth, not the goal.</p>
+  </div>
+  <div class="callout against">
+    <b>More structure means more questions.</b>
+    <p>Answer: nothing already in the book is asked again, and every stage can wrap up early with the gaps marked. The Xong run had 33 questions; this plan targets under 15 for Ideate and 20 for Define.</p>
+  </div>
+  <div class="callout against">
+    <b>Moving Design, Develop, Deliver and Release onto the engine is a big job.</b>
+    <p>Answer: it's done one stage at a time; until then each stage hands over to today's commands with the book as their input, so nothing breaks in between.</p>
+  </div>
+</section>
+
+<section class="block" id="order">
+  <h2>7 · Build order</h2>
+  <ol>
+    <li><b>Fix today's five bugs</b> (the false "nobody's here" mode, the double link ask, the stale restart, the raw tool output, the jargon proposal).</li>
+    <li><b>The Game Book:</b> the 16-chapter template, chapter levels, and the page that shows them.</li>
+    <li><b>Starting Point + Ideate</b> rebuilt on the chapters (reading once, at the start).</li>
+    <li><b>Define</b> moved onto the chapters (it's close already).</li>
+    <li><b>Design</b> as a new engine stage, with sketches and the build plan.</li>
+    <li><b>Develop, Deliver, Release</b> onto the engine, one at a time.</li>
+  </ol>
+  <p class="sub">Each step ends with a live look by you before the next starts.</p>
+</section>
+
+<section class="block qs" id="questions">
+  <h2>8 · Questions for you</h2>
+  <ol>
+    <li>Is the one big idea right: one Game Book, 16 fixed chapters, each stage filling them one level deeper?</li>
+    <li>Are the 16 chapters right? Any to merge, split, rename or add?</li>
+    <li>Do the step names read clearly to a designer? Mark any that don't.</li>
+    <li>Taste calls: should BMUZ ask your view first and only give its pick when you say "your pick" (what the research suggests), or keep giving its pick first (today's rule)?</li>
+    <li>One page for the whole game with tabs, or one page per stage?</li>
+    <li>Is "Game Book" the right name for the GDD in BMUZ, and "Build Book" for the TDD, or keep GDD and TDD?</li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
