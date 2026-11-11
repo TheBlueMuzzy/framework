@@ -133,14 +133,14 @@ td.dot { text-align: center; }
 <main>
 
 <header class="block">
-  <span class="sub" style="font: 500 .8rem var(--mono)">BMUZ · design document · draft 3, part 1 · 2026-11-11</span>
+  <span class="sub" style="font: 500 .8rem var(--mono)">BMUZ · design document · draft 3 · 2026-11-11</span>
   <div class="callout changed">
-    <b>New in draft 3, part 1: the exact script for Stages 1 and 2</b>
+    <b>New in draft 3: the exact script for every stage</b>
     <ul>
-      <li>Every step in Ideate and Define now shows exactly what BMUZ says, word for word. Lines that depend on the game are templates with highlighted slots.</li>
+      <li>Every step, Ideate to Release, now shows exactly what BMUZ says, word for word. Lines that depend on the game are templates with highlighted slots.</li>
       <li>One rule now holds throughout: free answers go in the chat, and choices go in a question box.</li>
-      <li>Each of the two stages ends with an example box, filled in with a made-up sample game.</li>
-      <li>Stages 3–6 still describe their steps. Their scripts come next, once you've checked the tone.</li>
+      <li>Ideate, Define and Design each end with an example box, filled in with a made-up sample game.</li>
+      <li>A last section shows the replies for when the designer steps in at any time: a new idea, a bug, "stop", a research request.</li>
     </ul>
   </div>
   <h1>BMUZ Design Document</h1>
@@ -172,6 +172,7 @@ td.dot { text-align: center; }
     <a href="#s6">Stage 6 · Release</a>
     <a href="#how">5 · How it's built</a>
     <a href="#against">6 · The case against</a>
+    <a href="#script-key">How to read the scripts</a>
     <a href="#questions">7 · Questions for you</a>
   </nav>
 </header>
@@ -641,144 +642,175 @@ td.dot { text-align: center; }
   </div>
 </section>
 
-<section class="block">
-  <h2>Stages 3–6: scripts coming next</h2>
-  <p>The steps below still describe what each one covers. Their word-for-word scripts follow once you've checked the tone of Stages 1–2.</p>
-</section>
 <!-- ================= STAGE 3 ================= -->
 <section class="stage" id="s3">
   <div class="stage-head">
     <span class="eyebrow">Stage 3 · Design · several sittings</span>
     <h2>Design: The Blueprint</h2>
-    <p class="for">Work the game out in detail. First the game itself (sketches, the rulebook, the content), then the digital game around it (platform features, look, screens), which starts the TDD. It ends with the full plan for building.</p>
-    <p class="ends">Ends with: GDD Parts 2 and 3 worked out · the content tables · the TDD · the roadmap · your project page, all approved.</p>
+    <p class="for">Work the game out in detail: first the game itself, then the digital game around it. It ends with the full plan for building.</p>
+    <p class="ends">Ends with: GDD Parts 2 and 3 worked out · the content tables · the TDD · the roadmap · the project page, approved.</p>
   </div>
 
   <article class="step welcome">
     <header><span class="num">3.0</span><h4>Welcome to Design</h4><span class="kind">teaches</span></header>
-    <dl>
-      <dt>Teaches</dt><dd>the game first, then the digital game around it · sketches answer questions, they aren't the game · the rulebook is the heart of the GDD and gets rewritten many times · scope and risks get a real second pass here</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Welcome to Design</b><br>The concept is locked. Now we work the game out in detail, in two halves.</p>
+      <p class="b"><b>The game itself</b><br>1. <b>Sketches</b>: we build the sketches on your list and play them<br>2. <b>The Rulebook</b>: the rules, written like a real rulebook<br>3. <b>Content &amp; Balance</b>: every card, unit, ability and number, in tables<br>4. <b>Change Over Time</b>: what changes within a game and between games<br>5. <b>Scope &amp; Risks, second pass</b>: the rulebook always adds things, so we size it up again</p>
+      <p class="b"><b>The digital game around it</b><br>6. <b>Players &amp; Opponents</b>: the computer opponent, online play, saving<br>7. <b>Look &amp; Sound</b>: the style, tested at real size<br>8. <b>Screens &amp; Menus</b>: every screen and what's on it<br>9. <b>The Build Plan</b>: how it all gets built, and in what order</p>
+      <p class="b">This is the longest stage, usually a few sittings. The rulebook is the heart of it and gets rewritten many times; that's how good rulebooks are made. You can stop after any step, and everything is saved.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">3.1</span><h4>Sketches, Round 1</h4><span class="kind you">you · play &amp; tune</span></header>
-    <p class="what">The sketches you picked, built and played, so the rulebook is written on tested ideas.</p>
-    <dl>
-      <dt>Teaches</dt><dd>these are only sketches: throwaway pages, each answering its one question. The game will not be built from them, only from what they prove.</dd>
-      <dt>How</dt><dd>each sketch gets a tab on your project page, with knobs, 3 presets and "Copy values for Claude". Before building, BMUZ writes down how we'll know the answer (Schell: decide the test first). A question about numbers gets a simulation or the math instead.</dd>
-      <dt>Asks</dt><dd><span class="q">Did it answer the question? Keep, change, or try another way?</span> · <span class="q">Copy your values back when you like a setting.</span></dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>7 Risks (results)</span></div> and whichever chapter the sketch settles</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Sketches, Round 1</b><br>Time to build the sketches on your list. A reminder: these are only sketches, small throwaway pages that each answer one question. We won't build the game from them, only from what they prove.</p>
+      <p class="b">Your list: <span class="slot">[S01 Ball speed feel · S02 Two score layouts]</span>. Before I build each one, here's how we'll know the answer:<br>· <span class="slot">[S01]</span>: <span class="slot">[you pick a speed that still feels readable after a minute]</span><br>· <span class="slot">[S02]</span>: <span class="slot">[you can read the score at a glance on a phone]</span></p>
+      <div class="box"><p class="bq">Build them in this order?</p><ul><li>Yes, build them</li><li>Change the order or the tests <span class="desc">next, tell me what</span></li></ul></div>
+      <p class="note">→ each sketch is built, checked on phone and desktop, and added as a tab on the project page. Then:</p>
+      <p class="b"><b><span class="slot">[S01 Ball speed feel]</span></b> is ready: <span class="slot">[link]</span><br>It answers: <span class="slot">[which speed feels fast but readable?]</span><br>Try moving: <span class="slot">[Speed]</span> and <span class="slot">[Speed-up per hit]</span>. When a setting feels right, press "Copy values for Claude" and paste them here.</p>
+      <div class="box"><p class="bq">Did <span class="slot">[S01]</span> answer the question?</p><ul>
+        <li>Yes, keep what it showed <span class="desc">paste your values if you have them</span></li>
+        <li>Partly, try another way <span class="desc">next, tell me what to change</span></li>
+        <li>No, rethink it <span class="desc">it goes back to Open Questions</span></li></ul></div>
+      <p class="note">→ a question about numbers or odds gets a simulation or the math instead of a sketch:</p>
+      <p class="b"><span class="slot">[S03 First-player advantage]</span> is a numbers question, so I ran <span class="slot">[10,000 simulated games]</span> instead of a sketch: <span class="slot">[the first player wins 53%; shuffling the order brings it to 50%]</span>.</p>
+    </div>
+    <p class="src">Decide how you'll know before building: Schell · one mechanic per prototype, rivals side by side: Mark Brown (GMTK).</p>
   </article>
 
   <article class="step">
     <header><span class="num">3.2</span><h4>The Rulebook</h4><span class="kind you">you · BMUZ drafts with you</span></header>
-    <p class="what">The rules, written like a real rulebook: the single truth the game, the tests and the tutorial follow.</p>
-    <dl>
-      <dt>Teaches</dt><dd>this is a first pass: capture all the rules, don't polish (Jesse Ross) · "TBD", "X", "[example]" and two rival rules side by side ("Rule A / Rule B — to test") are all fine · it will be rewritten many times, and the development log records why each change was made</dd>
-      <dt>Structure</dt><dd>the order of your own rulebooks (Blobimus, Sirius Smugglers, Dust Bunny Rumble, Glyphtender's Trial), which matches the published guides:
-        <ul>
-          <li>Title block: players · age · time</li>
-          <li>Overview · Components · How to Win · Setup (numbered)</li>
-          <li>Gameplay › Flow (the core loop as numbered steps) › one section per action or ability</li>
-          <li>Game End · Scoring · Keywords</li>
-          <li>Development Log: dated entries of Changed · Why · Result · To test · Ideas, as in your Killer Klowns rulebook, with a version tag (Law of Game Design's changelog)</li>
-        </ul></dd>
-      <dt>Asks</dt><dd>core loop first (the Flow), then outward (Jesse Ross: start with core gameplay):
-        <ul>
-          <li><span class="q">Walk me through one turn (or one moment), step by step.</span></li>
-          <li><span class="q">How do you win, and how does a game end?</span></li>
-          <li><span class="q">How is it set up?</span></li>
-          <li><span class="q">What happens when [edge case BMUZ spots]?</span></li>
-          <li><span class="q">What do players call each thing and each action?</span> (one term per idea, kept the same everywhere)</li>
-          <li><span class="q">What's secret, from whom, until when?</span></li>
-        </ul></dd>
-      <dt>You read it</dt><dd>on your project page as a GDD tab, and you can edit it in Obsidian; your edits are kept.</dd>
-      <dt>Research</dt><dd>BMUZ reads published rulebooks of the closest games first, for how they structure similar rules.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>8 Rulebook</span></div></dd>
-      <dt>Comes back</dt><dd>after every round of sketches and playtests</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The Rulebook</b><br>The rules, written like a real rulebook. This becomes the single truth: the game, the tests and the tutorial all follow it.</p>
+      <p class="b">This is a first pass, so we capture every rule and don't polish. "TBD", "X" for a number we don't know yet, and two rival rules side by side ("Rule A / Rule B, to test") are all fine. It'll be rewritten many times, and a dated development log at the end records what changed and why.</p>
+      <p class="b">The structure, the same order your own rulebooks use:<br>Overview · Components · How to Win · Setup · Gameplay (the Flow, then each action) · Game End · Scoring · Keywords · Development Log</p>
+      <div class="box"><p class="bq">Before we start, want me to read the rulebooks of the closest games, for how they explain similar rules?</p><ul>
+        <li>Yes, research first (Recommended) <span class="desc">about 5 minutes, sources on your project page</span></li><li>No, start now</li></ul></div>
+      <p class="b">We start with the heart: the Flow. Your core loop was: <b><span class="slot">[You draw → you plant → you score → (again)]</span></b>.<br>Walk me through one turn, step by step, as if you were teaching a friend at the table.</p>
+      <p class="note">→ BMUZ writes the Flow as numbered steps and shows it back:</p>
+      <p class="b">Here's the Flow as I've written it:<br><span class="slot">[1. Draw two cards. 2. Plant one seed card or play one weather card. 3. …]</span><br>The full rulebook is on your project page now, as its own tab.</p>
+      <div class="box"><p class="bq">Is that how a turn goes?</p><ul><li>Yes</li><li>Change something <span class="desc">next, tell me what</span></li></ul></div>
+      <p class="note">→ then outward, one section at a time, each with the same Yes / Change check:</p>
+      <ul class="pool">
+        <li>How do you win, and how does a game end?</li>
+        <li>How is the game set up, before the first turn?</li>
+        <li>What are all the pieces? <span class="slot">[Here's what I have so far: …]</span> Anything missing?</li>
+        <li>For <span class="slot">[each action]</span>: what exactly happens, and what can't you do?</li>
+        <li>What happens when <span class="slot">[an edge case BMUZ spots: two weather cards hit the same row]</span>?</li>
+        <li>What's secret, from whom, and until when?</li>
+        <li>What do players call each thing and each action? I'll keep one name per thing, everywhere.</li>
+      </ul>
+      <p class="b">First pass done. <span class="slot">[3]</span> rules are marked TBD and <span class="slot">[1]</span> is a Rule A / Rule B to test. I've added a first Development Log entry:<br><span class="slot">[v0.1 · 2026-11-12 · First pass written from the concept. To test: Rule A vs Rule B for hail.]</span><br>You can read and edit it any time, on your project page or in Obsidian. I keep your edits.</p>
+    </div>
+    <p class="src">Your rulebook structure: Blobimus, Sirius Smugglers, Dust Bunny Rumble, Glyphtender's Trial (Drive) · first pass, core gameplay first: Jesse Ross · one term per idea: League of Gamemakers · a changelog with the reason for each change: Law of Game Design.</p>
   </article>
 
   <article class="step">
     <header><span class="num">3.3</span><h4>Content &amp; Balance</h4><span class="kind you">you · tables</span></header>
-    <p class="what">Every card, unit, ability, level and number in tables: your second document beside the rulebook.</p>
-    <dl>
-      <dt>Structure</dt><dd>the shape of your own content sheets (Waveborn, Bytefall, Steampunch): one table per kind of thing, one row each: Name · Type · Cost · Effect · Flavour · Quantity · Balance value · a Playtesting table (date, players, start, end, duration, scores) · retired designs kept as "(deprecated)", never deleted</dd>
-      <dt>Asks</dt><dd><span class="q">What kinds of things are in the game? Let's make a table for each.</span> · <span class="q">What does each one cost, and what does it do?</span> · <span class="q">Which ones should feel strong, and which are utility?</span></dd>
-      <dt>How</dt><dd>balance values from weighted formulas (Entro Games' spreadsheet guide); simulations or the math for odds; in the built game these tables are the files the game reads, so the Dev Kit can tune them live.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>9 Content &amp; Balance</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Content &amp; Balance</b><br>Every card, unit, ability, level and number, in tables: the second document beside the rulebook. One table per kind of thing, one row each. In the finished game these tables are the files the game reads, so you can tune them live later.</p>
+      <p class="b">From the rulebook, the game has these kinds of things: <span class="slot">[Seed cards · Weather cards · Garden rows]</span>. Anything missing?</p>
+      <p class="b">For <span class="slot">[Seed cards]</span>, here are the columns I'd use: <span class="slot">[Name · Type · Cost · Effect · Quantity · Balance value · Flavour]</span>. Change any, then tell me the ones you already have in mind, even rough.</p>
+      <p class="note">→ BMUZ fills the table from the rulebook and the answers, then:</p>
+      <p class="b">I've worked out a balance value for each row, from <span class="slot">[cost against effect]</span>. These stand out:<br>· <span class="slot">[Sunflower is worth about twice its cost]</span><br>· <span class="slot">[Hail is weaker than every other weather card]</span><br>Want me to suggest fixes, or would you rather adjust them yourself?</p>
+      <p class="b">There's also a Playtesting table for every test game: date, players, start, end, length, scores. I'll fill it in as you play.</p>
+    </div>
+    <p class="src">Your content sheets: Waveborn, Bytefall, Steampunch (Drive) · weighted balance values: Entro Games' spreadsheet guide.</p>
   </article>
 
   <article class="step">
     <header><span class="num">3.4</span><h4>Change Over Time</h4><span class="kind you">you</span></header>
-    <p class="what">What changes within a game and between games, and the pace of it.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">What changes during one game: what's different at the end from the start?</span> · <span class="q">What changes from one game to the next?</span> · <span class="q">How long is the whole journey, and does each step bring something new?</span> · <span class="q">What decides when you move up?</span></dd>
-      <dt>How</dt><dd>flow models for anything earned or spent; checked for runaway leaders and stalemates (MDA dynamics); exact numbers live in the content tables.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>10 Change Over Time</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Change Over Time</b><br>What changes during a game and between games, and how fast. This is what keeps the hundredth game from feeling like the first.</p>
+      <p class="b">1. What's different at the end of a game compared with the start?<br>2. What changes from one game to the next, if anything?<br>3. If there's a longer journey (levels, unlocks, ranks): how long is it, and does each step bring something new?<br>4. What decides when a player moves up?</p>
+      <p class="note">→ skipped when there's no long-term progression. Then BMUZ checks the patterns:</p>
+      <p class="b">I checked for the common traps. <span class="slot">[A player who gets ahead early tends to stay ahead: the leader gets more cards.]</span> Want to keep that, or soften it?</p>
+    </div>
+    <p class="src">Runaway leader, stalemate and other patterns of play: MDA dynamics.</p>
   </article>
 
   <article class="step loop">
     <header><span class="num">3.5</span><h4>Scope &amp; Risks, Second Pass</h4><span class="kind you">you · charts</span></header>
-    <p class="what">The rulebook turns up new features, sketches and problems, so the scope chart and risk report are redone with them.</p>
-    <dl>
-      <dt>How</dt><dd>MoSCoW again with the rulebook's new pieces · the effort–impact chart redrawn · the vertical slice re-cut · new sketches added (round 2) · new research topics listed</dd>
-      <dt>Asks</dt><dd><span class="q">The rulebook added these [list]. Must, should, could or later?</span> · <span class="q">Does the pitch still say it right?</span> (loops to 2.3 if not)</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>6 Scope</span><span class="chip m-worked"><i></i>7 Risks</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Scope &amp; Risks, Second Pass</b><br>The rulebook always turns up new pieces, new problems and new questions. So we size it all up again, with what we know now.</p>
+      <p class="b">The rulebook added these: <span class="slot">[Hail rows can be repaired · a 3-round game end · a scoring bonus for full rows]</span>.</p>
+      <div class="box"><p class="bq"><span class="slot">[new piece]</span>: if it were missing, would the game be pointless?</p><ul><li>Must</li><li>Should</li><li>Could</li><li>Won't</li></ul></div>
+      <p class="b">The effort vs impact chart is redrawn on your project page. What moved: <span class="slot">[…]</span>.<br>The vertical slice is now: <span class="slot">[…]</span>.<br>New risks: <span class="slot">[…]</span>. New sketches, added as round 2: <span class="slot">[S04 …]</span>.</p>
+      <div class="box"><p class="bq">Does the pitch still say it right?</p><ul><li>Yes</li><li>Rework the pitch <span class="desc">back to The Pitch, then here again</span></li></ul></div>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">3.6</span><h4>Players &amp; Opponents</h4><span class="kind you">you · starts the TDD</span></header>
-    <p class="what">The digital game around the rules: who you play with and against, now that the gameplay is known.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">How should the computer opponent play: what does it go for, how does it differ by level, how does it still try to win?</span> · <span class="q">Online: what happens when someone leaves, goes quiet, comes back or joins late? Can the room play again?</span> · <span class="q">How long is one game, and can it be saved halfway?</span> · <span class="q">Accounts, friends, leaderboards: needed or not?</span></dd>
-      <dt>Research</dt><dd>how similar games handle these, and the current services for online play and saves</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>11 Players &amp; Opponents</span></div> · TDD</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Players &amp; Opponents</b><br>Now the digital game around the rules, starting with who you play with and against. Knowing the gameplay first makes these choices much easier. This also starts the technical plan, the TDD.</p>
+      <p class="b">I read how similar games handle this first: <span class="slot">[3 short lines, sources on the project page]</span>.</p>
+      <p class="note">→ only the questions that fit Platform &amp; Play's answers:</p>
+      <ul class="pool">
+        <li>How should the computer opponent play: what does it go for, how does it change by difficulty, and how does it still try to win?</li>
+        <li>Online: what happens when someone leaves, goes quiet, comes back or joins late? Can the room play again?</li>
+        <li>How long is one game? Can it be paused or saved halfway?</li>
+      </ul>
+      <div class="box"><p class="bq">Which of these does the game need? (pick any)</p><ul>
+        <li>Accounts <span class="desc">players sign in</span></li><li>Friends or invites</li><li>Leaderboards</li><li>None of these</li></ul></div>
+    </div>
+    <p class="src">Computer-opponent personalities: BMUZ's ai-opponent model · online rework in past games: an 8-phase fix after shipping.</p>
   </article>
 
   <article class="step">
     <header><span class="num">3.7</span><h4>Look &amp; Sound</h4><span class="kind you">you · sketches</span></header>
-    <p class="what">The look, proved at the size it'll be played, before the full build.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">Show me references you love.</span> · then 2–3 look sketches side by side at real size · <span class="q">How do the pieces move?</span> · <span class="q">What should it sound like, and is a stand-in fine for the first release?</span></dd>
-      <dt>How</dt><dd>sketched at real size (past rework: a look built for months and never checked on a phone); stand-ins first, polish later.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>12 Look &amp; Sound</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Look &amp; Sound</b><br>The style of the game, tested at the size it'll actually be played, before the full build.</p>
+      <p class="b">Share any pictures or games whose look you love: paste links, or describe them.</p>
+      <p class="b">From your references, here are <span class="slot">[3]</span> look sketches, side by side at real phone size: <span class="slot">[link]</span>.</p>
+      <div class="box"><p class="bq">Which look is closest?</p><ul><li><span class="slot">[A: …]</span></li><li><span class="slot">[B: …]</span></li><li><span class="slot">[C: …]</span></li><li>None yet <span class="desc">next, tell me what's missing</span></li></ul></div>
+      <p class="b">How do the pieces move: slide, snap, fly, bounce?</p>
+      <p class="b">What should it sound like? And is a simple placeholder sound good enough for the first playable version? Most games start that way.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">3.8</span><h4>Screens &amp; Menus</h4><span class="kind you">you · mock-ups</span></header>
-    <p class="what">Every screen, what's on it, and the UI style.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">During play, where are your eyes, and what must you see at a glance?</span> · <span class="q">What do players choose before a game, and what's a setting?</span> · <span class="q">What does the end of a game show and celebrate?</span> · the UI style (one of seven, side by side)</dd>
-      <dt>How</dt><dd>a screen map, then mock-ups from the UI kit at every screen size the game plays at.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-worked"><i></i>13 Screens &amp; Menus</span><span class="chip m-loose"><i></i>14 Teaching (notes)</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Screens &amp; Menus</b><br>Every screen in the game, and what's on each one.</p>
+      <p class="b">Here's the screen map: <span class="slot">[Title → Mode select → Game → Results → back]</span>. Anything missing?</p>
+      <p class="b">During play, where are the player's eyes? What must they see at a glance?</p>
+      <p class="b">What do players choose before a game, and what's a setting they change once?</p>
+      <p class="b">At the end of a game, what does the screen show, and what does it celebrate?</p>
+      <div class="box"><p class="bq">Which UI style fits? (all seven shown side by side on your project page)</p><ul><li><span class="slot">[Clean]</span></li><li><span class="slot">[Cozy]</span></li><li><span class="slot">[Cartoon]</span></li><li><span class="slot">[the 4th closest]</span></li></ul></div>
+      <p class="b">I'll also note what a new player will need to learn. The tutorial itself comes much later, after people have played it.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">3.9</span><h4>The Build Plan</h4><span class="kind">BMUZ · you're told</span></header>
-    <p class="what">The GDD, the TDD and the roadmap brought together into one plan.</p>
-    <dl>
-      <dt>How</dt><dd>research first (current tools, services and versions) · the TDD: how it's built, data files you can edit, budgets, safety, each decision explained in plain words · the roadmap: milestones (the vertical slice first, then alpha, beta, 1.0), every feature with what it needs first · all of it on your project page</dd>
-      <dt>Fills</dt><dd>TDD · Roadmap · project page</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The Build Plan</b><br>Everything so far, turned into a plan for building. The technical choices are mine, so I won't ask you about them; I'll tell you what I picked and why, in plain words.</p>
+      <p class="note">→ research first: current tools, services and versions. Then:</p>
+      <p class="b">Here's how it'll be built:<br>· <span class="slot">[Web first, a link anyone can open; the phone version later from the same code]</span><br>· <span class="slot">[Online play runs on your own free server account]</span><br>· <span class="slot">[Every number you'll want to tune lives in files you can change live with the Dev Kit]</span><br>The full technical plan, the TDD, is on your project page.</p>
+      <p class="b">And here's the roadmap, the order we'll build in:<br><span class="slot">[1. Vertical slice: one full game against the computer, close to final look]</span><br><span class="slot">[2. Alpha: every must-have feature, rough]</span><br><span class="slot">[3. Beta: finished, polished, tested]</span><br><span class="slot">[4. 1.0: release]</span><br>Each milestone lists its features and what each one needs first.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">3.10</span><h4>Blueprint Review</h4><span class="kind gate">gate</span></header>
-    <p class="what">A full read-through and revision before anything is built.</p>
-    <dl>
-      <dt>Shows</dt><dd>the GDD start to end · the roadmap as a picture · the first sprint it would start with · what building will be like from here</dd>
-      <dt>Asks</dt><dd>Not yet: change something · Approve: start building</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Blueprint Review</b><br>Before anything is built, one full read-through. Everything is on your project page:<br>· The GDD, start to end<br>· The rulebook and the content tables<br>· The technical plan (TDD)<br>· The roadmap, with the first sprint it would start with: <span class="slot">[three features]</span></p>
+      <p class="b">From here we start building. That's a loop: build a few pieces, you play them, we tune, and again. You can still change anything; changes are logged, and big ones may move the roadmap.</p>
+      <div class="box"><p class="bq">Ready to build?</p><ul>
+        <li>Not yet: change something <span class="desc">next, tell me what</span></li><li>Approve: start building</li></ul></div>
+    </div>
   </article>
+
+  <div class="block example">
+    <h3>Example · Design, filled in</h3>
+    <p class="sub">The same made-up garden race game. Not part of the script.</p>
+    <div class="script">
+      <p class="b"><b>The Rulebook</b>, the Flow as written:<br>1. Draw two cards.<br>2. Play one card: plant a seed in one of your rows, or send weather to one of your friend's rows.<br>3. Any row with three blooms scores and is cleared.<br>4. Your friend's turn.<br>Rule A / Rule B, to test: hail destroys one bloom (A) or the whole row (B).</p>
+      <p class="b"><b>Content &amp; Balance</b>, Seed cards (first rows):<br>Sunflower · Seed · Cost 1 · Blooms in 1 turn · Qty 6 · Value 2.0<br>Rose · Seed · Cost 2 · Blooms in 2 turns, scores double · Qty 4 · Value 2.5</p>
+    </div>
+  </div>
 </section>
 
 <!-- ================= STAGE 4 ================= -->
@@ -786,72 +818,93 @@ td.dot { text-align: center; }
   <div class="stage-head">
     <span class="eyebrow">Stage 4 · Develop · sprints, many loops</span>
     <h2>Develop: Building It</h2>
-    <p class="for">The game built from the blueprint, one milestone at a time, in short sprints you play and approve. From here it's a loop: plan, build, play, tune, look back, and again.</p>
-    <p class="ends">Ends with: each milestone's musts built and approved, delivered as it's ready (Stage 5).</p>
+    <p class="for">The game built from the blueprint, one milestone at a time, in short sprints you play and approve.</p>
+    <p class="ends">Ends with: each milestone's musts built and approved, then delivered (Stage 5).</p>
   </div>
 
   <article class="step welcome">
     <header><span class="num">4.0</span><h4>Welcome to Develop</h4><span class="kind">teaches</span></header>
-    <dl>
-      <dt>Teaches</dt><dd>
-        <ul>
-          <li>the loop: plan › build › play &amp; approve › tune › look back</li>
-          <li>you can add ideas any time: a tweak to what's being built is done now; a new idea goes to Ideas for Later and comes back at the right milestone; a bug is reported with <code>/bug</code> and fixed now only if it blocks the work</li>
-          <li>the roadmap is the map; your project page shows the progress</li>
-          <li>you approve each piece by playing it; nothing is "done" without your OK</li>
-        </ul></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Welcome to Develop</b><br>Now we build. From here on it's a loop:<br>1. <b>Plan the sprint</b>: a few features, each with what you'll see when it's done<br>2. <b>Build &amp; prove</b>: I build and test them<br>3. <b>Play &amp; approve</b>: you play each one; nothing is done without your OK<br>4. <b>Tune &amp; revise</b>: we adjust until it feels right<br>5. <b>Look back</b>: three lines on how it went<br>…then the next sprint.</p>
+      <p class="b">You can step in any time. Here's how I handle what you bring:<br>· <b>A tweak</b> to what we're building ("make it a bit faster"): I do it now.<br>· <b>A new idea</b>: it goes on Ideas for Later and comes back at the milestone where it fits, so we stay focused without losing it.<br>· <b>Something broken</b>: say so, or type /bug. If it blocks what we're doing, I fix it now; otherwise it's logged and fixed in order.<br>· <b>"Stop"</b> or <b>"go back"</b>: always works. Everything is saved after every step.</p>
+      <p class="b">Your project page shows the roadmap and every milestone's progress. Each time a milestone is ready, we make a build you can play and share. That's Stage 5, Deliver, and then we come back here.</p>
+    </div>
   </article>
 
   <article class="step">
-    <header><span class="num">4.1</span><h4>Setup</h4><span class="kind">BMUZ · you for accounts</span></header>
-    <p class="what">The project, tools and accounts this game needs, now that we know what it is.</p>
-    <dl>
-      <dt>How</dt><dd>research first (current versions and services) · the code repository, the build tools, and any service the TDD named (hosting, online play, stores) · anything that needs your login is one step at a time</dd>
-    </dl>
+    <header><span class="num">4.1</span><h4>Setup</h4><span class="kind">BMUZ · you for logins</span></header>
+    <div class="script">
+      <p class="b"><b>Setup</b><br>Now that we know what the game needs, I'll set up the project, the tools and any accounts. I'll check the current setup steps for each one first, since these services change often.</p>
+      <p class="b">The game needs: <span class="slot">[the project and its backup on GitHub · web hosting · an online-play server]</span>. Most of it I can do myself. These need you to log in: <span class="slot">[GitHub · Cloudflare]</span>. I'll walk you through each, one step at a time.</p>
+      <p class="b">Step 1 of <span class="slot">[3]</span>: <span class="slot">[open github.com and sign in, or make a free account]</span>. Say "done" when you're in.</p>
+    </div>
   </article>
 
   <article class="step">
-    <header><span class="num">4.2</span><h4>The Roadmap</h4><span class="kind">teaches · gate</span></header>
-    <p class="what">The whole journey ahead: milestones, what's in each, what needs what.</p>
-    <dl>
-      <dt>Shows</dt><dd>the milestones (the vertical slice first) · each one's features and % done · Ideas for Later · how roadmap check-ins work</dd>
-      <dt>Asks</dt><dd>Start the first milestone · Change the order</dd>
-    </dl>
+    <header><span class="num">4.2</span><h4>The Roadmap</h4><span class="kind gate">teaches · gate</span></header>
+    <div class="script">
+      <p class="b"><b>The Roadmap</b><br>The whole journey ahead, on your project page: <span class="slot">[link]</span><br>· Milestones, in order: <span class="slot">[Vertical slice → Alpha → Beta → 1.0]</span><br>· Each one's features, and what each needs first<br>· A % for each milestone, which can drop when we add something; that's normal<br>· Ideas for Later, kept apart so nothing is lost</p>
+      <p class="b">We'll look at it together at the start of each milestone, and whenever something big changes.</p>
+      <div class="box"><p class="bq">Start with <span class="slot">[the vertical slice]</span>?</p><ul><li>Yes, start building</li><li>Change the order first <span class="desc">next, tell me what</span></li></ul></div>
+    </div>
   </article>
 
   <article class="step loop">
     <header><span class="num">4.3</span><h4>Plan the Sprint</h4><span class="kind gate">gate</span></header>
-    <dl>
-      <dt>Shows</dt><dd>a card per feature: what you'll see · done when · not doing · needs from you. A sprint may include a new sketch.</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Plan the Sprint</b> · Sprint <span class="slot">[3]</span> · <span class="slot">[Vertical slice]</span><br>Here's what I'd build next, <span class="slot">[3]</span> features:</p>
+      <p class="b"><b><span class="slot">[F07 — Weather cards]</span></b><br>· You'll see: <span class="slot">[a storm cloud drift to a row and wilt its blooms]</span><br>· Done when: <span class="slot">[every weather card works by the rulebook, and you've played one game with them]</span><br>· Not doing yet: <span class="slot">[weather animations beyond the cloud]</span><br>· Needs from you: <span class="slot">[nothing]</span></p>
+      <div class="box"><p class="bq">Build this sprint?</p><ul><li>Yes, build it</li><li>Change it <span class="desc">next, tell me what</span></li></ul></div>
+    </div>
+    <p class="src">Plan card (what you'll see · done when · not doing · needs from you), sized to the work: Replit, Kiro, Devin planning practice.</p>
   </article>
+
   <article class="step loop">
     <header><span class="num">4.4</span><h4>Build &amp; Prove</h4><span class="kind">BMUZ</span></header>
-    <dl><dt>How</dt><dd>research first for anything new · tests for every rule · screenshots at every size · a separate critical review · stuck twice → it stops and says so plainly</dd></dl>
+    <div class="script">
+      <p class="b">⏳ <span class="slot">[14:05]</span>: building <span class="slot">[F07 — Weather cards]</span> (feature 1 of 3). Next update when it's done.</p>
+      <p class="note">→ re-posted as each piece finishes. Every rule gets a test, and every screen size gets a screenshot. If it's stuck twice:</p>
+      <p class="b"><span class="slot">[Hail on an empty row]</span> isn't working, and two tries haven't fixed it. Here's what I know: <span class="slot">[…]</span>. I'll <span class="slot">[try a simpler way]</span> unless you'd rather I park it.</p>
+    </div>
   </article>
+
   <article class="step loop">
     <header><span class="num">4.5</span><h4>Play &amp; Approve</h4><span class="kind you">you</span></header>
-    <dl><dt>Asks</dt><dd><span class="q">Did [moment] feel like [your feeling]?</span> · Approve / change</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-built"><i></i>the feature's chapters</span></div> · the Feelings chapter's "seen?" column</dd></dl>
+    <div class="script">
+      <p class="b"><b><span class="slot">[F07 — Weather cards]</span> — ready for you to check</b><br>· What changed: <span class="slot">[3 lines, from the player's side]</span><br>· Try it: <span class="slot">[PC link]</span> · <span class="slot">[phone link]</span><br>· Try this: <span class="slot">[play a hail card on a full row]</span><br>· Checked: <span class="slot">[12 tests pass; screenshots on phone and desktop look right]</span></p>
+      <div class="box"><p class="bq">Did <span class="slot">[sending a storm into a full row]</span> feel like <span class="slot">[a sneaky comeback]</span>?</p><ul>
+        <li>Yes, approve it</li><li>Close, needs tuning</li><li>Not right <span class="desc">next, tell me what feels off</span></li></ul></div>
+    </div>
   </article>
+
   <article class="step loop">
     <header><span class="num">4.6</span><h4>Tune &amp; Revise</h4><span class="kind you">you · Dev Kit</span></header>
-    <dl><dt>How</dt><dd>name what feels off › watch what players actually do › find whether it's feel, readability, a pattern of play, or the rule itself › change one setting at a time, live in the Dev Kit · your saved values are decisions · a rule that doesn't work goes back to the rulebook</dd></dl>
+    <div class="script">
+      <p class="b"><b>Tune &amp; Revise</b><br>Let's find what feels off. In your words, what's wrong with it?</p>
+      <p class="note">→ BMUZ sorts the cause: how it feels to control, whether you can read what's happening, a pattern of play, or the rule itself. Then:</p>
+      <p class="b">I think it's <span class="slot">[a pattern of play: the leader can always answer a storm]</span>. One setting to try: <span class="slot">[Storm cards per hand, 2 → 1]</span>. I expect <span class="slot">[storms to land more often]</span>. It's in the Dev Kit's Tuning tab, so you can move it while the game runs.</p>
+      <p class="b">Values you save in the Dev Kit are decisions: I'll keep them.</p>
+      <p class="note">→ if no setting can fix it, the rule itself is the question, and it goes back to the rulebook:</p>
+      <p class="b">No setting will fix this; it's the rule itself. Want to look at the rule together? It goes back to the rulebook, with a dev log entry.</p>
+    </div>
+    <p class="src">Name the feeling › watch what players do › sort the cause › one knob at a time: MDA diagnose.</p>
   </article>
+
   <article class="step loop">
     <header><span class="num">4.7</span><h4>Sprint Look-Back</h4><span class="kind you">you · 3 lines</span></header>
-    <dl><dt>How</dt><dd>went well · went wrong · change · the GDD, rulebook and TDD updated to match what was built</dd></dl>
+    <div class="script">
+      <p class="b"><b>Sprint <span class="slot">[3]</span> done</b> · <span class="slot">[Vertical slice]</span> is <span class="slot">[60%]</span> done.<br>Three lines on how it went: what went well, what went wrong, and what we change next time. Here's my draft; your words win:<br><span class="slot">[well: … · wrong: … · change: …]</span></p>
+      <p class="b">I've updated the GDD, the rulebook and the technical plan to match what we built. Next sprint: <span class="slot">[F10, F11, F12]</span>.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">4.8</span><h4>Teaching</h4><span class="kind you">you · after playtests</span></header>
-    <p class="what">How a new player learns the game, designed once it plays and people have tried it.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">In the playtests, where did people get stuck or ask "what do I do?"</span> · <span class="q">What must a new player understand in the first minute?</span> · <span class="q">Can the first level teach it without text?</span></dd>
-      <dt>How</dt><dd>designed after the core loop stops changing and playtests show where players get stuck (Level Design Book; studio postmortems); built with the tutorial toolbox.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-built"><i></i>14 Teaching</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Teaching</b><br>Now that the game plays and people have tried it, we can design how a new player learns it. Studios do this late on purpose: you can only teach well once you've seen where people get stuck.</p>
+      <p class="b">1. In the playtests, where did people get stuck, or ask "what do I do?"<br>2. What must a new player understand in the first minute?<br>3. Could the first game teach it with no text at all?</p>
+      <p class="b">Here's the tutorial I'd build: <span class="slot">[3 short steps]</span>. Each one teaches one thing, in the order players meet it.</p>
+    </div>
   </article>
 </section>
 
@@ -860,7 +913,7 @@ td.dot { text-align: center; }
   <div class="stage-head">
     <span class="eyebrow">Stage 5 · Deliver · each time a build is ready</span>
     <h2>Deliver: A Playable Build</h2>
-    <p class="for">Each time a milestone is ready, it's delivered as a build you can play and share, then it's back to Develop. The checks grow with the release stage.</p>
+    <p class="for">Each time a milestone is ready, it becomes a build you can play and share. Then it's back to Develop.</p>
     <p class="ends">Ends with: a build at that stage, a link to share, and playtest notes back into Develop.</p>
   </div>
   <div class="block">
@@ -868,34 +921,63 @@ td.dot { text-align: center; }
     <table>
       <thead><tr><th>Release stage</th><th>What it means</th><th>Exit check</th><th>Shared with</th></tr></thead>
       <tbody>
-        <tr><td><b>Playable</b> (each vertical slice)</td><td>a small piece with a bit of everything core</td><td>it runs, the slice's musts work</td><td>you, a local link and a shareable one</td></tr>
+        <tr><td><b>Playable</b> (each vertical slice)</td><td>a small piece with a bit of everything core</td><td>it runs; the slice's musts work</td><td>you · a local link and a shareable one</td></tr>
         <tr><td><b>Alpha</b></td><td>every must-have feature in, rough</td><td>feature complete, no blocking bugs</td><td>friends, playtesters</td></tr>
-        <tr><td><b>Beta</b></td><td>basically the finished game; fixing, polishing, tuning</td><td>known bugs fixed, no new features</td><td>wider testers</td></tr>
+        <tr><td><b>Beta</b></td><td>basically the finished game: fixing, polishing, tuning</td><td>known bugs fixed, no new features</td><td>wider testers</td></tr>
         <tr><td><b>1.0</b></td><td>the release</td><td>passed every check; remaining bugs acceptable</td><td>the public (Stage 6)</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="src">Definitions: Wikipedia's software release life cycle; game course milestone checklists; Game Developer on pre-production and vertical slices.</p>
+    <p class="src">Definitions: Wikipedia's software release life cycle; game course milestone checklists; Game Developer on vertical slices.</p>
   </div>
+
+  <article class="step welcome">
+    <header><span class="num">5.0</span><h4>Welcome to Deliver</h4><span class="kind">teaches · first time only</span></header>
+    <div class="script">
+      <p class="b"><b>Welcome to Deliver</b><br><span class="slot">[The vertical slice]</span> is built and approved, so it's time to turn it into something you can play and share. You'll come back here at each milestone:<br>· <b>Playable</b>: each vertical slice. A link for you, and one to share.<br>· <b>Alpha</b>: every must-have feature in, still rough. For friends and playtesters.<br>· <b>Beta</b>: basically finished. For wider testing.<br>· <b>1.0</b>: the release. Then Stage 6 takes it public.<br>The checks grow with each stage. After every build, playtest notes go back into Develop.</p>
+    </div>
+  </article>
+
   <article class="step">
     <header><span class="num">5.1</span><h4>Release Check</h4><span class="kind">script</span></header>
-    <dl><dt>How</dt><dd>the stage's exit check, run the same way every time</dd></dl>
+    <div class="script">
+      <p class="b"><b>Release Check</b> · <span class="slot">[Playable]</span><br>✓ <span class="slot">[every must for this stage is done (6 of 6)]</span><br>✓ <span class="slot">[no blocking bugs]</span><br>✓ <span class="slot">[every check passes]</span></p>
+      <p class="note">→ anything not met:</p>
+      <p class="b">Not ready yet: <span class="slot">[F09 — Scoring screen]</span> isn't done. Want to finish it first, or move it to the next stage?</p>
+    </div>
   </article>
+
   <article class="step">
     <header><span class="num">5.2</span><h4>Polish &amp; Stand-ins</h4><span class="kind you">you</span></header>
-    <dl><dt>Asks</dt><dd>stand-ins shown first: <span class="q">Good enough for this stage?</span> (past rework: sounds hunted that a stand-in would have covered)</dd></dl>
+    <div class="script">
+      <p class="b"><b>Polish &amp; Stand-ins</b><br>These are still placeholders: <span class="slot">[the sounds · the card art · the title screen]</span>. For a <span class="slot">[playable]</span> build, placeholders are usually fine.</p>
+      <div class="box"><p class="bq">Which should be polished before this build? (pick any)</p><ul>
+        <li><span class="slot">[the sounds]</span></li><li><span class="slot">[the card art]</span></li><li>None, ship it as it is</li></ul></div>
+    </div>
   </article>
+
   <article class="step">
     <header><span class="num">5.3</span><h4>Safety &amp; Legal</h4><span class="kind">BMUZ</span></header>
-    <dl><dt>How</dt><dd>scaled to the stage: a playable build gets the secrets check; alpha adds the security review; beta and 1.0 add privacy, store age and data forms, and every asset's licence</dd></dl>
+    <div class="script">
+      <p class="b"><b>Safety &amp; Legal</b> · <span class="slot">[Playable]</span><br>✓ <span class="slot">[no passwords or keys in the build]</span><br>✓ <span class="slot">[every font, sound and picture is licensed for this use]</span><br><span class="slot">[Beta and 1.0 add: a privacy page, store age and data forms, a full security review]</span></p>
+    </div>
   </article>
+
   <article class="step">
     <header><span class="num">5.4</span><h4>Build &amp; Share</h4><span class="kind gate">gate</span></header>
-    <dl><dt>How</dt><dd>built for each platform, smoke-tested, a link for you and one to share · Asks: Share it · Not yet</dd></dl>
+    <div class="script">
+      <p class="b"><b>Build &amp; Share</b><br>The <span class="slot">[playable]</span> build is ready and tested on <span class="slot">[phone and desktop]</span>:<br>· For you: <span class="slot">[link]</span><br>· To share: <span class="slot">[link]</span></p>
+      <div class="box"><p class="bq">Share it?</p><ul><li>Share it <span class="desc">the share link goes live</span></li><li>Not yet <span class="desc">next, tell me what's missing</span></li></ul></div>
+    </div>
   </article>
+
   <article class="step loop">
     <header><span class="num">5.5</span><h4>Playtest Notes</h4><span class="kind you">you</span></header>
-    <dl><dt>How</dt><dd>what testers did and said, against the Feelings chapter's "we'll know when" (seen / partly / not) · findings become tuning tasks, bugs or rulebook changes · back to Develop</dd></dl>
+    <div class="script">
+      <p class="b"><b>Playtest Notes</b><br>Once people have played it, tell me what happened: what they did, what they said, where they got stuck. Paste notes, links or messages, any way you have them.</p>
+      <p class="b">Against the feelings you chose:<br>· <span class="slot">["a sneaky comeback"]</span>: <span class="slot">[seen ✓ — 3 of 4 players celebrated a storm]</span><br>· <span class="slot">["a close race"]</span>: <span class="slot">[partly — games were decided by round 2]</span></p>
+      <p class="b">From your notes I've added <span class="slot">[2 tuning tasks, 1 bug, 1 rulebook question]</span> to the roadmap. Back to Develop.</p>
+    </div>
   </article>
 </section>
 
@@ -904,35 +986,71 @@ td.dot { text-align: center; }
   <div class="stage-head">
     <span class="eyebrow">Stage 6 · Release · public releases only</span>
     <h2>Release: In Players' Hands</h2>
-    <p class="for">Putting the game in front of the public. The steps depend on where it's released: a web link needs no store page, while Steam and the phone stores need a lot more.</p>
-    <p class="ends">Ends with: the game live, the first reactions read against your feelings, and lessons kept.</p>
+    <p class="for">Putting the game in front of the public. The steps depend on where it's released.</p>
+    <p class="ends">Ends with: the game live, first reactions read against your feelings, lessons kept.</p>
   </div>
   <div class="block">
     <div class="scroll">
     <table>
       <thead><tr><th>Platform</th><th>What its release needs</th></tr></thead>
       <tbody>
-        <tr><td>Web link (GitHub Pages)</td><td>deploy, live check</td></tr>
+        <tr><td>Web link</td><td>deploy, live check</td></tr>
         <tr><td>itch.io</td><td>a page: pitch, screenshots, build upload</td></tr>
-        <tr><td>Steam</td><td>store page (from the Pitch chapter), capsule art, trailer, build review, release date</td></tr>
-        <tr><td>Phone stores</td><td>store listing, age rating, data-safety forms, privacy page, review</td></tr>
+        <tr><td>Steam</td><td>a store page (from the Pitch), capsule art, a trailer, Valve's build review, a release date</td></tr>
+        <tr><td>Phone stores</td><td>a store listing, age rating, data-safety forms, a privacy page, the store's review</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="src">Each platform's steps are researched fresh at release time: stores change their rules.</p>
+    <p class="src">Each platform's current requirements are researched fresh at release time, because stores change their rules.</p>
   </div>
+
+  <article class="step welcome">
+    <header><span class="num">6.0</span><h4>Welcome to Release</h4><span class="kind">teaches</span></header>
+    <div class="script">
+      <p class="b"><b>Welcome to Release</b><br>1.0 is ready. Now it goes public. What that takes depends on where it's going: a web link is one step; Steam and the phone stores need store pages, artwork, forms and a review that can take days. I'll check each platform's current rules first.<br>Nothing goes public without your clear OK.</p>
+      <div class="box"><p class="bq">Where should it go? (pick any)</p><ul><li>The web</li><li>itch.io</li><li>Steam</li><li>Phone app stores</li></ul></div>
+    </div>
+  </article>
+
   <article class="step">
     <header><span class="num">6.1</span><h4>Store &amp; Launch</h4><span class="kind gate">gate · per platform</span></header>
-    <dl><dt>How</dt><dd>research the platform's current requirements · the store page built from the Pitch chapter · nothing public without your explicit OK · deploy and live check</dd></dl>
+    <div class="script">
+      <p class="b"><b>Store &amp; Launch</b> · <span class="slot">[Steam]</span><br>Here's what <span class="slot">[Steam]</span> needs today: <span class="slot">[list, from its current docs]</span>.<br>Done: <span class="slot">[…]</span> · Needs you: <span class="slot">[capsule art · a trailer]</span>.</p>
+      <p class="b">The store page, written from your pitch: <span class="slot">[draft]</span>. Change anything?</p>
+      <div class="box"><p class="bq">Release <span class="slot">[game name]</span> on <span class="slot">[Steam]</span>?</p><ul><li>Not yet</li><li>Release it <span class="desc">it goes public</span></li></ul></div>
+      <p class="b"><span class="slot">[Game name]</span> is live: <span class="slot">[link]</span>. I checked it from outside, and it loads and plays.</p>
+    </div>
   </article>
+
   <article class="step">
     <header><span class="num">6.2</span><h4>First Reactions</h4><span class="kind you">you</span></header>
-    <dl><dt>How</dt><dd>reviews and players' words, read against your feelings · findings into the roadmap (updates loop back to Develop)</dd></dl>
+    <div class="script">
+      <p class="b"><b>First Reactions</b><br>Share what players are saying: reviews, comments, messages. Paste links or text.</p>
+      <p class="b">Against your feelings: <span class="slot">[…]</span>. Worth fixing in an update: <span class="slot">[…]</span>. Added to the roadmap as <span class="slot">[Update 1.1]</span>.</p>
+    </div>
   </article>
+
   <article class="step">
     <header><span class="num">6.3</span><h4>Look Back</h4><span class="kind you">you</span></header>
-    <dl><dt>How</dt><dd>what this game teaches the next one: game lessons into the game's documents, BMUZ lessons to you as proposals</dd></dl>
+    <div class="script">
+      <p class="b"><b>Look Back</b><br>What did <span class="slot">[game name]</span> teach us for the next game? Here's my list; change anything:<br>· For this game: <span class="slot">[…]</span><br>· For BMUZ itself: <span class="slot">[…]</span> (sent to Muzzy as suggestions)</p>
+    </div>
   </article>
+</section>
+
+<section class="block">
+  <h2>Any time: when the designer steps in</h2>
+  <p>These work at every stage, said the same way every time.</p>
+  <div class="script">
+    <p class="you">what if the weather could also help your own garden?</p>
+    <p class="b">Good one. That's a new idea, so I've put it on Ideas for Later: <span class="slot">["weather that helps your own garden" · 2026-11-12]</span>. It comes back <span class="slot">[when we plan the Alpha]</span>. Back to <span class="slot">[Sprint 3 · F07 — Weather cards]</span>.</p>
+    <p class="you">the score text is cut off on my phone</p>
+    <p class="b">Logged as a bug: <span class="slot">[B004 · Score cut off on phone · P2 — annoying, not blocking]</span>. It doesn't block what we're doing, so I'll fix it <span class="slot">[after F07]</span>.</p>
+    <p class="you">stop</p>
+    <p class="b">Stopped. Everything's saved. When you're back, say "go" and I'll pick up at <span class="slot">[Sprint 3 · F07 — Weather cards, step 2 of 4]</span>.</p>
+    <p class="you">what's the research say about this?</p>
+    <p class="b">Let me look. <span class="slot">[about 3 minutes]</span> … Here's what I found: <span class="slot">[3 short lines]</span>. Sources are on your project page. Does it change anything?</p>
+  </div>
 </section>
 
 <section class="block" id="how">
