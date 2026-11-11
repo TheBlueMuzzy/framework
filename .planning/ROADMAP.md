@@ -663,6 +663,8 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - 🔨 F228 🔧 Ideate pipeline — (2026-11-10, replaces Discover as the first stage; evidence: research/bmuz-vision/discover-live-review-2026-11-09.md) gather the material: "show me what you have" (every file and Drive folder read), "the game so far" written back per need (fixed · ideas · open), a few gap questions in gather mode (never "which one?", never the creative's answer read back as options, no fiction questions for a fictionless game), frame first; no research by default; ends sharper than the creative walked in — must:bmuz-1.0 · needs: F225 · sprint 67
 - ⏳ F229 🔧 Research, callable anywhere — (2026-11-10) the sourced research flow built for F217 — Discover pipeline, started from any stage on a trigger (a creative block, a worry about being unique, something never built, a rule that doesn't work, something to improve, a risk to test, prior art before the concept locks); findings come back as "does this change anything?", never as a menu; the flow drops dead sources itself before its source check (2026-11-10 full run: Discover's theme dig BLOCKED three tries running on cited pages that 404 or have expired certificates) — must:bmuz-1.0 · needs: F217
 - ⏳ F230 🔧 Release pipeline — (2026-11-10) the public experiences it: launch, the live link and live check, players' first reactions — must:bmuz-1.0 · needs: F219
+- 🔨 F231 🐞 Engine fixes from the Xong live look — (2026-11-10 run, SPRINT Notes 09:00–14:40) a bad question box never turns a live window into "nobody's here"; a waiting question box is never a stall and no stale restart fires later; links given at the start aren't asked for again; the engine's own tool rows stay out of sight — must:bmuz-1.0 · needs: F228 · sprint 67
+- ⏳ F232 🔧 BMUZ follows the script — (2026-11-11, Muzzy approved the word-for-word script: research/bmuz-vision/bmuz-design-doc.html, "it's working well · keep going", "yes. looking good") the start, Ideate and Define rebuilt to say exactly what the script says: the GDD's 14 chapters with levels, free answers in chat and choices in a box, a welcome per stage, sketches captured in Ideate, the project page introduced at Ideate's end; Design / Deliver / Release follow it as F227 / F219 / F230 — must:bmuz-1.0 · needs: F231
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
@@ -689,6 +691,8 @@ flowchart LR
   F225 --> F228[🔨 F228 Ideate pipeline]
   F217 --> F229[⏳ F229 Research anywhere]
   F219 --> F230[⏳ F230 Release pipeline]
+  F228 --> F231[🔨 F231 Live-look engine fixes]
+  F231 --> F232[⏳ F232 BMUZ follows the script]
   F218 --> F227[⏳ F227 Design pipeline]
   F226 --> F227
 ```

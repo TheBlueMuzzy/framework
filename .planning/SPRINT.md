@@ -85,6 +85,16 @@ Done when: "bmuz go" in a new folder opens with a short self-selecting question 
 - [ ] 🙋 8. Live look: start from scratch with your own idea, entering where you choose (~15 min)
 Check: check:fast green · headless entries at three spots reach their stage's card · Muzzy's live look feels light for an experienced designer.
 
+## F231 🐞 Engine fixes from the Xong live look (pulled in 2026-11-11: Muzzy "continue" after approving the script)
+Done when: in a live window, a question box Claude Code refuses for its shape is a failed ask (Claude retries), never "nobody's here"; a question box waiting on the creative never counts as stalled and no restart queued while it waited fires later; links given at the start aren't asked for again in Ideate; the engine's own tool rows (step_done, ask_paste) don't show their raw output.
+- [ ] 🤖 1. A refused question box: only "the tool isn't available here" turns on auto; a shape refusal (fewer than 2 options, too many) goes back to Claude as a failed ask; the engine also refuses a one-option box itself first — ~/Documents/dev/bmuz/plugin/hooks/register.tsx
+- [ ] 🤖 2. The watchdog skips a step whose question box is open (or whose ask_paste is open), and a restart it queued is dropped if the creative answers first — ~/Documents/dev/bmuz/plugin/hooks/register.tsx
+- [ ] 🤖 3. Ideate's show step skips the material ask when the start already took links or files (intake.json sources / unreadable links "read next in Ideate") — ~/Documents/dev/bmuz/plugin/craft/ideate-show.md
+- [ ] 🤖 4. The engine's tool rows drawn compact (one dim line, e.g. "BMUZ · step recorded"), never their JSON — ~/Documents/dev/bmuz/plugin/hooks/register.tsx
+- [ ] 🤖 5. Tests for 1–4 (node + plugin), check:fast green — ~/Documents/dev/bmuz/plugin/tests/engine.test.tsx
+Check: check:fast green · each fix has a test that fails on the old code.
+Not here: the start's proposal wording ("What I read: nothing yet", jargon) — the script replaces the start (F232).
+
 Ask Muzzy:
 - F225: Question 1 shows four options, not the five you said yes to — Claude Code's question box takes four at most. "Nothing yet" and "A spark" share one ("Nothing yet, or just a spark"), since both start Discover at the Spark; concept, written and prototype stay separate. Fine?
 Notes: Plan stays in the framework roadmap until BMUZ has its own planner (Key facts rule, 2026-11-04). The new engine only acts in projects with a BMUZ pipeline file, so today's BMUZ keeps working untouched while it's built.
