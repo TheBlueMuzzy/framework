@@ -105,6 +105,20 @@ td.dot { text-align: center; }
 .path li + li::before { content: "›"; color: var(--muted); margin-right: 6px; margin-left: -2px; }
 .path li.hot { border-color: var(--worked); }
 .path li.gate { border-color: var(--warn); }
+.script { display: flex; flex-direction: column; gap: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.script .b { position: relative; padding-left: 18px; max-width: 70ch; }
+.script .b::before { content: "●"; position: absolute; left: 0; top: 0; color: var(--ink); font-size: .8rem; line-height: 1.9; }
+.script .you { padding: 6px 12px; border-left: 3px solid var(--muted); color: var(--muted); font-style: italic; }
+.script .you::before { content: "> "; font-style: normal; }
+.script .note { font: 500 .8rem/1.5 var(--mono); color: var(--muted); }
+.script .box { border: 1px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--page); display: flex; flex-direction: column; gap: 6px; }
+.script .bq { font-weight: 600; }
+.script .box ul { list-style: decimal; padding-left: 1.4em; }
+.script .desc { display: block; color: var(--muted); font-size: .88rem; }
+.script .pool { font-size: .92rem; }
+.slot { background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 0 4px; font-style: normal; }
+.b-inline { color: var(--ink); font-family: var(--body); }
+.example { border-style: dashed; }
 .down { text-align: center; font: 500 .78rem var(--mono); color: var(--muted); }
 .src { font-size: .85rem; color: var(--muted); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -119,7 +133,16 @@ td.dot { text-align: center; }
 <main>
 
 <header class="block">
-  <span class="sub" style="font: 500 .8rem var(--mono)">BMUZ · design document · draft 2 · 2026-11-11</span>
+  <span class="sub" style="font: 500 .8rem var(--mono)">BMUZ · design document · draft 3, part 1 · 2026-11-11</span>
+  <div class="callout changed">
+    <b>New in draft 3, part 1: the exact script for Stages 1 and 2</b>
+    <ul>
+      <li>Every step in Ideate and Define now shows exactly what BMUZ says, word for word. Lines that depend on the game are templates with highlighted slots.</li>
+      <li>One rule now holds throughout: free answers go in the chat, and choices go in a question box.</li>
+      <li>Each of the two stages ends with an example box, filled in with a made-up sample game.</li>
+      <li>Stages 3–6 still describe their steps. Their scripts come next, once you've checked the tone.</li>
+    </ul>
+  </div>
   <h1>BMUZ Design Document</h1>
   <p class="lead">How BMUZ takes a game from a loose idea to players' hands: every stage, every step, the questions each step asks, how it gets its answers, and which part of the game's documents it fills. It's written for any game, so no step names a particular one.</p>
   <div class="callout changed">
@@ -279,107 +302,169 @@ td.dot { text-align: center; }
 </section>
 
 <!-- ================= STAGE 1 ================= -->
+<section class="block" id="script-key">
+  <h2>How to read the scripts</h2>
+  <p>From here on, each step shows exactly what BMUZ says. The style marks below are the only things that aren't the actual wording.</p>
+  <div class="script">
+    <p class="b">A message from BMUZ, word for word. <span class="slot">[a slot]</span> is filled from the game so far.</p>
+    <div class="box"><p class="bq">A question box, for choices</p><ul><li>An option <span class="desc">its description</span></li></ul></div>
+    <p class="note">→ what happens next (not shown to the designer)</p>
+  </div>
+  <ul>
+    <li><b>Free answers go in the chat</b>: your next message is the answer, and Ctrl+V / Alt+V work there. <b>Choices go in a question box.</b> No option ever stands in for typing.</li>
+    <li>Every step opens the same way: its <b>title</b> in bold, then one or two lines on what it's for.</li>
+    <li>A question your material already answered is skipped, and its answer is shown with a one-tap Keep.</li>
+    <li>The band under the chat always shows <span class="slot">Stage · step N of M · Step name</span>, e.g. <code>Define · 3 of 8 · The Pitch</code>.</li>
+    <li>Questions that depend on the game are written reactively. The script shows them as templates with slots, and BMUZ fills them from what the designer wrote.</li>
+  </ul>
+</section>
+
 <section class="stage" id="s1">
   <div class="stage-head">
     <span class="eyebrow">Stage 1 · Ideate · 15–25 minutes</span>
     <h2>Ideate: The Game So Far</h2>
-    <p class="for">Gather everything about your idea, loose and unchosen, and show it back organised. Nothing is decided here.</p>
-    <p class="ends">Ends with: the GDD, version 1, every chapter loose or plainly open · a list of sketches to try · your project page.</p>
+    <p class="for">Gather everything about the idea, loose and unchosen, and show it back organised. Nothing is decided here.</p>
+    <p class="ends">Ends with: the GDD, version 1, every chapter loose or plainly open · a sketch list · the project page.</p>
   </div>
 
   <article class="step welcome">
-    <header><span class="num">1.0</span><h4>Welcome to BMUZ</h4><span class="kind">teaches</span></header>
-    <p class="what">Shown once, at the very start.</p>
-    <dl>
-      <dt>Teaches</dt><dd>the six stages in one line each · that BMUZ researches before it suggests · that you can say anything, any time (an idea, a worry, "stop", "go back") and how it's handled: a tweak is done now, a new idea goes to Ideas for Later, a problem becomes a bug · that everything lands in the GDD you'll see on your project page</dd>
-    </dl>
+    <header><span class="num">1.0</span><h4>Welcome to BMUZ</h4><span class="kind">once, at the very start</span></header>
+    <div class="script">
+      <p class="b"><b>Welcome to BMUZ</b><br>I'll help you take a game from an idea to something people can play. We'll go through six stages, in order:</p>
+      <p class="b">1. <b>Ideate</b>: gather everything about your idea. Nothing gets decided yet.<br>
+      2. <b>Define</b>: decide what the game is, on one page.<br>
+      3. <b>Design</b>: work out the rules, the content and the screens, and test the risky parts with quick sketches.<br>
+      4. <b>Develop</b>: build it in short sprints you play and approve.<br>
+      5. <b>Deliver</b>: turn each finished piece into a build you can play and share.<br>
+      6. <b>Release</b>: put it in front of the public.</p>
+      <p class="b">A few things to know:<br>
+      · I research before I suggest anything, and I'll show you where my answers come from.<br>
+      · Say anything, any time: an idea, a worry, "stop", "go back". A small tweak, I'll just do. A new idea goes on your Ideas for Later list so it's never lost. If something's broken, I log it as a bug.<br>
+      · Everything we decide goes into one design document, the GDD. You'll watch it fill in on your project page.</p>
+      <p class="b">Let's start with your idea.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">1.1</span><h4>Your Idea</h4><span class="kind you">you · free text</span></header>
-    <p class="what">The idea in your own words: the single most useful answer BMUZ gets.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">Tell me about your game in your own words: what it is, what you love about it, anything you remember. Half an idea is fine. "I'm not sure yet" is fine too.</span></dd>
-      <dt>How</dt><dd>one free answer, no options: in the earlier live run, one free answer held most of the game by minute 3. Where your game stands (nothing yet / a concept / written / a prototype) is worked out from this answer and your material, never asked.</dd>
-      <dt>If unsure</dt><dd>"I'm not sure yet" leads to three spark questions, one at a time: <span class="q">What kind of game do you love playing lately?</span> · <span class="q">A moment from a game, a film or your life you'd love to turn into play?</span> · <span class="q">A theme, a mechanism or a feeling you keep coming back to?</span> (Schell's Lens of Resonance; Fullerton's experience goals)</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>wherever it touches</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Your Idea</b><br>Tell me about your game in your own words: what it is, what you love about it, anything you remember. Half an idea is fine. If you're not sure yet, just say so.</p>
+      <p class="note">→ the designer's next message is the answer. Where the game stands (nothing yet / a concept / written / a prototype) is worked out from it, never asked.</p>
+      <p class="note">→ only if they're not sure yet:</p>
+      <p class="b">No problem: lots of games start that way. Three quick questions to find a spark. Answer one, two or all three, in one message:<br>
+      1. What kind of game do you love playing lately, and why?<br>
+      2. A moment from a game, a film or your life that you'd love to turn into play?<br>
+      3. A theme, a mechanism or a feeling you keep coming back to?</p>
+    </div>
+    <p class="src">Why one free answer first: in the Xong run, the single free answer held most of the game by minute 3. Spark questions: Schell's Lens of Resonance; Fullerton's experience goals.</p>
   </article>
 
   <article class="step">
     <header><span class="num">1.2</span><h4>Your Material</h4><span class="kind you">you · paste</span></header>
-    <p class="what">Everything you already have, in one message. It's read the moment you press Enter.</p>
-    <dl>
-      <dt>Asks</dt><dd><span class="q">Share your links — paste them with Alt+V. I can read Google Drive folder and/or doc links, GitHub links, and even folder and file links from your computer. If you don't want to share any links, just say "never mind".</span></dd>
-      <dt>How</dt><dd>read at once, the same way every time: Drive, GitHub and files on your computer are read only, and key or password files are skipped. Every line is sorted into the GDD's chapters; your own words are quoted and checked against the source.</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Your Material</b><br>Share your links — paste them with Alt+V. I can read Google Drive folder and/or doc links, GitHub links, and even folder and file links from your computer. If you don't want to share any links, just say "never mind".</p>
+      <p class="note">→ read the moment they press Enter (Drive, GitHub, files: read only; key and password files skipped). Progress shows in the band.</p>
+      <p class="b">Reading <span class="slot">[4 links: 2 Drive docs, 1 folder (12 files), 1 GitHub repo]</span>…</p>
+    </div>
   </article>
 
   <article class="step">
-    <header><span class="num">1.3</span><h4>The Game So Far</h4><span class="kind">shows · gate</span></header>
-    <p class="what">Your game shown back to you, organised, before any more questions.</p>
-    <dl>
-      <dt>Shows</dt><dd>each chapter as fixed / your ideas / open, your words in quotes · where your game stands ("a concept with loose rules") · where BMUZ suggests going next, in one plain line</dd>
-      <dt>Asks</dt><dd>Carry on in Ideate (most games) · Jump ahead to [the stage your material supports] · Something's wrong (tell me what)</dd>
-      <dt>How</dt><dd>reflect back before asking (Design Council: "the brief as said → the goal underneath"). A full GDD or rulebook can jump straight to Define or Design, keeping everything it already says.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>the GDD, version 0</span></div></dd>
-    </dl>
+    <header><span class="num">1.3</span><h4>The Game So Far</h4><span class="kind gate">shows · gate</span></header>
+    <div class="script">
+      <p class="b"><b>The Game So Far</b><br>Here's your game as I understand it, from your idea<span class="slot">[ and the 14 files you shared]</span>. Your own words are in quotes; anything I've worked out myself is marked "my reading". Nothing here is decided yet.</p>
+      <p class="b"><b>Already clear</b><br><span class="slot">[2–4 bullets, quotes first]</span></p>
+      <p class="b"><b>Your ideas</b><br><span class="slot">[2–4 bullets]</span></p>
+      <p class="b"><b>Still open</b><br><span class="slot">[the 3–5 biggest gaps, each with its chapter name]</span></p>
+      <p class="b"><b>Where it stands:</b> <span class="slot">[a concept with some rules written down]</span>.<span class="slot">[ I couldn't read: 2 Photoshop files (pictures, not text).]</span><br>The full version is on your project page: <span class="slot">[link]</span></p>
+      <div class="box"><p class="bq">What next?</p><ul>
+        <li>Carry on in Ideate (Recommended) <span class="desc">a few questions about what's still open, about 15 minutes</span></li>
+        <li><span class="slot">[Jump to Define]</span> <span class="desc">only shown when the material already covers it: <span class="slot">[your notes already cover the feelings, pitch and core loop]</span></span></li>
+        <li>I need to correct something <span class="desc">next, tell me what I got wrong</span></li>
+      </ul></div>
+      <p class="note">→ "I need to correct something": <span class="b-inline">What did I get wrong? Tell me in your next message.</span></p>
+    </div>
   </article>
 
   <article class="step">
-    <header><span class="num">1.4</span><h4>Feelings &amp; Hopes</h4><span class="kind you">you · 2–4 questions</span></header>
-    <p class="what">What playing it should feel like, gathered loosely. Define chooses from these later.</p>
-    <dl>
-      <dt>Asks</dt><dd>only what your idea hasn't already said, built on your words:
-        <ul>
-          <li><span class="q">Describe a moment you'd love a player to have: not a feature, a situation they're in.</span> (Fullerton)</li>
-          <li><span class="q">After a game, what would a player tell a friend about it?</span> (Fullerton)</li>
-          <li><span class="q">What do you hope this becomes, and what would disappoint you?</span> (Design Council's hopes and fears: the fears become risks)</li>
-        </ul></dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>1 Feelings</span><span class="chip m-loose"><i></i>7 Risks</span></div></dd>
-    </dl>
+    <header><span class="num">1.4</span><h4>Feelings &amp; Hopes</h4><span class="kind you">you · free text</span></header>
+    <div class="script">
+      <p class="b"><b>Feelings &amp; Hopes</b><br>Now, how playing it should feel. I'm only collecting here; Define is where you choose. Answer any of these in one message, and skip any you like:</p>
+      <p class="b">1. Describe a moment you'd love a player to have. Not a feature: a situation they find themselves in.<span class="slot">[ You mentioned "…": is that the moment, or is there another?]</span><br>
+      2. After a game, what would a player tell a friend about it?<br>
+      3. What do you hope this game becomes, and what would disappoint you?</p>
+      <p class="note">→ a question already answered by the material is left out and the list renumbered. Fears are kept as risks.</p>
+    </div>
+    <p class="src">Fullerton's experience goals (situations, not features) · Design Council's hopes and fears.</p>
   </article>
 
   <article class="step">
-    <header><span class="num">1.5</span><h4>Open Ideas</h4><span class="kind you">you · a few at a time</span></header>
-    <p class="what">The half-formed parts of your idea, drawn out without choosing anything.</p>
-    <dl>
-      <dt>Teaches</dt><dd>BMUZ asks first about what's <b>costliest to change later if it's guessed wrong</b>. In past games, how and where the game is played, and the shape of the rules, caused the most rework (10 and 8 of 51 cases), so those come first. Look and polish come last.</dd>
-      <dt>Asks</dt><dd>gathering questions, never "pick one", each quoting a gap in your idea:
-        <ul>
-          <li><span class="q">You mentioned [thing]: what ideas do you have for it, even half-formed?</span></li>
-          <li><span class="q">Anything you remember about [part your material hints at]?</span></li>
-          <li><span class="q">Where do you picture it being played: a phone, a computer, a store?</span></li>
-          <li><span class="q">How does a game end, as far as you know?</span></li>
-          <li><span class="q">What does a good player do that a new one doesn't?</span> (Meier: a game is a series of interesting decisions)</li>
-          <li><span class="q">What's the smallest version you'd want to play first?</span></li>
-          <li><span class="q">What's already decided, and what's off the table?</span></li>
-        </ul></dd>
-      <dt>How</dt><dd>2–3 short rounds; you can wrap up any time. "Not decided yet" is always an answer.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-loose"><i></i>3 Pitch</span><span class="chip m-loose"><i></i>4 Core Loop</span><span class="chip m-loose"><i></i>5 Platform</span><span class="chip m-loose"><i></i>6 Scope</span><span class="chip m-loose"><i></i>8 Rulebook</span><span class="chip m-loose"><i></i>10 Change</span><span class="chip m-loose"><i></i>11 Players</span><span class="chip m-loose"><i></i>12 Look</span></div></dd>
-    </dl>
+    <header><span class="num">1.5</span><h4>Open Ideas</h4><span class="kind you">you · 1–3 rounds</span></header>
+    <div class="script">
+      <p class="b"><b>Open Ideas</b><br>A few questions about the parts of your idea that are still half-formed. I start with what's hardest to change later: in past games, how and where a game is played, and the shape of its rules, caused the most rework. "Not sure yet" is always a fine answer.</p>
+      <p class="b"><span class="slot">[three questions, picked from the pool below for the biggest gaps, in one message]</span><br>Answer in one message, in any order.</p>
+      <p class="note">→ the pool (templates, filled from the game so far):</p>
+      <ul class="pool">
+        <li>You mentioned <span class="slot">[thing]</span>: what ideas do you have for it, even half-formed?</li>
+        <li>Anything you remember about <span class="slot">[a part your material hints at]</span>?</li>
+        <li>Where do you picture people playing it: on a phone, a computer, both?</li>
+        <li>How does a game end, as far as you know?</li>
+        <li>What does a good player do that a new player doesn't?</li>
+        <li>What's the smallest version you'd want to play first?</li>
+        <li>What's already decided, and what's off the table?</li>
+      </ul>
+      <p class="b">Got it: added to <span class="slot">[Rulebook, Platform, Scope]</span>.</p>
+      <div class="box"><p class="bq">Another round?</p><ul>
+        <li>One more round <span class="desc"><span class="slot">[3]</span> gaps left, about 3 minutes</span></li>
+        <li>That's enough for now <span class="desc">the rest stay open; Define comes back to them</span></li>
+      </ul></div>
+    </div>
+    <p class="src">Order from the rework evidence (frame 10 of 51 cases, rules 8 of 51) · "good player vs new player": Meier's interesting decisions.</p>
   </article>
 
   <article class="step">
     <header><span class="num">1.6</span><h4>Sketch List</h4><span class="kind you">you · pick several</span></header>
-    <p class="what">Things worth trying with a quick sketch, captured now and built in Design.</p>
-    <dl>
-      <dt>Teaches</dt><dd>a <b>sketch</b> is a small, throwaway playable page that answers one question: is this fun? which of two ways feels better? can you read it at phone size? It has knobs to tune, 3 presets and a "Copy values" button. The game is not built from sketches; they settle questions before building.</dd>
-      <dt>Asks</dt><dd><span class="q">From what you've told me, these look worth sketching: [3–6 suggestions, each with the one question it answers]. Pick any.</span> (several allowed) · then <span class="q">Anything else you're unsure of, or torn between two ways?</span></dd>
-      <dt>How</dt><dd>each sketch answers one named question, the riskiest first; rival options are built side by side (Schell's prototyping principles; Mark Brown; the Experimental Gameplay Project). Each pick becomes a numbered task: S01, S02…</dd>
-      <dt>Fills</dt><dd>the Sketches list · <div class="fills"><span class="chip m-loose"><i></i>7 Risks &amp; Unknowns</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Sketch List</b><br>A sketch is a small, throwaway playable page that answers one question: "Is this fun?", "Which of these two feels better?", "Can you read it on a phone?". Each one has sliders to tune, three saved presets, and a button to copy your settings back to me. We don't build the game from sketches; they settle questions before we build. Today I'm only making the list. We build them in Design.</p>
+      <div class="box"><p class="bq">Which of these should we sketch? Pick any.</p><ul>
+        <li><span class="slot">[short name]</span> <span class="desc">answers: <span class="slot">[the one question]</span></span></li>
+        <li><span class="slot">[up to 4, the riskiest first]</span></li>
+      </ul></div>
+      <p class="b">Anything else you're unsure about, or torn between two ways of doing? Tell me and I'll add it, or say "that's all".</p>
+      <p class="b">Added to your sketch list: <span class="slot">[S01 Ball speed feel · S02 Two score layouts]</span>.</p>
+    </div>
+    <p class="src">One question per sketch, riskiest first, rivals side by side: Schell's prototyping principles · Mark Brown · the Experimental Gameplay Project.</p>
   </article>
 
   <article class="step">
-    <header><span class="num">1.7</span><h4>Your Project Page</h4><span class="kind">teaches · gate</span></header>
-    <p class="what">Your game's home screen, opened in your browser, the same planner page you've been using.</p>
-    <dl>
-      <dt>Teaches</dt><dd>what's on it: the GDD's chapters with their levels · the sketch list (each becomes a tab once built) · the plan · open questions · ideas for later. You never edit it: it updates itself after every step. <code>/ppp</code> opens it any time.</dd>
-      <dt>Shows</dt><dd>what changed since you started · the 3 open questions that matter most for Define</dd>
-      <dt>Asks</dt><dd>On to Define · One more idea first</dd>
-    </dl>
+    <header><span class="num">1.7</span><h4>Your Project Page</h4><span class="kind gate">teaches · gate</span></header>
+    <div class="script">
+      <p class="b"><b>Your Project Page</b><br>This is your game's home page. It opens in your browser and updates itself after every step, so you never need to edit it. On it:<br>
+      · <b>The game</b>: your design document, chapter by chapter, each marked empty, loose, chosen, worked out or built<br>
+      · <b>Sketches</b>: each sketch gets its own tab once it's built<br>
+      · <b>Plan</b>: milestones and their progress (from Design on)<br>
+      · <b>Open questions</b> and <b>Ideas for Later</b><br>
+      Type /ppp any time to open it again. <span class="slot">[opens now]</span></p>
+      <p class="b"><b>Ideate is done.</b> Since you started, <span class="slot">[9]</span> chapters went from empty to loose, and <span class="slot">[2]</span> sketches are on the list.<br>The three questions that matter most for Define:<br><span class="slot">[1. … 2. … 3. …]</span></p>
+      <div class="box"><p class="bq">Ready for Define?</p><ul>
+        <li>On to Define (Recommended) <span class="desc">decide what the game is, on one page, about 30–45 minutes</span></li>
+        <li>One more thing first <span class="desc">next, tell me what to add or fix</span></li>
+      </ul></div>
+    </div>
   </article>
+
+  <div class="block example">
+    <h3>Example · Ideate, filled in</h3>
+    <p class="sub">A made-up sample game, only to show the slots filled. Not part of the script.</p>
+    <div class="script">
+      <p class="you">A card game where two friends race to grow the best garden. You draw seed cards and plant them, but weather cards can wreck the other person's rows. I'd like it on phones, quick games.</p>
+      <p class="b"><b>The Game So Far</b><br>Here's your game as I understand it, from your idea. Your own words are in quotes; anything I've worked out myself is marked "my reading". Nothing here is decided yet.</p>
+      <p class="b"><b>Already clear</b><br>· "two friends race to grow the best garden"<br>· "draw seed cards and plant them"<br>· "on phones, quick games"</p>
+      <p class="b"><b>Your ideas</b><br>· "weather cards can wreck the other person's rows"<br>· a shared deck of seeds and weather (my reading)</p>
+      <p class="b"><b>Still open</b><br>· how a game ends and who wins (Rulebook)<br>· what makes a garden "best" (Rulebook)<br>· against a friend in the same room, online, or both (Platform &amp; Play)</p>
+      <p class="b"><b>Where it stands:</b> a concept.</p>
+      <p class="b">… <b>Open Ideas</b> round 1:<br>1. You mentioned weather cards: what ideas do you have for them, even half-formed?<br>2. How does a game end, as far as you know?<br>3. Is your friend in the same room, online, or both?</p>
+    </div>
+  </div>
 </section>
 
 <!-- ================= STAGE 2 ================= -->
@@ -387,134 +472,179 @@ td.dot { text-align: center; }
   <div class="stage-head">
     <span class="eyebrow">Stage 2 · Define · 30–45 minutes</span>
     <h2>Define: The Concept</h2>
-    <p class="for">Turn the loose idea into decisions, from the biggest down: how it should feel, three pillars, the pitch, the core loop, then where it's played. It ends with a one-page concept you could pin on a wall.</p>
+    <p class="for">Turn the loose idea into decisions, from the biggest down. It ends with a one-page concept.</p>
     <p class="ends">Ends with: GDD Part 1 chosen and locked · a first, rough scope and risk report.</p>
   </div>
 
   <article class="step welcome">
     <header><span class="num">2.0</span><h4>Welcome to Define</h4><span class="kind">teaches</span></header>
-    <dl>
-      <dt>Teaches</dt><dd>Ideate gathered, Define decides · the order (big ideas › specific ones) and why · what's already in your GDD is one tap to keep · research is offered before each big decision · nothing is final: the rulebook will reopen some of this, and that's normal</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Welcome to Define</b><br>In Ideate we gathered. In Define we decide, from the biggest ideas down to the specific ones:<br>
+      1. <b>The Feelings</b>: how it should feel to play<br>
+      2. <b>The 3 Pillars</b>: three rules that settle arguments later<br>
+      3. <b>The Pitch</b>: the game in a few lines<br>
+      4. <b>The Core Loop</b>: what you do, over and over<br>
+      5. <b>Platform &amp; Play</b>: where it's played, and who with<br>
+      Then I check it all for clashes, we size up the scope, and you lock it.</p>
+      <p class="b">Whatever your GDD already says shows up first, one tap to keep. Before each big decision I'll offer to research how other games handled it. Nothing here is final: the rulebook in Design will reopen some of this, and that's normal.<br>About 30–45 minutes. You can stop after any step; everything is saved.</p>
+    </div>
   </article>
 
   <article class="step">
     <header><span class="num">2.1</span><h4>The Feelings</h4><span class="kind you">you</span></header>
-    <p class="what">The one or two feelings that are this game, and a sign we could watch for.</p>
-    <dl>
-      <dt>Asks</dt><dd>
-        <ul>
-          <li><span class="q">From the moments you gathered [shown], which one or two are this game?</span></li>
-          <li><span class="q">In your words, what's the main feeling?</span> then, after you answer, the eight kinds of fun in plain words (sense-pleasure, make-believe, drama, challenge, togetherness, discovery, self-expression, passing time) to see which yours matches (MDA)</li>
-          <li><span class="q">Is the main reward beating something hard, being curious, being with people, or something that changes you?</span> (Lazzaro's four keys)</li>
-          <li><span class="q">How will we know a player feels it? What would you see them do?</span> (Schell)</li>
-          <li><span class="q">What would a game like this usually have that you deliberately don't want?</span> ("non-goals", from design docs at Google and in GDD guides: only tempting things the game chooses not to do)</li>
-        </ul></dd>
-      <dt>Why "won't"</dt><dd>listing what the game deliberately leaves out stops scope creep and settles later arguments. It's asked as a tempting thing to leave out, never as a negative goal.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>1 The Feelings</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The Feelings</b><br>The one or two feelings that are this game, and a sign we could actually see in a player. Every later decision gets checked against these.</p>
+      <div class="box"><p class="bq">From Ideate, you described these moments. Which one or two ARE this game? (pick up to 2)</p><ul>
+        <li><span class="slot">["moment 1"]</span></li><li><span class="slot">["moment 2"]</span></li><li><span class="slot">[up to 4]</span></li>
+      </ul></div>
+      <p class="b">In your own words: what's the main feeling?</p>
+      <p class="note">→ after their answer:</p>
+      <p class="b">That sounds closest to <b><span class="slot">[challenge]</span></b>: <span class="slot">[overcoming something hard and getting better at it]</span>. Game designers often name eight kinds of fun: the senses, make-believe, drama, challenge, being together, discovery, self-expression, and simply passing time.</p>
+      <div class="box"><p class="bq">Is that the right match?</p><ul>
+        <li>Yes, that's it</li><li>Closer to another one <span class="desc">next, I'll show the eight to pick from</span></li>
+      </ul></div>
+      <p class="b">How would we know a player feels it? What would you see them do or say? For example: "they ask for a rematch straight away".</p>
+      <p class="b">Last one: what would a game like this usually have that you deliberately don't want? Things that would be tempting to add, but aren't this game. "None I can think of" is fine.</p>
+    </div>
+    <p class="src">Eight kinds of fun: MDA (Hunicke, LeBlanc, Zubek), shown only after their own answer · "we'll know when": Schell · the "deliberately don't want" list: non-goals, as in Google's design docs and GDD guides.</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.2</span><h4>The 3 Pillars</h4><span class="kind you">you</span></header>
-    <p class="what">Three rules that will settle every "does this belong?" argument later.</p>
-    <dl>
-      <dt>Teaches</dt><dd>what a pillar is, with real examples: God of War's Combat, Father/Son and Exploration, and Destiny's "Enjoyable by the Impatient and Distracted". A pillar is one to three words plus a line of what it means.</dd>
-      <dt>Asks</dt><dd>
-        <ul>
-          <li><span class="q">What are the three things this game is really about? One to three words each.</span></li>
-          <li><span class="q">For each: one line on what it means here.</span></li>
-          <li><span class="q">If we removed [pillar], would it still be this game?</span> (a pillar that fails this is a slogan, and BMUZ says so kindly)</li>
-          <li><span class="q">For each: what argument would it settle? "When we argue about X, this pillar says Y."</span></li>
-        </ul></dd>
-      <dt>How</dt><dd>Maine; Allgeier (3–5 short pillars); Koster's vision exercise; feelings first, so the pillars can grow from them. They may be revised after the first sketches (Duskers found its pillars by experimenting).</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>2 The 3 Pillars</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The 3 Pillars</b><br>Pillars are three short rules about what this game is really about. Later, whenever we wonder "does this idea belong?", the pillars decide. Each is one to three words, plus a line on what it means here.<br>Two real examples:<br>· God of War (2018): Combat · Father &amp; Son · Exploration<br>· Destiny: Enjoyable by the Impatient and Distracted · Shared with Other People</p>
+      <div class="box"><p class="bq">Want to see my take first?</p><ul>
+        <li>Show me your take <span class="desc">built from your feelings and the game so far</span></li>
+        <li>I'll write my own <span class="desc">next, in your own words</span></li>
+      </ul></div>
+      <p class="note">→ "I'll write my own":</p>
+      <p class="b">What are the three things <span class="slot">[game name]</span> is really about? One to three words each, and a line on what each means here.</p>
+      <p class="note">→ then, for each pillar:</p>
+      <p class="b">If we took away "<span class="slot">[pillar]</span>", would it still be <span class="slot">[game name]</span>? And finish this: "When we argue about ___, this pillar says ___."</p>
+      <p class="note">→ a pillar that settles nothing:</p>
+      <p class="b">"<span class="slot">[pillar]</span>" doesn't settle anything yet; it's more of a slogan. Want to sharpen it, or swap it for another?</p>
+    </div>
+    <p class="src">Maine · Allgeier (3–5 short pillars) · Koster's vision exercise · pillars may be revised after the first sketches (Duskers).</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.3</span><h4>The Pitch</h4><span class="kind you">you · or BMUZ's take</span></header>
-    <p class="what">The game in a few lines, so anyone gets it in ten seconds.</p>
-    <dl>
-      <dt>Asks</dt><dd>
-        <ul>
-          <li>first: <span class="q">Want to see my take, built from your feelings and pillars, or write your own?</span></li>
-          <li><span class="q">Who am I, what am I doing, and why is it cool?</span> (Hacura's logline)</li>
-          <li><span class="q">Describe a minute of play, written to "you".</span> (Tim Ryan's concept document)</li>
-          <li><span class="q">What's the one thing that makes it different from the nearest game you'd compare it to?</span></li>
-          <li>if you used "X meets Y": <span class="q">What exactly do you take from each?</span> ("X meets Y" alone means different things to different people)</li>
-          <li>last: <span class="q">Read it back. Can you say it in one breath?</span></li>
-        </ul></dd>
-      <dt>Research</dt><dd>offered first: <span class="q">Before we write it, want me to look at the closest games: what players love and miss, and what's new here?</span></dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>3 The Pitch</span></div></dd>
-      <dt>Comes back</dt><dd>after the rulebook, and whenever the game grows</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The Pitch</b><br>The game in a few lines, so anyone gets it in ten seconds. Two parts: one line, and 3–5 lines that describe playing it, written to "you". It's built from your feelings and pillars.</p>
+      <div class="box"><p class="bq">Before we write it, want me to look at the closest games: what players love and miss in them, and what's new in <span class="slot">[game name]</span>? About 5 minutes, every claim with a source.</p><ul>
+        <li>Yes, research first (Recommended)</li><li>No, write it now</li>
+      </ul></div>
+      <p class="note">→ if yes, after the research:</p>
+      <p class="b">Here's what I found: <span class="slot">[3 short lines: the closest games, what players miss in them, what's new here]</span>. Sources are on your project page.</p>
+      <div class="box"><p class="bq">Want to see my take on the pitch, or write your own?</p><ul>
+        <li>Show me your take</li><li>I'll write it <span class="desc">next, in your own words</span></li>
+      </ul></div>
+      <p class="note">→ "I'll write it":</p>
+      <p class="b">Write it in 3–5 lines, as if the reader is the player: "You…". Then one line: who am I, what am I doing, and why is it cool?</p>
+      <p class="note">→ "Show me your take":</p>
+      <p class="b">Here's my take:<br><span class="slot">[3–5 lines, written to "you"]</span><br>One line: <span class="slot">[the one-liner]</span></p>
+      <div class="box"><p class="bq">How's that?</p><ul><li>Keep it</li><li>Change something <span class="desc">next, tell me what</span></li></ul></div>
+      <p class="b">What's the one thing that makes it different from the nearest game you'd compare it to?</p>
+      <p class="note">→ skipped when the research already showed it · if they wrote "X meets Y": <span class="b-inline">What exactly do you take from <span class="slot">[X]</span>, and what from <span class="slot">[Y]</span>?</span></p>
+      <p class="b">Last check: read the one-liner out loud. Can you say it in one breath? If not, what would you cut?</p>
+    </div>
+    <p class="src">Tim Ryan's concept document ("you" description) · Hacura's logline (who am I, what am I doing, why is it cool) · "X meets Y" means different things to different people (Indiecator).</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.4</span><h4>The Core Loop</h4><span class="kind you">you</span></header>
-    <p class="what">What players do over and over, in plain words first. The rulebook builds on this.</p>
-    <dl>
-      <dt>Asks</dt><dd>
-        <ul>
-          <li><span class="q">What does the player do most often, as one verb?</span> (Unity)</li>
-          <li><span class="q">Fill in: "You ___, then ___, so you can ___."</span> (Unity)</li>
-          <li><span class="q">What's the challenge, what do you do about it, and what do you get, and how does that set up the next challenge?</span> (Brazie)</li>
-          <li><span class="q">What happens in 3 seconds, in 30 seconds, in 3 minutes?</span> and <span class="q">What's different the next time round?</span> (Griesemer, Halo)</li>
-          <li>per verb: <span class="q">Is this fun on its own?</span> (Ryan) · <span class="q">What things do you act on?</span> (Anthropy's verbs and objects)</li>
-        </ul></dd>
-      <dt>How</dt><dd>plain sentence first, diagram later; up to 3 core verbs (fewer and deeper beats many).</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>4 The Core Loop</span></div></dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>The Core Loop</b><br>The core loop is what players do over and over: the heartbeat of the game. We'll say it in plain words first. Later it becomes the "Flow" section of your rulebook.</p>
+      <p class="b">1. What does the player do most often? One verb.<br>2. Fill in: "You ___, then ___, so you can ___."</p>
+      <p class="note">→ then:</p>
+      <p class="b">For each step: what's in your way, what do you do about it, and what do you get? And how does that set up the next round?</p>
+      <p class="b">What happens in 3 seconds, in 30 seconds, and in 3 minutes? And what's different the next time round, so it doesn't feel the same?</p>
+      <p class="b">For <span class="slot">[each core verb]</span>: is it fun on its own? What does a good player do with it that a new player doesn't?</p>
+      <p class="b">Here's your core loop:<br><b><span class="slot">[You draw → you plant → you score → (again)]</span></b></p>
+      <div class="box"><p class="bq">Is that the heartbeat?</p><ul><li>Yes, keep it</li><li>Change something <span class="desc">next, tell me what</span></li></ul></div>
+    </div>
+    <p class="src">Fill-in sentence: Unity · challenge, action, reward: Brazie · 3 s / 30 s / 3 min and "different next time": Griesemer (Halo) · "is each verb fun?": Tim Ryan.</p>
   </article>
 
   <article class="step">
-    <header><span class="num">2.5</span><h4>Platform &amp; Play Structure</h4><span class="kind you">you</span></header>
-    <p class="what">The big platform choices that change the design. The details wait for the TDD.</p>
-    <dl>
-      <dt>Asks</dt><dd>
-        <ul>
-          <li><span class="q">Where is the player, and what are they holding: a phone on a bus, a desk with a mouse, a couch with a controller?</span></li>
-          <li><span class="q">Which one platform first (web, phone stores, Steam, itch), and which are "someday"?</span> (one platform first: Ryan; course templates)</li>
-          <li><span class="q">Who else is there: nobody, friends on the same screen, people online at the same time, or online taking turns days apart?</span> (multiplayer is decided early: it touches everything)</li>
-          <li><span class="q">If there's an opponent, must the computer be good enough to carry the game?</span></li>
-        </ul></dd>
-      <dt>Later</dt><dd>match length, leaving and rejoining, saves and accounts go to step 3.5 and the TDD.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>5 Platform &amp; Play Structure</span></div></dd>
-    </dl>
+    <header><span class="num">2.5</span><h4>Platform &amp; Play</h4><span class="kind you">you · choices</span></header>
+    <div class="script">
+      <p class="b"><b>Platform &amp; Play</b><br>Where it's played first, and who with. These change how the game is designed, so we decide the big ones now. The details (how long a game is, saving, what happens when someone leaves) come later, in Design.</p>
+      <div class="box"><p class="bq">Where is the player, and what are they holding? (pick any)</p><ul>
+        <li>A phone</li><li>A computer, mouse and keyboard</li><li>A controller</li><li>A tablet</li></ul></div>
+      <div class="box"><p class="bq">Which one platform first?</p><ul>
+        <li>The web <span class="desc">a link anyone can open</span></li><li>Phone app stores</li><li>Steam or another PC store</li><li>itch.io</li></ul></div>
+      <p class="b">And which ones are "someday"? Name them, or say "none".</p>
+      <div class="box"><p class="bq">Who else is playing? (pick any)</p><ul>
+        <li>Nobody, it's solo</li><li>Friends on the same screen</li><li>Online, at the same time</li><li>Online, taking turns</li></ul></div>
+      <div class="box"><p class="bq">If there's an opponent: must the computer be able to play it?</p><ul>
+        <li>Yes, and it has to be good</li><li>Nice to have</li><li>No</li></ul></div>
+    </div>
+    <p class="src">One platform first: Tim Ryan; game course templates · decide multiplayer early, since it touches everything: Unity's netcode guidance.</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.6</span><h4>Clash Check</h4><span class="kind">BMUZ, then you</span></header>
-    <p class="what">BMUZ's critical read: what doesn't fit, what you might not see. Your game, your call.</p>
-    <dl>
-      <dt>How</dt><dd>separate reviewers read Part 1 against itself: do the pillars and feelings support each other? Does the pitch use the core loop? Is the theme only pasted on (Juul)? Are the decisions real trade-offs (Meier)? Is anything there only because it's cool (Thornton)? Each finding comes with its reason.</dd>
-      <dt>Asks</dt><dd>per clash: <span class="q">These pull against each other because [why]. Keep both, change one, or park one?</span> BMUZ makes its case once and never digs in.</dd>
-      <dt>Fills</dt><dd>Decisions</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Clash Check</b><br>Now I'll read everything we've decided, looking for things that pull against each other and problems that are hard to see from the inside. I'll tell you what I find and why. It's your game: I'll make my case once, and you decide.</p>
+      <p class="note">→ separate reviewers read Part 1 (about 2 minutes). Per clash:</p>
+      <p class="b"><span class="slot">[1]</span>. <span class="slot">["Quick games"]</span> and <span class="slot">[the pillar "Big comebacks"]</span> pull against each other: <span class="slot">[a comeback needs time to build, and a 3-minute game may not have it]</span>.</p>
+      <div class="box"><p class="bq">What should we do?</p><ul>
+        <li>Keep both <span class="desc">I'll note it as a risk to test</span></li><li>Change one <span class="desc">next, tell me which and how</span></li><li>Park one for later <span class="desc">it goes to Ideas for Later</span></li></ul></div>
+      <p class="note">→ none found:</p>
+      <p class="b">Nothing clashes. <span class="slot">[One line on what holds it together.]</span></p>
+    </div>
+    <p class="src">Checks: pasted-on theme (Juul) · decisions with real trade-offs (Meier) · anything there only because it's cool (Thornton).</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.7</span><h4>Scope, First Pass</h4><span class="kind you">you · charts</span></header>
-    <p class="what">The big picture of what you'd build, and what a first playable slice looks like.</p>
-    <dl>
-      <dt>Teaches</dt><dd><b>MoSCoW</b>: must / should / could / won't, with the test "if it were missing, would the game be pointless?" · <b>Effort vs impact</b>: four boxes (quick wins, big projects, fill-ins, avoid) · <b>Vertical slice</b>: a small piece of the game with a bit of everything that's core (gameplay, art, systems) at close to final quality. It's the first thing you'll be able to play and share.</dd>
-      <dt>Asks</dt><dd><span class="q">What's the smallest version that still gives the main feeling?</span> (Derek Yu: small game first) · must / should / could / won't for each idea · then BMUZ places them on the effort–impact chart (effort is BMUZ's researched estimate, impact is yours) · <span class="q">Here's the slice I'd build first: does it feel like the game?</span></dd>
-      <dt>Shows</dt><dd>a first report: the chart, the slice, the risks, what needs research and which sketches (adds to the Sketch List). Marked "first pass": the rulebook will add a lot.</dd>
-      <dt>Fills</dt><dd><div class="fills"><span class="chip m-chosen"><i></i>6 Scope</span><span class="chip m-chosen"><i></i>7 Risks &amp; Unknowns</span></div></dd>
-      <dt>Comes back</dt><dd>step 3.5, after the rulebook</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Scope, First Pass</b><br>Time to see the size of what we're building. Three tools, quickly:<br>
+      · <b>Must / Should / Could / Won't</b>: for each idea, if it were missing, would the game be pointless? Yes means it's a must.<br>
+      · <b>Effort vs Impact</b>: four boxes: quick wins (do first), big projects (plan them), fill-ins (when there's time), and ones to avoid.<br>
+      · <b>Vertical slice</b>: a small piece of the game with a bit of everything that matters, at close to final quality. It's the first thing you'll play and share.<br>
+      This is a first pass. The rulebook will add a lot, and we'll redo it in Design.</p>
+      <p class="b">What's the smallest version that still gives "<span class="slot">[the main feeling]</span>"?</p>
+      <div class="box"><p class="bq"><span class="slot">[idea]</span>: if it were missing, would the game be pointless?</p><ul>
+        <li>Must</li><li>Should</li><li>Could</li><li>Won't</li></ul></div>
+      <p class="note">→ up to 4 ideas per box. Then:</p>
+      <p class="b">For each "won't", a quick reason, so we remember why: <span class="slot">[the won'ts]</span></p>
+      <p class="b">Here's the effort vs impact chart, on your project page now. Effort is my estimate from research; impact is yours to correct. Anything in the wrong box?</p>
+      <p class="b">Here's the vertical slice I'd build first: <span class="slot">[two lines]</span>.</p>
+      <div class="box"><p class="bq">Does that slice feel like the game?</p><ul><li>Yes</li><li>Change it <span class="desc">next, tell me what</span></li></ul></div>
+      <p class="b">My first report:<br>· Risks: <span class="slot">[list]</span><br>· Needs research: <span class="slot">[list]</span><br>· New sketch ideas, added to your list: <span class="slot">[S03 …]</span></p>
+    </div>
+    <p class="src">MoSCoW (DSDM) · Effort vs Impact, the Action Priority Matrix · vertical slice: Game Developer on pre-production · "small game first": Derek Yu.</p>
   </article>
 
   <article class="step">
     <header><span class="num">2.8</span><h4>Concept Lock</h4><span class="kind gate">gate</span></header>
-    <dl>
-      <dt>Shows</dt><dd>the one-page concept (Part 1) · what's still open, by chapter name · the checks: 3 pillars, 1–2 feelings, a pitch in one breath, every won't with a reason</dd>
-      <dt>Asks</dt><dd>Not yet: change something · Lock it: on to Design</dd>
-    </dl>
+    <div class="script">
+      <p class="b"><b>Concept Lock</b><br>Here's the concept, one page, on your project page now: <span class="slot">[link]</span><br>
+      ✓ The Feelings: <span class="slot">[1–2]</span><br>✓ The 3 Pillars: <span class="slot">[A · B · C]</span><br>✓ The Pitch: <span class="slot">[the one-liner]</span><br>✓ The Core Loop: <span class="slot">[the loop]</span><br>✓ Platform &amp; Play: <span class="slot">[phone first; online, at the same time]</span><br>✓ Scope, first pass: <span class="slot">[N]</span> musts, slice chosen<br>
+      Still open: <span class="slot">[chapter: what]</span>. That's fine; Design fills these.</p>
+      <p class="b">Locking means Design builds on this page. You can still change it later; every change is logged.</p>
+      <div class="box"><p class="bq">Lock the concept?</p><ul>
+        <li>Not yet: change something <span class="desc">next, tell me what</span></li><li>Lock it: on to Design</li></ul></div>
+    </div>
   </article>
+
+  <div class="block example">
+    <h3>Example · Define, filled in</h3>
+    <p class="sub">The same made-up sample game. Not part of the script.</p>
+    <div class="script">
+      <p class="b"><b>The 3 Pillars</b> · BMUZ's take:<br>· <b>Quick rivalry</b>: every game is a short, close race between two friends<br>· <b>Grow, then guard</b>: you build something, then protect it<br>· <b>Weather is fair</b>: the weather hurts both sides, never only the loser</p>
+      <p class="b"><b>The Pitch</b> · BMUZ's take:<br>You and a friend each have an empty garden and a hand of seed cards.<br>You plant, you water, your rows start to bloom.<br>Then the weather turns, and you send a hailstorm into their best row.<br>Three minutes later, the fullest garden wins.<br>One line: <b>a three-minute garden race where the weather is your weapon.</b></p>
+      <p class="b"><b>The Core Loop</b>: You draw → you plant or play weather → you score blooming rows → (again)</p>
+    </div>
+  </div>
 </section>
 
+<section class="block">
+  <h2>Stages 3–6: scripts coming next</h2>
+  <p>The steps below still describe what each one covers. Their word-for-word scripts follow once you've checked the tone of Stages 1–2.</p>
+</section>
 <!-- ================= STAGE 3 ================= -->
 <section class="stage" id="s3">
   <div class="stage-head">
