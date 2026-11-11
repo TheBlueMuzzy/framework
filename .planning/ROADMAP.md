@@ -651,7 +651,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - 🔨 F216 🔧 Develop pipeline — task flow with a separate reviewer, plan card, sprint loop, overnight runs that never stall — must:bmuz-1.0 · needs: F215
 - ✅ F217 🔧 Discover pipeline — the idea talk plus a research flow with checked sources — must:bmuz-1.0 · needs: F213 · sprint 67
 - 🔨 F218 🔧 Define pipeline — makes the blocks from Discover's material: the one-page concept (GDD Part 1 — story, feelings, pillars, core verbs, scope per release, risks), a concept check, lock → Design (changed 2026-11-09: the TDD, feature map and plan-check moved to F227 — Design pipeline) — must:bmuz-1.0 · needs: F217 · sprint 67
-- ⏳ F219 🔧 Deliver pipeline — (2026-11-10: Deliver and Release are separate stages again, Muzzy) the finished product made ready to hand over: final checks, polish, versions, a build per platform, security scans and review, store submission — must:bmuz-1.0 · needs: F216
+- 🔨 F219 🔧 Deliver pipeline — (2026-11-10: Deliver and Release are separate stages again, Muzzy) the finished product made ready to hand over: final checks, polish, versions, a build per platform, security scans and review, store submission — must:bmuz-1.0 · needs: F216
 - ⏳ F220 🔧 Milestone review pipeline — a retro flow that turns lessons into proposals Muzzy approves — must:bmuz-1.0 · needs: F216
 - ⏳ F221 🔧 First setup — tools and accounts detected and walked through, at install or as a sidequest — must:bmuz-1.0 · needs: F212
 - ⏳ F222 🧱 BMUZ for anyone — Muzzy's paths, accounts and machines into a profile; style rules sorted everyone / just me — must:bmuz-1.0 · needs: F221
@@ -675,7 +675,7 @@ flowchart LR
   F215 --> F216[🔨 F216 Develop pipeline]
   F213 --> F217[✅ F217 Discover pipeline]
   F217 --> F218[🔨 F218 Define pipeline]
-  F216 --> F219[⏳ F219 Deliver pipeline]
+  F216 --> F219[🔨 F219 Deliver pipeline]
   F216 --> F220[⏳ F220 Milestone review]
   F212 --> F221[⏳ F221 First setup]
   F221 --> F222[⏳ F222 BMUZ for anyone]
