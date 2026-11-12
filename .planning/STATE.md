@@ -3,10 +3,10 @@
 ## ▶ RESUME HERE
 2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
 - **Order (SPRINT.md "Overnight order"):** F232 — BMUZ follows the script ✅ → F227 — Design pipeline ✅ → F215 — Bug pipeline ✅ → F216 — Develop pipeline ✅ → F219 — Deliver pipeline ✅ (commits + checks in each SPRINT "Checked" line) → F230 — Release pipeline ✅. All six stages are on the engine. Each: /sprint, one fresh helper, commit per task, fresh review, /save; taste calls → "Ask Muzzy:"; stuck 3× → BLOCKED; nothing public.
-- **Next action:** F229 — Research, callable anywhere sprinted (Muzzy: "1. wait on 2"); a fresh helper builds tasks 1–5; then review, /save, and STOP for Muzzy's live looks. F226 — Six stages, one meaning each waits until he can watch it.
-- **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd ~/Documents/dev/.scratch/bmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6), then F215 — Bug pipeline live look (task 6, ~15 min), then F216 — Develop pipeline live look (task 7, ~45 min), then F219 — Deliver pipeline live look (task 7, ~30 min), then F230 — Release pipeline live look (task 7, ~30 min). Laptop: F212 task 4 install line.
+- **Next action:** STOPPED for Muzzy's live looks (his call 2026-11-11: "1. wait on 2"). F229 — Research, callable anywhere is built. F226 — Six stages, one meaning each waits until he can watch it; the rest of BMUZ 1.0 waits on his live looks (F212, F216).
+- **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd ~/Documents/dev/.scratch/bmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6), then F215 — Bug pipeline live look (task 6, ~15 min), then F216 — Develop pipeline live look (task 7, ~45 min), then F219 — Deliver pipeline live look (task 7, ~30 min), then F230 — Release pipeline live look (task 7, ~30 min), then F229 — Research, callable anywhere (task 6, ~10 min). Laptop: F212 task 4 install line.
 
-Reviewed through: bmuz 7f1e678 (F230 — Release pipeline: fresh helper read f09cad0..7f1e678 → 7 bugs + more, fixed through 3606449, checked by tests + check:fast + headless) · before: bmuz e18abf4 (F219 — Deliver pipeline, 10 fixed) · older: archive/log.md
+Reviewed through: bmuz 587989a (F229 — Research, callable anywhere: fresh helper read 3606449..587989a → 7 findings + 2 more, fixed in e2e80f6, checked by tests + check:fast + headless) · before: bmuz 7f1e678 (F230 — Release pipeline) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
