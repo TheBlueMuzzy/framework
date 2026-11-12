@@ -1,7 +1,8 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
-2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
+2026-11-12 — **F226 — Six stages, one meaning each: building (Muzzy: "live looks can wait. laptop will get updated once we are done with this big run of BMUZ. you can start building f226").** Tasks in SPRINT.md F226; task 1 (write proof in ~/.claude) passed; every ~/.claude edit pushed to ~/.claude-config right after it lands.
+- Earlier, 2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
 - **Order (SPRINT.md "Overnight order"):** F232 — BMUZ follows the script ✅ → F227 — Design pipeline ✅ → F215 — Bug pipeline ✅ → F216 — Develop pipeline ✅ → F219 — Deliver pipeline ✅ (commits + checks in each SPRINT "Checked" line) → F230 — Release pipeline ✅. All six stages are on the engine. Each: /sprint, one fresh helper, commit per task, fresh review, /save; taste calls → "Ask Muzzy:"; stuck 3× → BLOCKED; nothing public.
 - **Next action:** STOPPED for Muzzy's live looks (his call 2026-11-11: "1. wait on 2"). F229 — Research, callable anywhere is built. F226 — Six stages, one meaning each waits until he can watch it; the rest of BMUZ 1.0 waits on his live looks (F212, F216).
 - **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd ~/Documents/dev/.scratch/bmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6), then F215 — Bug pipeline live look (task 6, ~15 min), then F216 — Develop pipeline live look (task 7, ~45 min), then F219 — Deliver pipeline live look (task 7, ~30 min), then F230 — Release pipeline live look (task 7, ~30 min), then F229 — Research, callable anywhere (task 6, ~10 min). Laptop: F212 task 4 install line.
@@ -10,7 +11,7 @@ Reviewed through: bmuz 587989a (F229 — Research, callable anywhere: fresh help
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: BMUZ design document (the script, part 2 next) · F228 — Ideate pipeline live-look fixes · F212 waits on the laptop   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F226 — Six stages, one meaning each — building · live looks + F212 laptop step wait (Muzzy 2026-11-12)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
