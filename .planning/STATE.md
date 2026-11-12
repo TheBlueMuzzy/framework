@@ -2,11 +2,11 @@
 
 ## ▶ RESUME HERE
 2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
-- **Order (SPRINT.md "Overnight order"):** F232 — BMUZ follows the script ✅ → F227 — Design pipeline ✅ → F215 — Bug pipeline ✅ → F216 — Develop pipeline ✅ → F219 — Deliver pipeline ✅ (commits + checks in each SPRINT "Checked" line) → F230 — Release pipeline. Each: /sprint, one fresh helper, commit per task, fresh review, /save; taste calls → "Ask Muzzy:"; stuck 3× → BLOCKED; nothing public.
-- **Next action:** F230 — Release pipeline sprinted (SPRINT.md section, tasks 1–6); a fresh helper builds them; then review, /save, the context check, and ask Muzzy whether to go on to the other BMUZ 1.0 features.
-- **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd ~/Documents/dev/.scratch/bmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6), then F215 — Bug pipeline live look (task 6, ~15 min), then F216 — Develop pipeline live look (task 7, ~45 min), then F219 — Deliver pipeline live look (task 7, ~30 min). Laptop: F212 task 4 install line.
+- **Order (SPRINT.md "Overnight order"):** F232 — BMUZ follows the script ✅ → F227 — Design pipeline ✅ → F215 — Bug pipeline ✅ → F216 — Develop pipeline ✅ → F219 — Deliver pipeline ✅ (commits + checks in each SPRINT "Checked" line) → F230 — Release pipeline ✅. All six stages are on the engine. Each: /sprint, one fresh helper, commit per task, fresh review, /save; taste calls → "Ask Muzzy:"; stuck 3× → BLOCKED; nothing public.
+- **Next action:** the Overnight order is done. Ask Muzzy whether to go on to the other BMUZ 1.0 features (F214 — Save and sync pipelines, F220, F221, F222, F223, F224, F226, F229) or stop for his live looks; run context-check.mjs first.
+- **For Muzzy:** F232 — BMUZ follows the script live look (task 6, ~45 min: `cd ~/Documents/dev/.scratch/bmuz-live` → `claude` → `bmuz new`), then F227 — Design pipeline live look (task 6), then F215 — Bug pipeline live look (task 6, ~15 min), then F216 — Develop pipeline live look (task 7, ~45 min), then F219 — Deliver pipeline live look (task 7, ~30 min), then F230 — Release pipeline live look (task 7, ~30 min). Laptop: F212 task 4 install line.
 
-Reviewed through: bmuz e18abf4 (F219 — Deliver pipeline: fresh helper read c80739f..e18abf4 → Share-it gate holds; 9 bugs fixed through 3dda0bd, checked by tests + check:fast + headless) · before: bmuz 6297c38 (F216 — Develop pipeline, 12 fixed) · older: archive/log.md
+Reviewed through: bmuz 7f1e678 (F230 — Release pipeline: fresh helper read f09cad0..7f1e678 → 7 bugs + more, fixed through 3606449, checked by tests + check:fast + headless) · before: bmuz e18abf4 (F219 — Deliver pipeline, 10 fixed) · older: archive/log.md
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
