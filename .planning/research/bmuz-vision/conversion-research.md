@@ -47,10 +47,10 @@ Scope: only what changes how Ideate and Define talk to a creative who brings a f
 
 ## Sources
 1. Gordon Calleja (Mighty Box), "Posthuman: Sanctuary - From tabletop to desktop", Game Developer — https://www.gamedeveloper.com/design/posthuman-sanctuary-from-tabletop-to-desktop
-2. Soren Johnson, "When digital versions of board games surpass the originals", Game Developer (from Game Developer magazine, August 2012) — https://www.gamedeveloper.com/design/when-digital-versions-of-board-games-surpass-the-originals
-3. Asmodee Digital, "Translating Tabletop for Digital - Best Practices for Best of Show", Game Developer — https://www.gamedeveloper.com/business/translating-tabletop-for-digital---best-practices-for-best-of-show
-4. Jon Jordan, "Playdek's Joel Goodman on the challenges of bringing physical card and board games to mobile", Pocket Gamer — https://www.pocketgamer.com/interviews/playdeks-joel-goodman-on-the-challenges-of-bringing-physical-card-and-board-game/
-5. "Faithfully adapting the tabletop classic Ogre" (Auroch Digital: Nina Adams, Peter Willington), Game Developer — https://www.gamedeveloper.com/design/faithfully-adapting-the-tabletop-classic-i-ogre-i-
+2. Soren Johnson, "When digital versions of board games surpass the originals", Game Developer, 25 Oct 2012 (from Game Developer magazine, August 2012; its examples are old iPad-era apps) — https://www.gamedeveloper.com/design/when-digital-versions-of-board-games-surpass-the-originals
+3. Philippe Dao (Asmodee Digital), "Translating Tabletop for Digital - Best Practices for Best of Show", Game Developer blog, 13 Jun 2018 — https://www.gamedeveloper.com/business/translating-tabletop-for-digital---best-practices-for-best-of-show
+4. Jon Jordan, "Playdek's Joel Goodman on the challenges of bringing physical card and board games to mobile", Pocket Gamer, 23 Mar 2012 — https://www.pocketgamer.com/interviews/playdeks-joel-goodman-on-the-challenges-of-bringing-physical-card-and-board-game/
+5. "Faithfully adapting the tabletop classic Ogre" (Auroch Digital: Nina Adams, Peter Willington), Game Developer Staff, 5 Oct 2017 — https://www.gamedeveloper.com/design/faithfully-adapting-the-tabletop-classic-i-ogre-i-
 6. Board Game Arena, "BGA Studio Guidelines" (UX guidelines for games on BGA) — https://en.doc.boardgamearena.com/BGA_Studio_Guidelines
 7. Derek Bruneau, "Adding Asynchronicity" (Conclave), Game Developer — https://www.gamedeveloper.com/design/adding-asynchronicity
 8. Board Game Arena, "Game clock" (the page marks itself deprecated in favour of the site's FAQ) — https://be.doc.boardgamearena.com/Game_clock
