@@ -1,6 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
+2026-11-13 — **F233 — Finished games come in as fixed: planned (Muzzy "1a"), building next.** From the F232 — BMUZ follows the script live look on Sirius Smugglers (stopped at Define's The Feelings: Ideate + Define ask about what the rulebook already answers). Journal: ~/Documents/dev/.scratch/bmuz-live/.bmuz (Ideate in stages/1-ideate). Next: task 1 research, then the conversion path in ideate.json + define.json.
 2026-11-12 — **F226 — Six stages, one meaning each ✅ approved by Muzzy.** /ideate (was /discover) · /define ends at GDD Part 1 · /design (new) · /deliver per milestone · /release (new, 1.0 public); planner Ideate/Design states + Ready grey-green; guard changes A, B, E applied, settings.json pasted by Muzzy (claude-config d45ba5d, 39a04ab, 07cc880).
 - **Next action:** nothing left for Claude in BMUZ 1.0 without Muzzy: the remaining features wait on his live looks (F232 — BMUZ follows the script first, ~45 min) and the laptop install (F212 — BMUZ plugin on both machines task 4, after this big BMUZ run: Muzzy 2026-11-12) → then F214 — Save and sync pipelines, F221 — First setup, F220 — Milestone review pipeline.
 - Earlier, 2026-11-11 12:50 — **AUTO RUN (Muzzy: "build the entire thing including tests… overnight"; resumed after a PC restart: "1 auto mode").** Spec: research/bmuz-vision/bmuz-design-doc.html (every fixed line word for word).
@@ -12,7 +13,7 @@ Reviewed through: F226 — Six stages, one meaning each (2026-11-12): main chat 
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F226 — Six stages, one meaning each ✅ · live looks + F212 laptop step wait (Muzzy 2026-11-12)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: F233 — Finished games come in as fixed — building · live looks + F212 laptop step wait   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
