@@ -665,8 +665,9 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - 🔨 F230 🔧 Release pipeline — (2026-11-10) the public experiences it: launch, the live link and live check, players' first reactions — must:bmuz-1.0 · needs: F219
 - 🔨 F231 🐞 Engine fixes from the Xong live look — (2026-11-10 run, SPRINT Notes 09:00–14:40) a bad question box never turns a live window into "nobody's here"; a waiting question box is never a stall and no stale restart fires later; links given at the start aren't asked for again; the engine's own tool rows stay out of sight — must:bmuz-1.0 · needs: F228 · sprint 67
 - 🔨 F232 🔧 BMUZ follows the script — (2026-11-11, Muzzy approved the word-for-word script: research/bmuz-vision/bmuz-design-doc.html, "it's working well · keep going", "yes. looking good") the start, Ideate and Define rebuilt to say exactly what the script says: the GDD's 14 chapters with levels, free answers in chat and choices in a box, a welcome per stage, sketches captured in Ideate, the project page introduced at Ideate's end; Design / Deliver / Release follow it as F227 / F219 / F230 — must:bmuz-1.0 · needs: F231 · sprint 67
-- 🔨 F233 🔧 Finished games come in as fixed — (2026-11-13, from the F232 — BMUZ follows the script live look on Sirius Smugglers) a creative bringing a finished, played game takes a conversion path: the rules count as fixed, Define confirms what the rulebook decides in one pass, and only what the rules leave open and what digital adds is asked — must:bmuz-1.0 · needs: F232 · sprint 67
-- 🔨 F234 🔧 Steps ask only what's still open — (2026-11-13, Muzzy: BMUZ is "so strongly on rails"; "if you need to know something, ask") before each Ideate and Define step the engine asks, confirms or skips from what the design document really holds and what later stages need; "already decided" skips exactly one; every skip listed and reopenable — must:bmuz-1.0 · needs: F233 · sprint 67
+- ✅ F233 🔧 Finished games come in as fixed — (2026-11-13, from the F232 — BMUZ follows the script live look on Sirius Smugglers) a creative bringing a finished, played game takes a conversion path: the rules count as fixed, Define confirms what the rulebook decides in one pass, and only what the rules leave open and what digital adds is asked — must:bmuz-1.0 · needs: F232 · sprint 67
+- ✅ F234 🔧 Steps ask only what's still open — (2026-11-13, Muzzy: BMUZ is "so strongly on rails"; "if you need to know something, ask") before each Ideate and Define step the engine asks, confirms or skips from what the design document really holds and what later stages need; "already decided" skips exactly one; every skip listed and reopenable — must:bmuz-1.0 · needs: F233 · sprint 67
+- 🔨 F235 🐞 Fixes from the Sirius Smugglers live look — (2026-11-14, Muzzy: "ok") the 13 findings of rerun 3: the lock gate, BMUZ bugs routed to BMUZ, ask once where it's used, question craft, page links + a real scope chart, decisions said in passing recorded — must:bmuz-1.0 · needs: F234 · sprint 67
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
@@ -695,8 +696,9 @@ flowchart LR
   F219 --> F230[🔨 F230 Release pipeline]
   F228 --> F231[🔨 F231 Live-look engine fixes]
   F231 --> F232[🔨 F232 BMUZ follows the script]
-  F232 --> F233[🔨 F233 Finished games as fixed]
-  F233 --> F234[🔨 F234 Ask only what is open]
+  F232 --> F233[✅ F233 Finished games as fixed]
+  F233 --> F234[✅ F234 Ask only what is open]
+  F234 --> F235[🔨 F235 Sirius live-look fixes]
   F218 --> F227[⏳ F227 Design pipeline]
 ```
 
