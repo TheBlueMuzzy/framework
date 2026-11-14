@@ -1,4 +1,5 @@
 # Log archive (newest first)
+- 2026-11-07 — Released v0.41.0 (v0.39 Tutorial blocks): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words.
 - 2026-11-07 — Sprint 63 done (v0.39 — Tutorial blocks, Muzzy approved all four): a tutorial toolbox any game loads like a library, the UI kit's spotlight and keep-clear bubble, a 3-step tutorial in every new game, and a Dev Kit Lessons tab with live words. Ready for /deliver.
 - 2026-11-07 — Lessons tab: a step's words are typed right in the Dev Kit and change the tutorial bubble on screen at once (Muzzy's ask); Save touches only those words.
 - 2026-11-07 — F200 — Dev Kit Lessons tab built: any game with the tutorial module can edit its lessons live in the Dev Kit, and Save touches only what changed. Sprint 63's four features are all built; two wait on Muzzy's look.
