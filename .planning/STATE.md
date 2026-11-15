@@ -1,6 +1,7 @@
 # Game Framework — State
 
 ## ▶ RESUME HERE
+2026-11-15 ~01:00 — **F235 — Fixes from the Sirius Smugglers live look ✅ approved** (Muzzy: "approved"; boxes read clearly). Define locked on the finished game in his live look; his run went on into Design (sketch-build) in ~/Documents/dev/.scratch/sirius-live4 — DON'T change bmuz code while that run is going. Next: what Muzzy finds in Design becomes the next fix list; the Ask Muzzy word lines (F216–F235) are still open; check:version still refuses (2.1.325 vs pin 2.1.322 — ask before a full headless run).
 2026-11-14 14:40 — **F235 — Fixes from the Sirius Smugglers live look: every Claude task built (1–6, 8–11)**; task 11 made the research questions boxes. Next: Muzzy's 🙋 task 7 — live look in ~/Documents/dev/.scratch/sirius-live4, NEW window, bmuz go (resumes at Scope), through the lock. Then his words on the Ask Muzzy lines, then approval → F235: done.
 2026-11-14 13:20 — **F235 — Fixes from the Sirius Smugglers live look: tasks 8–10 built** (every question a box, enforced by check:pipelines; scope tabs named per feature; a message ending in /exit is never an answer). Muzzy's live look 4 is paused at Scope in ~/Documents/dev/.scratch/sirius-live4 — resume in a NEW window with bmuz go (not --continue). Next for Claude: task 11 (research.found / research.lost as boxes). Ask Muzzy lines for tasks 8–9 option words are in SPRINT.
 2026-11-14 ~03:00 — **F235 — Fixes from the Sirius Smugglers live look: built, checked, waiting for Muzzy's live look** (auto run overnight, Muzzy: "go auto"). Tasks 1–6 ✔ (bmuz a84c4e2..a70fe9e); node 360 + plugin 186 green, headless runs green (haiku). Next: Muzzy's 🙋 task 7 — cd ~/Documents/dev/.scratch/sirius-live4, bmuz go, Define through the lock (~15 min; Muzzy picked "Define only", 1.a). Then the Ask Muzzy words for F235 (new lines marked added). Known: check:version refuses (Claude Code 2.1.325 vs pin 2.1.322; moving it needs a full check:headless — ask Muzzy).
@@ -17,7 +18,7 @@ Reviewed through: F235 — Fixes from the Sirius Smugglers live look (2026-11-14
 
 ## Where we are
 Stage: develop   Milestone: BMUZ 1.0 — The rebuild   Sprint: 67
-Doing: F235 — Fixes from the Sirius Smugglers live look — tasks 1–6 + 8–11 built, waiting for Muzzy's live look   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
+Doing: — (F235 — Fixes from the Sirius Smugglers live look ✅; Muzzy is in Design's sketches on Sirius Smugglers)   Branch: dev/bmuz-1-0   Version: 0.44.0 (rooms 0.15.0 · table 0.8.2 · UI kit 0.43.1 · Dev Kit 0.32.0 · crashes 0.3.1 · audio 0.5.0 · saves 0.9.0 · version 0.3.0 · ai 0.9.0 · lint 0.4.1 · tutorial 0.1.1)
 Live: nothing to host (library) — repo https://github.com/TheBlueMuzzy/framework (public since 2026-10-23), tag v0.43.0
 
 ## Key facts
