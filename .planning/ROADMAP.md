@@ -668,6 +668,7 @@ Goal (Muzzy 2026-11-08: "games are on hold until you can discover, define, devel
 - ✅ F233 🔧 Finished games come in as fixed — (2026-11-13, from the F232 — BMUZ follows the script live look on Sirius Smugglers) a creative bringing a finished, played game takes a conversion path: the rules count as fixed, Define confirms what the rulebook decides in one pass, and only what the rules leave open and what digital adds is asked — must:bmuz-1.0 · needs: F232 · sprint 67
 - ✅ F234 🔧 Steps ask only what's still open — (2026-11-13, Muzzy: BMUZ is "so strongly on rails"; "if you need to know something, ask") before each Ideate and Define step the engine asks, confirms or skips from what the design document really holds and what later stages need; "already decided" skips exactly one; every skip listed and reopenable — must:bmuz-1.0 · needs: F233 · sprint 67
 - ✅ F235 🐞 Fixes from the Sirius Smugglers live look — (2026-11-14, Muzzy: "ok") the 13 findings of rerun 3: the lock gate, BMUZ bugs routed to BMUZ, ask once where it's used, question craft, page links + a real scope chart, decisions said in passing recorded — must:bmuz-1.0 · needs: F234 · sprint 67
+- 🟢 F236 🔧 BMUZ hands back with a card — (2026-11-15, Muzzy, Sirius Smugglers Design live look: "still running into situations where it asks me to do something, but it doesn't show me what I'm supposed to do (or answer). the way you layout Done: You'll See:, Try It:, Proof, Your To-dos: Questions: blocks are great, and that should be mirrored… in BMUZ… don't drop the question cards"; picks: "your pick (no proof)" and "two steps") every time BMUZ hands the turn to the creative mid-stage, the engine writes a short card in one message: Done (what just happened), Try it (what to open: sketch links opened for them like the project page, never a bare file:/// link), Your to-do (the one thing to do now), then the question box last; a sketch asks "Played it?" before "Did it answer the question?"; no bare "Type your answer below." (it always says what it waits for); a check refuses a hand-back without the card. Builds on F213 — Engine-written hand-off card (the end-of-stage card). Seen: after S01's "Yes, keep… paste your values" only "Type your answer below."; S02's ready line and "Did S02 answer?" came in separate turns before he had played it. Waits until his Design live look is done (his run reads the bmuz code) — must:bmuz-1.0 · needs: F235
 ```mermaid
 flowchart LR
   F211[✅ F211 Engine core] --> F212[🔨 F212 Plugin on both machines]
@@ -699,6 +700,7 @@ flowchart LR
   F232 --> F233[✅ F233 Finished games as fixed]
   F233 --> F234[✅ F234 Ask only what is open]
   F234 --> F235[✅ F235 Sirius live-look fixes]
+  F235 --> F236[🟢 F236 Hands back with a card]
   F218 --> F227[⏳ F227 Design pipeline]
 ```
 
